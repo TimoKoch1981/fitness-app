@@ -22,9 +22,13 @@ import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurem
 import { useBloodPressureLogs } from '../features/medical/hooks/useBloodPressure';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder } from '../features/reminders/hooks/useReminders';
+import { useBodyMeasurements } from '../features/body/hooks/useBodyMeasurements';
+import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { classifyBloodPressure } from '../lib/calculations';
 import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
 import { calculateTDEE_PAL } from '../lib/calculations/tdee';
+import { generateInsights } from '../lib/insights';
+import { InsightCard } from '../shared/components/InsightCard';
 import { today } from '../lib/utils';
 import {
   DEFAULT_CALORIES_GOAL,
@@ -45,7 +49,9 @@ export function DashboardPage() {
   const { totals } = useDailyMealTotals(selectedDate);
   const { data: workouts } = useWorkoutsByDate(selectedDate);
   const { data: latestBody } = useLatestBodyMeasurement();
-  const { data: bpLogs } = useBloodPressureLogs(1);
+  const { data: bodyMeasurements } = useBodyMeasurements(10);
+  const { data: bpLogs } = useBloodPressureLogs(5);
+  const { data: substances } = useSubstances(true);
 
   // Reminders
   const { data: remindersList } = useReminders(true);
@@ -99,6 +105,26 @@ export function DashboardPage() {
 
   // Net calories
   const netCalories = totals.calories - totalCaloriesBurned;
+
+  // Insights
+  const insights = generateInsights({
+    caloriesConsumed: totals.calories,
+    caloriesGoal,
+    caloriesBurned: totalCaloriesBurned,
+    proteinConsumed: Math.round(totals.protein),
+    proteinGoal,
+    waterGlasses,
+    waterGoal,
+    bodyMeasurements: bodyMeasurements ?? [],
+    bpLogs: bpLogs ?? [],
+    weightKg: latestBody?.weight_kg ?? undefined,
+    hasProfile: !!(profile?.height_cm && profile?.birth_date),
+    hasSubstances: (substances?.length ?? 0) > 0,
+    workoutCountToday: workouts?.length ?? 0,
+  });
+
+  // Show max 4 insights (critical/warning always, then fill with info/success)
+  const visibleInsights = insights.slice(0, 4);
 
   const stats = [
     {
@@ -317,6 +343,18 @@ export function DashboardPage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Insights Widget */}
+        {visibleInsights.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">
+              {language === 'de' ? 'Empfehlungen' : 'Recommendations'}
+            </p>
+            {visibleInsights.map((insight) => (
+              <InsightCard key={insight.id} insight={insight} language={language} />
+            ))}
           </div>
         )}
 
