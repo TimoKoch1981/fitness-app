@@ -25,6 +25,7 @@ const VALID_ACTIONS: ActionType[] = [
   'log_body',
   'log_blood_pressure',
   'log_substance',
+  'save_training_plan',
 ];
 
 /**

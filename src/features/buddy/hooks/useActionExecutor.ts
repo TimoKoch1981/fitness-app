@@ -16,7 +16,9 @@ import { useAddWorkout } from '../../workouts/hooks/useWorkouts';
 import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
 import { useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
+import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
+import type { SplitType, PlanExercise } from '../../../types/health';
 
 interface UseActionExecutorReturn {
   /** Currently pending action awaiting user confirmation */
@@ -44,6 +46,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
   const addBodyMeasurement = useAddBodyMeasurement();
   const addBloodPressure = useAddBloodPressure();
   const logSubstance = useLogSubstance();
+  const addTrainingPlan = useAddTrainingPlan();
 
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
@@ -146,6 +149,23 @@ export function useActionExecutor(): UseActionExecutorReturn {
           break;
         }
 
+        case 'save_training_plan': {
+          await addTrainingPlan.mutateAsync({
+            name: d.name as string,
+            split_type: (d.split_type as SplitType) ?? 'custom',
+            days_per_week: d.days_per_week as number,
+            notes: d.notes as string | undefined,
+            days: (d.days as any[]).map((day) => ({
+              day_number: day.day_number as number,
+              name: day.name as string,
+              focus: day.focus as string | undefined,
+              exercises: day.exercises as PlanExercise[],
+              notes: day.notes as string | undefined,
+            })),
+          });
+          break;
+        }
+
         default: {
           throw new Error(`Unknown action type: ${(actionToExecute as any).type}`);
         }
@@ -161,7 +181,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance]);
+  }, [pendingAction, activeSubstances, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

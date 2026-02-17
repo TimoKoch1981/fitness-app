@@ -108,6 +108,31 @@ const LogSubstanceSchema = z.object({
   notes: z.string().optional(),
 });
 
+const PlanExerciseSchema = z.object({
+  name: z.string().min(1),
+  sets: z.number().positive(),
+  reps: z.string().min(1),
+  weight_kg: z.number().nonnegative().optional(),
+  rest_seconds: z.number().positive().optional(),
+  notes: z.string().optional(),
+});
+
+const PlanDaySchema = z.object({
+  day_number: z.number().int().min(1).max(7),
+  name: z.string().min(1),
+  focus: z.string().optional(),
+  exercises: z.array(PlanExerciseSchema).min(1),
+  notes: z.string().optional(),
+});
+
+const SaveTrainingPlanSchema = z.object({
+  name: z.string().min(1),
+  split_type: z.enum(['ppl', 'upper_lower', 'full_body', 'custom']).default('custom'),
+  days_per_week: z.number().int().min(1).max(7),
+  notes: z.string().optional(),
+  days: z.array(PlanDaySchema).min(1),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -116,6 +141,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   log_body: LogBodySchema,
   log_blood_pressure: LogBloodPressureSchema,
   log_substance: LogSubstanceSchema,
+  save_training_plan: SaveTrainingPlanSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

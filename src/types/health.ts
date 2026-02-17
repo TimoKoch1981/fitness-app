@@ -220,6 +220,7 @@ export interface HealthContext {
   recentSubstanceLogs: SubstanceLog[];
   trainingGoals: TrainingGoal[];
   profile?: UserProfile;
+  activePlan?: TrainingPlan;
 }
 
 // === RECOMMENDATIONS ===
@@ -232,4 +233,40 @@ export interface Recommendation {
   title: string;
   description: string;
   priority: RecommendationPriority;
+}
+
+// === TRAINING PLAN ===
+export type SplitType = 'ppl' | 'upper_lower' | 'full_body' | 'custom';
+
+export interface PlanExercise {
+  name: string;
+  sets: number;
+  reps: string;         // "8-10" or "12" or "60s"
+  weight_kg?: number;
+  rest_seconds?: number;
+  notes?: string;
+}
+
+export interface TrainingPlanDay {
+  id: string;
+  plan_id: string;
+  day_number: number;
+  name: string;
+  focus?: string;
+  exercises: PlanExercise[];
+  notes?: string;
+  created_at: string;
+}
+
+export interface TrainingPlan {
+  id: string;
+  user_id: string;
+  name: string;
+  split_type: SplitType;
+  days_per_week: number;
+  is_active: boolean;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  days?: TrainingPlanDay[]; // eagerly loaded via join
 }

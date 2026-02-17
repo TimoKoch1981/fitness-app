@@ -23,6 +23,7 @@ import type {
   BloodPressure,
   SubstanceLog,
   TrainingGoal,
+  TrainingPlan,
 } from '../../../types/health';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
@@ -54,6 +55,7 @@ export interface UserSkillData {
   recentSubstanceLogs?: SubstanceLog[];
   recentBloodPressure?: BloodPressure[];
   trainingGoals?: TrainingGoal[];
+  activePlan?: TrainingPlan;
 }
 
 export type UserSkillType =
@@ -62,7 +64,8 @@ export type UserSkillType =
   | 'training_log'
   | 'body_progress'
   | 'substance_protocol'
-  | 'daily_summary';
+  | 'daily_summary'
+  | 'active_plan';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -375,6 +378,33 @@ export function generateDailySummarySkill(data: UserSkillData): string {
   return skill;
 }
 
+// ── Active Plan Skill ─────────────────────────────────────────────────
+
+/**
+ * Generates the user's active training plan for the training agent.
+ */
+export function generateActivePlanSkill(data: UserSkillData): string {
+  const { activePlan } = data;
+  if (!activePlan?.days?.length) return '';
+
+  let skill = `## AKTIVER TRAININGSPLAN: ${activePlan.name}\n`;
+  skill += `Split: ${activePlan.split_type}, ${activePlan.days_per_week}x/Woche\n\n`;
+
+  for (const day of activePlan.days) {
+    skill += `### Tag ${day.day_number}: ${day.name}`;
+    if (day.focus) skill += ` (${day.focus})`;
+    skill += `\n`;
+    for (const ex of day.exercises) {
+      skill += `- ${ex.name}: ${ex.sets}×${ex.reps}`;
+      if (ex.weight_kg) skill += ` @ ${ex.weight_kg}kg`;
+      skill += `\n`;
+    }
+    skill += `\n`;
+  }
+
+  return skill;
+}
+
 // ── Skill Aggregator ───────────────────────────────────────────────────
 
 /**
@@ -406,6 +436,9 @@ export function generateUserSkills(
         break;
       case 'daily_summary':
         parts.push(generateDailySummarySkill(data));
+        break;
+      case 'active_plan':
+        parts.push(generateActivePlanSkill(data));
         break;
     }
   }

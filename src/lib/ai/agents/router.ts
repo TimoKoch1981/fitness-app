@@ -72,6 +72,8 @@ const ROUTING_RULES: KeywordRule[] = [
       // Concepts
       'aufwärmen', 'stretching', 'deload', 'progressive', 'overload',
       'periodisierung', 'ausdauer', 'kraft', 'muskelaufbau', 'hypertrophie',
+      // Plan creation
+      'plan', 'wochenplan', 'erstell',
       // English
       'exercise', 'lift', 'run', 'warmup',
     ],

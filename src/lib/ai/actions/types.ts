@@ -12,7 +12,8 @@ export type ActionType =
   | 'log_workout'
   | 'log_body'
   | 'log_blood_pressure'
-  | 'log_substance';
+  | 'log_substance'
+  | 'save_training_plan';
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -72,6 +73,12 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '💊',
         title: 'Einnahme loggen?',
         summary: `${d.substance_name ?? 'Substanz'}${d.dosage_taken ? ` — ${d.dosage_taken}` : ''}`,
+      };
+    case 'save_training_plan':
+      return {
+        icon: '📋',
+        title: 'Trainingsplan speichern?',
+        summary: `${d.name ?? 'Plan'} — ${(d.days as any[])?.length ?? '?'} Tage`,
       };
   }
 }

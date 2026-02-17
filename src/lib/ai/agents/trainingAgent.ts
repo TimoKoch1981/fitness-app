@@ -16,7 +16,7 @@ const CONFIG: AgentConfig = {
   nameEN: 'Training Agent',
   icon: '💪',
   staticSkills: ['training'],
-  userSkills: ['profile', 'training_log', 'substance_protocol'],
+  userSkills: ['profile', 'training_log', 'substance_protocol', 'active_plan'],
   maxContextTokens: 4000,
   description: 'Spezialist für Trainingsplanung, Periodisierung, Übungsauswahl und Sportmedizin',
 };
@@ -60,7 +60,20 @@ Wenn der Nutzer ein Training beschreibt, logge es SOFORT. Frage nicht nach Detai
 - type: "strength", "cardio", "flexibility", "hiit", "sports" oder "other"
 - Nur bei abgeschlossenem Training, NICHT bei reinen Planungs-Fragen ("Erstell mir einen Plan")
 - exercises-Array optional: [{"name":"Bankdrücken","sets":4,"reps":10,"weight_kg":80}]
-- Speichere SOFORT — der Nutzer korrigiert bei Bedarf`;
+- Speichere SOFORT — der Nutzer korrigiert bei Bedarf
+
+## TRAININGSPLAN ERSTELLEN
+Wenn der Nutzer einen Trainingsplan möchte, erstelle einen vollständigen Plan als ACTION:
+- Berücksichtige sein Erfahrungslevel, Substanzen, Ziele und aktuellen Plan (falls vorhanden)
+- Bei Enhanced Athletes: mehr Volumen, höhere Frequenz
+- Immer Sets, Reps UND Gewichtsempfehlungen angeben
+
+\`\`\`ACTION:save_training_plan
+{"name":"4-Tage Upper/Lower Split","split_type":"upper_lower","days_per_week":4,"days":[{"day_number":1,"name":"Unterkörper A","focus":"Beine, Gluteus","exercises":[{"name":"Trap-Bar Deadlift","sets":4,"reps":"6-8","weight_kg":70},{"name":"Hip Thrust","sets":3,"reps":"10-12","weight_kg":60}]}]}
+\`\`\`
+- split_type: "ppl", "upper_lower", "full_body" oder "custom"
+- Nur bei EXPLIZITER Plan-Anfrage ("erstell mir einen Plan", "mach mir einen Trainingsplan")
+- NICHT bei Fragen ÜBER Training oder bei Workout-Logging`;
     }
     return `## RULES
 - Always calculate calorie burn with MET formula and body weight
@@ -78,6 +91,19 @@ When the user describes a workout, log it IMMEDIATELY. Don't ask for details —
 - type: "strength", "cardio", "flexibility", "hiit", "sports" or "other"
 - Only for completed workouts, NOT for pure planning requests ("Create a plan for me")
 - exercises array optional: [{"name":"Bench Press","sets":4,"reps":10,"weight_kg":80}]
-- Save IMMEDIATELY — the user will correct if needed`;
+- Save IMMEDIATELY — the user will correct if needed
+
+## CREATE TRAINING PLAN
+When the user wants a training plan, create a complete plan as ACTION:
+- Consider their experience level, substances, goals and current plan (if any)
+- For enhanced athletes: more volume, higher frequency
+- Always include sets, reps AND weight recommendations
+
+\`\`\`ACTION:save_training_plan
+{"name":"4-Day Upper/Lower Split","split_type":"upper_lower","days_per_week":4,"days":[{"day_number":1,"name":"Lower A","focus":"Legs, Glutes","exercises":[{"name":"Trap-Bar Deadlift","sets":4,"reps":"6-8","weight_kg":70},{"name":"Hip Thrust","sets":3,"reps":"10-12","weight_kg":60}]}]}
+\`\`\`
+- split_type: "ppl", "upper_lower", "full_body" or "custom"
+- Only for EXPLICIT plan requests ("create a plan for me", "make me a training plan")
+- NOT for questions about training or for workout logging`;
   }
 }
