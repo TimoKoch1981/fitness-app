@@ -1,12 +1,20 @@
 /**
  * System prompt for the FitBuddy AI assistant.
  * Injects health context so the LLM can give personalized advice.
+ *
+ * @deprecated Use the multi-agent system instead (lib/ai/agents/).
+ * Each agent now builds its own specialized prompt from versioned skills.
+ * This file is kept as an emergency fallback only.
+ *
+ * @see lib/ai/agents/baseAgent.ts — new prompt assembly
+ * @see lib/ai/skills/ — versioned knowledge base
  */
 
 import type { HealthContext } from '../../../types/health';
 
 /**
  * Build the system prompt with current health data context.
+ * @deprecated Replaced by agent-specific prompt building in baseAgent.ts
  */
 export function buildSystemPrompt(context?: Partial<HealthContext>, language: 'de' | 'en' = 'de'): string {
   const lang = language === 'de' ? 'Deutsch' : 'English';

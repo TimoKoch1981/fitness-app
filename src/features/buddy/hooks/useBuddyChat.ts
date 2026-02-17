@@ -1,13 +1,17 @@
 /**
- * Chat hook for the FitBuddy AI assistant.
- * Manages chat state, sends messages to the AI provider,
- * and injects health context for personalized responses.
+ * Chat hook for the FitBuddy Multi-Agent AI system.
+ *
+ * Routes user messages through the Agent Router, which selects the
+ * appropriate specialist agent (Nutrition, Training, Substance, Analysis, General).
+ * Each agent loads only its required skills for token-efficient responses.
+ *
+ * @see lib/ai/agents/router.ts — Intent detection + dispatch
  */
 
 import { useState, useCallback } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
-import { buildSystemPrompt } from '../lib/systemPrompt';
-import type { ChatMessage } from '../../../lib/ai/types';
+import { routeAndExecute } from '../../../lib/ai/agents/router';
+import type { AgentContext } from '../../../lib/ai/agents/types';
 import type { HealthContext } from '../../../types/health';
 
 export interface DisplayMessage {
@@ -17,6 +21,11 @@ export interface DisplayMessage {
   timestamp: Date;
   isLoading?: boolean;
   isError?: boolean;
+  // Agent attribution (filled by specialist agents)
+  agentType?: string;
+  agentName?: string;
+  agentIcon?: string;
+  skillVersions?: Record<string, string>;
 }
 
 interface UseBuddyChatOptions {
@@ -38,7 +47,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     return available;
   }, [provider]);
 
-  /** Send a message to the AI buddy */
+  /** Send a message to the AI buddy via the agent router */
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim() || isLoading) return;
 
@@ -64,24 +73,31 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     }]);
 
     try {
-      // Build message history for AI
-      const systemPrompt = buildSystemPrompt(context, language);
-      const chatMessages: ChatMessage[] = [
-        { role: 'system', content: systemPrompt },
-        // Include last 10 messages for context
-        ...messages.slice(-10).map(m => ({
+      // Build agent context from health data + conversation history
+      const agentContext: AgentContext = {
+        healthContext: context ?? {},
+        conversationHistory: messages.slice(-8).map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
         })),
-        { role: 'user', content: userMessage.trim() },
-      ];
+        language,
+      };
 
-      const response = await provider.chat(chatMessages, context as HealthContext);
+      // Route to the best agent and get response
+      const result = await routeAndExecute(userMessage.trim(), agentContext);
 
-      // Replace loading message with actual response
+      // Replace loading message with actual response + agent attribution
       setMessages(prev => prev.map(m =>
         m.id === loadingId
-          ? { ...m, content: response.content, isLoading: false }
+          ? {
+              ...m,
+              content: result.content,
+              isLoading: false,
+              agentType: result.agentType,
+              agentName: result.agentName,
+              agentIcon: result.agentIcon,
+              skillVersions: result.skillVersions,
+            }
           : m
       ));
       setIsConnected(true);
@@ -104,7 +120,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, context, language, provider]);
+  }, [messages, isLoading, context, language]);
 
   /** Clear all messages */
   const clearMessages = useCallback(() => {

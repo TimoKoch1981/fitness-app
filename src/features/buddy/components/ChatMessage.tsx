@@ -40,11 +40,20 @@ export function ChatMessageBubble({ message }: ChatMessageProps) {
   return (
     <div className="flex gap-3 mb-3">
       <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
-        <span className="text-xs text-white font-bold">FB</span>
+        <span className="text-xs text-white font-bold">
+          {message.agentIcon && message.agentType !== 'general' ? message.agentIcon : 'FB'}
+        </span>
       </div>
       <div className={`rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%] ${
         message.isError ? 'bg-red-50' : 'bg-white'
       }`}>
+        {/* Agent attribution — only for specialist agents, not general */}
+        {message.agentType && message.agentType !== 'general' && message.agentName && (
+          <div className="flex items-center gap-1 mb-1.5">
+            <span className="text-[10px]">{message.agentIcon}</span>
+            <span className="text-[10px] text-gray-400 font-medium">{message.agentName}</span>
+          </div>
+        )}
         {message.isError && (
           <div className="flex items-center gap-1.5 mb-1.5">
             <AlertCircle className="h-3.5 w-3.5 text-red-500" />
