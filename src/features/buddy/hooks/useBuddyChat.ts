@@ -13,7 +13,7 @@
  * @see lib/ai/actions/actionParser.ts — ACTION block extraction
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
 import { routeAndExecute } from '../../../lib/ai/agents/router';
 import { parseActionFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
@@ -47,6 +47,12 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
+  // Refs to avoid stale closures in sendMessage (#7, #8)
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
+
   const provider = getAIProvider();
 
   /** Check if AI provider is available */
@@ -58,7 +64,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
 
   /** Send a message to the AI buddy via the agent router */
   const sendMessage = useCallback(async (userMessage: string) => {
-    if (!userMessage.trim() || isLoading) return;
+    if (!userMessage.trim() || isLoadingRef.current) return;
 
     const userMsg: DisplayMessage = {
       id: crypto.randomUUID(),
@@ -85,7 +91,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       // Build agent context from health data + conversation history
       const agentContext: AgentContext = {
         healthContext: context ?? {},
-        conversationHistory: messages.slice(-8).map(m => ({
+        conversationHistory: messagesRef.current.slice(-8).map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
         })),
@@ -136,7 +142,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, context, language]);
+  }, [context, language]);
 
   /** Clear the pending action from a specific message (after execution/rejection) */
   const clearAction = useCallback((messageId: string) => {

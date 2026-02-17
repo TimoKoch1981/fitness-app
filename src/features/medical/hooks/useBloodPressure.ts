@@ -9,9 +9,13 @@ export function useBloodPressureLogs(limit = 30) {
   return useQuery({
     queryKey: [BP_KEY, limit],
     queryFn: async (): Promise<BloodPressure[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('blood_pressure_logs')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: false })
         .order('time', { ascending: false })
         .limit(limit);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
@@ -42,11 +42,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes (including session expiry)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
         setLoading(false);
       }
     );
@@ -73,10 +78,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return { error: error ? new Error(error.message) : null };
   };
 
+  const value = useMemo(
+    () => ({ user, session, loading, signIn, signUp, signOut, resetPassword }),
+    [user, session, loading],
+  );
+
   return (
-    <AuthContext.Provider
-      value={{ user, session, loading, signIn, signUp, signOut, resetPassword }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

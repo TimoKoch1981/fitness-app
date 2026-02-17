@@ -145,6 +145,10 @@ export function useActionExecutor(): UseActionExecutorReturn {
           });
           break;
         }
+
+        default: {
+          throw new Error(`Unknown action type: ${(actionToExecute as any).type}`);
+        }
       }
 
       setActionStatus('executed');

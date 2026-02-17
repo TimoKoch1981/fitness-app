@@ -15,9 +15,13 @@ export function useMealsByDate(date: string = today()) {
   return useQuery({
     queryKey: [MEALS_KEY, date],
     queryFn: async (): Promise<Meal[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('meals')
         .select('*')
+        .eq('user_id', user.id)
         .eq('date', date)
         .order('created_at', { ascending: true });
 

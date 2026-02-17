@@ -40,11 +40,30 @@ import {
 
 const WATER_STORAGE_KEY = 'fitbuddy_water_';
 
+/** Auto-updates date at midnight so the dashboard stays current. */
+function useToday(): string {
+  const [date, setDate] = useState(() => today());
+
+  useEffect(() => {
+    const now = new Date();
+    const msUntilMidnight =
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+
+    const timer = setTimeout(() => {
+      setDate(today());
+    }, msUntilMidnight + 100); // +100ms buffer
+
+    return () => clearTimeout(timer);
+  }, [date]);
+
+  return date;
+}
+
 export function DashboardPage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const selectedDate = today();
+  const selectedDate = useToday();
 
   const { data: profile } = useProfile();
   const { totals } = useDailyMealTotals(selectedDate);
@@ -299,7 +318,7 @@ export function DashboardPage() {
                 onClick={() => navigate('/medical')}
                 className="text-[10px] text-teal-600 hover:underline"
               >
-                {language === 'de' ? 'Alle anzeigen' : 'View all'}
+                {t.dashboard.viewAll}
               </button>
             </div>
 
@@ -340,7 +359,7 @@ export function DashboardPage() {
             ) : (
               <div className="px-4 py-3 text-center">
                 <p className="text-xs text-teal-600">
-                  {language === 'de' ? 'Alles erledigt! ✅' : 'All done! ✅'}
+                  {t.dashboard.allDone}
                 </p>
               </div>
             )}
@@ -351,7 +370,7 @@ export function DashboardPage() {
         {visibleInsights.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">
-              {language === 'de' ? 'Empfehlungen' : 'Recommendations'}
+              {t.dashboard.recommendations}
             </p>
             {visibleInsights.map((insight) => (
               <InsightCard key={insight.id} insight={insight} language={language} />
@@ -373,7 +392,7 @@ export function DashboardPage() {
               <p className="text-sm font-medium text-gray-900">{t.workouts.title}</p>
               <p className="text-xs text-gray-400">
                 {workouts && workouts.length > 0
-                  ? `${workouts.length} ${language === 'de' ? 'Einheiten' : 'sessions'} · ${totalCaloriesBurned} kcal ${t.dashboard.burned}`
+                  ? `${workouts.length} ${t.dashboard.sessions} · ${totalCaloriesBurned} kcal ${t.dashboard.burned}`
                   : t.common.noData
                 }
               </p>
@@ -443,7 +462,7 @@ export function DashboardPage() {
               <p className="text-sm font-medium text-gray-900">{t.meals.title}</p>
               <p className="text-xs text-gray-400">
                 {totals.mealCount > 0
-                  ? `${totals.mealCount} ${language === 'de' ? 'Mahlzeiten' : 'meals'} · ${totals.calories} kcal`
+                  ? `${totals.mealCount} ${t.dashboard.mealsCount} · ${totals.calories} kcal`
                   : t.common.noData
                 }
               </p>

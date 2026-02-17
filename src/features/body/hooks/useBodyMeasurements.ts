@@ -10,9 +10,13 @@ export function useBodyMeasurements(limit = 30) {
   return useQuery({
     queryKey: [BODY_KEY, limit],
     queryFn: async (): Promise<BodyMeasurement[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('body_measurements')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(limit);
 
@@ -26,9 +30,13 @@ export function useLatestBodyMeasurement() {
   return useQuery({
     queryKey: [BODY_KEY, 'latest'],
     queryFn: async (): Promise<BodyMeasurement | null> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
       const { data, error } = await supabase
         .from('body_measurements')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(1)
         .single();

@@ -76,6 +76,11 @@ export const en: TranslationKeys = {
     formula: 'Formula',
     completeProfile: 'Complete your profile for BMR calculation',
     net: 'Net',
+    viewAll: 'View all',
+    allDone: 'All done! ✅',
+    sessions: 'sessions',
+    mealsCount: 'meals',
+    recommendations: 'Recommendations',
   },
   meals: {
     title: 'Meals',
@@ -127,6 +132,7 @@ export const en: TranslationKeys = {
     kg: 'kg',
     cm: 'cm',
     percent: '%',
+    history: 'History',
   },
   medical: {
     title: 'Medical & Health',

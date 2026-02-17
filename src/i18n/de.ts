@@ -74,6 +74,11 @@ export const de = {
     formula: 'Formel',
     completeProfile: 'Profil ausfüllen für BMR-Berechnung',
     net: 'Netto',
+    viewAll: 'Alle anzeigen',
+    allDone: 'Alles erledigt! ✅',
+    sessions: 'Einheiten',
+    mealsCount: 'Mahlzeiten',
+    recommendations: 'Empfehlungen',
   },
   meals: {
     title: 'Mahlzeiten',
@@ -125,6 +130,7 @@ export const de = {
     kg: 'kg',
     cm: 'cm',
     percent: '%',
+    history: 'Verlauf',
   },
   medical: {
     title: 'Medizin & Gesundheit',

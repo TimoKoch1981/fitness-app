@@ -12,7 +12,10 @@ export function useSubstances(activeOnly = true) {
   return useQuery({
     queryKey: [SUBSTANCES_KEY, activeOnly],
     queryFn: async (): Promise<Substance[]> => {
-      let query = supabase.from('substances').select('*').order('name');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      let query = supabase.from('substances').select('*').eq('user_id', user.id).order('name');
       if (activeOnly) {
         query = query.eq('is_active', true);
       }
@@ -83,9 +86,13 @@ export function useSubstanceLogs(limit = 30) {
   return useQuery({
     queryKey: [SUBSTANCE_LOGS_KEY, limit],
     queryFn: async (): Promise<SubstanceLog[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('substance_logs')
         .select('*, substances(name)')
+        .eq('user_id', user.id)
         .order('date', { ascending: false })
         .order('time', { ascending: false })
         .limit(limit);

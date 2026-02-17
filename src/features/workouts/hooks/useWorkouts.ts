@@ -9,9 +9,13 @@ export function useWorkoutsByDate(date: string = today()) {
   return useQuery({
     queryKey: [WORKOUTS_KEY, date],
     queryFn: async (): Promise<Workout[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('workouts')
         .select('*')
+        .eq('user_id', user.id)
         .eq('date', date)
         .order('created_at', { ascending: true });
 
@@ -25,9 +29,13 @@ export function useRecentWorkouts(limit = 10) {
   return useQuery({
     queryKey: [WORKOUTS_KEY, 'recent', limit],
     queryFn: async (): Promise<Workout[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('workouts')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(limit);
 

@@ -20,7 +20,10 @@ export function useReminders(activeOnly = true) {
   return useQuery({
     queryKey: [REMINDERS_KEY, activeOnly],
     queryFn: async (): Promise<Reminder[]> => {
-      let query = supabase.from('reminders').select('*').order('time', { ascending: true });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      let query = supabase.from('reminders').select('*').eq('user_id', user.id).order('time', { ascending: true });
       if (activeOnly) {
         query = query.eq('is_active', true);
       }
@@ -38,6 +41,9 @@ export function useTodayReminderLogs() {
   return useQuery({
     queryKey: [REMINDER_LOGS_KEY, todayStr],
     queryFn: async (): Promise<ReminderLog[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       // completed_at is TIMESTAMPTZ — filter by date portion
       const startOfDay = `${todayStr}T00:00:00`;
       const endOfDay = `${todayStr}T23:59:59`;
@@ -45,6 +51,7 @@ export function useTodayReminderLogs() {
       const { data, error } = await supabase
         .from('reminder_logs')
         .select('*')
+        .eq('user_id', user.id)
         .gte('completed_at', startOfDay)
         .lte('completed_at', endOfDay);
 
