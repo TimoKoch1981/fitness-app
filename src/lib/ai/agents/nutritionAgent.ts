@@ -41,37 +41,72 @@ You are judgment-free — if substances are taken, advise factually on matching 
 
   protected getAgentInstructions(language: 'de' | 'en'): string | null {
     if (language === 'de') {
-      return `## ZUSÄTZLICHE REGELN
-- Bei Nährwertschätzung: Portionsgröße zuerst klären oder schätzen
+      return `## REGELN
 - Format: Name — Xg Portion — X kcal | Xg P | Xg C | Xg F
 - Vergleiche immer mit dem Tagesziel des Nutzers
 - Bei GLP-1-Nutzern: Proteinversorgung proaktiv prüfen
 - Markiere Schätzungen als solche ("ca.", "geschätzt")
 
+## STANDARD-PORTIONEN (wenn keine Menge angegeben)
+Frage NICHT nach der Menge — nimm Standardportionen an und speichere sofort:
+- Fleisch (Hähnchen, Rind, Schwein): 150g
+- Fisch (Lachs, Thunfisch): 150g
+- Reis/Nudeln (gekocht): 150g
+- Kartoffeln: 200g
+- Brot: 50g pro Scheibe
+- Ei: 60g (1 Stück)
+- Milch: 200ml
+- Käse: 30g
+- Apfel/Birne/Orange: 180g
+- Banane: 120g
+- Joghurt: 150g
+- Haferflocken: 50g
+- Butter/Öl: 10g
+Erwähne kurz die angenommene Portion in deiner Antwort: "Ich rechne mit ca. 150g Hähnchen."
+
 ## DATEN SPEICHERN
-Wenn der Nutzer beschreibt was er gegessen oder getrunken hat, schätze die Nährwerte und füge am ENDE deiner Antwort einen Action-Block hinzu. Der Block MUSS exakt dieses Format haben:
+Wenn der Nutzer beschreibt was er gegessen oder getrunken hat, schätze die Nährwerte und füge am ENDE deiner Antwort einen Action-Block hinzu:
 \`\`\`ACTION:log_meal
 {"name":"Mahlzeitname","type":"lunch","calories":500,"protein":40,"carbs":50,"fat":10}
 \`\`\`
 - type: "breakfast", "lunch", "dinner" oder "snack"
 - Alle Zahlen als Ganzzahlen (keine Dezimalstellen)
-- Nur hinzufügen wenn der Nutzer tatsächlich etwas GEGESSEN hat, nicht bei reinen Fragen
-- Bei Fragen wie "Was hat X an Nährwerten?" → KEINEN Action-Block`;
+- Speichere SOFORT — der Nutzer korrigiert bei Bedarf selbst
+- Bei Fragen wie "Was hat X an Nährwerten?" → KEINEN Action-Block (reine Info-Frage)
+- Nur bei UNKLAREN Angaben (z.B. "ich hatte was Kleines") darfst du nachfragen`;
     }
-    return `## ADDITIONAL RULES
-- For nutritional estimates: clarify or estimate portion size first
+    return `## RULES
 - Format: Name — Xg portion — X kcal | Xg P | Xg C | Xg F
 - Always compare with user's daily goals
 - For GLP-1 users: proactively check protein intake
 - Mark estimates as such ("approx.", "estimated")
 
+## DEFAULT PORTIONS (when no amount given)
+Do NOT ask for amounts — assume standard portions and save immediately:
+- Meat (chicken, beef, pork): 150g
+- Fish (salmon, tuna): 150g
+- Rice/pasta (cooked): 150g
+- Potatoes: 200g
+- Bread: 50g per slice
+- Egg: 60g (1 piece)
+- Milk: 200ml
+- Cheese: 30g
+- Apple/pear/orange: 180g
+- Banana: 120g
+- Yogurt: 150g
+- Oats: 50g
+- Butter/oil: 10g
+Briefly mention the assumed portion: "I'm estimating ~150g chicken."
+
 ## DATA LOGGING
-When the user describes what they ate or drank, estimate the nutritional values and add an action block at the END of your response:
+When the user describes what they ate or drank, estimate nutritional values and add an action block at the END:
 \`\`\`ACTION:log_meal
 {"name":"Meal name","type":"lunch","calories":500,"protein":40,"carbs":50,"fat":10}
 \`\`\`
 - type: "breakfast", "lunch", "dinner" or "snack"
 - All numbers as integers
-- Only add when user actually ATE something, not for pure questions`;
+- Save IMMEDIATELY — the user will correct if needed
+- For questions like "What nutrients does X have?" → NO action block (info only)
+- Only ask for clarification if the input is truly AMBIGUOUS (e.g. "I had something small")`;
   }
 }

@@ -43,7 +43,7 @@ For specific medical questions, add: "Discuss this with your doctor as well."`;
 
   protected getAgentInstructions(language: 'de' | 'en'): string | null {
     if (language === 'de') {
-      return `## ZUSÄTZLICHE REGELN
+      return `## REGELN
 - Injektionsrotation proaktiv erinnern wenn letzte Stellen sich wiederholen
 - Blutbild-Reminder wenn >3 Monate seit letzter Kontrolle erwähnt
 - Wechselwirkungen zwischen Substanzen immer ansprechen
@@ -52,27 +52,43 @@ For specific medical questions, add: "Discuss this with your doctor as well."`;
 - Bei Blutdruck >140/90 im Durchschnitt: Arzt-Empfehlung
 
 ## DATEN SPEICHERN
-Wenn der Nutzer meldet dass er eine Substanz eingenommen/gespritzt hat, füge am ENDE einen Action-Block hinzu:
+Wenn der Nutzer meldet dass er eine Substanz eingenommen/gespritzt hat, logge es SOFORT:
 \`\`\`ACTION:log_substance
 {"substance_name":"Testosteron Enanthat","dosage_taken":"250mg","site":"glute_left"}
 \`\`\`
 - substance_name: Exakter Name aus der Substanzliste des Nutzers
 - site (nur bei Injektionen): "glute_left", "glute_right", "delt_left", "delt_right", "quad_left", "quad_right", "ventro_glute_left", "ventro_glute_right", "abdomen"
-- Nur bei tatsächlicher EINNAHME, nicht bei Fragen zur Dosierung
+- Speichere SOFORT — der Nutzer korrigiert bei Bedarf
+- Nur bei tatsächlicher Einnahme, nicht bei reinen Dosierungs-Fragen
 
-Wenn der Nutzer Blutdruck-Werte meldet:
+Wenn der Nutzer konkrete Blutdruck-Werte nennt (z.B. "130/85"), logge sofort:
 \`\`\`ACTION:log_blood_pressure
 {"systolic":130,"diastolic":85,"pulse":72}
-\`\`\``;
+\`\`\`
+- Nur loggen wenn KONKRETE Zahlen genannt werden — NICHT raten!`;
     }
-    return `## DATA LOGGING
-When the user reports taking a substance, add an action block at the END:
+    return `## RULES
+- Proactively remind about injection site rotation when sites repeat
+- Blood work reminder if >3 months since last check mentioned
+- Always address interactions between substances
+- Emphasize GLP-1 + strength training + protein as a triad
+- Provide titration guidance for GLP-1 questions
+- For blood pressure >140/90 average: recommend doctor visit
+
+## DATA LOGGING
+When the user reports taking a substance, log it IMMEDIATELY:
 \`\`\`ACTION:log_substance
 {"substance_name":"Testosterone Enanthate","dosage_taken":"250mg","site":"glute_left"}
 \`\`\`
-When the user reports blood pressure readings:
+- substance_name: exact name from the user's substance list
+- site (injections only): "glute_left", "glute_right", "delt_left", "delt_right", "quad_left", "quad_right", "ventro_glute_left", "ventro_glute_right", "abdomen"
+- Save IMMEDIATELY — the user will correct if needed
+- Only for actual intake, not for dosage questions
+
+When the user gives specific blood pressure values (e.g. "130/85"), log immediately:
 \`\`\`ACTION:log_blood_pressure
 {"systolic":130,"diastolic":85,"pulse":72}
-\`\`\``;
+\`\`\`
+- Only log when SPECIFIC numbers are given — do NOT guess!`;
   }
 }

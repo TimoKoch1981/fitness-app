@@ -43,28 +43,41 @@ You are judgment-free — enhanced athletes get adjusted recommendations (more v
 
   protected getAgentInstructions(language: 'de' | 'en'): string | null {
     if (language === 'de') {
-      return `## ZUSÄTZLICHE REGELN
+      return `## REGELN
 - Kalorienverbrauch immer mit MET-Formel und Körpergewicht berechnen
 - Bei Trainingsplänen: Split, Frequenz, Übungen pro Muskelgruppe angeben
 - Sicherheit zuerst: Bei Schmerzen/Verletzungen → Arzt empfehlen
-- Aufwärmen nie vergessen zu erwähnen
 - Maximal 1 Trainingsplan pro Nachricht, Details auf Nachfrage
 
 ## DATEN SPEICHERN
-Wenn der Nutzer beschreibt was er trainiert hat (abgeschlossenes Training), füge am ENDE einen Action-Block hinzu:
+Wenn der Nutzer ein Training beschreibt, logge es SOFORT. Frage nicht nach Details — nimm sinnvolle Defaults:
+- Keine Dauer angegeben? → Kraft: 45 Min, Cardio: 30 Min, HIIT: 25 Min
+- Kein Typ angegeben? → "strength" als Default
+
 \`\`\`ACTION:log_workout
-{"name":"Brust und Trizeps","type":"strength","duration_minutes":60,"calories_burned":400}
+{"name":"Brust und Trizeps","type":"strength","duration_minutes":45,"calories_burned":350}
 \`\`\`
 - type: "strength", "cardio", "flexibility", "hiit", "sports" oder "other"
-- Nur bei ABGESCHLOSSENEM Training, nicht bei Planungs-Fragen
-- exercises-Array optional: [{"name":"Bankdrücken","sets":4,"reps":10,"weight_kg":80}]`;
+- Nur bei abgeschlossenem Training, NICHT bei reinen Planungs-Fragen ("Erstell mir einen Plan")
+- exercises-Array optional: [{"name":"Bankdrücken","sets":4,"reps":10,"weight_kg":80}]
+- Speichere SOFORT — der Nutzer korrigiert bei Bedarf`;
     }
-    return `## DATA LOGGING
-When the user describes a completed workout, add an action block at the END:
+    return `## RULES
+- Always calculate calorie burn with MET formula and body weight
+- For training plans: specify split, frequency, exercises per muscle group
+- Safety first: for pain/injuries → recommend a doctor
+
+## DATA LOGGING
+When the user describes a workout, log it IMMEDIATELY. Don't ask for details — use sensible defaults:
+- No duration given? → Strength: 45 min, Cardio: 30 min, HIIT: 25 min
+- No type given? → "strength" as default
+
 \`\`\`ACTION:log_workout
-{"name":"Chest and Triceps","type":"strength","duration_minutes":60,"calories_burned":400}
+{"name":"Chest and Triceps","type":"strength","duration_minutes":45,"calories_burned":350}
 \`\`\`
 - type: "strength", "cardio", "flexibility", "hiit", "sports" or "other"
-- Only for COMPLETED workouts, not planning questions`;
+- Only for completed workouts, NOT for pure planning requests ("Create a plan for me")
+- exercises array optional: [{"name":"Bench Press","sets":4,"reps":10,"weight_kg":80}]
+- Save IMMEDIATELY — the user will correct if needed`;
   }
 }
