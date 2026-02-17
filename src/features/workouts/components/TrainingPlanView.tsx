@@ -34,9 +34,9 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
 
   if (!plan) {
     return (
-      <div className="text-center py-16">
-        <Dumbbell className="h-16 w-16 mx-auto text-gray-200 mb-4" />
-        <p className="text-gray-500 font-medium">{t.workouts.noPlan}</p>
+      <div className="text-center py-12">
+        <Dumbbell className="h-12 w-12 mx-auto text-gray-200 mb-3" />
+        <p className="text-gray-400 text-sm">{t.workouts.noPlan}</p>
         <p className="text-gray-400 text-sm mt-1">{t.workouts.noPlanHint}</p>
 
         <div className="flex flex-col gap-2 mt-6 max-w-xs mx-auto">

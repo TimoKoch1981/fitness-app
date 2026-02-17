@@ -280,14 +280,14 @@ export function DashboardPage() {
               <div className="text-center">
                 <p className="text-lg font-bold text-gray-900">{bmrResult.bmr}</p>
                 <p className="text-[10px] text-gray-400">{t.dashboard.bmr}</p>
-                <p className="text-[9px] text-gray-300 mt-0.5">
+                <p className="text-[10px] text-gray-300 mt-0.5">
                   {bmrResult.formula === 'katch' ? 'Katch-McArdle' : 'Mifflin-St Jeor'}
                 </p>
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-teal-600">{tdee}</p>
                 <p className="text-[10px] text-gray-400">{t.dashboard.tdee}</p>
-                <p className="text-[9px] text-gray-300 mt-0.5">{t.dashboard.kcalDay}</p>
+                <p className="text-[10px] text-gray-300 mt-0.5">{t.dashboard.kcalDay}</p>
               </div>
             </div>
           </div>

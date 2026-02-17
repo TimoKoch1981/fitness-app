@@ -56,8 +56,8 @@ export function BodyPage() {
               if (!stat.value) return null;
               const trend = getTrend(stat.value, stat.prev);
               return (
-                <div key={stat.label} className="bg-white rounded-xl p-3 shadow-sm">
-                  <p className="text-xs text-gray-500">{stat.label}</p>
+                <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm">
+                  <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
                   <div className="flex items-end gap-1 mt-1">
                     <p className="text-xl font-bold text-gray-900">{stat.value}</p>
                     <span className="text-xs text-gray-400 mb-0.5">{stat.unit}</span>
@@ -93,9 +93,9 @@ export function BodyPage() {
                   </div>
                   <button
                     onClick={() => deleteMeasurement.mutate(m.id)}
-                    className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               ))}
@@ -103,9 +103,9 @@ export function BodyPage() {
           </div>
         </div>
       ) : (
-        <div className="text-center py-16">
-          <Activity className="h-16 w-16 mx-auto text-gray-200 mb-4" />
-          <p className="text-gray-500 font-medium">{t.common.noData}</p>
+        <div className="text-center py-12">
+          <Activity className="h-12 w-12 mx-auto text-gray-200 mb-3" />
+          <p className="text-gray-400 text-sm">{t.common.noData}</p>
           <button
             onClick={() => setShowAddDialog(true)}
             className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"

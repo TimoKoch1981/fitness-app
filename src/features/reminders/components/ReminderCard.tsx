@@ -83,7 +83,7 @@ export function ReminderCard({ reminder, isCompleted, onComplete, onToggle, onDe
                 <span
                   key={i}
                   title={label}
-                  className={`w-3.5 h-3.5 rounded-full text-[7px] font-medium flex items-center justify-center ${
+                  className={`w-3.5 h-3.5 rounded-full text-[8px] font-medium flex items-center justify-center ${
                     reminder.days_of_week.includes(i)
                       ? 'bg-teal-100 text-teal-700'
                       : 'bg-gray-50 text-gray-300'

@@ -60,7 +60,7 @@ export function MedicalPage() {
 
           {bpLoading ? (
             <div className="p-4 text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
             </div>
           ) : bpLogs && bpLogs.length > 0 ? (
             <div className="divide-y divide-gray-50">
@@ -86,9 +86,9 @@ export function MedicalPage() {
                     </div>
                     <button
                       onClick={() => deleteBP.mutate(bp.id)}
-                      className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 );

@@ -53,7 +53,7 @@ export function InsightCard({ insight, language }: Props) {
           <p className={`text-xs font-semibold ${style.titleColor}`}>
             {insight.title[language]}
           </p>
-          <p className={`text-[11px] ${style.msgColor} mt-0.5 leading-relaxed`}>
+          <p className={`text-[10px] ${style.msgColor} mt-0.5 leading-relaxed`}>
             {insight.message[language]}
           </p>
         </div>

@@ -20,7 +20,7 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
   const typeLabel = t.meals[meal.type as keyof typeof t.meals] ?? meal.type;
 
   return (
-    <div className="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 group">
+    <div className="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 group relative">
       {/* Emoji */}
       <div className="text-2xl flex-shrink-0">{emoji}</div>
 
@@ -52,7 +52,7 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
 
       {/* Source indicator */}
       {meal.source === 'ai' && (
-        <span className="text-[8px] text-amber-500 font-medium absolute top-1 right-1">
+        <span className="text-[10px] text-amber-500 font-medium absolute top-1 right-1">
           {t.common.estimated}
         </span>
       )}

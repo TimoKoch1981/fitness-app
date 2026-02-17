@@ -155,9 +155,9 @@ export function WorkoutsPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <Dumbbell className="h-16 w-16 mx-auto text-gray-200 mb-4" />
-              <p className="text-gray-500 font-medium">{t.common.noData}</p>
+            <div className="text-center py-12">
+              <Dumbbell className="h-12 w-12 mx-auto text-gray-200 mb-3" />
+              <p className="text-gray-400 text-sm">{t.common.noData}</p>
               <button
                 onClick={() => setShowAddDialog(true)}
                 className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
