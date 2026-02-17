@@ -64,6 +64,16 @@ export const de = {
     balance: 'Bilanz',
     goal: 'Ziel',
     glasses: 'Gläser',
+    bmr: 'Grundumsatz (BMR)',
+    tdee: 'Gesamtumsatz (TDEE)',
+    bmrTdee: 'Energiebedarf',
+    waterTracker: 'Wasser-Tracker',
+    glassesLeft: 'Gläser übrig',
+    glassesDone: 'Tagesziel erreicht!',
+    kcalDay: 'kcal/Tag',
+    formula: 'Formel',
+    completeProfile: 'Profil ausfüllen für BMR-Berechnung',
+    net: 'Netto',
   },
   meals: {
     title: 'Mahlzeiten',
@@ -175,6 +185,11 @@ export const de = {
     greeting:
       'Hey! Ich bin dein FitBuddy. Erzähl mir was du gegessen oder trainiert hast, und ich kümmere mich um den Rest! 💪',
     voiceInput: 'Spracheingabe',
+    send: 'Senden',
+    clearChat: 'Chat leeren',
+    connectionError: 'Verbindung zum KI-Modell fehlgeschlagen. Läuft Ollama?',
+    helpHint: 'Tipp: Erzähl mir was du gegessen hast oder frag mich etwas über Ernährung!',
+    you: 'Du',
   },
   reminders: {
     title: 'Erinnerungen',

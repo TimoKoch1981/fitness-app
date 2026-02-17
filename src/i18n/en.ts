@@ -66,6 +66,16 @@ export const en: TranslationKeys = {
     balance: 'Balance',
     goal: 'Goal',
     glasses: 'glasses',
+    bmr: 'Basal Metabolic Rate (BMR)',
+    tdee: 'Total Daily Energy (TDEE)',
+    bmrTdee: 'Energy Needs',
+    waterTracker: 'Water Tracker',
+    glassesLeft: 'glasses left',
+    glassesDone: 'Daily goal reached!',
+    kcalDay: 'kcal/day',
+    formula: 'Formula',
+    completeProfile: 'Complete your profile for BMR calculation',
+    net: 'Net',
   },
   meals: {
     title: 'Meals',
@@ -174,6 +184,11 @@ export const en: TranslationKeys = {
     greeting:
       "Hey! I'm your FitBuddy. Tell me what you ate or how you trained, and I'll take care of the rest! 💪",
     voiceInput: 'Voice Input',
+    send: 'Send',
+    clearChat: 'Clear Chat',
+    connectionError: 'Failed to connect to AI model. Is Ollama running?',
+    helpHint: 'Tip: Tell me what you ate or ask me about nutrition!',
+    you: 'You',
   },
   reminders: {
     title: 'Reminders',
