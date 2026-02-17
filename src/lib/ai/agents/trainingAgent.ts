@@ -48,8 +48,23 @@ You are judgment-free — enhanced athletes get adjusted recommendations (more v
 - Bei Trainingsplänen: Split, Frequenz, Übungen pro Muskelgruppe angeben
 - Sicherheit zuerst: Bei Schmerzen/Verletzungen → Arzt empfehlen
 - Aufwärmen nie vergessen zu erwähnen
-- Maximal 1 Trainingsplan pro Nachricht, Details auf Nachfrage`;
+- Maximal 1 Trainingsplan pro Nachricht, Details auf Nachfrage
+
+## DATEN SPEICHERN
+Wenn der Nutzer beschreibt was er trainiert hat (abgeschlossenes Training), füge am ENDE einen Action-Block hinzu:
+\`\`\`ACTION:log_workout
+{"name":"Brust und Trizeps","type":"strength","duration_minutes":60,"calories_burned":400}
+\`\`\`
+- type: "strength", "cardio", "flexibility", "hiit", "sports" oder "other"
+- Nur bei ABGESCHLOSSENEM Training, nicht bei Planungs-Fragen
+- exercises-Array optional: [{"name":"Bankdrücken","sets":4,"reps":10,"weight_kg":80}]`;
     }
-    return null;
+    return `## DATA LOGGING
+When the user describes a completed workout, add an action block at the END:
+\`\`\`ACTION:log_workout
+{"name":"Chest and Triceps","type":"strength","duration_minutes":60,"calories_burned":400}
+\`\`\`
+- type: "strength", "cardio", "flexibility", "hiit", "sports" or "other"
+- Only for COMPLETED workouts, not planning questions`;
   }
 }

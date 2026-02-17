@@ -1,13 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, Send, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
+import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
 import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
+import { ActionConfirmBanner } from '../features/buddy/components/ActionConfirmBanner';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { today } from '../lib/utils';
+import { getActionDisplayInfo } from '../lib/ai/actions/types';
 import type { HealthContext } from '../types/health';
 
 export function BuddyPage() {
@@ -44,9 +47,24 @@ export function BuddyPage() {
     isConnected,
     sendMessage,
     clearMessages,
+    clearAction,
+    addSystemMessage,
     checkConnection,
     providerName,
   } = useBuddyChat({ context: healthContext, language });
+
+  // Action executor for data logging
+  const {
+    pendingAction,
+    actionStatus,
+    errorMessage,
+    setPendingAction,
+    executeAction,
+    rejectAction,
+  } = useActionExecutor();
+
+  // Track which message ID owns the current pending action
+  const [actionMessageId, setActionMessageId] = useState<string | null>(null);
 
   // Check AI connection on mount
   useEffect(() => {
@@ -56,7 +74,45 @@ export function BuddyPage() {
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, pendingAction]);
+
+  // Detect new actions from messages and set them as pending
+  useEffect(() => {
+    // Find the last message with a pending action that isn't already being handled
+    const lastActionMsg = [...messages].reverse().find(m => m.pendingAction);
+    if (lastActionMsg && lastActionMsg.id !== actionMessageId) {
+      setPendingAction(lastActionMsg.pendingAction!);
+      setActionMessageId(lastActionMsg.id);
+    }
+  }, [messages, actionMessageId, setPendingAction]);
+
+  /** Handle confirm — execute action and show success message */
+  const handleConfirm = useCallback(async () => {
+    if (!pendingAction || !actionMessageId) return;
+
+    const display = getActionDisplayInfo(pendingAction);
+    const success = await executeAction();
+
+    if (success) {
+      // Clear the action from the message
+      clearAction(actionMessageId);
+      setActionMessageId(null);
+
+      // Add success confirmation message
+      const successText = language === 'de'
+        ? `${display.icon} Gespeichert! ${display.summary}`
+        : `${display.icon} Saved! ${display.summary}`;
+      addSystemMessage(successText, display.icon);
+    }
+  }, [pendingAction, actionMessageId, executeAction, clearAction, addSystemMessage, language]);
+
+  /** Handle reject — dismiss action */
+  const handleReject = useCallback(() => {
+    if (!actionMessageId) return;
+    rejectAction();
+    clearAction(actionMessageId);
+    setActionMessageId(null);
+  }, [actionMessageId, rejectAction, clearAction]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,9 +185,22 @@ export function BuddyPage() {
           </div>
         )}
 
-        {/* Messages */}
+        {/* Messages + Action Banners */}
         {messages.map((msg) => (
-          <ChatMessageBubble key={msg.id} message={msg} />
+          <div key={msg.id}>
+            <ChatMessageBubble message={msg} />
+
+            {/* Show ActionConfirmBanner below the message that owns the action */}
+            {msg.id === actionMessageId && pendingAction && (
+              <ActionConfirmBanner
+                action={pendingAction}
+                status={actionStatus}
+                errorMessage={errorMessage}
+                onConfirm={handleConfirm}
+                onReject={handleReject}
+              />
+            )}
+          </div>
         ))}
 
         {/* Help hint when no messages */}

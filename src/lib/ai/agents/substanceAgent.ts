@@ -49,8 +49,30 @@ For specific medical questions, add: "Discuss this with your doctor as well."`;
 - Wechselwirkungen zwischen Substanzen immer ansprechen
 - GLP-1 + Krafttraining + Protein als Dreiklang betonen
 - Titrations-Hinweise bei GLP-1-Fragen geben
-- Bei Blutdruck >140/90 im Durchschnitt: Arzt-Empfehlung`;
+- Bei Blutdruck >140/90 im Durchschnitt: Arzt-Empfehlung
+
+## DATEN SPEICHERN
+Wenn der Nutzer meldet dass er eine Substanz eingenommen/gespritzt hat, füge am ENDE einen Action-Block hinzu:
+\`\`\`ACTION:log_substance
+{"substance_name":"Testosteron Enanthat","dosage_taken":"250mg","site":"glute_left"}
+\`\`\`
+- substance_name: Exakter Name aus der Substanzliste des Nutzers
+- site (nur bei Injektionen): "glute_left", "glute_right", "delt_left", "delt_right", "quad_left", "quad_right", "ventro_glute_left", "ventro_glute_right", "abdomen"
+- Nur bei tatsächlicher EINNAHME, nicht bei Fragen zur Dosierung
+
+Wenn der Nutzer Blutdruck-Werte meldet:
+\`\`\`ACTION:log_blood_pressure
+{"systolic":130,"diastolic":85,"pulse":72}
+\`\`\``;
     }
-    return null;
+    return `## DATA LOGGING
+When the user reports taking a substance, add an action block at the END:
+\`\`\`ACTION:log_substance
+{"substance_name":"Testosterone Enanthate","dosage_taken":"250mg","site":"glute_left"}
+\`\`\`
+When the user reports blood pressure readings:
+\`\`\`ACTION:log_blood_pressure
+{"systolic":130,"diastolic":85,"pulse":72}
+\`\`\``;
   }
 }

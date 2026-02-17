@@ -5,13 +5,20 @@
  * appropriate specialist agent (Nutrition, Training, Substance, Analysis, General).
  * Each agent loads only its required skills for token-efficient responses.
  *
+ * After receiving a response, the hook parses any ACTION blocks from the
+ * agent's text and makes them available for user confirmation via the
+ * ActionConfirmBanner.
+ *
  * @see lib/ai/agents/router.ts — Intent detection + dispatch
+ * @see lib/ai/actions/actionParser.ts — ACTION block extraction
  */
 
 import { useState, useCallback } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
 import { routeAndExecute } from '../../../lib/ai/agents/router';
+import { parseActionFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import type { AgentContext } from '../../../lib/ai/agents/types';
+import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
 
 export interface DisplayMessage {
@@ -26,6 +33,8 @@ export interface DisplayMessage {
   agentName?: string;
   agentIcon?: string;
   skillVersions?: Record<string, string>;
+  // Parsed action from this message (if any)
+  pendingAction?: ParsedAction;
 }
 
 interface UseBuddyChatOptions {
@@ -86,17 +95,24 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       // Route to the best agent and get response
       const result = await routeAndExecute(userMessage.trim(), agentContext);
 
-      // Replace loading message with actual response + agent attribution
+      // Parse ACTION block from agent response (if any)
+      const parsedAction = parseActionFromResponse(result.content);
+      const cleanContent = parsedAction
+        ? stripActionBlock(result.content)
+        : result.content;
+
+      // Replace loading message with actual response + agent attribution + action
       setMessages(prev => prev.map(m =>
         m.id === loadingId
           ? {
               ...m,
-              content: result.content,
+              content: cleanContent,
               isLoading: false,
               agentType: result.agentType,
               agentName: result.agentName,
               agentIcon: result.agentIcon,
               skillVersions: result.skillVersions,
+              pendingAction: parsedAction ?? undefined,
             }
           : m
       ));
@@ -122,6 +138,24 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     }
   }, [messages, isLoading, context, language]);
 
+  /** Clear the pending action from a specific message (after execution/rejection) */
+  const clearAction = useCallback((messageId: string) => {
+    setMessages(prev => prev.map(m =>
+      m.id === messageId ? { ...m, pendingAction: undefined } : m
+    ));
+  }, []);
+
+  /** Add a system/confirmation message (e.g. "✅ Mahlzeit gespeichert!") */
+  const addSystemMessage = useCallback((content: string, icon?: string) => {
+    setMessages(prev => [...prev, {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content,
+      timestamp: new Date(),
+      agentIcon: icon,
+    }]);
+  }, []);
+
   /** Clear all messages */
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -133,6 +167,8 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     isConnected,
     sendMessage,
     clearMessages,
+    clearAction,
+    addSystemMessage,
     checkConnection,
     providerName: provider.getName(),
   };
