@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Plus, Heart, Pill, Trash2, ClipboardList } from 'lucide-react';
+import { Plus, Heart, Pill, Trash2, ClipboardList, Bell } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useBloodPressureLogs, useDeleteBloodPressure } from '../features/medical/hooks/useBloodPressure';
 import { useSubstances, useSubstanceLogs } from '../features/medical/hooks/useSubstances';
+import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder, useToggleReminder, useDeleteReminder } from '../features/reminders/hooks/useReminders';
 import { AddBloodPressureDialog } from '../features/medical/components/AddBloodPressureDialog';
 import { AddSubstanceDialog } from '../features/medical/components/AddSubstanceDialog';
 import { LogSubstanceDialog } from '../features/medical/components/LogSubstanceDialog';
+import { AddReminderDialog } from '../features/reminders/components/AddReminderDialog';
+import { ReminderCard } from '../features/reminders/components/ReminderCard';
 import { classifyBloodPressure } from '../lib/calculations';
 import { formatDate, formatTime } from '../lib/utils';
 
@@ -15,11 +18,25 @@ export function MedicalPage() {
   const [showBPDialog, setShowBPDialog] = useState(false);
   const [showAddSubstanceDialog, setShowAddSubstanceDialog] = useState(false);
   const [showLogSubstanceDialog, setShowLogSubstanceDialog] = useState(false);
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
 
   const { data: bpLogs, isLoading: bpLoading } = useBloodPressureLogs(10);
   const { data: substances } = useSubstances(true);
   const { data: substanceLogs } = useSubstanceLogs(10);
   const deleteBP = useDeleteBloodPressure();
+
+  // Reminders
+  const { data: reminders } = useReminders(false); // all reminders (active + inactive)
+  const { data: todayLogs } = useTodayReminderLogs();
+  const completeReminder = useCompleteReminder();
+  const toggleReminder = useToggleReminder();
+  const deleteReminder = useDeleteReminder();
+
+  const reminderStatus = reminders && todayLogs
+    ? getTodayReminderStatus(reminders, todayLogs)
+    : { pending: [], completed: [], totalDue: 0 };
+
+  const completedReminderIds = new Set(todayLogs?.map(l => l.reminder_id) ?? []);
 
   const locale = language === 'de' ? 'de-DE' : 'en-US';
 
@@ -155,7 +172,9 @@ export function MedicalPage() {
         {substanceLogs && substanceLogs.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="font-semibold text-gray-900 text-sm">Letzte Einnahmen</h3>
+              <h3 className="font-semibold text-gray-900 text-sm">
+                {language === 'de' ? 'Letzte Einnahmen' : 'Recent Logs'}
+              </h3>
             </div>
             <div className="divide-y divide-gray-50">
               {substanceLogs.slice(0, 5).map((log) => (
@@ -174,6 +193,92 @@ export function MedicalPage() {
             </div>
           </div>
         )}
+
+        {/* Reminders Section */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-teal-500" />
+              <h3 className="font-semibold text-gray-900">{t.reminders.title}</h3>
+              {reminderStatus.pending.length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-medium">
+                  {reminderStatus.pending.length}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setShowReminderDialog(true)}
+              className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Today's Due Reminders */}
+          {reminderStatus.totalDue > 0 && (
+            <div>
+              <div className="px-4 pt-2 pb-1">
+                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+                  {language === 'de' ? 'Heute fällig' : 'Due Today'}
+                  {' '}({reminderStatus.pending.length}/{reminderStatus.totalDue})
+                </p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {[...reminderStatus.pending, ...reminderStatus.completed].map((reminder) => (
+                  <ReminderCard
+                    key={reminder.id}
+                    reminder={reminder}
+                    isCompleted={completedReminderIds.has(reminder.id)}
+                    onComplete={(id) => completeReminder.mutate(id)}
+                    onToggle={(id, isActive) => toggleReminder.mutate({ id, is_active: isActive })}
+                    onDelete={(id) => deleteReminder.mutate(id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* All Reminders (if any exist beyond today's due) */}
+          {reminders && reminders.length > 0 ? (
+            <div>
+              {reminderStatus.totalDue > 0 && (
+                <div className="px-4 pt-3 pb-1 border-t">
+                  <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+                    {language === 'de' ? 'Alle Erinnerungen' : 'All Reminders'}
+                  </p>
+                </div>
+              )}
+              <div className="divide-y divide-gray-50">
+                {reminders
+                  .filter(r => !reminderStatus.pending.some(p => p.id === r.id) && !reminderStatus.completed.some(c => c.id === r.id))
+                  .map((reminder) => (
+                    <ReminderCard
+                      key={reminder.id}
+                      reminder={reminder}
+                      isCompleted={false}
+                      onComplete={(id) => completeReminder.mutate(id)}
+                      onToggle={(id, isActive) => toggleReminder.mutate({ id, is_active: isActive })}
+                      onDelete={(id) => deleteReminder.mutate(id)}
+                    />
+                  ))}
+              </div>
+            </div>
+          ) : (
+            !reminderStatus.totalDue && (
+              <div className="p-4 text-center">
+                <p className="text-sm text-gray-400">
+                  {language === 'de' ? 'Keine Erinnerungen angelegt' : 'No reminders set up'}
+                </p>
+                <button
+                  onClick={() => setShowReminderDialog(true)}
+                  className="mt-2 text-xs text-teal-600 hover:underline"
+                >
+                  {t.reminders.addReminder}
+                </button>
+              </div>
+            )
+          )}
+        </div>
       </div>
 
       <AddBloodPressureDialog
@@ -187,6 +292,10 @@ export function MedicalPage() {
       <LogSubstanceDialog
         open={showLogSubstanceDialog}
         onClose={() => setShowLogSubstanceDialog(false)}
+      />
+      <AddReminderDialog
+        open={showReminderDialog}
+        onClose={() => setShowReminderDialog(false)}
       />
     </PageShell>
   );

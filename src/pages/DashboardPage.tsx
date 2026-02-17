@@ -11,6 +11,8 @@ import {
   Minus,
   Flame,
   Zap,
+  Bell,
+  Check,
 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
@@ -19,6 +21,7 @@ import { useWorkoutsByDate } from '../features/workouts/hooks/useWorkouts';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { useBloodPressureLogs } from '../features/medical/hooks/useBloodPressure';
 import { useProfile } from '../features/auth/hooks/useProfile';
+import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder } from '../features/reminders/hooks/useReminders';
 import { classifyBloodPressure } from '../lib/calculations';
 import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
 import { calculateTDEE_PAL } from '../lib/calculations/tdee';
@@ -43,6 +46,14 @@ export function DashboardPage() {
   const { data: workouts } = useWorkoutsByDate(selectedDate);
   const { data: latestBody } = useLatestBodyMeasurement();
   const { data: bpLogs } = useBloodPressureLogs(1);
+
+  // Reminders
+  const { data: remindersList } = useReminders(true);
+  const { data: todayLogs } = useTodayReminderLogs();
+  const completeReminder = useCompleteReminder();
+  const reminderStatus = remindersList && todayLogs
+    ? getTodayReminderStatus(remindersList, todayLogs)
+    : { pending: [], completed: [], totalDue: 0 };
 
   // Water tracker (localStorage-based for now)
   const waterKey = WATER_STORAGE_KEY + selectedDate;
@@ -242,6 +253,71 @@ export function DashboardPage() {
             <Zap className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-yellow-700 font-medium">{t.dashboard.completeProfile}</p>
           </button>
+        )}
+
+        {/* Reminders Widget */}
+        {reminderStatus.totalDue > 0 && (
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-teal-500" />
+                <p className="text-xs text-gray-500 font-medium">{t.reminders.title}</p>
+                {reminderStatus.pending.length > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-medium">
+                    {reminderStatus.pending.length}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => navigate('/medical')}
+                className="text-[10px] text-teal-600 hover:underline"
+              >
+                {language === 'de' ? 'Alle anzeigen' : 'View all'}
+              </button>
+            </div>
+
+            {reminderStatus.pending.length > 0 ? (
+              <div className="divide-y divide-gray-50">
+                {reminderStatus.pending.slice(0, 3).map((reminder) => {
+                  const typeIcons: Record<string, string> = {
+                    substance: '💊',
+                    blood_pressure: '❤️',
+                    body_measurement: '⚖️',
+                    custom: '📌',
+                  };
+                  const timeDisplay = reminder.time
+                    ? reminder.time
+                    : reminder.time_period
+                      ? (reminder.time_period === 'morning' ? '🌅' : reminder.time_period === 'noon' ? '☀️' : '🌙')
+                      : '';
+
+                  return (
+                    <div key={reminder.id} className="px-4 py-2.5 flex items-center gap-3">
+                      <span className="text-sm">{typeIcons[reminder.type] ?? '📌'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900 truncate">{reminder.title}</p>
+                        {timeDisplay && (
+                          <p className="text-[10px] text-gray-400">{timeDisplay}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => completeReminder.mutate(reminder.id)}
+                        className="w-7 h-7 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-300 hover:border-teal-400 hover:text-teal-500 transition-all"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="px-4 py-3 text-center">
+                <p className="text-xs text-teal-600">
+                  {language === 'de' ? 'Alles erledigt! ✅' : 'All done! ✅'}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Quick Info Cards */}
