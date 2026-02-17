@@ -27,8 +27,8 @@ interface UseActionExecutorReturn {
   errorMessage: string | null;
   /** Set a new pending action (called after parsing agent response) */
   setPendingAction: (action: ParsedAction | null) => void;
-  /** User confirmed — execute the pending action */
-  executeAction: () => Promise<boolean>;
+  /** Execute action — optionally pass action directly (avoids state race) */
+  executeAction: (action?: ParsedAction) => Promise<{ success: boolean; error?: string }>;
   /** User dismissed — reject the pending action */
   rejectAction: () => void;
 }
@@ -49,19 +49,21 @@ export function useActionExecutor(): UseActionExecutorReturn {
   const { data: activeSubstances } = useSubstances(true);
 
   /**
-   * Execute the pending action by calling the appropriate mutation.
-   * Returns true on success, false on failure.
+   * Execute an action by calling the appropriate mutation.
+   * Accepts an action directly (preferred) or falls back to pendingAction state.
+   * Returns { success, error } to avoid stale closure issues.
    */
-  const executeAction = useCallback(async (): Promise<boolean> => {
-    if (!pendingAction) return false;
+  const executeAction = useCallback(async (actionOverride?: ParsedAction): Promise<{ success: boolean; error?: string }> => {
+    const actionToExecute = actionOverride ?? pendingAction;
+    if (!actionToExecute) return { success: false, error: 'No action to execute' };
 
     setActionStatus('executing');
     setErrorMessage(null);
 
     try {
-      const d = pendingAction.data;
+      const d = actionToExecute.data;
 
-      switch (pendingAction.type) {
+      switch (actionToExecute.type) {
         case 'log_meal': {
           await addMeal.mutateAsync({
             name: d.name as string,
@@ -147,13 +149,13 @@ export function useActionExecutor(): UseActionExecutorReturn {
 
       setActionStatus('executed');
       setPendingAction(null);
-      return true;
+      return { success: true };
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[ActionExecutor] Failed:', msg);
       setErrorMessage(msg);
       setActionStatus('failed');
-      return false;
+      return { success: false, error: msg };
     }
   }, [pendingAction, activeSubstances, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance]);
 

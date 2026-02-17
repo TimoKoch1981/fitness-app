@@ -23,9 +23,12 @@ export function formatDate(date: Date | string, locale = 'de-DE'): string {
 
 /**
  * Formats a time string (HH:mm) to locale format.
+ * Returns the raw string if parsing fails.
  */
-export function formatTime(time: string, locale = 'de-DE'): string {
+export function formatTime(time: string | null | undefined, locale = 'de-DE'): string {
+  if (!time) return '--:--';
   const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return time;
   const d = new Date();
   d.setHours(hours, minutes);
   return d.toLocaleTimeString(locale, {

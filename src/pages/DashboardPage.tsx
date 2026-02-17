@@ -18,11 +18,10 @@ import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useWorkoutsByDate } from '../features/workouts/hooks/useWorkouts';
-import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
+import { useLatestBodyMeasurement, useBodyMeasurements } from '../features/body/hooks/useBodyMeasurements';
 import { useBloodPressureLogs } from '../features/medical/hooks/useBloodPressure';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder } from '../features/reminders/hooks/useReminders';
-import { useBodyMeasurements } from '../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { classifyBloodPressure } from '../lib/calculations';
 import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
@@ -30,6 +29,7 @@ import { calculateTDEE_PAL } from '../lib/calculations/tdee';
 import { generateInsights } from '../lib/insights';
 import { InsightCard } from '../shared/components/InsightCard';
 import { today } from '../lib/utils';
+import { useAuth } from '../app/providers/AuthProvider';
 import {
   DEFAULT_CALORIES_GOAL,
   DEFAULT_PROTEIN_GOAL,
@@ -43,6 +43,7 @@ const WATER_STORAGE_KEY = 'fitbuddy_water_';
 export function DashboardPage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const selectedDate = today();
 
   const { data: profile } = useProfile();
@@ -61,8 +62,8 @@ export function DashboardPage() {
     ? getTodayReminderStatus(remindersList, todayLogs)
     : { pending: [], completed: [], totalDue: 0 };
 
-  // Water tracker (localStorage-based for now)
-  const waterKey = WATER_STORAGE_KEY + selectedDate;
+  // Water tracker (localStorage-based for now, scoped per user)
+  const waterKey = WATER_STORAGE_KEY + (user?.id ?? 'anon') + '_' + selectedDate;
   const [waterGlasses, setWaterGlasses] = useState(() => {
     const stored = localStorage.getItem(waterKey);
     return stored ? parseInt(stored) : 0;

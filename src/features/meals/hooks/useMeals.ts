@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
@@ -32,25 +33,29 @@ export function useMealsByDate(date: string = today()) {
 export function useDailyMealTotals(date: string = today()) {
   const { data: meals, ...rest } = useMealsByDate(date);
 
-  const totals = {
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    fiber: 0,
-    mealCount: 0,
-  };
+  const totals = useMemo(() => {
+    const result = {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      fiber: 0,
+      mealCount: 0,
+    };
 
-  if (meals) {
-    meals.forEach((meal) => {
-      totals.calories += meal.calories ?? 0;
-      totals.protein += meal.protein ?? 0;
-      totals.carbs += meal.carbs ?? 0;
-      totals.fat += meal.fat ?? 0;
-      totals.fiber += (meal.fiber ?? 0);
-      totals.mealCount++;
-    });
-  }
+    if (meals) {
+      meals.forEach((meal) => {
+        result.calories += meal.calories ?? 0;
+        result.protein += meal.protein ?? 0;
+        result.carbs += meal.carbs ?? 0;
+        result.fat += meal.fat ?? 0;
+        result.fiber += (meal.fiber ?? 0);
+        result.mealCount++;
+      });
+    }
+
+    return result;
+  }, [meals]);
 
   return { totals, meals, ...rest };
 }

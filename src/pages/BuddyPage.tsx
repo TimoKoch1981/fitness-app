@@ -36,6 +36,11 @@ export function BuddyPage() {
       water: 0,
       waterGoal: profile?.daily_water_goal ?? 8,
     },
+    recentMeals: [],
+    recentWorkouts: [],
+    recentBloodPressure: [],
+    recentSubstanceLogs: [],
+    trainingGoals: [],
     latestBodyMeasurement: latestBody ?? undefined,
     activeSubstances: activeSubstances ?? [],
   };
@@ -53,11 +58,7 @@ export function BuddyPage() {
   } = useBuddyChat({ context: healthContext, language });
 
   // Action executor for auto-saving data
-  const {
-    setPendingAction,
-    executeAction,
-    errorMessage: actionError,
-  } = useActionExecutor();
+  const { executeAction } = useActionExecutor();
 
   // Track which message IDs have already been auto-executed
   const executedActionsRef = useRef<Set<string>>(new Set());
@@ -83,15 +84,12 @@ export function BuddyPage() {
     const action = lastActionMsg.pendingAction!;
     const display = getActionDisplayInfo(action);
 
-    // Set action and execute immediately
-    setPendingAction(action);
-
-    // Use setTimeout to avoid state update during render
+    // Execute immediately — pass action directly to avoid state race condition
     setTimeout(async () => {
-      const success = await executeAction();
+      const result = await executeAction(action);
 
-      if (success) {
-        clearAction(lastActionMsg.id);
+      clearAction(lastActionMsg.id);
+      if (result.success) {
         addSystemMessage(
           language === 'de'
             ? `${display.icon} Gespeichert: ${display.summary}`
@@ -99,16 +97,15 @@ export function BuddyPage() {
           display.icon,
         );
       } else {
-        clearAction(lastActionMsg.id);
         addSystemMessage(
           language === 'de'
-            ? `❌ Fehler beim Speichern: ${actionError ?? 'Unbekannter Fehler'}`
-            : `❌ Save error: ${actionError ?? 'Unknown error'}`,
+            ? `❌ Fehler beim Speichern: ${result.error ?? 'Unbekannter Fehler'}`
+            : `❌ Save error: ${result.error ?? 'Unknown error'}`,
           '❌',
         );
       }
     }, 0);
-  }, [messages, setPendingAction, executeAction, clearAction, addSystemMessage, language, actionError]);
+  }, [messages, executeAction, clearAction, addSystemMessage, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

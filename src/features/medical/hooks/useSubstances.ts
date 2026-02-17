@@ -121,11 +121,11 @@ export function useLogSubstance() {
       const { data, error } = await supabase
         .from('substance_logs')
         .insert({
-          user_id: user.id,
-          date: input.date ?? today(),
-          time: input.time ?? `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
-          taken: input.taken ?? true,
           ...input,
+          user_id: user.id,
+          date: input.date || today(),
+          time: input.time || `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
+          taken: input.taken ?? true,
         })
         .select()
         .single();
