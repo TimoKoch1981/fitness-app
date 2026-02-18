@@ -18,7 +18,7 @@ import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
 import { useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
-import type { SplitType, PlanExercise } from '../../../types/health';
+import type { SplitType, PlanExercise, InjectionSite } from '../../../types/health';
 
 interface UseActionExecutorReturn {
   /** Currently pending action awaiting user confirmation */
@@ -89,7 +89,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             duration_minutes: d.duration_minutes as number | undefined,
             calories_burned: d.calories_burned as number | undefined,
             met_value: d.met_value as number | undefined,
-            exercises: d.exercises as any[] | undefined,
+            exercises: d.exercises as Array<{ name: string; sets?: number; reps?: number; weight_kg?: number }> | undefined,
             notes: d.notes as string | undefined,
             date: d.date as string | undefined,
           });
@@ -133,15 +133,15 @@ export function useActionExecutor(): UseActionExecutorReturn {
 
           if (!match) {
             throw new Error(
-              `Substanz "${d.substance_name}" nicht in deiner Liste gefunden. ` +
-              `Füge sie zuerst unter Substanzen hinzu.`
+              `Substance "${d.substance_name}" not found / Substanz nicht gefunden. ` +
+              `Add it first under Substances / Zuerst unter Substanzen hinzufügen.`
             );
           }
 
           await logSubstance.mutateAsync({
             substance_id: match.id,
             dosage_taken: d.dosage_taken as string | undefined,
-            site: d.site as any,
+            site: d.site as InjectionSite | undefined,
             date: d.date as string | undefined,
             time: d.time as string | undefined,
             notes: d.notes as string | undefined,
@@ -155,7 +155,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             split_type: (d.split_type as SplitType) ?? 'custom',
             days_per_week: d.days_per_week as number,
             notes: d.notes as string | undefined,
-            days: (d.days as any[]).map((day) => ({
+            days: (d.days as Array<{ day_number: number; name: string; focus?: string; exercises: PlanExercise[]; notes?: string }>).map((day) => ({
               day_number: day.day_number as number,
               name: day.name as string,
               focus: day.focus as string | undefined,
@@ -167,7 +167,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
         }
 
         default: {
-          throw new Error(`Unknown action type: ${(actionToExecute as any).type}`);
+          throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
         }
       }
 

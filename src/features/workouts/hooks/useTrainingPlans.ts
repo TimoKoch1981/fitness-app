@@ -29,14 +29,13 @@ export function useActivePlan() {
       if (error) throw error;
       if (!data) return null;
 
-      // Map nested days and sort by day_number
+      // Map nested days and sort by day_number, strip raw join field
+      const { training_plan_days, ...rest } = data as Record<string, unknown>;
       const plan: TrainingPlan = {
-        ...data,
-        days: (data.training_plan_days as TrainingPlanDay[] ?? [])
+        ...(rest as Omit<TrainingPlan, 'days'>),
+        days: (training_plan_days as TrainingPlanDay[] ?? [])
           .sort((a, b) => a.day_number - b.day_number),
       };
-      // Remove raw join field
-      delete (plan as any).training_plan_days;
       return plan;
     },
   });

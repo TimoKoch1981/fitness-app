@@ -78,7 +78,7 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
       return {
         icon: '📋',
         title: 'Trainingsplan speichern?',
-        summary: `${d.name ?? 'Plan'} — ${(d.days as any[])?.length ?? '?'} Tage`,
+        summary: `${d.name ?? 'Plan'} — ${(d.days as unknown[])?.length ?? '?'} Tage`,
       };
   }
 }
