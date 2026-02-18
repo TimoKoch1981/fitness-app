@@ -10,6 +10,7 @@
  */
 
 import type { AgentType, RoutingDecision, AgentContext, AgentResult } from './types';
+import type { StreamCallback } from '../types';
 import { getAgent } from './index';
 
 // ── Keyword Routing Rules ───────────────────────────────────────────────
@@ -215,6 +216,7 @@ export function detectIntent(userMessage: string): RoutingDecision {
 
 /**
  * Main entry point: route user message to the correct agent and get a response.
+ * Uses blocking mode — prefer routeAndExecuteStream() for interactive chat.
  */
 export async function routeAndExecute(
   userMessage: string,
@@ -233,6 +235,31 @@ export async function routeAndExecute(
   };
 
   const result = await agent.execute(fullContext);
+
+  return result;
+}
+
+/**
+ * Streaming entry point: route user message and stream the response.
+ * onChunk is called with accumulated text as tokens arrive.
+ */
+export async function routeAndExecuteStream(
+  userMessage: string,
+  context: AgentContext,
+  onChunk: StreamCallback,
+): Promise<AgentResult> {
+  const decision = detectIntent(userMessage);
+  const agent = getAgent(decision.targetAgent);
+
+  const fullContext: AgentContext = {
+    ...context,
+    conversationHistory: [
+      ...context.conversationHistory,
+      { role: 'user', content: userMessage },
+    ],
+  };
+
+  const result = await agent.executeStream(fullContext, onChunk);
 
   return result;
 }

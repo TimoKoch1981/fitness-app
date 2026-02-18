@@ -1,6 +1,12 @@
 import { AlertCircle } from 'lucide-react';
 import type { DisplayMessage } from '../hooks/useBuddyChat';
 
+/** Hide ACTION blocks from the display during streaming */
+function stripActionBlockFromDisplay(text: string): string {
+  // Remove everything from ```ACTION: onwards (including partial blocks during streaming)
+  return text.replace(/```(?:ACTION|action)[\s\S]*$/i, '').trim();
+}
+
 interface ChatMessageProps {
   message: DisplayMessage;
 }
@@ -8,17 +14,21 @@ interface ChatMessageProps {
 export function ChatMessageBubble({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
-  if (message.isLoading) {
+  // Loading state: show bouncing dots while waiting for first token
+  if (message.isLoading && !message.content) {
     return (
       <div className="flex gap-3 mb-3">
         <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
           <span className="text-xs text-white font-bold">FB</span>
         </div>
         <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%]">
-          <div className="flex gap-1.5">
-            <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5">
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="text-xs text-gray-400">Denkt nach...</span>
           </div>
         </div>
       </div>
@@ -63,7 +73,10 @@ export function ChatMessageBubble({ message }: ChatMessageProps) {
         <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
           message.isError ? 'text-red-700' : 'text-gray-700'
         }`}>
-          {message.content}
+          {/* During streaming, hide ACTION blocks from display */}
+          {message.isStreaming ? stripActionBlockFromDisplay(message.content) : message.content}
+          {/* Blinking cursor during streaming */}
+          {message.isStreaming && <span className="inline-block w-1.5 h-4 bg-teal-500 animate-pulse ml-0.5 align-text-bottom" />}
         </p>
       </div>
     </div>

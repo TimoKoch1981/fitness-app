@@ -14,6 +14,9 @@ export interface AIResponse {
   tokensUsed?: number;
 }
 
+/** Callback for streaming responses — called with accumulated text on each chunk */
+export type StreamCallback = (partialContent: string) => void;
+
 /**
  * Parsed intent from user message.
  * Used to determine if the AI wants to perform an action (log meal, etc.)

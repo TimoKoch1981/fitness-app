@@ -5,9 +5,11 @@
  * appropriate specialist agent (Nutrition, Training, Substance, Analysis, General).
  * Each agent loads only its required skills for token-efficient responses.
  *
+ * Uses STREAMING mode — tokens appear in real-time as Ollama generates them.
+ * This prevents the "hanging" feeling of blocking requests (which can take 15-60s).
+ *
  * After receiving a response, the hook parses any ACTION blocks from the
- * agent's text and makes them available for user confirmation via the
- * ActionConfirmBanner.
+ * agent's text and makes them available for execution.
  *
  * @see lib/ai/agents/router.ts — Intent detection + dispatch
  * @see lib/ai/actions/actionParser.ts — ACTION block extraction
@@ -15,7 +17,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
-import { routeAndExecute } from '../../../lib/ai/agents/router';
+import { routeAndExecuteStream } from '../../../lib/ai/agents/router';
 import { parseActionFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import type { AgentContext } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
@@ -27,6 +29,7 @@ export interface DisplayMessage {
   content: string;
   timestamp: Date;
   isLoading?: boolean;
+  isStreaming?: boolean;
   isError?: boolean;
   // Agent attribution (filled by specialist agents)
   agentType?: string;
@@ -62,7 +65,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     return available;
   }, [provider]);
 
-  /** Send a message to the AI buddy via the agent router */
+  /** Send a message to the AI buddy via the agent router (STREAMING) */
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim() || isLoadingRef.current) return;
 
@@ -77,14 +80,15 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
-    // Add loading placeholder
-    const loadingId = crypto.randomUUID();
+    // Add streaming placeholder (shows "thinking..." initially)
+    const streamId = crypto.randomUUID();
     setMessages(prev => [...prev, {
-      id: loadingId,
+      id: streamId,
       role: 'assistant',
       content: '',
       timestamp: new Date(),
       isLoading: true,
+      isStreaming: true,
     }]);
 
     try {
@@ -98,22 +102,34 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
         language,
       };
 
-      // Route to the best agent and get response
-      const result = await routeAndExecute(userMessage.trim(), agentContext);
+      // Route to the best agent and STREAM the response
+      const result = await routeAndExecuteStream(
+        userMessage.trim(),
+        agentContext,
+        // onChunk callback — update the message content in real-time
+        (partialContent: string) => {
+          setMessages(prev => prev.map(m =>
+            m.id === streamId
+              ? { ...m, content: partialContent, isLoading: false }
+              : m
+          ));
+        },
+      );
 
-      // Parse ACTION block from agent response (if any)
+      // Stream finished — parse ACTION block from final content
       const parsedAction = parseActionFromResponse(result.content);
       const cleanContent = parsedAction
         ? stripActionBlock(result.content)
         : result.content;
 
-      // Replace loading message with actual response + agent attribution + action
+      // Finalize the message: remove streaming flag, add agent attribution
       setMessages(prev => prev.map(m =>
-        m.id === loadingId
+        m.id === streamId
           ? {
               ...m,
               content: cleanContent,
               isLoading: false,
+              isStreaming: false,
               agentType: result.agentType,
               agentName: result.agentName,
               agentIcon: result.agentIcon,
@@ -124,16 +140,17 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       ));
       setIsConnected(true);
     } catch (error) {
-      // Replace loading message with error
+      // Replace streaming message with error
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       setMessages(prev => prev.map(m =>
-        m.id === loadingId
+        m.id === streamId
           ? {
               ...m,
               content: language === 'de'
                 ? `Verbindungsfehler: ${errorMsg}. Läuft Ollama? (ollama serve)`
                 : `Connection error: ${errorMsg}. Is Ollama running? (ollama serve)`,
               isLoading: false,
+              isStreaming: false,
               isError: true,
             }
           : m

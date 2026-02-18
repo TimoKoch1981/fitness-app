@@ -11,7 +11,7 @@
  */
 
 import type { AgentConfig, AgentContext, AgentResult } from './types';
-import type { ChatMessage } from '../types';
+import type { ChatMessage, StreamCallback } from '../types';
 import { getSkillContent, getSkillsForAgent, getSkillVersionMap } from '../skills/index';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
@@ -86,6 +86,7 @@ export abstract class BaseAgent {
 
   /**
    * Execute the agent: build prompt → call provider → return structured result.
+   * Uses blocking (non-streaming) mode — prefer executeStream() for interactive chat.
    */
   async execute(context: AgentContext): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
@@ -100,6 +101,38 @@ export abstract class BaseAgent {
     const response = await provider.chat(messages);
 
     // Build version map for transparency
+    const skillMap = getSkillsForAgent(this.config.type);
+    const versions = getSkillVersionMap(skillMap.staticSkills);
+
+    return {
+      content: response.content,
+      agentType: this.config.type,
+      agentName: this.config.name,
+      agentIcon: this.config.icon,
+      skillVersions: versions,
+      tokensUsed: response.tokensUsed,
+      model: response.model,
+    };
+  }
+
+  /**
+   * Execute with streaming — calls onChunk with partial text as it arrives.
+   * Returns the final AgentResult when the stream ends.
+   */
+  async executeStream(
+    context: AgentContext,
+    onChunk: StreamCallback,
+  ): Promise<AgentResult> {
+    const systemPrompt = this.buildSystemPrompt(context);
+
+    const messages: ChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      ...context.conversationHistory.slice(-8),
+    ];
+
+    const provider = getAIProvider();
+    const response = await provider.chatStream(messages, onChunk);
+
     const skillMap = getSkillsForAgent(this.config.type);
     const versions = getSkillVersionMap(skillMap.staticSkills);
 
