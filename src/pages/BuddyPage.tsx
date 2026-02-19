@@ -11,6 +11,7 @@ import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { useActivePlan } from '../features/workouts/hooks/useTrainingPlans';
+import { useStandardProducts, useUserProducts } from '../features/meals/hooks/useProducts';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
 import type { HealthContext } from '../types/health';
@@ -29,6 +30,8 @@ export function BuddyPage() {
   const { data: latestBody } = useLatestBodyMeasurement();
   const { data: activeSubstances } = useSubstances(true);
   const { data: activePlan } = useActivePlan();
+  const { data: standardProducts } = useStandardProducts();
+  const { data: userProducts } = useUserProducts();
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -50,6 +53,8 @@ export function BuddyPage() {
     latestBodyMeasurement: latestBody ?? undefined,
     activeSubstances: activeSubstances ?? [],
     activePlan: activePlan ?? undefined,
+    userProducts: userProducts ?? [],
+    standardProducts: standardProducts ?? [],
   };
 
   const {

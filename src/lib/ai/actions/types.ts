@@ -13,7 +13,8 @@ export type ActionType =
   | 'log_body'
   | 'log_blood_pressure'
   | 'log_substance'
-  | 'save_training_plan';
+  | 'save_training_plan'
+  | 'save_product';
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -79,6 +80,12 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '📋',
         title: 'Trainingsplan speichern?',
         summary: `${d.name ?? 'Plan'} — ${(d.days as unknown[])?.length ?? '?'} Tage`,
+      };
+    case 'save_product':
+      return {
+        icon: '📦',
+        title: 'Produkt speichern?',
+        summary: `${d.name ?? 'Produkt'} — ${d.serving_size_g ?? '?'}g — ${d.calories_per_serving ?? '?'} kcal | ${d.protein_per_serving ?? '?'}g P`,
       };
   }
 }

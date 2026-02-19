@@ -86,6 +86,20 @@ export const REMINDER_TYPES = [
   'custom',
 ] as const;
 
+// === PRODUCT CATEGORIES ===
+export const PRODUCT_CATEGORIES = [
+  'grain',
+  'dairy',
+  'meat',
+  'fish',
+  'fruit',
+  'vegetable',
+  'snack',
+  'beverage',
+  'supplement',
+  'general',
+] as const;
+
 // === DATA SOURCES ===
 export const DATA_SOURCES = [
   'manual',

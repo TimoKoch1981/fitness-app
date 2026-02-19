@@ -81,6 +81,8 @@ export abstract class BaseAgent {
       recentSubstanceLogs: hc.recentSubstanceLogs,
       recentBloodPressure: hc.recentBloodPressure,
       trainingGoals: hc.trainingGoals,
+      userProducts: hc.userProducts,
+      standardProducts: hc.standardProducts,
     };
   }
 
@@ -124,6 +126,8 @@ export abstract class BaseAgent {
     onChunk: StreamCallback,
   ): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
+
+    console.log(`[Agent:${this.config.type}] Prompt: ${systemPrompt.length} chars (~${Math.round(systemPrompt.length / 4)} tokens)`);
 
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },

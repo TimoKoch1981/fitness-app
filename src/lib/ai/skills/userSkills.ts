@@ -24,6 +24,8 @@ import type {
   SubstanceLog,
   TrainingGoal,
   TrainingPlan,
+  ProductNutrition,
+  UserProduct,
 } from '../../../types/health';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
@@ -56,6 +58,8 @@ export interface UserSkillData {
   recentBloodPressure?: BloodPressure[];
   trainingGoals?: TrainingGoal[];
   activePlan?: TrainingPlan;
+  userProducts?: UserProduct[];
+  standardProducts?: ProductNutrition[];
 }
 
 export type UserSkillType =
@@ -65,7 +69,8 @@ export type UserSkillType =
   | 'body_progress'
   | 'substance_protocol'
   | 'daily_summary'
-  | 'active_plan';
+  | 'active_plan'
+  | 'known_products';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -405,6 +410,46 @@ export function generateActivePlanSkill(data: UserSkillData): string {
   return skill;
 }
 
+// ── Known Products Skill ──────────────────────────────────────────────
+
+/**
+ * Generates a list of known products (user + standard) for the nutrition agent.
+ * The agent uses this to look up exact nutritional values instead of estimating.
+ */
+export function generateKnownProductsSkill(data: UserSkillData): string {
+  const { userProducts, standardProducts } = data;
+  const hasUser = userProducts && userProducts.length > 0;
+  const hasStandard = standardProducts && standardProducts.length > 0;
+
+  if (!hasUser && !hasStandard) return '';
+
+  let skill = `## BEKANNTE PRODUKTE (Nährwert-Datenbank)\n`;
+  skill += `> Verwende bei Übereinstimmung die EXAKTEN Werte aus dieser Liste statt zu schätzen.\n`;
+  skill += `> Markiere Werte aus dieser DB als "(exakt)" statt "(geschätzt)".\n\n`;
+
+  if (hasUser) {
+    skill += `### User-Produkte (individuell gespeichert)\n`;
+    // Sort by use_count descending
+    const sorted = [...userProducts!].sort((a, b) => b.use_count - a.use_count);
+    for (const p of sorted.slice(0, 30)) { // Limit to top 30 to save tokens
+      skill += `- **${p.name}**`;
+      if (p.aliases.length > 0) skill += ` [Aliases: ${p.aliases.join(', ')}]`;
+      skill += ` — ${p.serving_label ?? p.serving_size_g + 'g'}`;
+      skill += `: ${p.calories_per_serving} kcal | ${p.protein_per_serving}g P | ${p.carbs_per_serving}g C | ${p.fat_per_serving}g F`;
+      skill += `\n`;
+    }
+  }
+
+  if (hasStandard) {
+    skill += `\n### Standard-Produkte (Basis-Lebensmittel)\n`;
+    for (const p of standardProducts!) {
+      skill += `- ${p.name} — ${p.serving_label ?? p.serving_size_g + 'g'}: ${p.calories_per_serving} kcal | ${p.protein_per_serving}g P | ${p.carbs_per_serving}g C | ${p.fat_per_serving}g F\n`;
+    }
+  }
+
+  return skill;
+}
+
 // ── Skill Aggregator ───────────────────────────────────────────────────
 
 /**
@@ -439,6 +484,9 @@ export function generateUserSkills(
         break;
       case 'active_plan':
         parts.push(generateActivePlanSkill(data));
+        break;
+      case 'known_products':
+        parts.push(generateKnownProductsSkill(data));
         break;
     }
   }

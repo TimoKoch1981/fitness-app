@@ -133,6 +133,24 @@ const SaveTrainingPlanSchema = z.object({
   days: z.array(PlanDaySchema).min(1),
 });
 
+const SaveProductSchema = z.object({
+  name: z.string().min(1),
+  brand: z.string().optional(),
+  category: z.enum([
+    'grain', 'dairy', 'meat', 'fish', 'fruit', 'vegetable',
+    'snack', 'beverage', 'supplement', 'general',
+  ]).default('general'),
+  serving_size_g: z.number().positive(),
+  serving_label: z.string().optional(),
+  calories_per_serving: z.number().nonnegative(),
+  protein_per_serving: z.number().nonnegative(),
+  carbs_per_serving: z.number().nonnegative(),
+  fat_per_serving: z.number().nonnegative(),
+  fiber_per_serving: z.number().nonnegative().optional(),
+  aliases: z.array(z.string()).default([]),
+  notes: z.string().optional(),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -142,6 +160,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   log_blood_pressure: LogBloodPressureSchema,
   log_substance: LogSubstanceSchema,
   save_training_plan: SaveTrainingPlanSchema,
+  save_product: SaveProductSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

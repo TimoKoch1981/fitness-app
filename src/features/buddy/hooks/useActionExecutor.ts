@@ -18,8 +18,9 @@ import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
 import { useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
+import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
-import type { SplitType, PlanExercise, InjectionSite } from '../../../types/health';
+import type { SplitType, PlanExercise, InjectionSite, ProductCategory } from '../../../types/health';
 
 // ── Fuzzy Matching Helpers ────────────────────────────────────────────
 
@@ -114,6 +115,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addBloodPressure = useAddBloodPressure();
   const logSubstance = useLogSubstance();
   const addTrainingPlan = useAddTrainingPlan();
+  const addUserProduct = useAddUserProduct();
 
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
@@ -238,6 +240,25 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           break;
         }
 
+        case 'save_product': {
+          await addUserProduct.mutateAsync({
+            name: d.name as string,
+            brand: d.brand as string | undefined,
+            category: (d.category as ProductCategory) ?? 'general',
+            serving_size_g: d.serving_size_g as number,
+            serving_label: d.serving_label as string | undefined,
+            calories_per_serving: d.calories_per_serving as number,
+            protein_per_serving: d.protein_per_serving as number,
+            carbs_per_serving: d.carbs_per_serving as number,
+            fat_per_serving: d.fat_per_serving as number,
+            fiber_per_serving: d.fiber_per_serving as number | undefined,
+            aliases: d.aliases as string[] | undefined,
+            notes: d.notes as string | undefined,
+            user_id: userId,
+          });
+          break;
+        }
+
         default: {
           throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
         }
@@ -247,13 +268,13 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setPendingAction(null);
       return { success: true };
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      console.error('[ActionExecutor] Failed:', msg);
+      const msg = error instanceof Error ? error.message : (typeof error === 'object' && error !== null ? JSON.stringify(error) : 'Unknown error');
+      console.error('[ActionExecutor] Failed:', msg, error);
       setErrorMessage(msg);
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

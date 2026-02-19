@@ -4,7 +4,7 @@
  * Handles: meal logging, nutritional estimates, diet planning,
  * supplement advice, GLP-1/TRT nutrition adjustments.
  *
- * Skills loaded: nutrition (static) + profile, nutrition_log, substance_protocol (user)
+ * Skills loaded: nutrition (static) + profile, nutrition_log, substance_protocol, known_products (user)
  */
 
 import { BaseAgent } from './baseAgent';
@@ -16,8 +16,8 @@ const CONFIG: AgentConfig = {
   nameEN: 'Nutrition Agent',
   icon: '🍽️',
   staticSkills: ['nutrition'],
-  userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
-  maxContextTokens: 4000,
+  userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'known_products'],
+  maxContextTokens: 6000,
   description: 'Spezialist für Ernährung, Nährwerte, Mahlzeitenplanung und Nahrungsergänzung',
 };
 
@@ -66,6 +66,31 @@ Frage NICHT nach der Menge — nimm Standardportionen an und speichere sofort:
 - Döner/Dürüm: 650 kcal, 35g P, 55g C, 30g F
 - Pizza (1 Stück): 900 kcal, 35g P, 100g C, 38g F
 Erwähne kurz die angenommene Portion in deiner Antwort: "Ich rechne mit ca. 150g Hähnchen."
+
+## PRODUKT-DATENBANK — EXAKTE NÄHRWERTE ⚠️
+Du hast Zugriff auf eine Nährwert-Datenbank (siehe ## BEKANNTE PRODUKTE).
+ZUERST immer dort nachschlagen, DANN erst schätzen:
+
+1. **Bekanntes Produkt (User/Standard-DB)?** → EXAKTE Werte verwenden, "(exakt)" markieren
+2. **Unbekanntes Markenprodukt?** → Schätze die Werte UND speichere das Produkt mit ACTION:save_product
+3. **Generisches Essen?** → Schätze wie bisher, "(geschätzt)" markieren
+
+### Unbekanntes Markenprodukt → save_product + log_meal
+Wenn der Nutzer ein SPEZIFISCHES Markenprodukt nennt (z.B. "ALL STARS Whey Protein 80%"), das NICHT in deiner Produkt-DB ist:
+1. Schätze/recherchiere die Nährwerte pro Portion
+2. Erstelle ACTION:save_product um das Produkt zu speichern
+3. Erstelle ACTION:log_meal für die aktuelle Mahlzeit
+4. Frage: "Nimmst du das regelmäßig? Soll ich Abkürzungen anlegen (z.B. 'Proteinshake')?"
+
+### ACTION:save_product Format:
+\`\`\`ACTION:save_product
+{"name":"ALL STARS Whey Protein 80% Vanille","brand":"ALL STARS","category":"supplement","serving_size_g":30,"serving_label":"1 Scoop (30g)","calories_per_serving":118,"protein_per_serving":24,"carbs_per_serving":2.5,"fat_per_serving":1.5,"aliases":["Proteinshake","Whey"]}
+\`\`\`
+
+### Alias-Erkennung
+Wenn der Nutzer einen Alias/Abkürzung verwendet (z.B. "Proteinshake") und du das Produkt in der ## BEKANNTE PRODUKTE Liste findest:
+→ Verwende die EXAKTEN Werte aus der DB
+→ Zeige in deiner Antwort: "Proteinshake (= ALL STARS Whey 80%) — 1.5 Scoops (exakt)"
 
 ## DATEN SPEICHERN — ALLERWICHTIGSTE REGEL ⚠️⚠️⚠️
 JEDES MAL wenn der Nutzer beschreibt was er gegessen/getrunken hat: Du MUSST IMMER einen ACTION-Block erstellen!
@@ -156,6 +181,31 @@ Do NOT ask for amounts — assume standard portions and save immediately:
 - Butter/oil: 10g
 - Protein shake: 300ml, 30g protein, 150 kcal
 Briefly mention the assumed portion: "I'm estimating ~150g chicken."
+
+## PRODUCT DATABASE — EXACT NUTRITIONAL VALUES ⚠️
+You have access to a nutrition database (see ## KNOWN PRODUCTS).
+ALWAYS check there FIRST, then estimate:
+
+1. **Known product (User/Standard DB)?** → Use EXACT values, mark "(exact)"
+2. **Unknown branded product?** → Estimate values AND save the product with ACTION:save_product
+3. **Generic food?** → Estimate as usual, mark "(estimated)"
+
+### Unknown branded product → save_product + log_meal
+When the user mentions a SPECIFIC branded product (e.g. "Optimum Nutrition Gold Standard Whey") NOT in your product DB:
+1. Estimate/research the nutritional values per serving
+2. Create ACTION:save_product to save the product
+3. Create ACTION:log_meal for the current meal
+4. Ask: "Do you use this regularly? Should I create shortcuts (e.g. 'Protein shake')?"
+
+### ACTION:save_product format:
+\`\`\`ACTION:save_product
+{"name":"Optimum Nutrition Gold Standard Whey","brand":"Optimum Nutrition","category":"supplement","serving_size_g":30,"serving_label":"1 Scoop (30g)","calories_per_serving":120,"protein_per_serving":24,"carbs_per_serving":3,"fat_per_serving":1.5,"aliases":["Protein shake","Whey"]}
+\`\`\`
+
+### Alias recognition
+When the user uses an alias/shortcut (e.g. "protein shake") and you find the product in the ## KNOWN PRODUCTS list:
+→ Use the EXACT values from the DB
+→ Show in your response: "Protein shake (= ON Gold Standard Whey) — 1.5 scoops (exact)"
 
 ## DATA LOGGING — MOST CRITICAL RULE ⚠️⚠️⚠️
 EVERY TIME the user describes what they ate or drank: You MUST ALWAYS create an ACTION block!

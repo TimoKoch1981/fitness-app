@@ -197,6 +197,36 @@ export interface UserProfile {
   updated_at: string;
 }
 
+// === PRODUCT DATABASE ===
+export type ProductCategory = 'grain' | 'dairy' | 'meat' | 'fish' | 'fruit' | 'vegetable' | 'snack' | 'beverage' | 'supplement' | 'general';
+
+export interface ProductNutrition {
+  id: string;
+  name: string;
+  brand?: string;
+  category: ProductCategory;
+  barcode?: string;
+  serving_size_g: number;
+  serving_label?: string;
+  calories_per_serving: number;
+  protein_per_serving: number;
+  carbs_per_serving: number;
+  fat_per_serving: number;
+  fiber_per_serving?: number;
+  source?: string;
+  source_ref?: string;
+}
+
+export interface UserProduct extends ProductNutrition {
+  user_id: string;
+  aliases: string[];
+  is_favorite: boolean;
+  use_count: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // === AGGREGATIONS ===
 export interface DailyStats {
   calories: number;
@@ -221,6 +251,8 @@ export interface HealthContext {
   trainingGoals: TrainingGoal[];
   profile?: UserProfile;
   activePlan?: TrainingPlan;
+  userProducts?: UserProduct[];
+  standardProducts?: ProductNutrition[];
 }
 
 // === RECOMMENDATIONS ===
