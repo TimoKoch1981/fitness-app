@@ -65,7 +65,7 @@ export class OllamaProvider implements AIProvider {
           options: {
             temperature: 0.7,
             top_p: 0.9,
-            num_predict: 512,
+            num_predict: 2048,
           },
         }),
       });
@@ -122,7 +122,7 @@ export class OllamaProvider implements AIProvider {
           options: {
             temperature: 0.7,
             top_p: 0.9,
-            num_predict: 512,
+            num_predict: 2048,
           },
         }),
       });

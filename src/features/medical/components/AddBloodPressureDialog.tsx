@@ -18,6 +18,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
   const [diastolic, setDiastolic] = useState('');
   const [pulse, setPulse] = useState('');
   const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
@@ -33,23 +34,28 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-    await addBP.mutateAsync({
-      date: today(),
-      time,
-      systolic: sys,
-      diastolic: dia,
-      pulse: parseInt(pulse) || undefined,
-      notes: notes || undefined,
-    });
+    try {
+      await addBP.mutateAsync({
+        date: today(),
+        time,
+        systolic: sys,
+        diastolic: dia,
+        pulse: parseInt(pulse) || undefined,
+        notes: notes || undefined,
+      });
 
-    setSystolic('');
-    setDiastolic('');
-    setPulse('');
-    setNotes('');
-    onClose();
+      setSystolic('');
+      setDiastolic('');
+      setPulse('');
+      setNotes('');
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   return (
@@ -136,6 +142,10 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
             />
           </div>
+
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           <button
             type="submit"

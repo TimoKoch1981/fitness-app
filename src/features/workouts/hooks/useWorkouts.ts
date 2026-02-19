@@ -54,6 +54,8 @@ interface AddWorkoutInput {
   met_value?: number;
   exercises?: ExerciseSet[];
   notes?: string;
+  /** Pre-resolved user ID — skips getUser() network call */
+  user_id?: string;
 }
 
 export function useAddWorkout() {
@@ -61,13 +63,17 @@ export function useAddWorkout() {
 
   return useMutation({
     mutationFn: async (input: AddWorkoutInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       const { data, error } = await supabase
         .from('workouts')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           date: input.date ?? today(),
           name: input.name,
           type: input.type,

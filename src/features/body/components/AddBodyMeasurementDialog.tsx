@@ -21,6 +21,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
   const [chest, setChest] = useState('');
   const [arm, setArm] = useState('');
   const [leg, setLeg] = useState('');
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
@@ -28,29 +29,35 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
     e.preventDefault();
     if (!weight && !bodyFat && !waist) return; // Need at least one value
 
-    await addMeasurement.mutateAsync({
-      date: today(),
-      weight_kg: weight ? parseFloat(weight) : undefined,
-      body_fat_pct: bodyFat ? parseFloat(bodyFat) : undefined,
-      muscle_mass_kg: muscleMass ? parseFloat(muscleMass) : undefined,
-      water_pct: waterPct ? parseFloat(waterPct) : undefined,
-      waist_cm: waist ? parseFloat(waist) : undefined,
-      chest_cm: chest ? parseFloat(chest) : undefined,
-      arm_cm: arm ? parseFloat(arm) : undefined,
-      leg_cm: leg ? parseFloat(leg) : undefined,
-      source: 'manual',
-    });
+    setError('');
 
-    // Reset and close
-    setWeight('');
-    setBodyFat('');
-    setMuscleMass('');
-    setWaterPct('');
-    setWaist('');
-    setChest('');
-    setArm('');
-    setLeg('');
-    onClose();
+    try {
+      await addMeasurement.mutateAsync({
+        date: today(),
+        weight_kg: weight ? parseFloat(weight) : undefined,
+        body_fat_pct: bodyFat ? parseFloat(bodyFat) : undefined,
+        muscle_mass_kg: muscleMass ? parseFloat(muscleMass) : undefined,
+        water_pct: waterPct ? parseFloat(waterPct) : undefined,
+        waist_cm: waist ? parseFloat(waist) : undefined,
+        chest_cm: chest ? parseFloat(chest) : undefined,
+        arm_cm: arm ? parseFloat(arm) : undefined,
+        leg_cm: leg ? parseFloat(leg) : undefined,
+        source: 'manual',
+      });
+
+      // Reset and close
+      setWeight('');
+      setBodyFat('');
+      setMuscleMass('');
+      setWaterPct('');
+      setWaist('');
+      setChest('');
+      setArm('');
+      setLeg('');
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   return (
@@ -195,6 +202,11 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               </div>
             </div>
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           {/* Submit */}
           <button

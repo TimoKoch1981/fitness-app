@@ -33,6 +33,8 @@ interface AddBPInput {
   diastolic: number;
   pulse?: number;
   notes?: string;
+  /** Pre-resolved user ID — skips getUser() network call */
+  user_id?: string;
 }
 
 export function useAddBloodPressure() {
@@ -40,15 +42,19 @@ export function useAddBloodPressure() {
 
   return useMutation({
     mutationFn: async (input: AddBPInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       const { classification } = classifyBloodPressure(input.systolic, input.diastolic);
 
       const { data, error } = await supabase
         .from('blood_pressure_logs')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           ...input,
           classification,
         })

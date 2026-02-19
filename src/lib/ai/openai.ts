@@ -71,7 +71,7 @@ export class OpenAIProvider implements AIProvider {
           messages,
           temperature: 0.7,
           top_p: 0.9,
-          max_tokens: 1024,
+          max_tokens: 2048,
         }),
       });
 
@@ -129,7 +129,7 @@ export class OpenAIProvider implements AIProvider {
           messages,
           temperature: 0.7,
           top_p: 0.9,
-          max_tokens: 1024,
+          max_tokens: 2048,
           stream: true,
           stream_options: { include_usage: true },
         }),

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, Send, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
 import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
+import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
@@ -15,6 +17,8 @@ import type { HealthContext } from '../types/health';
 
 export function BuddyPage() {
   const { t, language } = useTranslation();
+  const { user } = useAuth();
+  const location = useLocation();
   const [input, setInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,8 +64,8 @@ export function BuddyPage() {
     providerName,
   } = useBuddyChat({ context: healthContext, language });
 
-  // Action executor for auto-saving data
-  const { executeAction } = useActionExecutor();
+  // Action executor for auto-saving data — pass user.id to avoid auth race conditions
+  const { executeAction } = useActionExecutor(user?.id);
 
   // Track which message IDs have already been auto-executed
   const executedActionsRef = useRef<Set<string>>(new Set());
@@ -76,34 +80,78 @@ export function BuddyPage() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-execute: detect actions and save immediately without user confirmation
+  // Handle autoMessage from navigation (e.g., "Evaluate Day" button on MealsPage)
+  const autoMessageSentRef = useRef(false);
   useEffect(() => {
-    const lastActionMsg = [...messages].reverse().find(m => m.pendingAction);
+    const state = location.state as { autoMessage?: string } | null;
+    const autoMsg = state?.autoMessage;
+    if (autoMsg && !isLoading && !autoMessageSentRef.current) {
+      autoMessageSentRef.current = true;
+      sendMessage(autoMsg);
+      // Clear navigation state to prevent re-sending
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, isLoading, sendMessage]);
+
+  // Auto-execute: detect actions and save immediately without user confirmation
+  // Supports MULTIPLE actions per message (e.g. 3 meals logged at once)
+  useEffect(() => {
+    const lastActionMsg = [...messages].reverse().find(m => m.pendingActions && m.pendingActions.length > 0);
     if (!lastActionMsg || executedActionsRef.current.has(lastActionMsg.id)) return;
 
     // Mark as handled immediately to prevent double-execution
     executedActionsRef.current.add(lastActionMsg.id);
 
-    const action = lastActionMsg.pendingAction!;
-    const display = getActionDisplayInfo(action);
+    const actions = lastActionMsg.pendingActions!;
 
-    // Execute immediately — pass action directly to avoid state race condition
+    // Execute ALL actions sequentially — pass each action directly to avoid state race
     setTimeout(async () => {
-      const result = await executeAction(action);
+      const results: Array<{ action: typeof actions[0]; success: boolean; error?: string }> = [];
+
+      for (const action of actions) {
+        const result = await executeAction(action);
+        results.push({ action, ...result });
+      }
 
       clearAction(lastActionMsg.id);
-      if (result.success) {
+
+      // Build combined status message
+      const successes = results.filter(r => r.success);
+      const failures = results.filter(r => !r.success);
+
+      if (successes.length > 0) {
+        const summaries = successes.map(r => {
+          const display = getActionDisplayInfo(r.action);
+          return `${display.icon} ${display.summary}`;
+        });
         addSystemMessage(
           language === 'de'
-            ? `${display.icon} Gespeichert: ${display.summary}`
-            : `${display.icon} Saved: ${display.summary}`,
-          display.icon,
+            ? `✅ ${successes.length === 1 ? 'Gespeichert' : `${successes.length}x gespeichert`}:\n${summaries.join('\n')}`
+            : `✅ ${successes.length === 1 ? 'Saved' : `${successes.length}x saved`}:\n${summaries.join('\n')}`,
+          '✅',
         );
-      } else {
+      }
+
+      if (failures.length > 0) {
+        const errorSummaries = failures.map(r => {
+          const display = getActionDisplayInfo(r.action);
+          // Map technical errors to user-friendly messages
+          let friendlyError = r.error ?? '?';
+          if (friendlyError.includes('Not authenticated') || friendlyError.includes('auth')) {
+            friendlyError = language === 'de'
+              ? 'Sitzung abgelaufen. Bitte neu einloggen.'
+              : 'Session expired. Please log in again.';
+          } else if (friendlyError.includes('row-level security') || friendlyError.includes('RLS') || friendlyError.includes('policy')) {
+            friendlyError = language === 'de'
+              ? 'Zugriffsfehler. Bitte neu einloggen.'
+              : 'Access denied. Please log in again.';
+          }
+          return `${display.icon} ${display.summary}: ${friendlyError}`;
+        });
         addSystemMessage(
           language === 'de'
-            ? `❌ Fehler beim Speichern: ${result.error ?? 'Unbekannter Fehler'}`
-            : `❌ Save error: ${result.error ?? 'Unknown error'}`,
+            ? `❌ ${failures.length} Fehler:\n${errorSummaries.join('\n')}`
+            : `❌ ${failures.length} error(s):\n${errorSummaries.join('\n')}`,
           '❌',
         );
       }

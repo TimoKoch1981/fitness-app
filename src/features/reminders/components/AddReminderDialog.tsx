@@ -50,6 +50,7 @@ export function AddReminderDialog({ open, onClose }: Props) {
   const [intervalDays, setIntervalDays] = useState('7');
   const [substanceId, setSubstanceId] = useState('');
   const [useTimePeriod, setUseTimePeriod] = useState(false);
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
@@ -72,30 +73,36 @@ export function AddReminderDialog({ open, onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await addReminder.mutateAsync({
-      type,
-      title: effectiveTitle,
-      description: description || undefined,
-      time: useTimePeriod ? undefined : time,
-      time_period: useTimePeriod && timePeriod ? timePeriod : undefined,
-      days_of_week: repeatMode === 'weekly' ? daysOfWeek : undefined,
-      repeat_mode: repeatMode,
-      interval_days: repeatMode === 'interval' ? parseInt(intervalDays) || 7 : undefined,
-      substance_id: type === 'substance' && substanceId ? substanceId : undefined,
-    });
+    setError('');
 
-    // Reset
-    setType('substance');
-    setTitle('');
-    setDescription('');
-    setTime('08:00');
-    setTimePeriod(null);
-    setDaysOfWeek([0, 1, 2, 3, 4, 5, 6]);
-    setRepeatMode('weekly');
-    setIntervalDays('7');
-    setSubstanceId('');
-    setUseTimePeriod(false);
-    onClose();
+    try {
+      await addReminder.mutateAsync({
+        type,
+        title: effectiveTitle,
+        description: description || undefined,
+        time: useTimePeriod ? undefined : time,
+        time_period: useTimePeriod && timePeriod ? timePeriod : undefined,
+        days_of_week: repeatMode === 'weekly' ? daysOfWeek : undefined,
+        repeat_mode: repeatMode,
+        interval_days: repeatMode === 'interval' ? parseInt(intervalDays) || 7 : undefined,
+        substance_id: type === 'substance' && substanceId ? substanceId : undefined,
+      });
+
+      // Reset
+      setType('substance');
+      setTitle('');
+      setDescription('');
+      setTime('08:00');
+      setTimePeriod(null);
+      setDaysOfWeek([0, 1, 2, 3, 4, 5, 6]);
+      setRepeatMode('weekly');
+      setIntervalDays('7');
+      setSubstanceId('');
+      setUseTimePeriod(false);
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   return (
@@ -286,6 +293,11 @@ export function AddReminderDialog({ open, onClose }: Props) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
             />
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           {/* Submit */}
           <button

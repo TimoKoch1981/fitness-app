@@ -18,7 +18,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
 import { routeAndExecuteStream } from '../../../lib/ai/agents/router';
-import { parseActionFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
+import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
+import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
 import type { AgentContext } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
@@ -36,8 +37,8 @@ export interface DisplayMessage {
   agentName?: string;
   agentIcon?: string;
   skillVersions?: Record<string, string>;
-  // Parsed action from this message (if any)
-  pendingAction?: ParsedAction;
+  // Parsed actions from this message (if any — supports multiple per message)
+  pendingActions?: ParsedAction[];
 }
 
 interface UseBuddyChatOptions {
@@ -46,7 +47,8 @@ interface UseBuddyChatOptions {
 }
 
 export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions = {}) {
-  const [messages, setMessages] = useState<DisplayMessage[]>([]);
+  // Messages live in BuddyChatProvider context (survives route changes + page refresh)
+  const { messages, setMessages, clearMessages } = useBuddyChatMessages();
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
@@ -116,9 +118,9 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
         },
       );
 
-      // Stream finished — parse ACTION block from final content
-      const parsedAction = parseActionFromResponse(result.content);
-      const cleanContent = parsedAction
+      // Stream finished — parse ALL ACTION blocks from final content
+      const parsedActions = parseAllActionsFromResponse(result.content);
+      const cleanContent = parsedActions.length > 0
         ? stripActionBlock(result.content)
         : result.content;
 
@@ -134,7 +136,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
               agentName: result.agentName,
               agentIcon: result.agentIcon,
               skillVersions: result.skillVersions,
-              pendingAction: parsedAction ?? undefined,
+              pendingActions: parsedActions.length > 0 ? parsedActions : undefined,
             }
           : m
       ));
@@ -161,10 +163,10 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     }
   }, [context, language]);
 
-  /** Clear the pending action from a specific message (after execution/rejection) */
+  /** Clear the pending actions from a specific message (after execution/rejection) */
   const clearAction = useCallback((messageId: string) => {
     setMessages(prev => prev.map(m =>
-      m.id === messageId ? { ...m, pendingAction: undefined } : m
+      m.id === messageId ? { ...m, pendingActions: undefined } : m
     ));
   }, []);
 
@@ -177,11 +179,6 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       timestamp: new Date(),
       agentIcon: icon,
     }]);
-  }, []);
-
-  /** Clear all messages */
-  const clearMessages = useCallback(() => {
-    setMessages([]);
   }, []);
 
   return {

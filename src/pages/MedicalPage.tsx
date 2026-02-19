@@ -3,7 +3,7 @@ import { Plus, Heart, Pill, Trash2, ClipboardList, Bell } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useBloodPressureLogs, useDeleteBloodPressure } from '../features/medical/hooks/useBloodPressure';
-import { useSubstances, useSubstanceLogs } from '../features/medical/hooks/useSubstances';
+import { useSubstances, useSubstanceLogs, useDeleteSubstance } from '../features/medical/hooks/useSubstances';
 import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder, useToggleReminder, useDeleteReminder } from '../features/reminders/hooks/useReminders';
 import { AddBloodPressureDialog } from '../features/medical/components/AddBloodPressureDialog';
 import { AddSubstanceDialog } from '../features/medical/components/AddSubstanceDialog';
@@ -24,6 +24,7 @@ export function MedicalPage() {
   const { data: substances } = useSubstances(true);
   const { data: substanceLogs } = useSubstanceLogs(10);
   const deleteBP = useDeleteBloodPressure();
+  const deleteSubstance = useDeleteSubstance();
 
   // Reminders
   const { data: reminders } = useReminders(false); // all reminders (active + inactive)
@@ -140,12 +141,21 @@ export function MedicalPage() {
                 const catKey = `cat_${sub.category}` as keyof typeof t.medical;
                 const catLabel = t.medical[catKey] ?? sub.category ?? '';
                 return (
-                  <div key={sub.id} className="px-4 py-2.5">
+                  <div key={sub.id} className="px-4 py-2.5 group">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-gray-900">{sub.name}</p>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-                        {catLabel}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                          {catLabel}
+                        </span>
+                        <button
+                          onClick={() => deleteSubstance.mutate(sub.id)}
+                          className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                          title={t.medical.deleteSubstance}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-xs text-gray-400">
                       {sub.dosage} {sub.unit} · {sub.frequency}
@@ -173,7 +183,7 @@ export function MedicalPage() {
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b">
               <h3 className="font-semibold text-gray-900 text-sm">
-                {language === 'de' ? 'Letzte Einnahmen' : 'Recent Logs'}
+                {t.medical.recentLogs}
               </h3>
             </div>
             <div className="divide-y divide-gray-50">
@@ -219,7 +229,7 @@ export function MedicalPage() {
             <div>
               <div className="px-4 pt-2 pb-1">
                 <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
-                  {language === 'de' ? 'Heute fällig' : 'Due Today'}
+                  {t.medical.dueToday}
                   {' '}({reminderStatus.pending.length}/{reminderStatus.totalDue})
                 </p>
               </div>
@@ -244,7 +254,7 @@ export function MedicalPage() {
               {reminderStatus.totalDue > 0 && (
                 <div className="px-4 pt-3 pb-1 border-t">
                   <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
-                    {language === 'de' ? 'Alle Erinnerungen' : 'All Reminders'}
+                    {t.medical.allReminders}
                   </p>
                 </div>
               )}
@@ -267,7 +277,7 @@ export function MedicalPage() {
             !reminderStatus.totalDue && (
               <div className="p-4 text-center">
                 <p className="text-sm text-gray-400">
-                  {language === 'de' ? 'Keine Erinnerungen angelegt' : 'No reminders set up'}
+                  {t.medical.noReminders}
                 </p>
                 <button
                   onClick={() => setShowReminderDialog(true)}

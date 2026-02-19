@@ -20,6 +20,7 @@ export const de = {
     time: 'Uhrzeit',
     notes: 'Notizen',
     estimated: 'geschätzt',
+    saveError: 'Speichern fehlgeschlagen. Bitte versuche es erneut.',
   },
   app: {
     name: 'FitBuddy',
@@ -95,6 +96,8 @@ export const de = {
     name: 'Bezeichnung',
     kcal: 'kcal',
     grams: 'g',
+    evaluateDay: 'Tag auswerten',
+    noMealsForDate: 'Keine Mahlzeiten an diesem Tag',
   },
   workouts: {
     title: 'Training',
@@ -192,6 +195,13 @@ export const de = {
     site_ventro_glute_right: 'Ventro-Gluteal rechts',
     site_abdomen: 'Bauch',
     site_other: 'Sonstige',
+    // Missing keys for MedicalPage
+    recentLogs: 'Letzte Einnahmen',
+    dueToday: 'Heute fällig',
+    allReminders: 'Alle Erinnerungen',
+    noReminders: 'Keine Erinnerungen angelegt',
+    addReminder: 'Erinnerung hinzufügen',
+    deleteSubstance: 'Substanz löschen',
   },
   buddy: {
     title: 'FitBuddy',

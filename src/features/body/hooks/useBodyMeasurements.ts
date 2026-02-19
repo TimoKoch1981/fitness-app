@@ -58,6 +58,8 @@ interface AddBodyMeasurementInput {
   arm_cm?: number;
   leg_cm?: number;
   source?: DataSource;
+  /** Pre-resolved user ID — skips getUser() network call */
+  user_id?: string;
 }
 
 export function useAddBodyMeasurement() {
@@ -65,14 +67,18 @@ export function useAddBodyMeasurement() {
 
   return useMutation({
     mutationFn: async (input: AddBodyMeasurementInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       // Get height from profile for BMI calculation
       const { data: profile } = await supabase
         .from('profiles')
         .select('height_cm')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
       // Calculate derived values
@@ -89,7 +95,7 @@ export function useAddBodyMeasurement() {
       const { data, error } = await supabase
         .from('body_measurements')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           date: input.date ?? today(),
           ...input,
           bmi,

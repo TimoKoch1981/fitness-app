@@ -77,6 +77,8 @@ export interface AddTrainingPlanInput {
     exercises: PlanExercise[];
     notes?: string;
   }[];
+  /** Optional: pass user_id directly to avoid auth race conditions */
+  user_id?: string;
 }
 
 /**
@@ -87,21 +89,26 @@ export function useAddTrainingPlan() {
 
   return useMutation({
     mutationFn: async (input: AddTrainingPlanInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // Use provided user_id (avoids auth race), fallback to getUser()
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       // Step 1: Deactivate all existing plans
       await supabase
         .from('training_plans')
         .update({ is_active: false })
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('is_active', true);
 
       // Step 2: Insert the new plan
       const { data: plan, error: planError } = await supabase
         .from('training_plans')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           name: input.name,
           split_type: input.split_type,
           days_per_week: input.days_per_week,

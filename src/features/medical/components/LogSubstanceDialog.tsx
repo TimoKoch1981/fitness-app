@@ -20,6 +20,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
   const [site, setSite] = useState<InjectionSite | ''>('');
   const [taken, setTaken] = useState(true);
   const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
@@ -44,21 +45,27 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
     e.preventDefault();
     if (!selectedId) return;
 
-    await logSubstance.mutateAsync({
-      substance_id: selectedId,
-      dosage_taken: dosageTaken || undefined,
-      site: site ? (site as InjectionSite) : undefined,
-      taken,
-      notes: notes || undefined,
-    });
+    setError('');
 
-    // Reset and close
-    setSelectedId('');
-    setDosageTaken('');
-    setSite('');
-    setTaken(true);
-    setNotes('');
-    onClose();
+    try {
+      await logSubstance.mutateAsync({
+        substance_id: selectedId,
+        dosage_taken: dosageTaken || undefined,
+        site: site ? (site as InjectionSite) : undefined,
+        taken,
+        notes: notes || undefined,
+      });
+
+      // Reset and close
+      setSelectedId('');
+      setDosageTaken('');
+      setSite('');
+      setTaken(true);
+      setNotes('');
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   return (
@@ -192,6 +199,11 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                   rows={2}
                 />
               </div>
+
+              {/* Error */}
+              {error && (
+                <p className="text-xs text-red-500 text-center">{error}</p>
+              )}
 
               {/* Submit */}
               <button

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryProvider } from './providers/QueryProvider';
 import { AuthProvider } from './providers/AuthProvider';
 import { I18nProvider } from './providers/I18nProvider';
+import { BuddyChatProvider } from './providers/BuddyChatProvider';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 import { Navigation } from '../shared/components/Navigation';
 
@@ -102,9 +103,11 @@ export default function App() {
     <QueryProvider>
       <I18nProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <BuddyChatProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </BuddyChatProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryProvider>

@@ -9,7 +9,7 @@
  * This normalizes across different-sized keyword lists.
  */
 
-import type { AgentType, RoutingDecision, AgentContext, AgentResult } from './types';
+import type { AgentType, RoutingDecision, MultiRoutingDecision, AgentContext, AgentResult } from './types';
 import type { StreamCallback } from '../types';
 import { getAgent } from './index';
 
@@ -27,9 +27,10 @@ const ROUTING_RULES: KeywordRule[] = [
     agent: 'nutrition',
     weight: 0.8,
     keywords: [
-      // Food & eating
-      'essen', 'gegessen', 'esse', 'mahlzeit', 'frühstück', 'mittagessen', 'abendessen',
-      'snack', 'hunger', 'satt', 'portion', 'rezept', 'kochen',
+      // Food & eating actions
+      'essen', 'gegessen', 'esse', 'hatte', 'getrunken', 'trinke',
+      'mahlzeit', 'frühstück', 'mittagessen', 'abendessen', 'morgens', 'mittags', 'abends',
+      'snack', 'hunger', 'satt', 'portion', 'rezept', 'kochen', 'gab es',
       // Macros & nutrients
       'kalorien', 'kcal', 'protein', 'eiweiß', 'kohlenhydrate', 'carbs',
       'fett', 'makros', 'nährwerte', 'nährwert', 'ballaststoffe', 'fiber',
@@ -37,15 +38,27 @@ const ROUTING_RULES: KeywordRule[] = [
       'ernährung', 'ernährungs', 'ernährungsplan', 'diät', 'abnehmen', 'zunehmen',
       'kalorienziel', 'proteinziel', 'defizit', 'überschuss',
       // Hydration
-      'trinken', 'wasser', 'getränk', 'hydration',
+      'trinken', 'wasser', 'getränk', 'hydration', 'tee', 'kaffee', 'radler', 'saft',
       // Supplements
-      'supplement', 'whey', 'kreatin', 'creatine', 'vitamin', 'omega',
-      // Common foods (German)
+      'supplement', 'whey', 'kreatin', 'creatine', 'vitamin', 'omega', 'scoop',
+      // Common foods (German) — comprehensive list for reliable routing
       'hühnchen', 'hähnchen', 'reis', 'nudeln', 'brot', 'müsli', 'joghurt',
       'quark', 'obst', 'gemüse', 'salat', 'pizza', 'burger', 'ei', 'eier',
       'lachs', 'thunfisch', 'kartoffeln', 'haferflocken', 'shake',
+      'skyr', 'orange', 'orangen', 'apfel', 'banane', 'birne', 'maracuja',
+      'kekse', 'keks', 'schokolade', 'nappo', 'mars', 'snickers', 'raider', 'prinzenrolle',
+      'suppe', 'gulasch', 'bolognese', 'döner', 'dürüm', 'kebab',
+      'milch', 'käse', 'butter', 'sahne', 'schmand',
+      'fleisch', 'steak', 'rind', 'schwein', 'pute', 'wurst', 'schinken',
+      'fisch', 'garnelen', 'shrimp',
+      'tofu', 'linsen', 'bohnen', 'erbsen', 'kichererbsen',
+      'avocado', 'nüsse', 'mandeln', 'erdnuss', 'erdnussbutter',
+      'marmelade', 'honig', 'zucker', 'süßigkeit',
+      'erbsennudeln', 'vollkorn', 'dinkel', 'roggen',
+      'porridge', 'overnight', 'smoothie', 'bowl',
       // English fallbacks
       'meal', 'food', 'eat', 'ate', 'nutrition', 'calories', 'macros',
+      'chicken', 'beef', 'yogurt', 'oats', 'bread', 'rice', 'pasta',
     ],
   },
 
@@ -91,7 +104,7 @@ const ROUTING_RULES: KeywordRule[] = [
       // GLP-1
       'wegovy', 'semaglutid', 'ozempic', 'mounjaro', 'tirzepatid', 'glp-1', 'glp1',
       // Administration
-      'substanz', 'substanzen', 'spritze', 'spritzen',
+      'substanz', 'substanzen', 'spritze', 'spritzen', 'gespritzt', 'genommen',
       'injektion', 'injizieren', 'injiziert', 'nadel', 'ampulle',
       'rotationsstelle', 'injektionsstelle', 'gluteus', 'delt', 'quad',
       'ventro', 'subkutan',
@@ -136,8 +149,12 @@ const ROUTING_RULES: KeywordRule[] = [
       'optimierung', 'optimieren',
       // Queries
       'wie läuft', 'wie laufe', 'wie geht', 'zeig mir', 'status',
+      // Daily evaluation
+      'tagesauswertung', 'tagesbilanz', 'tagesbewertung', 'tag auswerten',
+      'tagesstand', 'tagesübersicht',
       // Progress
       'progress', 'summary', 'overview', 'analyze', 'recommend',
+      'daily evaluation', 'day summary', 'evaluate my day',
     ],
   },
 ];
@@ -154,7 +171,11 @@ const GREETING_PATTERNS = [
 
 // ── Router Logic ────────────────────────────────────────────────────────
 
-const CONFIDENCE_THRESHOLD = 0.3;
+// Lower threshold to catch short messages like "Skyr und Orangen" or "TRT Spritze"
+// With ~80 nutrition keywords: 1 match scores 0.8*(1/√80) = 0.089
+// With ~40 substance keywords: 1 match scores 0.9*(1/√40) = 0.142
+// → threshold 0.12 ensures even a single keyword match routes correctly
+const CONFIDENCE_THRESHOLD = 0.12;
 
 /**
  * Detect intent from a user message using keyword scoring.
@@ -215,6 +236,69 @@ export function detectIntent(userMessage: string): RoutingDecision {
 }
 
 /**
+ * Detect ALL matching intents from a user message.
+ * Returns multiple agents when a message spans domains (e.g. "Kekse und TRT Spritze").
+ * Primary agent gets streaming, additional agents run blocking.
+ */
+export function detectMultiIntent(userMessage: string): MultiRoutingDecision {
+  const normalized = userMessage.toLowerCase().trim();
+
+  // 1. Short-circuit: greetings → only general agent
+  for (const pattern of GREETING_PATTERNS) {
+    if (pattern.test(normalized)) {
+      return {
+        agents: [{ targetAgent: 'general', confidence: 1.0, matchedKeywords: ['greeting'] }],
+        primaryAgent: 'general',
+      };
+    }
+  }
+
+  // 2. Score ALL agents
+  const scores: RoutingDecision[] = [];
+
+  for (const rule of ROUTING_RULES) {
+    const matches: string[] = [];
+    for (const keyword of rule.keywords) {
+      if (normalized.includes(keyword)) {
+        matches.push(keyword);
+      }
+    }
+    if (matches.length > 0) {
+      const score = rule.weight * (matches.length / Math.sqrt(rule.keywords.length));
+      if (score >= CONFIDENCE_THRESHOLD) {
+        scores.push({
+          targetAgent: rule.agent,
+          confidence: Math.min(score, 1.0),
+          matchedKeywords: matches,
+        });
+      }
+    }
+  }
+
+  // 3. No matches → general fallback
+  if (scores.length === 0) {
+    return {
+      agents: [{ targetAgent: 'general', confidence: 0.5, matchedKeywords: [] }],
+      primaryAgent: 'general',
+    };
+  }
+
+  // 4. Sort by confidence (highest first)
+  scores.sort((a, b) => b.confidence - a.confidence);
+
+  // 5. Analysis agent runs ALONE (needs holistic view, not partial)
+  if (scores[0].targetAgent === 'analysis') {
+    return { agents: [scores[0]], primaryAgent: 'analysis' };
+  }
+
+  // 6. Return ALL agents above threshold — multi-agent dispatch!
+  return {
+    agents: scores,
+    primaryAgent: scores[0].targetAgent,
+  };
+}
+
+/**
  * Main entry point: route user message to the correct agent and get a response.
  * Uses blocking mode — prefer routeAndExecuteStream() for interactive chat.
  */
@@ -240,7 +324,12 @@ export async function routeAndExecute(
 }
 
 /**
- * Streaming entry point: route user message and stream the response.
+ * Streaming entry point with MULTI-AGENT support.
+ *
+ * Single domain: streams normally (one agent).
+ * Multi domain (e.g. "Kekse und TRT"): primary agent streams live,
+ * additional agents run blocking, results are combined into one response.
+ *
  * onChunk is called with accumulated text as tokens arrive.
  */
 export async function routeAndExecuteStream(
@@ -248,8 +337,7 @@ export async function routeAndExecuteStream(
   context: AgentContext,
   onChunk: StreamCallback,
 ): Promise<AgentResult> {
-  const decision = detectIntent(userMessage);
-  const agent = getAgent(decision.targetAgent);
+  const decision = detectMultiIntent(userMessage);
 
   const fullContext: AgentContext = {
     ...context,
@@ -259,7 +347,55 @@ export async function routeAndExecuteStream(
     ],
   };
 
-  const result = await agent.executeStream(fullContext, onChunk);
+  // ── SINGLE AGENT (most common case): stream as before ──
+  if (decision.agents.length <= 1) {
+    const agent = getAgent(decision.primaryAgent);
+    return agent.executeStream(fullContext, onChunk);
+  }
 
-  return result;
+  // ── MULTI-AGENT: primary streams, additional agents run blocking ──
+  const primaryAgent = getAgent(decision.primaryAgent);
+  const primaryResult = await primaryAgent.executeStream(fullContext, onChunk);
+
+  // Collect results from all additional agents
+  const additionalResults: AgentResult[] = [];
+
+  for (let i = 1; i < decision.agents.length; i++) {
+    const agentType = decision.agents[i].targetAgent;
+    const agent = getAgent(agentType);
+    try {
+      const result = await agent.execute(fullContext);
+      additionalResults.push(result);
+    } catch (err) {
+      console.error(`Multi-agent: ${agentType} failed:`, err);
+    }
+  }
+
+  // If no additional results, just return primary
+  if (additionalResults.length === 0) {
+    return primaryResult;
+  }
+
+  // Combine: primary content + separator + each additional agent's content
+  let combinedContent = primaryResult.content;
+  const allVersions = { ...primaryResult.skillVersions };
+
+  for (const result of additionalResults) {
+    combinedContent += `\n\n---\n${result.agentIcon} **${result.agentName}:**\n${result.content}`;
+    Object.assign(allVersions, result.skillVersions);
+  }
+
+  // Push final combined content to UI
+  onChunk(combinedContent);
+
+  return {
+    content: combinedContent,
+    agentType: primaryResult.agentType,
+    agentName: primaryResult.agentName,
+    agentIcon: primaryResult.agentIcon,
+    skillVersions: allVersions,
+    tokensUsed: (primaryResult.tokensUsed ?? 0) +
+      additionalResults.reduce((sum, r) => sum + (r.tokensUsed ?? 0), 0),
+    model: primaryResult.model,
+  };
 }

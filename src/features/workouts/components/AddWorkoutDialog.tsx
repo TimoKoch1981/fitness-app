@@ -21,31 +21,37 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
   const [caloriesBurned, setCaloriesBurned] = useState('');
   const [notes, setNotes] = useState('');
   const [exercises, setExercises] = useState<ExerciseSet[]>([]);
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
+    setError('');
 
-    await addWorkout.mutateAsync({
-      date: date ?? today(),
-      name,
-      type,
-      duration_minutes: duration ? parseInt(duration) : undefined,
-      calories_burned: caloriesBurned ? parseInt(caloriesBurned) : undefined,
-      exercises: exercises.filter((ex) => ex.name.trim() !== ''),
-      notes: notes || undefined,
-    });
+    try {
+      await addWorkout.mutateAsync({
+        date: date ?? today(),
+        name,
+        type,
+        duration_minutes: duration ? parseInt(duration) : undefined,
+        calories_burned: caloriesBurned ? parseInt(caloriesBurned) : undefined,
+        exercises: exercises.filter((ex) => ex.name.trim() !== ''),
+        notes: notes || undefined,
+      });
 
-    // Reset and close
-    setName('');
-    setType('strength');
-    setDuration('');
-    setCaloriesBurned('');
-    setNotes('');
-    setExercises([]);
-    onClose();
+      // Reset and close
+      setName('');
+      setType('strength');
+      setDuration('');
+      setCaloriesBurned('');
+      setNotes('');
+      setExercises([]);
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   const workoutTypes: { value: WorkoutType; label: string; emoji: string }[] = [
@@ -231,6 +237,11 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
               rows={2}
             />
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           {/* Submit */}
           <button

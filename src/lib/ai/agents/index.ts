@@ -43,5 +43,5 @@ export function getAllAgentTypes(): AgentType[] {
 }
 
 // Re-export types for convenience
-export type { AgentType, AgentConfig, AgentContext, AgentResult, RoutingDecision } from './types';
+export type { AgentType, AgentConfig, AgentContext, AgentResult, RoutingDecision, MultiRoutingDecision } from './types';
 export { BaseAgent } from './baseAgent';

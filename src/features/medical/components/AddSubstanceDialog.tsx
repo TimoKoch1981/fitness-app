@@ -23,6 +23,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   const [ester, setEster] = useState('');
   const [halfLife, setHalfLife] = useState('');
   const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
@@ -30,29 +31,35 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     e.preventDefault();
     if (!name) return;
 
-    await addSubstance.mutateAsync({
-      name,
-      category,
-      type: adminType,
-      dosage: dosage || undefined,
-      unit: unit || undefined,
-      frequency: frequency || undefined,
-      ester: ester || undefined,
-      half_life_days: halfLife ? parseFloat(halfLife) : undefined,
-      notes: notes || undefined,
-    });
+    setError('');
 
-    // Reset and close
-    setName('');
-    setCategory('supplement');
-    setAdminType('oral');
-    setDosage('');
-    setUnit('mg');
-    setFrequency('');
-    setEster('');
-    setHalfLife('');
-    setNotes('');
-    onClose();
+    try {
+      await addSubstance.mutateAsync({
+        name,
+        category,
+        type: adminType,
+        dosage: dosage || undefined,
+        unit: unit || undefined,
+        frequency: frequency || undefined,
+        ester: ester || undefined,
+        half_life_days: halfLife ? parseFloat(halfLife) : undefined,
+        notes: notes || undefined,
+      });
+
+      // Reset and close
+      setName('');
+      setCategory('supplement');
+      setAdminType('oral');
+      setDosage('');
+      setUnit('mg');
+      setFrequency('');
+      setEster('');
+      setHalfLife('');
+      setNotes('');
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   const categoryLabels: Record<string, string> = {
@@ -232,6 +239,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               rows={2}
             />
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           {/* Submit */}
           <button

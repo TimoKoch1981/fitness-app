@@ -22,6 +22,7 @@ export const en: TranslationKeys = {
     time: 'Time',
     notes: 'Notes',
     estimated: 'estimated',
+    saveError: 'Failed to save. Please try again.',
   },
   app: {
     name: 'FitBuddy',
@@ -97,6 +98,8 @@ export const en: TranslationKeys = {
     name: 'Name',
     kcal: 'kcal',
     grams: 'g',
+    evaluateDay: 'Evaluate Day',
+    noMealsForDate: 'No meals for this date',
   },
   workouts: {
     title: 'Workouts',
@@ -191,6 +194,13 @@ export const en: TranslationKeys = {
     site_ventro_glute_right: 'Ventro-Glute Right',
     site_abdomen: 'Abdomen',
     site_other: 'Other',
+    // Missing keys for MedicalPage
+    recentLogs: 'Recent Logs',
+    dueToday: 'Due Today',
+    allReminders: 'All Reminders',
+    noReminders: 'No reminders set up',
+    addReminder: 'Add Reminder',
+    deleteSubstance: 'Delete Substance',
   },
   buddy: {
     title: 'FitBuddy',

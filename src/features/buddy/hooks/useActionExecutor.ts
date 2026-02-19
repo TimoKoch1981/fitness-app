@@ -1,13 +1,14 @@
 /**
  * Action Executor — bridges ParsedActions to Supabase mutation hooks.
  *
- * When an agent includes an ACTION block in its response, this hook:
- * 1. Holds the pending action in state
- * 2. On user confirmation: calls the appropriate mutation hook
+ * When an agent includes ACTION blocks in its response, this hook:
+ * 1. Holds pending actions in state
+ * 2. Executes each action via the appropriate mutation hook
  * 3. Tracks execution status (pending → executing → executed/failed)
  *
  * Special handling for `log_substance`: the LLM returns `substance_name`
- * but the DB needs `substance_id` (UUID). We resolve this via activeSubstances.
+ * but the DB needs `substance_id` (UUID). We resolve this via fuzzy matching
+ * against activeSubstances (case-insensitive, partial match, levenshtein distance).
  */
 
 import { useState, useCallback } from 'react';
@@ -19,6 +20,72 @@ import { useLogSubstance, useSubstances } from '../../medical/hooks/useSubstance
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
 import type { SplitType, PlanExercise, InjectionSite } from '../../../types/health';
+
+// ── Fuzzy Matching Helpers ────────────────────────────────────────────
+
+/**
+ * Simple Levenshtein distance between two strings.
+ * Used for fuzzy substance name matching.
+ */
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Fuzzy match a substance name against the active substances list.
+ * Matching strategy (in priority order):
+ * 1. Exact match (case-insensitive)
+ * 2. One name contains the other (partial match)
+ * 3. Levenshtein distance ≤ 3 (typo tolerance)
+ *
+ * Returns the best matching substance or null.
+ */
+function fuzzyMatchSubstance(
+  searchName: string,
+  substances: Array<{ id: string; name: string }>,
+): { id: string; name: string } | null {
+  const search = searchName.toLowerCase().trim();
+
+  // 1. Exact match
+  const exact = substances.find(s => s.name.toLowerCase() === search);
+  if (exact) return exact;
+
+  // 2. Partial match (search contains substance name or vice versa)
+  const partial = substances.find(s => {
+    const name = s.name.toLowerCase();
+    return name.includes(search) || search.includes(name);
+  });
+  if (partial) return partial;
+
+  // 3. Levenshtein distance (typo tolerance)
+  let bestMatch: { id: string; name: string } | null = null;
+  let bestDistance = Infinity;
+  for (const s of substances) {
+    const dist = levenshtein(search, s.name.toLowerCase());
+    // Allow distance proportional to name length, but max 3
+    const threshold = Math.min(3, Math.floor(s.name.length * 0.3));
+    if (dist <= threshold && dist < bestDistance) {
+      bestDistance = dist;
+      bestMatch = s;
+    }
+  }
+
+  return bestMatch;
+}
 
 interface UseActionExecutorReturn {
   /** Currently pending action awaiting user confirmation */
@@ -35,7 +102,7 @@ interface UseActionExecutorReturn {
   rejectAction: () => void;
 }
 
-export function useActionExecutor(): UseActionExecutorReturn {
+export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const [pendingAction, setPendingAction] = useState<ParsedAction | null>(null);
   const [actionStatus, setActionStatus] = useState<ActionStatus>('pending');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,6 +145,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             fiber: d.fiber as number | undefined,
             date: d.date as string | undefined,
             source: 'ai',
+            user_id: userId,
           });
           break;
         }
@@ -92,6 +160,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             exercises: d.exercises as Array<{ name: string; sets?: number; reps?: number; weight_kg?: number }> | undefined,
             notes: d.notes as string | undefined,
             date: d.date as string | undefined,
+            user_id: userId,
           });
           break;
         }
@@ -108,6 +177,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             leg_cm: d.leg_cm as number | undefined,
             date: d.date as string | undefined,
             source: 'ai',
+            user_id: userId,
           });
           break;
         }
@@ -120,20 +190,20 @@ export function useActionExecutor(): UseActionExecutorReturn {
             date: d.date as string,
             time: d.time as string,
             notes: d.notes as string | undefined,
+            user_id: userId,
           });
           break;
         }
 
         case 'log_substance': {
-          // Resolve substance_name → substance_id
-          const substanceName = (d.substance_name as string).toLowerCase();
-          const match = activeSubstances?.find(
-            (s) => s.name.toLowerCase() === substanceName
-          );
+          // Resolve substance_name → substance_id (fuzzy matching)
+          const match = activeSubstances
+            ? fuzzyMatchSubstance(d.substance_name as string, activeSubstances)
+            : null;
 
           if (!match) {
             throw new Error(
-              `Substance "${d.substance_name}" not found / Substanz nicht gefunden. ` +
+              `Substance "${d.substance_name}" not found / Substanz "${d.substance_name}" nicht gefunden. ` +
               `Add it first under Substances / Zuerst unter Substanzen hinzufügen.`
             );
           }
@@ -145,6 +215,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
             date: d.date as string | undefined,
             time: d.time as string | undefined,
             notes: d.notes as string | undefined,
+            user_id: userId,
           });
           break;
         }
@@ -162,6 +233,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
               exercises: day.exercises as PlanExercise[],
               notes: day.notes as string | undefined,
             })),
+            user_id: userId,
           });
           break;
         }
@@ -181,7 +253,7 @@ export function useActionExecutor(): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

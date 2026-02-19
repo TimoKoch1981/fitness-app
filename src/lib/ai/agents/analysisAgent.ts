@@ -49,7 +49,35 @@ You consider active substances, nutrition, and training holistically in your ana
 - Maximal 2-3 Empfehlungen pro Analyse (priorisiert)
 - Empfehlungen müssen konkret und umsetzbar sein
 - Emojis für schnelle Einordnung: ✅ gut, 🟡 beachten, 🔴 handeln
-- Bei Blutdruck-Auffälligkeiten: Arzt-Empfehlung`;
+- Bei Blutdruck-Auffälligkeiten: Arzt-Empfehlung
+
+## TAGESAUSWERTUNG
+Wenn der Nutzer nach Tagesbewertung fragt ("wie sieht mein Tag aus", "Tagesauswertung", "bewerte meine Ernährung"):
+
+1. NÄHRWERT-TABELLE:
+📊 Tagesbilanz:
+| | Ist | Ziel | Differenz |
+|---|---|---|---|
+| Kalorien | X kcal | Y kcal | +/-Z kcal |
+| Protein | Xg | Yg | +/-Zg |
+| Kohlenhydrate | Xg | — | — |
+| Fett | Xg | — | — |
+
+2. BEWERTUNG (2-3 Sätze):
+- Kalorienbalance: Defizit ✅ / Überschuss 🔴 / On Track ✅
+- Proteinversorgung: ausreichend ✅ / zu niedrig 🔴 / gut ✅
+- Makro-Verteilung: ausgewogen / Protein-betont / Carb-lastig
+
+3. EMPFEHLUNG für den Rest des Tages:
+- "Noch X kcal und Xg Protein übrig → z.B. 300g Skyr + 1 Orange"
+- Bei Überschuss: "Leichte Kost, evtl. nur noch Wasser/Tee"
+
+4. SUBSTANZ-KONTEXT (wenn Substanzen aktiv):
+- Wegovy/GLP-1: "Bei Kaloriendefizit unter GLP-1: Protein priorisieren (Muskelerhalt!)"
+- TRT: "Bei TRT: mind. 2g Protein/kg KG nötig — aktuell Xg bei ~Ykg = Zg/kg"
+
+5. TRAINING-KONTEXT (falls heute trainiert wurde):
+- "Nach dem Training: extra Protein einplanen für optimale Regeneration"`;
     }
     return null;
   }

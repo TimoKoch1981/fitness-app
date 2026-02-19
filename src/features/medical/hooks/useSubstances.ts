@@ -80,6 +80,25 @@ export function useToggleSubstance() {
   });
 }
 
+export function useDeleteSubstance() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('substances')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUBSTANCES_KEY] });
+      queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });
+    },
+  });
+}
+
 // === SUBSTANCE LOGS ===
 
 export function useSubstanceLogs(limit = 30) {
@@ -114,6 +133,8 @@ interface LogSubstanceInput {
   taken?: boolean;
   site?: InjectionSite;
   notes?: string;
+  /** Pre-resolved user ID — skips getUser() network call */
+  user_id?: string;
 }
 
 export function useLogSubstance() {
@@ -121,15 +142,19 @@ export function useLogSubstance() {
 
   return useMutation({
     mutationFn: async (input: LogSubstanceInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       const now = new Date();
       const { data, error } = await supabase
         .from('substance_logs')
         .insert({
           ...input,
-          user_id: user.id,
+          user_id: userId,
           date: input.date || today(),
           time: input.time || `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
           taken: input.taken ?? true,
@@ -139,6 +164,24 @@ export function useLogSubstance() {
 
       if (error) throw error;
       return data as SubstanceLog;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });
+    },
+  });
+}
+
+export function useDeleteSubstanceLog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('substance_logs')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });

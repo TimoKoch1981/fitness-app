@@ -22,30 +22,36 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+  const [error, setError] = useState('');
 
   if (!open) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !calories) return;
+    setError('');
 
-    await addMeal.mutateAsync({
-      date: date ?? today(),
-      name,
-      type,
-      calories: parseInt(calories) || 0,
-      protein: parseFloat(protein) || 0,
-      carbs: parseFloat(carbs) || 0,
-      fat: parseFloat(fat) || 0,
-    });
+    try {
+      await addMeal.mutateAsync({
+        date: date ?? today(),
+        name,
+        type,
+        calories: parseInt(calories) || 0,
+        protein: parseFloat(protein) || 0,
+        carbs: parseFloat(carbs) || 0,
+        fat: parseFloat(fat) || 0,
+      });
 
-    // Reset and close
-    setName('');
-    setCalories('');
-    setProtein('');
-    setCarbs('');
-    setFat('');
-    onClose();
+      // Reset and close
+      setName('');
+      setCalories('');
+      setProtein('');
+      setCarbs('');
+      setFat('');
+      onClose();
+    } catch {
+      setError(t.common.saveError);
+    }
   };
 
   const mealTypes: { value: MealType; label: string }[] = [
@@ -164,6 +170,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
               />
             </div>
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 text-center">{error}</p>
+          )}
 
           {/* Submit */}
           <button

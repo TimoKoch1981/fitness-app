@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, UtensilsCrossed } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, UtensilsCrossed, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../features/meals/hooks/useMeals';
@@ -8,13 +9,32 @@ import { AddMealDialog } from '../features/meals/components/AddMealDialog';
 import { today } from '../lib/utils';
 
 export function MealsPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedDate] = useState(today());
+  const [selectedDate, setSelectedDate] = useState(today());
 
   const { data: meals, isLoading } = useMealsByDate(selectedDate);
   const { totals } = useDailyMealTotals(selectedDate);
   const deleteMeal = useDeleteMeal();
+
+  const isToday = selectedDate === today();
+
+  const changeDate = (days: number) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + days);
+    const iso = d.toISOString().split('T')[0];
+    // Don't navigate into the future
+    if (iso <= today()) setSelectedDate(iso);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+  };
 
   const handleDelete = (id: string) => {
     deleteMeal.mutate({ id, date: selectedDate });
@@ -40,6 +60,29 @@ export function MealsPage() {
         </button>
       }
     >
+      {/* Date Navigation */}
+      <div className="flex items-center justify-between mb-4 bg-white rounded-xl p-3 shadow-sm">
+        <button
+          onClick={() => changeDate(-1)}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-gray-900">
+            {isToday ? t.common.today : formatDate(selectedDate)}
+          </p>
+          <p className="text-xs text-gray-400">{selectedDate}</p>
+        </div>
+        <button
+          onClick={() => changeDate(+1)}
+          disabled={isToday}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
       {/* Daily Totals Bar */}
       <div className="bg-white rounded-xl p-3 shadow-sm mb-4">
         <div className="grid grid-cols-4 text-center">
@@ -61,6 +104,26 @@ export function MealsPage() {
           </div>
         </div>
       </div>
+
+      {/* Evaluate Day Button (only when meals exist and viewing today) */}
+      {meals && meals.length > 0 && isToday && (
+        <button
+          onClick={() =>
+            navigate('/buddy', {
+              state: {
+                autoMessage:
+                  language === 'de'
+                    ? 'Wie sieht mein Tag heute aus? Bewerte meine Ernährung.'
+                    : 'How does my day look? Evaluate my nutrition.',
+              },
+            })
+          }
+          className="w-full py-2 px-3 bg-teal-50 text-teal-700 text-sm rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 mb-4"
+        >
+          <BarChart3 className="h-4 w-4" />
+          {t.meals.evaluateDay}
+        </button>
+      )}
 
       {/* Meals List */}
       {isLoading ? (
@@ -89,13 +152,17 @@ export function MealsPage() {
       ) : (
         <div className="text-center py-12">
           <UtensilsCrossed className="h-12 w-12 mx-auto text-gray-200 mb-3" />
-          <p className="text-gray-400 text-sm">{t.common.noData}</p>
-          <button
-            onClick={() => setShowAddDialog(true)}
-            className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
-          >
-            {t.meals.addMeal}
-          </button>
+          <p className="text-gray-400 text-sm">
+            {isToday ? t.common.noData : t.meals.noMealsForDate}
+          </p>
+          {isToday && (
+            <button
+              onClick={() => setShowAddDialog(true)}
+              className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+            >
+              {t.meals.addMeal}
+            </button>
+          )}
         </div>
       )}
 

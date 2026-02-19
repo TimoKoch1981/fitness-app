@@ -58,3 +58,9 @@ export interface RoutingDecision {
   matchedKeywords: string[];       // for debugging / transparency
   reasoning?: string;              // optional explanation
 }
+
+/** Multi-agent routing — dispatches to ALL matching agents above threshold */
+export interface MultiRoutingDecision {
+  agents: RoutingDecision[];       // all agents above threshold, sorted by score
+  primaryAgent: AgentType;         // highest score (gets streaming)
+}

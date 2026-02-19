@@ -77,6 +77,8 @@ interface AddMealInput {
   fiber?: number;
   source?: DataSource;
   source_ref?: string;
+  /** Pre-resolved user ID — skips getUser() network call (avoids auth race condition) */
+  user_id?: string;
 }
 
 export function useAddMeal() {
@@ -84,13 +86,17 @@ export function useAddMeal() {
 
   return useMutation({
     mutationFn: async (input: AddMealInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      let userId = input.user_id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+      }
 
       const { data, error } = await supabase
         .from('meals')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           date: input.date ?? today(),
           name: input.name,
           type: input.type,

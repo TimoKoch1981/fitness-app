@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseActionFromResponse, stripActionBlock } from '../actionParser';
+import { parseActionFromResponse, parseAllActionsFromResponse, stripActionBlock } from '../actionParser';
 
 // Suppress console.warn during tests (expected for invalid inputs)
 vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -128,7 +128,7 @@ describe('parseActionFromResponse', () => {
     expect(result!.type).toBe('log_meal');
   });
 
-  it('only parses the first ACTION block if multiple exist', () => {
+  it('returns only the first ACTION block when multiple exist (backwards compat)', () => {
     const text = `\`\`\`ACTION:log_meal
 {"name":"First","calories":100,"protein":10,"carbs":10,"fat":5}
 \`\`\`
@@ -139,6 +139,91 @@ describe('parseActionFromResponse', () => {
     const result = parseActionFromResponse(text);
     expect(result).not.toBeNull();
     expect(result!.data.name).toBe('First');
+  });
+});
+
+describe('parseAllActionsFromResponse', () => {
+  it('returns empty array when no ACTION blocks found', () => {
+    const text = 'Hallo! Wie geht es dir?';
+    const result = parseAllActionsFromResponse(text);
+    expect(result).toEqual([]);
+  });
+
+  it('returns single action in array', () => {
+    const text = `Gespeichert!
+
+\`\`\`ACTION:log_meal
+{"name":"Hähnchen","type":"lunch","calories":300,"protein":50,"carbs":0,"fat":8}
+\`\`\``;
+
+    const result = parseAllActionsFromResponse(text);
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe('log_meal');
+    expect(result[0].data.name).toBe('Hähnchen');
+  });
+
+  it('parses MULTIPLE ACTION blocks from one response', () => {
+    const text = `Hier sind deine Mahlzeiten:
+
+Frühstück: Proteinshake — 150 kcal | 30g P
+Mittagessen: Hähnchen mit Reis — 500 kcal | 48g P
+Abendessen: Döner — 650 kcal | 35g P
+
+Tages-Gesamt: ~1300 kcal | 113g P
+
+\`\`\`ACTION:log_meal
+{"name":"Proteinshake","type":"breakfast","calories":150,"protein":30,"carbs":8,"fat":2}
+\`\`\`
+\`\`\`ACTION:log_meal
+{"name":"Hähnchen mit Reis","type":"lunch","calories":500,"protein":48,"carbs":55,"fat":8}
+\`\`\`
+\`\`\`ACTION:log_meal
+{"name":"Döner","type":"dinner","calories":650,"protein":35,"carbs":55,"fat":30}
+\`\`\``;
+
+    const result = parseAllActionsFromResponse(text);
+    expect(result).toHaveLength(3);
+    expect(result[0].type).toBe('log_meal');
+    expect(result[0].data.name).toBe('Proteinshake');
+    expect(result[1].type).toBe('log_meal');
+    expect(result[1].data.name).toBe('Hähnchen mit Reis');
+    expect(result[2].type).toBe('log_meal');
+    expect(result[2].data.name).toBe('Döner');
+  });
+
+  it('parses mixed action types (meal + substance)', () => {
+    const text = `Alles notiert.
+
+\`\`\`ACTION:log_meal
+{"name":"Shake","type":"breakfast","calories":150,"protein":30,"carbs":8,"fat":2}
+\`\`\`
+\`\`\`ACTION:log_substance
+{"substance_name":"Testosteron","dosage_taken":"250mg","site":"glute_left"}
+\`\`\``;
+
+    const result = parseAllActionsFromResponse(text);
+    expect(result).toHaveLength(2);
+    expect(result[0].type).toBe('log_meal');
+    expect(result[1].type).toBe('log_substance');
+  });
+
+  it('skips invalid action blocks but includes valid ones', () => {
+    const text = `Gemischt.
+
+\`\`\`ACTION:log_meal
+{"name":"Gültig","type":"lunch","calories":500,"protein":40,"carbs":50,"fat":10}
+\`\`\`
+\`\`\`ACTION:log_meal
+{invalid json here}
+\`\`\`
+\`\`\`ACTION:log_meal
+{"name":"Auch gültig","type":"dinner","calories":600,"protein":45,"carbs":60,"fat":15}
+\`\`\``;
+
+    const result = parseAllActionsFromResponse(text);
+    expect(result).toHaveLength(2);
+    expect(result[0].data.name).toBe('Gültig');
+    expect(result[1].data.name).toBe('Auch gültig');
   });
 });
 
@@ -173,5 +258,24 @@ Nachher.`;
     const stripped = stripActionBlock(text);
     expect(stripped).toContain('Vorher.');
     expect(stripped).toContain('Nachher.');
+  });
+
+  it('removes ALL action blocks from text', () => {
+    const text = `Drei Mahlzeiten gespeichert!
+
+\`\`\`ACTION:log_meal
+{"name":"Shake","type":"breakfast","calories":150,"protein":30,"carbs":8,"fat":2}
+\`\`\`
+\`\`\`ACTION:log_meal
+{"name":"Hähnchen","type":"lunch","calories":500,"protein":48,"carbs":55,"fat":8}
+\`\`\`
+\`\`\`ACTION:log_meal
+{"name":"Döner","type":"dinner","calories":650,"protein":35,"carbs":55,"fat":30}
+\`\`\``;
+
+    const stripped = stripActionBlock(text);
+    expect(stripped).toBe('Drei Mahlzeiten gespeichert!');
+    expect(stripped).not.toContain('ACTION');
+    expect(stripped).not.toContain('```');
   });
 });
