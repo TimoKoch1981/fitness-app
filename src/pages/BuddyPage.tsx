@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
+import { useVoiceInput } from '../features/buddy/hooks/useVoiceInput';
 import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
@@ -21,8 +22,37 @@ export function BuddyPage() {
   const { user } = useAuth();
   const location = useLocation();
   const [input, setInput] = useState('');
+  const [voiceHint, setVoiceHint] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Voice input — Web Speech API
+  const handleVoiceTranscript = useCallback((text: string) => {
+    setInput(text);
+  }, []);
+
+  const handleVoiceError = useCallback((err: 'not-supported' | 'not-allowed' | 'no-speech' | 'network' | 'unknown') => {
+    if (err === 'not-supported') {
+      setVoiceHint(t.buddy.voiceNotSupported);
+    } else if (err === 'not-allowed') {
+      setVoiceHint(t.buddy.voiceError);
+    } else if (err === 'network') {
+      setVoiceHint(language === 'de' ? 'Netzwerkfehler bei der Spracherkennung.' : 'Network error during speech recognition.');
+    }
+    // Clear hint after 5s
+    setTimeout(() => setVoiceHint(''), 5000);
+  }, [t, language]);
+
+  const {
+    isSupported: voiceSupported,
+    isListening,
+    toggleListening,
+  } = useVoiceInput({
+    language: language as 'de' | 'en',
+    onTranscript: handleVoiceTranscript,
+    onError: handleVoiceError,
+    silenceTimeout: 3000,
+  });
 
   // Gather health context for personalized AI responses
   const { data: profile } = useProfile();
@@ -250,6 +280,19 @@ export function BuddyPage() {
         <div ref={chatEndRef} />
       </div>
 
+      {/* Voice Hint / Error */}
+      {(voiceHint || isListening) && (
+        <div className="fixed bottom-28 left-0 right-0 flex justify-center px-4 z-30 pointer-events-none">
+          <div className={`max-w-lg w-full text-center text-xs py-1.5 px-3 rounded-full shadow-sm ${
+            voiceHint
+              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+              : 'bg-red-50 text-red-600 border border-red-200'
+          }`}>
+            {voiceHint || t.buddy.voiceHint}
+          </div>
+        </div>
+      )}
+
       {/* Input Bar */}
       <div className="fixed bottom-14 left-0 right-0 bg-white border-t border-gray-200 p-3">
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto flex gap-2">
@@ -262,15 +305,22 @@ export function BuddyPage() {
             className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition-colors"
             disabled={isLoading}
           />
-          {/* Microphone Button — placeholder for future voice input */}
-          <button
-            type="button"
-            onClick={() => alert(language === 'de' ? 'Spracheingabe wird in einer künftigen Version verfügbar.' : 'Voice input will be available in a future version.')}
-            className="p-2.5 text-gray-300 hover:text-gray-400 rounded-full transition-colors"
-            title={t.buddy.voiceInput}
-          >
-            <Mic className="h-4 w-4" />
-          </button>
+          {/* Voice Input Button */}
+          {voiceSupported && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`relative p-2.5 rounded-full transition-all ${
+                isListening
+                  ? 'text-red-500 bg-red-50 ring-2 ring-red-400 ring-opacity-75 animate-pulse'
+                  : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'
+              }`}
+              title={isListening ? (t.buddy.voiceListening) : t.buddy.voiceInput}
+              disabled={isLoading}
+            >
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </button>
+          )}
           <button
             type="submit"
             disabled={isLoading || !input.trim()}

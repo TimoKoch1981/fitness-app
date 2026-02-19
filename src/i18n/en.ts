@@ -214,6 +214,10 @@ export const en: TranslationKeys = {
     greeting:
       "Hey! I'm your FitBuddy. Tell me what you ate or how you trained, and I'll take care of the rest! 💪",
     voiceInput: 'Voice Input',
+    voiceListening: 'Listening...',
+    voiceNotSupported: 'Voice input is not supported by your browser. Please use Chrome or Edge.',
+    voiceError: 'Microphone access denied. Please allow access in browser settings.',
+    voiceHint: 'Speak now... (e.g. "I had 200g chicken with rice")',
     send: 'Send',
     clearChat: 'Clear Chat',
     connectionError: 'Failed to connect to AI model. Is Ollama running?',

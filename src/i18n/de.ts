@@ -215,6 +215,10 @@ export const de = {
     greeting:
       'Hey! Ich bin dein FitBuddy. Erzähl mir was du gegessen oder trainiert hast, und ich kümmere mich um den Rest! 💪',
     voiceInput: 'Spracheingabe',
+    voiceListening: 'Ich höre zu...',
+    voiceNotSupported: 'Spracheingabe wird von deinem Browser nicht unterstützt. Bitte nutze Chrome oder Edge.',
+    voiceError: 'Mikrofon-Zugriff verweigert. Bitte erlaube den Zugriff in den Browser-Einstellungen.',
+    voiceHint: 'Sprich jetzt... (z.B. "Ich hatte 200g Hähnchen mit Reis")',
     send: 'Senden',
     clearChat: 'Chat leeren',
     connectionError: 'Verbindung zum KI-Modell fehlgeschlagen. Läuft Ollama?',
