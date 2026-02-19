@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, MessageCircle } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
+import { generateTrainingPlanPDF } from '../utils/generateTrainingPlanPDF';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -15,8 +16,9 @@ interface TrainingPlanViewProps {
  * Shows an empty state with import/buddy hints when no plan exists.
  */
 export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting }: TrainingPlanViewProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1])); // First day expanded by default
+  const [isExporting, setIsExporting] = useState(false);
 
   const toggleDay = (dayNumber: number) => {
     setExpandedDays(prev => {
@@ -87,15 +89,32 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
               <p className="text-xs text-gray-400 mt-1">{plan.notes}</p>
             )}
           </div>
-          {onDelete && (
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => onDelete(plan.id)}
-              className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
-              title={t.workouts.deletePlan}
+              onClick={() => {
+                setIsExporting(true);
+                try {
+                  generateTrainingPlanPDF(plan, language);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting}
+              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
+              title={language === 'de' ? 'Als PDF exportieren' : 'Export as PDF'}
             >
-              <Trash2 className="h-4 w-4" />
+              <Download className="h-4 w-4" />
             </button>
-          )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(plan.id)}
+                className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                title={t.workouts.deletePlan}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
