@@ -14,6 +14,7 @@ import { cn } from '../lib/utils';
 import {
   useMealsForRange,
   useWorkoutsForRange,
+  useBalanceForRange,
   useBodyTrend,
   useBloodPressureTrend,
   getLastNDays,
@@ -22,6 +23,8 @@ import {
 // Chart components
 import { CalorieChart } from '../features/reports/components/CalorieChart';
 import { MacroChart } from '../features/reports/components/MacroChart';
+import { BalanceChart } from '../features/reports/components/BalanceChart';
+import { BalanceSummaryCard } from '../features/reports/components/BalanceSummaryCard';
 import { WeightChart } from '../features/reports/components/WeightChart';
 import { BloodPressureChart } from '../features/reports/components/BloodPressureChart';
 import { WorkoutChart } from '../features/reports/components/WorkoutChart';
@@ -42,6 +45,8 @@ export function ReportsPage() {
   const weekWorkouts = useWorkoutsForRange(week.start, week.end);
   const monthMeals = useMealsForRange(month.start, month.end);
   const monthWorkouts = useWorkoutsForRange(month.start, month.end);
+  const weekBalance = useBalanceForRange(week.start, week.end);
+  const monthBalance = useBalanceForRange(month.start, month.end);
   const bodyTrend = useBodyTrend(30);
   const bpTrend = useBloodPressureTrend(30);
 
@@ -67,6 +72,7 @@ export function ReportsPage() {
 
   const isLoading =
     weekMeals.isLoading || weekWorkouts.isLoading ||
+    weekBalance.isLoading || monthBalance.isLoading ||
     monthMeals.isLoading || monthWorkouts.isLoading ||
     bodyTrend.isLoading || bpTrend.isLoading;
 
@@ -134,6 +140,14 @@ export function ReportsPage() {
           ) : (
             <EmptyState message={t.reports.noWorkoutData} />
           )}
+
+          {/* Calorie Balance */}
+          {weekBalance.data && weekBalance.data.some((d) => d.intake > 0) && (
+            <>
+              <BalanceChart data={weekBalance.data} language={language} />
+              <BalanceSummaryCard data={weekBalance.data} language={language} />
+            </>
+          )}
         </div>
       )}
 
@@ -172,6 +186,14 @@ export function ReportsPage() {
             <WorkoutChart data={monthWorkouts.data} language={language} />
           ) : (
             <EmptyState message={t.reports.noWorkoutData} />
+          )}
+
+          {/* Calorie Balance */}
+          {monthBalance.data && monthBalance.data.some((d) => d.intake > 0) && (
+            <>
+              <BalanceChart data={monthBalance.data} language={language} />
+              <BalanceSummaryCard data={monthBalance.data} language={language} />
+            </>
           )}
         </div>
       )}

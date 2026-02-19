@@ -128,6 +128,10 @@ export const en: TranslationKeys = {
     deletePlan: 'Delete plan',
     dayLabel: 'Day',
     focus: 'Focus',
+    exportPdf: 'Export as PDF',
+    pdfTitle: 'Training Plan',
+    pdfCreated: 'Created on',
+    pdfGenerated: 'Generating PDF...',
   },
   body: {
     title: 'Body Stats',
@@ -265,6 +269,15 @@ export const en: TranslationKeys = {
     noWorkoutData: 'No workouts in this period',
     noBodyData: 'No body measurements available',
     noBpData: 'No blood pressure data available',
+    // Calorie Balance
+    intake: 'Intake',
+    burned: 'Burned',
+    balance: 'Balance',
+    deficit: 'Deficit',
+    surplus: 'Surplus',
+    weeklyBalance: 'Weekly Balance',
+    tdee: 'Daily Expenditure',
+    equivalent: 'Equivalent to approx.',
   },
   products: {
     title: 'Products',

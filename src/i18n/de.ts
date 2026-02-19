@@ -126,6 +126,10 @@ export const de = {
     deletePlan: 'Plan löschen',
     dayLabel: 'Tag',
     focus: 'Fokus',
+    exportPdf: 'Als PDF exportieren',
+    pdfTitle: 'Trainingsplan',
+    pdfCreated: 'Erstellt am',
+    pdfGenerated: 'PDF wird erstellt...',
   },
   body: {
     title: 'Körperwerte',
@@ -266,6 +270,15 @@ export const de = {
     noWorkoutData: 'Keine Trainings in diesem Zeitraum',
     noBodyData: 'Keine Körpermessungen vorhanden',
     noBpData: 'Keine Blutdruckwerte vorhanden',
+    // Calorie Balance
+    intake: 'Aufnahme',
+    burned: 'Verbrauch',
+    balance: 'Bilanz',
+    deficit: 'Defizit',
+    surplus: 'Überschuss',
+    weeklyBalance: 'Wochen-Bilanz',
+    tdee: 'Tagesverbrauch',
+    equivalent: 'Entspricht ca.',
   },
   products: {
     title: 'Produkte',
