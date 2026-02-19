@@ -30,10 +30,13 @@ export abstract class BaseAgent {
 
   /**
    * Build the complete system prompt from skills.
-   * Order: Role Header → Static Knowledge → User Context → Agent Instructions
+   * Order: Facts Codex → Role Header → Static Knowledge → User Context → Agent Instructions
    */
   protected buildSystemPrompt(context: AgentContext): string {
     const parts: string[] = [];
+
+    // 0. Global Facts Codex (applies to ALL agents — facts > estimates)
+    parts.push(this.getFactsCodex(context.language));
 
     // 1. Agent identity / role header (defined by subclass)
     parts.push(this.buildRoleHeader(context.language));
@@ -57,6 +60,39 @@ export abstract class BaseAgent {
     }
 
     return parts.filter(Boolean).join('\n\n');
+  }
+
+  /**
+   * Global Facts Codex — applies to ALL agents.
+   * Core principle: Facts > Estimates. Always.
+   */
+  protected getFactsCodex(language: 'de' | 'en'): string {
+    if (language === 'de') {
+      return `## FAKTEN-CODEX (gilt für ALLE Agenten) ⚠️
+
+GRUNDREGEL: Fakten > Schätzungen. IMMER.
+
+1. **Datenbank-Werte**: Wenn ein Produkt/Wert in der Datenbank steht → EXAKTE Werte verwenden, "(exakt)" markieren
+2. **Hersteller-Angaben**: Wenn ein Markenprodukt genannt wird → Herstellerangaben von der Verpackung/Website verwenden, NICHT schätzen
+3. **Wissenschaftliche Quellen**: BMR, TDEE, BP-Klassifikation → immer aus zitierbaren Quellen (BLS, USDA, ESC/ESH)
+4. **Schätzung NUR als letztes Mittel**: Nur wenn KEINE Fakten verfügbar sind (z.B. selbstgekochtes Gericht ohne Rezept)
+5. **Kennzeichnung PFLICHT**:
+   - Fakten: "(exakt)" oder "(Herstellerangabe)" oder "(BLS 4.0)"
+   - Schätzungen: "(geschätzt)" oder "(ca.)"
+6. **NIE Markenprodukte schätzen**: Markenprodukte haben EXAKTE Nährwerte auf der Verpackung — diese verwenden!`;
+    }
+    return `## FACTS CODEX (applies to ALL agents) ⚠️
+
+CORE RULE: Facts > Estimates. ALWAYS.
+
+1. **Database values**: If a product/value exists in the database → use EXACT values, mark "(exact)"
+2. **Manufacturer data**: If a branded product is mentioned → use manufacturer data from packaging/website, do NOT estimate
+3. **Scientific sources**: BMR, TDEE, BP classification → always from citable sources (BLS, USDA, ESC/ESH)
+4. **Estimation ONLY as last resort**: Only when NO facts are available (e.g. home-cooked dish without recipe)
+5. **Labeling MANDATORY**:
+   - Facts: "(exact)" or "(manufacturer data)" or "(BLS 4.0)"
+   - Estimates: "(estimated)" or "(approx.)"
+6. **NEVER estimate branded products**: Branded products have EXACT nutritional values on packaging — use those!`;
   }
 
   /** Override in subclass: define the agent's role and personality */
