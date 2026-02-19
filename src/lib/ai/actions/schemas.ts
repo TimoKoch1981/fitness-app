@@ -151,6 +151,44 @@ const SaveProductSchema = z.object({
   notes: z.string().optional(),
 });
 
+const AddSubstanceSchema = z.object({
+  name: z.string().min(1),
+  category: z.enum(['trt', 'ped', 'medication', 'supplement', 'other']).default('other'),
+  type: z.enum(['injection', 'oral', 'transdermal', 'subcutaneous', 'other']).default('other'),
+  dosage: z.string().optional(),
+  unit: z.string().optional(),
+  frequency: z.string().optional(),
+  ester: z.string().optional(),
+  half_life_days: z.number().positive().optional(),
+  notes: z.string().optional(),
+});
+
+const AddReminderSchema = z.object({
+  title: z.string().min(1),
+  // LLMs sometimes send "supplement", "medication" etc. — coerce to valid ReminderType
+  type: z.string().default('custom').transform((val): 'substance' | 'blood_pressure' | 'body_measurement' | 'custom' => {
+    if (['substance', 'supplement', 'medication', 'trt', 'ped'].includes(val)) return 'substance';
+    if (['blood_pressure', 'bp'].includes(val)) return 'blood_pressure';
+    if (['body_measurement', 'body', 'weight'].includes(val)) return 'body_measurement';
+    return 'custom';
+  }),
+  time_period: z.enum(['morning', 'noon', 'evening']).optional(),
+  time: z.string().optional(),
+  // LLMs sometimes send "daily" — treat as "weekly" with all 7 days
+  repeat_mode: z.string().default('weekly').transform((val): 'weekly' | 'interval' => {
+    if (val === 'interval') return 'interval';
+    return 'weekly'; // "daily", "weekly", or anything else → weekly
+  }),
+  days_of_week: z.array(z.number().min(0).max(6)).optional(),
+  interval_days: z.number().positive().optional(),
+  substance_name: z.string().optional(),
+  description: z.string().optional(),
+}).transform((data) => ({
+  ...data,
+  // If repeat_mode is "weekly" and no days_of_week specified, default to every day
+  days_of_week: data.days_of_week ?? [0, 1, 2, 3, 4, 5, 6],
+}));
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -161,6 +199,8 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   log_substance: LogSubstanceSchema,
   save_training_plan: SaveTrainingPlanSchema,
   save_product: SaveProductSchema,
+  add_substance: AddSubstanceSchema,
+  add_reminder: AddReminderSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

@@ -30,6 +30,8 @@ const VALID_ACTIONS: ActionType[] = [
   'log_substance',
   'save_training_plan',
   'save_product',
+  'add_substance',
+  'add_reminder',
 ];
 
 /**

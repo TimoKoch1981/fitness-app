@@ -16,11 +16,12 @@ import { useAddMeal } from '../../meals/hooks/useMeals';
 import { useAddWorkout } from '../../workouts/hooks/useWorkouts';
 import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
-import { useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
+import { useAddSubstance, useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import { useAddUserProduct } from '../../meals/hooks/useProducts';
+import { useAddReminder } from '../../reminders/hooks/useReminders';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
-import type { SplitType, PlanExercise, InjectionSite, ProductCategory } from '../../../types/health';
+import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod } from '../../../types/health';
 
 // ── Fuzzy Matching Helpers ────────────────────────────────────────────
 
@@ -116,6 +117,8 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const logSubstance = useLogSubstance();
   const addTrainingPlan = useAddTrainingPlan();
   const addUserProduct = useAddUserProduct();
+  const addSubstance = useAddSubstance();
+  const addReminder = useAddReminder();
 
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
@@ -259,6 +262,47 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           break;
         }
 
+        case 'add_substance': {
+          await addSubstance.mutateAsync({
+            name: d.name as string,
+            category: (d.category as SubstanceCategory) ?? 'other',
+            type: (d.type as SubstanceAdminType) ?? 'other',
+            dosage: d.dosage as string | undefined,
+            unit: d.unit as string | undefined,
+            frequency: d.frequency as string | undefined,
+            ester: d.ester as string | undefined,
+            half_life_days: d.half_life_days as number | undefined,
+            notes: d.notes as string | undefined,
+          });
+          break;
+        }
+
+        case 'add_reminder': {
+          // If substance_name is provided, resolve to substance_id
+          let substanceId: string | undefined;
+          if (d.substance_name) {
+            const match = activeSubstances
+              ? fuzzyMatchSubstance(d.substance_name as string, activeSubstances)
+              : null;
+            if (match) {
+              substanceId = match.id;
+            }
+          }
+
+          await addReminder.mutateAsync({
+            type: (d.type as ReminderType) ?? 'custom',
+            title: d.title as string,
+            description: d.description as string | undefined,
+            time: d.time as string | undefined,
+            time_period: d.time_period as TimePeriod | undefined,
+            repeat_mode: (d.repeat_mode as RepeatMode) ?? 'weekly',
+            days_of_week: d.days_of_week as number[] | undefined,
+            interval_days: d.interval_days as number | undefined,
+            substance_id: substanceId,
+          });
+          break;
+        }
+
         default: {
           throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
         }
@@ -274,7 +318,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

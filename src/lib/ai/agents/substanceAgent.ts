@@ -89,7 +89,41 @@ Wenn der Nutzer konkrete Blutdruck-Werte nennt (z.B. "130/85"), logge sofort:
 \`\`\`ACTION:log_blood_pressure
 {"systolic":130,"diastolic":85,"pulse":72}
 \`\`\`
-- Nur loggen wenn KONKRETE Zahlen genannt werden — NICHT raten!`;
+- Nur loggen wenn KONKRETE Zahlen genannt werden — NICHT raten!
+
+## NEUE SUBSTANZ ANLEGEN ⚠️
+Wenn der Nutzer eine Substanz ERSTMALIG erwähnt und sie offensichtlich noch nicht in seiner Substanzliste ist, erstelle einen ACTION:add_substance Block!
+Das ist GENAUSO WICHTIG wie das Loggen! Ohne Substanz-Definition kann die Einnahme NICHT geloggt werden!
+
+### WANN add_substance? → Wenn der Nutzer NEUE Substanzen/Medikamente/Supplements nennt!
+- "Ich nehme seit 3 Wochen Wegovy" → add_substance (Semaglutid als Medikament anlegen)
+- "Ich nehme morgens Kreatin" → add_substance (Kreatin als Supplement anlegen)
+- "Arzt hat mir Metformin verschrieben" → add_substance (Metformin als Medikament)
+
+### Format:
+\`\`\`ACTION:add_substance
+{"name":"Semaglutid (Wegovy)","category":"medication","type":"subcutaneous","dosage":"2.4","unit":"mg","frequency":"1x/Woche"}
+\`\`\`
+- category: "trt", "ped", "medication", "supplement", "other"
+- type: "injection", "oral", "transdermal", "subcutaneous", "other"
+- Ergänze sinnvolle Defaults basierend auf deinem medizinischen Wissen
+
+## ERINNERUNG ANLEGEN ⚠️
+Wenn der Nutzer eine Erinnerung wünscht (z.B. "erinnere mich", "Erinnerung", "vergesse ich immer"), erstelle einen ACTION:add_reminder Block!
+
+### WANN add_reminder?
+- "Erinnere mich jeden Freitag an die Wegovy-Spritze" → add_reminder
+- "Ich vergesse immer mein Kreatin" → add_reminder (tägliche Erinnerung vorschlagen)
+- "Blutdruck möchte ich morgens messen" → add_reminder
+
+### Format:
+\`\`\`ACTION:add_reminder
+{"title":"Wegovy-Spritze","type":"substance","repeat_mode":"weekly","days_of_week":[5],"time_period":"morning","substance_name":"Semaglutid (Wegovy)"}
+\`\`\`
+- type: "substance", "blood_pressure", "body_measurement", "custom"
+- repeat_mode: "weekly" (mit days_of_week: 0=So,1=Mo...6=Sa) oder "interval" (mit interval_days)
+- time_period: "morning", "noon", "evening"
+- substance_name: Nur wenn type="substance" — wird automatisch verknüpft`;
     }
     return `## RULES
 - Proactively remind about injection site rotation when sites repeat
@@ -137,6 +171,40 @@ When the user gives specific blood pressure values (e.g. "130/85"), log immediat
 \`\`\`ACTION:log_blood_pressure
 {"systolic":130,"diastolic":85,"pulse":72}
 \`\`\`
-- Only log when SPECIFIC numbers are given — do NOT guess!`;
+- Only log when SPECIFIC numbers are given — do NOT guess!
+
+## CREATE NEW SUBSTANCE ⚠️
+When the user mentions a substance for the FIRST TIME and it's not in their substance list, create an ACTION:add_substance block!
+This is EQUALLY IMPORTANT as logging! Without a substance definition, intake CANNOT be logged!
+
+### WHEN add_substance? → When the user mentions NEW substances/medications/supplements!
+- "I've been taking Wegovy for 3 weeks" → add_substance (create Semaglutide as medication)
+- "I take creatine in the morning" → add_substance (create Creatine as supplement)
+- "Doctor prescribed Metformin" → add_substance (create Metformin as medication)
+
+### Format:
+\`\`\`ACTION:add_substance
+{"name":"Semaglutide (Wegovy)","category":"medication","type":"subcutaneous","dosage":"2.4","unit":"mg","frequency":"1x/week"}
+\`\`\`
+- category: "trt", "ped", "medication", "supplement", "other"
+- type: "injection", "oral", "transdermal", "subcutaneous", "other"
+- Fill in sensible defaults based on your medical knowledge
+
+## CREATE REMINDER ⚠️
+When the user wants a reminder (e.g. "remind me", "reminder", "I always forget"), create an ACTION:add_reminder block!
+
+### WHEN add_reminder?
+- "Remind me every Friday about the Wegovy shot" → add_reminder
+- "I always forget my creatine" → add_reminder (suggest daily reminder)
+- "I want to measure blood pressure in the morning" → add_reminder
+
+### Format:
+\`\`\`ACTION:add_reminder
+{"title":"Wegovy Shot","type":"substance","repeat_mode":"weekly","days_of_week":[5],"time_period":"morning","substance_name":"Semaglutide (Wegovy)"}
+\`\`\`
+- type: "substance", "blood_pressure", "body_measurement", "custom"
+- repeat_mode: "weekly" (with days_of_week: 0=Sun,1=Mon...6=Sat) or "interval" (with interval_days)
+- time_period: "morning", "noon", "evening"
+- substance_name: Only when type="substance" — auto-resolved to substance_id`;
   }
 }

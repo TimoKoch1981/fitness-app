@@ -39,8 +39,8 @@ const ROUTING_RULES: KeywordRule[] = [
       'kalorienziel', 'proteinziel', 'defizit', 'überschuss',
       // Hydration
       'trinken', 'wasser', 'getränk', 'hydration', 'tee', 'kaffee', 'radler', 'saft',
-      // Supplements
-      'supplement', 'whey', 'kreatin', 'creatine', 'vitamin', 'omega', 'scoop',
+      // Supplements (whey/vitamin/omega stay here; kreatin/creatine/supplement → substance agent)
+      'whey', 'vitamin', 'omega', 'scoop',
       // Common foods (German) — comprehensive list for reliable routing
       'hühnchen', 'hähnchen', 'reis', 'nudeln', 'brot', 'müsli', 'joghurt',
       'quark', 'obst', 'gemüse', 'salat', 'pizza', 'burger', 'ei', 'eier',
@@ -120,8 +120,15 @@ const ROUTING_RULES: KeywordRule[] = [
       'blutdruck', 'systolisch', 'diastolisch', 'hypertonie',
       // Medical
       'blutspende', 'arzt', 'medikament', 'wechselwirkung',
+      // Reminders & Management
+      'erinnerung', 'erinnere', 'erinnern', 'reminder', 'vergesse', 'vergessen',
+      'anlegen', 'hinzufügen',
+      // Supplements (routed to substance agent for add_substance)
+      'kreatin', 'creatine', 'supplement', 'supplements',
+      'nahrungsergänzung', 'nahrungsergänzungsmittel',
       // English
       'injection', 'needle', 'dose', 'blood pressure', 'blood work',
+      'remind', 'reminder', 'creatine', 'supplement',
     ],
   },
 

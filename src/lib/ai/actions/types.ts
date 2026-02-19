@@ -14,7 +14,9 @@ export type ActionType =
   | 'log_blood_pressure'
   | 'log_substance'
   | 'save_training_plan'
-  | 'save_product';
+  | 'save_product'
+  | 'add_substance'
+  | 'add_reminder';
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -86,6 +88,18 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '📦',
         title: 'Produkt speichern?',
         summary: `${d.name ?? 'Produkt'} — ${d.serving_size_g ?? '?'}g — ${d.calories_per_serving ?? '?'} kcal | ${d.protein_per_serving ?? '?'}g P`,
+      };
+    case 'add_substance':
+      return {
+        icon: '💊',
+        title: 'Substanz anlegen?',
+        summary: `${d.name ?? 'Substanz'}${d.dosage ? ` — ${d.dosage}${d.unit ?? ''}` : ''} (${d.category ?? 'Sonstige'})`,
+      };
+    case 'add_reminder':
+      return {
+        icon: '🔔',
+        title: 'Erinnerung anlegen?',
+        summary: `${d.title ?? 'Erinnerung'}${d.time_period ? ` — ${d.time_period}` : ''}${d.repeat_mode === 'interval' && d.interval_days ? ` — alle ${d.interval_days} Tage` : ''}`,
       };
   }
 }
