@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle, Send, Trash2, Wifi, WifiOff } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
@@ -262,6 +262,15 @@ export function BuddyPage() {
             className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition-colors"
             disabled={isLoading}
           />
+          {/* Microphone Button — placeholder for future voice input */}
+          <button
+            type="button"
+            onClick={() => alert(language === 'de' ? 'Spracheingabe wird in einer künftigen Version verfügbar.' : 'Voice input will be available in a future version.')}
+            className="p-2.5 text-gray-300 hover:text-gray-400 rounded-full transition-colors"
+            title={t.buddy.voiceInput}
+          >
+            <Mic className="h-4 w-4" />
+          </button>
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
