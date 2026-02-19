@@ -37,6 +37,7 @@ export const en: TranslationKeys = {
     workouts: 'Workouts',
     medical: 'Medical',
     body: 'Body',
+    reports: 'Reports',
     profile: 'Profile',
   },
   auth: {
@@ -251,6 +252,19 @@ export const en: TranslationKeys = {
     caloriesGoal: 'Calorie Goal',
     proteinGoal: 'Protein Goal',
     waterGoal: 'Water Goal',
+  },
+  reports: {
+    title: 'Reports',
+    week: 'Week',
+    month: 'Month',
+    trends: 'Trends',
+    avgCalories: 'Avg Calories',
+    avgProtein: 'Avg Protein',
+    workouts: 'Workouts',
+    noMealData: 'No meals in this period',
+    noWorkoutData: 'No workouts in this period',
+    noBodyData: 'No body measurements available',
+    noBpData: 'No blood pressure data available',
   },
   products: {
     title: 'Products',

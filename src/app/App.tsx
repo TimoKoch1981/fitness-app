@@ -17,6 +17,7 @@ import { WorkoutsPage } from '../pages/WorkoutsPage';
 import { MedicalPage } from '../pages/MedicalPage';
 import { BodyPage } from '../pages/BodyPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { ReportsPage } from '../pages/ReportsPage';
 
 function AppRoutes() {
   return (
@@ -77,6 +78,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <BodyPage />
+            <Navigation />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <ReportsPage />
             <Navigation />
           </ProtectedRoute>
         }

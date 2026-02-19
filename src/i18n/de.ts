@@ -35,6 +35,7 @@ export const de = {
     workouts: 'Training',
     medical: 'Medizin',
     body: 'Körper',
+    reports: 'Reports',
     profile: 'Profil',
   },
   auth: {
@@ -252,6 +253,19 @@ export const de = {
     caloriesGoal: 'Kalorienziel',
     proteinGoal: 'Proteinziel',
     waterGoal: 'Wasserziel',
+  },
+  reports: {
+    title: 'Berichte',
+    week: 'Woche',
+    month: 'Monat',
+    trends: 'Trends',
+    avgCalories: 'Ø Kalorien',
+    avgProtein: 'Ø Protein',
+    workouts: 'Trainings',
+    noMealData: 'Keine Mahlzeiten in diesem Zeitraum',
+    noWorkoutData: 'Keine Trainings in diesem Zeitraum',
+    noBodyData: 'Keine Körpermessungen vorhanden',
+    noBpData: 'Keine Blutdruckwerte vorhanden',
   },
   products: {
     title: 'Produkte',
