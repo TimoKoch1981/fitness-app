@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, MessageCircle } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
-import { generateTrainingPlanPDF } from '../utils/generateTrainingPlanPDF';
+import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -19,6 +19,20 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const { t, language } = useTranslation();
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1])); // First day expanded by default
   const [isExporting, setIsExporting] = useState(false);
+  const [showPdfMenu, setShowPdfMenu] = useState(false);
+  const pdfMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!showPdfMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (pdfMenuRef.current && !pdfMenuRef.current.contains(e.target as Node)) {
+        setShowPdfMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showPdfMenu]);
 
   const toggleDay = (dayNumber: number) => {
     setExpandedDays(prev => {
@@ -90,21 +104,51 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             )}
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => {
-                setIsExporting(true);
-                try {
-                  generateTrainingPlanPDF(plan, language);
-                } finally {
-                  setIsExporting(false);
-                }
-              }}
-              disabled={isExporting}
-              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
-              title={language === 'de' ? 'Als PDF exportieren' : 'Export as PDF'}
-            >
-              <Download className="h-4 w-4" />
-            </button>
+            {/* PDF Dropdown */}
+            <div className="relative" ref={pdfMenuRef}>
+              <button
+                onClick={() => setShowPdfMenu(!showPdfMenu)}
+                disabled={isExporting}
+                className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
+                title={language === 'de' ? 'PDF exportieren' : 'Export PDF'}
+              >
+                <Download className="h-4 w-4" />
+              </button>
+              {showPdfMenu && (
+                <div className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20 min-w-[180px]">
+                  <button
+                    onClick={() => {
+                      setIsExporting(true);
+                      setShowPdfMenu(false);
+                      try {
+                        generateTrainingPlanPDF(plan, language);
+                      } finally {
+                        setIsExporting(false);
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FileText className="h-4 w-4 text-teal-500" />
+                    {language === 'de' ? 'Plan drucken' : 'Print Plan'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsExporting(true);
+                      setShowPdfMenu(false);
+                      try {
+                        generateTrainingLogPDF(plan, undefined, language);
+                      } finally {
+                        setIsExporting(false);
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <ClipboardList className="h-4 w-4 text-orange-500" />
+                    {language === 'de' ? 'Logbuch drucken' : 'Print Log'}
+                  </button>
+                </div>
+              )}
+            </div>
             {onDelete && (
               <button
                 onClick={() => onDelete(plan.id)}
