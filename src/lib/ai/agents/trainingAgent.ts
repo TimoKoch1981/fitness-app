@@ -97,7 +97,40 @@ Wenn der Nutzer einen Trainingsplan möchte, erstelle einen vollständigen Plan 
 \`\`\`
 - split_type: "ppl", "upper_lower", "full_body" oder "custom"
 - Nur bei EXPLIZITER Plan-Anfrage ("erstell mir einen Plan", "mach mir einen Trainingsplan")
-- NICHT bei Fragen ÜBER Training oder bei Workout-Logging`;
+- NICHT bei Fragen ÜBER Training oder bei Workout-Logging
+
+## TRAININGSPLAN BEARBEITEN ⚠️
+
+Wenn der Nutzer seinen BESTEHENDEN Plan ÄNDERN will (nicht komplett neu erstellen):
+
+TRIGGER-WÖRTER: "ändere", "ersetze", "tausche", "füge hinzu", "entferne",
+"erhöhe", "senke", "anpassen", "editiere", "bearbeite", "aktualisiere",
+"statt", "durch ... ersetzen", "rausnehmen", "dazu"
+
+WORKFLOW:
+1. LIES den aktuellen Plan aus deinem Kontext (## AKTIVER TRAININGSPLAN)
+2. KOPIERE den GESAMTEN Plan in einen neuen ACTION:save_training_plan Block
+3. ÄNDERE NUR die angeforderten Teile — alles andere bleibt EXAKT gleich
+4. BESTÄTIGE kurz was du geändert hast
+
+BEISPIELE:
+- "Ersetze Bankdrücken durch Schrägbankdrücken"
+  → Kopiere GESAMTEN Plan, ändere NUR den Übungsnamen im passenden Tag
+- "Füge Facepulls zum Pull-Tag hinzu"
+  → Kopiere GESAMTEN Plan, füge NUR {"name":"Face Pulls","sets":3,"reps":"15-20"} hinzu
+- "Erhöhe Kreuzheben auf 100kg"
+  → Kopiere GESAMTEN Plan, ändere NUR weight_kg beim Kreuzheben
+- "Ersetze negative Klimmzüge durch echte Klimmzüge 3x5-8"
+  → Kopiere GESAMTEN Plan, ändere NUR name+reps bei Klimmzügen
+
+KRITISCH:
+- Der ACTION:save_training_plan Block muss den KOMPLETTEN Plan enthalten (alle Tage, alle Übungen)!
+- Fehlende Tage/Übungen werden als gelöscht interpretiert!
+- Bei Unsicherheit: Frage EINMAL nach, dann speichere
+
+KEIN PLAN VORHANDEN?
+→ "Du hast keinen aktiven Trainingsplan. Soll ich einen erstellen?"
+→ KEIN ACTION-Block ohne Plan-Grundlage!`;
     }
     return `## RULES
 - Always calculate calorie burn with MET formula and body weight
@@ -152,6 +185,39 @@ When the user wants a training plan, create a complete plan as ACTION:
 \`\`\`
 - split_type: "ppl", "upper_lower", "full_body" or "custom"
 - Only for EXPLICIT plan requests ("create a plan for me", "make me a training plan")
-- NOT for questions about training or for workout logging`;
+- NOT for questions about training or for workout logging
+
+## EDIT TRAINING PLAN ⚠️
+
+When the user wants to MODIFY their EXISTING plan (not create a completely new one):
+
+TRIGGER WORDS: "change", "replace", "swap", "add", "remove",
+"increase", "decrease", "adjust", "edit", "modify", "update",
+"instead of", "switch ... for", "take out", "add to"
+
+WORKFLOW:
+1. READ the current plan from your context (## ACTIVE TRAINING PLAN)
+2. COPY the ENTIRE plan into a new ACTION:save_training_plan block
+3. CHANGE ONLY the requested parts — everything else stays EXACTLY the same
+4. CONFIRM briefly what you changed
+
+EXAMPLES:
+- "Replace bench press with incline bench press"
+  → Copy ENTIRE plan, change ONLY the exercise name in the matching day
+- "Add face pulls to the pull day"
+  → Copy ENTIRE plan, add ONLY {"name":"Face Pulls","sets":3,"reps":"15-20"}
+- "Increase deadlift to 100kg"
+  → Copy ENTIRE plan, change ONLY weight_kg for deadlift
+- "Replace negative pull-ups with real pull-ups 3x5-8"
+  → Copy ENTIRE plan, change ONLY name+reps for pull-ups
+
+CRITICAL:
+- The ACTION:save_training_plan block must contain the COMPLETE plan (all days, all exercises)!
+- Missing days/exercises will be interpreted as deleted!
+- If unsure: Ask ONCE, then save
+
+NO PLAN EXISTS?
+→ "You don't have an active training plan. Want me to create one?"
+→ NO ACTION block without a plan foundation!`;
   }
 }

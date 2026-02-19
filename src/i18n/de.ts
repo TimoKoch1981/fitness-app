@@ -124,6 +124,8 @@ export const de = {
     loadDefault: 'Beispielplan laden',
     planSaved: 'Trainingsplan gespeichert!',
     deletePlan: 'Plan löschen',
+    editPlan: 'Plan bearbeiten',
+    editViaBuddyAuto: 'Ich möchte meinen Trainingsplan anpassen.',
     dayLabel: 'Tag',
     focus: 'Fokus',
     exportPdf: 'Als PDF exportieren',

@@ -126,6 +126,8 @@ export const en: TranslationKeys = {
     loadDefault: 'Load sample plan',
     planSaved: 'Training plan saved!',
     deletePlan: 'Delete plan',
+    editPlan: 'Edit plan',
+    editViaBuddyAuto: 'I want to adjust my training plan.',
     dayLabel: 'Day',
     focus: 'Focus',
     exportPdf: 'Export as PDF',

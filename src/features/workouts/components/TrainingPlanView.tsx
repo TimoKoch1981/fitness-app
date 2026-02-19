@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
@@ -17,6 +18,7 @@ interface TrainingPlanViewProps {
  */
 export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting }: TrainingPlanViewProps) {
   const { t, language } = useTranslation();
+  const navigate = useNavigate();
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1])); // First day expanded by default
   const [isExporting, setIsExporting] = useState(false);
   const [showPdfMenu, setShowPdfMenu] = useState(false);
@@ -104,6 +106,14 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             )}
           </div>
           <div className="flex items-center gap-1">
+            {/* Edit via Buddy */}
+            <button
+              onClick={() => navigate('/buddy', { state: { autoMessage: t.workouts.editViaBuddyAuto } })}
+              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors"
+              title={t.workouts.editPlan}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
             {/* PDF Dropdown */}
             <div className="relative" ref={pdfMenuRef}>
               <button

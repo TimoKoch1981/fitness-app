@@ -70,6 +70,11 @@ const ROUTING_RULES: KeywordRule[] = [
       // Training general
       'training', 'trainieren', 'trainiert', 'workout', 'sport', 'gym',
       'fitnessstudio', 'trainingsplan',
+      // Plan editing
+      'ändere', 'ändern', 'ersetze', 'ersetzen', 'tausche', 'tauschen',
+      'entferne', 'entfernen', 'anpassen', 'editiere', 'bearbeite',
+      'aktualisiere', 'aktualisieren',
+      'change', 'replace', 'swap', 'remove', 'modify', 'update plan',
       // Exercises
       'übung', 'übungen', 'bankdrücken', 'kniebeugen', 'kreuzheben',
       'deadlift', 'squat', 'bench', 'press', 'curl', 'rudern', 'klimmzüge',

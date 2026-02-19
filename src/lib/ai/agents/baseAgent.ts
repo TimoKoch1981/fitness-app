@@ -117,6 +117,7 @@ CORE RULE: Facts > Estimates. ALWAYS.
       recentSubstanceLogs: hc.recentSubstanceLogs,
       recentBloodPressure: hc.recentBloodPressure,
       trainingGoals: hc.trainingGoals,
+      activePlan: hc.activePlan,
       userProducts: hc.userProducts,
       standardProducts: hc.standardProducts,
     };
