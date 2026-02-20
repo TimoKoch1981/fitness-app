@@ -12,7 +12,10 @@ import type { UserSkillType } from './userSkills';
 import { NUTRITION_SKILL, NUTRITION_SKILL_META } from './nutrition';
 import { TRAINING_SKILL, TRAINING_SKILL_META } from './training';
 import { SUBSTANCE_SKILL, SUBSTANCE_SKILL_META } from './substances';
+import { ANABOLICS_SKILL, ANABOLICS_SKILL_META } from './anabolics';
 import { ANALYSIS_SKILL, ANALYSIS_SKILL_META } from './analysis';
+import { BEAUTY_SKILL, BEAUTY_SKILL_META } from './beauty';
+import { ATTRACTIVENESS_SKILL, ATTRACTIVENESS_SKILL_META } from './attractiveness';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -21,7 +24,10 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   nutrition: { meta: NUTRITION_SKILL_META, content: NUTRITION_SKILL },
   training: { meta: TRAINING_SKILL_META, content: TRAINING_SKILL },
   substances: { meta: SUBSTANCE_SKILL_META, content: SUBSTANCE_SKILL },
+  anabolics: { meta: ANABOLICS_SKILL_META, content: ANABOLICS_SKILL },
   analysis: { meta: ANALYSIS_SKILL_META, content: ANALYSIS_SKILL },
+  beauty: { meta: BEAUTY_SKILL_META, content: BEAUTY_SKILL },
+  attractiveness: { meta: ATTRACTIVENESS_SKILL_META, content: ATTRACTIVENESS_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -45,12 +51,20 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'training_log', 'substance_protocol'],
   },
   substance: {
-    staticSkills: ['substances'],
+    staticSkills: ['substances', 'anabolics'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   analysis: {
     staticSkills: ['analysis'],
     userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
+  },
+  beauty: {
+    staticSkills: ['beauty'],
+    userSkills: ['profile', 'substance_protocol', 'body_progress'],
+  },
+  lifestyle: {
+    staticSkills: ['attractiveness'],
+    userSkills: ['profile', 'body_progress'],
   },
   general: {
     staticSkills: [],  // no heavy skills — lightweight fallback

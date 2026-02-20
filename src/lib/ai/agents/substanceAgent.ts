@@ -6,7 +6,7 @@
  *
  * URTEILSFREI — sachlich, evidenzbasiert, schadensminimierend.
  *
- * Skills loaded: substances (static) + profile, substance_protocol, body_progress (user)
+ * Skills loaded: substances + anabolics (static) + profile, substance_protocol, body_progress (user)
  */
 
 import { BaseAgent } from './baseAgent';
@@ -17,9 +17,9 @@ const CONFIG: AgentConfig = {
   name: 'Substanz-Agent',
   nameEN: 'Substance Agent',
   icon: '💊',
-  staticSkills: ['substances'],
+  staticSkills: ['substances', 'anabolics'],
   userSkills: ['profile', 'substance_protocol', 'body_progress'],
-  maxContextTokens: 4000,
+  maxContextTokens: 5500,
   description: 'Spezialist für Substanzen, Harm Reduction, Injektionstechnik, Blutbild-Monitoring und Blutdruck',
 };
 

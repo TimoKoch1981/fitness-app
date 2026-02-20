@@ -118,6 +118,16 @@ const ROUTING_RULES: KeywordRule[] = [
       // Cycling
       'zyklus', 'cycle', 'blast', 'cruise', 'pct',
       'aromatasehemmer', 'hcg',
+      // AAS / PED specific
+      'anabolika', 'steroide', 'steroid', 'nandrolon', 'deca',
+      'trenbolon', 'tren', 'boldenon', 'equipoise',
+      'oxandrolon', 'anavar', 'stanozolol', 'winstrol',
+      'oxymetholon', 'anadrol', 'dianabol',
+      'sarm', 'sarms', 'ostarine', 'ligandrol',
+      'wachstumshormon', 'hgh', 'igf',
+      'insulin', 'clenbuterol', 'clen', 'ephedrin',
+      'diuretika', 'furosemid',
+      'myonuklei', 'muscle memory',
       // Blood work
       'blutbild', 'blutwerte', 'hämatokrit', 'estradiol', 'psa',
       'leberwerte', 'lipide', 'cholesterin', 'marker',
@@ -134,6 +144,64 @@ const ROUTING_RULES: KeywordRule[] = [
       // English
       'injection', 'needle', 'dose', 'blood pressure', 'blood work',
       'remind', 'reminder', 'creatine', 'supplement',
+    ],
+  },
+
+  // ── Beauty & Aesthetics ──
+  {
+    agent: 'beauty',
+    weight: 0.85,
+    keywords: [
+      // Cosmetic procedures (DE)
+      'liposuktion', 'lipo', 'fettabsaugung', 'absaugen', 'absaugung',
+      'bauchdeckenstraffung', 'abdominoplastik', 'hautstraffung',
+      'gynäkomastie', 'gyno', 'brustdrüse',
+      'schönheits-op', 'schönheitsop', 'ästhetische', 'ästhetischer',
+      'kosmetisch', 'kosmetische', 'plastische', 'plastischer',
+      'chirurg', 'chirurgie', 'eingriff', 'operation',
+      // HD-Lipo / VASER
+      'vaser', 'high-definition', 'hi-def', 'hd-lipo',
+      'sixpack-shaping', 'muskelkonturen',
+      // Minimally invasive
+      'botox', 'filler', 'hyaluronsäure', 'hyaluron',
+      'kryolipolyse', 'coolsculpting',
+      // Recovery
+      'narbe', 'narben', 'heilung', 'komplikation', 'komplikationen',
+      'kompressionsmieder', 'ausfallzeit',
+      // English
+      'liposuction', 'tummy tuck', 'skin tightening', 'cosmetic surgery',
+      'plastic surgery', 'gynecomastia', 'coolsculpting',
+    ],
+  },
+
+  // ── Lifestyle & Attractiveness ──
+  {
+    agent: 'lifestyle',
+    weight: 0.75,
+    keywords: [
+      // Attractiveness (DE)
+      'attraktivität', 'attraktiv', 'attraktiver', 'anziehend',
+      'wirkung', 'ausstrahlung', 'charisma', 'auftreten',
+      'aussehen', 'optik', 'ästhetik',
+      // Social dynamics
+      'dating', 'partnersuche', 'flirten', 'beziehung',
+      'beruflich', 'karriere', 'bewerbung', 'vorstellungsgespräch',
+      'ersteindruck', 'eindruck', 'wirkung',
+      // Psychology
+      'selbstwert', 'selbstbewusstsein', 'selbstvertrauen', 'selbstbild',
+      'körperbild', 'body image', 'psychologie', 'psychologisch',
+      'motivation', 'mindset',
+      // Styling & Grooming
+      'styling', 'kleidung', 'outfit', 'mode', 'fashion',
+      'grooming', 'pflege', 'hautpflege', 'frisur', 'bart',
+      // Body composition perception
+      'proportionen', 'symmetrie', 'v-form',
+      'muskulös', 'definiert', 'athletisch',
+      // Studies & research
+      'studie', 'studien', 'forschung', 'halo-effekt',
+      // English
+      'attractiveness', 'dating', 'confidence', 'self-esteem',
+      'grooming', 'styling', 'first impression', 'body image',
     ],
   },
 

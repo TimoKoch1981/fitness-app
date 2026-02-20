@@ -8,6 +8,8 @@ import { NutritionAgent } from './nutritionAgent';
 import { TrainingAgent } from './trainingAgent';
 import { SubstanceAgent } from './substanceAgent';
 import { AnalysisAgent } from './analysisAgent';
+import { BeautyAgent } from './beautyAgent';
+import { LifestyleAgent } from './lifestyleAgent';
 import { GeneralAgent } from './generalAgent';
 
 /** Lazy singleton instances — created on first access */
@@ -29,6 +31,12 @@ export function getAgent(type: AgentType): BaseAgent {
       case 'analysis':
         agents.set(type, new AnalysisAgent());
         break;
+      case 'beauty':
+        agents.set(type, new BeautyAgent());
+        break;
+      case 'lifestyle':
+        agents.set(type, new LifestyleAgent());
+        break;
       case 'general':
         agents.set(type, new GeneralAgent());
         break;
@@ -39,7 +47,7 @@ export function getAgent(type: AgentType): BaseAgent {
 
 /** All available agent types */
 export function getAllAgentTypes(): AgentType[] {
-  return ['nutrition', 'training', 'substance', 'analysis', 'general'];
+  return ['nutrition', 'training', 'substance', 'analysis', 'beauty', 'lifestyle', 'general'];
 }
 
 // Re-export types for convenience

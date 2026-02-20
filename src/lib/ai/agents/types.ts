@@ -18,6 +18,8 @@ export type AgentType =
   | 'training'
   | 'substance'
   | 'analysis'
+  | 'beauty'
+  | 'lifestyle'
   | 'general';
 
 /** Static configuration for an agent */
