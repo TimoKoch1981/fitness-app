@@ -189,6 +189,22 @@ const AddReminderSchema = z.object({
   days_of_week: data.days_of_week ?? [0, 1, 2, 3, 4, 5, 6],
 }));
 
+const UpdateProfileSchema = z.object({
+  height_cm: z.number().min(50).max(250).optional(),
+  birth_year: z.number().min(1920).max(2020).optional(),
+  gender: z.enum(['male', 'female', 'other']).optional(),
+  activity_level: z.number().min(1.0).max(2.5).optional(),
+  display_name: z.string().min(1).optional(),
+  daily_calories_goal: z.number().positive().optional(),
+  daily_protein_goal: z.number().positive().optional(),
+}).refine(
+  (data) => {
+    // At least one field must be present
+    return Object.values(data).some(v => v != null);
+  },
+  { message: 'At least one profile field must be provided' }
+);
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -201,6 +217,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   save_product: SaveProductSchema,
   add_substance: AddSubstanceSchema,
   add_reminder: AddReminderSchema,
+  update_profile: UpdateProfileSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

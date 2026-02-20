@@ -8,6 +8,7 @@ import { useVoiceInput } from '../features/buddy/hooks/useVoiceInput';
 import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
+import { useOnboarding } from '../features/buddy/hooks/useOnboarding';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
@@ -56,6 +57,7 @@ export function BuddyPage() {
 
   // Gather health context for personalized AI responses
   const { data: profile } = useProfile();
+  const { needsOnboarding } = useOnboarding(profile);
   const { totals } = useDailyMealTotals(today());
   const { data: latestBody } = useLatestBodyMeasurement();
   const { data: activeSubstances } = useSubstances(true);
@@ -65,6 +67,7 @@ export function BuddyPage() {
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
+    onboardingMode: needsOnboarding,
     dailyStats: {
       calories: totals.calories,
       caloriesGoal: profile?.daily_calories_goal ?? 2000,
@@ -245,7 +248,7 @@ export function BuddyPage() {
           </div>
           <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%]">
             <p className="text-sm text-gray-700 leading-relaxed">
-              {t.buddy.greeting}
+              {needsOnboarding ? t.buddy.onboardingGreeting : t.buddy.greeting}
             </p>
           </div>
         </div>

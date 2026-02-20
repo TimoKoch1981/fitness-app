@@ -16,7 +16,8 @@ export type ActionType =
   | 'save_training_plan'
   | 'save_product'
   | 'add_substance'
-  | 'add_reminder';
+  | 'add_reminder'
+  | 'update_profile';
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -100,6 +101,17 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '🔔',
         title: 'Erinnerung anlegen?',
         summary: `${d.title ?? 'Erinnerung'}${d.time_period ? ` — ${d.time_period}` : ''}${d.repeat_mode === 'interval' && d.interval_days ? ` — alle ${d.interval_days} Tage` : ''}`,
+      };
+    case 'update_profile':
+      return {
+        icon: '👤',
+        title: 'Profil aktualisieren?',
+        summary: [
+          d.height_cm ? `${d.height_cm} cm` : null,
+          d.birth_year ? `Jg. ${d.birth_year}` : null,
+          d.gender ? `${d.gender}` : null,
+          d.activity_level ? `PAL ${d.activity_level}` : null,
+        ].filter(Boolean).join(', ') || 'Profil-Update',
       };
   }
 }

@@ -225,6 +225,8 @@ export const en: TranslationKeys = {
     connectionError: 'Failed to connect to AI model. Is Ollama running?',
     helpHint: 'Tip: Tell me what you ate or ask me about nutrition!',
     you: 'You',
+    onboardingGreeting:
+      "Hey! Welcome to FitBuddy! I'm your personal fitness & health advisor. Tell me a bit about yourself — how old are you, how tall, and what's your goal?",
   },
   reminders: {
     title: 'Reminders',

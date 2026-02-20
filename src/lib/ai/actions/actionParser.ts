@@ -32,6 +32,7 @@ const VALID_ACTIONS: ActionType[] = [
   'save_product',
   'add_substance',
   'add_reminder',
+  'update_profile',
 ];
 
 /**

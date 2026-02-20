@@ -15,6 +15,7 @@ import type { ChatMessage, StreamCallback } from '../types';
 import { getSkillContent, getSkillsForAgent, getSkillVersionMap } from '../skills/index';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
+import { getOnboardingPrompt } from './onboardingPrompt';
 
 export abstract class BaseAgent {
   protected config: AgentConfig;
@@ -57,6 +58,11 @@ export abstract class BaseAgent {
     const instructions = this.getAgentInstructions(context.language);
     if (instructions) {
       parts.push(instructions);
+    }
+
+    // 5. Onboarding mode: prepend onboarding instructions when user profile is incomplete
+    if (context.healthContext.onboardingMode) {
+      parts.unshift(getOnboardingPrompt(context.language));
     }
 
     return parts.filter(Boolean).join('\n\n');

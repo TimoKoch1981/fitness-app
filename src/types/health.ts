@@ -253,6 +253,8 @@ export interface HealthContext {
   activePlan?: TrainingPlan;
   userProducts?: UserProduct[];
   standardProducts?: ProductNutrition[];
+  /** When true, agents prepend onboarding instructions to their system prompt */
+  onboardingMode?: boolean;
 }
 
 // === RECOMMENDATIONS ===

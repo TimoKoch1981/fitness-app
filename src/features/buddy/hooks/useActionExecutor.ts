@@ -20,8 +20,9 @@ import { useAddSubstance, useLogSubstance, useSubstances } from '../../medical/h
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
+import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
-import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod } from '../../../types/health';
+import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod, Gender } from '../../../types/health';
 
 // ── Fuzzy Matching Helpers ────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addUserProduct = useAddUserProduct();
   const addSubstance = useAddSubstance();
   const addReminder = useAddReminder();
+  const updateProfile = useUpdateProfile();
 
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
@@ -303,6 +305,23 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           break;
         }
 
+        case 'update_profile': {
+          // Convert birth_year to birth_date (YYYY-01-01) for the DB
+          const profileUpdate: Record<string, unknown> = {};
+          if (d.height_cm != null) profileUpdate.height_cm = d.height_cm as number;
+          if (d.gender != null) profileUpdate.gender = d.gender as Gender;
+          if (d.activity_level != null) profileUpdate.activity_level = d.activity_level as number;
+          if (d.display_name != null) profileUpdate.display_name = d.display_name as string;
+          if (d.daily_calories_goal != null) profileUpdate.daily_calories_goal = d.daily_calories_goal as number;
+          if (d.daily_protein_goal != null) profileUpdate.daily_protein_goal = d.daily_protein_goal as number;
+          if (d.birth_year != null) {
+            profileUpdate.birth_date = `${d.birth_year}-01-01`;
+          }
+
+          await updateProfile.mutateAsync(profileUpdate as Parameters<typeof updateProfile.mutateAsync>[0]);
+          break;
+        }
+
         default: {
           throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
         }
@@ -318,7 +337,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

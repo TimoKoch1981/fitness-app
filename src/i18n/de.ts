@@ -226,6 +226,8 @@ export const de = {
     connectionError: 'Verbindung zum KI-Modell fehlgeschlagen. Läuft Ollama?',
     helpHint: 'Tipp: Erzähl mir was du gegessen hast oder frag mich etwas über Ernährung!',
     you: 'Du',
+    onboardingGreeting:
+      'Hey! Willkommen bei FitBuddy! Ich bin dein persoenlicher Fitness- & Gesundheitsberater. Erzaehl mir kurz ueber dich — wie alt bist du, wie gross, und was ist dein Ziel?',
   },
   reminders: {
     title: 'Erinnerungen',
