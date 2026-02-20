@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, UtensilsCrossed, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
+import { Plus, UtensilsCrossed, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
 import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../features/meals/hooks/useMeals';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { MealCard } from '../features/meals/components/MealCard';
 import { AddMealDialog } from '../features/meals/components/AddMealDialog';
 import { today } from '../lib/utils';
 
 export function MealsPage() {
   const { t, language } = useTranslation();
-  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const mealsSuggestions = usePageBuddySuggestions('meals', language as 'de' | 'en');
   const [selectedDate, setSelectedDate] = useState(today());
 
   const { data: meals, isLoading } = useMealsByDate(selectedDate);
@@ -105,24 +106,9 @@ export function MealsPage() {
         </div>
       </div>
 
-      {/* Evaluate Day Button (only when meals exist and viewing today) */}
+      {/* Buddy Quick Access — page-specific suggestions */}
       {meals && meals.length > 0 && isToday && (
-        <button
-          onClick={() =>
-            navigate('/buddy', {
-              state: {
-                autoMessage:
-                  language === 'de'
-                    ? 'Wie sieht mein Tag heute aus? Bewerte meine Ernährung.'
-                    : 'How does my day look? Evaluate my nutrition.',
-              },
-            })
-          }
-          className="w-full py-2 px-3 bg-teal-50 text-teal-700 text-sm rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 mb-4"
-        >
-          <BarChart3 className="h-4 w-4" />
-          {t.meals.evaluateDay}
-        </button>
+        <BuddyQuickAccess suggestions={mealsSuggestions} />
       )}
 
       {/* Meals List */}

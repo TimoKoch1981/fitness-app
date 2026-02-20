@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Plus, Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../features/workouts/hooks/useWorkouts';
 import { useActivePlan, useAddTrainingPlan, useDeleteTrainingPlan } from '../features/workouts/hooks/useTrainingPlans';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from '../features/workouts/components/AddWorkoutDialog';
 import { TrainingPlanView } from '../features/workouts/components/TrainingPlanView';
 import { DEFAULT_PLAN } from '../features/workouts/data/defaultPlan';
@@ -12,6 +14,10 @@ import { today, formatDate } from '../lib/utils';
 export function WorkoutsPage() {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<'today' | 'plan'>('today');
+  const buddySuggestions = usePageBuddySuggestions(
+    activeTab === 'plan' ? 'workouts_plan' : 'workouts',
+    language as 'de' | 'en',
+  );
   const [selectedDate] = useState(today());
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -97,6 +103,9 @@ export function WorkoutsPage() {
           {t.workouts.myPlan}
         </button>
       </div>
+
+      {/* Buddy Quick Access — page-specific suggestions */}
+      <BuddyQuickAccess suggestions={buddySuggestions} />
 
       {/* Tab Content */}
       {activeTab === 'today' ? (

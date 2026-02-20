@@ -346,4 +346,8 @@ export const en: TranslationKeys = {
     reminderDue: 'Reminder due',
     summaryTitle: 'Your Daily Report',
   },
+  buddyAccess: {
+    title: 'Ask the Buddy',
+    open: 'Open Chat',
+  },
 } as const;

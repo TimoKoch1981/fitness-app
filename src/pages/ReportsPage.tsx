@@ -6,8 +6,10 @@
 
 import { useState } from 'react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
 import { useProfile } from '../features/auth/hooks/useProfile';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { cn } from '../lib/utils';
 
 // Report data hooks
@@ -35,6 +37,7 @@ export function ReportsPage() {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<ReportTab>('week');
   const { data: profile } = useProfile();
+  const reportsSuggestions = usePageBuddySuggestions('reports', language as 'de' | 'en');
 
   // Date ranges
   const week = getLastNDays(7);
@@ -95,6 +98,9 @@ export function ReportsPage() {
           </button>
         ))}
       </div>
+
+      {/* Buddy Quick Access */}
+      <BuddyQuickAccess suggestions={reportsSuggestions} />
 
       {/* Loading State */}
       {isLoading && (

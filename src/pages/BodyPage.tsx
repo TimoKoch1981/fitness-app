@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Plus, Activity, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
 import { useBodyMeasurements, useDeleteBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { AddBodyMeasurementDialog } from '../features/body/components/AddBodyMeasurementDialog';
 import { formatDate } from '../lib/utils';
 
 export function BodyPage() {
   const { t, language } = useTranslation();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const bodySuggestions = usePageBuddySuggestions('body', language as 'de' | 'en');
   const { data: measurements, isLoading } = useBodyMeasurements(20);
   const deleteMeasurement = useDeleteBodyMeasurement();
 
@@ -71,6 +74,9 @@ export function BodyPage() {
               );
             })}
           </div>
+
+          {/* Buddy Quick Access */}
+          <BuddyQuickAccess suggestions={bodySuggestions} />
 
           {/* History */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Plus, Heart, Pill, Trash2, ClipboardList, Bell } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { useBloodPressureLogs, useDeleteBloodPressure } from '../features/medical/hooks/useBloodPressure';
 import { useSubstances, useSubstanceLogs, useDeleteSubstance } from '../features/medical/hooks/useSubstances';
 import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder, useToggleReminder, useDeleteReminder } from '../features/reminders/hooks/useReminders';
@@ -15,6 +17,7 @@ import { formatDate, formatTime } from '../lib/utils';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
+  const medicalSuggestions = usePageBuddySuggestions('medical', language as 'de' | 'en');
   const [showBPDialog, setShowBPDialog] = useState(false);
   const [showAddSubstanceDialog, setShowAddSubstanceDialog] = useState(false);
   const [showLogSubstanceDialog, setShowLogSubstanceDialog] = useState(false);
@@ -44,6 +47,9 @@ export function MedicalPage() {
   return (
     <PageShell title={t.medical.title}>
       <div className="space-y-4">
+        {/* Buddy Quick Access */}
+        <BuddyQuickAccess suggestions={medicalSuggestions} />
+
         {/* Blood Pressure Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">

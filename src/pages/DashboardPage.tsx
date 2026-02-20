@@ -15,7 +15,9 @@ import {
   Check,
 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
+import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useWorkoutsByDate } from '../features/workouts/hooks/useWorkouts';
 import { useLatestBodyMeasurement, useBodyMeasurements } from '../features/body/hooks/useBodyMeasurements';
@@ -64,6 +66,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const selectedDate = useToday();
+  const dashSuggestions = usePageBuddySuggestions('dashboard', language as 'de' | 'en');
 
   const { data: profile } = useProfile();
   const { totals } = useDailyMealTotals(selectedDate);
@@ -182,6 +185,9 @@ export function DashboardPage() {
   return (
     <PageShell title={t.dashboard.title}>
       <div className="space-y-4">
+        {/* Buddy Quick Access */}
+        <BuddyQuickAccess suggestions={dashSuggestions} />
+
         {/* Macro Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           {stats.map((stat) => {

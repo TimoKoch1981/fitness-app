@@ -347,6 +347,10 @@ export const de = {
     reminderDue: 'Erinnerung fällig',
     summaryTitle: 'Dein Tagesbericht',
   },
+  buddyAccess: {
+    title: 'Frag den Buddy',
+    open: 'Chat öffnen',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility
