@@ -9,6 +9,8 @@ import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useOnboarding } from '../features/buddy/hooks/useOnboarding';
+import { useSuggestions } from '../features/buddy/hooks/useSuggestions';
+import { SuggestionChips } from '../features/buddy/components/SuggestionChips';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
@@ -89,6 +91,15 @@ export function BuddyPage() {
     userProducts: userProducts ?? [],
     standardProducts: standardProducts ?? [],
   };
+
+  // Proactive suggestion chips (rule-based, no LLM)
+  const suggestions = useSuggestions({
+    profile: profile ?? undefined,
+    dailyStats: healthContext.dailyStats,
+    latestBody: latestBody ?? undefined,
+    activePlan: activePlan ?? undefined,
+    language: language as 'de' | 'en',
+  });
 
   const {
     messages,
@@ -298,6 +309,16 @@ export function BuddyPage() {
 
       {/* Input Bar */}
       <div className="fixed bottom-14 left-0 right-0 bg-white border-t border-gray-200 p-3">
+        {/* Suggestion Chips — only when chat is empty or few messages */}
+        {suggestions.length > 0 && messages.length <= 2 && !needsOnboarding && (
+          <div className="max-w-lg mx-auto mb-2">
+            <SuggestionChips
+              suggestions={suggestions}
+              onTap={(message) => sendMessage(message)}
+              disabled={isLoading}
+            />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto flex gap-2">
           <input
             ref={inputRef}
