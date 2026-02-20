@@ -29,6 +29,10 @@ export interface UseVoiceInputOptions {
   onError?: (error: VoiceError) => void;
   /** Auto-stop after this many ms of silence. 0 = disabled. Default: 3000 */
   silenceTimeout?: number;
+  /** Auto-send the final transcript when voice input stops (silence or manual). Default: false */
+  autoSend?: boolean;
+  /** Called when auto-send triggers. Receives the trimmed final transcript. */
+  onAutoSend?: (text: string) => void;
 }
 
 export type VoiceError =
@@ -76,6 +80,8 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
     onTranscript,
     onError,
     silenceTimeout = 3000,
+    autoSend = false,
+    onAutoSend,
   } = options;
 
   // State
@@ -88,6 +94,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
   const isListeningRef = useRef(false);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalTranscriptRef = useRef('');
+  const autoSentRef = useRef(false); // Guard against double auto-send
 
   // Browser support check
   const isSupported = getSpeechRecognitionClass() !== null;
@@ -116,9 +123,15 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
         recognitionRef.current?.stop();
         isListeningRef.current = false;
         setIsListening(false);
+
+        // Auto-send transcript on silence timeout
+        if (autoSend && finalTranscriptRef.current.trim() && !autoSentRef.current) {
+          autoSentRef.current = true;
+          onAutoSend?.(finalTranscriptRef.current.trim());
+        }
       }
     }, silenceTimeout);
-  }, [silenceTimeout, clearSilenceTimer]);
+  }, [silenceTimeout, clearSilenceTimer, autoSend, onAutoSend]);
 
   // -------------------------------------------------------------------------
   // Stop listening
@@ -136,7 +149,13 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
         // Already stopped — ignore
       }
     }
-  }, [clearSilenceTimer]);
+
+    // Auto-send transcript on manual stop
+    if (autoSend && finalTranscriptRef.current.trim() && !autoSentRef.current) {
+      autoSentRef.current = true;
+      onAutoSend?.(finalTranscriptRef.current.trim());
+    }
+  }, [clearSilenceTimer, autoSend, onAutoSend]);
 
   // -------------------------------------------------------------------------
   // Start listening
@@ -168,6 +187,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
     setError(null);
     finalTranscriptRef.current = '';
     setTranscript('');
+    autoSentRef.current = false;
 
     // Create new instance (reuse can cause issues in Chrome)
     const recognition = new SpeechRecognitionClass();

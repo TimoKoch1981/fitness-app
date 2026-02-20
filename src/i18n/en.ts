@@ -363,5 +363,6 @@ export const en: TranslationKeys = {
   buddyAccess: {
     title: 'Ask the Buddy',
     open: 'Open Chat',
+    close: 'Close',
   },
 } as const;

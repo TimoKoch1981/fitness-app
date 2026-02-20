@@ -46,6 +46,14 @@ export function BuddyPage() {
     setTimeout(() => setVoiceHint(''), 5000);
   }, [t, language]);
 
+  // Ref to hold sendMessage for voice auto-send (avoids hook ordering issues)
+  const sendMessageRef = useRef<((msg: string) => Promise<void>) | undefined>(undefined);
+
+  const handleVoiceAutoSend = useCallback((text: string) => {
+    setInput('');
+    sendMessageRef.current?.(text);
+  }, []);
+
   const {
     isSupported: voiceSupported,
     isListening,
@@ -55,6 +63,8 @@ export function BuddyPage() {
     onTranscript: handleVoiceTranscript,
     onError: handleVoiceError,
     silenceTimeout: 3000,
+    autoSend: true,
+    onAutoSend: handleVoiceAutoSend,
   });
 
   // Gather health context for personalized AI responses
@@ -112,6 +122,9 @@ export function BuddyPage() {
     checkConnection,
     providerName,
   } = useBuddyChat({ context: healthContext, language });
+
+  // Wire sendMessage ref for voice auto-send
+  sendMessageRef.current = sendMessage;
 
   // Action executor for auto-saving data — pass user.id to avoid auth race conditions
   const { executeAction } = useActionExecutor(user?.id);

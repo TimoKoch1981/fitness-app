@@ -2,16 +2,15 @@
  * BuddyQuickAccess — reusable card that provides page-specific buddy access.
  *
  * Renders a compact card with the buddy icon, a "Frag den Buddy" header,
- * and 2-3 tappable suggestion chips. Tapping a chip navigates to /buddy
- * with the associated autoMessage, which triggers the keyword router
- * to dispatch to the correct specialist agent.
+ * and 2-3 tappable suggestion chips. Tapping a chip opens the inline
+ * buddy chat bottom-sheet overlay directly on the current page.
  *
- * Placed inline on every feature page (Meals, Workouts, Body, Medical, Reports, Dashboard).
+ * Placed inline on every feature page (Meals, Workouts, Body, Medical, Cockpit).
  */
 
-import { useNavigate } from 'react-router-dom';
 import { MessageCircle, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../../i18n';
+import { useInlineBuddyChat } from './InlineBuddyChatContext';
 import type { BuddySuggestion } from '../../features/buddy/hooks/usePageBuddySuggestions';
 
 interface BuddyQuickAccessProps {
@@ -19,13 +18,13 @@ interface BuddyQuickAccessProps {
 }
 
 export function BuddyQuickAccess({ suggestions }: BuddyQuickAccessProps) {
-  const navigate = useNavigate();
+  const { openBuddyChat } = useInlineBuddyChat();
   const { t } = useTranslation();
 
   if (suggestions.length === 0) return null;
 
   const goToBuddy = (autoMessage?: string) => {
-    navigate('/buddy', autoMessage ? { state: { autoMessage } } : undefined);
+    openBuddyChat(autoMessage);
   };
 
   return (

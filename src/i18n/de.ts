@@ -364,6 +364,7 @@ export const de = {
   buddyAccess: {
     title: 'Frag den Buddy',
     open: 'Chat öffnen',
+    close: 'Schließen',
   },
 } as const;
 
