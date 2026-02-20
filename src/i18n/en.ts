@@ -32,13 +32,27 @@ export const en: TranslationKeys = {
   },
   nav: {
     buddy: 'Buddy',
+    cockpit: 'Cockpit',
+    tracking: 'Tracking',
+    medical: 'Medical',
+    profile: 'Profile',
+    // Legacy keys
     dashboard: 'Home',
     meals: 'Meals',
     workouts: 'Workouts',
-    medical: 'Medical',
     body: 'Body',
     reports: 'Reports',
-    profile: 'Profile',
+  },
+  tracking: {
+    title: 'Tracking',
+    nutrition: 'Nutrition',
+    training: 'Training',
+    body: 'Body',
+  },
+  cockpit: {
+    title: 'Cockpit',
+    weeklyCalories: 'Calories This Week',
+    weightTrend: 'Weight Trend',
   },
   auth: {
     login: 'Sign In',

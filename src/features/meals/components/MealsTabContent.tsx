@@ -1,18 +1,27 @@
-import { useState } from 'react';
-import { Plus, UtensilsCrossed, ChevronLeft, ChevronRight } from 'lucide-react';
-import { PageShell } from '../shared/components/PageShell';
-import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
-import { useTranslation } from '../i18n';
-import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../features/meals/hooks/useMeals';
-import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
-import { MealCard } from '../features/meals/components/MealCard';
-import { AddMealDialog } from '../features/meals/components/AddMealDialog';
-import { today } from '../lib/utils';
+/**
+ * MealsTabContent — Inner content of the Meals tab, extracted from MealsPage.
+ * Used inside TrackingPage as one of 3 tracking tabs.
+ */
 
-export function MealsPage() {
+import { useState } from 'react';
+import { UtensilsCrossed, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
+import { useTranslation } from '../../../i18n';
+import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../hooks/useMeals';
+import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
+import { MealCard } from './MealCard';
+import { AddMealDialog } from './AddMealDialog';
+import { today } from '../../../lib/utils';
+
+interface MealsTabContentProps {
+  showAddDialog: boolean;
+  onOpenAddDialog: () => void;
+  onCloseAddDialog: () => void;
+}
+
+export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: MealsTabContentProps) {
   const { t, language } = useTranslation();
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const mealsSuggestions = usePageBuddySuggestions('meals', language as 'de' | 'en');
+  const mealsSuggestions = usePageBuddySuggestions('tracking_nutrition', language as 'de' | 'en');
   const [selectedDate, setSelectedDate] = useState(today());
 
   const { data: meals, isLoading } = useMealsByDate(selectedDate);
@@ -25,7 +34,6 @@ export function MealsPage() {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() + days);
     const iso = d.toISOString().split('T')[0];
-    // Don't navigate into the future
     if (iso <= today()) setSelectedDate(iso);
   };
 
@@ -50,17 +58,7 @@ export function MealsPage() {
   };
 
   return (
-    <PageShell
-      title={t.meals.title}
-      actions={
-        <button
-          onClick={() => setShowAddDialog(true)}
-          className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      }
-    >
+    <>
       {/* Date Navigation */}
       <div className="flex items-center justify-between mb-4 bg-white rounded-xl p-3 shadow-sm">
         <button
@@ -106,7 +104,7 @@ export function MealsPage() {
         </div>
       </div>
 
-      {/* Buddy Quick Access — page-specific suggestions */}
+      {/* Buddy Quick Access */}
       {meals && meals.length > 0 && isToday && (
         <BuddyQuickAccess suggestions={mealsSuggestions} />
       )}
@@ -143,7 +141,7 @@ export function MealsPage() {
           </p>
           {isToday && (
             <button
-              onClick={() => setShowAddDialog(true)}
+              onClick={onOpenAddDialog}
               className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
             >
               {t.meals.addMeal}
@@ -155,9 +153,9 @@ export function MealsPage() {
       {/* Add Meal Dialog */}
       <AddMealDialog
         open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
+        onClose={onCloseAddDialog}
         date={selectedDate}
       />
-    </PageShell>
+    </>
   );
 }

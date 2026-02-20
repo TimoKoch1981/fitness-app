@@ -30,13 +30,27 @@ export const de = {
   },
   nav: {
     buddy: 'Buddy',
+    cockpit: 'Cockpit',
+    tracking: 'Tracking',
+    medical: 'Medizin',
+    profile: 'Profil',
+    // Legacy keys (for references in old code during migration)
     dashboard: 'Start',
     meals: 'Essen',
     workouts: 'Training',
-    medical: 'Medizin',
     body: 'Körper',
     reports: 'Reports',
-    profile: 'Profil',
+  },
+  tracking: {
+    title: 'Tracking',
+    nutrition: 'Ernährung',
+    training: 'Training',
+    body: 'Körper',
+  },
+  cockpit: {
+    title: 'Cockpit',
+    weeklyCalories: 'Kalorien diese Woche',
+    weightTrend: 'Gewichtsverlauf',
   },
   auth: {
     login: 'Anmelden',

@@ -5,7 +5,7 @@
  * with an autoMessage, triggering the appropriate specialist agent via
  * the keyword router.
  *
- * Usage: const suggestions = usePageBuddySuggestions('meals', language);
+ * Usage: const suggestions = usePageBuddySuggestions('cockpit', language);
  */
 
 import { useMemo } from 'react';
@@ -21,13 +21,12 @@ export interface BuddySuggestion {
 }
 
 export type PageId =
-  | 'meals'
-  | 'workouts'
-  | 'workouts_plan'
-  | 'body'
+  | 'tracking_nutrition'
+  | 'tracking_training'
+  | 'tracking_training_plan'
+  | 'tracking_body'
   | 'medical'
-  | 'reports'
-  | 'dashboard';
+  | 'cockpit';
 
 export function usePageBuddySuggestions(
   pageId: PageId,
@@ -37,8 +36,8 @@ export function usePageBuddySuggestions(
     const de = language === 'de';
 
     switch (pageId) {
-      // ── Meals ──
-      case 'meals':
+      // ── Tracking: Nutrition ──
+      case 'tracking_nutrition':
         return [
           {
             id: 'meals_evaluate',
@@ -66,8 +65,8 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Workouts — Today tab ──
-      case 'workouts':
+      // ── Tracking: Training — Today ──
+      case 'tracking_training':
         return [
           {
             id: 'workout_log',
@@ -87,8 +86,8 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Workouts — Plan tab ──
-      case 'workouts_plan':
+      // ── Tracking: Training — Plan ──
+      case 'tracking_training_plan':
         return [
           {
             id: 'plan_edit',
@@ -116,8 +115,8 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Body ──
-      case 'body':
+      // ── Tracking: Body ──
+      case 'tracking_body':
         return [
           {
             id: 'body_analyze',
@@ -166,11 +165,19 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Reports ──
-      case 'reports':
+      // ── Cockpit (Dashboard + Reports combined) ──
+      case 'cockpit':
         return [
           {
-            id: 'reports_week',
+            id: 'cockpit_status',
+            label: de ? 'Tagesbilanz' : 'Daily Summary',
+            message: de
+              ? 'Wie steht mein Tag heute?'
+              : 'How is my day going?',
+            icon: '\ud83d\udcca',
+          },
+          {
+            id: 'cockpit_week',
             label: de ? 'Woche analysieren' : 'Analyze Week',
             message: de
               ? 'Analysiere meine letzte Woche.'
@@ -178,25 +185,12 @@ export function usePageBuddySuggestions(
             icon: '\ud83d\udcc8',
           },
           {
-            id: 'reports_recommend',
+            id: 'cockpit_recommend',
             label: de ? 'Empfehlungen' : 'Recommendations',
             message: de
               ? 'Welche Empfehlungen hast du basierend auf meinen Trends?'
               : 'What recommendations do you have based on my trends?',
             icon: '\ud83d\udca1',
-          },
-        ];
-
-      // ── Dashboard ──
-      case 'dashboard':
-        return [
-          {
-            id: 'dash_status',
-            label: de ? 'Tagesbilanz' : 'Daily Summary',
-            message: de
-              ? 'Wie steht mein Tag heute?'
-              : 'How is my day going?',
-            icon: '\ud83d\udcca',
           },
         ];
 

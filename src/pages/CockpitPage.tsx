@@ -1,11 +1,13 @@
+/**
+ * CockpitPage — Central dashboard with daily overview, weekly charts, and insights.
+ *
+ * Replaces the old DashboardPage. Adds weekly CalorieChart and WeightChart
+ * from Reports, removes Quick Info Cards (no longer needed with 5-item nav).
+ */
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  UtensilsCrossed,
-  Dumbbell,
-  Heart,
-  Activity,
-  ChevronRight,
   Droplets,
   Plus,
   Minus,
@@ -25,7 +27,6 @@ import { useBloodPressureLogs } from '../features/medical/hooks/useBloodPressure
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useCompleteReminder } from '../features/reminders/hooks/useReminders';
 import { useSubstances } from '../features/medical/hooks/useSubstances';
-import { classifyBloodPressure } from '../lib/calculations';
 import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
 import { calculateTDEE_PAL } from '../lib/calculations/tdee';
 import { generateInsights } from '../lib/insights';
@@ -40,9 +41,14 @@ import {
   DEFAULT_WATER_GOAL,
 } from '../lib/constants';
 
+// Report data hooks & chart components
+import { useMealsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
+import { CalorieChart } from '../features/reports/components/CalorieChart';
+import { WeightChart } from '../features/reports/components/WeightChart';
+
 const WATER_STORAGE_KEY = 'fitbuddy_water_';
 
-/** Auto-updates date at midnight so the dashboard stays current. */
+/** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
   const [date, setDate] = useState(() => today());
 
@@ -53,7 +59,7 @@ function useToday(): string {
 
     const timer = setTimeout(() => {
       setDate(today());
-    }, msUntilMidnight + 100); // +100ms buffer
+    }, msUntilMidnight + 100);
 
     return () => clearTimeout(timer);
   }, [date]);
@@ -61,12 +67,12 @@ function useToday(): string {
   return date;
 }
 
-export function DashboardPage() {
+export function CockpitPage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const selectedDate = useToday();
-  const dashSuggestions = usePageBuddySuggestions('dashboard', language as 'de' | 'en');
+  const cockpitSuggestions = usePageBuddySuggestions('cockpit', language as 'de' | 'en');
 
   const { data: profile } = useProfile();
   const { totals } = useDailyMealTotals(selectedDate);
@@ -84,7 +90,12 @@ export function DashboardPage() {
     ? getTodayReminderStatus(remindersList, todayLogs)
     : { pending: [], completed: [], totalDue: 0 };
 
-  // Water tracker (localStorage-based for now, scoped per user)
+  // Weekly data for charts
+  const week = getLastNDays(7);
+  const weekMeals = useMealsForRange(week.start, week.end);
+  const bodyTrendData = useBodyTrend(10);
+
+  // Water tracker (localStorage-based, scoped per user)
   const waterKey = WATER_STORAGE_KEY + (user?.id ?? 'anon') + '_' + selectedDate;
   const [waterGlasses, setWaterGlasses] = useState(() => {
     const stored = localStorage.getItem(waterKey);
@@ -122,10 +133,6 @@ export function DashboardPage() {
     tdee = calculateTDEE_PAL(bmrResult.bmr, profile.activity_level ?? 1.55);
   }
 
-  // Blood pressure
-  const latestBP = bpLogs?.[0];
-  const bpClass = latestBP ? classifyBloodPressure(latestBP.systolic, latestBP.diastolic) : null;
-
   // Net calories
   const netCalories = totals.calories - totalCaloriesBurned;
 
@@ -146,7 +153,6 @@ export function DashboardPage() {
     workoutCountToday: workouts?.length ?? 0,
   });
 
-  // Show max 4 insights (critical/warning always, then fill with info/success)
   const visibleInsights = insights.slice(0, 4);
 
   const stats = [
@@ -183,10 +189,10 @@ export function DashboardPage() {
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterGlasses / waterGoal) * 100)) : 0;
 
   return (
-    <PageShell title={t.dashboard.title}>
+    <PageShell title={t.cockpit.title}>
       <div className="space-y-4">
         {/* Buddy Quick Access */}
-        <BuddyQuickAccess suggestions={dashSuggestions} />
+        <BuddyQuickAccess suggestions={cockpitSuggestions} />
 
         {/* Macro Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -275,6 +281,16 @@ export function DashboardPage() {
           </div>
         </div>
 
+        {/* Weekly Calorie Chart */}
+        {weekMeals.data && weekMeals.data.some(d => d.calories > 0) && (
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
+              {t.cockpit.weeklyCalories}
+            </p>
+            <CalorieChart data={weekMeals.data} calorieGoal={caloriesGoal} language={language} />
+          </div>
+        )}
+
         {/* BMR/TDEE Card */}
         {bmrResult && tdee ? (
           <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -307,6 +323,16 @@ export function DashboardPage() {
           </button>
         )}
 
+        {/* Weight Trend Chart */}
+        {bodyTrendData.data && bodyTrendData.data.length > 1 && (
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
+              {t.cockpit.weightTrend}
+            </p>
+            <WeightChart data={bodyTrendData.data} language={language} />
+          </div>
+        )}
+
         {/* Reminders Widget */}
         {reminderStatus.totalDue > 0 && (
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -332,20 +358,20 @@ export function DashboardPage() {
               <div className="divide-y divide-gray-50">
                 {reminderStatus.pending.slice(0, 3).map((reminder) => {
                   const typeIcons: Record<string, string> = {
-                    substance: '💊',
-                    blood_pressure: '❤️',
-                    body_measurement: '⚖️',
-                    custom: '📌',
+                    substance: '\u{1F48A}',
+                    blood_pressure: '\u{2764}\u{FE0F}',
+                    body_measurement: '\u{2696}\u{FE0F}',
+                    custom: '\u{1F4CC}',
                   };
                   const timeDisplay = reminder.time
                     ? reminder.time
                     : reminder.time_period
-                      ? (reminder.time_period === 'morning' ? '🌅' : reminder.time_period === 'noon' ? '☀️' : '🌙')
+                      ? (reminder.time_period === 'morning' ? '\u{1F305}' : reminder.time_period === 'noon' ? '\u{2600}\u{FE0F}' : '\u{1F319}')
                       : '';
 
                   return (
                     <div key={reminder.id} className="px-4 py-2.5 flex items-center gap-3">
-                      <span className="text-sm">{typeIcons[reminder.type] ?? '📌'}</span>
+                      <span className="text-sm">{typeIcons[reminder.type] ?? '\u{1F4CC}'}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-900 truncate">{reminder.title}</p>
                         {timeDisplay && (
@@ -383,99 +409,6 @@ export function DashboardPage() {
             ))}
           </div>
         )}
-
-        {/* Quick Info Cards */}
-        <div className="space-y-2">
-          {/* Training Today */}
-          <button
-            onClick={() => navigate('/workouts')}
-            className="w-full bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
-          >
-            <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-              <Dumbbell className="h-5 w-5 text-orange-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{t.workouts.title}</p>
-              <p className="text-xs text-gray-400">
-                {workouts && workouts.length > 0
-                  ? `${workouts.length} ${t.dashboard.sessions} · ${totalCaloriesBurned} kcal ${t.dashboard.burned}`
-                  : t.common.noData
-                }
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300" />
-          </button>
-
-          {/* Latest Body */}
-          <button
-            onClick={() => navigate('/body')}
-            className="w-full bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
-          >
-            <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-              <Activity className="h-5 w-5 text-purple-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{t.body.title}</p>
-              <p className="text-xs text-gray-400">
-                {latestBody?.weight_kg
-                  ? `${latestBody.weight_kg} kg${latestBody.body_fat_pct ? ` · ${latestBody.body_fat_pct}% KFA` : ''}`
-                  : t.common.noData
-                }
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300" />
-          </button>
-
-          {/* Latest BP */}
-          <button
-            onClick={() => navigate('/medical')}
-            className="w-full bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
-          >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              bpClass?.color === 'green' ? 'bg-green-50' :
-              bpClass?.color === 'yellow' ? 'bg-yellow-50' :
-              bpClass?.color === 'orange' ? 'bg-orange-50' :
-              bpClass?.color === 'red' ? 'bg-red-50' : 'bg-gray-50'
-            }`}>
-              <Heart className={`h-5 w-5 ${
-                bpClass?.color === 'green' ? 'text-green-500' :
-                bpClass?.color === 'yellow' ? 'text-yellow-500' :
-                bpClass?.color === 'orange' ? 'text-orange-500' :
-                bpClass?.color === 'red' ? 'text-red-500' : 'text-gray-400'
-              }`} />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{t.medical.bloodPressure}</p>
-              <p className="text-xs text-gray-400">
-                {latestBP
-                  ? `${latestBP.systolic}/${latestBP.diastolic} ${t.medical.mmHg}${latestBP.pulse ? ` · ${latestBP.pulse} bpm` : ''}`
-                  : t.common.noData
-                }
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300" />
-          </button>
-
-          {/* Meals shortcut */}
-          <button
-            onClick={() => navigate('/meals')}
-            className="w-full bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
-          >
-            <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
-              <UtensilsCrossed className="h-5 w-5 text-teal-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{t.meals.title}</p>
-              <p className="text-xs text-gray-400">
-                {totals.mealCount > 0
-                  ? `${totals.mealCount} ${t.dashboard.mealsCount} · ${totals.calories} kcal`
-                  : t.common.noData
-                }
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300" />
-          </button>
-        </div>
       </div>
     </PageShell>
   );

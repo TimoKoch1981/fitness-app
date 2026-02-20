@@ -58,7 +58,7 @@ export interface NotificationPayload {
 export const NOTIFICATION_ROUTES: Record<NotificationType, string> = {
   substance: '/medical',
   blood_pressure: '/medical',
-  body_measurement: '/body',
-  custom: '/dashboard',
-  daily_summary: '/dashboard',
+  body_measurement: '/tracking',
+  custom: '/cockpit',
+  daily_summary: '/cockpit',
 };

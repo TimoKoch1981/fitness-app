@@ -62,7 +62,7 @@ export function isSupported(): boolean {
  * Web: Uses setTimeout + Notification API (only works while app is open)
  */
 export async function scheduleNotification(payload: NotificationPayload): Promise<void> {
-  const route = payload.route ?? NOTIFICATION_ROUTES[payload.type] ?? '/dashboard';
+  const route = payload.route ?? NOTIFICATION_ROUTES[payload.type] ?? '/cockpit';
 
   if (Capacitor.isNativePlatform()) {
     await LocalNotifications.schedule({
@@ -107,7 +107,7 @@ export async function scheduleMultiple(payloads: NotificationPayload[]): Promise
         body: p.body,
         schedule: { at: p.at },
         extra: {
-          route: p.route ?? NOTIFICATION_ROUTES[p.type] ?? '/dashboard',
+          route: p.route ?? NOTIFICATION_ROUTES[p.type] ?? '/cockpit',
           type: p.type,
         },
       })),
@@ -146,7 +146,7 @@ export function onNotificationClick(
   const listener = LocalNotifications.addListener(
     'localNotificationActionPerformed',
     (action) => {
-      const route = action.notification.extra?.route ?? '/dashboard';
+      const route = action.notification.extra?.route ?? '/cockpit';
       handler(route);
     },
   );

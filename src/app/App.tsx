@@ -12,13 +12,10 @@ import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { BuddyPage } from '../pages/BuddyPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { MealsPage } from '../pages/MealsPage';
-import { WorkoutsPage } from '../pages/WorkoutsPage';
+import { CockpitPage } from '../pages/CockpitPage';
+import { TrackingPage } from '../pages/TrackingPage';
 import { MedicalPage } from '../pages/MedicalPage';
-import { BodyPage } from '../pages/BodyPage';
 import { ProfilePage } from '../pages/ProfilePage';
-import { ReportsPage } from '../pages/ReportsPage';
 
 function AppRoutes() {
   return (
@@ -39,28 +36,19 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/dashboard"
+        path="/cockpit"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <CockpitPage />
             <Navigation />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/meals"
+        path="/tracking"
         element={
           <ProtectedRoute>
-            <MealsPage />
-            <Navigation />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/workouts"
-        element={
-          <ProtectedRoute>
-            <WorkoutsPage />
+            <TrackingPage />
             <Navigation />
           </ProtectedRoute>
         }
@@ -75,24 +63,6 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/body"
-        element={
-          <ProtectedRoute>
-            <BodyPage />
-            <Navigation />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <ReportsPage />
-            <Navigation />
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/profile"
         element={
           <ProtectedRoute>
@@ -101,6 +71,13 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Redirects for old URLs */}
+      <Route path="/dashboard" element={<Navigate to="/cockpit" replace />} />
+      <Route path="/meals" element={<Navigate to="/tracking" replace />} />
+      <Route path="/workouts" element={<Navigate to="/tracking" replace />} />
+      <Route path="/body" element={<Navigate to="/tracking" replace />} />
+      <Route path="/reports" element={<Navigate to="/cockpit" replace />} />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/buddy" replace />} />
