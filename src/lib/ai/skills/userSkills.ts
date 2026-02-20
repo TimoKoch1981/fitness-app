@@ -111,6 +111,31 @@ export function generateProfileSkill(data: UserSkillData): string {
     }
   }
 
+  // Personal goals — the buddy should know and reference these
+  const goals = profile.personal_goals;
+  if (goals) {
+    const goalLabels: Record<string, string> = {
+      muscle_gain: 'Muskelaufbau',
+      fat_loss: 'Fettabbau',
+      health: 'Gesundheit',
+      performance: 'Leistung',
+      body_recomp: 'Body Recomposition',
+    };
+    skill += `\n### Persoenliche Ziele\n`;
+    if (goals.primary_goal) skill += `- Hauptziel: ${goalLabels[goals.primary_goal] ?? goals.primary_goal}\n`;
+    if (goals.target_weight_kg) {
+      skill += `- Zielgewicht: ${goals.target_weight_kg} kg`;
+      if (latestBody?.weight_kg) {
+        const diff = latestBody.weight_kg - goals.target_weight_kg;
+        skill += ` (noch ${diff > 0 ? '-' : '+'}${Math.abs(diff).toFixed(1)} kg)`;
+      }
+      skill += '\n';
+    }
+    if (goals.target_body_fat_pct) skill += `- Ziel-KFA: ${goals.target_body_fat_pct}%\n`;
+    if (goals.target_date) skill += `- Zieldatum: ${goals.target_date}\n`;
+    if (goals.notes) skill += `- Notizen: "${goals.notes}"\n`;
+  }
+
   return skill;
 }
 

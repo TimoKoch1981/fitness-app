@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { UserProfile, Gender, BMRFormula } from '../../../types/health';
+import type { UserProfile, Gender, BMRFormula, PersonalGoals } from '../../../types/health';
 
 const PROFILE_KEY = 'profile';
 
@@ -37,6 +37,7 @@ interface UpdateProfileInput {
   daily_water_goal?: number;
   preferred_language?: 'de' | 'en';
   preferred_bmr_formula?: BMRFormula;
+  personal_goals?: PersonalGoals;
 }
 
 export function useUpdateProfile() {

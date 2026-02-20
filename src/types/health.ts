@@ -181,6 +181,16 @@ export interface ReminderLog {
 export type Gender = 'male' | 'female' | 'other';
 export type BMRFormula = 'mifflin' | 'katch' | 'auto';
 
+export type PrimaryGoal = 'muscle_gain' | 'fat_loss' | 'health' | 'performance' | 'body_recomp';
+
+export interface PersonalGoals {
+  primary_goal?: PrimaryGoal;
+  target_weight_kg?: number;
+  target_body_fat_pct?: number;
+  target_date?: string;          // ISO date: "2026-12-31"
+  notes?: string;                // Freitext, z.B. "Sixpack bis Sommer"
+}
+
 export interface UserProfile {
   id: string;
   display_name?: string;
@@ -193,6 +203,7 @@ export interface UserProfile {
   daily_water_goal: number;
   preferred_language: 'de' | 'en';
   preferred_bmr_formula: BMRFormula;
+  personal_goals?: PersonalGoals;
   created_at: string;
   updated_at: string;
 }

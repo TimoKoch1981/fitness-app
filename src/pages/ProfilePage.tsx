@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
 import { PAL_FACTORS } from '../lib/constants';
-import type { Gender, BMRFormula } from '../types/health';
+import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
 
 export function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -24,6 +24,12 @@ export function ProfilePage() {
   const [caloriesGoal, setCaloriesGoal] = useState('2000');
   const [proteinGoal, setProteinGoal] = useState('150');
   const [waterGoal, setWaterGoal] = useState('8');
+  // Personal goals
+  const [primaryGoal, setPrimaryGoal] = useState<PrimaryGoal | ''>('');
+  const [targetWeight, setTargetWeight] = useState('');
+  const [targetBodyFat, setTargetBodyFat] = useState('');
+  const [targetDate, setTargetDate] = useState('');
+  const [goalNotes, setGoalNotes] = useState('');
 
   // Sync profile data into form
   useEffect(() => {
@@ -37,6 +43,12 @@ export function ProfilePage() {
       setCaloriesGoal(profile.daily_calories_goal?.toString() ?? '2000');
       setProteinGoal(profile.daily_protein_goal?.toString() ?? '150');
       setWaterGoal(profile.daily_water_goal?.toString() ?? '8');
+      // Personal goals
+      setPrimaryGoal(profile.personal_goals?.primary_goal ?? '');
+      setTargetWeight(profile.personal_goals?.target_weight_kg?.toString() ?? '');
+      setTargetBodyFat(profile.personal_goals?.target_body_fat_pct?.toString() ?? '');
+      setTargetDate(profile.personal_goals?.target_date ?? '');
+      setGoalNotes(profile.personal_goals?.notes ?? '');
     }
   }, [profile]);
 
@@ -56,6 +68,18 @@ export function ProfilePage() {
       daily_calories_goal: parseInt(caloriesGoal) || 2000,
       daily_protein_goal: parseInt(proteinGoal) || 150,
       daily_water_goal: parseInt(waterGoal) || 8,
+    });
+  };
+
+  const handleSavePersonalGoals = async () => {
+    await updateProfile.mutateAsync({
+      personal_goals: {
+        primary_goal: primaryGoal || undefined,
+        target_weight_kg: targetWeight ? parseFloat(targetWeight) : undefined,
+        target_body_fat_pct: targetBodyFat ? parseFloat(targetBodyFat) : undefined,
+        target_date: targetDate || undefined,
+        notes: goalNotes || undefined,
+      },
     });
   };
 
@@ -302,6 +326,112 @@ export function ProfilePage() {
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Personal Goals */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">{t.profile.personalGoals}</h3>
+            <button
+              onClick={handleSavePersonalGoals}
+              disabled={updateProfile.isPending}
+              className="flex items-center gap-1 px-3 py-1 bg-teal-500 text-white text-xs rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
+            >
+              <Save className="h-3 w-3" />
+              {t.common.save}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t.profile.goalType}
+              </label>
+              <div className="flex gap-1 flex-wrap">
+                {([
+                  ['muscle_gain', t.profile.goalMuscle],
+                  ['fat_loss', t.profile.goalFatLoss],
+                  ['health', t.profile.goalHealth],
+                  ['performance', t.profile.goalPerformance],
+                  ['body_recomp', t.profile.goalRecomp],
+                ] as const).map(([val, label]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setPrimaryGoal(primaryGoal === val ? '' : val)}
+                    className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      primaryGoal === val
+                        ? 'bg-teal-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t.profile.targetWeight}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={targetWeight}
+                    onChange={(e) => setTargetWeight(e.target.value)}
+                    placeholder="85"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    min="30"
+                    max="300"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">kg</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t.profile.targetBodyFat}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={targetBodyFat}
+                    onChange={(e) => setTargetBodyFat(e.target.value)}
+                    placeholder="15"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    min="3"
+                    max="50"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">%</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t.profile.targetDate}
+                </label>
+                <input
+                  type="date"
+                  value={targetDate}
+                  onChange={(e) => setTargetDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t.profile.goalNotes}
+              </label>
+              <input
+                type="text"
+                value={goalNotes}
+                onChange={(e) => setGoalNotes(e.target.value)}
+                placeholder={language === 'de' ? 'z.B. Sixpack bis Sommer' : 'e.g. Get a sixpack by summer'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              />
             </div>
           </div>
         </div>
