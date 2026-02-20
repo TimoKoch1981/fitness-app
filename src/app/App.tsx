@@ -3,6 +3,7 @@ import { QueryProvider } from './providers/QueryProvider';
 import { AuthProvider } from './providers/AuthProvider';
 import { I18nProvider } from './providers/I18nProvider';
 import { BuddyChatProvider } from './providers/BuddyChatProvider';
+import { NotificationSchedulerProvider } from '../features/notifications/components/NotificationSchedulerProvider';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 import { Navigation } from '../shared/components/Navigation';
 
@@ -115,7 +116,9 @@ export default function App() {
         <AuthProvider>
           <BuddyChatProvider>
             <BrowserRouter>
-              <AppRoutes />
+              <NotificationSchedulerProvider>
+                <AppRoutes />
+              </NotificationSchedulerProvider>
             </BrowserRouter>
           </BuddyChatProvider>
         </AuthProvider>

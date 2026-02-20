@@ -314,6 +314,26 @@ export const de = {
     cat_supplement: 'Supplements',
     cat_general: 'Allgemein',
   },
+  notifications: {
+    title: 'Benachrichtigungen',
+    enable: 'Benachrichtigungen aktivieren',
+    enabled: 'Aktiviert',
+    disabled: 'Benachrichtigungen sind deaktiviert',
+    permissionDenied: 'Vom Browser blockiert. Bitte in den Browser-Einstellungen erlauben.',
+    notSupported: 'Dein Browser unterstützt keine Benachrichtigungen.',
+    types: 'Benachrichtigungstypen',
+    substance: 'Substanz-Erinnerungen',
+    bloodPressure: 'Blutdruck-Erinnerungen',
+    bodyMeasurement: 'Körpermessung-Erinnerungen',
+    custom: 'Eigene Erinnerungen',
+    dailySummary: 'Tages-Zusammenfassung',
+    dailySummaryTime: 'Zusammenfassung um',
+    quietHours: 'Ruhezeiten',
+    quietHoursFrom: 'Von',
+    quietHoursTo: 'Bis',
+    reminderDue: 'Erinnerung fällig',
+    summaryTitle: 'Dein Tagesbericht',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

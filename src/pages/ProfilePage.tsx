@@ -4,6 +4,7 @@ import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
+import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
 import { PAL_FACTORS } from '../lib/constants';
 import type { Gender, BMRFormula } from '../types/health';
 
@@ -113,6 +114,9 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Notification Settings */}
+        <NotificationSettings />
 
         {/* Personal Data */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
