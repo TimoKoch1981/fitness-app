@@ -11,6 +11,7 @@ import { AnalysisAgent } from './analysisAgent';
 import { BeautyAgent } from './beautyAgent';
 import { LifestyleAgent } from './lifestyleAgent';
 import { GeneralAgent } from './generalAgent';
+import { MedicalAgent } from './medicalAgent';
 
 /** Lazy singleton instances — created on first access */
 const agents = new Map<AgentType, BaseAgent>();
@@ -37,6 +38,9 @@ export function getAgent(type: AgentType): BaseAgent {
       case 'lifestyle':
         agents.set(type, new LifestyleAgent());
         break;
+      case 'medical':
+        agents.set(type, new MedicalAgent());
+        break;
       case 'general':
         agents.set(type, new GeneralAgent());
         break;
@@ -47,7 +51,7 @@ export function getAgent(type: AgentType): BaseAgent {
 
 /** All available agent types */
 export function getAllAgentTypes(): AgentType[] {
-  return ['nutrition', 'training', 'substance', 'analysis', 'beauty', 'lifestyle', 'general'];
+  return ['nutrition', 'training', 'substance', 'analysis', 'beauty', 'lifestyle', 'medical', 'general'];
 }
 
 // Re-export types for convenience

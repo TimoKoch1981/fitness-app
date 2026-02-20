@@ -38,7 +38,8 @@ export type SkillId =
   | 'anabolics'
   | 'analysis'
   | 'beauty'
-  | 'attractiveness';
+  | 'attractiveness'
+  | 'medical';
 
 /** Metadata for the dynamic user skill generator */
 export interface UserSkillsMeta {

@@ -237,6 +237,48 @@ const ROUTING_RULES: KeywordRule[] = [
       'daily evaluation', 'day summary', 'evaluate my day',
     ],
   },
+
+  // ── Medical (general health, NOT substance-specific) ──
+  {
+    agent: 'medical',
+    weight: 0.85,
+    keywords: [
+      // Organs & systems (DE)
+      'herz', 'herz-kreislauf', 'kardiovaskulär', 'herzinfarkt', 'schlaganfall',
+      'leber', 'niere', 'nieren', 'schilddrüse', 'thyroid',
+      'prostata', 'gelenke', 'sehnen', 'knochen', 'knorpel',
+      'immunsystem', 'stoffwechsel', 'metabolismus',
+      // Medical conditions
+      'diabetes', 'insulinresistenz', 'metabolisches syndrom',
+      'arthrose', 'osteoporose', 'gicht', 'rheuma',
+      'schlafapnoe', 'apnoe', 'asthma',
+      // Lab values & diagnostics
+      'laborwerte', 'blutwerte', 'blutbild', 'hba1c', 'tsh',
+      'gfr', 'kreatinin', 'got', 'gpt', 'ggt', 'gamma-gt',
+      'triglyceride', 'ldl', 'hdl', 'lipidprofil',
+      'vitamin d', 'ferritin', 'eisen', 'zink', 'magnesium',
+      // Medical advice
+      'gesundheit', 'gesundheitlich', 'medizinisch',
+      'symptom', 'symptome', 'diagnose', 'vorsorge', 'check-up',
+      'warnsignal', 'warnsignale', 'risiko', 'risiken', 'risikofaktor',
+      'prävention', 'vorbeugung',
+      // Age-related
+      'alter', 'altern', 'alterung', 'regeneration', 'regenerationsfähigkeit',
+      // Cardiovascular health
+      'puls', 'ruhepuls', 'herzfrequenz', 'herzrhythmus',
+      'arteriosklerose', 'atherosklerose', 'thrombose',
+      'brustschmerz', 'atemnot',
+      // Nutritional medicine
+      'mikronährstoff', 'mikronährstoffe', 'nährstoffmangel',
+      'malabsorption', 'unverträglichkeit', 'allergie',
+      // Drug interactions (general)
+      'wechselwirkung', 'kontraindikation', 'nebenwirkung gesundheit',
+      // English
+      'health', 'medical', 'cardiovascular', 'heart', 'liver', 'kidney',
+      'thyroid', 'diabetes', 'blood test', 'lab values', 'symptoms',
+      'side effects health', 'warning signs', 'prevention',
+    ],
+  },
 ];
 
 // ── Greeting / Small Talk Detection ─────────────────────────────────────

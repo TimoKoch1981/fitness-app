@@ -16,6 +16,7 @@ import { ANABOLICS_SKILL, ANABOLICS_SKILL_META } from './anabolics';
 import { ANALYSIS_SKILL, ANALYSIS_SKILL_META } from './analysis';
 import { BEAUTY_SKILL, BEAUTY_SKILL_META } from './beauty';
 import { ATTRACTIVENESS_SKILL, ATTRACTIVENESS_SKILL_META } from './attractiveness';
+import { MEDICAL_SKILL, MEDICAL_SKILL_META } from './medical';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -28,6 +29,7 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   analysis: { meta: ANALYSIS_SKILL_META, content: ANALYSIS_SKILL },
   beauty: { meta: BEAUTY_SKILL_META, content: BEAUTY_SKILL },
   attractiveness: { meta: ATTRACTIVENESS_SKILL_META, content: ATTRACTIVENESS_SKILL },
+  medical: { meta: MEDICAL_SKILL_META, content: MEDICAL_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -65,6 +67,10 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   lifestyle: {
     staticSkills: ['attractiveness'],
     userSkills: ['profile', 'body_progress'],
+  },
+  medical: {
+    staticSkills: ['medical'],
+    userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   general: {
     staticSkills: [],  // no heavy skills — lightweight fallback

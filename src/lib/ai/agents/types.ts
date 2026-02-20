@@ -20,6 +20,7 @@ export type AgentType =
   | 'analysis'
   | 'beauty'
   | 'lifestyle'
+  | 'medical'
   | 'general';
 
 /** Static configuration for an agent */
