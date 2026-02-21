@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { LogOut, User, Save } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { LogOut, User, Save, Shield } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
@@ -9,7 +10,7 @@ import { PAL_FACTORS } from '../lib/constants';
 import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
 
 export function ProfilePage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const { t, language, setLanguage } = useTranslation();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
@@ -435,6 +436,17 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Admin Link (only visible for admins) */}
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-medium hover:bg-indigo-100 transition-colors"
+          >
+            <Shield className="h-4 w-4" />
+            {t.admin.adminLink}
+          </Link>
+        )}
 
         {/* Logout */}
         <button

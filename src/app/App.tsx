@@ -20,6 +20,13 @@ import { TrackingPage } from '../pages/TrackingPage';
 import { MedicalPage } from '../pages/MedicalPage';
 import { ProfilePage } from '../pages/ProfilePage';
 
+// Admin Pages
+import { AdminRoute } from '../features/admin/components/AdminRoute';
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
+import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
+import { AdminUsagePage } from '../pages/admin/AdminUsagePage';
+
 function AppRoutes() {
   return (
     <Routes>
@@ -73,6 +80,40 @@ function AppRoutes() {
             <ProfilePage />
             <Navigation />
           </ProtectedRoute>
+        }
+      />
+
+      {/* Admin routes */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminDashboardPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <AdminUsersPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <AdminRoute>
+            <AdminProductsPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/usage"
+        element={
+          <AdminRoute>
+            <AdminUsagePage />
+          </AdminRoute>
         }
       />
 

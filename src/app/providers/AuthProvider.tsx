@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -31,12 +32,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Load admin status from profile
+  const loadAdminStatus = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', userId)
+        .single();
+      setIsAdmin(data?.is_admin ?? false);
+    } catch {
+      setIsAdmin(false);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadAdminStatus(session.user.id);
+      }
       setLoading(false);
     }).catch((err) => {
       console.error('[Auth] Failed to get session:', err);
@@ -49,9 +68,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
+          setIsAdmin(false);
         } else {
           setSession(session);
           setUser(session?.user ?? null);
+          if (session?.user) {
+            loadAdminStatus(session.user.id);
+          }
         }
         setLoading(false);
       }
@@ -85,8 +108,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const value = useMemo(
-    () => ({ user, session, loading, signIn, signUp, signOut, resetPassword, updatePassword }),
-    [user, session, loading],
+    () => ({ user, session, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword }),
+    [user, session, loading, isAdmin],
   );
 
   return (

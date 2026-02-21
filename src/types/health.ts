@@ -204,8 +204,51 @@ export interface UserProfile {
   preferred_language: 'de' | 'en';
   preferred_bmr_formula: BMRFormula;
   personal_goals?: PersonalGoals;
+  is_admin?: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// === AI USAGE LOG ===
+export interface AiUsageLog {
+  id: string;
+  user_id: string;
+  agent_type: string;
+  model: string;
+  tokens_input: number;
+  tokens_output: number;
+  tokens_total: number;
+  estimated_cost_usd: number;
+  duration_ms?: number;
+  created_at: string;
+}
+
+// === ADMIN STATS ===
+export interface AdminUserStat {
+  user_id: string;
+  display_name?: string;
+  email?: string;
+  registered_at: string;
+  last_sign_in_at?: string;
+  email_confirmed_at?: string;
+  meal_count: number;
+  workout_count: number;
+  body_count: number;
+  last_meal_at?: string;
+  last_workout_at?: string;
+}
+
+export interface AdminUsageStat {
+  day: string;
+  agent_type: string;
+  model: string;
+  call_count: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_tokens: number;
+  total_cost_usd: number;
+  avg_duration_ms: number;
+  unique_users: number;
 }
 
 // === PRODUCT DATABASE ===

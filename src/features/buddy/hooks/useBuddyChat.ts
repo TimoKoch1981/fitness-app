@@ -20,6 +20,7 @@ import { getAIProvider } from '../../../lib/ai/provider';
 import { routeAndExecuteStream } from '../../../lib/ai/agents/router';
 import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
+import { useLogAiUsage } from '../../admin/hooks/useAiUsageLog';
 import type { AgentContext } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
@@ -51,6 +52,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
   const { messages, setMessages, clearMessages } = useBuddyChatMessages();
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const logAiUsage = useLogAiUsage();
 
   // Refs to avoid stale closures in sendMessage (#7, #8)
   const messagesRef = useRef(messages);
@@ -104,6 +106,9 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
         language,
       };
 
+      // Track timing for usage logging
+      const startTime = Date.now();
+
       // Route to the best agent and STREAM the response
       const result = await routeAndExecuteStream(
         userMessage.trim(),
@@ -117,6 +122,16 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
           ));
         },
       );
+
+      const durationMs = Date.now() - startTime;
+
+      // Log AI usage (fire-and-forget)
+      logAiUsage({
+        agentType: result.agentType,
+        model: result.model ?? 'unknown',
+        tokensTotal: result.tokensUsed,
+        durationMs,
+      });
 
       // Stream finished — parse ALL ACTION blocks from final content
       const parsedActions = parseAllActionsFromResponse(result.content);
