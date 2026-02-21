@@ -126,6 +126,7 @@ CORE RULE: Facts > Estimates. ALWAYS.
       activePlan: hc.activePlan,
       userProducts: hc.userProducts,
       standardProducts: hc.standardProducts,
+      availableEquipment: hc.availableEquipment,
     };
   }
 

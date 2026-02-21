@@ -17,7 +17,8 @@ export type ActionType =
   | 'save_product'
   | 'add_substance'
   | 'add_reminder'
-  | 'update_profile';
+  | 'update_profile'
+  | 'update_equipment';
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -112,6 +113,12 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
           d.gender ? `${d.gender}` : null,
           d.activity_level ? `PAL ${d.activity_level}` : null,
         ].filter(Boolean).join(', ') || 'Profil-Update',
+      };
+    case 'update_equipment':
+      return {
+        icon: '🏋️',
+        title: 'Gerätepark aktualisieren?',
+        summary: `${(d.equipment_names as string[])?.length ?? '?'} Geräte`,
       };
   }
 }

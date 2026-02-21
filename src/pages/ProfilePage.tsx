@@ -6,6 +6,7 @@ import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
+import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
 import { PAL_FACTORS } from '../lib/constants';
 import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
 
@@ -435,6 +436,13 @@ export function ProfilePage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Equipment / Gerätepark */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-semibold text-gray-900 mb-3">{t.equipment.title}</h3>
+          <p className="text-xs text-gray-500 mb-3">{t.equipment.subtitle}</p>
+          <EquipmentSelector />
         </div>
 
         {/* Admin Link (only visible for admins) */}

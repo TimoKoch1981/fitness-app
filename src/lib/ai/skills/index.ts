@@ -50,7 +50,7 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   },
   training: {
     staticSkills: ['training'],
-    userSkills: ['profile', 'training_log', 'substance_protocol'],
+    userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
   },
   substance: {
     staticSkills: ['substances', 'anabolics'],

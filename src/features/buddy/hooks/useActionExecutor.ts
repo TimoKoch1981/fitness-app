@@ -21,6 +21,7 @@ import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
+import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
 import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod, Gender } from '../../../types/health';
 
@@ -121,6 +122,8 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addSubstance = useAddSubstance();
   const addReminder = useAddReminder();
   const updateProfile = useUpdateProfile();
+  const setUserEquipment = useSetUserEquipment();
+  const { data: equipmentCatalog } = useEquipmentCatalog();
 
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
@@ -322,6 +325,55 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           break;
         }
 
+        case 'update_equipment': {
+          // Resolve equipment_names → equipment_ids via fuzzy matching against catalog
+          const names = d.equipment_names as string[];
+          if (!equipmentCatalog || equipmentCatalog.length === 0) {
+            throw new Error('Equipment catalog not loaded / Geräte-Katalog nicht geladen.');
+          }
+
+          const resolvedIds: string[] = [];
+          const notFound: string[] = [];
+
+          for (const name of names) {
+            const searchLower = name.toLowerCase().trim();
+            // Try exact match first
+            const exact = equipmentCatalog.find(e =>
+              e.name.toLowerCase() === searchLower ||
+              (e.name_en?.toLowerCase() ?? '') === searchLower
+            );
+            if (exact) {
+              resolvedIds.push(exact.id);
+              continue;
+            }
+            // Partial match
+            const partial = equipmentCatalog.find(e =>
+              e.name.toLowerCase().includes(searchLower) ||
+              searchLower.includes(e.name.toLowerCase()) ||
+              (e.name_en?.toLowerCase() ?? '').includes(searchLower) ||
+              searchLower.includes(e.name_en?.toLowerCase() ?? '')
+            );
+            if (partial) {
+              resolvedIds.push(partial.id);
+              continue;
+            }
+            notFound.push(name);
+          }
+
+          if (resolvedIds.length === 0) {
+            throw new Error(`No matching equipment found for: ${notFound.join(', ')}`);
+          }
+
+          await setUserEquipment.mutateAsync({
+            equipment_ids: resolvedIds,
+          });
+
+          if (notFound.length > 0) {
+            console.warn('[ActionExecutor] Equipment not found:', notFound);
+          }
+          break;
+        }
+
         default: {
           throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
         }
@@ -337,7 +389,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

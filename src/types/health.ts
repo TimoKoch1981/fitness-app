@@ -307,6 +307,7 @@ export interface HealthContext {
   activePlan?: TrainingPlan;
   userProducts?: UserProduct[];
   standardProducts?: ProductNutrition[];
+  availableEquipment?: Equipment[];
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }
@@ -321,6 +322,42 @@ export interface Recommendation {
   title: string;
   description: string;
   priority: RecommendationPriority;
+}
+
+// === EQUIPMENT ===
+export type EquipmentCategory = 'machine' | 'cable' | 'free_weight' | 'bodyweight' | 'cardio' | 'other';
+
+export interface Equipment {
+  id: string;
+  name: string;
+  name_en?: string;
+  category: EquipmentCategory;
+  muscle_groups: string[];
+  description?: string;
+  icon?: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface GymProfile {
+  id: string;
+  name: string;
+  description?: string;
+  equipment_ids: string[];
+  is_template: boolean;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface UserEquipment {
+  id: string;
+  user_id: string;
+  gym_profile_id?: string;
+  equipment_ids: string[];
+  custom_name?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // === TRAINING PLAN ===

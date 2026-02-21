@@ -205,6 +205,11 @@ const UpdateProfileSchema = z.object({
   { message: 'At least one profile field must be provided' }
 );
 
+const UpdateEquipmentSchema = z.object({
+  equipment_names: z.array(z.string().min(1)).min(1),
+  gym_profile_name: z.string().optional(),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -218,6 +223,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   add_substance: AddSubstanceSchema,
   add_reminder: AddReminderSchema,
   update_profile: UpdateProfileSchema,
+  update_equipment: UpdateEquipmentSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

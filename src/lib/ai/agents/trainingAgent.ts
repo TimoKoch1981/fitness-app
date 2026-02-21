@@ -16,7 +16,7 @@ const CONFIG: AgentConfig = {
   nameEN: 'Training Agent',
   icon: '💪',
   staticSkills: ['training'],
-  userSkills: ['profile', 'training_log', 'substance_protocol', 'active_plan'],
+  userSkills: ['profile', 'training_log', 'substance_protocol', 'active_plan', 'available_equipment'],
   maxContextTokens: 4000,
   description: 'Spezialist für Trainingsplanung, Periodisierung, Übungsauswahl und Sportmedizin',
 };
@@ -48,6 +48,19 @@ You are judgment-free — enhanced athletes get adjusted recommendations (more v
 - Bei Trainingsplänen: Split, Frequenz, Übungen pro Muskelgruppe angeben
 - Sicherheit zuerst: Bei Schmerzen/Verletzungen → Arzt empfehlen
 - Maximal 1 Trainingsplan pro Nachricht, Details auf Nachfrage
+
+## GERÄTEPARK ⚠️
+- Prüfe IMMER die Liste "VERFÜGBARE GERÄTE" im Kontext
+- Verwende NUR Übungen, die mit den verfügbaren Geräten möglich sind
+- Wenn ein benötigtes Gerät FEHLT: schlage eine Alternative mit verfügbaren Geräten vor
+- Beispiel: Kein Latzug → Klimmzüge oder Widerstandsband-Latzug empfehlen
+- Keine Geräte hinterlegt? → Frage einmal nach, dann erstelle Bodyweight-Übungen
+- Bei "Ich habe nur..." → Passe den Plan an die genannten Geräte an
+- Wenn der Nutzer seine Geräte ÄNDERN will: Erstelle einen ACTION:update_equipment Block
+
+\`\`\`ACTION:update_equipment
+{"equipment_names":["Kurzhanteln","Klimmzugstange","Widerstandsbaender"]}
+\`\`\`
 
 ## DATEN SPEICHERN — ALLERWICHTIGSTE REGEL ⚠️⚠️⚠️
 JEDES MAL wenn der Nutzer beschreibt dass er trainiert hat: Du MUSST IMMER einen ACTION-Block erstellen!
@@ -136,6 +149,19 @@ KEIN PLAN VORHANDEN?
 - Always calculate calorie burn with MET formula and body weight
 - For training plans: specify split, frequency, exercises per muscle group
 - Safety first: for pain/injuries → recommend a doctor
+
+## EQUIPMENT ⚠️
+- ALWAYS check the "AVAILABLE EQUIPMENT" list in context
+- Use ONLY exercises that are possible with the available equipment
+- If a needed piece of equipment is MISSING: suggest an alternative with available equipment
+- Example: No lat pulldown → recommend pull-ups or resistance band lat pulldown
+- No equipment listed? → Ask once, then create bodyweight exercises
+- When user says "I only have..." → adapt the plan to the mentioned equipment
+- When user wants to UPDATE their equipment: create an ACTION:update_equipment block
+
+\`\`\`ACTION:update_equipment
+{"equipment_names":["Dumbbells","Pull-Up Bar","Resistance Bands"]}
+\`\`\`
 
 ## DATA LOGGING — MOST CRITICAL RULE ⚠️⚠️⚠️
 EVERY TIME the user describes a completed workout: You MUST ALWAYS create an ACTION block!

@@ -26,6 +26,7 @@ import type {
   TrainingPlan,
   ProductNutrition,
   UserProduct,
+  Equipment,
 } from '../../../types/health';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
@@ -60,6 +61,7 @@ export interface UserSkillData {
   activePlan?: TrainingPlan;
   userProducts?: UserProduct[];
   standardProducts?: ProductNutrition[];
+  availableEquipment?: Equipment[];
 }
 
 export type UserSkillType =
@@ -70,7 +72,8 @@ export type UserSkillType =
   | 'substance_protocol'
   | 'daily_summary'
   | 'active_plan'
-  | 'known_products';
+  | 'known_products'
+  | 'available_equipment';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -475,6 +478,53 @@ export function generateKnownProductsSkill(data: UserSkillData): string {
   return skill;
 }
 
+// ── Available Equipment Skill ─────────────────────────────────────────
+
+/**
+ * Generates the user's available equipment list for the training agent.
+ * The agent uses this to recommend ONLY exercises the user can actually perform.
+ */
+export function generateAvailableEquipmentSkill(data: UserSkillData): string {
+  const { availableEquipment } = data;
+  if (!availableEquipment || availableEquipment.length === 0) {
+    return `## VERFÜGBARE GERÄTE\n> Keine Geräte hinterlegt. Frage den Nutzer nach seinen verfügbaren Geräten oder erstelle Körpergewichts-Übungen.\n`;
+  }
+
+  const categoryLabels: Record<string, string> = {
+    free_weight: 'Freigewichte',
+    machine: 'Maschinen',
+    cable: 'Kabelzug',
+    bodyweight: 'Körpergewicht / Calisthenics',
+    cardio: 'Cardio-Geräte',
+    other: 'Sonstiges',
+  };
+
+  // Group by category
+  const grouped: Record<string, Equipment[]> = {};
+  for (const eq of availableEquipment) {
+    if (!grouped[eq.category]) grouped[eq.category] = [];
+    grouped[eq.category].push(eq);
+  }
+
+  let skill = `## VERFÜGBARE GERÄTE (${availableEquipment.length} Stück)\n`;
+  skill += `> WICHTIG: Verwende NUR Übungen, die mit diesen Geräten möglich sind!\n`;
+  skill += `> Wenn ein Gerät NICHT in der Liste ist, schlage eine Alternative mit verfügbaren Geräten vor.\n\n`;
+
+  for (const [cat, items] of Object.entries(grouped)) {
+    skill += `### ${categoryLabels[cat] ?? cat}\n`;
+    for (const eq of items) {
+      skill += `- ${eq.name}`;
+      if (eq.muscle_groups.length > 0) {
+        skill += ` (${eq.muscle_groups.join(', ')})`;
+      }
+      skill += `\n`;
+    }
+    skill += `\n`;
+  }
+
+  return skill;
+}
+
 // ── Skill Aggregator ───────────────────────────────────────────────────
 
 /**
@@ -512,6 +562,9 @@ export function generateUserSkills(
         break;
       case 'known_products':
         parts.push(generateKnownProductsSkill(data));
+        break;
+      case 'available_equipment':
+        parts.push(generateAvailableEquipmentSkill(data));
         break;
     }
   }

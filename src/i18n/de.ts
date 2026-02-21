@@ -408,6 +408,25 @@ export const de = {
     nutritionPerServing: 'Nährwerte pro Portion',
     adminLink: 'Admin',
   },
+  equipment: {
+    title: 'Gerätepark',
+    subtitle: 'Welche Geräte stehen dir zur Verfügung?',
+    gymProfile: 'Gym-Profil (Vorlage)',
+    customSelection: 'Individuelle Auswahl',
+    allCategories: 'Alle',
+    selectAll: 'Alle auswählen',
+    clearAll: 'Alle abwählen',
+    selected: 'ausgewählt',
+    saveEquipment: 'Geräte speichern',
+    saved: 'Gespeichert!',
+    noEquipment: 'Noch keine Geräte ausgewählt. Wähle deine verfügbaren Geräte aus, damit der Trainer passende Übungen empfiehlt.',
+    cat_free_weight: 'Freigewichte',
+    cat_machine: 'Maschinen',
+    cat_cable: 'Kabelzug',
+    cat_bodyweight: 'Körpergewicht',
+    cat_cardio: 'Cardio',
+    cat_other: 'Sonstiges',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

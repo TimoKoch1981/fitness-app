@@ -25,6 +25,7 @@ import { useLatestBodyMeasurement } from '../../features/body/hooks/useBodyMeasu
 import { useSubstances } from '../../features/medical/hooks/useSubstances';
 import { useActivePlan } from '../../features/workouts/hooks/useTrainingPlans';
 import { useStandardProducts, useUserProducts } from '../../features/meals/hooks/useProducts';
+import { useUserEquipmentResolved } from '../../features/equipment/hooks/useEquipment';
 import { today } from '../../lib/utils';
 import { getActionDisplayInfo } from '../../lib/ai/actions/types';
 import type { HealthContext } from '../../types/health';
@@ -93,6 +94,7 @@ function InlineBuddyChatContent() {
   const { data: activePlan } = useActivePlan();
   const { data: standardProducts } = useStandardProducts();
   const { data: userProducts } = useUserProducts();
+  const { equipment: availableEquipment } = useUserEquipmentResolved();
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -117,6 +119,7 @@ function InlineBuddyChatContent() {
     activePlan: activePlan ?? undefined,
     userProducts: userProducts ?? [],
     standardProducts: standardProducts ?? [],
+    availableEquipment: availableEquipment ?? [],
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurem
 import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { useActivePlan } from '../features/workouts/hooks/useTrainingPlans';
 import { useStandardProducts, useUserProducts } from '../features/meals/hooks/useProducts';
+import { useUserEquipmentResolved } from '../features/equipment/hooks/useEquipment';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
 import type { HealthContext } from '../types/health';
@@ -76,6 +77,7 @@ export function BuddyPage() {
   const { data: activePlan } = useActivePlan();
   const { data: standardProducts } = useStandardProducts();
   const { data: userProducts } = useUserProducts();
+  const { equipment: availableEquipment } = useUserEquipmentResolved();
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -100,6 +102,7 @@ export function BuddyPage() {
     activePlan: activePlan ?? undefined,
     userProducts: userProducts ?? [],
     standardProducts: standardProducts ?? [],
+    availableEquipment: availableEquipment ?? [],
   };
 
   // Proactive suggestion chips (rule-based, no LLM)
