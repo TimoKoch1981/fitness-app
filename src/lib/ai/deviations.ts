@@ -271,43 +271,45 @@ export function getDeviationSuggestions(
   const de = language === 'de';
 
   // Map high-priority deviations to actionable chips
+  // Note: message checks use lowercase to avoid case-sensitivity bugs
   for (const d of deviations.slice(0, 3)) { // Max 3 chips
-    if (d.agent === 'training' && d.type === 'warning' && d.message.includes('krank')) {
+    const msgLower = d.message.toLowerCase();
+    if (d.agent === 'training' && d.type === 'warning' && msgLower.includes('krank')) {
       suggestions.push({
         id: 'dev_illness',
         label: de ? 'Training bei Krankheit?' : 'Training while sick?',
         message: de ? 'Ich bin krank. Soll ich trotzdem trainieren?' : 'I\'m sick. Should I still train?',
         icon: '🤒',
       });
-    } else if (d.agent === 'training' && d.message.includes('Energie')) {
+    } else if (d.agent === 'training' && msgLower.includes('energie')) {
       suggestions.push({
         id: 'dev_low_energy',
         label: de ? 'Leichtes Training' : 'Light workout',
         message: de ? 'Mir fehlt heute Energie. Gib mir ein leichtes Workout.' : 'I\'m low on energy today. Give me a light workout.',
         icon: '😴',
       });
-    } else if (d.agent === 'nutrition' && d.message.includes('Protein')) {
+    } else if (d.agent === 'nutrition' && msgLower.includes('protein')) {
       suggestions.push({
         id: 'dev_protein',
         label: de ? 'Protein auffüllen' : 'Boost protein',
         message: de ? 'Wie kann ich heute noch mein Protein erreichen?' : 'How can I still hit my protein target today?',
         icon: '💪',
       });
-    } else if (d.agent === 'medical' && d.message.includes('Blutdruck')) {
+    } else if (d.agent === 'medical' && msgLower.includes('blutdruck')) {
       suggestions.push({
         id: 'dev_bp',
         label: de ? 'Blutdruck besprechen' : 'Discuss BP',
         message: de ? 'Mein Blutdruck war hoch. Was bedeutet das?' : 'My blood pressure was high. What does that mean?',
         icon: '❤️',
       });
-    } else if (d.agent === 'training' && d.message.includes('Tagen')) {
+    } else if (d.agent === 'training' && msgLower.includes('tagen')) {
       suggestions.push({
         id: 'dev_notraining',
         label: de ? 'Training nachholen' : 'Catch up training',
         message: de ? 'Ich habe lange nicht trainiert. Wie steige ich wieder ein?' : 'I haven\'t trained in a while. How do I get back into it?',
         icon: '💪',
       });
-    } else if (d.agent === 'nutrition' && d.message.includes('Kalorien')) {
+    } else if (d.agent === 'nutrition' && msgLower.includes('kalorien')) {
       suggestions.push({
         id: 'dev_calories',
         label: de ? 'Kalorien nachholen' : 'Catch up calories',
