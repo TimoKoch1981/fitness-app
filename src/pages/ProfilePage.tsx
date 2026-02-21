@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, User, Save, Shield } from 'lucide-react';
+import { LogOut, Save, Shield } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
+import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
 import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
 import { PAL_FACTORS } from '../lib/constants';
@@ -96,11 +97,12 @@ export function ProfilePage() {
   return (
     <PageShell title={t.profile.title}>
       <div className="space-y-4">
-        {/* User Info */}
+        {/* User Info + Avatar */}
         <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center">
-            <User className="h-6 w-6 text-white" />
-          </div>
+          <AvatarUpload
+            avatarUrl={profile?.avatar_url}
+            displayName={profile?.display_name}
+          />
           <div>
             <p className="font-semibold text-gray-900">
               {profile?.display_name ?? user?.email ?? 'Benutzer'}

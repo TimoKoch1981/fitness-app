@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { AdminNav } from '../../features/admin/components/AdminNav';
-import { useTokenUsage, useAiUsageLogs, useUsageSummary } from '../../features/admin/hooks/useAdminData';
+import { useAiUsageLogs, useUsageSummary } from '../../features/admin/hooks/useAdminData';
 import { useTranslation } from '../../i18n';
 
 export function AdminUsagePage() {

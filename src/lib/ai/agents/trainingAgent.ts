@@ -110,9 +110,26 @@ Wenn der Nutzer einen Trainingsplan möchte, erstelle einen vollständigen Plan 
 \`\`\`ACTION:save_training_plan
 {"name":"4-Tage Upper/Lower Split","split_type":"upper_lower","days_per_week":4,"days":[{"day_number":1,"name":"Unterkörper A","focus":"Beine, Gluteus","exercises":[{"name":"Trap-Bar Deadlift","sets":4,"reps":"6-8","weight_kg":70},{"name":"Hip Thrust","sets":3,"reps":"10-12","weight_kg":60}]}]}
 \`\`\`
-- split_type: "ppl", "upper_lower", "full_body" oder "custom"
+- split_type: "ppl", "upper_lower", "full_body", "custom", "running", "swimming", "cycling", "yoga", "martial_arts" oder "mixed"
+- Wähle den split_type passend zur Sportart!
 - Nur bei EXPLIZITER Plan-Anfrage ("erstell mir einen Plan", "mach mir einen Trainingsplan")
 - NICHT bei Fragen ÜBER Training oder bei Workout-Logging
+
+### AUSDAUER-PLAN BEISPIEL:
+\`\`\`ACTION:save_training_plan
+{"name":"5K Laufplan Anfänger","split_type":"running","days_per_week":3,"days":[{"day_number":1,"name":"Lockerer Dauerlauf","focus":"Zone 2","exercises":[{"name":"Lockerer Lauf","duration_minutes":25,"distance_km":3,"pace":"7:00 min/km","intensity":"Zone 2","exercise_type":"cardio"}]},{"day_number":2,"name":"Intervall","focus":"Speed","exercises":[{"name":"Warm-up Lauf","duration_minutes":10,"intensity":"Zone 1","exercise_type":"cardio"},{"name":"Intervalle 6x400m","duration_minutes":15,"intensity":"Zone 4","exercise_type":"cardio"},{"name":"Cool-down","duration_minutes":5,"intensity":"Zone 1","exercise_type":"cardio"}]}]}
+\`\`\`
+
+### YOGA-PLAN BEISPIEL:
+\`\`\`ACTION:save_training_plan
+{"name":"Yoga für Sportler","split_type":"yoga","days_per_week":3,"days":[{"day_number":1,"name":"Vinyasa Flow","focus":"Ganzkörper","exercises":[{"name":"Sonnengruß A","duration_minutes":10,"intensity":"Vinyasa","exercise_type":"flexibility"},{"name":"Warrior Sequenz","duration_minutes":15,"intensity":"moderat","exercise_type":"flexibility"},{"name":"Savasana","duration_minutes":5,"intensity":"Yin","exercise_type":"flexibility"}]}]}
+\`\`\`
+
+### FORMAT-REGELN PRO TRAININGSART:
+- **Kraft:** name, sets, reps, weight_kg, rest_seconds
+- **Ausdauer (Laufen/Schwimmen/Radfahren):** name, duration_minutes, distance_km, pace, intensity, exercise_type:"cardio"
+- **Yoga/Flexibilität:** name, duration_minutes, intensity, exercise_type:"flexibility"
+- **Kampfsport:** name, duration_minutes, intensity, exercise_type:"cardio"
 
 ## TRAININGSPLAN BEARBEITEN ⚠️
 
@@ -211,9 +228,26 @@ When the user wants a training plan, create a complete plan as ACTION:
 \`\`\`ACTION:save_training_plan
 {"name":"4-Day Upper/Lower Split","split_type":"upper_lower","days_per_week":4,"days":[{"day_number":1,"name":"Lower A","focus":"Legs, Glutes","exercises":[{"name":"Trap-Bar Deadlift","sets":4,"reps":"6-8","weight_kg":70},{"name":"Hip Thrust","sets":3,"reps":"10-12","weight_kg":60}]}]}
 \`\`\`
-- split_type: "ppl", "upper_lower", "full_body" or "custom"
+- split_type: "ppl", "upper_lower", "full_body", "custom", "running", "swimming", "cycling", "yoga", "martial_arts" or "mixed"
+- Choose the split_type matching the sport!
 - Only for EXPLICIT plan requests ("create a plan for me", "make me a training plan")
 - NOT for questions about training or for workout logging
+
+### ENDURANCE PLAN EXAMPLE:
+\`\`\`ACTION:save_training_plan
+{"name":"5K Running Plan Beginner","split_type":"running","days_per_week":3,"days":[{"day_number":1,"name":"Easy Run","focus":"Zone 2","exercises":[{"name":"Easy Run","duration_minutes":25,"distance_km":3,"pace":"7:00 min/km","intensity":"Zone 2","exercise_type":"cardio"}]},{"day_number":2,"name":"Intervals","focus":"Speed","exercises":[{"name":"Warm-up Jog","duration_minutes":10,"intensity":"Zone 1","exercise_type":"cardio"},{"name":"Intervals 6x400m","duration_minutes":15,"intensity":"Zone 4","exercise_type":"cardio"},{"name":"Cool-down","duration_minutes":5,"intensity":"Zone 1","exercise_type":"cardio"}]}]}
+\`\`\`
+
+### YOGA PLAN EXAMPLE:
+\`\`\`ACTION:save_training_plan
+{"name":"Yoga for Athletes","split_type":"yoga","days_per_week":3,"days":[{"day_number":1,"name":"Vinyasa Flow","focus":"Full Body","exercises":[{"name":"Sun Salutation A","duration_minutes":10,"intensity":"Vinyasa","exercise_type":"flexibility"},{"name":"Warrior Sequence","duration_minutes":15,"intensity":"moderate","exercise_type":"flexibility"},{"name":"Savasana","duration_minutes":5,"intensity":"Yin","exercise_type":"flexibility"}]}]}
+\`\`\`
+
+### FORMAT RULES PER SPORT:
+- **Strength:** name, sets, reps, weight_kg, rest_seconds
+- **Endurance (Running/Swimming/Cycling):** name, duration_minutes, distance_km, pace, intensity, exercise_type:"cardio"
+- **Yoga/Flexibility:** name, duration_minutes, intensity, exercise_type:"flexibility"
+- **Martial Arts:** name, duration_minutes, intensity, exercise_type:"cardio"
 
 ## EDIT TRAINING PLAN ⚠️
 

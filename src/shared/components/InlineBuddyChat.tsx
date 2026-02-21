@@ -336,7 +336,7 @@ function InlineBuddyChatContent() {
 
         {/* Messages */}
         {messages.map((msg) => (
-          <ChatMessageBubble key={msg.id} message={msg} />
+          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} />
         ))}
 
         <div ref={chatEndRef} />

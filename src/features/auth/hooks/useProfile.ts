@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import type { UserProfile, Gender, BMRFormula, PersonalGoals } from '../../../types/health';
 
-const PROFILE_KEY = 'profile';
+export const PROFILE_KEY = 'profile';
 
 /**
  * Fetch the current user's profile.
@@ -38,6 +38,7 @@ interface UpdateProfileInput {
   preferred_language?: 'de' | 'en';
   preferred_bmr_formula?: BMRFormula;
   personal_goals?: PersonalGoals;
+  avatar_url?: string | null;
 }
 
 export function useUpdateProfile() {

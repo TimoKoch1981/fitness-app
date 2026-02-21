@@ -8,7 +8,30 @@
 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
+import type { TrainingPlan, TrainingPlanDay, PlanExercise } from '../../../types/health';
+
+/** Detect if an exercise is endurance-type (has duration but no sets) */
+function isEnduranceExercise(ex: PlanExercise): boolean {
+  return ex.exercise_type === 'cardio' ||
+    (ex.duration_minutes != null && ex.sets == null && ex.reps == null);
+}
+
+/** Format exercise details for PDF: returns [detail, weight/info] tuple */
+function formatExerciseForPDF(ex: PlanExercise, _language?: 'de' | 'en'): { detail: string; info: string } {
+  if (isEnduranceExercise(ex)) {
+    const parts: string[] = [];
+    if (ex.duration_minutes != null) parts.push(`${ex.duration_minutes} Min`);
+    if (ex.distance_km != null) parts.push(`${ex.distance_km} km`);
+    if (ex.pace) parts.push(ex.pace);
+    const info = ex.intensity ?? '';
+    return { detail: parts.join(' / '), info };
+  }
+  // Strength default
+  return {
+    detail: `${ex.sets ?? '—'} × ${ex.reps ?? '—'}`,
+    info: ex.weight_kg != null ? `${ex.weight_kg} kg` : '—',
+  };
+}
 
 const SPLIT_LABELS: Record<string, Record<string, string>> = {
   de: {
@@ -16,12 +39,24 @@ const SPLIT_LABELS: Record<string, Record<string, string>> = {
     upper_lower: 'Upper/Lower',
     full_body: 'Ganzkörper',
     custom: 'Custom',
+    running: 'Laufplan',
+    swimming: 'Schwimmplan',
+    cycling: 'Radfahrplan',
+    yoga: 'Yoga',
+    martial_arts: 'Kampfsport',
+    mixed: 'Gemischt',
   },
   en: {
     ppl: 'Push/Pull/Legs',
     upper_lower: 'Upper/Lower',
     full_body: 'Full Body',
     custom: 'Custom',
+    running: 'Running Plan',
+    swimming: 'Swimming Plan',
+    cycling: 'Cycling Plan',
+    yoga: 'Yoga',
+    martial_arts: 'Martial Arts',
+    mixed: 'Mixed',
   },
 };
 
@@ -132,16 +167,27 @@ export function generateTrainingPlanPDF(
 
     yPos += 3;
 
-    // Exercise table
-    const tableHeaders = [['#', t.exercise, t.sets, t.reps, t.weight, t.notes]];
-    const tableRows = day.exercises.map((ex, idx) => [
-      String(idx + 1),
-      ex.name,
-      String(ex.sets),
-      ex.reps,
-      ex.weight_kg != null ? `${ex.weight_kg} kg` : '—',
-      ex.notes ?? '',
-    ]);
+    // Exercise table — adaptive headers based on exercise types
+    const hasEndurance = day.exercises.some(isEnduranceExercise);
+    const detailHeader = hasEndurance
+      ? (language === 'de' ? 'Details' : 'Details')
+      : t.sets;
+    const infoHeader = hasEndurance
+      ? (language === 'de' ? 'Info' : 'Info')
+      : t.reps;
+
+    const tableHeaders = [['#', t.exercise, detailHeader, infoHeader, t.weight, t.notes]];
+    const tableRows = day.exercises.map((ex, idx) => {
+      const fmt = formatExerciseForPDF(ex, language);
+      return [
+        String(idx + 1),
+        ex.name,
+        isEnduranceExercise(ex) ? fmt.detail : String(ex.sets ?? '—'),
+        isEnduranceExercise(ex) ? fmt.info : (ex.reps ?? '—'),
+        isEnduranceExercise(ex) ? (ex.intensity ?? '—') : (ex.weight_kg != null ? `${ex.weight_kg} kg` : '—'),
+        ex.notes ?? '',
+      ];
+    });
 
     autoTable(doc, {
       startY: yPos,
@@ -319,10 +365,25 @@ export function generateTrainingLogPDF(
         ? `${lastData.reps}${lastData.weight_kg != null ? ` × ${lastData.weight_kg}kg` : ''}`
         : '—';
 
+      // Adaptive format for endurance exercises
+      if (isEnduranceExercise(ex)) {
+        const fmt = formatExerciseForPDF(ex, language);
+        return [
+          String(idx + 1),
+          ex.name,
+          fmt.detail,
+          fmt.info || '—',
+          lastTimeStr,
+          t.blankField,
+          t.blankField,
+          t.blankField,
+        ];
+      }
+
       return [
         String(idx + 1),
         ex.name,
-        ex.reps,
+        ex.reps ?? '—',
         ex.weight_kg != null ? `${ex.weight_kg} kg` : '—',
         lastTimeStr,
         t.blankField,

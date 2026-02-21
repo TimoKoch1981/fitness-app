@@ -1,4 +1,5 @@
 import { AlertCircle } from 'lucide-react';
+import { UserAvatar } from '../../../shared/components/UserAvatar';
 import type { DisplayMessage } from '../hooks/useBuddyChat';
 
 /** Hide ACTION blocks from the display during streaming */
@@ -9,9 +10,10 @@ function stripActionBlockFromDisplay(text: string): string {
 
 interface ChatMessageProps {
   message: DisplayMessage;
+  avatarUrl?: string | null;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageProps) {
+export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
   // Loading state: show bouncing dots while waiting for first token
@@ -43,6 +45,7 @@ export function ChatMessageBubble({ message }: ChatMessageProps) {
             {message.content}
           </p>
         </div>
+        <UserAvatar avatarUrl={avatarUrl} size="sm" className="mt-1" />
       </div>
     );
   }

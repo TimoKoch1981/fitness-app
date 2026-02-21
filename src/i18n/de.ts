@@ -153,6 +153,18 @@ export const de = {
     pdfTitle: 'Trainingsplan',
     pdfCreated: 'Erstellt am',
     pdfGenerated: 'PDF wird erstellt...',
+    // Sport types (split types)
+    running: 'Laufen',
+    swimming: 'Schwimmen',
+    cycling: 'Radfahren',
+    yoga: 'Yoga',
+    martialArts: 'Kampfsport',
+    mixed: 'Gemischt',
+    // Endurance fields
+    distance: 'Distanz',
+    pace: 'Pace',
+    intensity: 'Intensität',
+    zone: 'Zone',
   },
   body: {
     title: 'Körperwerte',
@@ -297,6 +309,10 @@ export const de = {
     targetBodyFat: 'Ziel-KFA',
     targetDate: 'Zieldatum',
     goalNotes: 'Notizen',
+    // Avatar
+    changePhoto: 'Foto ändern',
+    removePhoto: 'Bild entfernen',
+    uploadError: 'Bild-Upload fehlgeschlagen',
   },
   reports: {
     title: 'Berichte',

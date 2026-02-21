@@ -155,6 +155,18 @@ export const en: TranslationKeys = {
     pdfTitle: 'Training Plan',
     pdfCreated: 'Created on',
     pdfGenerated: 'Generating PDF...',
+    // Sport types (split types)
+    running: 'Running',
+    swimming: 'Swimming',
+    cycling: 'Cycling',
+    yoga: 'Yoga',
+    martialArts: 'Martial Arts',
+    mixed: 'Mixed',
+    // Endurance fields
+    distance: 'Distance',
+    pace: 'Pace',
+    intensity: 'Intensity',
+    zone: 'Zone',
   },
   body: {
     title: 'Body Stats',
@@ -296,6 +308,10 @@ export const en: TranslationKeys = {
     targetBodyFat: 'Target BF%',
     targetDate: 'Target Date',
     goalNotes: 'Notes',
+    // Avatar
+    changePhoto: 'Change photo',
+    removePhoto: 'Remove photo',
+    uploadError: 'Image upload failed',
   },
   reports: {
     title: 'Reports',

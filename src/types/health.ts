@@ -204,6 +204,7 @@ export interface UserProfile {
   preferred_language: 'de' | 'en';
   preferred_bmr_formula: BMRFormula;
   personal_goals?: PersonalGoals;
+  avatar_url?: string;
   is_admin?: boolean;
   created_at: string;
   updated_at: string;
@@ -340,6 +341,24 @@ export interface Recommendation {
   priority: RecommendationPriority;
 }
 
+// === EXERCISE CATALOG ===
+export interface CatalogExercise {
+  id: string;
+  name: string;
+  name_en?: string;
+  aliases: string[];
+  category: ExerciseCategory;
+  muscle_groups: string[];
+  description?: string;
+  description_en?: string;
+  video_url_de?: string;
+  video_url_en?: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  equipment_needed: string[];
+  is_compound: boolean;
+  created_at: string;
+}
+
 // === EQUIPMENT ===
 export type EquipmentCategory = 'machine' | 'cable' | 'free_weight' | 'bodyweight' | 'cardio' | 'other';
 
@@ -377,14 +396,27 @@ export interface UserEquipment {
 }
 
 // === TRAINING PLAN ===
-export type SplitType = 'ppl' | 'upper_lower' | 'full_body' | 'custom';
+export type ExerciseCategory = 'strength' | 'cardio' | 'flexibility' | 'functional' | 'other';
+
+export type SplitType =
+  | 'ppl' | 'upper_lower' | 'full_body' | 'custom'
+  | 'running' | 'swimming' | 'cycling' | 'yoga' | 'martial_arts' | 'mixed';
 
 export interface PlanExercise {
   name: string;
-  sets: number;
-  reps: string;         // "8-10" or "12" or "60s"
+  // Strength fields (optional — backwards compatible, was required)
+  sets?: number;
+  reps?: string;              // "8-10" or "12" or "60s"
   weight_kg?: number;
   rest_seconds?: number;
+  // Endurance fields
+  duration_minutes?: number;
+  distance_km?: number;
+  pace?: string;              // e.g. "5:30 min/km"
+  intensity?: string;         // e.g. "Zone 2", "moderat", "80% HRmax"
+  // Common
+  exercise_type?: ExerciseCategory;
+  exercise_id?: string;       // optional FK to exercise_catalog
   notes?: string;
 }
 

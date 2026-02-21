@@ -428,9 +428,20 @@ export function generateActivePlanSkill(data: UserSkillData): string {
     if (day.focus) skill += ` (${day.focus})`;
     skill += `\n`;
     for (const ex of day.exercises) {
-      skill += `- ${ex.name}: ${ex.sets}×${ex.reps}`;
-      if (ex.weight_kg) skill += ` @ ${ex.weight_kg}kg`;
-      skill += `\n`;
+      // Adaptive format: strength vs endurance
+      const isEndurance = ex.exercise_type === 'cardio' || (ex.duration_minutes != null && ex.sets == null);
+      if (isEndurance) {
+        const parts: string[] = [ex.name + ':'];
+        if (ex.duration_minutes) parts.push(`${ex.duration_minutes} Min`);
+        if (ex.distance_km) parts.push(`${ex.distance_km} km`);
+        if (ex.pace) parts.push(`@ ${ex.pace}`);
+        if (ex.intensity) parts.push(`(${ex.intensity})`);
+        skill += `- ${parts.join(' ')}\n`;
+      } else {
+        skill += `- ${ex.name}: ${ex.sets ?? '?'}×${ex.reps ?? '?'}`;
+        if (ex.weight_kg) skill += ` @ ${ex.weight_kg}kg`;
+        skill += `\n`;
+      }
     }
     skill += `\n`;
   }

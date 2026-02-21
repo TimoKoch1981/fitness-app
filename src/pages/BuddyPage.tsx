@@ -9,7 +9,7 @@ import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useOnboarding } from '../features/buddy/hooks/useOnboarding';
-import { useSuggestions } from '../features/buddy/hooks/useSuggestions';
+import { useSuggestions, type Suggestion } from '../features/buddy/hooks/useSuggestions';
 import { SuggestionChips } from '../features/buddy/components/SuggestionChips';
 import { useDailyMealTotals } from '../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
@@ -122,8 +122,13 @@ export function BuddyPage() {
   const deviations = analyzeDeviations(healthContext, dailyCheckin);
   const deviationSuggestions = getDeviationSuggestions(deviations, language as 'de' | 'en');
   // Merge: deviation chips first, then regular suggestions
-  const allSuggestions = [
-    ...deviationSuggestions.map(ds => ({ ...ds, icon: ds.icon })),
+  const allSuggestions: Suggestion[] = [
+    ...deviationSuggestions.map(ds => ({
+      id: ds.id,
+      text: ds.label,
+      message: ds.message,
+      priority: 100, // Deviation chips always first
+    })),
     ...suggestions.filter(s => !deviationSuggestions.some(ds => ds.id === s.id)),
   ];
 
@@ -309,7 +314,7 @@ export function BuddyPage() {
 
         {/* Messages */}
         {messages.map((msg) => (
-          <ChatMessageBubble key={msg.id} message={msg} />
+          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} />
         ))}
 
         {/* Help hint when no messages */}

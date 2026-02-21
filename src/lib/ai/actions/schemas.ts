@@ -110,12 +110,28 @@ const LogSubstanceSchema = z.object({
 
 const PlanExerciseSchema = z.object({
   name: z.string().min(1),
-  sets: z.number().positive(),
-  reps: z.string().min(1),
+  // Strength fields (optional — backwards compatible, was required)
+  sets: z.number().positive().optional(),
+  reps: z.string().min(1).optional(),
   weight_kg: z.number().nonnegative().optional(),
   rest_seconds: z.number().positive().optional(),
+  // Endurance fields
+  duration_minutes: z.number().positive().optional(),
+  distance_km: z.number().positive().optional(),
+  pace: z.string().optional(),
+  intensity: z.string().optional(),
+  // Common
+  exercise_type: z.enum(['strength', 'cardio', 'flexibility', 'functional', 'other']).optional(),
+  exercise_id: z.string().optional(),
   notes: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    const hasStrength = data.sets != null || data.reps != null;
+    const hasEndurance = data.duration_minutes != null || data.distance_km != null;
+    return hasStrength || hasEndurance;
+  },
+  { message: 'Exercise must have either sets/reps (strength) or duration/distance (endurance)' },
+);
 
 const PlanDaySchema = z.object({
   day_number: z.number().int().min(1).max(7),
@@ -127,7 +143,10 @@ const PlanDaySchema = z.object({
 
 const SaveTrainingPlanSchema = z.object({
   name: z.string().min(1),
-  split_type: z.enum(['ppl', 'upper_lower', 'full_body', 'custom']).default('custom'),
+  split_type: z.enum([
+    'ppl', 'upper_lower', 'full_body', 'custom',
+    'running', 'swimming', 'cycling', 'yoga', 'martial_arts', 'mixed',
+  ]).default('custom'),
   days_per_week: z.number().int().min(1).max(7),
   notes: z.string().optional(),
   days: z.array(PlanDaySchema).min(1),

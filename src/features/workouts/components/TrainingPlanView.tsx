@@ -2,8 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
+import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
+import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseCatalog';
+import { ExerciseDetailModal } from './ExerciseDetailModal';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -23,6 +25,8 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const [isExporting, setIsExporting] = useState(false);
   const [showPdfMenu, setShowPdfMenu] = useState(false);
   const pdfMenuRef = useRef<HTMLDivElement>(null);
+  const { data: catalog } = useExerciseCatalog();
+  const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -82,8 +86,14 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const splitTypeLabels: Record<string, string> = {
     ppl: 'Push/Pull/Legs',
     upper_lower: 'Upper/Lower',
-    full_body: 'Ganzkörper',
+    full_body: language === 'de' ? 'Ganzkörper' : 'Full Body',
     custom: 'Custom',
+    running: language === 'de' ? 'Laufplan' : 'Running Plan',
+    swimming: language === 'de' ? 'Schwimmplan' : 'Swimming Plan',
+    cycling: language === 'de' ? 'Radfahrplan' : 'Cycling Plan',
+    yoga: 'Yoga',
+    martial_arts: language === 'de' ? 'Kampfsport' : 'Martial Arts',
+    mixed: language === 'de' ? 'Gemischt' : 'Mixed',
   };
 
   return (
@@ -179,9 +189,57 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           day={day}
           isExpanded={expandedDays.has(day.day_number)}
           onToggle={() => toggleDay(day.day_number)}
+          catalog={catalog ?? []}
+          onExerciseClick={setSelectedExercise}
         />
       ))}
+
+      {/* Exercise Detail Modal */}
+      {selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          onClose={() => setSelectedExercise(null)}
+        />
+      )}
     </div>
+  );
+}
+
+// ── Exercise Format Helper ─────────────────────────────────────────────
+
+/**
+ * Format exercise details based on type (strength vs endurance vs flexibility).
+ * - Strength: 4×8-10 @ 80kg
+ * - Endurance: 30 Min · 4 km · @ 5:30 min/km · (Zone 2)
+ * - Flexibility: 10 Min · (moderat)
+ * - Fallback: uses heuristic (has duration but no sets → endurance)
+ */
+function formatExerciseDetails(ex: PlanExercise): React.ReactNode {
+  const isEndurance =
+    ex.exercise_type === 'cardio' ||
+    (ex.duration_minutes != null && ex.sets == null && ex.reps == null);
+
+  const isFlexibility =
+    ex.exercise_type === 'flexibility' ||
+    (ex.duration_minutes != null && ex.intensity != null && ex.sets == null && ex.distance_km == null);
+
+  if (isEndurance || isFlexibility) {
+    const parts: string[] = [];
+    if (ex.duration_minutes != null) parts.push(`${ex.duration_minutes} Min`);
+    if (ex.distance_km != null) parts.push(`${ex.distance_km} km`);
+    if (ex.pace) parts.push(`@ ${ex.pace}`);
+    if (ex.intensity) parts.push(`(${ex.intensity})`);
+    return <>{parts.join(' · ')}</>;
+  }
+
+  // Strength format (default)
+  return (
+    <>
+      {ex.sets != null && ex.reps != null ? `${ex.sets}×${ex.reps}` : ''}
+      {ex.weight_kg != null && (
+        <span className="text-teal-600 ml-1">@ {ex.weight_kg}kg</span>
+      )}
+    </>
   );
 }
 
@@ -191,9 +249,11 @@ interface DayCardProps {
   day: TrainingPlanDay;
   isExpanded: boolean;
   onToggle: () => void;
+  catalog: CatalogExercise[];
+  onExerciseClick: (exercise: CatalogExercise) => void;
 }
 
-function DayCard({ day, isExpanded, onToggle }: DayCardProps) {
+function DayCard({ day, isExpanded, onToggle, catalog, onExerciseClick }: DayCardProps) {
   const { t } = useTranslation();
 
   return (
@@ -231,25 +291,34 @@ function DayCard({ day, isExpanded, onToggle }: DayCardProps) {
       {isExpanded && (
         <div className="px-4 pb-4 pt-0">
           <div className="border-t border-gray-100 pt-3 space-y-2">
-            {day.exercises.map((ex, idx) => (
-              <div key={idx} className="flex items-baseline gap-2 text-sm">
-                <span className="text-gray-300 text-xs w-5 text-right flex-shrink-0">
-                  {idx + 1}.
-                </span>
-                <div className="flex-1 min-w-0">
-                  <span className="text-gray-700 font-medium">{ex.name}</span>
-                  <span className="text-gray-400 ml-2">
-                    {ex.sets}×{ex.reps}
-                    {ex.weight_kg != null && (
-                      <span className="text-teal-600 ml-1">@ {ex.weight_kg}kg</span>
-                    )}
+            {day.exercises.map((ex, idx) => {
+              const catalogEntry = findExerciseInCatalog(ex.name, catalog);
+              return (
+                <div key={idx} className="flex items-baseline gap-2 text-sm">
+                  <span className="text-gray-300 text-xs w-5 text-right flex-shrink-0">
+                    {idx + 1}.
                   </span>
-                  {ex.notes && (
-                    <span className="text-gray-300 ml-2 text-xs">({ex.notes})</span>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    {catalogEntry ? (
+                      <button
+                        onClick={() => onExerciseClick(catalogEntry)}
+                        className="text-gray-700 font-medium underline decoration-dotted decoration-teal-400 underline-offset-2 hover:text-teal-600 transition-colors text-left"
+                      >
+                        {ex.name}
+                      </button>
+                    ) : (
+                      <span className="text-gray-700 font-medium">{ex.name}</span>
+                    )}
+                    <span className="text-gray-400 ml-2">
+                      {formatExerciseDetails(ex)}
+                    </span>
+                    {ex.notes && (
+                      <span className="text-gray-300 ml-2 text-xs">({ex.notes})</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           {day.notes && (
             <p className="text-xs text-gray-400 mt-2 italic">{day.notes}</p>
