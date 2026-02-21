@@ -3,12 +3,14 @@
  * Used inside TrackingPage as one of 3 tracking tabs.
  */
 
-import { Activity, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, Camera, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useBodyMeasurements, useDeleteBodyMeasurement } from '../hooks/useBodyMeasurements';
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddBodyMeasurementDialog } from './AddBodyMeasurementDialog';
+import { ScreenshotImport } from './ScreenshotImport';
 import { formatDate } from '../../../lib/utils';
 
 interface BodyTabContentProps {
@@ -22,6 +24,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
   const bodySuggestions = usePageBuddySuggestions('tracking_body', language as 'de' | 'en');
   const { data: measurements, isLoading } = useBodyMeasurements(20);
   const deleteMeasurement = useDeleteBodyMeasurement();
+  const [showScreenshotImport, setShowScreenshotImport] = useState(false);
 
   const locale = language === 'de' ? 'de-DE' : 'en-US';
 
@@ -49,15 +52,28 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
       <div className="text-center py-12">
         <Activity className="h-12 w-12 mx-auto text-gray-200 mb-3" />
         <p className="text-gray-400 text-sm">{t.common.noData}</p>
-        <button
-          onClick={onOpenAddDialog}
-          className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
-        >
-          {t.body.addMeasurement}
-        </button>
+        <div className="mt-3 flex gap-2 justify-center">
+          <button
+            onClick={onOpenAddDialog}
+            className="px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+          >
+            {t.body.addMeasurement}
+          </button>
+          <button
+            onClick={() => setShowScreenshotImport(true)}
+            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+          >
+            <Camera className="h-3.5 w-3.5" />
+            {t.screenshot.importButton}
+          </button>
+        </div>
         <AddBodyMeasurementDialog
           open={showAddDialog}
           onClose={onCloseAddDialog}
+        />
+        <ScreenshotImport
+          open={showScreenshotImport}
+          onClose={() => setShowScreenshotImport(false)}
         />
       </div>
     );
@@ -94,6 +110,15 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             );
           })}
         </div>
+
+        {/* Screenshot Import Button */}
+        <button
+          onClick={() => setShowScreenshotImport(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm"
+        >
+          <Camera className="h-4 w-4" />
+          {t.screenshot.importButton}
+        </button>
 
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={bodySuggestions} />
@@ -132,6 +157,11 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
       <AddBodyMeasurementDialog
         open={showAddDialog}
         onClose={onCloseAddDialog}
+      />
+
+      <ScreenshotImport
+        open={showScreenshotImport}
+        onClose={() => setShowScreenshotImport(false)}
       />
     </>
   );
