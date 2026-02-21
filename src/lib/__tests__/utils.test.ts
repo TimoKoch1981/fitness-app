@@ -9,7 +9,8 @@ describe('cn()', () => {
   });
 
   it('handles conditional classes', () => {
-    expect(cn('base', false && 'hidden', 'visible')).toBe('base visible');
+    const hidden = false as boolean;
+    expect(cn('base', hidden && 'hidden', 'visible')).toBe('base visible');
   });
 
   it('merges conflicting tailwind classes (last wins)', () => {

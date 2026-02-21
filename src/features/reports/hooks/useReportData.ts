@@ -245,7 +245,7 @@ export function useBalanceForRange(startDate: string, endDate: string) {
 
   // Compute TDEE from profile (or 0 if profile incomplete)
   let dailyTDEE = 0;
-  let dailyGoal = profile?.daily_calories_goal ?? 0;
+  const dailyGoal = profile?.daily_calories_goal ?? 0;
 
   if (profile?.height_cm && profile?.birth_date && profile?.gender) {
     // We need current weight — fetch latest body measurement

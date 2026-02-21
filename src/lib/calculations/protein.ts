@@ -46,7 +46,7 @@ export function calculateProteinRecommendation(
         source: 'Morton et al. (2018)',
       };
 
-    case 'strength_deficit':
+    case 'strength_deficit': {
       // Uses lean mass if available, otherwise estimates
       const lm = lean_mass_kg ?? weight_kg * 0.8; // rough estimate
       return {
@@ -55,6 +55,7 @@ export function calculateProteinRecommendation(
         context,
         source: 'Helms et al. (2014)',
       };
+    }
 
     case 'strength_anabolic':
       return {
