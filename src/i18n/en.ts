@@ -68,6 +68,13 @@ export const en: TranslationKeys = {
     loginError: 'Login failed',
     registerError: 'Registration failed',
     resetSent: 'Password reset email sent',
+    newPassword: 'New Password',
+    confirmNewPassword: 'Confirm New Password',
+    updatePassword: 'Update Password',
+    passwordUpdated: 'Your password has been updated successfully. Redirecting...',
+    passwordMismatch: 'Passwords do not match',
+    passwordTooShort: 'Password must be at least 6 characters',
+    registerSuccess: 'Registration successful! Please check your email and confirm your account.',
   },
   dashboard: {
     title: 'Daily Overview',

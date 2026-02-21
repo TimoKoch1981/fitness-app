@@ -66,6 +66,13 @@ export const de = {
     loginError: 'Anmeldung fehlgeschlagen',
     registerError: 'Registrierung fehlgeschlagen',
     resetSent: 'E-Mail zum Zurücksetzen wurde gesendet',
+    newPassword: 'Neues Passwort',
+    confirmNewPassword: 'Neues Passwort bestätigen',
+    updatePassword: 'Passwort aktualisieren',
+    passwordUpdated: 'Dein Passwort wurde erfolgreich geändert. Du wirst jetzt weitergeleitet...',
+    passwordMismatch: 'Passwörter stimmen nicht überein',
+    passwordTooShort: 'Passwort muss mindestens 6 Zeichen lang sein',
+    registerSuccess: 'Registrierung erfolgreich! Bitte überprüfe deine E-Mail und bestätige dein Konto.',
   },
   dashboard: {
     title: 'Tagesübersicht',
