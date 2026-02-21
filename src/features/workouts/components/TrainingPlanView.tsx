@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
 import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseCatalog';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
+import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -27,6 +28,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const pdfMenuRef = useRef<HTMLDivElement>(null);
   const { data: catalog } = useExerciseCatalog();
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -124,6 +126,14 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             >
               <Pencil className="h-4 w-4" />
             </button>
+            {/* Share Button */}
+            <button
+              onClick={() => setShowShareDialog(true)}
+              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors"
+              title={t.share.sharePlan}
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
             {/* PDF Dropdown */}
             <div className="relative" ref={pdfMenuRef}>
               <button
@@ -199,6 +209,14 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
         <ExerciseDetailModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
+        />
+      )}
+
+      {/* Share Training Plan Dialog */}
+      {showShareDialog && (
+        <ShareTrainingPlanDialog
+          plan={plan}
+          onClose={() => setShowShareDialog(false)}
         />
       )}
     </div>

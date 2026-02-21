@@ -15,6 +15,7 @@ import {
   Zap,
   Bell,
   Check,
+  Share2,
 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
@@ -43,9 +44,11 @@ import {
 } from '../lib/constants';
 
 // Report data hooks & chart components
-import { useMealsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
+import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
 import { CalorieChart } from '../features/reports/components/CalorieChart';
 import { WeightChart } from '../features/reports/components/WeightChart';
+import { ShareCardDialog } from '../features/share/components/ShareCardDialog';
+import type { ShareCardData } from '../features/share/components/ShareProgressCard';
 
 const WATER_STORAGE_KEY = 'fitbuddy_water_';
 
@@ -91,10 +94,12 @@ export function CockpitPage() {
     ? getTodayReminderStatus(remindersList, todayLogs)
     : { pending: [], completed: [], totalDue: 0 };
 
-  // Weekly data for charts
+  // Weekly data for charts + share card
   const week = getLastNDays(7);
   const weekMeals = useMealsForRange(week.start, week.end);
+  const weekWorkouts = useWorkoutsForRange(week.start, week.end);
   const bodyTrendData = useBodyTrend(10);
+  const [showShareCard, setShowShareCard] = useState(false);
 
   // Water tracker (localStorage-based, scoped per user)
   const waterKey = WATER_STORAGE_KEY + (user?.id ?? 'anon') + '_' + selectedDate;
@@ -189,9 +194,74 @@ export function CockpitPage() {
 
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterGlasses / waterGoal) * 100)) : 0;
 
+  // Share card data
+  const shareCardData: ShareCardData | null = (() => {
+    if (!weekMeals.data) return null;
+    const daysWithData = weekMeals.data.filter(d => d.calories > 0);
+    const avgCal = daysWithData.length > 0
+      ? Math.round(daysWithData.reduce((s, d) => s + d.calories, 0) / daysWithData.length)
+      : 0;
+    const avgProt = daysWithData.length > 0
+      ? Math.round(daysWithData.reduce((s, d) => s + d.protein, 0) / daysWithData.length)
+      : 0;
+    const totalWorkouts = weekWorkouts.data
+      ? weekWorkouts.data.reduce((s, d) => s + d.workoutCount, 0)
+      : 0;
+
+    // Weight change: compare first and last body measurement in trend
+    let weightChange: number | undefined;
+    if (bodyTrendData.data && bodyTrendData.data.length >= 2) {
+      const first = bodyTrendData.data[0];
+      const last = bodyTrendData.data[bodyTrendData.data.length - 1];
+      if (first.weight_kg && last.weight_kg) {
+        weightChange = last.weight_kg - first.weight_kg;
+      }
+    }
+
+    // Week label
+    const now = new Date();
+    const weekNum = Math.ceil(
+      ((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7
+    );
+    const weekLabel = `KW ${weekNum} / ${now.getFullYear()}`;
+
+    return {
+      displayName: profile?.display_name ?? 'FitBuddy User',
+      currentWeight: latestBody?.weight_kg ?? undefined,
+      weightChange,
+      avgCalories: avgCal,
+      caloriesGoal,
+      avgProtein: avgProt,
+      proteinGoal,
+      workoutCount: totalWorkouts,
+      weekLabel,
+    };
+  })();
+
   return (
     <PageShell title={t.cockpit.title}>
       <div className="space-y-4">
+        {/* Share Button — top right float */}
+        {shareCardData && shareCardData.avgCalories > 0 && (
+          <div className="flex justify-end -mt-2 -mb-2">
+            <button
+              onClick={() => setShowShareCard(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-teal-600 bg-teal-50 rounded-full hover:bg-teal-100 transition-colors"
+            >
+              <Share2 className="h-3 w-3" />
+              {t.share.shareProgress}
+            </button>
+          </div>
+        )}
+
+        {/* Share Card Dialog */}
+        {showShareCard && shareCardData && (
+          <ShareCardDialog
+            data={shareCardData}
+            onClose={() => setShowShareCard(false)}
+          />
+        )}
+
         {/* Daily Check-in */}
         <DailyCheckinCard />
 
