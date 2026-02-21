@@ -16,6 +16,7 @@ import { getSkillContent, getSkillsForAgent, getSkillVersionMap } from '../skill
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
 import { getOnboardingPrompt } from './onboardingPrompt';
+import { analyzeDeviations, formatDeviationsForAgent } from '../deviations';
 
 export abstract class BaseAgent {
   protected config: AgentConfig;
@@ -60,7 +61,14 @@ export abstract class BaseAgent {
       parts.push(instructions);
     }
 
-    // 5. Onboarding mode: prepend onboarding instructions when user profile is incomplete
+    // 5. Proactive deviations — inject alerts relevant to this agent
+    const deviations = analyzeDeviations(context.healthContext, context.healthContext.dailyCheckin);
+    const deviationBlock = formatDeviationsForAgent(deviations, this.config.type, context.language);
+    if (deviationBlock) {
+      parts.push(deviationBlock);
+    }
+
+    // 6. Onboarding mode: prepend onboarding instructions when user profile is incomplete
     if (context.healthContext.onboardingMode) {
       parts.unshift(getOnboardingPrompt(context.language));
     }

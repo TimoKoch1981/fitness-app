@@ -31,6 +31,7 @@ import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
 import { calculateTDEE_PAL } from '../lib/calculations/tdee';
 import { generateInsights } from '../lib/insights';
 import { InsightCard } from '../shared/components/InsightCard';
+import { DailyCheckinCard } from '../features/checkin/components/DailyCheckinCard';
 import { today } from '../lib/utils';
 import { useAuth } from '../app/providers/AuthProvider';
 import {
@@ -191,6 +192,9 @@ export function CockpitPage() {
   return (
     <PageShell title={t.cockpit.title}>
       <div className="space-y-4">
+        {/* Daily Check-in */}
+        <DailyCheckinCard />
+
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />
 

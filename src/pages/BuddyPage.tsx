@@ -17,6 +17,8 @@ import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { useActivePlan } from '../features/workouts/hooks/useTrainingPlans';
 import { useStandardProducts, useUserProducts } from '../features/meals/hooks/useProducts';
 import { useUserEquipmentResolved } from '../features/equipment/hooks/useEquipment';
+import { useTodayCheckin } from '../features/checkin/hooks/useDailyCheckin';
+import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
 import type { HealthContext } from '../types/health';
@@ -78,6 +80,7 @@ export function BuddyPage() {
   const { data: standardProducts } = useStandardProducts();
   const { data: userProducts } = useUserProducts();
   const { equipment: availableEquipment } = useUserEquipmentResolved();
+  const { data: dailyCheckin } = useTodayCheckin();
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -103,6 +106,7 @@ export function BuddyPage() {
     userProducts: userProducts ?? [],
     standardProducts: standardProducts ?? [],
     availableEquipment: availableEquipment ?? [],
+    dailyCheckin: dailyCheckin ?? undefined,
   };
 
   // Proactive suggestion chips (rule-based, no LLM)
@@ -113,6 +117,15 @@ export function BuddyPage() {
     activePlan: activePlan ?? undefined,
     language: language as 'de' | 'en',
   });
+
+  // Deviation-based suggestion chips (proactive alerts)
+  const deviations = analyzeDeviations(healthContext, dailyCheckin);
+  const deviationSuggestions = getDeviationSuggestions(deviations, language as 'de' | 'en');
+  // Merge: deviation chips first, then regular suggestions
+  const allSuggestions = [
+    ...deviationSuggestions.map(ds => ({ ...ds, icon: ds.icon })),
+    ...suggestions.filter(s => !deviationSuggestions.some(ds => ds.id === s.id)),
+  ];
 
   const {
     messages,
@@ -326,10 +339,10 @@ export function BuddyPage() {
       {/* Input Bar */}
       <div className="fixed bottom-14 left-0 right-0 bg-white border-t border-gray-200 p-3">
         {/* Suggestion Chips — only when chat is empty or few messages */}
-        {suggestions.length > 0 && messages.length <= 2 && !needsOnboarding && (
+        {allSuggestions.length > 0 && messages.length <= 2 && !needsOnboarding && (
           <div className="max-w-lg mx-auto mb-2">
             <SuggestionChips
-              suggestions={suggestions}
+              suggestions={allSuggestions}
               onTap={(message) => sendMessage(message)}
               disabled={isLoading}
             />

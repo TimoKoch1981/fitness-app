@@ -422,6 +422,17 @@ export const de = {
     errorTitle: 'Analyse fehlgeschlagen',
     importButton: 'Screenshot importieren',
   },
+  checkin: {
+    title: 'Tagesform',
+    subtitle: 'Wie fühlst du dich heute?',
+    energy: 'Energie',
+    sleep: 'Schlaf',
+    mood: 'Stimmung',
+    stress: 'Stress',
+    illness: 'Krank',
+    save: 'Check-in speichern',
+    update: 'Aktualisieren',
+  },
   equipment: {
     title: 'Gerätepark',
     subtitle: 'Welche Geräte stehen dir zur Verfügung?',

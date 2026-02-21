@@ -293,6 +293,21 @@ export interface DailyStats {
   waterGoal: number;
 }
 
+// === DAILY CHECK-IN ===
+export interface DailyCheckin {
+  id: string;
+  user_id: string;
+  date: string;
+  energy_level?: number; // 1-5
+  sleep_quality?: number; // 1-5
+  mood?: number; // 1-5
+  stress_level?: number; // 1-5
+  pain_areas: string[];
+  illness: boolean;
+  notes?: string;
+  created_at: string;
+}
+
 // === HEALTH CONTEXT (for AI) ===
 export interface HealthContext {
   dailyStats: DailyStats;
@@ -308,6 +323,7 @@ export interface HealthContext {
   userProducts?: UserProduct[];
   standardProducts?: ProductNutrition[];
   availableEquipment?: Equipment[];
+  dailyCheckin?: DailyCheckin;
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }

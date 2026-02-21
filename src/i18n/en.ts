@@ -421,6 +421,17 @@ export const en: TranslationKeys = {
     errorTitle: 'Analysis failed',
     importButton: 'Import screenshot',
   },
+  checkin: {
+    title: 'Daily Check-in',
+    subtitle: 'How are you feeling today?',
+    energy: 'Energy',
+    sleep: 'Sleep',
+    mood: 'Mood',
+    stress: 'Stress',
+    illness: 'Sick',
+    save: 'Save check-in',
+    update: 'Update',
+  },
   equipment: {
     title: 'Equipment',
     subtitle: 'Which equipment is available to you?',
