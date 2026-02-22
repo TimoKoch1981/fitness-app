@@ -88,9 +88,9 @@ function InlineBuddyChatContent() {
 
   // ── Health Context ──────────────────────────────────────────────────────
   const { data: profile } = useProfile();
-  const { needsOnboarding } = useOnboarding(profile);
-  const { totals } = useDailyMealTotals(today());
   const { data: latestBody } = useLatestBodyMeasurement();
+  const { needsOnboarding } = useOnboarding(profile, latestBody);
+  const { totals } = useDailyMealTotals(today());
   const { data: activeSubstances } = useSubstances(true);
   const { data: activePlan } = useActivePlan();
   const { data: standardProducts } = useStandardProducts();

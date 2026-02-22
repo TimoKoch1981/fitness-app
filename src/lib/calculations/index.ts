@@ -32,3 +32,17 @@ export {
   getCalorieRecommendation,
   calculateCalorieBalance,
 } from './protein';
+
+export {
+  calculateRecommendedGoals,
+} from './goals';
+
+export type { GoalCalculationInput, RecommendedGoals } from './goals';
+
+export {
+  classifyBMI,
+  calculateFFMI,
+  classifyFFMI,
+} from './bodyMetrics';
+
+export type { BMIClassification, FFMIResult, FFMIClassification } from './bodyMetrics';

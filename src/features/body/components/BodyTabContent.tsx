@@ -8,9 +8,11 @@ import { Activity, Camera, Trash2, TrendingDown, TrendingUp } from 'lucide-react
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useBodyMeasurements, useDeleteBodyMeasurement } from '../hooks/useBodyMeasurements';
+import { useProfile } from '../../auth/hooks/useProfile';
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddBodyMeasurementDialog } from './AddBodyMeasurementDialog';
 import { ScreenshotImport } from './ScreenshotImport';
+import { classifyBMI, calculateFFMI, classifyFFMI } from '../../../lib/calculations';
 import { formatDate } from '../../../lib/utils';
 
 interface BodyTabContentProps {
@@ -21,8 +23,10 @@ interface BodyTabContentProps {
 
 export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: BodyTabContentProps) {
   const { t, language } = useTranslation();
+  const isDE = language === 'de';
   const bodySuggestions = usePageBuddySuggestions('tracking_body', language as 'de' | 'en');
   const { data: measurements, isLoading } = useBodyMeasurements(20);
+  const { data: profile } = useProfile();
   const deleteMeasurement = useDeleteBodyMeasurement();
   const [showScreenshotImport, setShowScreenshotImport] = useState(false);
 
@@ -88,7 +92,6 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             { label: t.body.weight, value: latest.weight_kg, unit: t.body.kg, prev: previous?.weight_kg },
             { label: t.body.bodyFat, value: latest.body_fat_pct, unit: t.body.percent, prev: previous?.body_fat_pct },
             { label: t.body.muscleMass, value: latest.muscle_mass_kg, unit: t.body.kg, prev: previous?.muscle_mass_kg },
-            { label: t.body.bmi, value: latest.bmi, unit: '', prev: previous?.bmi },
             { label: t.body.waist, value: latest.waist_cm, unit: t.body.cm, prev: previous?.waist_cm },
             { label: t.body.waterPct, value: latest.water_pct, unit: t.body.percent, prev: previous?.water_pct },
           ].map((stat) => {
@@ -109,6 +112,45 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
               </div>
             );
           })}
+
+          {/* BMI — color-coded */}
+          {latest.bmi && (() => {
+            const bmiClass = classifyBMI(latest.bmi);
+            const trend = getTrend(latest.bmi, previous?.bmi);
+            return (
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-xs text-gray-500 font-medium">{t.body.bmi}</p>
+                <div className="flex items-end gap-1 mt-1">
+                  <p className="text-xl font-bold text-gray-900">{latest.bmi}</p>
+                  {trend && (
+                    trend === 'up'
+                      ? <TrendingUp className="h-3.5 w-3.5 text-orange-500 mb-0.5 ml-auto" />
+                      : <TrendingDown className="h-3.5 w-3.5 text-green-500 mb-0.5 ml-auto" />
+                  )}
+                </div>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-medium ${bmiClass.color} ${bmiClass.textColor}`}>
+                  {isDE ? bmiClass.label_de : bmiClass.label_en}
+                </span>
+              </div>
+            );
+          })()}
+
+          {/* FFMI — if body fat available */}
+          {latest.lean_mass_kg && profile?.height_cm && (() => {
+            const ffmiResult = calculateFFMI(latest.lean_mass_kg!, profile.height_cm);
+            const ffmiClass = classifyFFMI(ffmiResult.normalizedFFMI, profile.gender ?? 'male');
+            return (
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-xs text-gray-500 font-medium">{t.body.ffmi}</p>
+                <div className="flex items-end gap-1 mt-1">
+                  <p className="text-xl font-bold text-gray-900">{ffmiResult.normalizedFFMI}</p>
+                </div>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-medium ${ffmiClass.color} ${ffmiClass.textColor}`}>
+                  {isDE ? ffmiClass.label_de : ffmiClass.label_en}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Screenshot Import Button */}

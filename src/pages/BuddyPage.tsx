@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic, MicOff, Lightbulb } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
@@ -21,6 +21,8 @@ import { useTodayCheckin } from '../features/checkin/hooks/useDailyCheckin';
 import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
+import { FeatureTour, isFeatureTourCompleted } from '../features/buddy/components/FeatureTour';
+import { CapabilitiesSheet } from '../features/buddy/components/CapabilitiesSheet';
 import type { HealthContext } from '../types/health';
 
 export function BuddyPage() {
@@ -29,6 +31,8 @@ export function BuddyPage() {
   const location = useLocation();
   const [input, setInput] = useState('');
   const [voiceHint, setVoiceHint] = useState('');
+  const [showCapabilities, setShowCapabilities] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -72,9 +76,9 @@ export function BuddyPage() {
 
   // Gather health context for personalized AI responses
   const { data: profile } = useProfile();
-  const { needsOnboarding } = useOnboarding(profile);
-  const { totals } = useDailyMealTotals(today());
   const { data: latestBody } = useLatestBodyMeasurement();
+  const { needsOnboarding } = useOnboarding(profile, latestBody);
+  const { totals } = useDailyMealTotals(today());
   const { data: activeSubstances } = useSubstances(true);
   const { data: activePlan } = useActivePlan();
   const { data: standardProducts } = useStandardProducts();
@@ -157,6 +161,13 @@ export function BuddyPage() {
   useEffect(() => {
     checkConnection();
   }, [checkConnection]);
+
+  // Show Feature Tour on first visit (if not completed)
+  useEffect(() => {
+    if (user?.id && !isFeatureTourCompleted(user.id)) {
+      setShowTour(true);
+    }
+  }, [user?.id]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -272,15 +283,24 @@ export function BuddyPage() {
               </div>
             </div>
           </div>
-          {messages.length > 0 && (
+          <div className="flex items-center gap-1">
             <button
-              onClick={clearMessages}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              title={t.buddy.clearChat}
+              onClick={() => setShowCapabilities(true)}
+              className="p-2 text-gray-400 hover:text-teal-500 transition-colors"
+              title={t.buddy.whatCanIDo}
             >
-              <Trash2 className="h-4 w-4" />
+              <Lightbulb className="h-4 w-4" />
             </button>
-          )}
+            {messages.length > 0 && (
+              <button
+                onClick={clearMessages}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title={t.buddy.clearChat}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -389,6 +409,28 @@ export function BuddyPage() {
           </button>
         </form>
       </div>
+
+      {/* Feature Tour (first visit only) */}
+      {showTour && user?.id && (
+        <FeatureTour
+          userId={user.id}
+          onComplete={() => setShowTour(false)}
+          onSendMessage={(msg) => {
+            setShowTour(false);
+            sendMessage(msg);
+          }}
+        />
+      )}
+
+      {/* Capabilities Sheet */}
+      <CapabilitiesSheet
+        open={showCapabilities}
+        onClose={() => setShowCapabilities(false)}
+        onSendMessage={(msg) => {
+          setShowCapabilities(false);
+          sendMessage(msg);
+        }}
+      />
     </div>
   );
 }

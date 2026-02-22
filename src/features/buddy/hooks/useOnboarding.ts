@@ -12,7 +12,7 @@
  */
 
 import { useMemo } from 'react';
-import type { UserProfile } from '../../../types/health';
+import type { UserProfile, BodyMeasurement } from '../../../types/health';
 
 export interface OnboardingState {
   /** Whether the user needs onboarding (incomplete profile) */
@@ -33,14 +33,17 @@ export interface OnboardingState {
  *
  * If ANY of these are missing, the buddy enters onboarding mode.
  */
-export function useOnboarding(profile: UserProfile | null | undefined): OnboardingState {
+export function useOnboarding(
+  profile: UserProfile | null | undefined,
+  latestBody?: BodyMeasurement | null,
+): OnboardingState {
   return useMemo(() => {
     // No profile at all = definitely needs onboarding
     if (!profile) {
       return {
         needsOnboarding: true,
         onboardingComplete: false,
-        missingFields: ['height', 'birth_date', 'gender'],
+        missingFields: ['height', 'birth_date', 'gender', 'weight'],
       };
     }
 
@@ -58,10 +61,15 @@ export function useOnboarding(profile: UserProfile | null | undefined): Onboardi
       missing.push('gender');
     }
 
+    // Weight is needed for BMR/BMI/goal calculations
+    if (!latestBody?.weight_kg) {
+      missing.push('weight');
+    }
+
     return {
       needsOnboarding: missing.length > 0,
       onboardingComplete: missing.length === 0,
       missingFields: missing,
     };
-  }, [profile]);
+  }, [profile, latestBody]);
 }

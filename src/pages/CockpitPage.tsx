@@ -30,6 +30,7 @@ import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useComplete
 import { useSubstances } from '../features/medical/hooks/useSubstances';
 import { calculateBMR, calculateAge } from '../lib/calculations/bmr';
 import { calculateTDEE_PAL } from '../lib/calculations/tdee';
+import { classifyBMI, calculateFFMI, classifyFFMI } from '../lib/calculations/bodyMetrics';
 import { generateInsights } from '../lib/insights';
 import { InsightCard } from '../shared/components/InsightCard';
 import { DailyCheckinCard } from '../features/checkin/components/DailyCheckinCard';
@@ -404,6 +405,44 @@ export function CockpitPage() {
               {t.cockpit.weightTrend}
             </p>
             <WeightChart data={bodyTrendData.data} language={language} />
+          </div>
+        )}
+
+        {/* Key Metrics Card (BMI + FFMI) */}
+        {latestBody?.bmi && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+              {t.cockpit.keyMetrics}
+            </p>
+            <div className="flex gap-3">
+              {/* BMI */}
+              {(() => {
+                const bmiClass = classifyBMI(latestBody.bmi!);
+                return (
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500">{t.body.bmi}</p>
+                    <p className="text-lg font-bold text-gray-900">{latestBody.bmi}</p>
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${bmiClass.color} ${bmiClass.textColor}`}>
+                      {language === 'de' ? bmiClass.label_de : bmiClass.label_en}
+                    </span>
+                  </div>
+                );
+              })()}
+              {/* FFMI */}
+              {latestBody.lean_mass_kg && profile?.height_cm && (() => {
+                const ffmiResult = calculateFFMI(latestBody.lean_mass_kg!, profile.height_cm);
+                const ffmiClass = classifyFFMI(ffmiResult.normalizedFFMI, profile.gender ?? 'male');
+                return (
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500">{t.body.ffmi}</p>
+                    <p className="text-lg font-bold text-gray-900">{ffmiResult.normalizedFFMI}</p>
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${ffmiClass.color} ${ffmiClass.textColor}`}>
+                      {language === 'de' ? ffmiClass.label_de : ffmiClass.label_en}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         )}
 

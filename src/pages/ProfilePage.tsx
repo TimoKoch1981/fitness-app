@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Save, Shield } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
@@ -8,6 +8,10 @@ import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile'
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
 import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
+import { useDebouncedCallback } from '../shared/hooks/useDebounce';
+import { calculateRecommendedGoals } from '../lib/calculations';
+import type { RecommendedGoals } from '../lib/calculations';
+import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { PAL_FACTORS } from '../lib/constants';
 import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
 
@@ -33,10 +37,22 @@ export function ProfilePage() {
   const [targetBodyFat, setTargetBodyFat] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [goalNotes, setGoalNotes] = useState('');
+  // BMR Help toggle
+  const [showBmrHelp, setShowBmrHelp] = useState(false);
+  // Goal recommendation
+  const [recommendedGoals, setRecommendedGoals] = useState<RecommendedGoals | null>(null);
+  const { data: latestBody } = useLatestBodyMeasurement();
+  // Auto-save status
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync profile data into form
+  // Track if initial hydration from server is done — prevent auto-save on first load
+  const isHydratedRef = useRef(false);
+
+  // Sync profile data into form (hydration)
   useEffect(() => {
     if (profile) {
+      isHydratedRef.current = false; // Pause auto-save during hydration
       setDisplayName(profile.display_name ?? '');
       setHeightCm(profile.height_cm?.toString() ?? '');
       setBirthDate(profile.birth_date ?? '');
@@ -46,45 +62,76 @@ export function ProfilePage() {
       setCaloriesGoal(profile.daily_calories_goal?.toString() ?? '2000');
       setProteinGoal(profile.daily_protein_goal?.toString() ?? '150');
       setWaterGoal(profile.daily_water_goal?.toString() ?? '8');
-      // Personal goals
       setPrimaryGoal(profile.personal_goals?.primary_goal ?? '');
       setTargetWeight(profile.personal_goals?.target_weight_kg?.toString() ?? '');
       setTargetBodyFat(profile.personal_goals?.target_body_fat_pct?.toString() ?? '');
       setTargetDate(profile.personal_goals?.target_date ?? '');
       setGoalNotes(profile.personal_goals?.notes ?? '');
+      // Mark hydrated after a tick so setState batching completes
+      requestAnimationFrame(() => {
+        isHydratedRef.current = true;
+      });
     }
   }, [profile]);
 
-  const handleSavePersonalData = async () => {
-    await updateProfile.mutateAsync({
-      display_name: displayName || undefined,
-      height_cm: heightCm ? parseFloat(heightCm) : undefined,
-      birth_date: birthDate || undefined,
-      gender,
-      activity_level: parseFloat(activityLevel),
-      preferred_bmr_formula: bmrFormula,
-    });
+  // Refs that hold the latest form values (for the debounced save to read)
+  const formRef = useRef({
+    displayName: '', heightCm: '', birthDate: '', gender: 'male' as Gender,
+    activityLevel: '', bmrFormula: 'auto' as BMRFormula,
+    caloriesGoal: '', proteinGoal: '', waterGoal: '',
+    primaryGoal: '' as PrimaryGoal | '', targetWeight: '', targetBodyFat: '',
+    targetDate: '', goalNotes: '',
+  });
+
+  // Keep formRef in sync
+  formRef.current = {
+    displayName, heightCm, birthDate, gender, activityLevel, bmrFormula,
+    caloriesGoal, proteinGoal, waterGoal,
+    primaryGoal, targetWeight, targetBodyFat, targetDate, goalNotes,
   };
 
-  const handleSaveGoals = async () => {
-    await updateProfile.mutateAsync({
-      daily_calories_goal: parseInt(caloriesGoal) || 2000,
-      daily_protein_goal: parseInt(proteinGoal) || 150,
-      daily_water_goal: parseInt(waterGoal) || 8,
-    });
-  };
+  const showSaveStatus = useCallback((status: 'saved' | 'error') => {
+    setSaveStatus(status);
+    if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+    saveStatusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2500);
+  }, []);
 
-  const handleSavePersonalGoals = async () => {
-    await updateProfile.mutateAsync({
-      personal_goals: {
-        primary_goal: primaryGoal || undefined,
-        target_weight_kg: targetWeight ? parseFloat(targetWeight) : undefined,
-        target_body_fat_pct: targetBodyFat ? parseFloat(targetBodyFat) : undefined,
-        target_date: targetDate || undefined,
-        notes: goalNotes || undefined,
-      },
-    });
-  };
+  // Single auto-save function that saves ALL form state at once
+  const autoSave = useDebouncedCallback(async () => {
+    if (!isHydratedRef.current) return;
+    const f = formRef.current;
+    try {
+      await updateProfile.mutateAsync({
+        display_name: f.displayName || undefined,
+        height_cm: f.heightCm ? parseFloat(f.heightCm) : undefined,
+        birth_date: f.birthDate || undefined,
+        gender: f.gender,
+        activity_level: parseFloat(f.activityLevel),
+        preferred_bmr_formula: f.bmrFormula,
+        daily_calories_goal: parseInt(f.caloriesGoal) || 2000,
+        daily_protein_goal: parseInt(f.proteinGoal) || 150,
+        daily_water_goal: parseInt(f.waterGoal) || 8,
+        personal_goals: {
+          primary_goal: f.primaryGoal || undefined,
+          target_weight_kg: f.targetWeight ? parseFloat(f.targetWeight) : undefined,
+          target_body_fat_pct: f.targetBodyFat ? parseFloat(f.targetBodyFat) : undefined,
+          target_date: f.targetDate || undefined,
+          notes: f.goalNotes || undefined,
+        },
+      });
+      showSaveStatus('saved');
+    } catch {
+      showSaveStatus('error');
+    }
+  }, 800);
+
+  // Wrapper: update local state + trigger auto-save
+  const handleChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
+    (value: T) => {
+      setter(value);
+      // Trigger save after state update (next tick so formRef is updated)
+      requestAnimationFrame(() => autoSave());
+    };
 
   const palOptions = [
     { value: PAL_FACTORS.sedentary.toString(), label: language === 'de' ? 'Sitzend (1.4)' : 'Sedentary (1.4)' },
@@ -97,6 +144,21 @@ export function ProfilePage() {
   return (
     <PageShell title={t.profile.title}>
       <div className="space-y-4">
+        {/* Auto-Save Status Indicator */}
+        {saveStatus !== 'idle' && (
+          <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shadow-lg transition-all ${
+            saveStatus === 'saved'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {saveStatus === 'saved' ? (
+              <><Check className="h-3.5 w-3.5" />{t.profile.autoSaved}</>
+            ) : (
+              <><AlertCircle className="h-3.5 w-3.5" />{t.common.saveError}</>
+            )}
+          </div>
+        )}
+
         {/* User Info + Avatar */}
         <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
           <AvatarUpload
@@ -148,17 +210,7 @@ export function ProfilePage() {
 
         {/* Personal Data */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">{t.profile.personalData}</h3>
-            <button
-              onClick={handleSavePersonalData}
-              disabled={updateProfile.isPending}
-              className="flex items-center gap-1 px-3 py-1 bg-teal-500 text-white text-xs rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
-            >
-              <Save className="h-3 w-3" />
-              {t.common.save}
-            </button>
-          </div>
+          <h3 className="font-semibold text-gray-900 mb-3">{t.profile.personalData}</h3>
 
           {isLoading ? (
             <div className="text-center py-4">
@@ -173,7 +225,7 @@ export function ProfilePage() {
                 <input
                   type="text"
                   value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  onChange={(e) => handleChange(setDisplayName)(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 />
               </div>
@@ -186,7 +238,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={heightCm}
-                    onChange={(e) => setHeightCm(e.target.value)}
+                    onChange={(e) => handleChange(setHeightCm)(e.target.value)}
                     placeholder="180"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="100"
@@ -200,7 +252,7 @@ export function ProfilePage() {
                   <input
                     type="date"
                     value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
+                    onChange={(e) => handleChange(setBirthDate)(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                   />
                 </div>
@@ -216,7 +268,7 @@ export function ProfilePage() {
                       <button
                         key={val}
                         type="button"
-                        onClick={() => setGender(val as Gender)}
+                        onClick={() => handleChange(setGender)(val as Gender)}
                         className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                           gender === val
                             ? 'bg-teal-500 text-white'
@@ -234,7 +286,7 @@ export function ProfilePage() {
                   </label>
                   <select
                     value={bmrFormula}
-                    onChange={(e) => setBmrFormula(e.target.value as BMRFormula)}
+                    onChange={(e) => handleChange(setBmrFormula)(e.target.value as BMRFormula)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm bg-white"
                   >
                     <option value="auto">{t.profile.auto}</option>
@@ -244,13 +296,30 @@ export function ProfilePage() {
                 </div>
               </div>
 
+              {/* BMR Formula Help */}
+              <button
+                type="button"
+                onClick={() => setShowBmrHelp(!showBmrHelp)}
+                className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+              >
+                <HelpCircle className="h-3.5 w-3.5" />
+                {t.profile.bmrHelpToggle}
+              </button>
+              {showBmrHelp && (
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-[10px] text-gray-600 leading-relaxed">
+                  <p><span className="font-semibold text-gray-700">{t.profile.auto}:</span> {t.profile.bmrHelpAuto.split(': ').slice(1).join(': ')}</p>
+                  <p><span className="font-semibold text-gray-700">{t.profile.mifflin}:</span> {t.profile.bmrHelpMifflin.split(': ').slice(1).join(': ')}</p>
+                  <p><span className="font-semibold text-gray-700">{t.profile.katch}:</span> {t.profile.bmrHelpKatch.split(': ').slice(1).join(': ')}</p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
                   {t.profile.activityLevel}
                 </label>
                 <select
                   value={activityLevel}
-                  onChange={(e) => setActivityLevel(e.target.value)}
+                  onChange={(e) => handleChange(setActivityLevel)(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm bg-white"
                 >
                   {palOptions.map((opt) => (
@@ -266,17 +335,7 @@ export function ProfilePage() {
 
         {/* Daily Goals */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">{t.profile.goals}</h3>
-            <button
-              onClick={handleSaveGoals}
-              disabled={updateProfile.isPending}
-              className="flex items-center gap-1 px-3 py-1 bg-teal-500 text-white text-xs rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
-            >
-              <Save className="h-3 w-3" />
-              {t.common.save}
-            </button>
-          </div>
+          <h3 className="font-semibold text-gray-900 mb-3">{t.profile.goals}</h3>
 
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-3">
@@ -288,7 +347,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={caloriesGoal}
-                    onChange={(e) => setCaloriesGoal(e.target.value)}
+                    onChange={(e) => handleChange(setCaloriesGoal)(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="1000"
                     max="10000"
@@ -304,7 +363,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={proteinGoal}
-                    onChange={(e) => setProteinGoal(e.target.value)}
+                    onChange={(e) => handleChange(setProteinGoal)(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="50"
                     max="500"
@@ -320,7 +379,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={waterGoal}
-                    onChange={(e) => setWaterGoal(e.target.value)}
+                    onChange={(e) => handleChange(setWaterGoal)(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="1"
                     max="20"
@@ -331,22 +390,80 @@ export function ProfilePage() {
                 </div>
               </div>
             </div>
+
+            {/* Calculate Recommended Goals */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!latestBody?.weight_kg || !profile?.height_cm || !profile?.birth_date) {
+                  setRecommendedGoals(null);
+                  return;
+                }
+                const result = calculateRecommendedGoals({
+                  weight_kg: latestBody.weight_kg,
+                  height_cm: profile.height_cm,
+                  birth_date: profile.birth_date,
+                  gender: profile.gender ?? 'male',
+                  activity_level: profile.activity_level ?? 1.55,
+                  preferred_bmr_formula: profile.preferred_bmr_formula,
+                  body_fat_pct: latestBody.body_fat_pct,
+                  primary_goal: profile.personal_goals?.primary_goal,
+                  lean_mass_kg: latestBody.lean_mass_kg,
+                });
+                setRecommendedGoals(result);
+              }}
+              className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+            >
+              <Calculator className="h-3.5 w-3.5" />
+              {t.profile.calculateGoals}
+            </button>
+
+            {/* Recommendation Card */}
+            {recommendedGoals === null && !latestBody?.weight_kg && (
+              <p className="text-[10px] text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                {t.profile.insufficientData}
+              </p>
+            )}
+            {recommendedGoals && (
+              <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-semibold text-teal-800">{t.profile.recommendedValues}</p>
+                <div className="grid grid-cols-3 gap-2 text-[10px] text-teal-700">
+                  <div>
+                    <span className="block text-teal-500">{t.profile.caloriesGoal}</span>
+                    <span className="font-bold">{recommendedGoals.calories} kcal</span>
+                  </div>
+                  <div>
+                    <span className="block text-teal-500">{t.profile.proteinGoal}</span>
+                    <span className="font-bold">{recommendedGoals.protein}g</span>
+                  </div>
+                  <div>
+                    <span className="block text-teal-500">{t.profile.waterGoal}</span>
+                    <span className="font-bold">{recommendedGoals.water_glasses} {t.dashboard.glasses}</span>
+                  </div>
+                </div>
+                <div className="text-[9px] text-teal-500">
+                  BMR: {recommendedGoals.bmr} kcal ({recommendedGoals.bmr_formula === 'katch' ? t.profile.katch : t.profile.mifflin}) | TDEE: {recommendedGoals.tdee} kcal
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleChange(setCaloriesGoal)(recommendedGoals.calories.toString());
+                    handleChange(setProteinGoal)(recommendedGoals.protein.toString());
+                    handleChange(setWaterGoal)(recommendedGoals.water_glasses.toString());
+                    setRecommendedGoals(null);
+                  }}
+                  className="w-full mt-1 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors"
+                >
+                  {t.profile.applyRecommendation}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Personal Goals */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">{t.profile.personalGoals}</h3>
-            <button
-              onClick={handleSavePersonalGoals}
-              disabled={updateProfile.isPending}
-              className="flex items-center gap-1 px-3 py-1 bg-teal-500 text-white text-xs rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
-            >
-              <Save className="h-3 w-3" />
-              {t.common.save}
-            </button>
-          </div>
+          <h3 className="font-semibold text-gray-900 mb-3">{t.profile.personalGoals}</h3>
 
           <div className="space-y-3">
             <div>
@@ -364,7 +481,7 @@ export function ProfilePage() {
                   <button
                     key={val}
                     type="button"
-                    onClick={() => setPrimaryGoal(primaryGoal === val ? '' : val)}
+                    onClick={() => handleChange(setPrimaryGoal)(primaryGoal === val ? '' : val)}
                     className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       primaryGoal === val
                         ? 'bg-teal-500 text-white'
@@ -386,7 +503,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={targetWeight}
-                    onChange={(e) => setTargetWeight(e.target.value)}
+                    onChange={(e) => handleChange(setTargetWeight)(e.target.value)}
                     placeholder="85"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="30"
@@ -403,7 +520,7 @@ export function ProfilePage() {
                   <input
                     type="number"
                     value={targetBodyFat}
-                    onChange={(e) => setTargetBodyFat(e.target.value)}
+                    onChange={(e) => handleChange(setTargetBodyFat)(e.target.value)}
                     placeholder="15"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                     min="3"
@@ -419,7 +536,7 @@ export function ProfilePage() {
                 <input
                   type="date"
                   value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
+                  onChange={(e) => handleChange(setTargetDate)(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 />
               </div>
@@ -432,7 +549,7 @@ export function ProfilePage() {
               <input
                 type="text"
                 value={goalNotes}
-                onChange={(e) => setGoalNotes(e.target.value)}
+                onChange={(e) => handleChange(setGoalNotes)(e.target.value)}
                 placeholder={language === 'de' ? 'z.B. Sixpack bis Sommer' : 'e.g. Get a sixpack by summer'}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
               />

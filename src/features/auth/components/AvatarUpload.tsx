@@ -10,7 +10,7 @@
  * - Client-side compression via useUploadAvatar hook
  */
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Camera, Trash2, User, Loader2 } from 'lucide-react';
 import { useUploadAvatar, useDeleteAvatar } from '../hooks/useAvatar';
 import { useTranslation } from '../../../i18n';
@@ -25,6 +25,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
   const isDE = language === 'de';
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewObjectUrlRef = useRef<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const uploadAvatar = useUploadAvatar();
@@ -36,24 +37,46 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
 
   const currentImage = previewUrl ?? avatarUrl;
 
+  // Clear preview once the server avatar URL has been updated (query refetched)
+  useEffect(() => {
+    if (avatarUrl && previewUrl) {
+      // Server has delivered the new URL → safe to drop the local preview
+      setPreviewUrl(null);
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(previewObjectUrlRef.current);
+        previewObjectUrlRef.current = null;
+      }
+    }
+  }, [avatarUrl, previewUrl]);
+
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(previewObjectUrlRef.current);
+      }
+    };
+  }, []);
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Show instant preview
     const objectUrl = URL.createObjectURL(file);
+    previewObjectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
 
     try {
       await uploadAvatar.mutateAsync(file);
+      // Preview stays visible until useEffect detects new avatarUrl from server
     } catch {
       // Revert preview on error
       setPreviewUrl(null);
-    } finally {
-      // Cleanup object URL
       URL.revokeObjectURL(objectUrl);
-      setPreviewUrl(null);
-      // Reset file input
+      previewObjectUrlRef.current = null;
+    } finally {
+      // Reset file input so same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
