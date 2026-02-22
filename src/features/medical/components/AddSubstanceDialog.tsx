@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Bell } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddSubstance } from '../hooks/useSubstances';
+import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { SUBSTANCE_CATEGORIES, SUBSTANCE_TYPES } from '../../../lib/constants';
+import { parseFrequencyToReminder } from '../../reminders/lib/parseFrequency';
 import type { SubstanceCategory, SubstanceAdminType } from '../../../types/health';
 
 interface AddSubstanceDialogProps {
@@ -11,8 +13,9 @@ interface AddSubstanceDialogProps {
 }
 
 export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const addSubstance = useAddSubstance();
+  const addReminder = useAddReminder();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<SubstanceCategory>('supplement');
@@ -34,7 +37,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     setError('');
 
     try {
-      await addSubstance.mutateAsync({
+      const substance = await addSubstance.mutateAsync({
         name,
         category,
         type: adminType,
@@ -45,6 +48,27 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
         half_life_days: halfLife ? parseFloat(halfLife) : undefined,
         notes: notes || undefined,
       });
+
+      // Auto-create linked reminder if frequency is set
+      if (frequency && substance?.id) {
+        const reminderConfig = parseFrequencyToReminder(frequency);
+        if (reminderConfig) {
+          try {
+            const title = language === 'de'
+              ? `${name} einnehmen`
+              : `Take ${name}`;
+            await addReminder.mutateAsync({
+              type: 'substance',
+              title,
+              substance_id: substance.id,
+              time_period: 'morning',
+              ...reminderConfig,
+            });
+          } catch {
+            // Non-critical: substance was saved, reminder failed silently
+          }
+        }
+      }
 
       // Reset and close
       setName('');
@@ -151,8 +175,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
             </div>
           </div>
 
-          {/* Dosage + Unit + Frequency */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Dosage + Unit */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
                 {t.medical.dosage}
@@ -181,18 +205,51 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                 <option value="g">g</option>
               </select>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t.medical.frequency}
+          </div>
+
+          {/* Frequency — prominent with quick-select buttons */}
+          <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-teal-500" />
+              <label className="text-sm font-medium text-gray-700">
+                {language === 'de' ? 'Einnahme-Rhythmus' : 'Frequency'}
               </label>
-              <input
-                type="text"
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                placeholder="1x/Woche"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
-              />
             </div>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: language === 'de' ? 'Täglich' : 'Daily', value: 'täglich' },
+                { label: '1x/Woche', value: '1x/Woche' },
+                { label: '2x/Woche', value: '2x/Woche' },
+                { label: language === 'de' ? 'Alle 3 Tage' : 'Every 3 days', value: 'alle 3 Tage' },
+                { label: language === 'de' ? 'Alle 14 Tage' : 'Every 14 days', value: 'alle 14 Tage' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setFrequency(frequency === opt.value ? '' : opt.value)}
+                  className={`py-1 px-2.5 rounded-lg text-xs font-medium transition-all ${
+                    frequency === opt.value
+                      ? 'bg-teal-500 text-white'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-teal-300'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+              placeholder={language === 'de' ? 'Oder eigenen Rhythmus eingeben...' : 'Or enter custom frequency...'}
+              className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
+            />
+            {frequency && (
+              <p className="text-[10px] text-teal-600 flex items-center gap-1">
+                <Bell className="h-3 w-3" />
+                {language === 'de' ? 'Erinnerung wird automatisch angelegt' : 'Reminder will be created automatically'}
+              </p>
+            )}
           </div>
 
           {/* Ester + Half-Life (for injections) */}

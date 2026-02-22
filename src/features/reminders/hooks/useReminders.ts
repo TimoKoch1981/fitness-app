@@ -152,6 +152,54 @@ export function useAddReminder() {
   });
 }
 
+interface UpdateReminderInput {
+  id: string;
+  title?: string;
+  description?: string;
+  type?: ReminderType;
+  time?: string | null;
+  time_period?: TimePeriod | null;
+  days_of_week?: number[];
+  repeat_mode?: RepeatMode;
+  interval_days?: number | null;
+  substance_id?: string | null;
+  is_active?: boolean;
+}
+
+export function useUpdateReminder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...fields }: UpdateReminderInput) => {
+      // Build update payload, converting null to explicit null for clearable fields
+      const payload: Record<string, unknown> = {};
+      if (fields.title !== undefined) payload.title = fields.title;
+      if (fields.description !== undefined) payload.description = fields.description;
+      if (fields.type !== undefined) payload.type = fields.type;
+      if (fields.time !== undefined) payload.time = fields.time;
+      if (fields.time_period !== undefined) payload.time_period = fields.time_period;
+      if (fields.days_of_week !== undefined) payload.days_of_week = fields.days_of_week;
+      if (fields.repeat_mode !== undefined) payload.repeat_mode = fields.repeat_mode;
+      if (fields.interval_days !== undefined) payload.interval_days = fields.interval_days;
+      if (fields.substance_id !== undefined) payload.substance_id = fields.substance_id;
+      if (fields.is_active !== undefined) payload.is_active = fields.is_active;
+
+      const { data, error } = await supabase
+        .from('reminders')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Reminder;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [REMINDERS_KEY] });
+    },
+  });
+}
+
 export function useToggleReminder() {
   const queryClient = useQueryClient();
 

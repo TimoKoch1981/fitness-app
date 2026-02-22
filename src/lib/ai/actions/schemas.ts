@@ -229,6 +229,12 @@ const UpdateEquipmentSchema = z.object({
   gym_profile_name: z.string().optional(),
 });
 
+const SearchProductSchema = z.object({
+  query: z.string().min(1),
+  portion_g: z.number().positive().optional(),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -243,6 +249,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   add_reminder: AddReminderSchema,
   update_profile: UpdateProfileSchema,
   update_equipment: UpdateEquipmentSchema,
+  search_product: SearchProductSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

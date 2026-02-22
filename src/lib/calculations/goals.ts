@@ -42,6 +42,12 @@ export interface RecommendedGoals {
 
 /**
  * Map PrimaryGoal to FitnessGoal for calorie calculation.
+ *
+ * fat_loss     → fat_loss_moderate (TDEE - 300 to -500) — controlled deficit
+ * muscle_gain  → lean_bulk (TDEE + 200 to +300) — clean surplus for hypertrophy
+ * body_recomp  → recomposition (TDEE to TDEE+100) — near maintenance
+ * performance  → lean_bulk (TDEE + 200 to +300) — fuel for training
+ * health       → recomposition (TDEE to TDEE+100) — maintenance, no forced deficit
  */
 function mapPrimaryGoalToFitnessGoal(goal?: PrimaryGoal): FitnessGoal {
   switch (goal) {
@@ -55,26 +61,32 @@ function mapPrimaryGoalToFitnessGoal(goal?: PrimaryGoal): FitnessGoal {
       return 'lean_bulk';
     case 'health':
     default:
-      return 'fat_loss_moderate'; // Default: slight deficit for health
+      return 'recomposition'; // Default: near maintenance, no forced deficit
   }
 }
 
 /**
  * Map PrimaryGoal to protein training context.
+ *
+ * Standard for all training goals: strength_maintenance (1.6-2.2 g/kg, Morton et al. 2018)
+ * This is the scientifically well-supported range for active individuals.
+ *
+ * strength_anabolic (2.0-3.0 g/kg, Mero et al. 2010) is available as optional
+ * "Boost" for users on anabolic support — selectable in profile, not auto-mapped.
+ *
+ * fat_loss uses strength_deficit (2.3-3.1 g/kg lean mass, Helms et al. 2014)
+ * to preserve muscle during calorie deficit.
  */
 function mapPrimaryGoalToProteinContext(goal?: PrimaryGoal) {
   switch (goal) {
     case 'fat_loss':
       return 'strength_deficit' as const;
     case 'muscle_gain':
-      return 'strength_maintenance' as const;
     case 'body_recomp':
-      return 'strength_maintenance' as const;
     case 'performance':
-      return 'strength_maintenance' as const;
     case 'health':
     default:
-      return 'general' as const;
+      return 'strength_maintenance' as const;
   }
 }
 

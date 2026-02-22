@@ -33,15 +33,20 @@ const VALID_ACTIONS: ActionType[] = [
   'add_substance',
   'add_reminder',
   'update_profile',
+  'update_equipment',
+  'search_product',
 ];
 
 /**
  * Regex to match ACTION blocks in LLM output.
- * Matches: ```ACTION:<type>\n<json>\n```
- * Also handles variations like ```action:... or extra whitespace.
+ * Matches multiple formats LLMs might produce:
+ * - ```ACTION:type\n{json}```       (standard)
+ * - ```action:type\n{json}\n```     (lowercase + trailing newline)
+ * - ```ACTION:type {json}```        (no newline after type)
+ * - ```ACTION:type\n{json}          (missing closing backticks — streaming cutoff)
  * Global flag enables matchAll() for multiple blocks.
  */
-const ACTION_BLOCK_REGEX = /```ACTION:(\w+)\s*\n([\s\S]*?)```/gi;
+const ACTION_BLOCK_REGEX = /```\s*ACTION:(\w+)[\s\n]+([\s\S]*?)(?:\n```|```|$)/gi;
 
 /**
  * Parse ALL actions from the LLM response text.

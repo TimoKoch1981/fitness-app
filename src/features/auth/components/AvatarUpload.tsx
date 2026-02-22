@@ -26,6 +26,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewObjectUrlRef = useRef<string | null>(null);
+  const prevAvatarUrlRef = useRef(avatarUrl);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const uploadAvatar = useUploadAvatar();
@@ -37,16 +38,18 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
 
   const currentImage = previewUrl ?? avatarUrl;
 
-  // Clear preview once the server avatar URL has been updated (query refetched)
+  // Clear preview only when the server avatar URL has actually CHANGED to a new value.
+  // This prevents clearing the preview on re-renders where avatarUrl hasn't changed.
   useEffect(() => {
-    if (avatarUrl && previewUrl) {
-      // Server has delivered the new URL → safe to drop the local preview
+    if (previewUrl && avatarUrl && avatarUrl !== prevAvatarUrlRef.current) {
+      // Server has delivered a NEW URL → safe to drop the local preview
       setPreviewUrl(null);
       if (previewObjectUrlRef.current) {
         URL.revokeObjectURL(previewObjectUrlRef.current);
         previewObjectUrlRef.current = null;
       }
     }
+    prevAvatarUrlRef.current = avatarUrl;
   }, [avatarUrl, previewUrl]);
 
   // Cleanup object URL on unmount

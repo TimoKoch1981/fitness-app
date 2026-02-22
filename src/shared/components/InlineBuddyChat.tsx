@@ -174,7 +174,7 @@ function InlineBuddyChatContent() {
     language: language as 'de' | 'en',
     onTranscript: handleVoiceTranscript,
     onError: handleVoiceError,
-    silenceTimeout: 3000,
+    silenceTimeout: 8000,
     autoSend: true,
     onAutoSend: handleVoiceAutoSend,
   });
@@ -186,10 +186,13 @@ function InlineBuddyChatContent() {
     checkConnection();
   }, [checkConnection]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages + re-focus input after AI response
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (!isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [messages, isLoading]);
 
   // Handle autoMessage: send once when sheet opens with a message
   useEffect(() => {

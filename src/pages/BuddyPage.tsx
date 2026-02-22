@@ -69,7 +69,7 @@ export function BuddyPage() {
     language: language as 'de' | 'en',
     onTranscript: handleVoiceTranscript,
     onError: handleVoiceError,
-    silenceTimeout: 3000,
+    silenceTimeout: 8000,
     autoSend: true,
     onAutoSend: handleVoiceAutoSend,
   });
@@ -169,10 +169,13 @@ export function BuddyPage() {
     }
   }, [user?.id]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages + re-focus input after AI response
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (!isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [messages, isLoading]);
 
   // Handle autoMessage from navigation (e.g., "Evaluate Day" button on MealsPage)
   const autoMessageSentRef = useRef(false);

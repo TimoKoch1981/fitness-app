@@ -18,7 +18,11 @@ export type ActionType =
   | 'add_substance'
   | 'add_reminder'
   | 'update_profile'
-  | 'update_equipment';
+  | 'update_equipment'
+  | 'search_product';
+
+/** Action types that are auto-executed (no user confirmation needed) */
+export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product'];
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -119,6 +123,12 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '🏋️',
         title: 'Gerätepark aktualisieren?',
         summary: `${(d.equipment_names as string[])?.length ?? '?'} Geräte`,
+      };
+    case 'search_product':
+      return {
+        icon: '🔍',
+        title: 'Produkt wird recherchiert...',
+        summary: `Suche nach "${d.query ?? 'Produkt'}"`,
       };
   }
 }

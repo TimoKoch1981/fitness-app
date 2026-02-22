@@ -67,10 +67,11 @@ export function ProfilePage() {
       setTargetBodyFat(profile.personal_goals?.target_body_fat_pct?.toString() ?? '');
       setTargetDate(profile.personal_goals?.target_date ?? '');
       setGoalNotes(profile.personal_goals?.notes ?? '');
-      // Mark hydrated after a tick so setState batching completes
-      requestAnimationFrame(() => {
+      // Mark hydrated after a longer delay so all React state batching + renders complete.
+      // requestAnimationFrame was too short (single frame) and could race with auto-save.
+      setTimeout(() => {
         isHydratedRef.current = true;
-      });
+      }, 300);
     }
   }, [profile]);
 
@@ -395,19 +396,20 @@ export function ProfilePage() {
             <button
               type="button"
               onClick={() => {
-                if (!latestBody?.weight_kg || !profile?.height_cm || !profile?.birth_date) {
+                const hCm = parseFloat(heightCm);
+                if (!latestBody?.weight_kg || !hCm || !birthDate) {
                   setRecommendedGoals(null);
                   return;
                 }
                 const result = calculateRecommendedGoals({
                   weight_kg: latestBody.weight_kg,
-                  height_cm: profile.height_cm,
-                  birth_date: profile.birth_date,
-                  gender: profile.gender ?? 'male',
-                  activity_level: profile.activity_level ?? 1.55,
-                  preferred_bmr_formula: profile.preferred_bmr_formula,
+                  height_cm: hCm,
+                  birth_date: birthDate,
+                  gender: gender,
+                  activity_level: parseFloat(activityLevel) || 1.55,
+                  preferred_bmr_formula: bmrFormula,
                   body_fat_pct: latestBody.body_fat_pct,
-                  primary_goal: profile.personal_goals?.primary_goal,
+                  primary_goal: (primaryGoal || undefined) as PrimaryGoal | undefined,
                   lean_mass_kg: latestBody.lean_mass_kg,
                 });
                 setRecommendedGoals(result);

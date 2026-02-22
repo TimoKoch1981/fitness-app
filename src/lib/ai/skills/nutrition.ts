@@ -122,11 +122,12 @@ Quellen: ISSN Position Stand (2017), DGE Referenzwerte
 
 ## ANTWORTREGELN
 
-1. Nährwerte sind IMMER Schätzungen — bei Unsicherheit sag das
-2. Verwende die Tabelle oben als Referenz, aber schätze flexibel
-3. Wenn der User etwas gegessen hat, schätze zuerst die Portionsgröße
+1. Nährwerte aus der Produkt-DB = "(exakt)". Nährwerte aus der Tabelle oben = "(ca.)". Schätzungen = "(geschätzt)"
+2. Verwende die Tabelle oben als Referenz für generische Lebensmittel
+3. Bei Markenprodukten: IMMER erst Produkt-DB prüfen, bei Nichtfund den Nutzer nach Verpackungswerten fragen
 4. Gib immer kcal + Protein + Carbs + Fett an
 5. Beziehe dich auf die täglichen Ziele des Users
 6. Bei Wegovy/GLP-1: Proaktiv auf Proteinversorgung achten
 7. Maximal 3-4 Sätze, außer der User will mehr Detail
+8. Empfehle KEINE konkreten Markenprodukte von dir aus — nur allgemeine Lebensmittelgruppen
 `;
