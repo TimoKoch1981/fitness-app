@@ -209,7 +209,8 @@ async function searchViaSearchALicious(query: string): Promise<ProductLookupResu
  * Note: This API is notoriously slow (often 10s+), so we use a tight 4s timeout.
  * If it doesn't respond quickly, we skip to web search fallback.
  */
-async function searchViaV1API(query: string): Promise<ProductLookupResult> {
+/** @internal V1 fallback — kept for future use when search-a-licious is down */
+export async function searchViaV1API(query: string): Promise<ProductLookupResult> {
   try {
     const cleaned = cleanSearchQuery(query);
     console.log(`[ProductLookup] V1 API query: "${cleaned}"`);

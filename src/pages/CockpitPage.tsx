@@ -49,6 +49,7 @@ import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } fro
 import { CalorieChart } from '../features/reports/components/CalorieChart';
 import { WeightChart } from '../features/reports/components/WeightChart';
 import { ShareCardDialog } from '../features/share/components/ShareCardDialog';
+import { ProgressionCard } from '../features/reports/components/ProgressionCard';
 import type { ShareCardData } from '../features/share/components/ShareProgressCard';
 
 const WATER_STORAGE_KEY = 'fitbuddy_water_';
@@ -407,6 +408,9 @@ export function CockpitPage() {
             <WeightChart data={bodyTrendData.data} language={language} />
           </div>
         )}
+
+        {/* Progression / Forecast */}
+        <ProgressionCard language={language} />
 
         {/* Key Metrics Card (BMI + FFMI) */}
         {latestBody?.bmi && (

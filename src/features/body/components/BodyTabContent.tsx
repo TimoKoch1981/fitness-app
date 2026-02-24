@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Activity, Camera, Info, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { Activity, Camera, FileSpreadsheet, Info, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useBodyMeasurements, useDeleteBodyMeasurement } from '../hooks/useBodyMeasurements';
@@ -12,6 +12,8 @@ import { useProfile } from '../../auth/hooks/useProfile';
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddBodyMeasurementDialog } from './AddBodyMeasurementDialog';
 import { ScreenshotImport } from './ScreenshotImport';
+import { BodySilhouette } from './BodySilhouette';
+import { DataImportDialog } from '../../import/components/DataImportDialog';
 import { classifyBMI, calculateFFMI, classifyFFMI } from '../../../lib/calculations';
 import { formatDate } from '../../../lib/utils';
 
@@ -29,6 +31,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
   const { data: profile } = useProfile();
   const deleteMeasurement = useDeleteBodyMeasurement();
   const [showScreenshotImport, setShowScreenshotImport] = useState(false);
+  const [showDataImport, setShowDataImport] = useState(false);
   const [showInfo, setShowInfo] = useState<'bmi' | 'ffmi' | null>(null);
 
   const locale = language === 'de' ? 'de-DE' : 'en-US';
@@ -71,6 +74,13 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             <Camera className="h-3.5 w-3.5" />
             {t.screenshot.importButton}
           </button>
+          <button
+            onClick={() => setShowDataImport(true)}
+            className="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            {isDE ? 'CSV Import' : 'CSV Import'}
+          </button>
         </div>
         <AddBodyMeasurementDialog
           open={showAddDialog}
@@ -79,6 +89,10 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
         <ScreenshotImport
           open={showScreenshotImport}
           onClose={() => setShowScreenshotImport(false)}
+        />
+        <DataImportDialog
+          open={showDataImport}
+          onClose={() => setShowDataImport(false)}
         />
       </div>
     );
@@ -328,14 +342,39 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
           </div>
         )}
 
-        {/* Screenshot Import Button */}
-        <button
-          onClick={() => setShowScreenshotImport(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm"
-        >
-          <Camera className="h-4 w-4" />
-          {t.screenshot.importButton}
-        </button>
+        {/* Body Silhouette */}
+        {(latest.waist_cm || latest.chest_cm || latest.arm_cm || latest.leg_cm) && (
+          <BodySilhouette
+            measurements={{
+              waist_cm: latest.waist_cm,
+              chest_cm: latest.chest_cm,
+              arm_cm: latest.arm_cm,
+              leg_cm: latest.leg_cm,
+              body_fat_pct: latest.body_fat_pct,
+              weight_kg: latest.weight_kg,
+            }}
+            gender={profile?.gender}
+            language={language as 'de' | 'en'}
+          />
+        )}
+
+        {/* Import Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowScreenshotImport(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm"
+          >
+            <Camera className="h-4 w-4" />
+            {t.screenshot.importButton}
+          </button>
+          <button
+            onClick={() => setShowDataImport(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all shadow-sm"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            {isDE ? 'CSV / Text' : 'CSV / Text'}
+          </button>
+        </div>
 
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={bodySuggestions} />
@@ -379,6 +418,11 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
       <ScreenshotImport
         open={showScreenshotImport}
         onClose={() => setShowScreenshotImport(false)}
+      />
+
+      <DataImportDialog
+        open={showDataImport}
+        onClose={() => setShowDataImport(false)}
       />
     </>
   );

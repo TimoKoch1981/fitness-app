@@ -5,7 +5,7 @@ import {
   planToBase64,
   planToShareURL,
 } from '../exportTrainingPlan';
-import type { TrainingPlan, PlanExercise } from '../../../../types/health';
+import type { TrainingPlan } from '../../../../types/health';
 
 // ── Test Fixtures ────────────────────────────────────────────────────
 

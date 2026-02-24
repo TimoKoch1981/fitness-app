@@ -206,6 +206,7 @@ export interface UserProfile {
   personal_goals?: PersonalGoals;
   avatar_url?: string;
   is_admin?: boolean;
+  disclaimer_accepted_at?: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
@@ -13,6 +13,7 @@ import { calculateRecommendedGoals } from '../lib/calculations';
 import type { RecommendedGoals } from '../lib/calculations';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { PAL_FACTORS } from '../lib/constants';
+import { DisclaimerModal as DisclaimerModalView } from '../shared/components/DisclaimerModal';
 import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
 
 export function ProfilePage() {
@@ -39,6 +40,8 @@ export function ProfilePage() {
   const [goalNotes, setGoalNotes] = useState('');
   // BMR Help toggle
   const [showBmrHelp, setShowBmrHelp] = useState(false);
+  // Disclaimer viewer
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   // Goal recommendation
   const [recommendedGoals, setRecommendedGoals] = useState<RecommendedGoals | null>(null);
   const { data: latestBody } = useLatestBodyMeasurement();
@@ -586,10 +589,22 @@ export function ProfilePage() {
           {t.auth.logout}
         </button>
 
-        {/* Disclaimer */}
-        <p className="text-[10px] text-gray-400 text-center px-4 mt-4">
-          {t.app.disclaimer}
-        </p>
+        {/* Disclaimer Link */}
+        <button
+          onClick={() => setShowDisclaimer(true)}
+          className="w-full flex items-center justify-center gap-2 py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <FileText className="h-3 w-3" />
+          {t.disclaimer.viewLink}
+        </button>
+
+        {showDisclaimer && (
+          <DisclaimerModalView
+            readOnly
+            onAccepted={() => {}}
+            onClose={() => setShowDisclaimer(false)}
+          />
+        )}
       </div>
     </PageShell>
   );

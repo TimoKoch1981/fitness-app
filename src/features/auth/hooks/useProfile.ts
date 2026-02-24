@@ -39,6 +39,7 @@ interface UpdateProfileInput {
   preferred_bmr_formula?: BMRFormula;
   personal_goals?: PersonalGoals;
   avatar_url?: string | null;
+  disclaimer_accepted_at?: string;
 }
 
 export function useUpdateProfile() {
