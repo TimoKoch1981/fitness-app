@@ -1,0 +1,64 @@
+# FitBuddy — Caddy Reverse Proxy
+# Auto-SSL via Let's Encrypt, HTTP/2 + HTTP/3
+#
+# {$DOMAIN} wird aus der Umgebungsvariable gelesen,
+# z.B. DOMAIN=fitbuddy.app
+
+{$DOMAIN} {
+	# Frontend — Static SPA
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+
+		# Cache static assets (Vite hashed filenames)
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+	}
+
+	# Supabase API — Proxy zu Kong
+	handle /rest/* {
+		reverse_proxy kong:8000
+	}
+
+	handle /auth/* {
+		reverse_proxy kong:8000
+	}
+
+	handle /realtime/* {
+		reverse_proxy kong:8000
+	}
+
+	handle /storage/* {
+		reverse_proxy kong:8000
+	}
+
+	handle /functions/* {
+		reverse_proxy kong:8000
+	}
+
+	# Security Headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# Compression
+	encode gzip zstd
+
+	# Logging
+	log {
+		output file /var/log/caddy/fitbuddy.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}
+
+# Studio — nur intern erreichbar (Port 3000 via SSH Tunnel)
+:3000 {
+	reverse_proxy studio:3000
+}
