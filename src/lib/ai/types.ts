@@ -1,6 +1,6 @@
 /**
  * AI Provider types for the FitBuddy chat system.
- * Supports multiple providers: Ollama (local), OpenAI, Claude.
+ * Supports multiple providers: Ollama (local), OpenAI, Supabase Proxy, Claude.
  */
 
 export interface ChatMessage {
@@ -39,7 +39,7 @@ export interface ParsedIntent {
 }
 
 export interface AIProviderConfig {
-  provider: 'ollama' | 'openai' | 'claude';
+  provider: 'ollama' | 'openai' | 'supabase' | 'claude';
   baseUrl?: string;
   model?: string;
   apiKey?: string;

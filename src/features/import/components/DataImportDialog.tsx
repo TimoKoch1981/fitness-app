@@ -8,9 +8,12 @@ import { useTranslation } from '../../../i18n';
 import { parseCSV, autoDetectColumns, detectDataType, mapToImportedRows, type ParsedCsv } from '../lib/csvParser';
 import { detectScaleFormat } from '../lib/scaleFormats';
 import { extractHealthDataFromText } from '../lib/emailExtractor';
-import type { ImportStep, ImportMode, ImportedRow, CsvColumnMapping } from '../lib/importTypes';
+import type { ImportStep, ImportMode, ImportedRow, ImportDataType, CsvColumnMapping } from '../lib/importTypes';
 import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddMeal } from '../../meals/hooks/useMeals';
+import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
+import { isUsingProxy } from '../../../lib/ai/provider';
+import { ColumnMappingStep } from './ColumnMappingStep';
 
 interface DataImportDialogProps {
   open: boolean;
@@ -22,8 +25,9 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
   const [step, setStep] = useState<ImportStep>('mode_select');
   const [mode, setMode] = useState<ImportMode>('csv');
   const [rows, setRows] = useState<ImportedRow[]>([]);
-  const [_csvData, setCsvData] = useState<ParsedCsv | null>(null);
-  const [_mappings, setMappings] = useState<CsvColumnMapping[]>([]);
+  const [csvData, setCsvData] = useState<ParsedCsv | null>(null);
+  const [mappings, setMappings] = useState<CsvColumnMapping[]>([]);
+  const [detectedDataType, setDetectedDataType] = useState<ImportDataType>('body');
   const [scaleFormat, setScaleFormat] = useState<string | null>(null);
   const [emailText, setEmailText] = useState('');
   const [error, setError] = useState('');
@@ -32,6 +36,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
 
   const addBody = useAddBodyMeasurement();
   const addMeal = useAddMeal();
+  const addBP = useAddBloodPressure();
 
   const isDE = language === 'de';
 
@@ -41,6 +46,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
     setRows([]);
     setCsvData(null);
     setMappings([]);
+    setDetectedDataType('body');
     setScaleFormat(null);
     setEmailText('');
     setError('');
@@ -71,21 +77,22 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
       // Try scale format detection first
       const scale = detectScaleFormat(parsed.headers);
       if (scale) {
+        // Known scale format — skip mapping, go straight to review
         setScaleFormat(scale.name);
         const scaleMappings = scale.getMappings(parsed.headers);
         setMappings(scaleMappings);
         const dataType = detectDataType(scaleMappings);
+        setDetectedDataType(dataType);
         const imported = mapToImportedRows(parsed.headers, parsed.rows, scaleMappings, dataType);
         setRows(imported);
         setStep('review');
       } else {
-        // Generic CSV — auto-detect columns
+        // Generic CSV — auto-detect columns, let user confirm mapping
         const detectedMappings = autoDetectColumns(parsed.headers);
         setMappings(detectedMappings);
         const dataType = detectDataType(detectedMappings);
-        const imported = mapToImportedRows(parsed.headers, parsed.rows, detectedMappings, dataType);
-        setRows(imported);
-        setStep('review');
+        setDetectedDataType(dataType);
+        setStep('mapping');
       }
     };
     reader.readAsText(file);
@@ -97,8 +104,10 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
     setStep('analyzing');
 
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
+      // In proxy mode, the API key is on the server — no client-side key needed.
+      // In direct mode, we still need the key from env.
+      const apiKey = isUsingProxy() ? '' : ((import.meta.env.VITE_OPENAI_API_KEY as string) || '');
+      if (!isUsingProxy() && !apiKey) {
         setError(isDE ? 'OpenAI API-Key nicht konfiguriert' : 'OpenAI API key not configured');
         setStep('error');
         return;
@@ -149,6 +158,19 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
             carbs: (row.values.carbs as number) ?? 0,
             fat: (row.values.fat as number) ?? 0,
             source: 'import' as const,
+          });
+          count++;
+        } else if (row.type === 'blood_pressure') {
+          // BP table expects separate date + time columns
+          const bpDate = row.date;
+          const bpTime = (row.values.time as string) ?? new Date().toTimeString().slice(0, 5);
+          await addBP.mutateAsync({
+            date: bpDate,
+            time: bpTime,
+            systolic: (row.values.systolic as number) ?? 0,
+            diastolic: (row.values.diastolic as number) ?? 0,
+            pulse: row.values.pulse as number | undefined,
+            notes: 'Import',
           });
           count++;
         }
@@ -262,6 +284,27 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
               <Loader2 className="h-10 w-10 animate-spin text-teal-500 mx-auto mb-3" />
               <p className="text-sm text-gray-600">{isDE ? 'Daten werden analysiert...' : 'Analyzing data...'}</p>
             </div>
+          )}
+
+          {/* Step: Column Mapping (generic CSV only) */}
+          {step === 'mapping' && csvData && (
+            <ColumnMappingStep
+              mappings={mappings}
+              dataType={detectedDataType}
+              sampleRow={csvData.rows[0]}
+              headers={csvData.headers}
+              isDE={isDE}
+              onConfirm={(confirmedMappings, confirmedType) => {
+                setMappings(confirmedMappings);
+                setDetectedDataType(confirmedType);
+                const imported = mapToImportedRows(
+                  csvData.headers, csvData.rows, confirmedMappings, confirmedType
+                );
+                setRows(imported);
+                setStep('review');
+              }}
+              onBack={reset}
+            />
           )}
 
           {/* Step: Review */}

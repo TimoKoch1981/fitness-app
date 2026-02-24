@@ -1,8 +1,14 @@
 /**
- * Email/Text Extractor — Uses OpenAI to extract health data from freeform text.
+ * Email/Text Extractor — Uses AI to extract health data from freeform text.
+ *
+ * Supports two modes:
+ * - Direct: Uses OpenAI API key directly (local development)
+ * - Proxy: Routes through Supabase Edge Function ai-proxy (cloud / production)
  */
 
 import type { ImportedRow } from './importTypes';
+import { isUsingProxy } from '../../../lib/ai/provider';
+import { proxyCompletionRequest } from '../../../lib/ai/supabaseProxy';
 
 const EXTRACTION_PROMPT = `Du bist ein Gesundheitsdaten-Extraktor. Analysiere den folgenden Text und extrahiere alle Gesundheitsdaten daraus.
 
@@ -26,6 +32,13 @@ Regeln:
 
 let idCounter = 0;
 
+/**
+ * Extract health data from freeform text using AI.
+ *
+ * @param text - Freeform text (email, notes, lab report, etc.)
+ * @param apiKey - OpenAI API key (only used in direct mode, ignored in proxy mode)
+ * @param language - Response language ('de' or 'en')
+ */
 export async function extractHealthDataFromText(
   text: string,
   apiKey: string,
@@ -43,30 +56,51 @@ export async function extractHealthDataFromText(
     .replace('Wenn nichts extrahierbar ist, gib ein leeres Array [] zurueck', 'If nothing is extractable, return an empty array []')
     .replace('Antworte NUR mit dem JSON-Array, kein anderer Text', 'Respond ONLY with the JSON array, no other text');
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
+  const messages = [
+    { role: 'system' as const, content: systemPrompt },
+    { role: 'user' as const, content: text },
+  ];
+
+  let content: string;
+
+  if (isUsingProxy()) {
+    // ── Cloud mode: Route through Supabase Edge Function ──────────
+    const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+    const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+    if (!supabaseUrl || !anonKey) {
+      throw new Error('Supabase not configured for AI proxy');
+    }
+
+    const data = await proxyCompletionRequest(supabaseUrl, anonKey, messages, {
       model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: text },
-      ],
       temperature: 0.1,
       max_tokens: 2000,
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
+    });
+    content = data.choices?.[0]?.message?.content?.trim() ?? '[]';
+  } else {
+    // ── Local mode: Direct OpenAI API call ────────────────────────
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages,
+        temperature: 0.1,
+        max_tokens: 2000,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    content = data.choices?.[0]?.message?.content?.trim() ?? '[]';
   }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content?.trim() ?? '[]';
 
   // Parse JSON from response (may be wrapped in markdown code block)
   const jsonStr = content.replace(/^```json?\n?/m, '').replace(/\n?```$/m, '').trim();

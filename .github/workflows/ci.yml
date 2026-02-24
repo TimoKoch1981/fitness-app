@@ -37,3 +37,44 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Security check — no API keys in bundle
+        run: |
+          if grep -r "sk-proj-\|sk-live-\|sk-test-" dist/ 2>/dev/null; then
+            echo "ERROR: OpenAI API key found in build output!"
+            exit 1
+          fi
+          echo "OK: No API keys found in build output."
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_AI_PROVIDER: supabase
+          VITE_OPENAI_MODEL: gpt-4o-mini
+
+      - name: Deploy to Vercel
+        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

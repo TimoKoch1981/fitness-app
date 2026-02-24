@@ -1,10 +1,14 @@
 /**
  * AI Provider Interface and Factory.
- * Supports swappable AI backends: Ollama (local), OpenAI, Claude.
+ * Supports swappable AI backends: Ollama (local), OpenAI, Supabase Proxy.
  *
  * Provider selection via environment variable VITE_AI_PROVIDER:
- *   'openai'  → OpenAI API (default for development)
- *   'ollama'  → Local Ollama instance
+ *   'openai'    → OpenAI API direct (default for local development)
+ *   'ollama'    → Local Ollama instance
+ *   'supabase'  → Supabase Edge Function ai-proxy (recommended for cloud)
+ *
+ * Auto-detection: if VITE_SUPABASE_URL starts with https:// (= cloud),
+ * the provider automatically switches to 'supabase' unless overridden.
  *
  * @see docs/ARCHITEKTUR.md - Section 4: KI-Provider Strategie
  */
@@ -13,6 +17,7 @@ import type { ChatMessage, AIResponse, AIProviderConfig, StreamCallback } from '
 import type { HealthContext } from '../../types/health';
 import { OllamaProvider } from './ollama';
 import { OpenAIProvider } from './openai';
+import { SupabaseAIProvider } from './supabaseProxy';
 
 export interface AIProvider {
   /** Send a chat message and get a response (blocking — waits for full response) */
@@ -26,23 +31,39 @@ export interface AIProvider {
 }
 
 /**
+ * Detect if we're running in a Supabase Cloud environment.
+ * Cloud URLs start with https://, local URLs are http://127.0.0.1:54321.
+ */
+function isCloudEnvironment(): boolean {
+  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+  return supabaseUrl.startsWith('https://');
+}
+
+/**
  * Read provider config from environment variables.
- * VITE_AI_PROVIDER: 'openai' | 'ollama' (default: 'openai')
+ * VITE_AI_PROVIDER: 'openai' | 'ollama' | 'supabase' (default: auto-detect)
  * VITE_OPENAI_API_KEY: OpenAI API key (required for openai provider)
  * VITE_OPENAI_MODEL: OpenAI model name (default: 'gpt-4o-mini')
  * VITE_OLLAMA_URL: Ollama base URL (default: 'http://localhost:11434')
  * VITE_OLLAMA_MODEL: Ollama model name (default: 'llama3.1:8b')
+ * VITE_SUPABASE_URL: Supabase project URL
+ * VITE_SUPABASE_ANON_KEY: Supabase anonymous key
  */
 function getConfigFromEnv(): AIProviderConfig {
-  const provider = (import.meta.env.VITE_AI_PROVIDER as string) || 'openai';
+  let provider = (import.meta.env.VITE_AI_PROVIDER as string) || '';
+
+  // Auto-detect: if no explicit provider set, use 'supabase' in cloud, 'openai' locally
+  if (!provider) {
+    provider = isCloudEnvironment() ? 'supabase' : 'openai';
+  }
 
   return {
     provider: provider as AIProviderConfig['provider'],
     apiKey: (import.meta.env.VITE_OPENAI_API_KEY as string) || '',
     baseUrl: (import.meta.env.VITE_OLLAMA_URL as string) || 'http://localhost:11434',
-    model: provider === 'openai'
-      ? (import.meta.env.VITE_OPENAI_MODEL as string) || 'gpt-4o-mini'
-      : (import.meta.env.VITE_OLLAMA_MODEL as string) || 'llama3.1:8b',
+    model: provider === 'ollama'
+      ? (import.meta.env.VITE_OLLAMA_MODEL as string) || 'llama3.1:8b'
+      : (import.meta.env.VITE_OPENAI_MODEL as string) || 'gpt-4o-mini',
   };
 }
 
@@ -58,6 +79,25 @@ export function getAIProvider(config?: Partial<AIProviderConfig>): AIProvider {
 
   if (!currentProvider || (config && Object.keys(config).length > 0)) {
     switch (mergedConfig.provider) {
+      case 'supabase': {
+        const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+        const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+        if (!supabaseUrl || !anonKey) {
+          console.warn('[FitBuddy] Supabase URL/Key missing. Falling back to OpenAI direct.');
+          if (mergedConfig.apiKey) {
+            currentProvider = new OpenAIProvider(mergedConfig.apiKey, mergedConfig.model ?? 'gpt-4o-mini');
+          } else {
+            console.warn('[FitBuddy] No OpenAI key either. Falling back to Ollama.');
+            currentProvider = new OllamaProvider(
+              mergedConfig.baseUrl ?? 'http://localhost:11434',
+              mergedConfig.model ?? 'llama3.1:8b',
+            );
+          }
+        } else {
+          currentProvider = new SupabaseAIProvider(supabaseUrl, anonKey, mergedConfig.model ?? 'gpt-4o-mini');
+        }
+        break;
+      }
       case 'openai':
         if (!mergedConfig.apiKey) {
           console.warn('[FitBuddy] VITE_OPENAI_API_KEY is not set. Falling back to Ollama.');
@@ -78,10 +118,6 @@ export function getAIProvider(config?: Partial<AIProviderConfig>): AIProvider {
           mergedConfig.model ?? 'llama3.1:8b'
         );
         break;
-      // Future providers:
-      // case 'claude':
-      //   currentProvider = new ClaudeProvider(mergedConfig.apiKey!, mergedConfig.model ?? 'claude-sonnet-4-20250514');
-      //   break;
       default:
         currentProvider = new OllamaProvider(
           mergedConfig.baseUrl ?? 'http://localhost:11434',
@@ -91,4 +127,14 @@ export function getAIProvider(config?: Partial<AIProviderConfig>): AIProvider {
   }
 
   return currentProvider;
+}
+
+/**
+ * Check if the current environment uses the Supabase proxy.
+ * Useful for call sites that need to decide between direct API calls
+ * and proxy calls (vision, email extractor).
+ */
+export function isUsingProxy(): boolean {
+  const provider = (import.meta.env.VITE_AI_PROVIDER as string) || '';
+  return provider === 'supabase' || (!provider && isCloudEnvironment());
 }

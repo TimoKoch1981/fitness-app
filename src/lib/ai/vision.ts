@@ -5,11 +5,15 @@
  * - Fitdays smart scale screenshot import (weight, body fat, muscle mass, water %)
  * - General body composition screenshots
  *
- * Sends base64-encoded image to OpenAI Chat Completions with vision capability.
- * Returns structured JSON with extracted body measurement values.
+ * Supports two modes:
+ * - Direct: Uses VITE_OPENAI_API_KEY (local development)
+ * - Proxy: Routes through Supabase Edge Function ai-proxy (cloud / production)
  *
  * @see https://platform.openai.com/docs/guides/vision
  */
+
+import { isUsingProxy } from './provider';
+import { proxyCompletionRequest } from './supabaseProxy';
 
 /** Structured result from scale screenshot analysis */
 export interface ScaleAnalysisResult {
@@ -48,21 +52,131 @@ export async function analyzeScaleScreenshot(
   mimeType: string = 'image/jpeg',
   language: 'de' | 'en' = 'de',
 ): Promise<ScaleAnalysisResult> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string;
-  if (!apiKey) {
-    throw new Error(
-      language === 'de'
-        ? 'OpenAI API-Key nicht konfiguriert. Vision-Analyse nicht möglich.'
-        : 'OpenAI API key not configured. Vision analysis not available.',
-    );
+  const systemPrompt = getSystemPrompt(language);
+  const userContent = [
+    {
+      type: 'image_url' as const,
+      image_url: {
+        url: `data:${mimeType};base64,${imageBase64}`,
+        detail: 'high' as const,
+      },
+    },
+    {
+      type: 'text' as const,
+      text: language === 'de'
+        ? 'Analysiere dieses Waagen-Screenshot und extrahiere die Koerperwerte als JSON.'
+        : 'Analyze this scale screenshot and extract the body metrics as JSON.',
+    },
+  ];
+
+  const messages = [
+    { role: 'system' as const, content: systemPrompt },
+    { role: 'user' as const, content: userContent },
+  ];
+
+  let content: string;
+
+  if (isUsingProxy()) {
+    // ── Cloud mode: Route through Supabase Edge Function ──────────
+    const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+    const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+    if (!supabaseUrl || !anonKey) {
+      throw new Error(
+        language === 'de'
+          ? 'Supabase nicht konfiguriert. Vision-Analyse nicht moeglich.'
+          : 'Supabase not configured. Vision analysis not available.',
+      );
+    }
+
+    const data = await proxyCompletionRequest(supabaseUrl, anonKey, messages, {
+      model: VISION_MODEL,
+      temperature: 0.1,
+      max_tokens: 500,
+    });
+    content = data.choices?.[0]?.message?.content ?? '';
+  } else {
+    // ── Local mode: Direct OpenAI API call ────────────────────────
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string;
+    if (!apiKey) {
+      throw new Error(
+        language === 'de'
+          ? 'OpenAI API-Key nicht konfiguriert. Vision-Analyse nicht moeglich.'
+          : 'OpenAI API key not configured. Vision analysis not available.',
+      );
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: VISION_MODEL,
+          messages,
+          temperature: 0.1,
+          max_tokens: 500,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = (errorData as { error?: { message?: string } }).error?.message ?? `HTTP ${response.status}`;
+        throw new Error(`Vision API error: ${errorMsg}`);
+      }
+
+      const data = await response.json();
+      content = data.choices?.[0]?.message?.content ?? '';
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error(
+          language === 'de'
+            ? 'Vision-Analyse Timeout. Bitte versuche es erneut.'
+            : 'Vision analysis timeout. Please try again.',
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
-  const systemPrompt = language === 'de'
-    ? `Du bist ein Bildanalyse-Assistent für Fitness-Apps. Deine Aufgabe ist es, Körperwerte aus Screenshots von Smart-Waagen (z.B. Fitdays, Renpho, Withings) zu extrahieren.
+  // ── Parse JSON from response ──────────────────────────────────────
+  return parseVisionResponse(content, language);
+}
+
+/**
+ * Convert a File object to base64 string.
+ * Returns the base64 string WITHOUT the data:... prefix.
+ */
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove "data:image/jpeg;base64," prefix
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Helper functions ────────────────────────────────────────────────
+
+function getSystemPrompt(language: 'de' | 'en'): string {
+  return language === 'de'
+    ? `Du bist ein Bildanalyse-Assistent fuer Fitness-Apps. Deine Aufgabe ist es, Koerperwerte aus Screenshots von Smart-Waagen (z.B. Fitdays, Renpho, Withings) zu extrahieren.
 
 Analysiere das Bild und extrahiere folgende Werte (falls sichtbar):
 - weight_kg: Gewicht in kg
-- body_fat_pct: Körperfettanteil in %
+- body_fat_pct: Koerperfettanteil in %
 - muscle_mass_kg: Muskelmasse in kg
 - water_pct: Wasseranteil in %
 - bone_mass_kg: Knochenmasse in kg
@@ -86,7 +200,7 @@ Regeln:
 - Nur Werte eintragen die KLAR LESBAR sind
 - Fehlende Werte weglassen (nicht null setzen)
 - confidence: 0.9+ wenn klar lesbar, 0.5-0.8 wenn teilweise verdeckt/unscharf
-- Bei nicht-Waagen-Bildern: confidence 0.0 und notes erklären warum
+- Bei nicht-Waagen-Bildern: confidence 0.0 und notes erklaeren warum
 - Dezimaltrennzeichen: Punkt (nicht Komma)`
     : `You are an image analysis assistant for fitness apps. Your task is to extract body metrics from smart scale screenshots (e.g., Fitdays, Renpho, Withings).
 
@@ -118,106 +232,28 @@ Rules:
 - confidence: 0.9+ if clearly readable, 0.5-0.8 if partially obscured/blurry
 - For non-scale images: confidence 0.0 and explain in notes
 - Decimal separator: dot (not comma)`;
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: VISION_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mimeType};base64,${imageBase64}`,
-                  detail: 'high',
-                },
-              },
-              {
-                type: 'text',
-                text: language === 'de'
-                  ? 'Analysiere dieses Waagen-Screenshot und extrahiere die Körperwerte als JSON.'
-                  : 'Analyze this scale screenshot and extract the body metrics as JSON.',
-              },
-            ],
-          },
-        ],
-        temperature: 0.1, // Low temperature for accurate data extraction
-        max_tokens: 500,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMsg = (errorData as { error?: { message?: string } }).error?.message ?? `HTTP ${response.status}`;
-      throw new Error(`Vision API error: ${errorMsg}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content ?? '';
-
-    // Parse JSON from response (handle potential markdown code blocks)
-    let jsonStr = content.trim();
-    if (jsonStr.startsWith('```')) {
-      jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
-    }
-
-    try {
-      const result = JSON.parse(jsonStr) as ScaleAnalysisResult;
-      // Ensure confidence exists
-      if (result.confidence === undefined) {
-        result.confidence = 0.5;
-      }
-      return result;
-    } catch {
-      console.error('[Vision] Failed to parse JSON response:', content);
-      return {
-        confidence: 0,
-        notes: language === 'de'
-          ? 'Konnte die KI-Antwort nicht verarbeiten. Bitte versuche ein deutlicheres Bild.'
-          : 'Could not process AI response. Please try a clearer image.',
-        raw_text: content,
-      };
-    }
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error(
-        language === 'de'
-          ? 'Vision-Analyse Timeout. Bitte versuche es erneut.'
-          : 'Vision analysis timeout. Please try again.',
-      );
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
 }
 
-/**
- * Convert a File object to base64 string.
- * Returns the base64 string WITHOUT the data:... prefix.
- */
-export function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove "data:image/jpeg;base64," prefix
-      const base64 = result.split(',')[1];
-      resolve(base64);
+function parseVisionResponse(content: string, language: 'de' | 'en'): ScaleAnalysisResult {
+  let jsonStr = content.trim();
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+
+  try {
+    const result = JSON.parse(jsonStr) as ScaleAnalysisResult;
+    if (result.confidence === undefined) {
+      result.confidence = 0.5;
+    }
+    return result;
+  } catch {
+    console.error('[Vision] Failed to parse JSON response:', content);
+    return {
+      confidence: 0,
+      notes: language === 'de'
+        ? 'Konnte die KI-Antwort nicht verarbeiten. Bitte versuche ein deutlicheres Bild.'
+        : 'Could not process AI response. Please try a clearer image.',
+      raw_text: content,
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  }
 }
