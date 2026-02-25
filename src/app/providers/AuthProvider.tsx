@@ -49,34 +49,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let initialLoad = true;
+
+    // Get initial session — await admin status before setting loading=false
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadAdminStatus(session.user.id);
+        await loadAdminStatus(session.user.id);
       }
       setLoading(false);
+      initialLoad = false;
     }).catch((err) => {
       console.error('[Auth] Failed to get session:', err);
       setLoading(false);
+      initialLoad = false;
     });
 
-    // Listen for auth changes (including session expiry)
+    // Listen for auth changes (sign-in, sign-out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
           setIsAdmin(false);
-        } else {
+          setLoading(false);
+        } else if (!initialLoad) {
+          // Skip INITIAL_SESSION — handled by getSession above
           setSession(session);
           setUser(session?.user ?? null);
           if (session?.user) {
             loadAdminStatus(session.user.id);
           }
         }
-        setLoading(false);
       }
     );
 
