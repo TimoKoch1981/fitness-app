@@ -16,9 +16,16 @@ www.{$DOMAIN} {
 		try_files {path} /index.html
 		file_server
 
-		# Cache static assets (Vite hashed filenames)
+		# Cache static assets (Vite hashed filenames → immutable)
 		@assets path /assets/*
 		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# index.html & other HTML → never cache (so deploys take effect immediately)
+		@html {
+			not path /assets/*
+			path *.html /
+		}
+		header @html Cache-Control "no-cache, no-store, must-revalidate"
 	}
 
 	# Supabase API — Proxy zu Kong
@@ -47,7 +54,7 @@ www.{$DOMAIN} {
 		X-Content-Type-Options nosniff
 		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
-		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
 		-Server
 	}
 
