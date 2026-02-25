@@ -8,7 +8,7 @@
 set -euo pipefail
 
 # ── Konfiguration ──────────────────────────────────────────────
-SERVER="${DEPLOY_SERVER:-fitbuddy@YOUR_SERVER_IP}"
+SERVER="${DEPLOY_SERVER:-root@46.225.228.12}"
 DEPLOY_DIR="/opt/fitbuddy"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -22,7 +22,7 @@ echo "[1/4] Production Build..."
 cd "$PROJECT_DIR"
 
 # Production env vars (Supabase URL zeigt auf den eigenen Server)
-VITE_SUPABASE_URL="${VITE_SUPABASE_URL:-https://fitbuddy.app}" \
+VITE_SUPABASE_URL="${VITE_SUPABASE_URL:-https://fudda.de}" \
 VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY:?Fehlt! Setze VITE_SUPABASE_ANON_KEY}" \
 VITE_AI_PROVIDER=supabase \
 VITE_OPENAI_MODEL=gpt-4o-mini \
@@ -49,4 +49,4 @@ rsync -avz --delete \
 
 echo ""
 echo "=== Deploy erfolgreich! ==="
-echo "URL: https://fitbuddy.app"
+echo "URL: https://fudda.de"
