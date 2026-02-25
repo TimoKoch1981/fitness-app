@@ -54,6 +54,7 @@ export class SupabaseAIProvider implements AIProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'apikey': this.anonKey,
           'Authorization': `Bearer ${this.anonKey}`,
         },
         signal: controller.signal,
@@ -104,6 +105,7 @@ export class SupabaseAIProvider implements AIProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'apikey': this.anonKey,
           'Authorization': `Bearer ${this.anonKey}`,
         },
         signal: controller.signal,
@@ -175,6 +177,7 @@ export async function proxyCompletionRequest(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'apikey': anonKey,
       'Authorization': `Bearer ${anonKey}`,
     },
     body: JSON.stringify({
