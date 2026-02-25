@@ -11,6 +11,7 @@ const ADMIN_TABS = [
   { path: '/admin/users', labelKey: 'users' as const, icon: '👥' },
   { path: '/admin/products', labelKey: 'products' as const, icon: '🍎' },
   { path: '/admin/usage', labelKey: 'usage' as const, icon: '🤖' },
+  { path: '/admin/feedback', labelKey: 'feedback' as const, icon: '💬' },
 ] as const;
 
 export function AdminNav() {

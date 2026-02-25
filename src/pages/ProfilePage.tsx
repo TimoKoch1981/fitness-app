@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
@@ -8,6 +8,7 @@ import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile'
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
 import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
+import { FeedbackDialog } from '../features/feedback/components/FeedbackDialog';
 import { useDebouncedCallback } from '../shared/hooks/useDebounce';
 import { calculateRecommendedGoals } from '../lib/calculations';
 import type { RecommendedGoals } from '../lib/calculations';
@@ -42,6 +43,8 @@ export function ProfilePage() {
   const [showBmrHelp, setShowBmrHelp] = useState(false);
   // Disclaimer viewer
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  // Feedback dialog
+  const [showFeedback, setShowFeedback] = useState(false);
   // Goal recommendation
   const [recommendedGoals, setRecommendedGoals] = useState<RecommendedGoals | null>(null);
   const { data: latestBody } = useLatestBodyMeasurement();
@@ -568,6 +571,26 @@ export function ProfilePage() {
           <p className="text-xs text-gray-500 mb-3">{t.equipment.subtitle}</p>
           <EquipmentSelector />
         </div>
+
+        {/* Feedback & Feature Requests */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-teal-50 text-teal-600 rounded-xl font-medium hover:bg-teal-100 transition-colors"
+          >
+            <MessageSquare className="h-4 w-4" />
+            {t.feedback.feedbackButton}
+          </button>
+          <Link
+            to="/features"
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-600 rounded-xl font-medium hover:bg-amber-100 transition-colors"
+          >
+            <Lightbulb className="h-4 w-4" />
+            {t.feedback.featureRequests}
+          </Link>
+        </div>
+
+        <FeedbackDialog open={showFeedback} onClose={() => setShowFeedback(false)} />
 
         {/* Admin Link (only visible for admins) */}
         {isAdmin && (

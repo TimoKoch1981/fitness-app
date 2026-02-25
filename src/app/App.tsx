@@ -26,6 +26,8 @@ import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
 import { AdminUsagePage } from '../pages/admin/AdminUsagePage';
+import { AdminFeedbackPage } from '../pages/admin/AdminFeedbackPage';
+import { FeatureVotingPage } from '../pages/FeatureVotingPage';
 
 function AppRoutes() {
   return (
@@ -114,6 +116,25 @@ function AppRoutes() {
           <AdminRoute>
             <AdminUsagePage />
           </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/feedback"
+        element={
+          <AdminRoute>
+            <AdminFeedbackPage />
+          </AdminRoute>
+        }
+      />
+
+      {/* Feature Voting (public, authenticated) */}
+      <Route
+        path="/features"
+        element={
+          <ProtectedRoute>
+            <FeatureVotingPage />
+            <Navigation />
+          </ProtectedRoute>
         }
       />
 
