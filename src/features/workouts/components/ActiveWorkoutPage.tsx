@@ -18,6 +18,7 @@ import { WarmupCard } from './WarmupCard';
 import { ExerciseTracker } from './ExerciseTracker';
 import { RestTimer } from './RestTimer';
 import { WorkoutSummary } from './WorkoutSummary';
+import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
 export function ActiveWorkoutPage() {
@@ -238,6 +239,13 @@ export function ActiveWorkoutPage() {
           />
         )}
       </div>
+
+      {/* Floating Music Player */}
+      {state.phase !== 'summary' && (
+        <div className="fixed bottom-24 right-4 z-20">
+          <WorkoutMusicPlayer />
+        </div>
+      )}
 
       {/* Floating Finish Button (during exercise phase) */}
       {(state.phase === 'exercise' || state.phase === 'rest') && (
