@@ -28,6 +28,46 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Send welcome email on first login (after email confirmation).
+ * Non-blocking, fire-and-forget — login is never delayed by email sending.
+ * Idempotent: checks welcome_email_sent_at before sending.
+ */
+async function triggerWelcomeEmail(userId: string, accessToken: string): Promise<void> {
+  try {
+    // Check if welcome email was already sent
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('welcome_email_sent_at')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.welcome_email_sent_at) return; // Already sent
+
+    // Call Edge Function to send welcome email
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321';
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (!data.skipped) {
+        console.log('[Auth] Welcome email sent successfully');
+      }
+    } else {
+      console.warn('[Auth] Welcome email failed:', res.status);
+    }
+  } catch (err) {
+    // Non-critical: don't block login if welcome email fails
+    console.warn('[Auth] Welcome email error:', err);
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -80,6 +120,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(session?.user ?? null);
           if (session?.user) {
             loadAdminStatus(session.user.id);
+
+            // Trigger welcome email on SIGNED_IN (first login after confirmation)
+            if (event === 'SIGNED_IN' && session.access_token) {
+              triggerWelcomeEmail(session.user.id, session.access_token);
+            }
           }
         }
       }

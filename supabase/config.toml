@@ -224,7 +224,7 @@ host = "smtp.resend.com"
 port = 465
 user = "resend"
 pass = "env(RESEND_API_KEY)"
-admin_email = "noreply@fitbuddy.app"
+admin_email = "noreply@fudda.de"
 sender_name = "FitBuddy"
 
 # Email-Templates (Deutsch)
