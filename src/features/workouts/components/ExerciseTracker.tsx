@@ -4,10 +4,10 @@
  * Shows exercise name, info button, navigation, and modify options.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, SkipForward, Video,
-  MoreVertical, Trash2, Plus, Info,
+  MoreVertical, Trash2, Plus, Info, Clock,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -19,6 +19,7 @@ import { ManualTimer } from './ManualTimer';
 import { ExerciseVideoModal } from './ExerciseVideoModal';
 import { ExerciseModifyDialog } from './ExerciseModifyDialog';
 import { AddExerciseDialog } from './AddExerciseDialog';
+import { suggestRestTime } from '../utils/suggestRestTimes';
 import type { Workout, WorkoutExerciseResult } from '../../../types/health';
 
 interface ExerciseTrackerProps {
@@ -51,6 +52,18 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const hasVideo = catalogEntry && (catalogEntry.video_url_de || catalogEntry.video_url_en);
 
   const allSetsComplete = exercise.sets.every(s => s.completed || s.skipped);
+
+  // AI rest time suggestion
+  const restSuggestion = useMemo(() => suggestRestTime({
+    exerciseName: exercise.name,
+    repsTarget: exercise.sets[0]?.target_reps,
+    durationSeconds: exercise.duration_minutes ? exercise.duration_minutes * 60 : undefined,
+    isTimedExercise: exercise.exercise_type === 'flexibility' ||
+      (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg),
+  }), [exercise.name, exercise.sets, exercise.duration_minutes, exercise.exercise_type]);
+
+  // Use AI suggestion if no explicit rest_seconds on exercise
+  const effectiveRestSeconds = exercise.rest_seconds ?? restSuggestion.restSeconds;
 
   // Detect timed exercises: flexibility, or exercises with duration but no weight/reps
   const isTimedExercise = (
@@ -156,6 +169,21 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
             )}
           </div>
         )}
+
+        {/* AI Rest Time Suggestion Badge */}
+        {!isTimedExercise && (
+          <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-teal-50 border border-teal-100 rounded-lg">
+            <Clock className="h-3.5 w-3.5 text-teal-500 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-medium text-teal-700">
+                {isDE ? 'Empfohlene Pause' : 'Suggested Rest'}: {effectiveRestSeconds}s
+              </span>
+              <p className="text-[10px] text-teal-500 leading-tight mt-0.5 truncate">
+                {isDE ? restSuggestion.reason : restSuggestion.reasonEN}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tracker Content (based on mode and exercise type) */}
@@ -190,7 +218,7 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
 
       {/* Manual Timer (always available for any exercise) */}
       {!isTimedExercise && (
-        <ManualTimer initialSeconds={exercise.rest_seconds} />
+        <ManualTimer initialSeconds={effectiveRestSeconds} />
       )}
 
       {/* Navigation (visible in set-by-set when all sets done) */}
