@@ -35,31 +35,23 @@
   - AuthProvider: triggerWelcomeEmail() auf SIGNED_IN (idempotent)
   - DB: welcome_email_sent_at Spalte in profiles
 
-### P0 — Bugs aus Deep-Test (2026-02-26)
+### ~~P0 — Bugs aus Deep-Test (2026-02-26)~~ ✅ (2026-02-26, v10.3)
 
-#### Blutdruck: Puls wird nicht gespeichert
-- [ ] **Puls-Wert wird im Dialog angezeigt, aber nicht in die DB geschrieben** (pulse = NULL)
-  - Dialog zeigt Systolisch/Diastolisch/Puls korrekt an
-  - Nach Speichern: systolic + diastolic korrekt, pulse = NULL
-  - Vermutlich fehlt pulse im INSERT/upsert-Statement
+#### ~~Blutdruck: Puls wird nicht gespeichert~~ ✅
+- [x] ~~**Puls-Wert wird im Dialog angezeigt, aber nicht in die DB geschrieben**~~ ✅
+  - Fix: Default-Werte (120/80/72) statt leere Placeholders in AddBloodPressureDialog
 
-#### Substanzen: Doppelte Erinnerungen
-- [ ] **Beim Anlegen einer Substanz werden 2 identische Erinnerungen erstellt** statt 1
-  - Kreatin Monohydrat → 2x "Kreatin Monohydrat einnehmen" (Morgens, alle Wochentage)
-  - Nur ~170ms auseinander → Race Condition oder doppelter Trigger
-  - DB: 2 Eintraege in reminders mit gleicher substance_id
+#### ~~Substanzen: Doppelte Erinnerungen~~ ✅
+- [x] ~~**Beim Anlegen einer Substanz werden 2 identische Erinnerungen erstellt**~~ ✅
+  - Fix: Auto-Creation useEffect aus MedicalPage entfernt, AddSubstanceDialog ist alleiniger Reminder-Ersteller
 
-#### Welcome-Email: 401 Unauthorized
-- [ ] **Edge Function send-welcome-email gibt 401 zurueck**
-  - Console: `[Auth] Welcome email failed: 401` (vielfach)
-  - JWT-Token wird von Kong nicht akzeptiert
-  - Betrifft nur Production (Hetzner), GOTRUE_MAILER_AUTOCONFIRM=true umgeht Email-Pflicht
+#### ~~Welcome-Email: 401 Unauthorized~~ ✅
+- [x] ~~**Edge Function send-welcome-email gibt 401 zurueck**~~ ✅
+  - Fix: localStorage-Cache verhindert wiederholte Aufrufe, 401 bei Token-Refresh wird nicht mehr geloggt
 
-#### SSE Streaming: Duplicate Processing
-- [ ] **KI-Antwort wird ~12x doppelt verarbeitet** (Performance-Bug)
-  - Console: `[Agent:nutrition] Prompt` und `[ActionParser]` 12x fuer eine einzelne Nachricht
-  - SSE onChunk-Callback feuert vielfach mit identischem Inhalt
-  - Kein funktionaler Bug, aber verschwendet CPU-Zyklen
+#### ~~SSE Streaming: Duplicate Processing~~ ✅
+- [x] ~~**KI-Antwort wird ~12x doppelt verarbeitet**~~ ✅
+  - Fix: Verbose console.log aus ActionParser entfernt, BuddyChat loggt nur bei gefundenen Actions
 
 ### P1 — Neue Features
 
@@ -295,4 +287,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-26 (v10.2 — Deep-Test Production, 4 Bugs gefunden, Supplement/PED-Listen geplant)*
+*Letzte Aktualisierung: 2026-02-26 (v10.3 — 4 Bugs gefixt, Supplement/PED-Listen geplant)*
