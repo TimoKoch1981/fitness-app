@@ -19,6 +19,7 @@ import { ExerciseTracker } from './ExerciseTracker';
 import { RestTimer } from './RestTimer';
 import { WorkoutSummary } from './WorkoutSummary';
 import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
+import { WorkoutVoiceControl } from './WorkoutVoiceControl';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
 export function ActiveWorkoutPage() {
@@ -240,9 +241,10 @@ export function ActiveWorkoutPage() {
         )}
       </div>
 
-      {/* Floating Music Player */}
+      {/* Floating Controls: Voice + Music */}
       {state.phase !== 'summary' && (
-        <div className="fixed bottom-24 right-4 z-20">
+        <div className="fixed bottom-24 right-4 z-20 flex flex-col items-end gap-3">
+          <WorkoutVoiceControl />
           <WorkoutMusicPlayer />
         </div>
       )}
