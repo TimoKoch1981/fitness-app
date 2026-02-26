@@ -31,18 +31,27 @@ interface AuthProviderProps {
 /**
  * Send welcome email on first login (after email confirmation).
  * Non-blocking, fire-and-forget — login is never delayed by email sending.
- * Idempotent: checks welcome_email_sent_at before sending.
+ * Idempotent: checks localStorage fast-cache + DB welcome_email_sent_at before sending.
  */
+const WELCOME_EMAIL_SENT_KEY = 'fitbuddy_welcome_email_sent';
+
 async function triggerWelcomeEmail(userId: string, accessToken: string): Promise<void> {
   try {
-    // Check if welcome email was already sent
+    // Fast-check: localStorage cache (avoids DB query + Edge Function call on every page load)
+    if (localStorage.getItem(WELCOME_EMAIL_SENT_KEY) === userId) return;
+
+    // Check if welcome email was already sent (DB source of truth)
     const { data: profile } = await supabase
       .from('profiles')
       .select('welcome_email_sent_at')
       .eq('id', userId)
       .single();
 
-    if (profile?.welcome_email_sent_at) return; // Already sent
+    if (profile?.welcome_email_sent_at) {
+      // Already sent — cache in localStorage to avoid future DB queries
+      localStorage.setItem(WELCOME_EMAIL_SENT_KEY, userId);
+      return;
+    }
 
     // Call Edge Function to send welcome email
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321';
@@ -59,12 +68,16 @@ async function triggerWelcomeEmail(userId: string, accessToken: string): Promise
       if (!data.skipped) {
         console.log('[Auth] Welcome email sent successfully');
       }
+      // Cache success in localStorage
+      localStorage.setItem(WELCOME_EMAIL_SENT_KEY, userId);
+    } else if (res.status === 401) {
+      // JWT not accepted by Kong — expected on token refresh, don't log warning
+      // Will retry on next fresh login
     } else {
       console.warn('[Auth] Welcome email failed:', res.status);
     }
-  } catch (err) {
+  } catch {
     // Non-critical: don't block login if welcome email fails
-    console.warn('[Auth] Welcome email error:', err);
   }
 }
 

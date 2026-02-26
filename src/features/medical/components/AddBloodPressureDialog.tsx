@@ -14,9 +14,9 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
   const { t } = useTranslation();
   const addBP = useAddBloodPressure();
 
-  const [systolic, setSystolic] = useState('');
-  const [diastolic, setDiastolic] = useState('');
-  const [pulse, setPulse] = useState('');
+  const [systolic, setSystolic] = useState('120');
+  const [diastolic, setDiastolic] = useState('80');
+  const [pulse, setPulse] = useState('72');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
@@ -48,9 +48,9 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
         notes: notes || undefined,
       });
 
-      setSystolic('');
-      setDiastolic('');
-      setPulse('');
+      setSystolic('120');
+      setDiastolic('80');
+      setPulse('72');
       setNotes('');
       onClose();
     } catch {

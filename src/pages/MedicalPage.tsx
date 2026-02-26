@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Plus, Heart, Pill, Trash2, ClipboardList, Bell } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
@@ -6,14 +6,13 @@ import { useTranslation } from '../i18n';
 import { usePageBuddySuggestions } from '../features/buddy/hooks/usePageBuddySuggestions';
 import { useBloodPressureLogs, useDeleteBloodPressure } from '../features/medical/hooks/useBloodPressure';
 import { useSubstances, useSubstanceLogs, useDeleteSubstance } from '../features/medical/hooks/useSubstances';
-import { useReminders, useAddReminder, useTodayReminderLogs, getTodayReminderStatus, useToggleReminder, useDeleteReminder } from '../features/reminders/hooks/useReminders';
+import { useReminders, useTodayReminderLogs, getTodayReminderStatus, useToggleReminder, useDeleteReminder } from '../features/reminders/hooks/useReminders';
 import { AddBloodPressureDialog } from '../features/medical/components/AddBloodPressureDialog';
 import { AddSubstanceDialog } from '../features/medical/components/AddSubstanceDialog';
 import { LogSubstanceDialog } from '../features/medical/components/LogSubstanceDialog';
 import { AddReminderDialog } from '../features/reminders/components/AddReminderDialog';
 import { EditReminderDialog } from '../features/reminders/components/EditReminderDialog';
 import { ReminderCard } from '../features/reminders/components/ReminderCard';
-import { parseFrequencyToReminder } from '../features/reminders/lib/parseFrequency';
 import { classifyBloodPressure } from '../lib/calculations';
 import type { Reminder } from '../types/health';
 import { formatDate, formatTime } from '../lib/utils';
@@ -36,55 +35,12 @@ export function MedicalPage() {
   // Reminders
   const { data: reminders } = useReminders(false); // all reminders (active + inactive)
   const { data: todayLogs } = useTodayReminderLogs();
-  const addReminder = useAddReminder();
   const toggleReminder = useToggleReminder();
   const deleteReminder = useDeleteReminder();
 
-  // ── Auto-create reminders for substances with frequency but no linked reminder ──
-  // Uses a ref to track which substances we already created reminders for (prevents duplicates).
-  // Runs only once per substance, even if reminders query re-fetches.
-  const autoCreatedRef = useRef<Set<string>>(new Set());
-  const isCreatingRef = useRef(false);
-
-  useEffect(() => {
-    if (!substances || !reminders || isCreatingRef.current) return;
-
-    const unlinked = substances.filter(
-      s => s.is_active && s.frequency && !reminders.some(r => r.substance_id === s.id) && !autoCreatedRef.current.has(s.id)
-    );
-
-    if (unlinked.length === 0) return;
-
-    // Mark all as "being created" BEFORE any async call to prevent double-runs
-    for (const sub of unlinked) {
-      autoCreatedRef.current.add(sub.id);
-    }
-
-    isCreatingRef.current = true;
-
-    // Create all missing reminders sequentially to avoid race conditions
-    (async () => {
-      for (const sub of unlinked) {
-        const config = parseFrequencyToReminder(sub.frequency!);
-        if (!config) continue;
-
-        const title = language === 'de' ? `${sub.name} einnehmen` : `Take ${sub.name}`;
-        try {
-          await addReminder.mutateAsync({
-            type: 'substance',
-            title,
-            substance_id: sub.id,
-            time_period: 'morning',
-            ...config,
-          });
-        } catch {
-          // If creation fails, allow retry next time
-          autoCreatedRef.current.delete(sub.id);
-        }
-      }
-      isCreatingRef.current = false;
-    })();
-  }, [substances, reminders]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Note: Reminder auto-creation is handled by AddSubstanceDialog on submit.
+  // Previously there was a useEffect here that also auto-created reminders,
+  // but this caused race conditions leading to duplicate reminders.
 
   const reminderStatus = reminders && todayLogs
     ? getTodayReminderStatus(reminders, todayLogs)

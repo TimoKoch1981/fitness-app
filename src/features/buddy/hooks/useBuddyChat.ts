@@ -165,7 +165,9 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       const searchActions = parsedActions.filter(a => a.type === 'search_product');
       const regularActions = parsedActions.filter(a => a.type !== 'search_product');
 
-      console.log(`[BuddyChat] Parsed actions: ${parsedActions.map(a => a.type).join(', ') || 'none'}. search_product: ${searchActions.length}`);
+      if (parsedActions.length > 0) {
+        console.log(`[BuddyChat] Parsed actions: ${parsedActions.map(a => a.type).join(', ')}. search_product: ${searchActions.length}`);
+      }
 
       if (searchActions.length > 0) {
         // Phase 1: Show "searching..." status

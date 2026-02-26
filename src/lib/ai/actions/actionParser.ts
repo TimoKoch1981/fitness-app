@@ -55,14 +55,6 @@ const ACTION_BLOCK_REGEX = /```\s*ACTION:(\w+)[\s\n]+([\s\S]*?)(?:\n```|```|$)/g
 export function parseAllActionsFromResponse(text: string): ParsedAction[] {
   const actions: ParsedAction[] = [];
 
-  // Debug: log response length and whether it contains ACTION markers
-  const hasActionMarker = /ACTION:/i.test(text);
-  console.log(`[ActionParser] Response length: ${text.length} chars, contains ACTION: ${hasActionMarker}`);
-  if (hasActionMarker && text.length > 100) {
-    // Show last 80 chars to detect truncation
-    console.log(`[ActionParser] Response tail: ...${text.slice(-80)}`);
-  }
-
   const matches = text.matchAll(ACTION_BLOCK_REGEX);
 
   for (const match of matches) {
@@ -100,7 +92,10 @@ export function parseAllActionsFromResponse(text: string): ParsedAction[] {
     });
   }
 
-  console.log(`[ActionParser] Parsed ${actions.length} action(s):`, actions.map(a => a.type));
+  // Only log when actions were found (reduces console noise in production)
+  if (actions.length > 0) {
+    console.log(`[ActionParser] Parsed ${actions.length} action(s):`, actions.map(a => a.type));
+  }
   return actions;
 }
 
