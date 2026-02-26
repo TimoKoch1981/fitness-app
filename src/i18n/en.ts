@@ -33,6 +33,8 @@ export const en: TranslationKeys = {
   nav: {
     buddy: 'Buddy',
     cockpit: 'Cockpit',
+    nutrition: 'Nutrition',
+    training: 'Training',
     tracking: 'Tracking',
     medical: 'Medical',
     profile: 'Profile',

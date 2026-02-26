@@ -10,27 +10,27 @@ import { Navigation } from '../Navigation';
 
 describe('Navigation', () => {
   it('renders 5 navigation items', () => {
-    renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
+    renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const links = screen.getAllByRole('menuitem');
     expect(links).toHaveLength(5);
   });
 
   it('renders correct nav labels (German)', () => {
-    renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
-    expect(screen.getByText('Buddy')).toBeInTheDocument();
+    renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     expect(screen.getByText('Cockpit')).toBeInTheDocument();
-    expect(screen.getByText('Tracking')).toBeInTheDocument();
+    expect(screen.getByText('Ernährung')).toBeInTheDocument();
+    expect(screen.getByText('Training')).toBeInTheDocument();
     expect(screen.getByText('Medizin')).toBeInTheDocument();
     expect(screen.getByText('Profil')).toBeInTheDocument();
   });
 
   it('links to correct paths', () => {
-    renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
+    renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const links = screen.getAllByRole('menuitem');
     const hrefs = links.map(l => l.getAttribute('href'));
-    expect(hrefs).toContain('/buddy');
     expect(hrefs).toContain('/cockpit');
-    expect(hrefs).toContain('/tracking');
+    expect(hrefs).toContain('/nutrition');
+    expect(hrefs).toContain('/training');
     expect(hrefs).toContain('/medical');
     expect(hrefs).toContain('/profile');
   });
@@ -42,20 +42,20 @@ describe('Navigation', () => {
   });
 
   it('non-active items have gray color', () => {
-    renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
-    const cockpitLink = screen.getByText('Cockpit').closest('a');
-    expect(cockpitLink?.className).toContain('text-gray-500');
+    renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
+    const medizinLink = screen.getByText('Medizin').closest('a');
+    expect(medizinLink?.className).toContain('text-gray-500');
   });
 
   it('is fixed to bottom of screen', () => {
-    const { container } = renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
+    const { container } = renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const nav = container.querySelector('nav');
     expect(nav?.className).toContain('fixed');
     expect(nav?.className).toContain('bottom-0');
   });
 
   it('has z-50 for overlay stacking', () => {
-    const { container } = renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
+    const { container } = renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const nav = container.querySelector('nav');
     expect(nav?.className).toContain('z-50');
   });

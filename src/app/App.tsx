@@ -17,6 +17,8 @@ import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { BuddyPage } from '../pages/BuddyPage';
 import { CockpitPage } from '../pages/CockpitPage';
 import { TrackingPage } from '../pages/TrackingPage';
+import { NutritionPage } from '../pages/NutritionPage';
+import { TrainingPage } from '../pages/TrainingPage';
 import { MedicalPage } from '../pages/MedicalPage';
 import { ProfilePage } from '../pages/ProfilePage';
 
@@ -62,13 +64,26 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/tracking"
+        path="/nutrition"
         element={
           <ProtectedRoute>
-            <TrackingPage />
+            <NutritionPage />
             <Navigation />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/training"
+        element={
+          <ProtectedRoute>
+            <TrainingPage />
+            <Navigation />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tracking"
+        element={<Navigate to="/nutrition" replace />}
       />
       <Route
         path="/medical"
@@ -156,14 +171,14 @@ function AppRoutes() {
 
       {/* Redirects for old URLs */}
       <Route path="/dashboard" element={<Navigate to="/cockpit" replace />} />
-      <Route path="/meals" element={<Navigate to="/tracking" replace />} />
-      <Route path="/workouts" element={<Navigate to="/tracking" replace />} />
-      <Route path="/body" element={<Navigate to="/tracking" replace />} />
+      <Route path="/meals" element={<Navigate to="/nutrition" replace />} />
+      <Route path="/workouts" element={<Navigate to="/training" replace />} />
+      <Route path="/body" element={<Navigate to="/nutrition" replace />} />
       <Route path="/reports" element={<Navigate to="/cockpit" replace />} />
 
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/buddy" replace />} />
-      <Route path="*" element={<Navigate to="/buddy" replace />} />
+      <Route path="/" element={<Navigate to="/cockpit" replace />} />
+      <Route path="*" element={<Navigate to="/cockpit" replace />} />
     </Routes>
   );
 }

@@ -31,6 +31,8 @@ export const de = {
   nav: {
     buddy: 'Buddy',
     cockpit: 'Cockpit',
+    nutrition: 'Ernährung',
+    training: 'Training',
     tracking: 'Tracking',
     medical: 'Medizin',
     profile: 'Profil',

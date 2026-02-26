@@ -1,8 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  MessageCircle,
   LayoutDashboard,
-  ClipboardList,
+  UtensilsCrossed,
+  Dumbbell,
   Heart,
   User,
 } from 'lucide-react';
@@ -10,9 +10,9 @@ import { useTranslation } from '../../i18n';
 import { cn } from '../../lib/utils';
 
 const navItems = [
-  { path: '/buddy', icon: MessageCircle, labelKey: 'buddy' as const },
   { path: '/cockpit', icon: LayoutDashboard, labelKey: 'cockpit' as const },
-  { path: '/tracking', icon: ClipboardList, labelKey: 'tracking' as const },
+  { path: '/nutrition', icon: UtensilsCrossed, labelKey: 'nutrition' as const },
+  { path: '/training', icon: Dumbbell, labelKey: 'training' as const },
   { path: '/medical', icon: Heart, labelKey: 'medical' as const },
   { path: '/profile', icon: User, labelKey: 'profile' as const },
 ];
