@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
@@ -121,7 +121,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             {/* Edit via Buddy */}
             <button
               onClick={() => navigate('/buddy', { state: { autoMessage: t.workouts.editViaBuddyAuto } })}
-              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
               title={t.workouts.editPlan}
             >
               <Pencil className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             {/* Share Button */}
             <button
               onClick={() => setShowShareDialog(true)}
-              className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
               title={t.share.sharePlan}
             >
               <Share2 className="h-4 w-4" />
@@ -139,7 +139,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
               <button
                 onClick={() => setShowPdfMenu(!showPdfMenu)}
                 disabled={isExporting}
-                className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
+                className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors disabled:opacity-50"
                 title={language === 'de' ? 'PDF exportieren' : 'Export PDF'}
               >
                 <Download className="h-4 w-4" />
@@ -182,7 +182,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             {onDelete && (
               <button
                 onClick={() => onDelete(plan.id)}
-                className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
                 title={t.workouts.deletePlan}
               >
                 <Trash2 className="h-4 w-4" />
@@ -197,6 +197,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
         <DayCard
           key={day.id}
           day={day}
+          planId={plan.id}
           isExpanded={expandedDays.has(day.day_number)}
           onToggle={() => toggleDay(day.day_number)}
           catalog={catalog ?? []}
@@ -265,14 +266,22 @@ function formatExerciseDetails(ex: PlanExercise): React.ReactNode {
 
 interface DayCardProps {
   day: TrainingPlanDay;
+  planId: string;
   isExpanded: boolean;
   onToggle: () => void;
   catalog: CatalogExercise[];
   onExerciseClick: (exercise: CatalogExercise) => void;
 }
 
-function DayCard({ day, isExpanded, onToggle, catalog, onExerciseClick }: DayCardProps) {
-  const { t } = useTranslation();
+function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }: DayCardProps) {
+  const { t, language } = useTranslation();
+  const navigate = useNavigate();
+  const isDE = language === 'de';
+
+  const handleStartWorkout = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/workout/active?planId=${planId}&dayId=${day.id}&dayNumber=${day.day_number}`);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -300,9 +309,22 @@ function DayCard({ day, isExpanded, onToggle, catalog, onExerciseClick }: DayCar
             </div>
           )}
         </div>
-        <span className="text-xs text-gray-300 flex-shrink-0">
-          {day.exercises.length} {t.workouts.exercises.toLowerCase()}
-        </span>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs text-gray-300">
+            {day.exercises.length} {t.workouts.exercises.toLowerCase()}
+          </span>
+          {day.exercises.length > 0 && (
+            <span
+              role="button"
+              onClick={handleStartWorkout}
+              className="flex items-center gap-1 px-2.5 py-1 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors"
+              title={isDE ? 'Training starten' : 'Start Workout'}
+            >
+              <Play className="h-3 w-3" />
+              {isDE ? 'Start' : 'Start'}
+            </span>
+          )}
+        </div>
       </button>
 
       {/* Exercises — expandable */}

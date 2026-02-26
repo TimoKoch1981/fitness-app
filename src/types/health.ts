@@ -37,6 +37,54 @@ export interface ExerciseSet {
   notes?: string;
 }
 
+// === LIVE WORKOUT SESSION TYPES ===
+
+/** Per-set result tracked during a live workout session */
+export interface SetResult {
+  set_number: number;
+  target_reps: string;        // from plan, e.g. "8-10"
+  target_weight_kg?: number;  // from plan
+  actual_reps?: number;       // what the user actually did
+  actual_weight_kg?: number;  // what the user actually used
+  completed: boolean;
+  skipped?: boolean;
+  notes?: string;
+}
+
+/** Detailed per-exercise result from a live session */
+export interface WorkoutExerciseResult {
+  name: string;
+  exercise_id?: string;        // FK to exercise_catalog
+  exercise_type?: ExerciseCategory;
+  plan_exercise_index: number; // position in the plan day
+  sets: SetResult[];
+  // endurance fields
+  duration_minutes?: number;
+  distance_km?: number;
+  pace?: string;
+  intensity?: string;
+  // timer / rest
+  rest_seconds?: number;       // per-exercise rest time (from plan or user-adjusted)
+  // meta
+  skipped?: boolean;
+  is_addition?: boolean;       // user-added exercise (not in plan)
+  notes?: string;
+}
+
+/** Cardio warm-up result */
+export interface WarmupResult {
+  description: string;       // free text: "10 Min Laufband, Zone 2"
+  duration_minutes: number;
+  calories_burned: number;   // MET-based calculation
+  met_value?: number;
+}
+
+/** Tracking mode for the active workout session */
+export type WorkoutTrackingMode = 'set-by-set' | 'exercise';
+
+/** Session phase */
+export type WorkoutSessionPhase = 'warmup' | 'exercise' | 'rest' | 'summary';
+
 export interface Workout {
   id: string;
   user_id: string;
@@ -49,6 +97,14 @@ export interface Workout {
   exercises: ExerciseSet[];
   notes?: string;
   created_at: string;
+  // Live session fields
+  plan_id?: string;
+  plan_day_id?: string;
+  plan_day_number?: number;
+  session_exercises?: WorkoutExerciseResult[];
+  warmup?: WarmupResult;
+  started_at?: string;
+  finished_at?: string;
 }
 
 // === BODY MEASUREMENTS ===

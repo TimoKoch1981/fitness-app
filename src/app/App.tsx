@@ -20,6 +20,10 @@ import { TrackingPage } from '../pages/TrackingPage';
 import { MedicalPage } from '../pages/MedicalPage';
 import { ProfilePage } from '../pages/ProfilePage';
 
+// Workout Session
+import { ActiveWorkoutProvider } from '../features/workouts/context/ActiveWorkoutContext';
+import { ActiveWorkoutPage } from '../features/workouts/components/ActiveWorkoutPage';
+
 // Admin Pages
 import { AdminRoute } from '../features/admin/components/AdminRoute';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
@@ -124,6 +128,18 @@ function AppRoutes() {
           <AdminRoute>
             <AdminFeedbackPage />
           </AdminRoute>
+        }
+      />
+
+      {/* Active Workout Session (no Navigation — full-screen experience) */}
+      <Route
+        path="/workout/active"
+        element={
+          <ProtectedRoute>
+            <ActiveWorkoutProvider>
+              <ActiveWorkoutPage />
+            </ActiveWorkoutProvider>
+          </ProtectedRoute>
         }
       />
 

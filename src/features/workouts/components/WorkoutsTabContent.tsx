@@ -13,6 +13,7 @@ import { useActivePlan, useAddTrainingPlan, useDeleteTrainingPlan } from '../hoo
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanView } from './TrainingPlanView';
+import { WorkoutHistoryPage } from './WorkoutHistoryPage';
 import { DEFAULT_PLAN } from '../data/defaultPlan';
 import { today, formatDate } from '../../../lib/utils';
 
@@ -24,7 +25,7 @@ interface WorkoutsTabContentProps {
 
 export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
-  const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan'>('today');
+  const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history'>('today');
   const buddySuggestions = usePageBuddySuggestions(
     activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
     language as 'de' | 'en',
@@ -78,7 +79,7 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
 
   return (
     <>
-      {/* Sub-Tab Bar (Today | Plan) */}
+      {/* Sub-Tab Bar (Today | Plan | History) */}
       <div className="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1">
         <button
           onClick={() => setActiveSubTab('today')}
@@ -99,6 +100,16 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
           }`}
         >
           {t.workouts.myPlan}
+        </button>
+        <button
+          onClick={() => setActiveSubTab('history')}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeSubTab === 'history'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          {language === 'de' ? 'Historie' : 'History'}
         </button>
       </div>
 
@@ -153,7 +164,7 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
                     </div>
                     <button
                       onClick={() => deleteWorkout.mutate({ id: workout.id, date: workout.date })}
-                      className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -180,7 +191,7 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
             date={selectedDate}
           />
         </>
-      ) : (
+      ) : activeSubTab === 'plan' ? (
         /* Plan Sub-Tab */
         isPlanLoading ? (
           <div className="text-center py-12">
@@ -194,6 +205,9 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
             isImporting={addTrainingPlan.isPending}
           />
         )
+      ) : (
+        /* History Sub-Tab */
+        <WorkoutHistoryPage embedded />
       )}
     </>
   );

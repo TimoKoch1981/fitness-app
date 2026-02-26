@@ -214,7 +214,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
                       <button
                         type="button"
                         onClick={() => removeExercise(idx)}
-                        className="p-1.5 text-gray-300 hover:text-red-500"
+                        className="p-1.5 text-gray-400 hover:text-red-500"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
