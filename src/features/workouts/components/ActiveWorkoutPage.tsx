@@ -92,13 +92,13 @@ export function ActiveWorkoutPage() {
       setShowLeaveDialog(true);
     } else {
       clearSession();
-      navigate('/tracking');
+      navigate('/training');
     }
   };
 
   const confirmLeave = () => {
     clearSession();
-    navigate('/tracking');
+    navigate('/training');
   };
 
   // No plan/day params or plan loaded without matching day → show message
@@ -110,10 +110,10 @@ export function ActiveWorkoutPage() {
             {isDE ? 'Kein Trainingsplan ausgewählt. Starte ein Training über deinen Trainingsplan.' : 'No training plan selected. Start a workout from your training plan.'}
           </p>
           <button
-            onClick={() => navigate('/tracking')}
+            onClick={() => navigate('/training')}
             className="px-6 py-2.5 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors"
           >
-            {isDE ? 'Zurück zum Tracking' : 'Back to Tracking'}
+            {isDE ? 'Zurück zum Training' : 'Back to Training'}
           </button>
         </div>
       );
@@ -235,7 +235,7 @@ export function ActiveWorkoutPage() {
             weightKg={userWeight}
             onClose={() => {
               clearSession();
-              navigate('/tracking');
+              navigate('/training');
             }}
           />
         )}
