@@ -13,7 +13,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
-  if (user) return <Navigate to="/buddy" replace />;
+  if (user) return <Navigate to="/cockpit" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +50,11 @@ export function LoginPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
               {t.auth.email}
             </label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -63,10 +64,11 @@ export function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
               {t.auth.password}
             </label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -84,12 +86,12 @@ export function LoginPage() {
           </button>
 
           <div className="text-center text-sm text-gray-500 space-y-2">
-            <Link to="/forgot-password" className="block text-teal-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
+            <Link to="/forgot-password" className="block text-teal-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
               {t.auth.forgotPassword}
             </Link>
             <p>
               {t.auth.noAccount}{' '}
-              <Link to="/register" className="text-teal-600 font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
+              <Link to="/register" className="text-teal-700 font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
                 {t.auth.register}
               </Link>
             </p>
