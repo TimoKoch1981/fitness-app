@@ -52,10 +52,14 @@ export function InlineBuddyChat() {
             onClick={closeBuddyChat}
             className="fixed inset-0 bg-black/30"
             style={{ zIndex: 44 }}
+            aria-hidden="true"
           />
           {/* Bottom Sheet */}
           <motion.div
             key="inline-chat-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Buddy Chat"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}

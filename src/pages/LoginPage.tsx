@@ -32,7 +32,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg" aria-hidden="true">
             <span className="text-2xl text-white font-bold">FB</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">{APP_NAME}</h1>
@@ -44,7 +44,7 @@ export function LoginPage() {
           <h2 className="text-lg font-semibold text-gray-900">{t.auth.login}</h2>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
+            <div role="alert" aria-live="assertive" className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
               {error}
             </div>
           )}
@@ -84,12 +84,12 @@ export function LoginPage() {
           </button>
 
           <div className="text-center text-sm text-gray-500 space-y-2">
-            <Link to="/forgot-password" className="block text-teal-600 hover:underline">
+            <Link to="/forgot-password" className="block text-teal-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
               {t.auth.forgotPassword}
             </Link>
             <p>
               {t.auth.noAccount}{' '}
-              <Link to="/register" className="text-teal-600 font-medium hover:underline">
+              <Link to="/register" className="text-teal-600 font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
                 {t.auth.register}
               </Link>
             </p>

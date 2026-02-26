@@ -44,7 +44,7 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
       {onDelete && (
         <button
           onClick={() => onDelete(meal.id)}
-          className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>

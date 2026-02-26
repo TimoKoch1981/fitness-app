@@ -11,7 +11,7 @@ import { Navigation } from '../Navigation';
 describe('Navigation', () => {
   it('renders 5 navigation items', () => {
     renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
-    const links = screen.getAllByRole('link');
+    const links = screen.getAllByRole('menuitem');
     expect(links).toHaveLength(5);
   });
 
@@ -26,7 +26,7 @@ describe('Navigation', () => {
 
   it('links to correct paths', () => {
     renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
-    const links = screen.getAllByRole('link');
+    const links = screen.getAllByRole('menuitem');
     const hrefs = links.map(l => l.getAttribute('href'));
     expect(hrefs).toContain('/buddy');
     expect(hrefs).toContain('/cockpit');
@@ -44,7 +44,7 @@ describe('Navigation', () => {
   it('non-active items have gray color', () => {
     renderWithProviders(<Navigation />, { initialRoute: '/buddy' });
     const cockpitLink = screen.getByText('Cockpit').closest('a');
-    expect(cockpitLink?.className).toContain('text-gray-400');
+    expect(cockpitLink?.className).toContain('text-gray-500');
   });
 
   it('is fixed to bottom of screen', () => {

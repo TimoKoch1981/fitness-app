@@ -122,7 +122,7 @@ export function ReminderCard({ reminder, onToggle, onDelete, onEdit }: Props) {
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={() => onDelete(reminder.id)}
-          className="p-1.5 text-gray-300 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+          className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
           title={t.common.delete}
         >
           <Trash2 className="h-3.5 w-3.5" />

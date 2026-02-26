@@ -138,7 +138,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
                   <p className="text-xs text-gray-500 font-medium">{t.body.bmi}</p>
                   <button
                     onClick={() => setShowInfo(showInfo === 'bmi' ? null : 'bmi')}
-                    className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors"
+                    className="p-0.5 text-gray-400 hover:text-teal-500 transition-colors"
                     title={isDE ? 'Formel anzeigen' : 'Show formula'}
                   >
                     <Info className="h-3.5 w-3.5" />
@@ -169,7 +169,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
                   <p className="text-xs text-gray-500 font-medium">{t.body.ffmi}</p>
                   <button
                     onClick={() => setShowInfo(showInfo === 'ffmi' ? null : 'ffmi')}
-                    className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors"
+                    className="p-0.5 text-gray-400 hover:text-teal-500 transition-colors"
                     title={isDE ? 'Formel anzeigen' : 'Show formula'}
                   >
                     <Info className="h-3.5 w-3.5" />
@@ -400,7 +400,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
                 </div>
                 <button
                   onClick={() => deleteMeasurement.mutate(m.id)}
-                  className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                  className="p-1.5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
