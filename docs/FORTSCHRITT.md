@@ -78,10 +78,30 @@
 | 10.0    | 2026-02-26 | Welcome-Email, Git-Workflow, shadcn/ui, CI/CD Deploy (2095 Tests)       | Erledigt   |
 | 10.1    | 2026-02-26 | Production-Deploy v10.0 + Edge Functions Env + GoTrue SMTP              | Erledigt   |
 | 10.2    | 2026-02-26 | Deep-Test Production: 8 Features geprueft, 4 Bugs gefunden              | Erledigt   |
+| 10.3    | 2026-02-26 | 4 Bug-Fixes + Production-Deployment + Verifikation                       | Erledigt   |
 
 ---
 
 ## Log
+
+### 2026-02-26 - v10.3: Bug-Fixes aus Deep-Test
+
+**4 Bugs gefixt, deployed und auf Production verifiziert:**
+
+| Bug | Fix | Datei |
+|-----|-----|-------|
+| Puls nicht gespeichert | Default-Werte (120/80/72) statt leere Strings | AddBloodPressureDialog.tsx |
+| Doppelte Erinnerungen | Auto-Creation useEffect aus MedicalPage entfernt | MedicalPage.tsx |
+| Welcome-Email 401 Spam | localStorage-Cache + 401 silent ignore | AuthProvider.tsx |
+| SSE Log-Spam (~12x) | Verbose console.log entfernt, nur bei Actions loggen | actionParser.ts, useBuddyChat.ts |
+
+**Production-Verifikation (fudda.de):**
+- Neuer BP-Eintrag: 120/80, pulse=72 in DB ✅ (vorher NULL)
+- Nur 1 Reminder pro Substanz ✅ (Duplikat aus DB geloescht)
+- Keine neuen 401-Warnings nach Deployment ✅
+- Kein ActionParser-Spam nach Deployment ✅
+
+**Git:** c84013b (fix), bf166b9 (docs) auf develop, gepusht
 
 ### 2026-02-26 - v10.2: Deep-Test Production (fudda.de)
 
