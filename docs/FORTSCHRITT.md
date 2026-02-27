@@ -82,10 +82,27 @@
 | 10.4    | 2026-02-27 | 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung    | Erledigt   |
 | 10.5    | 2026-02-27 | DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records  | Erledigt   |
 | 10.6    | 2026-02-27 | P1-Features: Supplement-Presets, Celebrations, 6 Skill-Erweiterungen, 2 Bug-Fixes | Erledigt   |
+| 10.7    | 2026-02-27 | Chat-Trennung pro Agent Phase 1 (Separate Threads, sessionStorage) | Erledigt   |
 
 ---
 
 ## Log
+
+### 2026-02-27 - v10.7: Chat-Trennung pro Agent (Phase 1 — Separate Threads)
+
+**Jeder der 8 Agents bekommt seinen eigenen Chat-Thread — kein Kontextmischen mehr.**
+
+1. **agentDisplayConfig.ts** (NEU) — Zentrale Agent-Metadaten (Name/Icon/Farbe/Greeting DE+EN) fuer alle 8 Agents
+2. **AgentThreadTabs.tsx** (NEU) — Horizontal scrollbare Tab-Leiste mit Agent-Icons, aktive Farbunterlinie, Unread-Dots
+3. **BuddyChatProvider.tsx** — Multi-Thread State (Record<AgentType, DisplayMessage[]>), Migration alter single-array Messages, Max 50/Thread
+4. **useBuddyChat.ts** — Routing-Bypass: `activeThread !== 'general'` → direkt getAgent().executeStream(), General-Tab behält Auto-Routing
+5. **BuddyPage.tsx** — AgentThreadTabs im Header, per-Thread-Greeting + Agent-Avatar (Emoji+Color statt statisch "FB")
+6. **InlineBuddyChat.tsx** — Compact-Tabs, per-Thread-Greeting, targetAgent-Switch beim Oeffnen
+7. **InlineBuddyChatContext.tsx** — targetAgent-Feld in openBuddyChat(msg?, agent?) Signatur
+8. **BuddyQuickAccess + usePageBuddySuggestions** — targetAgent pro Suggestion (Nutrition→nutrition, Training→training, Body→analysis, Medical→medical/substance, Cockpit→analysis)
+9. **i18n** — clearThread + clearAllThreads Keys (DE + EN)
+
+**Dateien:** 11 (2 neu, 9 modifiziert) | **Zeilen:** 560+ / 91- | **Build:** 0 Fehler
 
 ### 2026-02-27 - v10.6: P1-Features, Bug-Fixes, Skill-Erweiterungen
 

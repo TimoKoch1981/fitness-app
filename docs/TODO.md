@@ -193,16 +193,21 @@
   - Fix: InlineBuddyChat z-index auf 55/56 angehoben
   - Betroffene Datei: InlineBuddyChat.tsx
 
-### P1 — Konzeptionell (nicht umgesetzt)
+### ~~P1 — Chat-Trennung pro Agent~~ ✅ (2026-02-27, v10.7)
 
-#### Chat-Trennung pro Agent
-- [x] ~~**Konzeptionelle Analyse erstellt**~~ ✅ (2026-02-27) — 3 Optionen evaluiert:
-  - **Option A: Themen-Filter** (S, 1-2h) — UI-Filter, keine DB-Aenderung, aber KI-Kontext bleibt gemischt
-  - **Option B: Separate Threads** (L, 8-10h) — Echte Trennung, DB-Tabellen, professionell ← **EMPFOHLEN**
-  - **Option C: Intelligente Zusammenfassungen** (M, 3-4h) — LLM-Summaries als Kontext-Bridge
-  - Empfehlung: Option B (Separate Threads) — medizinische Sicherheit, sauberer Kontext, Zukunftssicher
-  - Roadmap: Phase 1 (sessionStorage) → Phase 2 (Supabase) → Phase 3 (Thread-Sharing)
-  - Detaillierte Analyse in UX-Studie-Dokument
+#### ~~Chat-Trennung pro Agent — Phase 1 (sessionStorage)~~ ✅
+- [x] ~~**Konzeptionelle Analyse erstellt**~~ ✅ (2026-02-27) — 3 Optionen evaluiert, Option B gewaehlt
+- [x] ~~**Phase 1: Separate Threads implementiert**~~ ✅ (2026-02-27)
+  - NEU: agentDisplayConfig.ts — zentrale Agent-Metadaten (Name, Icon, Farbe, Greeting DE/EN)
+  - NEU: AgentThreadTabs.tsx — horizontal scrollbare Tab-Leiste mit Unread-Dots
+  - BuddyChatProvider: Multi-Thread State (Record<AgentType, DisplayMessage[]>), sessionStorage-Migration
+  - useBuddyChat: Routing-Bypass bei activeThread !== 'general', General behält Auto-Routing
+  - BuddyPage + InlineBuddyChat: Tabs im Header, per-Thread-Greeting/Avatar
+  - BuddyQuickAccess + usePageBuddySuggestions: targetAgent pro Suggestion
+  - InlineBuddyChatContext: targetAgent-Feld fuer gezieltes Oeffnen
+  - i18n: clearThread + clearAllThreads Keys (DE + EN)
+  - Max 50 Messages/Thread (sessionStorage-Limit-Schutz)
+  - Phase 2 (Supabase DB) und Phase 3 (Thread-Sharing) stehen noch aus
 
 ### P2 — Nice-to-Have
 
@@ -322,6 +327,7 @@
 
 ## Erledigt (letzte 10)
 
+- [x] **v10.7: Chat-Trennung pro Agent (Phase 1)** — Separate Threads pro Agent (sessionStorage), AgentThreadTabs (scrollbar, Unread-Dots), agentDisplayConfig (zentrale Metadaten), Routing-Bypass (spezifische Tabs → Direkt-Agent), targetAgent in BuddyQuickAccess/Suggestions, per-Thread-Greeting/Avatar. 11 Dateien, 560+/91- Zeilen (2026-02-27)
 - [x] **v10.6: P1-Features + Bug-Fixes + Skill-Erweiterungen** — Supplement/Doping-Presets (24 Substanzen), Celebration-System (Konfetti+Toast, 4 Level, 6 Kategorien), 6 Skills auf v2.0.0 erweitert (~2.900 Zeilen), Agent-Loop-Fix (rawContent), Z-Index-Fix (InlineBuddyChat), Chat-Trennungs-Konzept (Option B empfohlen), UX/UI-Studie (2026-02-27)
 - [x] **v8.0: Disclaimer + 4 P2-Features** — Liability Disclaimer Modal (P0), KI-Prognosen (Regression + Plateau + ProgressionCard), Koerper-Silhouette (SVG, KFA-Farben), Data Import (CSV + Email-Text, Fitdays/Renpho/Withings Auto-Erkennung). 16 neue Dateien, 87 neue Tests (1.410 gesamt) (2026-02-24)
 - [x] **v7.2: Produkt-Recherche Pipeline + Ehrlichkeits-Codex** — Product Lookup (Open Food Facts + OpenAI Web Search), Query-Cleaning (Noise-Words, Umlaut-Normalisierung), Zwei-Phasen-Flow (search_product → lookupProduct → save_product + log_meal), Vite Proxy (CORS-Bypass), Ehrlichkeits-Codex fuer alle Agenten, Zielberechnung korrigiert (Protein 1.6-2.2 g/kg), ProfilePage lokaler Form-State, ACTION-Regex flexibilisiert, Fallback-Detektoren, Erinnerungen bearbeiten. 24 Dateien, 1.753+ / 227- Zeilen (2026-02-22)
@@ -348,4 +354,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27 (v10.6 — P1-Features: Supplement-Presets, Celebration-System, 6 Skill-Erweiterungen, 2 Bug-Fixes, Chat-Trennungs-Konzept)*
+*Letzte Aktualisierung: 2026-02-27 (v10.7 — Chat-Trennung pro Agent Phase 1: Separate Threads, AgentThreadTabs, Routing-Bypass, targetAgent)*
