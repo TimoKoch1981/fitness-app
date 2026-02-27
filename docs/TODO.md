@@ -16,7 +16,7 @@
   - ~~Disclaimer-Text auch in Profil/Einstellungen einsehbar~~ ✅ — ReadOnly-Modus im Profil
   - DB-Migration: `disclaimer_accepted_at TIMESTAMPTZ` in profiles
   - Dual-Storage: localStorage (fast-check) + Supabase DB (source of truth)
-  - [x] ~~Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)~~ ✅ (2026-02-27) — `docs/RECHTSKONFORMITAET.md` (DSGVO Art.9, MDR, HWG, ePrivacy, 23 Action Items)
+  - [ ] Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)
@@ -24,13 +24,22 @@
 - [x] ~~**site_url korrigieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**ResetPasswordPage implementieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**Email-Templates anpassen**~~ ✅ (2026-02-21, v6.1)
-- [x] ~~**Resend Domain-Validierung**~~ ✅ (2026-02-27) — fudda.de bei Resend verifiziert
+- [ ] **Resend Domain-Validierung** — fudda.de bei Resend verifizieren (fuer Produktion)
   - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
-  - ~~DNS von Strato zu Hetzner DNS umgezogen~~ ✅ (2026-02-27)
-  - ~~SPF, DKIM, MX Records~~ ✅ — alle Verified bei Resend (2026-02-27)
-  - ~~AUTOCONFIRM=false gesetzt, GoTrue neugestartet~~ ✅ (2026-02-27)
-  - Email-Verifizierung bei Registrierung jetzt AKTIV
-  - DMARC Record optional (noch nicht gesetzt, nicht blockierend)
+  - Produktion: AUTOCONFIRM=true als Workaround ✅ (2026-02-27)
+  - Registrierung funktioniert ohne Email-Bestaetigung ✅ (verifiziert 2026-02-27)
+  - ~~**DNS von Strato zu Hetzner DNS umziehen**~~ ✅ (2026-02-27)
+    - Hetzner DNS Zone erstellt (ID: 919094, Projekt: 13589003)
+    - Strato Nameserver umgestellt auf: hydrogen.ns.hetzner.com, oxygen.ns.hetzner.com, helium.ns.hetzner.de
+  - ~~**SPF, DKIM, MX Records eintragen**~~ ✅ (2026-02-27)
+    - TXT: resend._domainkey → DKIM Public Key
+    - TXT: send → v=spf1 include:amazonses.com ~all
+    - MX: send → 10 feedback-smtp.eu-west-1.amazonses.com. (Trailing Dot Fix)
+    - A: @ → 46.225.228.12, CNAME: www → fudda.de
+  - **Naechster Schritt:** DNS-Propagation abwarten (bis 24h nach NS-Umstellung)
+  - Dann: Resend Domain verifizieren (Restart klicken) + AUTOCONFIRM wieder auf false
+  - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
+  - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
   - Edge Function: send-welcome-email (Resend HTTP API)
   - Template: welcome.html (gleiches Design wie confirmation.html)
@@ -55,13 +64,14 @@
 - [x] ~~**KI-Antwort wird ~12x doppelt verarbeitet**~~ ✅
   - Fix: Verbose console.log aus ActionParser entfernt, BuddyChat loggt nur bei gefundenen Actions
 
-### ~~P1 — Neue Features~~ ✅ (2026-02-27, v10.6)
+### P1 — Neue Features
 
-#### ~~Supplement- & Substanz-Auswahlvorschlaege~~ ✅
-- [x] ~~**Supplement-Listen als Auswahlvorschlag**~~ ✅ (2026-02-27) — 12 Supplements (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.) als Tabs im AddSubstanceDialog
-- [x] ~~**Doping/Anabolika-Liste als Auswahlvorschlag**~~ ✅ (2026-02-27) — 12 PEDs (Testosteron, Trenbolon, Anavar, Deca, etc.) als Tab mit Disclaimer-Gate
-  - Disclaimer erforderlich bei Aktivierung ✅
-  - substancePresets.ts mit 24 vordefinierten Substanzen ✅
+#### Supplement- & Substanz-Auswahlvorschlaege
+- [ ] **Supplement-Listen als Auswahlvorschlag** — Gaengige Supplements (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.) als vordefinierte Auswahl beim Anlegen einer Substanz
+- [ ] **Doping/Anabolika-Liste als Auswahlvorschlag** — PED-Liste (Testosteron, Trenbolon, Anavar, Deca, etc.) als Auswahlvorschlag
+  - Muss explizit unter Medizin durch den Nutzer aktiviert werden
+  - Disclaimer erforderlich bei Aktivierung
+  - Skill-Dateien werden Detailinfos enthalten (Halbwertszeiten, Dosierungen, Nebenwirkungen)
 
 ### P1 — Wichtig
 
@@ -107,23 +117,22 @@
 
 #### Wissensdateien (Skills) konzeptionell ueberarbeiten + fachlich erweitern
 > ~~Aktuell: 8 statische Skills mit ~1.200 Zeilen Fachwissen.~~
-> ~~**Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.~~
-> **Stand v10.6:** 13 Skills mit ~2.900 Zeilen Fachwissen. 6 bestehende Skills auf v2.0.0 erweitert.
+> **Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.
 > **Diskussionsbedarf:** Struktur, Quellen-Qualitaet, Fach-Tiefe, Token-Budget.
 
 - [ ] **Konzeptionelle Diskussion** — Wie tief sollen Skills sein? Token-Budget vs. Qualitaet. RAG-Alternative? Skill-Versioning-Strategie.
-- [x] ~~**Nutrition-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — KH-Dosierung, Fett-Minimum+Hormonwarnung, Leucin-Schwelle, praezises Meal-Timing, Diaetformen, Refeed/Diet-Break (MATADOR), GLP-1 Lean-Mass, Red-Flags
-- [x] ~~**Training-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Schritte-Wissenschaft (Lancet 2025), MEV/MAV/MRV, RPE/RIR, HF-Zonen, Detraining+Muscle-Memory, Overtraining-Marker, HRV, RAMP-Warmup, Prehab, Training 50+, HIIT-Kontraindikationen
-- [x] ~~**Substances-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Safety-Gates, TRAVERSE-Signale, GLP-1 Lean-Mass+Androgen-Achse, E2-Screening, Standard-Checklist, 4-Block-Output
-- [x] ~~**Analysis-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — FFMI+Grenzen, Biomarker-Referenzbereiche, Wassergewicht-Analyse, Plateau-Erkennung, Ziel-Metriken, Saisonale Variation, Progressives Defizit
-- [x] ~~**Medical-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Hypogonadismus-Screening, TRAVERSE AFib/AKI/PE, E2-Screening, Labor-Kernpanel, GLP-1 Andrologie, OSA-Screening, 5-Block-Antwortschema
-- [x] ~~**Beauty/Lifestyle erweitern**~~ ✅ (2026-02-27, v2.0.0) — "First base then contour"-Regel, Dysmorphie-Screening, Fett-Embolie-Risiko, TRT-praeop-Flags, Evidenz-PMIDs
+- [ ] **Nutrition-Skill erweitern** — Mikronaehrstoffe, Meal-Timing, Sport-spezifische Ernaehrung, Diaet-Strategien (Cutting/Bulking), Alkohol-Impact, Hydration
+- [ ] **Training-Skill erweitern** — Periodisierung (linear/undulierend/block), Deload-Wochen, RPE/RIR-Skala, Superkompensation, Aufwaermprogramme, Mobilitaet, Verletzungspraevention
+- [ ] **Substances-Skill erweitern** — Blutbild-Interpretation (detailliert), Wechselwirkungen, Halbwertszeit-Kurven, Ester-Vergleich, Nebenwirkungs-Management
+- [ ] **Analysis-Skill erweitern** — Plateau-Erkennung, Prognose-Modelle, Wochen-/Monats-Trends, Anomalie-Erkennung, Vergleich mit Referenzwerten
+- [ ] **Medical-Skill erweitern** — Laborwerte-Referenzbereiche (detailliert), Sport-Kardiologie, Hormonspiegel-Interpretation, Schilddruese, Leber/Niere-Marker
+- [ ] **Beauty/Lifestyle erweitern** — Mehr Studien-Referenzen, evidenzbasierte Empfehlungen, Timing-Tabellen
 - [x] ~~**Neuer Skill: Schlaf & Regeneration**~~ ✅ (2026-02-27, v10.4) — sleep.ts: Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
 - [x] ~~**Neuer Skill: Supplements**~~ ✅ (2026-02-27, v10.4) — supplements.ts: 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen
 - [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
 - [x] ~~**Neuer Skill: Wettkampfvorbereitung**~~ ✅ (2026-02-27, v10.4) — competition.ts: Natural vs Enhanced, Peak Week, Reverse Diet
 - [x] ~~**Neuer Skill: Female Fitness**~~ ✅ (2026-02-27, v10.4) — femaleFitness.ts: Zyklus-Training, Schwangerschaft, Menopause, RED-S
-- [x] ~~**Quellen-Audit**~~ ✅ (2026-02-27) — 12 fehlerhafte Zitate korrigiert (falsche Journals/Jahre), PMIDs zu 40+ Quellen ergaenzt, 15+ neue Quellen hinzugefuegt. Quality Score: Durchschnitt von 62% → ~85%
+- [x] ~~**Quellen-Audit**~~ ✅ (2026-02-27, v10.6) — 12 fehlerhafte Zitate korrigiert, 40+ PMIDs ergaenzt, 15+ neue Quellen
 
 ### ~~P1 — User-Feedback-Modul (Testphase)~~ ✅ (2026-02-25, v9.0)
 
@@ -152,55 +161,51 @@
 
 ### P1 — Internationalisierung (i18n)
 
-#### ~~Sprachen deutlich erweitern~~ ✅ (2026-02-27, v10.8)
-- [x] ~~**15 neue Sprachen hinzugefuegt (17 total)**~~ ✅ (2026-02-27)
-  - AR (Arabisch), ES (Spanisch), FA (Persisch), FIL (Filipino), FR (Franzoesisch)
-  - IT (Italienisch), JA (Japanisch), KO (Koreanisch), PL (Polnisch), PT (Portugiesisch)
-  - RO (Rumaenisch), RU (Russisch), TR (Tuerkisch), UK (Ukrainisch), ZH (Chinesisch)
-  - Alle 610+ Keys type-safe gegen TranslationKeys, 0 TS-Fehler
-  - ProfilePage: Dropdown-Selektor mit Flaggen statt 2-Button-Toggle
-  - LANGUAGE_OPTIONS Array mit Flag-Emojis in index.ts
-  - I18nProvider: Erweiterte localStorage-Validierung fuer 17 Sprachen
+#### Sprachen deutlich erweitern
+- [ ] **15+ neue Sprachen hinzufuegen** — Aktuell nur DE + EN. Geplant:
+  - Ukrainisch, Polnisch, Russisch, Rumaenisch
+  - Italienisch, Spanisch, Franzoesisch, Portugiesisch
+  - Arabisch, Tuerkisch, Marokkanisch, Persisch
+  - Chinesisch, Japanisch, Koreanisch
+  - Eigener i18n-Context muss erweitert werden (~300 Schluessel pro Sprache)
 
-### ~~P1 — UX/Gamification~~ ✅ (2026-02-27, v10.6)
+### P1 — UX/Gamification
 
-#### ~~Erfolgs-Lob fuer den Nutzer~~ ✅
-- [x] ~~**Zwischen-Lob bei Erfolgen einbauen**~~ ✅ (2026-02-27) — CelebrationProvider + CelebrationOverlay (Konfetti + Toast)
-  - ~~Trainings-PRs (neues Maximalgewicht, mehr Reps)~~ ✅ — WorkoutSummary: celebrateNewPR()
-  - ~~Gewichtsverlust-Meilensteine (5kg-Schwellen)~~ ✅ — AddBodyMeasurementDialog: celebrateWeightMilestone()
-  - ~~Kaloriendefizit eingehalten~~ ✅ — CockpitPage: celebrateCalorieGoal() + celebrateProteinGoal()
-  - ~~Blutdruck-Verbesserung~~ ✅ — AddBloodPressureDialog: celebrateBPImprovement()
-  - 4 Level (small/medium/large/epic), 6 Kategorien, localStorage-Dedup, 24h-Cooldown
+#### Erfolgs-Lob fuer den Nutzer
+- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden
+  - Trainings-PRs (neues Maximalgewicht, mehr Reps)
+  - Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)
+  - Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)
+  - Kaloriendefizit eingehalten
+  - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
 
-### ~~P1 — Bug-Fixes (2026-02-27)~~ ✅
+### P1 — UX-Ueberarbeitung Workout-Session ⚠️
 
-#### ~~Trainingsassistent dreht sich im Kreis~~ ✅
-- [x] ~~**Agent-Loop bei Planerstellung**~~ ✅ (2026-02-27)
-  - Root Cause: stripActionBlock() entfernt ACTION-Bloecke aus Display-Content, aber Conversation-History nutzt gestrippten Content → Agent sieht nicht, dass er bereits einen Plan erstellt hat
-  - Fix: rawContent-Feld in DisplayMessage, Conversation-History nutzt rawContent ?? content
-  - Betroffene Datei: useBuddyChat.ts
+#### Musik & Timer im Trainer-Modus ueberarbeiten (User-Feedback: "ist so Mist")
+- [ ] **Musik-Integration ueberarbeiten** — Aktuelle YouTube-Einbettung ist unbefriedigend, Konzept neu diskutieren
+  - Alternativen: Native Audio-Player, Spotify-Connect, lokale Playlists?
+  - Floating-Player UX verbessern
+  - Aktuelle Impl: WorkoutMusicPlayer (YouTube-Einbettung), 4 kuratierte Playlists
+- [ ] **Timer im Trainer-Modus ueberarbeiten** — Aktuelle Implementierung muss verbessert werden
+  - RestTimer, ManualTimer, ExerciseTimer Interaktion pruefen
+  - UX-Flow Pause → Timer → naechste Uebung optimieren
+  - Audio-Feedback bei Timer-Ablauf
+  - Aktuelle Impl: ExerciseTimer, ManualTimer, RestTimer, suggestRestTimes
 
-#### ~~Agent nicht aufrufbar bei Training-Menue~~ ✅
-- [x] ~~**InlineBuddyChat wird von Training-Dialog ueberdeckt**~~ ✅ (2026-02-27)
-  - Root Cause: InlineBuddyChat z-index (44/45) < AddWorkoutDialog z-index (50)
-  - Fix: InlineBuddyChat z-index auf 55/56 angehoben
-  - Betroffene Datei: InlineBuddyChat.tsx
+### P2 — Power/Power+ Modus
+> **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)
+> DB-Migration, Types, useTrainingMode Hook, TrainingModeSelector, ProfilePage Integration,
+> Anabolics Skill v3.0 (4 Ziel-Zyklen, 11 Wechselwirkungen, Ester-Tabelle, Monitoring),
+> Modus-bewusstes Skill-Loading (getSkillIdsForMode), Agent Training-Mode-Kontext,
+> Substance Agent Power+ (volle Zyklus-Beratung, BloodWork-Logging)
 
-### ~~P1 — Chat-Trennung pro Agent~~ ✅ (2026-02-27, v10.7)
-
-#### ~~Chat-Trennung pro Agent — Phase 1 (sessionStorage)~~ ✅
-- [x] ~~**Konzeptionelle Analyse erstellt**~~ ✅ (2026-02-27) — 3 Optionen evaluiert, Option B gewaehlt
-- [x] ~~**Phase 1: Separate Threads implementiert**~~ ✅ (2026-02-27)
-  - NEU: agentDisplayConfig.ts — zentrale Agent-Metadaten (Name, Icon, Farbe, Greeting DE/EN)
-  - NEU: AgentThreadTabs.tsx — horizontal scrollbare Tab-Leiste mit Unread-Dots
-  - BuddyChatProvider: Multi-Thread State (Record<AgentType, DisplayMessage[]>), sessionStorage-Migration
-  - useBuddyChat: Routing-Bypass bei activeThread !== 'general', General behält Auto-Routing
-  - BuddyPage + InlineBuddyChat: Tabs im Header, per-Thread-Greeting/Avatar
-  - BuddyQuickAccess + usePageBuddySuggestions: targetAgent pro Suggestion
-  - InlineBuddyChatContext: targetAgent-Feld fuer gezieltes Oeffnen
-  - i18n: clearThread + clearAllThreads Keys (DE + EN)
-  - Max 50 Messages/Thread (sessionStorage-Limit-Schutz)
-  - Phase 2 (Supabase DB) und Phase 3 (Thread-Sharing) stehen noch aus
+- [x] ~~**Phase A: Basis**~~ ✅ — DB-Migration, Types, Hooks, Selector, ProfilePage
+- [x] ~~**Phase A2: Anabolika-Skill erweitern**~~ ✅ — Zyklen, Dosierungen, Wechselwirkungen nach Ziel
+- [x] ~~**Phase A3: Skill-Anpassung**~~ ✅ — Agent-Instructions nach Modus, modus-bewusstes Loading
+- [x] ~~**Phase A4: ProfilePage Integration**~~ ✅ — TrainingModeSelector eingebunden, useUpdateProfile erweitert
+- [ ] **Phase B: Power Features** — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc
+- [ ] **Phase C: Power+ Features** — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert
+- [ ] **Phase D: Shared** — DoctorReport PDF, PosingPhotos, i18n trainingMode Keys fuer 15 Sprachen, Tests
 
 ### P2 — Nice-to-Have
 
@@ -255,7 +260,7 @@
 - [x] ~~deploy-frontend.sh auf fudda.de aktualisiert~~ ✅ (2026-02-25) — Default-Domain, Server-IP
 - [x] ~~Caddyfile: Cache-Header fuer index.html~~ ✅ (2026-02-25) — no-cache/no-store fuer HTML, immutable fuer Assets
 - [x] ~~Caddyfile: Permissions-Policy camera/microphone~~ ✅ (2026-02-25) — camera=(self), microphone=(self) statt Blockierung
-- [x] ~~Resend Domain-Validierung~~ ✅ (2026-02-27) — Resend verifiziert, AUTOCONFIRM=false
+- [ ] Resend Domain-Validierung (fudda.de — DNS umgezogen, wartet auf Propagation)
 - [x] ~~Monitoring aufsetzen (Error Tracking, Uptime)~~ ✅ (2026-02-26, v9.4) — monitor.sh (Docker, Disk, Memory, Service-Health)
 - [x] ~~Backup-Strategie fuer Supabase-DB (pg_dump Cronjob → Hetzner Storage Box)~~ ✅ (2026-02-26, v9.4) — backup-db.sh Script
 
@@ -268,24 +273,6 @@
 #### Auth-Erweiterungen
 - [ ] OAuth / Social Login (Google, Apple) — alle Provider in config.toml disabled
 - [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
-
-#### Bodybuilder-Modus (Explizit)
-- [ ] **Dedizierter Bodybuilding-Modus mit 2 Profilen:**
-  - **Profi (Natural)** — Wettkampf-Bodybuilding OHNE Doping (WNBF/GNBF-konform)
-    - Natuerliche Supplementierung (Kreatin, Whey, etc.)
-    - Periodisierung: Aufbau → Diaet → Peak Week → Show Day
-    - Posing-Tracking, Wettkampf-Kalender
-  - **Amateur (Enhanced)** — Freizeit-Bodybuilding MIT Substanzen
-    - Volle Substanz-Integration (Stacks, Zyklen, Blutbild-Korrelation)
-    - Risikobewertung, PCT-Planung, Gesundheits-Monitoring
-  - **Gemeinsame Features:**
-    - Koerperpartien-Split (Schwachstellen-Analyse)
-    - Posing-Fotos (Vergleich ueber Zeit)
-    - Wettkampf-Countdown / Prep-Tracker
-    - Makro-Cycling (Refeed-Tage, Carb-Loading)
-    - Deload-Wochen, Volumen-Tracking
-  - **Einstellung im Profil:** Modus-Auswahl beeinflusst KI-Empfehlungen + Skills
-  - **Substanzen-Agent Anpassung:** Reagiert unterschiedlich je nach Modus
 
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
@@ -338,8 +325,6 @@
 
 ## Erledigt (letzte 10)
 
-- [x] **v10.7: Chat-Trennung pro Agent (Phase 1)** — Separate Threads pro Agent (sessionStorage), AgentThreadTabs (scrollbar, Unread-Dots), agentDisplayConfig (zentrale Metadaten), Routing-Bypass (spezifische Tabs → Direkt-Agent), targetAgent in BuddyQuickAccess/Suggestions, per-Thread-Greeting/Avatar. 11 Dateien, 560+/91- Zeilen (2026-02-27)
-- [x] **v10.6: P1-Features + Bug-Fixes + Skill-Erweiterungen** — Supplement/Doping-Presets (24 Substanzen), Celebration-System (Konfetti+Toast, 4 Level, 6 Kategorien), 6 Skills auf v2.0.0 erweitert (~2.900 Zeilen), Agent-Loop-Fix (rawContent), Z-Index-Fix (InlineBuddyChat), Chat-Trennungs-Konzept (Option B empfohlen), UX/UI-Studie (2026-02-27)
 - [x] **v8.0: Disclaimer + 4 P2-Features** — Liability Disclaimer Modal (P0), KI-Prognosen (Regression + Plateau + ProgressionCard), Koerper-Silhouette (SVG, KFA-Farben), Data Import (CSV + Email-Text, Fitdays/Renpho/Withings Auto-Erkennung). 16 neue Dateien, 87 neue Tests (1.410 gesamt) (2026-02-24)
 - [x] **v7.2: Produkt-Recherche Pipeline + Ehrlichkeits-Codex** — Product Lookup (Open Food Facts + OpenAI Web Search), Query-Cleaning (Noise-Words, Umlaut-Normalisierung), Zwei-Phasen-Flow (search_product → lookupProduct → save_product + log_meal), Vite Proxy (CORS-Bypass), Ehrlichkeits-Codex fuer alle Agenten, Zielberechnung korrigiert (Protein 1.6-2.2 g/kg), ProfilePage lokaler Form-State, ACTION-Regex flexibilisiert, Fallback-Detektoren, Erinnerungen bearbeiten. 24 Dateien, 1.753+ / 227- Zeilen (2026-02-22)
 - [x] **v7.1: Bug-Fixes Substanzen/Erinnerungen/Mobile** — Auto-Erinnerung bei Substanz-Anlage (Frequenz→Reminder), Substanz-Erinnerung-Verknuepfung (Bell-Icon, Cascade-Delete), Toggle/Delete-Buttons auf Mobile sichtbar (sm:opacity statt opacity), Substanz-Toggle (Aktivieren/Deaktivieren), Test-User neu angelegt nach DB-Reset (2026-02-22)
@@ -365,4 +350,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27 (v10.7 — Chat-Trennung pro Agent Phase 1: Separate Threads, AgentThreadTabs, Routing-Bypass, targetAgent)*
+*Letzte Aktualisierung: 2026-02-27 (v10.9 — Power/Power+ Trainingsmodus Phase A komplett)*

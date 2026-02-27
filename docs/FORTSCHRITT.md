@@ -81,102 +81,35 @@
 | 10.3    | 2026-02-26 | 4 Bug-Fixes + Production-Deployment + Verifikation                       | Erledigt   |
 | 10.4    | 2026-02-27 | 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung    | Erledigt   |
 | 10.5    | 2026-02-27 | DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records  | Erledigt   |
-| 10.6    | 2026-02-27 | P1-Features: Supplement-Presets, Celebrations, 6 Skill-Erweiterungen, 2 Bug-Fixes | Erledigt   |
-| 10.7    | 2026-02-27 | Chat-Trennung pro Agent Phase 1 (Separate Threads, sessionStorage) | Erledigt   |
-| 10.8    | 2026-02-27 | i18n Expansion: 15 neue Sprachen (17 total), Resend verifiziert, RECHTSKONFORMITAET.md | Erledigt   |
+| 10.6    | 2026-02-27 | i18n 17 Sprachen, Skills Quellen-Audit, Rechtskonformitaet              | Erledigt   |
+| 10.7    | 2026-02-27 | Chat-Trennung pro Agent (AgentThreadTabs, Routing-Bypass)                | Erledigt   |
+| 10.8    | 2026-02-27 | Celebrations (Konfetti+Toast), 24 Substanz-Presets                       | Erledigt   |
+| 10.9    | 2026-02-27 | Power/Power+ Modus — Phase A komplett                                    | Erledigt   |
 
 ---
 
 ## Log
 
-### 2026-02-27 - v10.8: i18n Expansion + Resend + Rechtskonformitaet
+### 2026-02-27 - v10.9: Power/Power+ Trainingsmodus (Phase A)
 
-**15 neue Sprachen, Email-Verifizierung aktiviert, umfassende Rechtsanalyse.**
+**Bodybuilder-Modus: Standard / Power / Power+**
 
-1. **P0: Resend Domain verifiziert** — DKIM ✅, SPF ✅, MX ✅ bei Resend. AUTOCONFIRM=false gesetzt, GoTrue neugestartet. Email-Verifizierung bei Registrierung jetzt aktiv.
-2. **P0: RECHTSKONFORMITAET.md** — Umfassende Rechtsanalyse: DSGVO Art. 9 (Gesundheitsdaten), MDR (Medizinprodukte-Abgrenzung), HWG (Substanzen-Werbung), ePrivacy/TTDSG. 23 Action Items in 3 Phasen.
-3. **P1: 15 neue Sprachen** — AR, ES, FA, FIL, FR, IT, JA, KO, PL, PT, RO, RU, TR, UK, ZH. Alle 610+ Keys type-safe, 0 TS-Fehler.
-4. **ProfilePage** — Sprach-Selektor von 2-Button-Toggle zu 17-Sprachen-Dropdown mit Flaggen-Emojis
-5. **index.ts** — LANGUAGE_OPTIONS Array, erweiterte Language Union Type, alle Imports
-6. **I18nProvider** — Erweiterte localStorage-Validierung fuer 17 Sprachen
+Vollstaendige Implementierung des dreistufigen Trainingsmodus-Systems:
 
-### 2026-02-27 - v10.7: Chat-Trennung pro Agent (Phase 1 — Separate Threads)
+| Komponente | Status | Details |
+|------------|--------|---------|
+| DB-Migration | ✅ | training_mode, cycle_status, blood_work Tabelle (25+ Lab-Werte) |
+| Types | ✅ | TrainingMode, TrainingPhase, CycleStatus, BloodWork Interface |
+| useTrainingMode Hook | ✅ | ~20 Feature-Flags (showPEDContent, showBloodWork, showCycleTracker, etc.) |
+| TrainingModeSelector | ✅ | 3-Card UI (Standard/Power/Power+), Power+ Disclaimer Modal |
+| ProfilePage Integration | ✅ | Selector eingebunden, Auto-Save, power_plus_accepted_at |
+| Anabolics Skill v3.0 | ✅ | +2.400 Tokens: 4 Ziel-Zyklen, 11 Wechselwirkungen, Ester-Tabelle, Monitoring |
+| Modus-bewusstes Skill-Loading | ✅ | getSkillIdsForMode() — Power+ bekommt anabolics_powerplus Extension |
+| Agent Training-Mode-Kontext | ✅ | Alle Agents wissen welcher Modus aktiv ist |
+| Substance Agent Power+ | ✅ | Volle Zyklus-Beratung, Dosierungen, BloodWork-Logging |
+| useUpdateProfile erweitert | ✅ | +8 neue Felder (training_mode, cycle_status, show_date, etc.) |
 
-**Jeder der 8 Agents bekommt seinen eigenen Chat-Thread — kein Kontextmischen mehr.**
-
-1. **agentDisplayConfig.ts** (NEU) — Zentrale Agent-Metadaten (Name/Icon/Farbe/Greeting DE+EN) fuer alle 8 Agents
-2. **AgentThreadTabs.tsx** (NEU) — Horizontal scrollbare Tab-Leiste mit Agent-Icons, aktive Farbunterlinie, Unread-Dots
-3. **BuddyChatProvider.tsx** — Multi-Thread State (Record<AgentType, DisplayMessage[]>), Migration alter single-array Messages, Max 50/Thread
-4. **useBuddyChat.ts** — Routing-Bypass: `activeThread !== 'general'` → direkt getAgent().executeStream(), General-Tab behält Auto-Routing
-5. **BuddyPage.tsx** — AgentThreadTabs im Header, per-Thread-Greeting + Agent-Avatar (Emoji+Color statt statisch "FB")
-6. **InlineBuddyChat.tsx** — Compact-Tabs, per-Thread-Greeting, targetAgent-Switch beim Oeffnen
-7. **InlineBuddyChatContext.tsx** — targetAgent-Feld in openBuddyChat(msg?, agent?) Signatur
-8. **BuddyQuickAccess + usePageBuddySuggestions** — targetAgent pro Suggestion (Nutrition→nutrition, Training→training, Body→analysis, Medical→medical/substance, Cockpit→analysis)
-9. **i18n** — clearThread + clearAllThreads Keys (DE + EN)
-
-**Dateien:** 11 (2 neu, 9 modifiziert) | **Zeilen:** 560+ / 91- | **Build:** 0 Fehler
-
-### 2026-02-27 - v10.6: P1-Features, Bug-Fixes, Skill-Erweiterungen
-
-**Umfangreiche P1-Runde mit 5 Feature-Bloecken + 2 Bug-Fixes + Konzeptarbeit:**
-
-#### 1. UX/UI-Studie (Recherche-Dokument)
-- Analyse von 29 Research-Markdown-Dateien aus dem Skills-Ordner
-- Dokument: `docs/20260227_UX_UI_Studie_Nutzererlebnis_Optimierung.md`
-- Themen: Gamification, Onboarding, Mikro-Interaktionen, Fortschritts-Visualisierung
-
-#### 2. Supplement- & Doping-Presets (AddSubstanceDialog)
-- `substancePresets.ts`: 24 vordefinierte Substanzen in 2 Kategorien
-- **Supplements:** 12 (Kreatin, Omega-3, Vitamin D3, Zink, Magnesium, Whey, Koffein, Ashwagandha, etc.)
-- **PEDs:** 12 (Testosteron, Trenbolon, Anavar, Deca, Dianabol, Winstrol, HGH, etc.)
-- Disclaimer-Gate fuer PED-Tab mit Sicherheitshinweis
-- Tab-UI im Dialog (Manuell / Supplements / PEDs)
-- One-Tap-Uebernahme mit automatischem Tab-Wechsel
-
-#### 3. Celebration-System (Zwischen-Lob)
-- `CelebrationProvider.tsx`: React Context mit 6 celebrate-Funktionen
-- `CelebrationOverlay.tsx`: Konfetti-Animation (Canvas) + Toast-Nachrichten
-- `useCelebration.ts`: Hook fuer Konfetti-Logik (4 Level: small/medium/large/epic)
-- **Integrationspunkte:**
-  - WorkoutSummary: PR-Celebrations bei neuen Bestleistungen
-  - CockpitPage: Kalorien- und Protein-Ziel erreicht
-  - AddBodyMeasurementDialog: Gewichtsmeilensteine (5kg-Schwellen)
-  - AddBloodPressureDialog: Blutdruck-Verbesserung (ueber 130 → unter 130)
-- localStorage-Dedup + 24h-Cooldown gegen Spam
-
-#### 4. Skill-Erweiterungen (6 Skills v1.x → v2.0.0)
-| Skill | Alt | Neu | Wichtigste Ergaenzungen |
-|-------|-----|-----|------------------------|
-| analysis.ts | 850 Token | 2800 Token | FFMI+Grenzen, Biomarker-Refs, Plateau-Erkennung, Wassergewicht, Saisonale Variation |
-| nutrition.ts | 950 Token | 2600 Token | KH-Dosierung, Fett-Minimum, Leucin, Diaetformen, MATADOR, GLP-1 Lean-Mass, Red-Flags |
-| training.ts | 1800 Token | 3200 Token | Steps (Lancet), MEV/MAV/MRV, RPE/RIR, HF-Zonen, Detraining, RAMP, Prehab, 50+ |
-| substances.ts | 1100 Token | 1800 Token | Safety-Gates, TRAVERSE, GLP-1 Androgen, E2-Screening, Checklist |
-| medical.ts | 1200 Token | 2200 Token | Hypogonadismus, TRAVERSE-Signale, Lab-Panel, GLP-1 Andrologie, OSA |
-| beauty.ts | 950 Token | 1300 Token | Dysmorphie-Screening, Fett-Embolie, TRT-praeop, PMIDs |
-
-#### 5. Bug-Fix: Trainingsassistent dreht sich im Kreis
-- **Root Cause:** `stripActionBlock()` entfernt ACTION-Bloecke aus Display, aber Conversation-History nutzt gestrippten Content
-- **Fix:** Neues `rawContent`-Feld in DisplayMessage — speichert vollen LLM-Output inkl. ACTION-Bloecke
-- Conversation-History nutzt `rawContent ?? content` fuer korrekte Kontext-Weitergabe
-- Datei: `useBuddyChat.ts`
-
-#### 6. Bug-Fix: Agent nicht aufrufbar bei Training-Menue
-- **Root Cause:** InlineBuddyChat z-index (44/45) < AddWorkoutDialog z-index (50)
-- **Fix:** z-index Backdrop 44→55, Bottom-Sheet 45→56
-- Datei: `InlineBuddyChat.tsx`
-
-#### 7. Konzept: Chat-Trennung pro Agent
-- Detaillierte Analyse von 3 Optionen (A: Filter, B: Threads, C: Summaries)
-- **Empfehlung: Option B (Separate Threads)** — medizinische Sicherheit, sauberer Kontext, DB-Persistenz
-- Roadmap: Phase 1 (sessionStorage) → Phase 2 (Supabase) → Phase 3 (Thread-Sharing)
-
-**Zahlen:**
-- 14 Dateien geaendert, 3 neue Dateien + 1 neuer Ordner
-- ~967 Zeilen hinzugefuegt, ~294 Zeilen entfernt
-- Build: 0 TS-Fehler
-- Skills gesamt: ~2.900 Zeilen Fachwissen (vorher ~1.900)
-
----
+**Konzept:** docs/BODYBUILDER_MODUS_KONZEPT.md (2 Personas, Digital Twins, Experten-Challenge)
 
 ### 2026-02-27 - v10.5: DNS-Infrastruktur fuer Email-Verifizierung
 
