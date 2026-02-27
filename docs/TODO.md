@@ -16,7 +16,7 @@
   - ~~Disclaimer-Text auch in Profil/Einstellungen einsehbar~~ ✅ — ReadOnly-Modus im Profil
   - DB-Migration: `disclaimer_accepted_at TIMESTAMPTZ` in profiles
   - Dual-Storage: localStorage (fast-check) + Supabase DB (source of truth)
-  - [ ] Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)
+  - [x] ~~Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)~~ ✅ (2026-02-27) — `docs/RECHTSKONFORMITAET.md` (DSGVO Art.9, MDR, HWG, ePrivacy, 23 Action Items)
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)
@@ -24,22 +24,13 @@
 - [x] ~~**site_url korrigieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**ResetPasswordPage implementieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**Email-Templates anpassen**~~ ✅ (2026-02-21, v6.1)
-- [ ] **Resend Domain-Validierung** — fudda.de bei Resend verifizieren (fuer Produktion)
+- [x] ~~**Resend Domain-Validierung**~~ ✅ (2026-02-27) — fudda.de bei Resend verifiziert
   - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
-  - Produktion: AUTOCONFIRM=true als Workaround ✅ (2026-02-27)
-  - Registrierung funktioniert ohne Email-Bestaetigung ✅ (verifiziert 2026-02-27)
-  - ~~**DNS von Strato zu Hetzner DNS umziehen**~~ ✅ (2026-02-27)
-    - Hetzner DNS Zone erstellt (ID: 919094, Projekt: 13589003)
-    - Strato Nameserver umgestellt auf: hydrogen.ns.hetzner.com, oxygen.ns.hetzner.com, helium.ns.hetzner.de
-  - ~~**SPF, DKIM, MX Records eintragen**~~ ✅ (2026-02-27)
-    - TXT: resend._domainkey → DKIM Public Key
-    - TXT: send → v=spf1 include:amazonses.com ~all
-    - MX: send → 10 feedback-smtp.eu-west-1.amazonses.com. (Trailing Dot Fix)
-    - A: @ → 46.225.228.12, CNAME: www → fudda.de
-  - **Naechster Schritt:** DNS-Propagation abwarten (bis 24h nach NS-Umstellung)
-  - Dann: Resend Domain verifizieren (Restart klicken) + AUTOCONFIRM wieder auf false
-  - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
-  - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
+  - ~~DNS von Strato zu Hetzner DNS umgezogen~~ ✅ (2026-02-27)
+  - ~~SPF, DKIM, MX Records~~ ✅ — alle Verified bei Resend (2026-02-27)
+  - ~~AUTOCONFIRM=false gesetzt, GoTrue neugestartet~~ ✅ (2026-02-27)
+  - Email-Verifizierung bei Registrierung jetzt AKTIV
+  - DMARC Record optional (noch nicht gesetzt, nicht blockierend)
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
   - Edge Function: send-welcome-email (Resend HTTP API)
   - Template: welcome.html (gleiches Design wie confirmation.html)
@@ -161,13 +152,15 @@
 
 ### P1 — Internationalisierung (i18n)
 
-#### Sprachen deutlich erweitern
-- [ ] **15+ neue Sprachen hinzufuegen** — Aktuell nur DE + EN. Geplant:
-  - Ukrainisch, Polnisch, Russisch, Rumaenisch
-  - Italienisch, Spanisch, Franzoesisch, Portugiesisch
-  - Arabisch, Tuerkisch, Marokkanisch, Persisch
-  - Chinesisch, Japanisch, Koreanisch
-  - Eigener i18n-Context muss erweitert werden (~300 Schluessel pro Sprache)
+#### ~~Sprachen deutlich erweitern~~ ✅ (2026-02-27, v10.8)
+- [x] ~~**15 neue Sprachen hinzugefuegt (17 total)**~~ ✅ (2026-02-27)
+  - AR (Arabisch), ES (Spanisch), FA (Persisch), FIL (Filipino), FR (Franzoesisch)
+  - IT (Italienisch), JA (Japanisch), KO (Koreanisch), PL (Polnisch), PT (Portugiesisch)
+  - RO (Rumaenisch), RU (Russisch), TR (Tuerkisch), UK (Ukrainisch), ZH (Chinesisch)
+  - Alle 610+ Keys type-safe gegen TranslationKeys, 0 TS-Fehler
+  - ProfilePage: Dropdown-Selektor mit Flaggen statt 2-Button-Toggle
+  - LANGUAGE_OPTIONS Array mit Flag-Emojis in index.ts
+  - I18nProvider: Erweiterte localStorage-Validierung fuer 17 Sprachen
 
 ### ~~P1 — UX/Gamification~~ ✅ (2026-02-27, v10.6)
 
@@ -262,7 +255,7 @@
 - [x] ~~deploy-frontend.sh auf fudda.de aktualisiert~~ ✅ (2026-02-25) — Default-Domain, Server-IP
 - [x] ~~Caddyfile: Cache-Header fuer index.html~~ ✅ (2026-02-25) — no-cache/no-store fuer HTML, immutable fuer Assets
 - [x] ~~Caddyfile: Permissions-Policy camera/microphone~~ ✅ (2026-02-25) — camera=(self), microphone=(self) statt Blockierung
-- [ ] Resend Domain-Validierung (fudda.de — DNS umgezogen, wartet auf Propagation)
+- [x] ~~Resend Domain-Validierung~~ ✅ (2026-02-27) — Resend verifiziert, AUTOCONFIRM=false
 - [x] ~~Monitoring aufsetzen (Error Tracking, Uptime)~~ ✅ (2026-02-26, v9.4) — monitor.sh (Docker, Disk, Memory, Service-Health)
 - [x] ~~Backup-Strategie fuer Supabase-DB (pg_dump Cronjob → Hetzner Storage Box)~~ ✅ (2026-02-26, v9.4) — backup-db.sh Script
 

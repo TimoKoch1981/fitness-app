@@ -83,10 +83,22 @@
 | 10.5    | 2026-02-27 | DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records  | Erledigt   |
 | 10.6    | 2026-02-27 | P1-Features: Supplement-Presets, Celebrations, 6 Skill-Erweiterungen, 2 Bug-Fixes | Erledigt   |
 | 10.7    | 2026-02-27 | Chat-Trennung pro Agent Phase 1 (Separate Threads, sessionStorage) | Erledigt   |
+| 10.8    | 2026-02-27 | i18n Expansion: 15 neue Sprachen (17 total), Resend verifiziert, RECHTSKONFORMITAET.md | Erledigt   |
 
 ---
 
 ## Log
+
+### 2026-02-27 - v10.8: i18n Expansion + Resend + Rechtskonformitaet
+
+**15 neue Sprachen, Email-Verifizierung aktiviert, umfassende Rechtsanalyse.**
+
+1. **P0: Resend Domain verifiziert** — DKIM ✅, SPF ✅, MX ✅ bei Resend. AUTOCONFIRM=false gesetzt, GoTrue neugestartet. Email-Verifizierung bei Registrierung jetzt aktiv.
+2. **P0: RECHTSKONFORMITAET.md** — Umfassende Rechtsanalyse: DSGVO Art. 9 (Gesundheitsdaten), MDR (Medizinprodukte-Abgrenzung), HWG (Substanzen-Werbung), ePrivacy/TTDSG. 23 Action Items in 3 Phasen.
+3. **P1: 15 neue Sprachen** — AR, ES, FA, FIL, FR, IT, JA, KO, PL, PT, RO, RU, TR, UK, ZH. Alle 610+ Keys type-safe, 0 TS-Fehler.
+4. **ProfilePage** — Sprach-Selektor von 2-Button-Toggle zu 17-Sprachen-Dropdown mit Flaggen-Emojis
+5. **index.ts** — LANGUAGE_OPTIONS Array, erweiterte Language Union Type, alle Imports
+6. **I18nProvider** — Erweiterte localStorage-Validierung fuer 17 Sprachen
 
 ### 2026-02-27 - v10.7: Chat-Trennung pro Agent (Phase 1 — Separate Threads)
 
