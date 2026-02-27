@@ -303,6 +303,35 @@ Caddy (Reverse Proxy + SSL + Static Files)
 - **Kontext-Awareness:** Schlaf, Stress, Krankheit, Verletzung beruecksichtigen
 - **Learning:** Proaktivitaet muss dosiert sein — zu viele Vorschlaege nerven
 
+### Chat-Trennung pro Agent (v10.7 Learnings)
+
+**Learning: Agenten brauchen KEINE gemeinsame Chat-History**
+- User-Kontext (Profil, Mahlzeiten, Koerperwerte, Substanzen, Trainingsplaene) kommt aus der DATENBANK, nicht aus der Chat-History
+- 9 UserSkill-Generatoren (profile, nutrition_log, training_log, body_progress, substance_protocol, daily_summary, active_plan, known_products, available_equipment) liefern den Agenten personalisierten Kontext via System-Prompt
+- Chat-History ist nur fuer den Konversationsfluss relevant — Trennung verliert kein Wissen
+
+**Learning: setMessages-Kompatibilitaet bei Multi-Thread-Migration**
+- Bestehender Code ruft ueberall `setMessages(prev => ...)` auf (sendMessage, clearAction, addSystemMessage)
+- Loesung: `setMessages` als scoped Dispatch — operiert immer auf `threads[activeThread]`
+- Dadurch bleiben ALLE bestehenden Hook-Internals ohne Aenderung funktional
+- Backward-Compatibility > Clean-Architecture bei inkrementeller Migration
+
+**Learning: Routing-Bypass muss fullContext bauen**
+- `routeAndExecuteStream()` fuegt user-Message intern an conversationHistory an (Zeile 471-474 router.ts)
+- `getAgent().executeStream()` erwartet die user-Message BEREITS in conversationHistory
+- Loesung: `fullContext` mit appendierter User-Message fuer den Bypass-Pfad erstellen
+
+**Learning: sessionStorage-Limit-Schutz (Max 50/Thread)**
+- sessionStorage hat ~5MB Limit pro Origin
+- 8 Threads × 50 Messages × ~2KB/Message = ~800KB — sicher unter dem Limit
+- Truncation beim Laden: aelteste Messages werden entfernt
+
+**Learning: Agent-Metadaten zentral halten**
+- `agentDisplayConfig.ts` enthaelt ALLE UI-Metadaten (Name, Icon, Farbe, Greeting DE/EN)
+- Entkoppelt von der Agent-Execution-Schicht (agents/index.ts → getAgent())
+- Tabs, Header, Greeting, Avatar nutzen alle dieselbe Config-Quelle
+- Spaeter erweiterbar: Agent-Beschreibungen, Beispiel-Prompts, Kategorien
+
 ---
 
 ## G. UI/UX Learnings
