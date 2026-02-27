@@ -64,14 +64,13 @@
 - [x] ~~**KI-Antwort wird ~12x doppelt verarbeitet**~~ ✅
   - Fix: Verbose console.log aus ActionParser entfernt, BuddyChat loggt nur bei gefundenen Actions
 
-### P1 — Neue Features
+### ~~P1 — Neue Features~~ ✅ (2026-02-27, v10.6)
 
-#### Supplement- & Substanz-Auswahlvorschlaege
-- [ ] **Supplement-Listen als Auswahlvorschlag** — Gaengige Supplements (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.) als vordefinierte Auswahl beim Anlegen einer Substanz
-- [ ] **Doping/Anabolika-Liste als Auswahlvorschlag** — PED-Liste (Testosteron, Trenbolon, Anavar, Deca, etc.) als Auswahlvorschlag
-  - Muss explizit unter Medizin durch den Nutzer aktiviert werden
-  - Disclaimer erforderlich bei Aktivierung
-  - Skill-Dateien werden Detailinfos enthalten (Halbwertszeiten, Dosierungen, Nebenwirkungen)
+#### ~~Supplement- & Substanz-Auswahlvorschlaege~~ ✅
+- [x] ~~**Supplement-Listen als Auswahlvorschlag**~~ ✅ (2026-02-27) — 12 Supplements (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.) als Tabs im AddSubstanceDialog
+- [x] ~~**Doping/Anabolika-Liste als Auswahlvorschlag**~~ ✅ (2026-02-27) — 12 PEDs (Testosteron, Trenbolon, Anavar, Deca, etc.) als Tab mit Disclaimer-Gate
+  - Disclaimer erforderlich bei Aktivierung ✅
+  - substancePresets.ts mit 24 vordefinierten Substanzen ✅
 
 ### P1 — Wichtig
 
@@ -117,16 +116,17 @@
 
 #### Wissensdateien (Skills) konzeptionell ueberarbeiten + fachlich erweitern
 > ~~Aktuell: 8 statische Skills mit ~1.200 Zeilen Fachwissen.~~
-> **Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.
+> ~~**Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.~~
+> **Stand v10.6:** 13 Skills mit ~2.900 Zeilen Fachwissen. 6 bestehende Skills auf v2.0.0 erweitert.
 > **Diskussionsbedarf:** Struktur, Quellen-Qualitaet, Fach-Tiefe, Token-Budget.
 
 - [ ] **Konzeptionelle Diskussion** — Wie tief sollen Skills sein? Token-Budget vs. Qualitaet. RAG-Alternative? Skill-Versioning-Strategie.
-- [ ] **Nutrition-Skill erweitern** — Mikronaehrstoffe, Meal-Timing, Sport-spezifische Ernaehrung, Diaet-Strategien (Cutting/Bulking), Alkohol-Impact, Hydration
-- [ ] **Training-Skill erweitern** — Periodisierung (linear/undulierend/block), Deload-Wochen, RPE/RIR-Skala, Superkompensation, Aufwaermprogramme, Mobilitaet, Verletzungspraevention
-- [ ] **Substances-Skill erweitern** — Blutbild-Interpretation (detailliert), Wechselwirkungen, Halbwertszeit-Kurven, Ester-Vergleich, Nebenwirkungs-Management
-- [ ] **Analysis-Skill erweitern** — Plateau-Erkennung, Prognose-Modelle, Wochen-/Monats-Trends, Anomalie-Erkennung, Vergleich mit Referenzwerten
-- [ ] **Medical-Skill erweitern** — Laborwerte-Referenzbereiche (detailliert), Sport-Kardiologie, Hormonspiegel-Interpretation, Schilddruese, Leber/Niere-Marker
-- [ ] **Beauty/Lifestyle erweitern** — Mehr Studien-Referenzen, evidenzbasierte Empfehlungen, Timing-Tabellen
+- [x] ~~**Nutrition-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — KH-Dosierung, Fett-Minimum+Hormonwarnung, Leucin-Schwelle, praezises Meal-Timing, Diaetformen, Refeed/Diet-Break (MATADOR), GLP-1 Lean-Mass, Red-Flags
+- [x] ~~**Training-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Schritte-Wissenschaft (Lancet 2025), MEV/MAV/MRV, RPE/RIR, HF-Zonen, Detraining+Muscle-Memory, Overtraining-Marker, HRV, RAMP-Warmup, Prehab, Training 50+, HIIT-Kontraindikationen
+- [x] ~~**Substances-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Safety-Gates, TRAVERSE-Signale, GLP-1 Lean-Mass+Androgen-Achse, E2-Screening, Standard-Checklist, 4-Block-Output
+- [x] ~~**Analysis-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — FFMI+Grenzen, Biomarker-Referenzbereiche, Wassergewicht-Analyse, Plateau-Erkennung, Ziel-Metriken, Saisonale Variation, Progressives Defizit
+- [x] ~~**Medical-Skill erweitern**~~ ✅ (2026-02-27, v2.0.0) — Hypogonadismus-Screening, TRAVERSE AFib/AKI/PE, E2-Screening, Labor-Kernpanel, GLP-1 Andrologie, OSA-Screening, 5-Block-Antwortschema
+- [x] ~~**Beauty/Lifestyle erweitern**~~ ✅ (2026-02-27, v2.0.0) — "First base then contour"-Regel, Dysmorphie-Screening, Fett-Embolie-Risiko, TRT-praeop-Flags, Evidenz-PMIDs
 - [x] ~~**Neuer Skill: Schlaf & Regeneration**~~ ✅ (2026-02-27, v10.4) — sleep.ts: Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
 - [x] ~~**Neuer Skill: Supplements**~~ ✅ (2026-02-27, v10.4) — supplements.ts: 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen
 - [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
@@ -169,15 +169,40 @@
   - Chinesisch, Japanisch, Koreanisch
   - Eigener i18n-Context muss erweitert werden (~300 Schluessel pro Sprache)
 
-### P1 — UX/Gamification
+### ~~P1 — UX/Gamification~~ ✅ (2026-02-27, v10.6)
 
-#### Erfolgs-Lob fuer den Nutzer
-- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden
-  - Trainings-PRs (neues Maximalgewicht, mehr Reps)
-  - Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)
-  - Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)
-  - Kaloriendefizit eingehalten
-  - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
+#### ~~Erfolgs-Lob fuer den Nutzer~~ ✅
+- [x] ~~**Zwischen-Lob bei Erfolgen einbauen**~~ ✅ (2026-02-27) — CelebrationProvider + CelebrationOverlay (Konfetti + Toast)
+  - ~~Trainings-PRs (neues Maximalgewicht, mehr Reps)~~ ✅ — WorkoutSummary: celebrateNewPR()
+  - ~~Gewichtsverlust-Meilensteine (5kg-Schwellen)~~ ✅ — AddBodyMeasurementDialog: celebrateWeightMilestone()
+  - ~~Kaloriendefizit eingehalten~~ ✅ — CockpitPage: celebrateCalorieGoal() + celebrateProteinGoal()
+  - ~~Blutdruck-Verbesserung~~ ✅ — AddBloodPressureDialog: celebrateBPImprovement()
+  - 4 Level (small/medium/large/epic), 6 Kategorien, localStorage-Dedup, 24h-Cooldown
+
+### ~~P1 — Bug-Fixes (2026-02-27)~~ ✅
+
+#### ~~Trainingsassistent dreht sich im Kreis~~ ✅
+- [x] ~~**Agent-Loop bei Planerstellung**~~ ✅ (2026-02-27)
+  - Root Cause: stripActionBlock() entfernt ACTION-Bloecke aus Display-Content, aber Conversation-History nutzt gestrippten Content → Agent sieht nicht, dass er bereits einen Plan erstellt hat
+  - Fix: rawContent-Feld in DisplayMessage, Conversation-History nutzt rawContent ?? content
+  - Betroffene Datei: useBuddyChat.ts
+
+#### ~~Agent nicht aufrufbar bei Training-Menue~~ ✅
+- [x] ~~**InlineBuddyChat wird von Training-Dialog ueberdeckt**~~ ✅ (2026-02-27)
+  - Root Cause: InlineBuddyChat z-index (44/45) < AddWorkoutDialog z-index (50)
+  - Fix: InlineBuddyChat z-index auf 55/56 angehoben
+  - Betroffene Datei: InlineBuddyChat.tsx
+
+### P1 — Konzeptionell (nicht umgesetzt)
+
+#### Chat-Trennung pro Agent
+- [x] ~~**Konzeptionelle Analyse erstellt**~~ ✅ (2026-02-27) — 3 Optionen evaluiert:
+  - **Option A: Themen-Filter** (S, 1-2h) — UI-Filter, keine DB-Aenderung, aber KI-Kontext bleibt gemischt
+  - **Option B: Separate Threads** (L, 8-10h) — Echte Trennung, DB-Tabellen, professionell ← **EMPFOHLEN**
+  - **Option C: Intelligente Zusammenfassungen** (M, 3-4h) — LLM-Summaries als Kontext-Bridge
+  - Empfehlung: Option B (Separate Threads) — medizinische Sicherheit, sauberer Kontext, Zukunftssicher
+  - Roadmap: Phase 1 (sessionStorage) → Phase 2 (Supabase) → Phase 3 (Thread-Sharing)
+  - Detaillierte Analyse in UX-Studie-Dokument
 
 ### P2 — Nice-to-Have
 
@@ -297,6 +322,7 @@
 
 ## Erledigt (letzte 10)
 
+- [x] **v10.6: P1-Features + Bug-Fixes + Skill-Erweiterungen** — Supplement/Doping-Presets (24 Substanzen), Celebration-System (Konfetti+Toast, 4 Level, 6 Kategorien), 6 Skills auf v2.0.0 erweitert (~2.900 Zeilen), Agent-Loop-Fix (rawContent), Z-Index-Fix (InlineBuddyChat), Chat-Trennungs-Konzept (Option B empfohlen), UX/UI-Studie (2026-02-27)
 - [x] **v8.0: Disclaimer + 4 P2-Features** — Liability Disclaimer Modal (P0), KI-Prognosen (Regression + Plateau + ProgressionCard), Koerper-Silhouette (SVG, KFA-Farben), Data Import (CSV + Email-Text, Fitdays/Renpho/Withings Auto-Erkennung). 16 neue Dateien, 87 neue Tests (1.410 gesamt) (2026-02-24)
 - [x] **v7.2: Produkt-Recherche Pipeline + Ehrlichkeits-Codex** — Product Lookup (Open Food Facts + OpenAI Web Search), Query-Cleaning (Noise-Words, Umlaut-Normalisierung), Zwei-Phasen-Flow (search_product → lookupProduct → save_product + log_meal), Vite Proxy (CORS-Bypass), Ehrlichkeits-Codex fuer alle Agenten, Zielberechnung korrigiert (Protein 1.6-2.2 g/kg), ProfilePage lokaler Form-State, ACTION-Regex flexibilisiert, Fallback-Detektoren, Erinnerungen bearbeiten. 24 Dateien, 1.753+ / 227- Zeilen (2026-02-22)
 - [x] **v7.1: Bug-Fixes Substanzen/Erinnerungen/Mobile** — Auto-Erinnerung bei Substanz-Anlage (Frequenz→Reminder), Substanz-Erinnerung-Verknuepfung (Bell-Icon, Cascade-Delete), Toggle/Delete-Buttons auf Mobile sichtbar (sm:opacity statt opacity), Substanz-Toggle (Aktivieren/Deaktivieren), Test-User neu angelegt nach DB-Reset (2026-02-22)
@@ -322,4 +348,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27 (v10.5 — DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records)*
+*Letzte Aktualisierung: 2026-02-27 (v10.6 — P1-Features: Supplement-Presets, Celebration-System, 6 Skill-Erweiterungen, 2 Bug-Fixes, Chat-Trennungs-Konzept)*

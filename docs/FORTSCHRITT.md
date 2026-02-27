@@ -81,10 +81,73 @@
 | 10.3    | 2026-02-26 | 4 Bug-Fixes + Production-Deployment + Verifikation                       | Erledigt   |
 | 10.4    | 2026-02-27 | 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung    | Erledigt   |
 | 10.5    | 2026-02-27 | DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records  | Erledigt   |
+| 10.6    | 2026-02-27 | P1-Features: Supplement-Presets, Celebrations, 6 Skill-Erweiterungen, 2 Bug-Fixes | Erledigt   |
 
 ---
 
 ## Log
+
+### 2026-02-27 - v10.6: P1-Features, Bug-Fixes, Skill-Erweiterungen
+
+**Umfangreiche P1-Runde mit 5 Feature-Bloecken + 2 Bug-Fixes + Konzeptarbeit:**
+
+#### 1. UX/UI-Studie (Recherche-Dokument)
+- Analyse von 29 Research-Markdown-Dateien aus dem Skills-Ordner
+- Dokument: `docs/20260227_UX_UI_Studie_Nutzererlebnis_Optimierung.md`
+- Themen: Gamification, Onboarding, Mikro-Interaktionen, Fortschritts-Visualisierung
+
+#### 2. Supplement- & Doping-Presets (AddSubstanceDialog)
+- `substancePresets.ts`: 24 vordefinierte Substanzen in 2 Kategorien
+- **Supplements:** 12 (Kreatin, Omega-3, Vitamin D3, Zink, Magnesium, Whey, Koffein, Ashwagandha, etc.)
+- **PEDs:** 12 (Testosteron, Trenbolon, Anavar, Deca, Dianabol, Winstrol, HGH, etc.)
+- Disclaimer-Gate fuer PED-Tab mit Sicherheitshinweis
+- Tab-UI im Dialog (Manuell / Supplements / PEDs)
+- One-Tap-Uebernahme mit automatischem Tab-Wechsel
+
+#### 3. Celebration-System (Zwischen-Lob)
+- `CelebrationProvider.tsx`: React Context mit 6 celebrate-Funktionen
+- `CelebrationOverlay.tsx`: Konfetti-Animation (Canvas) + Toast-Nachrichten
+- `useCelebration.ts`: Hook fuer Konfetti-Logik (4 Level: small/medium/large/epic)
+- **Integrationspunkte:**
+  - WorkoutSummary: PR-Celebrations bei neuen Bestleistungen
+  - CockpitPage: Kalorien- und Protein-Ziel erreicht
+  - AddBodyMeasurementDialog: Gewichtsmeilensteine (5kg-Schwellen)
+  - AddBloodPressureDialog: Blutdruck-Verbesserung (ueber 130 → unter 130)
+- localStorage-Dedup + 24h-Cooldown gegen Spam
+
+#### 4. Skill-Erweiterungen (6 Skills v1.x → v2.0.0)
+| Skill | Alt | Neu | Wichtigste Ergaenzungen |
+|-------|-----|-----|------------------------|
+| analysis.ts | 850 Token | 2800 Token | FFMI+Grenzen, Biomarker-Refs, Plateau-Erkennung, Wassergewicht, Saisonale Variation |
+| nutrition.ts | 950 Token | 2600 Token | KH-Dosierung, Fett-Minimum, Leucin, Diaetformen, MATADOR, GLP-1 Lean-Mass, Red-Flags |
+| training.ts | 1800 Token | 3200 Token | Steps (Lancet), MEV/MAV/MRV, RPE/RIR, HF-Zonen, Detraining, RAMP, Prehab, 50+ |
+| substances.ts | 1100 Token | 1800 Token | Safety-Gates, TRAVERSE, GLP-1 Androgen, E2-Screening, Checklist |
+| medical.ts | 1200 Token | 2200 Token | Hypogonadismus, TRAVERSE-Signale, Lab-Panel, GLP-1 Andrologie, OSA |
+| beauty.ts | 950 Token | 1300 Token | Dysmorphie-Screening, Fett-Embolie, TRT-praeop, PMIDs |
+
+#### 5. Bug-Fix: Trainingsassistent dreht sich im Kreis
+- **Root Cause:** `stripActionBlock()` entfernt ACTION-Bloecke aus Display, aber Conversation-History nutzt gestrippten Content
+- **Fix:** Neues `rawContent`-Feld in DisplayMessage — speichert vollen LLM-Output inkl. ACTION-Bloecke
+- Conversation-History nutzt `rawContent ?? content` fuer korrekte Kontext-Weitergabe
+- Datei: `useBuddyChat.ts`
+
+#### 6. Bug-Fix: Agent nicht aufrufbar bei Training-Menue
+- **Root Cause:** InlineBuddyChat z-index (44/45) < AddWorkoutDialog z-index (50)
+- **Fix:** z-index Backdrop 44→55, Bottom-Sheet 45→56
+- Datei: `InlineBuddyChat.tsx`
+
+#### 7. Konzept: Chat-Trennung pro Agent
+- Detaillierte Analyse von 3 Optionen (A: Filter, B: Threads, C: Summaries)
+- **Empfehlung: Option B (Separate Threads)** — medizinische Sicherheit, sauberer Kontext, DB-Persistenz
+- Roadmap: Phase 1 (sessionStorage) → Phase 2 (Supabase) → Phase 3 (Thread-Sharing)
+
+**Zahlen:**
+- 14 Dateien geaendert, 3 neue Dateien + 1 neuer Ordner
+- ~967 Zeilen hinzugefuegt, ~294 Zeilen entfernt
+- Build: 0 TS-Fehler
+- Skills gesamt: ~2.900 Zeilen Fachwissen (vorher ~1.900)
+
+---
 
 ### 2026-02-27 - v10.5: DNS-Infrastruktur fuer Email-Verifizierung
 
