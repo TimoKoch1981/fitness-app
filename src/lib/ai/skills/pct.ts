@@ -18,11 +18,11 @@ export const PCT_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-26',
   sources: [
-    'Rahnema et al. 2014, Fertil Steril — AAS & Male Fertility',
-    'Endocrine Society 2018 — Testosterone Therapy Guidelines',
-    'Pope et al. 2014, Drug Alcohol Depend — AAS Dependence',
-    'Kanayama et al. 2015, Lancet — AAS Epidemiology',
-    'Bhasin et al. 2018, JCEM — Testosterone Guideline',
+    'Rahnema et al. 2014, Fertil Steril, PMID:24636400 — AAS & Male Fertility',
+    'Endocrine Society (Bhasin et al.) 2018, JCEM, PMID:29562364 — Testosterone Therapy Guidelines',
+    'Pope et al. 2014, Am J Addict, PMID:24112239 — AAS Dependence',
+    'Kanayama et al. 2015, Addiction, PMID:25598171 — Prolonged hypogonadism after AAS',
+    'Kanayama et al. 2010, Drug Alcohol Depend — Suicide risk in AAS withdrawal',
   ],
   tokenEstimate: 2000,
   changelog: [

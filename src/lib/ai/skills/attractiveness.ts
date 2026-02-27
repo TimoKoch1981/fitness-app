@@ -17,11 +17,12 @@ export const ATTRACTIVENESS_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-20',
   sources: [
-    'Frederick & Haselton 2007, Pers Soc Psychol Bull — Muscularity preferences',
-    'Sell et al. 2009, Proc R Soc B — Upper body strength & attractiveness',
-    'Swami & Tovée 2005, Body Image — BMI and attractiveness ratings',
-    'Mehrabian 1971 — Communication model (verbal/nonverbal)',
-    'Dion et al. 1972, J Pers Soc Psychol — What is beautiful is good',
+    'Frederick & Haselton 2007, Pers Soc Psychol Bull, PMID:17578932 — Muscularity preferences',
+    'Sell et al. 2017, Proc R Soc B — Upper body strength & attractiveness',
+    'Swami & Tovee 2005, Body Image, PMID:18089180 — BMI and attractiveness ratings',
+    'Mehrabian 1971 — Communication model (verbal/nonverbal, Caveat: 7-38-55 often overgeneralized)',
+    'Dion et al. 1972, J Pers Soc Psychol, PMID:4655540 — What is beautiful is good',
+    'Langlois et al. 2000, Psychol Bull, PMID:10748995 — Attractiveness meta-analysis (halo effect sizes)',
   ],
   tokenEstimate: 900,
   changelog: [

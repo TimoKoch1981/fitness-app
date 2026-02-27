@@ -16,10 +16,12 @@ export const COMPETITION_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-26',
   sources: [
-    'Helms et al. 2014, JISSN — Natural Bodybuilding Contest Prep',
-    'Trexler et al. 2014, JISSN — Metabolic Adaptation to Weight Loss',
-    'Fagerberg 2018, Sports Med — Peak Week Strategies',
-    'Roberts et al. 2020, Sports Med — Bodybuilding Prep Recommendations',
+    'Helms et al. 2014, JISSN, PMID:24864135 — Natural Bodybuilding Contest Prep',
+    'Trexler et al. 2014, JISSN, PMID:24571926 — Metabolic Adaptation to Weight Loss',
+    'Chappell & Simper 2018, J Sports Sci, PMID:30352979 — Peak Week Strategies',
+    'Roberts et al. 2020, J Hum Kinet, PMID:32148575 — Bodybuilding Prep Recommendations',
+    'Rossow et al. 2013, Int J Sport Nutr Exerc Metab, PMID:23412685 — Post-Competition Recovery',
+    'Fagerberg 2018, Int J Sport Nutr Exerc Metab — Low Energy Availability in Natural BB',
   ],
   tokenEstimate: 2000,
   changelog: [

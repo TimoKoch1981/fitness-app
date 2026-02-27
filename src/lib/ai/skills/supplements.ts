@@ -16,11 +16,14 @@ export const SUPPLEMENTS_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-26',
   sources: [
-    'ISSN Position Stand: Creatine (Kreider et al. 2017, JISSN)',
-    'ISSN Position Stand: Protein & Exercise (Jäger et al. 2017)',
-    'Examine.com Evidence-Based Supplement Guide',
+    'ISSN Position Stand: Creatine (Kreider et al. 2017, JISSN, PMID:28615996)',
+    'ISSN Position Stand: Protein & Exercise (Jager et al. 2017, JISSN, PMID:28642676)',
     'DGE Referenzwerte 2024',
-    'Meta-Analyse: Kreatin Nierenfunktion (2025, PMID:41199218)',
+    'Meta-Analyse: Kreatin Nierenfunktion (Kabiri Naeini et al. 2025, BMC Nephrol, PMID:41199218)',
+    'Saunders et al. 2017, Br J Sports Med, PMID:28007636 — Beta-Alanine',
+    'Wankhede et al. 2015, JISSN, PMID:26609282 — Ashwagandha (KSM-66)',
+    'Shaw et al. 2017, Am J Clin Nutr, PMID:27852613 — Collagen + Vitamin C',
+    'Avgerinos et al. 2018, Exp Gerontol, PMID:29704637 — Creatine & Cognition Meta-Analysis',
   ],
   tokenEstimate: 2800,
   changelog: [

@@ -18,12 +18,15 @@ export const ANALYSIS_SKILL_META: SkillMeta = {
   updatedAt: '2026-02-27',
   sources: [
     'WHO BMI Classification',
-    'Mifflin-St Jeor BMR (Frankenfield et al., 2005)',
+    'Mifflin-St Jeor BMR (Frankenfield et al. 2005, J Am Diet Assoc)',
     'FAO/WHO/UNU TDEE Energy Requirements (2004)',
     'Katch-McArdle BMR Formula',
-    'Cunningham 1991 — BMR for Athletes',
+    'Cunningham 1991, Med Sci Sports Exerc — BMR for Athletes',
     'Karakasis et al., Metabolism 2025, PMID:39719170 — GLP-1 Lean-Mass NMA',
-    'MATADOR Study — Intermittent Energy Restriction',
+    'Byrne et al. 2018, Int J Obes (MATADOR), PMID:28925405 — Intermittent Energy Restriction',
+    'Kouri et al. 1995, Clin J Sport Med, PMID:7496846 — FFMI Natural Limits',
+    'Trexler et al. 2014, JISSN, PMID:24571926 — Adaptive Thermogenesis',
+    'Endocrine Society (Bhasin et al.) 2018, JCEM, PMID:29562364 — Biomarker Reference Ranges',
   ],
   tokenEstimate: 2800,
   changelog: [

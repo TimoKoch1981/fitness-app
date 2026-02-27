@@ -18,13 +18,15 @@ export const NUTRITION_SKILL_META: SkillMeta = {
   version: '2.0.0',
   updatedAt: '2026-02-27',
   sources: [
-    'ISSN Position Stand on Protein (Jaeger et al., 2017)',
+    'ISSN Position Stand on Protein (Jager et al. 2017, JISSN, PMID:28642676)',
     'DGE Referenzwerte fuer die Naehrstoffzufuhr (2024)',
     'Open Food Facts Database',
     'Bundeslebensmittelschluessel BLS 4.0',
     'Karakasis et al., Metabolism 2025, PMID:39719170 — GLP-1 Lean-Mass NMA',
-    'MATADOR Study — Intermittent Energy Restriction',
-    'Schoenfeld & Aragon 2018, JISSN — Meal Frequency Review',
+    'Byrne et al. 2018, Int J Obes (MATADOR), PMID:28925405 — Intermittent Energy Restriction',
+    'Schoenfeld & Aragon 2018, JISSN, PMID:29497353 — Protein Distribution Review',
+    'Thomas et al. 2016, Med Sci Sports Exerc, PMID:26891166 — ACSM/AND/DC Nutrition Position Stand',
+    'Kerksick et al. 2017, JISSN, PMID:29405526 — Nutrient Timing Position Stand',
   ],
   tokenEstimate: 2600,
   changelog: [

@@ -16,11 +16,13 @@ export const FEMALE_FITNESS_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-26',
   sources: [
-    'McNulty et al. 2020, Sports Med — Menstrual Cycle & Exercise Performance',
-    'ACOG Guidelines — Physical Activity and Exercise During Pregnancy',
-    'Mountjoy et al. 2018, Br J Sports Med — IOC Consensus on RED-S',
-    'Constantini et al. 2005 — Female Athletes & Hormones',
-    'Nattiv et al. 2007, Med Sci Sports Exerc — Female Athlete Triad',
+    'McNulty et al. 2020, Sports Med, PMID:32661839 — Menstrual Cycle & Exercise Performance',
+    'ACOG Committee Opinion No. 804, 2020 — Physical Activity During Pregnancy',
+    'Mountjoy et al. 2018, Br J Sports Med, PMID:29773536 — IOC Consensus on RED-S',
+    'Nattiv et al. 2007, Med Sci Sports Exerc, PMID:17909417 — Female Athlete Triad Position Stand',
+    'Beynnon et al. 2006, J Athl Train, PMID:16620079 — ACL Injury Risk & Menstrual Cycle',
+    'Mottola et al. 2018, Br J Sports Med — Postpartum Return-to-Exercise Guidelines',
+    'Peeling et al. 2008, Med Sci Sports Exerc — Iron Status in Female Athletes',
   ],
   tokenEstimate: 2200,
   changelog: [

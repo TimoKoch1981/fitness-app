@@ -19,7 +19,7 @@ export const BEAUTY_SKILL_META: SkillMeta = {
   sources: [
     'ASPS (American Society of Plastic Surgeons) Guidelines',
     'ISAPS Global Survey on Aesthetic Procedures',
-    'Hoyos & Millard 2012, Aesth Surg J — VASER Hi-Def Liposculpture',
+    'Hoyos & Millard 2007, Aesthet Surg J, PMID:19341688 — VASER Hi-Def Liposculpture',
     'Swanson 2012, Plast Reconstr Surg — Liposuction outcomes',
     'Comerci et al. 2024, Aesthetic Surg J — Liposuction SR/MA (PMID:38563572)',
     'Willet et al. 2023, Plast Reconstr Surg — HD-Lipo SR (PMID:36728192)',

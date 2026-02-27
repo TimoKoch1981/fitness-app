@@ -16,12 +16,14 @@ export const SLEEP_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-26',
   sources: [
-    'Walker 2017 — Why We Sleep',
-    'Vitale et al. 2019, Int J Environ Res Public Health — Sleep & Athletic Performance',
-    'Leproult & Van Cauter 2011, JAMA — Sleep & Testosterone',
-    'Meeusen et al. 2013, Med Sci Sports Exerc — Overtraining Consensus',
+    'Carskadon & Dement 2005, Principles of Sleep Medicine — Sleep Architecture',
+    'Vitale et al. 2019, Int J Sports Med, PMID:31288293 — Sleep & Athletic Performance',
+    'Leproult & Van Cauter 2011, JAMA, PMID:21632481 — Sleep & Testosterone',
+    'Meeusen et al. 2013, Med Sci Sports Exerc — ECSS/ACSM Overtraining Consensus',
     'Halson 2014, Sports Med — Recovery Techniques',
     'Plews et al. 2013, Int J Sports Physiol Perform — HRV & Training',
+    'Ferracioli-Oda et al. 2013, PLoS One, PMID:23691095 — Melatonin Meta-Analysis',
+    'Roberts et al. 2015, J Physiol, PMID:26174323 — Cold Water Immersion & mTORC1',
   ],
   tokenEstimate: 2200,
   changelog: [

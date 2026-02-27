@@ -10,7 +10,7 @@
  *
  * @version 1.0.0
  * @see Bhasin et al. 1996 (NEJM), Egner et al. 2013 (J Physiol),
- *      Nielsen et al. 2023 (JCEM), Pope et al. 2014 (Drug Alcohol Depend)
+ *      Nielsen et al. 2023 (JCEM), Pope et al. 2014 (Am J Addict)
  */
 
 import type { SkillMeta } from './types';
@@ -21,14 +21,16 @@ export const ANABOLICS_SKILL_META: SkillMeta = {
   version: '1.0.0',
   updatedAt: '2026-02-20',
   sources: [
-    'Bhasin et al. 1996, NEJM — Testosterone dose-response',
-    'Egner et al. 2013, J Physiol — Myonuclei & muscle memory',
-    'Nielsen et al. 2023, JCEM — Myonuclei in ex-AAS users',
-    'Pope et al. 2014, Drug Alcohol Depend — AAS dependence',
+    'Bhasin et al. 1996, NEJM, PMID:8637535 — Testosterone dose-response',
+    'Egner et al. 2013, J Physiol, PMID:24167222 — Myonuclei & muscle memory',
+    'Nielsen et al. 2023, JCEM, PMID:37466198 — Myonuclei in ex-AAS users',
+    'Pope et al. 2014, Am J Addict, PMID:24112239 — AAS dependence',
     'WADA Prohibited List 2025',
-    'Kanayama et al. 2015, Lancet — AAS epidemiology',
-    'Endocrine Society 2018 — Testosterone Therapy Guidelines',
-    'Nieschlag & Vorona 2015, Andrology — TRT dosing',
+    'Kanayama et al. 2015, Addiction, PMID:25598171 — Prolonged hypogonadism after AAS',
+    'Endocrine Society (Bhasin et al.) 2018, JCEM, PMID:29562364 — Testosterone Therapy Guidelines',
+    'Nieschlag & Vorona 2015, Eur J Endocrinol, PMID:25805894 — TRT dosing',
+    'Kicman 2008, Br J Pharmacol, PMID:18500378 — AAS pharmacology',
+    'Baggish et al. 2017, Circulation, PMID:28533317 — Cardiovascular effects of AAS',
   ],
   tokenEstimate: 1800,
   changelog: [
