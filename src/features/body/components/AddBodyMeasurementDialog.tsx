@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useAddBodyMeasurement } from '../hooks/useBodyMeasurements';
+import { useAddBodyMeasurement, useLatestBodyMeasurement } from '../hooks/useBodyMeasurements';
+import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { today } from '../../../lib/utils';
 
 interface AddBodyMeasurementDialogProps {
@@ -12,6 +13,8 @@ interface AddBodyMeasurementDialogProps {
 export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDialogProps) {
   const { t } = useTranslation();
   const addMeasurement = useAddBodyMeasurement();
+  const { data: latestBody } = useLatestBodyMeasurement();
+  const { celebrateWeightMilestone } = useCelebrations();
 
   const [weight, setWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
@@ -44,6 +47,20 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
         leg_cm: leg ? parseFloat(leg) : undefined,
         source: 'manual',
       });
+
+      // Check for weight milestone celebrations
+      // Celebrate when user drops below a round 5kg threshold (e.g., under 100, 95, 90...)
+      const newWeight = weight ? parseFloat(weight) : null;
+      const prevWeight = latestBody?.weight_kg;
+      if (newWeight && prevWeight && newWeight < prevWeight) {
+        // Check if we crossed a 5kg milestone threshold
+        const prevThreshold = Math.floor(prevWeight / 5) * 5; // e.g. 102 → 100
+        const newThreshold = Math.floor(newWeight / 5) * 5;   // e.g. 99.5 → 95
+        if (newThreshold < prevThreshold) {
+          const kgLost = Math.round(prevWeight - newWeight);
+          celebrateWeightMilestone(kgLost > 0 ? kgLost : 1);
+        }
+      }
 
       // Reset and close
       setWeight('');

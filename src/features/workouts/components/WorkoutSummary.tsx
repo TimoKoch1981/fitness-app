@@ -4,7 +4,7 @@
  * weight PRs, and a save button.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   CheckCircle2, Clock, Flame, Trophy, TrendingUp,
   Save, Trash2, SkipForward,
@@ -13,6 +13,7 @@ import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useSaveWorkoutSession } from '../hooks/useSaveWorkoutSession';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
+import { useCelebrations } from '../../celebrations/CelebrationProvider';
 
 interface WorkoutSummaryProps {
   weightKg: number;
@@ -24,6 +25,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const isDE = language === 'de';
   const { state, clearSession } = useActiveWorkout();
   const saveSession = useSaveWorkoutSession();
+  const { celebrateNewPR, celebrateFirstWorkoutOfWeek } = useCelebrations();
   const [isSaving, setIsSaving] = useState(false);
 
   // Calculate stats
@@ -62,10 +64,22 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     return { durationMin, completed, skipped, additions, totalSets, calories, prs };
   }, [state, weightKg]);
 
+  // Trigger celebrations for PRs when summary is shown
+  useEffect(() => {
+    if (stats.prs.length > 0) {
+      for (const pr of stats.prs) {
+        celebrateNewPR(pr.name, pr.weight, pr.targetWeight);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only once on mount
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await saveSession.mutateAsync({ session: state, weightKg });
+      // Celebrate first workout of the week
+      celebrateFirstWorkoutOfWeek();
       clearSession();
       onClose();
     } catch (err) {

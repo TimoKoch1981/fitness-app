@@ -51,6 +51,7 @@ import { WeightChart } from '../features/reports/components/WeightChart';
 import { ShareCardDialog } from '../features/share/components/ShareCardDialog';
 import { ProgressionCard } from '../features/reports/components/ProgressionCard';
 import type { ShareCardData } from '../features/share/components/ShareProgressCard';
+import { useCelebrations } from '../features/celebrations/CelebrationProvider';
 
 const WATER_STORAGE_KEY = 'fitbuddy_water_';
 
@@ -79,6 +80,7 @@ export function CockpitPage() {
   const { user } = useAuth();
   const selectedDate = useToday();
   const cockpitSuggestions = usePageBuddySuggestions('cockpit', language as 'de' | 'en');
+  const { celebrateCalorieGoal, celebrateProteinGoal } = useCelebrations();
 
   const { data: profile } = useProfile();
   const { totals } = useDailyMealTotals(selectedDate);
@@ -162,6 +164,17 @@ export function CockpitPage() {
   });
 
   const visibleInsights = insights.slice(0, 4);
+
+  // Celebrate when calorie or protein goal is reached
+  useEffect(() => {
+    if (totals.calories > 0 && totals.calories >= caloriesGoal) {
+      celebrateCalorieGoal(1); // Single day achievement
+    }
+    if (totals.protein > 0 && totals.protein >= proteinGoal) {
+      celebrateProteinGoal();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totals.calories >= caloriesGoal, totals.protein >= proteinGoal]);
 
   const stats = [
     {

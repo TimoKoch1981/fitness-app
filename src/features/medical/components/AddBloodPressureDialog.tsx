@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useAddBloodPressure } from '../hooks/useBloodPressure';
+import { useAddBloodPressure, useBloodPressureLogs } from '../hooks/useBloodPressure';
 import { classifyBloodPressure } from '../../../lib/calculations';
+import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { today } from '../../../lib/utils';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 export function AddBloodPressureDialog({ open, onClose }: Props) {
   const { t } = useTranslation();
   const addBP = useAddBloodPressure();
+  const { data: bpLogs } = useBloodPressureLogs(5);
+  const { celebrateBPImprovement } = useCelebrations();
 
   const [systolic, setSystolic] = useState('120');
   const [diastolic, setDiastolic] = useState('80');
@@ -47,6 +50,14 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
         pulse: parseInt(pulse) || undefined,
         notes: notes || undefined,
       });
+
+      // Check for BP improvement celebration
+      if (bpLogs && bpLogs.length > 0) {
+        const prevSys = bpLogs[0].systolic;
+        if (sys < prevSys && sys <= 130 && prevSys > 130) {
+          celebrateBPImprovement(prevSys, sys);
+        }
+      }
 
       setSystolic('120');
       setDiastolic('80');

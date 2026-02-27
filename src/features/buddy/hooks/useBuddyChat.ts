@@ -30,6 +30,9 @@ export interface DisplayMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  /** Raw LLM output including ACTION blocks — used for conversation history so
+   *  the agent knows what actions were already taken. Display uses `content`. */
+  rawContent?: string;
   timestamp: Date;
   isLoading?: boolean;
   isStreaming?: boolean;
@@ -102,7 +105,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
         healthContext: context ?? {},
         conversationHistory: messagesRef.current.slice(-8).map(m => ({
           role: m.role as 'user' | 'assistant',
-          content: m.content,
+          content: m.rawContent ?? m.content, // Use raw content (incl. ACTION blocks) so agent knows what was already done
         })),
         language,
       };
@@ -253,6 +256,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
             ? {
                 ...m,
                 content: followUpClean,
+                rawContent: followUpResult.content,
                 isLoading: false,
                 isStreaming: false,
                 agentType: followUpResult.agentType,
@@ -270,11 +274,13 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
           : result.content;
 
         // Finalize the message: remove streaming flag, add agent attribution
+        // Keep rawContent with ACTION blocks so the agent can see its past actions
         setMessages(prev => prev.map(m =>
           m.id === streamId
             ? {
                 ...m,
                 content: cleanContent,
+                rawContent: result.content, // Full content incl. ACTION blocks
                 isLoading: false,
                 isStreaming: false,
                 agentType: result.agentType,

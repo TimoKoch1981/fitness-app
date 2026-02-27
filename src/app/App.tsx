@@ -4,6 +4,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import { I18nProvider } from './providers/I18nProvider';
 import { BuddyChatProvider } from './providers/BuddyChatProvider';
 import { NotificationSchedulerProvider } from '../features/notifications/components/NotificationSchedulerProvider';
+import { CelebrationProvider } from '../features/celebrations/CelebrationProvider';
 import { InlineBuddyChatProvider } from '../shared/components/InlineBuddyChatContext';
 import { InlineBuddyChat } from '../shared/components/InlineBuddyChat';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
@@ -190,10 +191,12 @@ export default function App() {
           <BuddyChatProvider>
             <BrowserRouter>
               <NotificationSchedulerProvider>
-                <InlineBuddyChatProvider>
-                  <AppRoutes />
-                  <InlineBuddyChat />
-                </InlineBuddyChatProvider>
+                <CelebrationProvider>
+                  <InlineBuddyChatProvider>
+                    <AppRoutes />
+                    <InlineBuddyChat />
+                  </InlineBuddyChatProvider>
+                </CelebrationProvider>
               </NotificationSchedulerProvider>
             </BrowserRouter>
           </BuddyChatProvider>

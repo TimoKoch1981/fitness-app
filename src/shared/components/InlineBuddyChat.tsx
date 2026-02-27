@@ -51,7 +51,7 @@ export function InlineBuddyChat() {
             transition={{ duration: 0.2 }}
             onClick={closeBuddyChat}
             className="fixed inset-0 bg-black/30"
-            style={{ zIndex: 44 }}
+            style={{ zIndex: 55 }}
             aria-hidden="true"
           />
           {/* Bottom Sheet */}
@@ -65,7 +65,7 @@ export function InlineBuddyChat() {
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className="fixed left-0 right-0 bg-white rounded-t-2xl shadow-2xl flex flex-col"
-            style={{ bottom: 56, maxHeight: '70vh', zIndex: 45 }}
+            style={{ bottom: 56, maxHeight: '70vh', zIndex: 56 }}
           >
             <InlineBuddyChatContent />
           </motion.div>
