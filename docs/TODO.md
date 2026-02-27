@@ -123,7 +123,7 @@
 - [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
 - [x] ~~**Neuer Skill: Wettkampfvorbereitung**~~ ✅ (2026-02-27, v10.4) — competition.ts: Natural vs Enhanced, Peak Week, Reverse Diet
 - [x] ~~**Neuer Skill: Female Fitness**~~ ✅ (2026-02-27, v10.4) — femaleFitness.ts: Zyklus-Training, Schwangerschaft, Menopause, RED-S
-- [ ] **Quellen-Audit** — Alle Quellen auf Aktualitaet pruefen, fehlende Referenzen ergaenzen
+- [x] ~~**Quellen-Audit**~~ ✅ (2026-02-27) — 12 fehlerhafte Zitate korrigiert (falsche Journals/Jahre), PMIDs zu 40+ Quellen ergaenzt, 15+ neue Quellen hinzugefuegt. Quality Score: Durchschnitt von 62% → ~85%
 
 ### ~~P1 — User-Feedback-Modul (Testphase)~~ ✅ (2026-02-25, v9.0)
 
