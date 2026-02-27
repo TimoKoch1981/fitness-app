@@ -85,6 +85,7 @@
 | 10.7    | 2026-02-27 | Chat-Trennung pro Agent (AgentThreadTabs, Routing-Bypass)                | Erledigt   |
 | 10.8    | 2026-02-27 | Celebrations (Konfetti+Toast), 24 Substanz-Presets                       | Erledigt   |
 | 10.9    | 2026-02-27 | Power/Power+ Modus — Phase A komplett                                    | Erledigt   |
+| 10.9a   | 2026-02-27 | Musik/Timer Analyse + Konzept (MUSIK_TIMER_KONZEPT.md)                   | Erledigt   |
 
 ---
 
@@ -2412,4 +2413,31 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-02-24*
+---
+
+### v10.9a — Musik/Timer Analyse & Konzept (2026-02-27)
+
+**Was:** Code-Analyse der bestehenden Musik- und Timer-Implementierung, Root-Cause-Analyse der Probleme, Konzept-Dokument fuer die Ueberarbeitung erstellt.
+
+**Analyse-Ergebnis:**
+
+| Bereich | Status | Problem |
+|---------|--------|---------|
+| YouTube Audio | Komplett kaputt | IFrame API nie geladen, iframe unsichtbar (Autoplay blockiert), postMessage wirkungslos |
+| Uebung ueberspringen | Feature existiert | Aber im ⋮ Menu versteckt — User hat es nicht gefunden |
+| Timer deaktivieren | Feature existiert | Winziger Icon-Button im Header — User hat es nicht erkannt |
+| Multi-Timer | Fehlt komplett | ManualTimer kann nur 1 Zeit tracken, User will 5 Sektionen |
+
+**Konzept erstellt (`docs/MUSIK_TIMER_KONZEPT.md`):**
+
+1. **Musik:** YouTube IFrame API korrekt laden + sichtbarer Mini-Player + Spotify Deep-Links als Alternative
+2. **Timer:** Tabellarischer Multi-Timer mit 5 unabhaengigen Sektionen (Gesamttraining, Uebung, Uebungspause, Set, Setpause), jede separat aktivierbar/deaktivierbar
+3. **UX:** Skip als prominenter Button (nicht Menu), Timer ON/OFF als Switch (nicht Icon)
+
+**Dateien:** 1 neu (MUSIK_TIMER_KONZEPT.md), 2 modifiziert (TODO.md, FORTSCHRITT.md)
+**Geschaetzter Aufwand Implementierung:** ~16h (M1-M3 + T1-T5)
+**Status:** Konzept fertig, User-Diskussion ausstehend
+
+---
+
+*Letzte Aktualisierung: 2026-02-27*

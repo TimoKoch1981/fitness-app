@@ -180,17 +180,48 @@
   - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
 
 ### P1 — UX-Ueberarbeitung Workout-Session ⚠️
+> Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
+> Analyse: 2026-02-27, Status: Konzept fertig, User-Diskussion ausstehend
 
-#### Musik & Timer im Trainer-Modus ueberarbeiten (User-Feedback: "ist so Mist")
-- [ ] **Musik-Integration ueberarbeiten** — Aktuelle YouTube-Einbettung ist unbefriedigend, Konzept neu diskutieren
-  - Alternativen: Native Audio-Player, Spotify-Connect, lokale Playlists?
-  - Floating-Player UX verbessern
-  - Aktuelle Impl: WorkoutMusicPlayer (YouTube-Einbettung), 4 kuratierte Playlists
-- [ ] **Timer im Trainer-Modus ueberarbeiten** — Aktuelle Implementierung muss verbessert werden
-  - RestTimer, ManualTimer, ExerciseTimer Interaktion pruefen
-  - UX-Flow Pause → Timer → naechste Uebung optimieren
-  - Audio-Feedback bei Timer-Ablauf
-  - Aktuelle Impl: ExerciseTimer, ManualTimer, RestTimer, suggestRestTimes
+#### Musik-Integration komplett ueberarbeiten
+- [ ] **M1: YouTube IFrame API fixen** — Sound reparieren (aktuell kein Audio!)
+  - YouTube IFrame Player API korrekt laden (`new YT.Player()`)
+  - Problem: iframe unsichtbar (`w-0 h-0 opacity-0`) → Browser blockt Autoplay
+  - Problem: `postMessage()` ohne geladene API → Mute/Unmute wirkungslos
+  - Loesung: Sichtbarer Mini-Player mit Thumbnail + Titel
+- [ ] **M2: Sichtbarer Mini-Player** — Floating Player am unteren Rand
+  - Play/Pause/Skip/Lautstaerke als echte YT.Player API-Calls
+  - Error-Handling: Fallback-Meldung wenn Playback fehlschlaegt
+  - Autoplay nur nach User-Interaktion (Playlist-Klick)
+- [ ] **M3: Spotify Deep-Links** — "In Spotify oeffnen" als Alternative
+  - Kuratierte Spotify-Playlists parallel zu YouTube
+  - Deep-Links (`spotify:playlist:...`) oeffnen Spotify-App direkt
+  - Kein SDK/OAuth noetig, kein Premium noetig
+
+#### Timer komplett ueberarbeiten — Tabellarischer Multi-Timer
+- [ ] **T1: useWorkoutTimers Hook** — 5 unabhaengige Timer-States
+  - Gesamttraining (Countdown/Stopwatch, default 60min)
+  - Aktuelle Uebung (Countdown/Stopwatch, default 5min)
+  - Pause zwischen Uebungen (Countdown, default 2min)
+  - Aktuelles Set (Countdown/Stopwatch, default 45s)
+  - Pause zwischen Sets (Countdown, default suggestRestTime())
+  - Jede Sektion separat aktivierbar/deaktivierbar
+- [ ] **T2: WorkoutTimerPanel UI** — Grosse tabellarische Uhr
+  - Tabelle: Checkbox | Sektion | Soll-Zeit (editierbar) | Ist-Zeit (laufend)
+  - Prominente Buttons: START, PAUSE, RESET, SKIP
+  - Global ON/OFF Switch (deutlich sichtbar, nicht kleiner Icon-Button)
+- [ ] **T3: ActiveWorkoutContext umbauen** — Phase-System erweitern
+  - Von 3-Phasen (warmup/exercise/rest) zu Sektions-basiert
+  - Optional: Auto-Advance zwischen Phasen (zuschaltbar)
+- [ ] **T4: Skip + Timer-Toggle UX** — Prominente Bedienelemente
+  - Skip-Button als grosser Button in der Button-Leiste (nicht im ⋮ Menu!)
+  - Timer ON/OFF als Switch mit Label (nicht nur Icon)
+  - Vibration + Sound bei Timer-Ablauf (konfigurierbar)
+- [ ] **T5: Alte Timer entfernen + Tests** — Migration
+  - RestTimer.tsx → ersetzt durch TimerSectionRow #5
+  - ManualTimer.tsx → ersetzt durch WorkoutTimerPanel
+  - ExerciseTimer.tsx → ersetzt durch TimerSectionRow #2/#4
+  - Neue Tests fuer useWorkoutTimers + WorkoutTimerPanel
 
 ### P2 — Power/Power+ Modus
 > **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)
@@ -350,4 +381,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27 (v10.9 — Power/Power+ Trainingsmodus Phase A komplett)*
+*Letzte Aktualisierung: 2026-02-27 (v10.9 — Musik/Timer-Konzept dokumentiert, User-Diskussion ausstehend)*
