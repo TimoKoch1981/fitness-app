@@ -276,6 +276,24 @@
 - [ ] OAuth / Social Login (Google, Apple) — alle Provider in config.toml disabled
 - [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
 
+#### Bodybuilder-Modus (Explizit)
+- [ ] **Dedizierter Bodybuilding-Modus mit 2 Profilen:**
+  - **Profi (Natural)** — Wettkampf-Bodybuilding OHNE Doping (WNBF/GNBF-konform)
+    - Natuerliche Supplementierung (Kreatin, Whey, etc.)
+    - Periodisierung: Aufbau → Diaet → Peak Week → Show Day
+    - Posing-Tracking, Wettkampf-Kalender
+  - **Amateur (Enhanced)** — Freizeit-Bodybuilding MIT Substanzen
+    - Volle Substanz-Integration (Stacks, Zyklen, Blutbild-Korrelation)
+    - Risikobewertung, PCT-Planung, Gesundheits-Monitoring
+  - **Gemeinsame Features:**
+    - Koerperpartien-Split (Schwachstellen-Analyse)
+    - Posing-Fotos (Vergleich ueber Zeit)
+    - Wettkampf-Countdown / Prep-Tracker
+    - Makro-Cycling (Refeed-Tage, Carb-Loading)
+    - Deload-Wochen, Volumen-Tracking
+  - **Einstellung im Profil:** Modus-Auswahl beeinflusst KI-Empfehlungen + Skills
+  - **Substanzen-Agent Anpassung:** Reagiert unterschiedlich je nach Modus
+
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
 #### Phase 8.2+: Cloud-Push
