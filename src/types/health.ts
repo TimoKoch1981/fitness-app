@@ -236,6 +236,9 @@ export interface ReminderLog {
 // === USER PROFILE ===
 export type Gender = 'male' | 'female' | 'other';
 export type BMRFormula = 'mifflin' | 'katch' | 'auto';
+export type TrainingMode = 'standard' | 'power' | 'power_plus';
+export type TrainingPhase = 'bulk' | 'cut' | 'maintenance' | 'peak_week' | 'reverse_diet' | 'off_season';
+export type CycleStatus = 'natural' | 'blast' | 'cruise' | 'pct' | 'off';
 
 export type PrimaryGoal = 'muscle_gain' | 'fat_loss' | 'health' | 'performance' | 'body_recomp';
 
@@ -263,8 +266,56 @@ export interface UserProfile {
   avatar_url?: string;
   is_admin?: boolean;
   disclaimer_accepted_at?: string;
+  // Training Mode (Power/Power+)
+  training_mode?: TrainingMode;
+  show_date?: string;
+  show_federation?: string;
+  current_phase?: TrainingPhase;
+  cycle_status?: CycleStatus;
+  cycle_start_date?: string;
+  cycle_planned_weeks?: number;
+  power_plus_accepted_at?: string;
   created_at: string;
   updated_at: string;
+}
+
+// === BLOOD WORK (Power+ Modus) ===
+export interface BloodWork {
+  id: string;
+  user_id: string;
+  date: string;
+  // Hormone
+  testosterone_total?: number;   // ng/dL
+  testosterone_free?: number;    // pg/mL
+  estradiol?: number;            // pg/mL
+  lh?: number;                   // mIU/mL
+  fsh?: number;                  // mIU/mL
+  shbg?: number;                 // nmol/L
+  prolactin?: number;            // ng/mL
+  // Blutbild
+  hematocrit?: number;           // %
+  hemoglobin?: number;           // g/dL
+  // Lipide
+  hdl?: number;                  // mg/dL
+  ldl?: number;                  // mg/dL
+  triglycerides?: number;        // mg/dL
+  total_cholesterol?: number;    // mg/dL
+  // Leber
+  ast?: number;                  // U/L (GOT)
+  alt?: number;                  // U/L (GPT)
+  ggt?: number;                  // U/L
+  // Niere
+  creatinine?: number;           // mg/dL
+  egfr?: number;                 // mL/min/1.73m2
+  // Schilddruese
+  tsh?: number;                  // mIU/L
+  // Sonstige
+  psa?: number;                  // ng/mL
+  hba1c?: number;                // %
+  vitamin_d?: number;            // ng/mL
+  ferritin?: number;             // ng/mL
+  notes?: string;
+  created_at: string;
 }
 
 // === AI USAGE LOG ===

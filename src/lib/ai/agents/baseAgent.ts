@@ -12,7 +12,8 @@
 
 import type { AgentConfig, AgentContext, AgentResult } from './types';
 import type { ChatMessage, StreamCallback } from '../types';
-import { getSkillContent, getSkillsForAgent, getSkillVersionMap } from '../skills/index';
+import { getSkillContent, getSkillsForAgent, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
+import type { TrainingMode } from '../../../types/health';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
 import { getOnboardingPrompt } from './onboardingPrompt';
@@ -32,10 +33,11 @@ export abstract class BaseAgent {
 
   /**
    * Build the complete system prompt from skills.
-   * Order: Facts Codex → Role Header → Static Knowledge → User Context → Agent Instructions
+   * Order: Facts Codex → Role Header → Training Mode Context → Static Knowledge → User Context → Agent Instructions
    */
   protected buildSystemPrompt(context: AgentContext): string {
     const parts: string[] = [];
+    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
     // 0. Global Facts Codex (applies to ALL agents — facts > estimates)
     parts.push(this.getFactsCodex(context.language));
@@ -43,8 +45,12 @@ export abstract class BaseAgent {
     // 1. Agent identity / role header (defined by subclass)
     parts.push(this.buildRoleHeader(context.language));
 
-    // 2. Static knowledge-base skills (versioned, domain-specific)
-    for (const skillId of this.config.staticSkills) {
+    // 1.5 Training mode context (tells agent which mode the user is in)
+    parts.push(this.getTrainingModeContext(trainingMode, context.language));
+
+    // 2. Static knowledge-base skills (versioned, domain-specific, mode-aware)
+    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    for (const skillId of skillIds) {
       parts.push(getSkillContent(skillId));
     }
 
@@ -55,8 +61,8 @@ export abstract class BaseAgent {
       parts.push(userSkillContent);
     }
 
-    // 4. Agent-specific instructions (optional override by subclass)
-    const instructions = this.getAgentInstructions(context.language);
+    // 4. Agent-specific instructions (optional override by subclass, mode-aware)
+    const instructions = this.getAgentInstructions(context.language, trainingMode);
     if (instructions) {
       parts.push(instructions);
     }
@@ -191,11 +197,63 @@ When the user makes progress or achieves milestones:
 - Keep it brief but genuine — don't overdo it, stay authentic`;
   }
 
+  /**
+   * Inject training mode context so agents know which mode the user is in.
+   * This influences tone, content depth, and feature visibility.
+   */
+  protected getTrainingModeContext(mode: TrainingMode, language: 'de' | 'en'): string {
+    if (language === 'de') {
+      const modeLabels: Record<TrainingMode, string> = {
+        standard: 'Standard (allgemeines Fitness-Tracking)',
+        power: 'Power (Natural Bodybuilding, Wettkampf, Periodisierung)',
+        power_plus: 'Power+ (Enhanced Training, Substanz-Monitoring, Blutbild, Zyklen)',
+      };
+      let ctx = `## TRAININGSMODUS: ${modeLabels[mode]}\n`;
+      if (mode === 'standard') {
+        ctx += `Der Nutzer ist im Standard-Modus. Fokus auf allgemeines Fitness-Tracking.\n`;
+        ctx += `- Bei PED/Anabolika-Fragen: Sachliche Harm-Reduction-Info geben, aber KEINE Zyklus-Empfehlungen oder Dosierungsprotokolle.\n`;
+        ctx += `- Hinweis: "Für detaillierte Substanz-Beratung kannst du den Power+ Modus in deinem Profil aktivieren."`;
+      } else if (mode === 'power') {
+        ctx += `Der Nutzer ist Natural Bodybuilder (Power-Modus). Wettkampf, Periodisierung, Peak Week sind relevant.\n`;
+        ctx += `- KEINE PED-Empfehlungen oder Zyklus-Details. Der Nutzer trainiert natural.\n`;
+        ctx += `- Bei PED-Fragen: Sachliche Harm-Reduction-Info, aber klar: "Du bist im Natural-Modus."`;
+      } else {
+        ctx += `Der Nutzer ist im Power+ Modus (Enhanced Training). VOLLE Substanz-Beratung aktiviert.\n`;
+        ctx += `- Zyklus-Empfehlungen, Dosierungen, Wechselwirkungen ERLAUBT und erwünscht.\n`;
+        ctx += `- Immer mit Disclaimer: Keine medizinische Beratung, Blutbild-Monitoring PFLICHT.\n`;
+        ctx += `- Phasen-bewusst beraten: Blast/Cruise/PCT/Off beeinflusst Ernährung + Training.`;
+      }
+      return ctx;
+    }
+    // English
+    const modeLabels: Record<TrainingMode, string> = {
+      standard: 'Standard (general fitness tracking)',
+      power: 'Power (natural bodybuilding, competition, periodization)',
+      power_plus: 'Power+ (enhanced training, substance monitoring, blood work, cycles)',
+    };
+    let ctx = `## TRAINING MODE: ${modeLabels[mode]}\n`;
+    if (mode === 'standard') {
+      ctx += `User is in Standard mode. Focus on general fitness tracking.\n`;
+      ctx += `- For PED/anabolic questions: Provide factual harm-reduction info, but NO cycle recommendations or dosage protocols.\n`;
+      ctx += `- Note: "For detailed substance guidance, you can enable Power+ mode in your profile."`;
+    } else if (mode === 'power') {
+      ctx += `User is a natural bodybuilder (Power mode). Competition, periodization, peak week are relevant.\n`;
+      ctx += `- NO PED recommendations or cycle details. The user trains natural.\n`;
+      ctx += `- For PED questions: Factual harm-reduction info, but clear: "You're in Natural mode."`;
+    } else {
+      ctx += `User is in Power+ mode (Enhanced Training). FULL substance consultation enabled.\n`;
+      ctx += `- Cycle recommendations, dosages, interactions ALLOWED and expected.\n`;
+      ctx += `- Always with disclaimer: Not medical advice, blood work monitoring MANDATORY.\n`;
+      ctx += `- Phase-aware advice: Blast/Cruise/PCT/Off affects nutrition + training.`;
+    }
+    return ctx;
+  }
+
   /** Override in subclass: define the agent's role and personality */
   protected abstract buildRoleHeader(language: 'de' | 'en'): string;
 
   /** Override in subclass (optional): add extra agent-specific instructions */
-  protected getAgentInstructions(_language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(_language: 'de' | 'en', _trainingMode?: TrainingMode): string | null {
     return null;
   }
 
@@ -226,6 +284,7 @@ When the user makes progress or achieves milestones:
    */
   async execute(context: AgentContext): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
+    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
     // Assemble messages: system prompt + last 8 conversation messages
     const messages: ChatMessage[] = [
@@ -236,9 +295,9 @@ When the user makes progress or achieves milestones:
     const provider = getAIProvider();
     const response = await provider.chat(messages);
 
-    // Build version map for transparency
-    const skillMap = getSkillsForAgent(this.config.type);
-    const versions = getSkillVersionMap(skillMap.staticSkills);
+    // Build version map for transparency (mode-aware skill list)
+    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    const versions = getSkillVersionMap(skillIds);
 
     return {
       content: response.content,
@@ -260,8 +319,9 @@ When the user makes progress or achieves milestones:
     onChunk: StreamCallback,
   ): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
+    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
-    console.log(`[Agent:${this.config.type}] Prompt: ${systemPrompt.length} chars (~${Math.round(systemPrompt.length / 4)} tokens)`);
+    console.log(`[Agent:${this.config.type}] Prompt: ${systemPrompt.length} chars (~${Math.round(systemPrompt.length / 4)} tokens), mode: ${trainingMode}`);
 
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -271,8 +331,8 @@ When the user makes progress or achieves milestones:
     const provider = getAIProvider();
     const response = await provider.chatStream(messages, onChunk);
 
-    const skillMap = getSkillsForAgent(this.config.type);
-    const versions = getSkillVersionMap(skillMap.staticSkills);
+    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    const versions = getSkillVersionMap(skillIds);
 
     return {
       content: response.content,

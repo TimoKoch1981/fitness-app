@@ -710,6 +710,56 @@ export const de = {
     importError: 'Plan konnte nicht geladen werden.',
     scanOrShare: 'Scanne den QR-Code oder teile den Link',
   },
+
+  // === TRAINING MODE (Power / Power+) ===
+  trainingMode: {
+    title: 'Trainingsmodus',
+    subtitle: 'Personalisierte Empfehlungen fuer deinen Trainingsansatz',
+    active: 'Aktiv',
+    standardDesc: 'Allgemeines Fitness-Tracking fuer jeden Trainingsstand',
+    powerDesc: 'Natural Bodybuilding — Wettkampf, Periodisierung, Peak Week',
+    powerPlusDesc: 'Enhanced Training — Substanz-Monitoring, Blutbild, Zyklen',
+    hint: 'Der Modus beeinflusst KI-Empfehlungen und sichtbare Features. Jederzeit aenderbar.',
+    disclaimerText1: 'Dieser Modus aktiviert erweiterte Features fuer Substanz-Monitoring, Blutbild-Analyse und Zyklus-Tracking.',
+    disclaimerText2: 'FitBuddy ist KEINE medizinische Beratung. Alle Informationen dienen der Schadensminimierung und ersetzen keinen Arzt.',
+    disclaimerText3: 'Substanz-Empfehlungen, Dosierungen und Zyklen sind rein informativ — Entscheidungen liegen in deiner Verantwortung.',
+    disclaimerCheckbox: 'Ich verstehe, dass FitBuddy keine medizinische Beratung ist und Substanz-Entscheidungen in meiner Verantwortung liegen.',
+    activate: 'Aktivieren',
+    // Phase labels
+    bulk: 'Aufbau',
+    cut: 'Diaet',
+    maintenance: 'Erhaltung',
+    peakWeek: 'Peak Week',
+    reverseDiet: 'Reverse Diet',
+    offSeason: 'Off-Season',
+    // Cycle labels
+    blast: 'Blast',
+    cruise: 'Cruise',
+    pct: 'PCT',
+    natural: 'Natural',
+    off: 'Off',
+    // Blood work
+    bloodWork: 'Blutbild',
+    addBloodWork: 'Blutbild eintragen',
+    bloodWorkHistory: 'Blutbild-Verlauf',
+    hormones: 'Hormone',
+    lipids: 'Lipide',
+    liver: 'Leber',
+    kidney: 'Niere',
+    thyroid: 'Schilddruese',
+    hematocritWarning: 'Haematokrit erhoht — bitte Arzt konsultieren',
+    hematocritCritical: 'Haematokrit kritisch — sofort Arzt aufsuchen',
+    // Cycle tracker
+    cycleWeek: 'Woche',
+    cycleOf: 'von',
+    nextBloodWork: 'Naechstes Blutbild',
+    daysRemaining: 'Tage verbleibend',
+    // Competition
+    showDate: 'Show-Datum',
+    showFederation: 'Verband',
+    daysToShow: 'Tage bis zur Show',
+    currentPhase: 'Aktuelle Phase',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

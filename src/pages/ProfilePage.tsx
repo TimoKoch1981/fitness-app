@@ -15,7 +15,8 @@ import type { RecommendedGoals } from '../lib/calculations';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { PAL_FACTORS } from '../lib/constants';
 import { DisclaimerModal as DisclaimerModalView } from '../shared/components/DisclaimerModal';
-import type { Gender, BMRFormula, PrimaryGoal } from '../types/health';
+import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
+import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -553,6 +554,27 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Training Mode Selector (Standard / Power / Power+) */}
+        <TrainingModeSelector
+          value={(profile?.training_mode as TrainingMode) ?? 'standard'}
+          onChange={async (mode: TrainingMode) => {
+            try {
+              await updateProfile.mutateAsync({ training_mode: mode });
+              showSaveStatus('saved');
+            } catch {
+              showSaveStatus('error');
+            }
+          }}
+          powerPlusAccepted={!!profile?.power_plus_accepted_at}
+          onAcceptPowerPlus={async () => {
+            try {
+              await updateProfile.mutateAsync({ power_plus_accepted_at: new Date().toISOString() });
+            } catch {
+              showSaveStatus('error');
+            }
+          }}
+        />
 
         {/* Equipment / Gerätepark */}
         <div className="bg-white rounded-xl p-4 shadow-sm">

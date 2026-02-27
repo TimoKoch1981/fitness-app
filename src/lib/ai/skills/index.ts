@@ -8,11 +8,12 @@
 
 import type { SkillId, VersionedSkill, SkillMeta } from './types';
 import type { AgentType } from '../agents/types';
+import type { TrainingMode } from '../../../types/health';
 import type { UserSkillType } from './userSkills';
 import { NUTRITION_SKILL, NUTRITION_SKILL_META } from './nutrition';
 import { TRAINING_SKILL, TRAINING_SKILL_META } from './training';
 import { SUBSTANCE_SKILL, SUBSTANCE_SKILL_META } from './substances';
-import { ANABOLICS_SKILL, ANABOLICS_SKILL_META } from './anabolics';
+import { ANABOLICS_SKILL, ANABOLICS_SKILL_META, ANABOLICS_POWERPLUS_SKILL, ANABOLICS_POWERPLUS_SKILL_META } from './anabolics';
 import { ANALYSIS_SKILL, ANALYSIS_SKILL_META } from './analysis';
 import { BEAUTY_SKILL, BEAUTY_SKILL_META } from './beauty';
 import { ATTRACTIVENESS_SKILL, ATTRACTIVENESS_SKILL_META } from './attractiveness';
@@ -40,6 +41,7 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   pct: { meta: PCT_SKILL_META, content: PCT_SKILL },
   competition: { meta: COMPETITION_SKILL_META, content: COMPETITION_SKILL },
   femaleFitness: { meta: FEMALE_FITNESS_SKILL_META, content: FEMALE_FITNESS_SKILL },
+  anabolics_powerplus: { meta: ANABOLICS_POWERPLUS_SKILL_META, content: ANABOLICS_POWERPLUS_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -90,6 +92,27 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   },
 };
 
+// ── Mode-Specific Skill Extensions ─────────────────────────────────────
+// Skills that are only loaded for certain training modes.
+// Key: base skill ID that triggers the extension.
+// Value: { skillId to add, required mode(s) }.
+
+interface ModeSkillExtension {
+  skillId: SkillId;
+  modes: TrainingMode[];
+}
+
+const MODE_SKILL_EXTENSIONS: Record<string, ModeSkillExtension[]> = {
+  // Power+ users get the full cycle/dosage/interaction tables
+  anabolics: [
+    { skillId: 'anabolics_powerplus', modes: ['power_plus'] },
+  ],
+  // Power & Power+ users get competition skill on training agent
+  training: [
+    { skillId: 'competition', modes: ['power', 'power_plus'] },
+  ],
+};
+
 // ── Public API ──────────────────────────────────────────────────────────
 
 /** Get a versioned skill by ID */
@@ -115,6 +138,28 @@ export function getAllSkills(): VersionedSkill[] {
 /** Get the skill mapping for a specific agent type */
 export function getSkillsForAgent(agentType: AgentType): AgentSkillMap {
   return AGENT_SKILL_MAP[agentType];
+}
+
+/**
+ * Get the static skill IDs for an agent, extended with mode-specific skills.
+ * E.g. substance agent in power_plus mode also gets 'anabolics_powerplus'.
+ */
+export function getSkillIdsForMode(agentType: AgentType, trainingMode: TrainingMode): SkillId[] {
+  const base = AGENT_SKILL_MAP[agentType].staticSkills;
+  const extended = [...base];
+
+  for (const baseSkillId of base) {
+    const extensions = MODE_SKILL_EXTENSIONS[baseSkillId];
+    if (extensions) {
+      for (const ext of extensions) {
+        if (ext.modes.includes(trainingMode) && !extended.includes(ext.skillId)) {
+          extended.push(ext.skillId);
+        }
+      }
+    }
+  }
+
+  return extended;
 }
 
 /**

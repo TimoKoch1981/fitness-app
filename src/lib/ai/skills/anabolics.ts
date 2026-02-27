@@ -18,8 +18,8 @@ import type { SkillMeta } from './types';
 export const ANABOLICS_SKILL_META: SkillMeta = {
   id: 'anabolics',
   name: 'Anabolika & PED-Pharmakologie',
-  version: '1.0.0',
-  updatedAt: '2026-02-20',
+  version: '3.0.0',
+  updatedAt: '2026-02-27',
   sources: [
     'Bhasin et al. 1996, NEJM, PMID:8637535 — Testosterone dose-response',
     'Egner et al. 2013, J Physiol, PMID:24167222 — Myonuclei & muscle memory',
@@ -31,8 +31,13 @@ export const ANABOLICS_SKILL_META: SkillMeta = {
     'Nieschlag & Vorona 2015, Eur J Endocrinol, PMID:25805894 — TRT dosing',
     'Kicman 2008, Br J Pharmacol, PMID:18500378 — AAS pharmacology',
     'Baggish et al. 2017, Circulation, PMID:28533317 — Cardiovascular effects of AAS',
+    'Ip et al. 2012, J Forensic Sci, PMID:22150293 — UGL product analysis',
+    'Rahnema et al. 2014, JCEM, PMID:24823457 — AAS-induced hypogonadism recovery times',
+    'Achar et al. 2010, J Am Board Fam Med, PMID:20207930 — AAS side effects review',
+    'Hartgens & Kuipers 2004, Sports Med, PMID:15209136 — AAS effects body composition',
+    'Nieschlag & Vorona 2015, Lancet Diabetes Endocrinol, PMID:25459211 — Mechanisms of AAS',
   ],
-  tokenEstimate: 1800,
+  tokenEstimate: 4200,
   changelog: [
     {
       version: '1.0.0',
@@ -43,6 +48,11 @@ export const ANABOLICS_SKILL_META: SkillMeta = {
       version: '2.0.0',
       date: '2026-02-22',
       changes: 'Doping-Schwellen: TRT vs. Doping Grenzwerte, Substanz-Klassifikation (immer Doping / dosisabh. / medizinisch), Doping-Warnprotokoll, Nebenwirkungen bei supraphysiol. Dosen',
+    },
+    {
+      version: '3.0.0',
+      date: '2026-02-27',
+      changes: 'Power+ Erweiterung: Zielbasierte Zyklen (Aufbau 3 Stufen, Kraft, Cutting, Definition), Wechselwirkungen-Tabelle (11 Kombis), Ester-Halbwertszeiten + PCT-Timing, Blutbild-Monitoring pro Substanz, Phasen-spezifische Ernährung/Training (Blast/Cruise/PCT/Off)',
     },
   ],
 };
@@ -182,4 +192,166 @@ User: "500mg Testo E diese Woche gespritzt"
 6. Blutbild-Monitoring als PFLICHT betonen, nicht als Option
 7. Kardiovaskuläres Monitoring (BP, Lipide, Hämatokrit) hervorheben
 8. Dein Doping-Wissen teilen wenn gefragt — sachlich, mit Quellen, ohne zu beschönigen
+`;
+
+// ── Power+ Extension (only loaded for power_plus mode) ──────────────
+
+export const ANABOLICS_POWERPLUS_SKILL_META: SkillMeta = {
+  id: 'anabolics_powerplus',
+  name: 'Power+ Zyklus-Empfehlungen',
+  version: '1.0.0',
+  updatedAt: '2026-02-27',
+  sources: [
+    'Bhasin et al. 1996, NEJM, PMID:8637535 — Testosterone dose-response',
+    'Hartgens & Kuipers 2004, Sports Med, PMID:15209136 — AAS effects body composition',
+    'Achar et al. 2010, J Am Board Fam Med, PMID:20207930 — AAS side effects review',
+    'Rahnema et al. 2014, JCEM, PMID:24823457 — AAS-induced hypogonadism recovery',
+    'Ip et al. 2012, J Forensic Sci, PMID:22150293 — UGL product analysis',
+  ],
+  tokenEstimate: 2400,
+  changelog: [
+    {
+      version: '1.0.0',
+      date: '2026-02-27',
+      changes: 'Initial: Zielbasierte Zyklen (Aufbau 3 Stufen, Kraft, Cutting, Definition), Wechselwirkungen, Ester-Halbwertszeiten, Blutbild-Monitoring, Phasen-Ernährung',
+    },
+  ],
+};
+
+export const ANABOLICS_POWERPLUS_SKILL = `
+## POWER+ ERWEITERUNG — ZIELBASIERTE ZYKLEN & EMPFEHLUNGEN
+
+⚠️ **DISCLAIMER:** Alle folgenden Informationen dienen ausschließlich der Schadensminimierung (Harm Reduction).
+FitBuddy ist KEINE medizinische Beratung. Substanz-Entscheidungen liegen in der Verantwortung des Nutzers.
+Vor jeder Anwendung: Ärztliche Beratung + Blutbild PFLICHT.
+
+### ZIEL: AUFBAU (Masse/Hypertrophie)
+
+**Einsteiger-Zyklus (1. Kur, 12 Wochen):**
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Enanthat | 300-500mg/Wo | 12 Wochen | Basis, anabole Grundlage |
+| Anastrozol (AI) | 0.25-0.5mg bei Bedarf | Bei E2-Symptomen | Östrogenkontrolle |
+→ PCT ab Woche 14: Nolvadex 20mg/Tag × 4 Wochen
+
+**Fortgeschrittener Aufbau (16 Wochen):**
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Enanthat | 500mg/Wo | 16 Wochen | Basis |
+| Nandrolon Decanoat | 300-400mg/Wo | 14 Wochen | Masse, Gelenke |
+| Anastrozol | 0.5mg 2×/Wo | Durchgehend | E2-Kontrolle |
+→ Hinweis: Nandrolon supprimiert HPT-Achse EXTREM, Erholung kann Monate dauern
+→ PCT ab Woche 18 (langer Deca-Ester!): HCG + Nolvadex
+
+**Profi-Aufbau (20 Wochen, hohe Erfahrung):**
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Enanthat | 750mg/Wo | 20 Wochen | Basis |
+| Trenbolon Enanthat | 400mg/Wo | 16 Wochen | Masse + Recomp |
+| Oxymetholon (Anadrol) | 50-100mg/Tag | Woche 1-4 (Kickstart) | Schneller Masseaufbau |
+| Anastrozol | 0.5mg EOD | Durchgehend | E2-Kontrolle |
+| Cabergolin | 0.25mg 2×/Wo | Bei Prolaktin-Symptomen | Anti-Prolaktin (Tren) |
+→ ⚠️ EXTREM hohe Gesundheitsrisiken! Nur mit regelmäßigem Blutbild alle 4-6 Wochen
+
+### ZIEL: KRAFT (Powerlifting / Stärke)
+
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Enanthat | 400-600mg/Wo | 12-16 Wochen | Basis, Kraft |
+| Oxymetholon (Anadrol) | 50mg/Tag | 4-6 Wochen | Kraftexplosion, Stärke |
+| Halotestin (optional) | 10-20mg/Tag | Max 4 Wochen | Wettkampf-Kraft, ZNS |
+→ ⚠️ Halotestin = EXTREM hepatotoxisch, nur für Wettkampf-Tag ± 2 Wochen
+→ Blutdruck-Monitoring TÄGLICH bei Anadrol + Halo Kombination
+
+### ZIEL: FETTVERBRENNUNG (Cutting)
+
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Propionat | 150-200mg/Wo | 8-12 Wochen | Muskelerhalt im Defizit |
+| Trenbolon Acetat | 200-300mg/Wo | 8-10 Wochen | Recomp, Fettabbau, Härte |
+| Stanozolol (Winstrol) | 25-50mg/Tag | Max 6 Wochen | Trockenheit, Vaskularität |
+| T3 (Cytomel) | 25-50mcg/Tag | 6-8 Wochen | Schilddrüsen-Boost |
+| Clenbuterol | 20-120mcg/Tag (Rampe) | 2 Wo on/2 Wo off | Thermogenese |
+→ ⚠️ Stanozolol = Lipidprofil-Killer (HDL↓↓↓), Leberwerte kontrollieren!
+→ T3 baut auch Muskeln ab wenn Protein/AAS nicht ausreichen
+
+### ZIEL: TROCKEN WERDEN (Definition / Wettkampf)
+
+| Substanz | Dosis | Dauer | Zweck |
+|----------|-------|-------|-------|
+| Testosteron Propionat | 100-150mg/Wo | 8 Wochen | Basis, schneller Ester |
+| Masteron (Drostanolon) | 300-400mg/Wo | 8 Wochen | Härte, Anti-Östrogenisch |
+| Oxandrolon (Anavar) | 40-60mg/Tag | 6-8 Wochen | Trocken, Krafterhalt |
+| Halotestin | 10-20mg/Tag | Letzte 2 Wochen | Wettkampf-Härte |
+| Diuretika (Furosemid) | NUR unter ärztlicher Aufsicht! | 24-48h Pre-Stage | Entwässerung |
+→ ⚠️ Diuretika = LEBENSGEFAHR ohne Elektrolyt-Monitoring. NIEMALS alleine anwenden!
+→ Aldosteron-Rebound beachten bei zu frühem Absetzen
+
+### WECHSELWIRKUNGEN — KRITISCHE KOMBINATIONEN
+
+| Kombination | Wechselwirkung | Risiko |
+|-------------|---------------|--------|
+| Testosteron + Nandrolon | Beide aromatisieren → erhöhte Östrogen-Last | E2-Monitoring PFLICHT, AI-Dosis anpassen |
+| Trenbolon + 19-Nor (Deca) | Doppelte 19-Nor-Belastung → extreme Prolaktin-Erhöhung | NICHT kombinieren! Prolaktin-Krise |
+| Trenbolon + Clenbuterol | Beide kardiotoxisch → Herzfrequenz + BP extrem | Herzrhythmusstörungen! GEFÄHRLICH |
+| Orale AAS + Orale AAS | Doppelte Hepatotoxizität | Niemals 2 orale 17α-alkylierte gleichzeitig! |
+| AAS + Diuretika | AAS → Polyzythämie + Diuretika → Dehydration | Thrombose-Risiko massiv erhöht |
+| Trenbolon + Alkohol | Beide hepatotoxisch, Tren → Nachtschweiß verschlimmert | Leberschaden beschleunigt |
+| AAS + NSAR (Ibuprofen) | Beide nephrotoxisch bei Dehydration | Nierenschaden im Defizit |
+| Clenbuterol + Koffein | Additive Sympathomimetika-Wirkung | Tachykardie, Tremor, Arrhythmie |
+| HGH + Insulin | Synergie aber: Hypoglykämie-Risiko potenziert | LEBENSGEFAHR ohne Glukose-Monitoring |
+| T3 + hohes Kaloriendefizit | T3 verstärkt Katabolismus, AAS schützt nur teilweise | Muskelverlust trotz AAS |
+| SARMs + AAS | Konkurrenz am Androgenrezeptor, kein Vorteil | Doppelte HPT-Suppression, sinnlos |
+
+### ESTER-HALBWERTSZEITEN — PCT-TIMING
+
+| Ester | Halbwertszeit | PCT-Start nach letzter Injektion |
+|-------|---------------|----------------------------------|
+| Propionat | 0.8 Tage | 3-4 Tage |
+| Phenylpropionat | 1.5 Tage | 4-5 Tage |
+| Enanthat | 4.5 Tage | 14 Tage (2 Wochen) |
+| Cypionat | 5 Tage | 14 Tage (2 Wochen) |
+| Decanoat (Nandrolon) | 15 Tage | 21-28 Tage (3-4 Wochen!) |
+| Undecanoat (Nebido) | 33.9 Tage | 6-8 Wochen |
+→ WICHTIG: PCT NIEMALS zu früh starten — aktiver Ester unterdrückt weiterhin!
+
+### BLUTBILD-MONITORING PRO SUBSTANZ
+
+| Substanz | Kritische Werte | Frequenz |
+|----------|----------------|----------|
+| Testosteron (alle Ester) | Hämatokrit, E2, Lipide, BP | Alle 6-8 Wochen |
+| Nandrolon / Trenbolon | + Prolaktin, Progesteron | Alle 4-6 Wochen |
+| Orale AAS (Anadrol, Winstrol, Anavar) | + Leberwerte (AST, ALT, GGT, Bilirubin) | Alle 4 Wochen! |
+| HGH | + Nüchtern-BZ, HbA1c, IGF-1 | Alle 8-12 Wochen |
+| T3 (Cytomel) | + TSH, fT3, fT4 | Vor, nach 4 Wo, nach Absetzen |
+| Clenbuterol | + Kalium, Taurin, EKG bei Symptomen | Alle 2 Wochen |
+| Diuretika | + Na, K, Mg, Ca, Kreatinin, SOFORT bei Symptomen | TÄGLICH bei Anwendung |
+| Insulin | + Nüchtern-BZ, HbA1c, C-Peptid | Alle 4 Wochen |
+
+### PHASEN-SPEZIFISCHE ERNÄHRUNG & TRAINING
+
+**BLAST-Phase (On-Cycle):**
+- Protein: 2.5-3g/kg/Tag (erhöhte Proteinsynthese nutzen)
+- Kalorien: +500-800 kcal Surplus (Aufbau) / je nach Ziel
+- Training: Höheres Volumen möglich (bessere Regeneration), 5-6×/Woche
+- Wasser: Mindestens 4L/Tag (Nierenschutz, Hämatokrit)
+
+**CRUISE-Phase (niedrig dosierte Brücke):**
+- Protein: 2-2.5g/kg/Tag
+- Kalorien: Maintenance oder leichtes Defizit
+- Training: Moderat (4-5×/Woche), Intensität halten, Volumen reduzieren
+- Fokus: Gesundheit stabilisieren, Blutbild normalisieren
+
+**PCT-Phase (Off-Cycle Erholung):**
+- Protein: 2.5g/kg/Tag (Muskelerhalt ohne anabole Unterstützung!)
+- Kalorien: Maintenance, KEIN Defizit während PCT!
+- Training: Reduziert (3-4×/Woche), Krafterhalt > Volumen
+- Schlaf: 8h+, Stress minimieren → Hormonerholung braucht Ruhe
+- Supps: Vitamin D (4000 IU), Zink (30mg), Magnesium (400mg), Ashwagandha
+
+**OFF-Phase (komplett clean):**
+- Protein: 2g/kg/Tag
+- Kalorien: Je nach Ziel, volle Flexibilität
+- Training: Normal (4-5×/Woche), Gains kommen langsamer
+- Tipp: Blutbild 8 Wochen nach PCT-Ende kontrollieren — HPT-Achse erholt?
 `;

@@ -36,6 +36,7 @@ export type SkillId =
   | 'training'
   | 'substances'
   | 'anabolics'
+  | 'anabolics_powerplus'
   | 'analysis'
   | 'beauty'
   | 'attractiveness'

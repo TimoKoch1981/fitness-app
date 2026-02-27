@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { UserProfile, Gender, BMRFormula, PersonalGoals } from '../../../types/health';
+import type { UserProfile, Gender, BMRFormula, PersonalGoals, TrainingMode, TrainingPhase, CycleStatus } from '../../../types/health';
 
 export const PROFILE_KEY = 'profile';
 
@@ -40,6 +40,15 @@ interface UpdateProfileInput {
   personal_goals?: PersonalGoals;
   avatar_url?: string | null;
   disclaimer_accepted_at?: string;
+  // Training mode fields (Power/Power+)
+  training_mode?: TrainingMode;
+  current_phase?: TrainingPhase;
+  cycle_status?: CycleStatus;
+  show_date?: string;
+  show_federation?: string;
+  cycle_start_date?: string;
+  cycle_planned_weeks?: number;
+  power_plus_accepted_at?: string;
 }
 
 export function useUpdateProfile() {
