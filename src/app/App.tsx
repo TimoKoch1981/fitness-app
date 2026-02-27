@@ -16,7 +16,6 @@ import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { BuddyPage } from '../pages/BuddyPage';
 import { CockpitPage } from '../pages/CockpitPage';
-import { TrackingPage } from '../pages/TrackingPage';
 import { NutritionPage } from '../pages/NutritionPage';
 import { TrainingPage } from '../pages/TrainingPage';
 import { MedicalPage } from '../pages/MedicalPage';

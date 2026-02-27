@@ -15,7 +15,7 @@ import { useState, useRef, useCallback } from 'react';
 import { Camera, Upload, X, Loader2, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddBodyMeasurement } from '../hooks/useBodyMeasurements';
-import { analyzeScaleScreenshot, fileToBase64 } from '../../../lib/ai/vision';
+import { analyzeScaleScreenshot, compressImage } from '../../../lib/ai/vision';
 import type { ScaleAnalysisResult } from '../../../lib/ai/vision';
 import { today } from '../../../lib/utils';
 
@@ -69,10 +69,10 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
     setStep('analyzing');
 
     try {
-      const base64 = await fileToBase64(file);
+      const { base64, mimeType } = await compressImage(file);
       const analysisResult = await analyzeScaleScreenshot(
         base64,
-        file.type || 'image/jpeg',
+        mimeType,
         language as 'de' | 'en',
       );
 

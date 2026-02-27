@@ -7,7 +7,7 @@
 import { useState, useRef, useCallback } from 'react';
 import {
   Music, X, ChevronUp, ChevronDown,
-  Play, Pause, SkipForward, Volume2, VolumeX,
+  Play, Pause, Volume2, VolumeX,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';

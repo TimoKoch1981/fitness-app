@@ -188,7 +188,7 @@ export async function proxyCompletionRequest(
       stream: false,
       ...(options.response_format ? { response_format: options.response_format } : {}),
     }),
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!response.ok) {

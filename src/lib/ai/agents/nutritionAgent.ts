@@ -15,10 +15,10 @@ const CONFIG: AgentConfig = {
   name: 'Ernährungs-Agent',
   nameEN: 'Nutrition Agent',
   icon: '🍽️',
-  staticSkills: ['nutrition'],
+  staticSkills: ['nutrition', 'supplements'],
   userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'known_products'],
-  maxContextTokens: 6000,
-  description: 'Spezialist für Ernährung, Nährwerte, Mahlzeitenplanung und Nahrungsergänzung',
+  maxContextTokens: 12000,
+  description: 'Spezialist für Ernährung, Nährwerte, Mahlzeitenplanung, Supplements und Nahrungsergänzung',
 };
 
 export class NutritionAgent extends BaseAgent {

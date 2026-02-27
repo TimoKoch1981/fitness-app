@@ -37,7 +37,13 @@ const OPENAI_BASE_URL = 'https://api.openai.com/v1';
 const VISION_MODEL = 'gpt-4o-mini';
 
 /** Timeout for vision API calls (images take longer to process) */
-const VISION_TIMEOUT_MS = 30_000;
+const VISION_TIMEOUT_MS = 45_000;
+
+/** Max image dimension (px) for compression — 1280px is enough for scale screenshots */
+const MAX_IMAGE_DIMENSION = 1280;
+
+/** JPEG quality for compression (0-1) */
+const JPEG_QUALITY = 0.85;
 
 /**
  * Analyze a scale screenshot and extract body measurements.
@@ -151,20 +157,73 @@ export async function analyzeScaleScreenshot(
 }
 
 /**
- * Convert a File object to base64 string.
- * Returns the base64 string WITHOUT the data:... prefix.
+ * Convert a File object to a compressed base64 string.
+ * Resizes large images to MAX_IMAGE_DIMENSION and compresses as JPEG.
+ * Returns { base64, mimeType } — base64 WITHOUT the data:... prefix.
  */
-export function fileToBase64(file: File): Promise<string> {
+export async function fileToBase64(file: File): Promise<string> {
+  // Compress the image first to avoid sending huge payloads
+  const compressed = await compressImage(file);
+  return compressed.base64;
+}
+
+/**
+ * Compress and resize an image File.
+ * Returns the compressed base64 string and the resulting MIME type (always image/jpeg).
+ *
+ * - Resizes to max 1280px on longest side (preserves aspect ratio)
+ * - Compresses to JPEG 85% quality
+ * - Typical result: 5-12MB phone photo → 100-400KB JPEG
+ */
+export async function compressImage(file: File): Promise<{ base64: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove "data:image/jpeg;base64," prefix
-      const base64 = result.split(',')[1];
-      resolve(base64);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      let { width, height } = img;
+
+      // Scale down if needed (preserve aspect ratio)
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      // Draw to canvas for compression
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas context not available'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Export as JPEG with quality setting
+      const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+      const base64 = dataUrl.split(',')[1];
+
+      resolve({ base64, mimeType: 'image/jpeg' });
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      // Fallback: read original file without compression
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1];
+        resolve({ base64, mimeType: file.type || 'image/jpeg' });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    };
+
+    img.src = url;
   });
 }
 

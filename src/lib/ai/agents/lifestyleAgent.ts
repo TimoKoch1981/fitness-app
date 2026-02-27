@@ -20,7 +20,7 @@ const CONFIG: AgentConfig = {
   icon: '🌟',
   staticSkills: ['attractiveness'],
   userSkills: ['profile', 'body_progress'],
-  maxContextTokens: 3500,
+  maxContextTokens: 8000,
   description: 'Spezialist für Attraktivität, Wirkung, Psychologie, Selbstbild und Lifestyle-Optimierung',
 };
 

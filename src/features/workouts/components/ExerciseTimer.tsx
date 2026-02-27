@@ -19,7 +19,7 @@ interface ExerciseTimerProps {
   onSkip: () => void;
 }
 
-export function ExerciseTimer({ durationSeconds, exerciseName, onComplete, onSkip }: ExerciseTimerProps) {
+export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, onComplete, onSkip }: ExerciseTimerProps) {
   const { t } = useTranslation();
   const [remaining, setRemaining] = useState(durationSeconds);
   const [isRunning, setIsRunning] = useState(false);

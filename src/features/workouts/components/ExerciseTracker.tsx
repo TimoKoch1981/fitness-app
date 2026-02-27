@@ -56,7 +56,7 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   // AI rest time suggestion
   const restSuggestion = useMemo(() => suggestRestTime({
     exerciseName: exercise.name,
-    repsTarget: exercise.sets[0]?.target_reps,
+    repsTarget: exercise.sets[0]?.target_reps ? Number(exercise.sets[0].target_reps) : undefined,
     durationSeconds: exercise.duration_minutes ? exercise.duration_minutes * 60 : undefined,
     isTimedExercise: exercise.exercise_type === 'flexibility' ||
       (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg),

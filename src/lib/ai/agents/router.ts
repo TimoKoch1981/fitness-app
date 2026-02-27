@@ -141,9 +141,14 @@ const ROUTING_RULES: KeywordRule[] = [
       // Supplements (routed to substance agent for add_substance)
       'kreatin', 'creatine', 'supplement', 'supplements',
       'nahrungsergänzung', 'nahrungsergänzungsmittel',
+      // PED intent detection (catch phrases like "was kann ich nehmen")
+      'nehmen', 'verbotenes', 'verboten', 'kur', 'stack',
+      'schnell muskeln', 'schneller muskelaufbau', 'was nehmen',
+      'dopen', 'doping', 'enhancement', 'leistungssteigerung',
       // English
       'injection', 'needle', 'dose', 'blood pressure', 'blood work',
       'remind', 'reminder', 'creatine', 'supplement',
+      'take something', 'what can i take', 'performance enhancing',
     ],
   },
 

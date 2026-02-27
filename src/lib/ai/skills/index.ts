@@ -17,6 +17,11 @@ import { ANALYSIS_SKILL, ANALYSIS_SKILL_META } from './analysis';
 import { BEAUTY_SKILL, BEAUTY_SKILL_META } from './beauty';
 import { ATTRACTIVENESS_SKILL, ATTRACTIVENESS_SKILL_META } from './attractiveness';
 import { MEDICAL_SKILL, MEDICAL_SKILL_META } from './medical';
+import { SLEEP_SKILL, SLEEP_SKILL_META } from './sleep';
+import { SUPPLEMENTS_SKILL, SUPPLEMENTS_SKILL_META } from './supplements';
+import { PCT_SKILL, PCT_SKILL_META } from './pct';
+import { COMPETITION_SKILL, COMPETITION_SKILL_META } from './competition';
+import { FEMALE_FITNESS_SKILL, FEMALE_FITNESS_SKILL_META } from './femaleFitness';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -30,6 +35,11 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   beauty: { meta: BEAUTY_SKILL_META, content: BEAUTY_SKILL },
   attractiveness: { meta: ATTRACTIVENESS_SKILL_META, content: ATTRACTIVENESS_SKILL },
   medical: { meta: MEDICAL_SKILL_META, content: MEDICAL_SKILL },
+  sleep: { meta: SLEEP_SKILL_META, content: SLEEP_SKILL },
+  supplements: { meta: SUPPLEMENTS_SKILL_META, content: SUPPLEMENTS_SKILL },
+  pct: { meta: PCT_SKILL_META, content: PCT_SKILL },
+  competition: { meta: COMPETITION_SKILL_META, content: COMPETITION_SKILL },
+  femaleFitness: { meta: FEMALE_FITNESS_SKILL_META, content: FEMALE_FITNESS_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -42,18 +52,20 @@ interface AgentSkillMap {
 /**
  * Defines which skills each agent loads.
  * Agents only get the knowledge they need → token-efficient.
+ *
+ * v2.0.0: Extended with 5 new skills (sleep, supplements, pct, competition, femaleFitness)
  */
 const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   nutrition: {
-    staticSkills: ['nutrition'],
+    staticSkills: ['nutrition', 'supplements'],
     userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
   },
   training: {
-    staticSkills: ['training'],
+    staticSkills: ['training', 'sleep', 'competition'],
     userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
   },
   substance: {
-    staticSkills: ['substances', 'anabolics'],
+    staticSkills: ['substances', 'anabolics', 'pct'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   analysis: {
@@ -69,7 +81,7 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical'],
+    staticSkills: ['medical', 'sleep', 'pct'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   general: {

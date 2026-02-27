@@ -20,7 +20,7 @@ const CONFIG: AgentConfig = {
   icon: '✨',
   staticSkills: ['beauty'],
   userSkills: ['profile', 'substance_protocol', 'body_progress'],
-  maxContextTokens: 4000,
+  maxContextTokens: 8000,
   description: 'Spezialist für ästhetische Eingriffe, Schönheits-OPs, Liposuktion und kosmetische Verfahren',
 };
 

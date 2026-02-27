@@ -21,10 +21,10 @@ const CONFIG: AgentConfig = {
   name: 'Medical-Agent',
   nameEN: 'Medical Agent',
   icon: '🏥',
-  staticSkills: ['medical'],
+  staticSkills: ['medical', 'sleep', 'pct'],
   userSkills: ['profile', 'substance_protocol', 'body_progress'],
-  maxContextTokens: 5000,
-  description: 'Expertenrat: Sportmedizin, Kardiologie, Endokrinologie, Ernährungsmedizin — evidenzbasiert, sachlich',
+  maxContextTokens: 10000,
+  description: 'Expertenrat: Sportmedizin, Kardiologie, Endokrinologie, Schlaf/Regeneration, PCT-Monitoring — evidenzbasiert, sachlich',
 };
 
 export class MedicalAgent extends BaseAgent {

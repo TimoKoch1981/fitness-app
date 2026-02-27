@@ -6,12 +6,13 @@ import { APP_NAME } from '../lib/constants';
 
 export function RegisterPage() {
   const { signUp, user, loading } = useAuth();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [autoLogging, setAutoLogging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
@@ -22,24 +23,45 @@ export function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwörter stimmen nicht überein');
+      setError(language === 'de' ? 'Passwörter stimmen nicht überein' : 'Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      setError('Passwort muss mindestens 6 Zeichen lang sein');
+      setError(language === 'de' ? 'Passwort muss mindestens 6 Zeichen lang sein' : 'Password must be at least 6 characters');
       return;
     }
 
     setSubmitting(true);
-    const { error } = await signUp(email, password);
+    const { error, autoConfirmed } = await signUp(email, password);
     if (error) {
       setError(error.message);
+    } else if (autoConfirmed) {
+      // AUTOCONFIRM active: user is already logged in, wait for redirect
+      setAutoLogging(true);
+      return; // Navigate to /buddy will trigger via AuthProvider
     } else {
       setSuccess(true);
     }
     setSubmitting(false);
   };
+
+  // Auto-login spinner while auth state propagates
+  if (autoLogging) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-md p-6 max-w-sm w-full text-center">
+          <div className="text-4xl mb-4">🎉</div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            {language === 'de' ? 'Willkommen bei FitBuddy!' : 'Welcome to FitBuddy!'}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {language === 'de' ? 'Du wirst gleich weitergeleitet...' : 'Redirecting...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -47,10 +69,15 @@ export function RegisterPage() {
         <div className="bg-white rounded-2xl shadow-md p-6 max-w-sm w-full text-center">
           <div className="text-4xl mb-4">✉️</div>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            Registrierung erfolgreich!
+            {language === 'de' ? 'Registrierung erfolgreich!' : 'Registration successful!'}
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Bitte überprüfe deine E-Mail und bestätige dein Konto.
+          <p className="text-sm text-gray-600 mb-1">
+            {language === 'de'
+              ? 'Bitte überprüfe deine E-Mail und bestätige dein Konto.'
+              : 'Please check your email and confirm your account.'}
+          </p>
+          <p className="text-sm font-medium text-teal-600 mb-4">
+            {email}
           </p>
           <Link
             to="/login"

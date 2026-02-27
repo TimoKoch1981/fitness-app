@@ -19,7 +19,7 @@ const CONFIG: AgentConfig = {
   icon: '📊',
   staticSkills: ['analysis'],
   userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
-  maxContextTokens: 4500,
+  maxContextTokens: 10000,
   description: 'Spezialist für Datenanalyse, Trend-Erkennung, Fortschrittsbewertung und Empfehlungen',
 };
 
