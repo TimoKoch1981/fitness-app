@@ -26,7 +26,11 @@
 - [x] ~~**Email-Templates anpassen**~~ ✅ (2026-02-21, v6.1)
 - [ ] **Resend Domain-Validierung** — fudda.de bei Resend verifizieren (fuer Produktion)
   - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
-  - Produktion: SMTP enabled, braucht verifizierte Domain bei Resend
+  - Produktion: AUTOCONFIRM=true als Workaround ✅ (2026-02-27)
+  - Registrierung funktioniert ohne Email-Bestaetigung ✅ (verifiziert 2026-02-27)
+  - **Naechster Schritt:** DNS von Strato zu Hetzner DNS umziehen (kostenlos)
+  - Dann: SPF, DKIM (3x CNAME), DMARC Records eintragen
+  - Dann: Resend Domain verifizieren + AUTOCONFIRM wieder auf false
   - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
   - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
@@ -105,18 +109,22 @@
 - [x] ~~**Fuzzy-Matching**~~ ✅ — findExerciseInCatalog (exakt → alias → partial → null), 14 Tests
 
 #### Wissensdateien (Skills) konzeptionell ueberarbeiten + fachlich erweitern
-> Aktuell: 8 statische Skills mit ~1.200 Zeilen Fachwissen. Inhaltlich funktional,
-> aber noch duenn — viele Themen nur angerissen, Tiefe fehlt.
+> ~~Aktuell: 8 statische Skills mit ~1.200 Zeilen Fachwissen.~~
+> **Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.
 > **Diskussionsbedarf:** Struktur, Quellen-Qualitaet, Fach-Tiefe, Token-Budget.
 
 - [ ] **Konzeptionelle Diskussion** — Wie tief sollen Skills sein? Token-Budget vs. Qualitaet. RAG-Alternative? Skill-Versioning-Strategie.
-- [ ] **Nutrition-Skill erweitern** — Mikronaehrstoffe, Meal-Timing, Sport-spezifische Ernaehrung, Nahrungsergaenzung, Diaet-Strategien (Cutting/Bulking), Alkohol-Impact, Hydration
+- [ ] **Nutrition-Skill erweitern** — Mikronaehrstoffe, Meal-Timing, Sport-spezifische Ernaehrung, Diaet-Strategien (Cutting/Bulking), Alkohol-Impact, Hydration
 - [ ] **Training-Skill erweitern** — Periodisierung (linear/undulierend/block), Deload-Wochen, RPE/RIR-Skala, Superkompensation, Aufwaermprogramme, Mobilitaet, Verletzungspraevention
-- [ ] **Substances-Skill erweitern** — PCT-Protokolle, Blutbild-Interpretation (detailliert), Wechselwirkungen, Halbwertszeit-Kurven, Ester-Vergleich, Nebenwirkungs-Management
+- [ ] **Substances-Skill erweitern** — Blutbild-Interpretation (detailliert), Wechselwirkungen, Halbwertszeit-Kurven, Ester-Vergleich, Nebenwirkungs-Management
 - [ ] **Analysis-Skill erweitern** — Plateau-Erkennung, Prognose-Modelle, Wochen-/Monats-Trends, Anomalie-Erkennung, Vergleich mit Referenzwerten
 - [ ] **Medical-Skill erweitern** — Laborwerte-Referenzbereiche (detailliert), Sport-Kardiologie, Hormonspiegel-Interpretation, Schilddruese, Leber/Niere-Marker
 - [ ] **Beauty/Lifestyle erweitern** — Mehr Studien-Referenzen, evidenzbasierte Empfehlungen, Timing-Tabellen
-- [ ] **Neuer Skill: Schlaf & Regeneration** — Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
+- [x] ~~**Neuer Skill: Schlaf & Regeneration**~~ ✅ (2026-02-27, v10.4) — sleep.ts: Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
+- [x] ~~**Neuer Skill: Supplements**~~ ✅ (2026-02-27, v10.4) — supplements.ts: 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen
+- [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
+- [x] ~~**Neuer Skill: Wettkampfvorbereitung**~~ ✅ (2026-02-27, v10.4) — competition.ts: Natural vs Enhanced, Peak Week, Reverse Diet
+- [x] ~~**Neuer Skill: Female Fitness**~~ ✅ (2026-02-27, v10.4) — femaleFitness.ts: Zyklus-Training, Schwangerschaft, Menopause, RED-S
 - [ ] **Quellen-Audit** — Alle Quellen auf Aktualitaet pruefen, fehlende Referenzen ergaenzen
 
 ### ~~P1 — User-Feedback-Modul (Testphase)~~ ✅ (2026-02-25, v9.0)
@@ -143,6 +151,26 @@
 - [x] ~~**Manuelle Timer pro Einheit**~~ ✅ (2026-02-26, v9.4) — ManualTimer (Stoppuhr + Countdown), pro Uebung startbar
 - [x] ~~**KI-Vorschlag fuer Zeiten**~~ ✅ (2026-02-26, v9.7) — suggestRestTimes Utility: Automatische Erkennung von Uebungstyp (Verbund/Isolation/Cardio/Flex/Isometrisch), Ziel aus Reps (Kraft/Hypertrophie/Ausdauer), Empfohlene-Pause-Badge in ExerciseTracker, KI-Preset fuer ManualTimer, 21 Tests
 - [x] ~~**Audio-Steuerung ueber Agent**~~ ✅ (2026-02-26, v9.8) — useWorkoutVoiceCommands Hook mit Regex-basiertem Command-Parser (DE+EN), WorkoutVoiceControl Floating-Mic-Button, TTS-Feedback via speechSynthesis, 35 Tests. Befehle: Naechste/Vorherige Uebung, Skip, Reps+Gewicht loggen, Timer starten/stoppen, Training beenden, Pause
+
+### P1 — Internationalisierung (i18n)
+
+#### Sprachen deutlich erweitern
+- [ ] **15+ neue Sprachen hinzufuegen** — Aktuell nur DE + EN. Geplant:
+  - Ukrainisch, Polnisch, Russisch, Rumaenisch
+  - Italienisch, Spanisch, Franzoesisch, Portugiesisch
+  - Arabisch, Tuerkisch, Marokkanisch, Persisch
+  - Chinesisch, Japanisch, Koreanisch
+  - Eigener i18n-Context muss erweitert werden (~300 Schluessel pro Sprache)
+
+### P1 — UX/Gamification
+
+#### Erfolgs-Lob fuer den Nutzer
+- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden
+  - Trainings-PRs (neues Maximalgewicht, mehr Reps)
+  - Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)
+  - Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)
+  - Kaloriendefizit eingehalten
+  - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
 
 ### P2 — Nice-to-Have
 
@@ -287,4 +315,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-26 (v10.3 — 4 Bugs gefixt, Supplement/PED-Listen geplant)*
+*Letzte Aktualisierung: 2026-02-27 (v10.4 — 5 neue Skills, Agent-Verbesserungen, Registrierung Autoconfirm)*

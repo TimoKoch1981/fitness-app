@@ -84,6 +84,50 @@
 
 ## Log
 
+### 2026-02-27 - v10.4: 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung
+
+**5 neue Wissensdateien (Skills v2.0):**
+| Skill | Zeilen | Inhalt |
+|-------|--------|--------|
+| sleep.ts | 141 | Schlafphasen, HRV, Melatonin, Overtraining, Schlafhygiene |
+| supplements.ts | 132 | 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen |
+| pct.ts | 127 | HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle |
+| competition.ts | 123 | Natural vs Enhanced Prep, Peak Week, Reverse Diet |
+| femaleFitness.ts | 167 | Zyklus-Training, Schwangerschaft, Menopause, RED-S |
+
+**Agent-Verbesserungen:**
+- baseAgent: Schaetzungs-Kennzeichnungspflicht, Substanz-Fragen nie verweigern, Erfolge loben
+- substanceAgent: +PCT-Skill, Token 6500→12000, verstaerkte Harm-Reduction-Prompts (DE+EN)
+- trainingAgent: +Sleep+Competition Skills, Token 4000→12000, Anti-Endlosschleife bei Planerstellung
+- nutritionAgent: +Supplements-Skill zugewiesen
+- medicalAgent: +Sleep+PCT Skills zugewiesen
+- router: 10+ neue PED/Doping Keywords fuer besseres Intent-Routing
+
+**Weitere Aenderungen:**
+- vision.ts: Bildkomprimierung (JPEG 85%, max 1280px, Fallback bei Fehler) — 5-12MB Handyfotos → 100-400KB
+- ScreenshotImport: compressImage statt fileToBase64 (Breaking-Change-sicher)
+- RegisterPage: Autoconfirm-Support — erkennt ob Session sofort da ist, zeigt Willkommens-Screen
+- AuthProvider: signUp gibt `autoConfirmed: boolean` zurueck
+- App.tsx: Unbenutzter TrackingPage-Import entfernt
+
+**Registrierungs-Fix (Production):**
+- GOTRUE_MAILER_AUTOCONFIRM=true war bereits auf Hetzner aktiviert
+- Registrierung getestet und verifiziert: User bekommt sofort access_token
+- RegisterPage Code erkennt autoConfirmed und leitet direkt weiter (kein "Pruefe Email" mehr)
+
+**DNS/Email-Status:**
+- Resend Domain fudda.de noch NICHT verifiziert (Strato kann DKIM-CNAMEs nicht)
+- Empfehlung: DNS zu Hetzner DNS umziehen (kostenlos, DSGVO, gleicher Anbieter)
+- Workaround (AUTOCONFIRM) funktioniert bis DNS steht
+
+**Zahlen:**
+- 25 Dateien geaendert, 957 Zeilen hinzugefuegt, 56 entfernt
+- Build: 2.409KB JS, 68KB CSS, 0 TS-Fehler
+- Tests: 2.095/2.095 gruen (46 Dateien)
+- Git: 74789b8 auf develop, gepusht
+
+---
+
 ### 2026-02-26 - v10.3: Bug-Fixes aus Deep-Test
 
 **4 Bugs gefixt, deployed und auf Production verifiziert:**
