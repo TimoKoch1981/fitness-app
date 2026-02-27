@@ -28,9 +28,16 @@
   - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
   - Produktion: AUTOCONFIRM=true als Workaround ✅ (2026-02-27)
   - Registrierung funktioniert ohne Email-Bestaetigung ✅ (verifiziert 2026-02-27)
-  - **Naechster Schritt:** DNS von Strato zu Hetzner DNS umziehen (kostenlos)
-  - Dann: SPF, DKIM (3x CNAME), DMARC Records eintragen
-  - Dann: Resend Domain verifizieren + AUTOCONFIRM wieder auf false
+  - ~~**DNS von Strato zu Hetzner DNS umziehen**~~ ✅ (2026-02-27)
+    - Hetzner DNS Zone erstellt (ID: 919094, Projekt: 13589003)
+    - Strato Nameserver umgestellt auf: hydrogen.ns.hetzner.com, oxygen.ns.hetzner.com, helium.ns.hetzner.de
+  - ~~**SPF, DKIM, MX Records eintragen**~~ ✅ (2026-02-27)
+    - TXT: resend._domainkey → DKIM Public Key
+    - TXT: send → v=spf1 include:amazonses.com ~all
+    - MX: send → 10 feedback-smtp.eu-west-1.amazonses.com. (Trailing Dot Fix)
+    - A: @ → 46.225.228.12, CNAME: www → fudda.de
+  - **Naechster Schritt:** DNS-Propagation abwarten (bis 24h nach NS-Umstellung)
+  - Dann: Resend Domain verifizieren (Restart klicken) + AUTOCONFIRM wieder auf false
   - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
   - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
@@ -225,7 +232,7 @@
 - [x] ~~deploy-frontend.sh auf fudda.de aktualisiert~~ ✅ (2026-02-25) — Default-Domain, Server-IP
 - [x] ~~Caddyfile: Cache-Header fuer index.html~~ ✅ (2026-02-25) — no-cache/no-store fuer HTML, immutable fuer Assets
 - [x] ~~Caddyfile: Permissions-Policy camera/microphone~~ ✅ (2026-02-25) — camera=(self), microphone=(self) statt Blockierung
-- [ ] Resend Domain-Validierung (fudda.de statt fitbuddy.app)
+- [ ] Resend Domain-Validierung (fudda.de — DNS umgezogen, wartet auf Propagation)
 - [x] ~~Monitoring aufsetzen (Error Tracking, Uptime)~~ ✅ (2026-02-26, v9.4) — monitor.sh (Docker, Disk, Memory, Service-Health)
 - [x] ~~Backup-Strategie fuer Supabase-DB (pg_dump Cronjob → Hetzner Storage Box)~~ ✅ (2026-02-26, v9.4) — backup-db.sh Script
 
@@ -315,4 +322,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27 (v10.4 — 5 neue Skills, Agent-Verbesserungen, Registrierung Autoconfirm)*
+*Letzte Aktualisierung: 2026-02-27 (v10.5 — DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records)*

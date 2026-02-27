@@ -79,10 +79,42 @@
 | 10.1    | 2026-02-26 | Production-Deploy v10.0 + Edge Functions Env + GoTrue SMTP              | Erledigt   |
 | 10.2    | 2026-02-26 | Deep-Test Production: 8 Features geprueft, 4 Bugs gefunden              | Erledigt   |
 | 10.3    | 2026-02-26 | 4 Bug-Fixes + Production-Deployment + Verifikation                       | Erledigt   |
+| 10.4    | 2026-02-27 | 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung    | Erledigt   |
+| 10.5    | 2026-02-27 | DNS-Infrastruktur: Hetzner DNS + Strato NS-Umstellung + Resend Records  | Erledigt   |
 
 ---
 
 ## Log
+
+### 2026-02-27 - v10.5: DNS-Infrastruktur fuer Email-Verifizierung
+
+**DNS-Umzug von Strato zu Hetzner DNS (autonom via Browser-Automation):**
+
+| Schritt | Status | Details |
+|---------|--------|---------|
+| Hetzner DNS Zone erstellen | ✅ | Zone 919094, Projekt 13589003 |
+| A-Record: @ → 46.225.228.12 | ✅ | Webserver erreichbar |
+| CNAME: www → fudda.de | ✅ | www-Subdomain |
+| TXT: resend._domainkey (DKIM) | ✅ | RSA Public Key fuer DKIM-Signierung |
+| TXT: send (SPF) | ✅ | v=spf1 include:amazonses.com ~all |
+| MX: send → feedback-smtp.eu-west-1.amazonses.com. | ✅ | Priority 10, Trailing-Dot Fix |
+| Strato NS → Hetzner | ✅ | hydrogen/oxygen/helium.ns.hetzner |
+| DNS-Propagation | ⏳ | Bis 24h, Google DNS zeigt noch Strato |
+| Resend Domain-Verifizierung | ⏳ | Wartet auf DNS-Propagation |
+
+**Technische Details:**
+- Hetzner DNS Zone ID: 919094 (Projekt: 13589003)
+- Resend Domain ID: 395dd33d-e3ba-4721-b04a-87b718bff886 (Region: eu-west-1)
+- MX-Record Trailing-Dot Fix: Ohne abschliessenden Punkt wurde Zone-Name angehaengt (feedback-smtp...com.fudda.de statt feedback-smtp...com)
+- Strato bleibt Domain-Registrar, nur NS-Delegation geaendert
+- Alle Records per nslookup gegen hydrogen.ns.hetzner.com verifiziert ✅
+
+**Naechste Schritte (nach DNS-Propagation):**
+1. Resend Domain verifizieren (SPF + DKIM + MX)
+2. GOTRUE_MAILER_AUTOCONFIRM=false setzen
+3. Email-Confirmation-Flow testen
+
+---
 
 ### 2026-02-27 - v10.4: 5 neue Skills, Agent-Verbesserungen, Bildkomprimierung, Registrierung
 
