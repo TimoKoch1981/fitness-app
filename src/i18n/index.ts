@@ -1,10 +1,36 @@
 import { createContext, useContext } from 'react';
 import { de, type TranslationKeys } from './de';
 import { en } from './en';
+import { tr } from './tr';
+import { uk } from './uk';
+import { pl } from './pl';
+import { ru } from './ru';
+import { ro } from './ro';
+import { es } from './es';
+import { fr } from './fr';
+import { it } from './it';
+import { pt } from './pt';
+import { ar } from './ar';
+import { zh } from './zh';
+import { ja } from './ja';
+import { ko } from './ko';
+import { fa } from './fa';
+import { fil } from './fil';
 
-export type Language = 'de' | 'en';
+export type Language =
+  | 'de' | 'en'
+  | 'tr' | 'uk' | 'pl' | 'ru' | 'ro'
+  | 'es' | 'fr' | 'it' | 'pt'
+  | 'ar' | 'zh' | 'ja' | 'ko'
+  | 'fa' | 'fil';
 
-const translations: Record<Language, TranslationKeys> = { de, en };
+const translations: Record<Language, TranslationKeys> = {
+  de, en,
+  tr, uk, pl, ru, ro,
+  es, fr, it, pt,
+  ar, zh, ja, ko,
+  fa, fil,
+};
 
 export interface I18nContextType {
   language: Language;
@@ -30,5 +56,26 @@ export function getTranslations(lang: Language): TranslationKeys {
   return translations[lang];
 }
 
-export { de, en };
+export { de, en, tr, uk, pl, ru, ro, es, fr, it, pt, ar, zh, ja, ko, fa, fil };
 export type { TranslationKeys };
+
+/** Display names for language selector UI */
+export const LANGUAGE_OPTIONS: { code: Language; label: string; flag: string }[] = [
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'pt', label: 'Português', flag: '🇵🇹' },
+  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
+  { code: 'ro', label: 'Română', flag: '🇷🇴' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'uk', label: 'Українська', flag: '🇺🇦' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { code: 'fa', label: 'فارسی', flag: '🇮🇷' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'ko', label: '한국어', flag: '🇰🇷' },
+  { code: 'fil', label: 'Filipino', flag: '🇵🇭' },
+];

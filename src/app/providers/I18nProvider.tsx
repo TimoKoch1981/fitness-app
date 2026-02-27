@@ -10,7 +10,12 @@ export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderP
   const [language, setLanguageState] = useState<Language>(() => {
     // Try to load from localStorage
     const saved = localStorage.getItem('fitbuddy-language');
-    if (saved === 'de' || saved === 'en') return saved;
+    // Validate saved language is a supported Language code
+    const validCodes: string[] = [
+      'de','en','tr','uk','pl','ru','ro',
+      'es','fr','it','pt','ar','zh','ja','ko','fa','fil',
+    ];
+    if (saved && validCodes.includes(saved)) return saved as Language;
     return defaultLanguage;
   });
 

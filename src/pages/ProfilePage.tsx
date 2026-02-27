@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
-import { useTranslation } from '../i18n';
+import { useTranslation, LANGUAGE_OPTIONS, type Language } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
@@ -187,28 +187,17 @@ export function ProfilePage() {
           <h3 className="font-semibold text-gray-900 mb-3">{t.profile.settings}</h3>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">{t.profile.language}</span>
-            <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
-              <button
-                onClick={() => setLanguage('de')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  language === 'de'
-                    ? 'bg-teal-500 text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {t.profile.german}
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  language === 'en'
-                    ? 'bg-teal-500 text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {t.profile.english}
-              </button>
-            </div>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt.code} value={opt.code}>
+                  {opt.flag} {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
