@@ -9,6 +9,7 @@
  */
 
 import { useMemo } from 'react';
+import type { AgentType } from '../../../lib/ai/agents/types';
 
 export interface BuddySuggestion {
   id: string;
@@ -18,6 +19,8 @@ export interface BuddySuggestion {
   message: string;
   /** Optional emoji icon prefix */
   icon?: string;
+  /** Target agent thread to open (bypasses keyword router) */
+  targetAgent?: AgentType;
 }
 
 export type PageId =
@@ -46,6 +49,7 @@ export function usePageBuddySuggestions(
               ? 'Wie sieht mein Tag heute aus? Bewerte meine Ern\u00e4hrung.'
               : 'How does my day look? Evaluate my nutrition.',
             icon: '\ud83d\udcca',
+            targetAgent: 'nutrition' as AgentType,
           },
           {
             id: 'meals_suggest',
@@ -54,6 +58,7 @@ export function usePageBuddySuggestions(
               ? 'Was kann ich jetzt noch essen, um meine Makros zu treffen?'
               : 'What should I eat to hit my macros?',
             icon: '\ud83c\udf7d\ufe0f',
+            targetAgent: 'nutrition' as AgentType,
           },
           {
             id: 'meals_protein',
@@ -62,6 +67,7 @@ export function usePageBuddySuggestions(
               ? 'Gib mir proteinreiche Mahlzeit-Ideen.'
               : 'Give me high-protein meal ideas.',
             icon: '\ud83d\udcaa',
+            targetAgent: 'nutrition' as AgentType,
           },
         ];
 
@@ -75,6 +81,7 @@ export function usePageBuddySuggestions(
               ? 'Ich habe gerade trainiert.'
               : 'I just worked out.',
             icon: '\ud83c\udfcb\ufe0f',
+            targetAgent: 'training' as AgentType,
           },
           {
             id: 'workout_advice',
@@ -83,6 +90,7 @@ export function usePageBuddySuggestions(
               ? 'Welche \u00dcbungen sind heute dran?'
               : 'Which exercises should I do today?',
             icon: '\ud83d\udca1',
+            targetAgent: 'training' as AgentType,
           },
         ];
 
@@ -96,6 +104,7 @@ export function usePageBuddySuggestions(
               ? 'Ich m\u00f6chte meinen Trainingsplan anpassen.'
               : 'I want to adjust my training plan.',
             icon: '\u270f\ufe0f',
+            targetAgent: 'training' as AgentType,
           },
           {
             id: 'plan_evaluate',
@@ -104,6 +113,7 @@ export function usePageBuddySuggestions(
               ? 'Wie gut ist mein aktueller Trainingsplan?'
               : 'How good is my current training plan?',
             icon: '\ud83d\udccb',
+            targetAgent: 'training' as AgentType,
           },
           {
             id: 'plan_create',
@@ -112,6 +122,7 @@ export function usePageBuddySuggestions(
               ? 'Erstell mir einen Trainingsplan.'
               : 'Create a training plan for me.',
             icon: '\ud83c\udd95',
+            targetAgent: 'training' as AgentType,
           },
         ];
 
@@ -125,6 +136,7 @@ export function usePageBuddySuggestions(
               ? 'Analysiere meine K\u00f6rperkomposition.'
               : 'Analyze my body composition.',
             icon: '\ud83d\udcca',
+            targetAgent: 'analysis' as AgentType,
           },
           {
             id: 'body_recomp',
@@ -133,6 +145,7 @@ export function usePageBuddySuggestions(
               ? 'Gib mir Tipps f\u00fcr Body Recomposition.'
               : 'Give me body recomposition tips.',
             icon: '\ud83d\udd04',
+            targetAgent: 'analysis' as AgentType,
           },
         ];
 
@@ -146,6 +159,7 @@ export function usePageBuddySuggestions(
               ? 'Analysiere meinen Blutdruck-Verlauf.'
               : 'Analyze my blood pressure trend.',
             icon: '\u2764\ufe0f',
+            targetAgent: 'medical' as AgentType,
           },
           {
             id: 'medical_substances',
@@ -154,6 +168,7 @@ export function usePageBuddySuggestions(
               ? '\u00dcberpr\u00fcfe meine Substanzen und deren Wechselwirkungen.'
               : 'Check my substances and their interactions.',
             icon: '\ud83d\udc8a',
+            targetAgent: 'substance' as AgentType,
           },
           {
             id: 'medical_health',
@@ -162,6 +177,7 @@ export function usePageBuddySuggestions(
               ? 'Gib mir einen Gesundheits-\u00dcberblick.'
               : 'Give me a health overview.',
             icon: '\ud83c\udfe5',
+            targetAgent: 'medical' as AgentType,
           },
         ];
 
@@ -175,6 +191,7 @@ export function usePageBuddySuggestions(
               ? 'Wie steht mein Tag heute?'
               : 'How is my day going?',
             icon: '\ud83d\udcca',
+            targetAgent: 'analysis' as AgentType,
           },
           {
             id: 'cockpit_week',
@@ -183,6 +200,7 @@ export function usePageBuddySuggestions(
               ? 'Analysiere meine letzte Woche.'
               : 'Analyze my last week.',
             icon: '\ud83d\udcc8',
+            targetAgent: 'analysis' as AgentType,
           },
           {
             id: 'cockpit_recommend',
@@ -191,6 +209,7 @@ export function usePageBuddySuggestions(
               ? 'Welche Empfehlungen hast du basierend auf meinen Trends?'
               : 'What recommendations do you have based on my trends?',
             icon: '\ud83d\udca1',
+            targetAgent: 'analysis' as AgentType,
           },
         ];
 

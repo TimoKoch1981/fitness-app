@@ -18,11 +18,12 @@
 import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
 import { routeAndExecuteStream } from '../../../lib/ai/agents/router';
+import { getAgent } from '../../../lib/ai/agents';
 import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
 import { useLogAiUsage } from '../../admin/hooks/useAiUsageLog';
 import { lookupProduct } from '../../../lib/ai/actions/productLookup';
-import type { AgentContext } from '../../../lib/ai/agents/types';
+import type { AgentContext, AgentType } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
 
@@ -53,7 +54,7 @@ interface UseBuddyChatOptions {
 
 export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions = {}) {
   // Messages live in BuddyChatProvider context (survives route changes + page refresh)
-  const { messages, setMessages, clearMessages } = useBuddyChatMessages();
+  const { messages, setMessages, clearMessages, activeThread, setActiveThread, threads } = useBuddyChatMessages();
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const logAiUsage = useLogAiUsage();
@@ -110,22 +111,36 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
         language,
       };
 
+      // Context with user message appended (needed for direct agent calls)
+      const fullContext: AgentContext = {
+        ...agentContext,
+        conversationHistory: [
+          ...agentContext.conversationHistory,
+          { role: 'user', content: userMessage.trim() },
+        ],
+      };
+
       // Track timing for usage logging
       const startTime = Date.now();
 
       // Route to the best agent and STREAM the response
-      const result = await routeAndExecuteStream(
-        userMessage.trim(),
-        agentContext,
-        // onChunk callback — update the message content in real-time
-        (partialContent: string) => {
-          setMessages(prev => prev.map(m =>
-            m.id === streamId
-              ? { ...m, content: partialContent, isLoading: false }
-              : m
-          ));
-        },
-      );
+      // If a specific agent thread is active (not 'general'), bypass the router
+      // and go directly to that agent. 'general' still uses auto-routing.
+      const onChunk = (partialContent: string) => {
+        setMessages(prev => prev.map(m =>
+          m.id === streamId
+            ? { ...m, content: partialContent, isLoading: false }
+            : m
+        ));
+      };
+
+      const result = activeThread !== 'general'
+        ? await getAgent(activeThread).executeStream(fullContext, onChunk)
+        : await routeAndExecuteStream(
+            userMessage.trim(),
+            agentContext,
+            onChunk,
+          );
 
       const durationMs = Date.now() - startTime;
 
@@ -344,5 +359,9 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
     addSystemMessage,
     checkConnection,
     providerName: provider.getName(),
+    // Thread management
+    activeThread,
+    setActiveThread,
+    threads,
   };
 }

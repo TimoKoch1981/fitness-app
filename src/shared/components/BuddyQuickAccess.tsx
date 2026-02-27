@@ -23,15 +23,15 @@ export function BuddyQuickAccess({ suggestions }: BuddyQuickAccessProps) {
 
   if (suggestions.length === 0) return null;
 
-  const goToBuddy = (autoMessage?: string) => {
-    openBuddyChat(autoMessage);
+  const goToBuddy = (suggestion?: BuddySuggestion) => {
+    openBuddyChat(suggestion?.message, suggestion?.targetAgent);
   };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-3 mb-4">
       {/* Header row — tapping opens buddy chat */}
       <button
-        onClick={() => goToBuddy()}
+        onClick={() => goToBuddy(undefined)}
         className="w-full flex items-center gap-2 mb-2 group"
       >
         <div className="w-6 h-6 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -48,7 +48,7 @@ export function BuddyQuickAccess({ suggestions }: BuddyQuickAccessProps) {
         {suggestions.map((s) => (
           <button
             key={s.id}
-            onClick={() => goToBuddy(s.message)}
+            onClick={() => goToBuddy(s)}
             className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 rounded-full border border-teal-200 hover:bg-teal-100 hover:border-teal-300 transition-colors whitespace-nowrap"
           >
             {s.icon && <span className="mr-1">{s.icon}</span>}

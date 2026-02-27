@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MessageCircle, Send, Trash2, Wifi, WifiOff, Mic, MicOff, Lightbulb } from 'lucide-react';
 import { useTranslation } from '../i18n';
@@ -6,6 +6,8 @@ import { useBuddyChat } from '../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../features/buddy/hooks/useActionExecutor';
 import { useVoiceInput } from '../features/buddy/hooks/useVoiceInput';
 import { ChatMessageBubble } from '../features/buddy/components/ChatMessage';
+import { AgentThreadTabs } from '../features/buddy/components/AgentThreadTabs';
+import { getAgentDisplayConfig } from '../lib/ai/agents/agentDisplayConfig';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { useOnboarding } from '../features/buddy/hooks/useOnboarding';
@@ -146,7 +148,13 @@ export function BuddyPage() {
     addSystemMessage,
     checkConnection,
     providerName,
+    activeThread,
+    setActiveThread,
+    threads,
   } = useBuddyChat({ context: healthContext, language });
+
+  // Active agent display config (icon, color, greeting)
+  const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
 
   // Wire sendMessage ref for voice auto-send
   sendMessageRef.current = sendMessage;
@@ -271,11 +279,13 @@ export function BuddyPage() {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center">
-              <MessageCircle className="h-4 w-4 text-white" />
+            <div className={`w-8 h-8 bg-gradient-to-br ${agentConfig.color} rounded-full flex items-center justify-center`}>
+              <span className="text-sm">{agentConfig.icon}</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">{t.buddy.title}</h1>
+              <h1 className="text-lg font-bold text-gray-900">
+                {language === 'de' ? agentConfig.name : agentConfig.nameEN}
+              </h1>
               <div className="flex items-center gap-1">
                 {isConnected === true ? (
                   <Wifi className="h-2.5 w-2.5 text-green-500" />
@@ -305,18 +315,28 @@ export function BuddyPage() {
             )}
           </div>
         </div>
+        {/* Agent Thread Tabs */}
+        <div className="max-w-lg mx-auto">
+          <AgentThreadTabs
+            activeThread={activeThread}
+            onSelectThread={setActiveThread}
+            threads={threads}
+          />
+        </div>
       </header>
 
       {/* Chat Area */}
       <div className="max-w-lg mx-auto px-4 py-4 pb-36">
-        {/* Greeting */}
+        {/* Per-Thread Greeting */}
         <div className="flex gap-3 mb-4">
-          <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
-            <span className="text-xs text-white font-bold">FB</span>
+          <div className={`w-8 h-8 bg-gradient-to-br ${agentConfig.color} rounded-full flex-shrink-0 flex items-center justify-center mt-1`}>
+            <span className="text-sm">{agentConfig.icon}</span>
           </div>
           <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%]">
             <p className="text-sm text-gray-700 leading-relaxed">
-              {needsOnboarding ? t.buddy.onboardingGreeting : t.buddy.greeting}
+              {needsOnboarding
+                ? t.buddy.onboardingGreeting
+                : language === 'de' ? agentConfig.greeting : agentConfig.greetingEN}
             </p>
           </div>
         </div>

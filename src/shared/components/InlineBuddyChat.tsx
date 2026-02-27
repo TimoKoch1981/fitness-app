@@ -8,15 +8,17 @@
  * so messages and actions are fully shared and persistent.
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, Send, X, Trash2, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
+import { Send, X, Trash2, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
 import { useTranslation } from '../../i18n';
 import { useInlineBuddyChat } from './InlineBuddyChatContext';
 import { useBuddyChat } from '../../features/buddy/hooks/useBuddyChat';
 import { useActionExecutor } from '../../features/buddy/hooks/useActionExecutor';
 import { useVoiceInput } from '../../features/buddy/hooks/useVoiceInput';
 import { ChatMessageBubble } from '../../features/buddy/components/ChatMessage';
+import { AgentThreadTabs } from '../../features/buddy/components/AgentThreadTabs';
+import { getAgentDisplayConfig } from '../../lib/ai/agents/agentDisplayConfig';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useProfile } from '../../features/auth/hooks/useProfile';
 import { useOnboarding } from '../../features/buddy/hooks/useOnboarding';
@@ -82,7 +84,7 @@ export function InlineBuddyChat() {
 function InlineBuddyChatContent() {
   const { t, language } = useTranslation();
   const { user } = useAuth();
-  const { autoMessage, closeBuddyChat, clearAutoMessage } = useInlineBuddyChat();
+  const { autoMessage, targetAgent, closeBuddyChat, clearAutoMessage } = useInlineBuddyChat();
 
   const [input, setInput] = useState('');
   const [voiceHint, setVoiceHint] = useState('');
@@ -139,7 +141,22 @@ function InlineBuddyChatContent() {
     clearAction,
     addSystemMessage,
     checkConnection,
+    activeThread,
+    setActiveThread,
+    threads,
   } = useBuddyChat({ context: healthContext, language });
+
+  // Active agent display config (icon, color, greeting)
+  const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
+
+  // Switch to target agent when inline chat opens with a specific agent
+  const targetAgentAppliedRef = useRef(false);
+  useEffect(() => {
+    if (targetAgent && !targetAgentAppliedRef.current) {
+      targetAgentAppliedRef.current = true;
+      setActiveThread(targetAgent);
+    }
+  }, [targetAgent, setActiveThread]);
 
   // ── Action Executor ─────────────────────────────────────────────────────
   const { executeAction } = useActionExecutor(user?.id);
@@ -289,10 +306,12 @@ function InlineBuddyChatContent() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 pb-2 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center">
-            <MessageCircle className="h-3 w-3 text-white" />
+          <div className={`w-6 h-6 bg-gradient-to-br ${agentConfig.color} rounded-full flex items-center justify-center`}>
+            <span className="text-xs">{agentConfig.icon}</span>
           </div>
-          <span className="text-sm font-bold text-gray-900">{t.buddy.title}</span>
+          <span className="text-sm font-bold text-gray-900">
+            {language === 'de' ? agentConfig.shortName : agentConfig.shortNameEN}
+          </span>
           {isConnected === true ? (
             <Wifi className="h-2.5 w-2.5 text-green-500" />
           ) : isConnected === false ? (
@@ -319,16 +338,26 @@ function InlineBuddyChatContent() {
         </div>
       </div>
 
+      {/* Agent Thread Tabs (compact) */}
+      <AgentThreadTabs
+        activeThread={activeThread}
+        onSelectThread={setActiveThread}
+        threads={threads}
+        compact
+      />
+
       {/* Chat Messages — scrollable area */}
       <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
-        {/* Greeting */}
+        {/* Per-Thread Greeting */}
         <div className="flex gap-2 mb-3">
-          <div className="w-7 h-7 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5">
-            <span className="text-[10px] text-white font-bold">FB</span>
+          <div className={`w-7 h-7 bg-gradient-to-br ${agentConfig.color} rounded-full flex-shrink-0 flex items-center justify-center mt-0.5`}>
+            <span className="text-xs">{agentConfig.icon}</span>
           </div>
           <div className="bg-gray-50 rounded-2xl rounded-tl-md p-3 shadow-sm max-w-[85%]">
             <p className="text-xs text-gray-700 leading-relaxed">
-              {needsOnboarding ? t.buddy.onboardingGreeting : t.buddy.greeting}
+              {needsOnboarding
+                ? t.buddy.onboardingGreeting
+                : language === 'de' ? agentConfig.greeting : agentConfig.greetingEN}
             </p>
           </div>
         </div>

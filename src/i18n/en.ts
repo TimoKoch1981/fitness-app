@@ -259,6 +259,8 @@ export const en: TranslationKeys = {
     voiceHint: 'Speak now... (e.g. "I had 200g chicken with rice")',
     send: 'Send',
     clearChat: 'Clear Chat',
+    clearThread: 'Clear this thread',
+    clearAllThreads: 'Clear all threads',
     connectionError: 'Failed to connect to AI model. Is Ollama running?',
     helpHint: 'Tip: Tell me what you ate or ask me about nutrition!',
     you: 'You',

@@ -260,6 +260,8 @@ export const de = {
     voiceHint: 'Sprich jetzt... (z.B. "Ich hatte 200g Hähnchen mit Reis")',
     send: 'Senden',
     clearChat: 'Chat leeren',
+    clearThread: 'Diesen Thread leeren',
+    clearAllThreads: 'Alle Threads leeren',
     connectionError: 'Verbindung zum KI-Modell fehlgeschlagen. Läuft Ollama?',
     helpHint: 'Tipp: Erzähl mir was du gegessen hast oder frag mich etwas über Ernährung!',
     you: 'Du',
