@@ -169,8 +169,19 @@
 > Quelle: 25-Persona-Testing (2026-02-28, v11.1). Sofortmassnahmen ✅ erledigt, restliche Findings hier.
 
 #### Onboarding & Erstnutzer-Erlebnis
-- [ ] **Onboarding-Wizard nach Registrierung** (~8h) — Gefuehrter 5-Schritt-Setup: Name → Alter/Groesse/Gewicht → Ziel → Erfahrung → Equipment → Fertig. Aktuell: Leere Seiten, nur gelber Banner "Profil ausfuellen". Betroffene Twins: A1-A5, E2
+- [ ] **Onboarding-Wizard nach Registrierung** (~8h) — Gefuehrter 5-Schritt-Setup: Name → Alter/Groesse/Geschlecht/Gewicht → Ziel → Erfahrung/Modus → Equipment → Fertig. Aktuell: Leere Seiten, nur gelber Banner "Profil ausfuellen". Betroffene Twins: A1-A5, E2
+  - WICHTIG: Geschlecht + Trainingsmodus muessen im Wizard abgefragt werden → steuert Feature-Sichtbarkeit (Zyklus-Tracker, Power+ Features etc.)
+  - Modus-Erklaerung: Standard ("Allgemein"), Power ("Wettkampf, Natural"), Power+ ("Enhanced, Substanzen") mit kurzem Disclaimer
 - [ ] **Cockpit: Keine Standard-Ziele ohne Profil** (~2h) — 2000 kcal / 150g Protein anzeigen obwohl Profil leer → irrefuehrend fuer Viktor (4000 kcal) und Karim (1800 kcal). Stattdessen: "Profil ausfuellen" CTA bis Daten vorhanden. Betroffene Twins: Alle ohne Profil
+
+#### Geschlechts- und Modus-basierte Feature-Sichtbarkeit
+- [ ] **Gender-basiertes Feature-Gating** (~4h) — Aktuell: Geschlecht NUR fuer BMR-Berechnung genutzt, KEINE UI-Sichtbarkeitssteuerung. Braucht: `useGenderFeatures()` Hook analog zu `useTrainingMode()` Hook.
+  - Frauen-Features (gender === 'female'): Menstruationszyklus-Tracker, Symptom-Tracker (Hitzewallungen), RED-S-Warnung, Stillzeit-Kalorienzuschlag, Rektusdiastase-Option
+  - Maenner-Features (gender === 'male'): Prostata-Marker (PSA bei >40), Testosteron-Referenzwerte maennlich
+  - Geschlecht 'other': Alle Features sichtbar, Nutzer waehlt selbst was relevant ist
+  - Pattern: Wie `useTrainingMode()` — returned Feature-Flags (`showCycleTracker`, `showProstataMarkers` etc.)
+  - Abhaengigkeit: Geschlecht muss im Profil gesetzt sein → Onboarding-Wizard fragen!
+- [ ] **Modus-Erklaerung im Onboarding verbessern** (~1h) — TrainingModeSelector existiert (3 Karten mit Icons), aber wird erst im Profil gezeigt. Muss frueher kommen (Onboarding Schritt 4). Erklaerungstext erweitern: Was bedeutet Power+? Wer braucht das? Was wird freigeschaltet?
 
 #### KI-Buddy Verbesserungen
 - [ ] **Profil-Daten an KI-Context uebergeben** (~3h) — Allergien, Ernaehrungsform, Gesundheitseinschraenkungen (seit v11.3 in DB) werden NICHT an Agents uebergeben. Buddy weiss nichts von Erdnussallergie, Vegetarismus, Rektusdiastase. SICHERHEITSRELEVANT! Betroffene: A4, A5, E2, E4
@@ -184,8 +195,11 @@
 - [ ] **🟡 Rektusdiastase-Kontraindikations-Check** (~3h) — KI-Trainingsplaene enthalten keine Kontraindikations-Warnungen. Lena (E4) koennte Crunches im Plan bekommen. Loesung: Gesundheits-Tags → Trainingsplan-Filter (keine Crunches bei Rektusdiastase, keine Deadlifts bei Bandscheibe). Betroffene: E4, A2
 
 #### Frauen-spezifische Features
-- [ ] **Menstruationszyklus-Tracker** (~10h) — Kein Zyklus-Tracking. Keine Korrelation Zyklus↔Leistung. Kein RED-S/FAT/Amenorrhoe-Warnsystem. Braucht: Phaseneingabe (Follikel/Luteal/Menstruation), Symptome, Leistungskorrelation-Graph. Betroffene: E1-E5, B2, C3, C5
-- [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Betroffene: E3, E5, C5
+> VORAUSSETZUNG: Gender-basiertes Feature-Gating (siehe oben). Features nur sichtbar wenn `gender === 'female'` oder `gender === 'other'`.
+
+- [ ] **Menstruationszyklus-Tracker** (~10h) — Kein Zyklus-Tracking. Keine Korrelation Zyklus↔Leistung. Kein RED-S/FAT/Amenorrhoe-Warnsystem. Braucht: Phaseneingabe (Follikel/Luteal/Menstruation), Symptome, Leistungskorrelation-Graph. Nur sichtbar bei gender=female/other. Betroffene: E1-E5, B2, C3, C5
+- [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Nur sichtbar bei gender=female/other. Betroffene: E3, E5, C5
+- [ ] **Stillzeit-Kalorienzuschlag** (~2h) — TDEE-Berechnung beruecksichtigt Stillen nicht (+300-500 kcal/Tag). Lena (E4) stillt noch. Braucht: Profil-Toggle "Stillend" → TDEE-Aufschlag. Nur bei gender=female. Betroffene: E4
 
 #### Medizin-Erweiterungen
 - [ ] **Blutbild/Laborwerte-Tracking** (~12h) — Nur Blutdruck wird getrackt. Keine Laborwerte (Testosteron, LH, FSH, Haematokrit, HDL, LDL, Leberwerte, PSA, IGF-1). Braucht: Vordefinierte Felder + Trends + Warnschwellen (Hkt>54%, HDL<25). Fuer Enhanced-User essentiell. Betroffene: D1-D5, C2, C5
