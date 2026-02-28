@@ -91,8 +91,36 @@
 | 11.2    | 2026-02-28 | Digital Twins: 25 Personas + Testing Report (10 UX-Issues, 5 Safety, 17 Feature-Requests) | Erledigt   |
 | 11.3    | 2026-02-28 | Twin-Testing Sofortmassnahmen: 5 Fixes (KI-Mahlzeit, Profil-Felder, Reminder, Disclaimer, Datum) | Erledigt   |
 | 11.4    | 2026-02-28 | Profil-Daten an KI-Context + Gender Feature-Gating Hook                  | Erledigt   |
+| 11.5    | 2026-02-28 | DSGVO-Komplett: Impressum, Datenschutz, Granulare Consents, Account-Löschung, Widerrufsrecht | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.5: DSGVO-Komplett (5 Rechtskonformitaets-Features)
+
+**E.1.2+E.1.1: Impressum + Datenschutzerklaerung:**
+- /impressum Route (§5 DDG): Anbieterinfo, Haftung, Urheberrecht, Medizin-Disclaimer
+- /datenschutz Route (Art. 13/14 DSGVO): 10 Abschnitte (Verantwortlicher, Art.9, KI, Hosting DE, Cookies, Drittdienste, Rechte)
+- Oeffentliche Seiten (kein Login noetig), Legal-Footer auf Login + Register
+- i18n: legal + privacy Keys in 17 Sprachen (88 Keys)
+
+**E.1.3: Granulare Einwilligungen:**
+- 3 separate Consents statt 1 Checkbox: Gesundheitsdaten (Art. 9), KI-Verarbeitung, Drittlandtransfer (Art. 49)
+- DB-Migration: consent_health_data_at, consent_ai_processing_at, consent_third_country_at
+- DisclaimerModal mit 4 Checkboxen, Links zu /datenschutz + /impressum
+- useDisclaimerCheck v2: Prueft alle 3 Consents
+
+**E.1.6: Account-Loeschung (Art. 17):**
+- DB-Funktion delete_user_account() (SECURITY DEFINER): CASCADE-Loeschung aller Daten
+- useDeleteAccount Hook + DeleteAccountDialog mit Bestaetigungswort
+- ProfilePage: "Account loeschen" Button
+
+**E.1.7: Widerrufsrecht (Art. 7 Abs. 3):**
+- PrivacySettings Komponente: 3 Consent-Karten mit Status-Anzeige
+- Jede Einwilligung einzeln widerrufbar mit Warnung
+- localStorage-Cache wird bei Widerruf geloescht → DisclaimerModal erneut
+
+Neue Dateien: ImpressumPage, DatenschutzPage, DeleteAccountDialog, useDeleteAccount, PrivacySettings, 2 DB-Migrationen
+Commits: a1d1d2f, b92e5c0, 025a5f7, 284aade
 
 ### 2026-02-28 - v11.4: Profil-Daten an KI-Context + Gender Feature-Gating
 

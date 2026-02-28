@@ -22,13 +22,13 @@
 > Analyse FERTIG. Umsetzung der identifizierten Massnahmen:
 
 **Phase 1 — Kritisch (vor kommerziellem Launch):**
-- [ ] **E.1.2: Impressum erstellen** (~1h) — Pflichtangaben auf fudda.de (Name, Anschrift, Kontakt, ggf. Register). Braucht: /impressum Route + statische Seite
-- [ ] **E.1.1: Datenschutzerklaerung erstellen** (~4-8h) — Vollstaendige DSGVO Art. 13/14 Erklaerung. 12 Pflichtabschnitte. EMPFEHLUNG: Anwalt konsultieren, dann als /datenschutz Route einbinden
-- [ ] **E.1.3: Einwilligung granularisieren** (~4-6h Code) — Aktuell: 1 Checkbox fuer alles. Braucht: Separate Einwilligungen fuer (1) Gesundheitsdaten, (2) KI-Verarbeitung, (3) Drittlandtransfer. DisclaimerModal erweitern.
+- [x] ~~**E.1.2: Impressum erstellen**~~ ✅ (2026-02-28, v11.4) — /impressum Route, §5 DDG Pflichtangaben, Haftung, Urheberrecht, Medizin-Disclaimer. 17 Sprachen. Commit: a1d1d2f
+- [x] ~~**E.1.1: Datenschutzerklaerung erstellen**~~ ✅ (2026-02-28, v11.4) — /datenschutz Route, 10 Abschnitte (Verantwortlicher, Art.9 Gesundheitsdaten, KI, Hosting DE, Cookies, Drittdienste, Betroffenenrechte). 17 Sprachen. HINWEIS: Anwalts-Pruefung empfohlen! Commit: a1d1d2f
+- [x] ~~**E.1.3: Einwilligung granularisieren**~~ ✅ (2026-02-28, v11.4) — 3 granulare Consents (Gesundheitsdaten Art.9, KI-Verarbeitung, Drittlandtransfer Art.49). DB-Migration, DisclaimerModal mit 4 Checkboxen, useDisclaimerCheck v2. Commit: b92e5c0
 - [ ] **E.1.4: AVV mit OpenAI abschliessen** (~2h) — OpenAI DPA unterschreiben, SCCs pruefen. MANUELL, kein Code.
 - [ ] **E.1.5: AVV mit Hetzner pruefen** (~1h) — Hetzner Standard-AVV pruefen. MANUELL.
-- [ ] **E.1.6: Account-Loeschung implementieren** (~4-6h Code) — Vollstaendige Kaskaden-Loeschung aller Nutzerdaten (DSGVO Art. 17). Braucht: Edge Function oder DB-Function + Profil-Button "Account loeschen"
-- [ ] **E.1.7: Widerrufsrecht implementieren** (~2-4h Code) — Einwilligung pro Kategorie zurueckziehen koennen. Profil-Sektion "Datenschutz-Einstellungen"
+- [x] ~~**E.1.6: Account-Loeschung implementieren**~~ ✅ (2026-02-28, v11.4) — DB-Funktion delete_user_account() (SECURITY DEFINER, CASCADE), useDeleteAccount Hook, DeleteAccountDialog mit Bestaetigungswort, ProfilePage Button. 17 Sprachen. Commit: 025a5f7
+- [x] ~~**E.1.7: Widerrufsrecht implementieren**~~ ✅ (2026-02-28, v11.4) — PrivacySettings Komponente, 3 Consent-Karten einzeln widerrufbar, ProfilePage integriert. 17 Sprachen. Commit: 284aade
 - [ ] **E.1.8: DSFA dokumentieren** (~4-8h Doku) — Datenschutz-Folgenabschaetzung. MANUELL/Doku, kein Code.
 
 **Phase 2 — Zeitnah (nach Launch):**
