@@ -25,6 +25,7 @@ import { ProfilePage } from '../pages/ProfilePage';
 // Workout Session
 import { ActiveWorkoutProvider } from '../features/workouts/context/ActiveWorkoutContext';
 import { ActiveWorkoutPage } from '../features/workouts/components/ActiveWorkoutPage';
+import { SpotifyCallback } from '../features/workouts/components/SpotifyCallback';
 
 // Admin Pages
 import { AdminRoute } from '../features/admin/components/AdminRoute';
@@ -168,6 +169,9 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Spotify OAuth Callback (popup window, no nav) */}
+      <Route path="/spotify/callback" element={<SpotifyCallback />} />
 
       {/* Redirects for old URLs */}
       <Route path="/dashboard" element={<Navigate to="/cockpit" replace />} />

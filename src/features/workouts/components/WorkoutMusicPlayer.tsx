@@ -1,17 +1,18 @@
 /**
  * WorkoutMusicPlayer — Floating music player for workout sessions.
- * Uses the YouTube IFrame Player API for real playback control.
- * Supports curated playlists and custom YouTube URLs.
+ * Supports YouTube IFrame Player API and Spotify Web Playback SDK.
+ * Toggle between providers; both can coexist.
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Music, ChevronUp, ChevronDown,
   Play, Pause, Square, Volume2, VolumeX,
-  AlertCircle, RefreshCw, Loader2,
+  AlertCircle, RefreshCw, Loader2, SkipForward, SkipBack,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
+import { useSpotifyPlayer } from '../hooks/useSpotifyPlayer';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -94,8 +95,9 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
   // UI state
   const [isExpanded, setIsExpanded] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
+  const [activeProvider, setActiveProvider] = useState<'youtube' | 'spotify'>('youtube');
 
-  // Player state
+  // YouTube state
   const [ytReady, setYtReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
@@ -103,6 +105,22 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
   const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Spotify
+  const spotify = useSpotifyPlayer();
+  const hasSpotifyClientId = Boolean(import.meta.env.VITE_SPOTIFY_CLIENT_ID);
+
+  // Listen for Spotify OAuth callback from popup
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === 'spotify-callback') {
+        spotify.handleCallback(event.data.code, event.data.state);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [spotify]);
 
   // Refs
   const playerRef = useRef<YT.Player | null>(null);
@@ -436,8 +454,130 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
         </div>
       </div>
 
+      {/* ── Provider Tabs ─────────────────────────────────────────── */}
+      {hasSpotifyClientId && (
+        <div className="px-4 pb-2">
+          <div className="flex gap-1 bg-gray-700/50 rounded-lg p-0.5">
+            <button
+              onClick={() => setActiveProvider('youtube')}
+              className={cn(
+                'flex-1 py-1.5 text-[11px] font-medium rounded-md transition-colors',
+                activeProvider === 'youtube'
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-400 hover:text-gray-200',
+              )}
+            >
+              YouTube
+            </button>
+            <button
+              onClick={() => setActiveProvider('spotify')}
+              className={cn(
+                'flex-1 py-1.5 text-[11px] font-medium rounded-md transition-colors',
+                activeProvider === 'spotify'
+                  ? 'bg-green-600 text-white'
+                  : 'text-gray-400 hover:text-gray-200',
+              )}
+            >
+              Spotify
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Spotify Section ────────────────────────────────────────── */}
+      {activeProvider === 'spotify' && hasSpotifyClientId && (
+        <div className="px-4 pb-3 space-y-2">
+          {!spotify.isConnected ? (
+            <div className="text-center py-3">
+              <p className="text-xs text-gray-400 mb-2">
+                {language === 'de' ? 'Spotify Premium benötigt' : 'Spotify Premium required'}
+              </p>
+              <button
+                onClick={spotify.connect}
+                className="px-4 py-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors"
+              >
+                {language === 'de' ? 'Mit Spotify verbinden' : 'Connect Spotify'}
+              </button>
+              {spotify.error && (
+                <p className="text-[10px] text-red-400 mt-2">{spotify.error}</p>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Spotify Status */}
+              {spotify.status === 'connecting' && (
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>{language === 'de' ? 'Verbinde...' : 'Connecting...'}</span>
+                </div>
+              )}
+
+              {/* Now Playing */}
+              {spotify.currentTrack && (
+                <div className="flex items-center gap-3 bg-gray-700/50 rounded-lg p-2">
+                  {spotify.currentTrack.albumArt && (
+                    <img
+                      src={spotify.currentTrack.albumArt}
+                      alt=""
+                      className="w-10 h-10 rounded"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white font-medium truncate">
+                      {spotify.currentTrack.name}
+                    </p>
+                    <p className="text-[10px] text-gray-400 truncate">
+                      {spotify.currentTrack.artist}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Spotify Controls */}
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={spotify.prevTrack}
+                  className="p-1.5 text-gray-400 hover:text-white transition-colors"
+                >
+                  <SkipBack className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={spotify.togglePlay}
+                  className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
+                >
+                  {spotify.status === 'playing'
+                    ? <Pause className="h-4 w-4" />
+                    : <Play className="h-4 w-4" />}
+                </button>
+                <button
+                  onClick={spotify.nextTrack}
+                  className="p-1.5 text-gray-400 hover:text-white transition-colors"
+                >
+                  <SkipForward className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Spotify Playlists */}
+              <p className="text-[10px] text-gray-500">
+                {language === 'de'
+                  ? 'Öffne Spotify und wähle eine Playlist — sie spielt über FitBuddy ab.'
+                  : 'Open Spotify and choose a playlist — it plays through FitBuddy.'}
+              </p>
+
+              {/* Disconnect */}
+              <button
+                onClick={spotify.disconnect}
+                className="text-[10px] text-gray-500 hover:text-red-400 transition-colors"
+              >
+                {language === 'de' ? 'Spotify trennen' : 'Disconnect Spotify'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Error message */}
-      {error && (
+      {error && activeProvider === 'youtube' && (
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
             <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
