@@ -55,6 +55,9 @@ export const ar: TranslationKeys = {
     weeklyCalories: 'السعرات هذا الأسبوع',
     weightTrend: 'تطور الوزن',
     keyMetrics: 'المؤشرات الرئيسية',
+    setupGoals: 'حدد أهدافك اليومية',
+    setupGoalsHint: 'أكمل ملفك الشخصي للحصول على أهداف مخصصة للسعرات والمغذيات الكبرى.',
+    noGoalSet: 'لم يتم تحديد هدف',
   },
   auth: {
     login: 'تسجيل الدخول',

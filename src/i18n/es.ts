@@ -55,6 +55,9 @@ export const es: TranslationKeys = {
     weeklyCalories: 'Calorías esta semana',
     weightTrend: 'Evolución del peso',
     keyMetrics: 'Indicadores clave',
+    setupGoals: 'Configura tus objetivos diarios',
+    setupGoalsHint: 'Completa tu perfil para obtener objetivos personalizados de calorías y macronutrientes.',
+    noGoalSet: 'Sin objetivo definido',
   },
   auth: {
     login: 'Iniciar sesión',

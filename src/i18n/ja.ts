@@ -55,6 +55,9 @@ export const ja: TranslationKeys = {
     weeklyCalories: '今週のカロリー',
     weightTrend: '体重推移',
     keyMetrics: '主要指標',
+    setupGoals: '1日の目標を設定しよう',
+    setupGoalsHint: 'プロフィールを入力して、パーソナライズされたカロリーとマクロ栄養素の目標を取得しましょう。',
+    noGoalSet: '目標未設定',
   },
   auth: {
     login: 'ログイン',

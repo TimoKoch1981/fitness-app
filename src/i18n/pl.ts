@@ -55,6 +55,9 @@ export const pl: TranslationKeys = {
     weeklyCalories: 'Kalorie w tym tygodniu',
     weightTrend: 'Trend wagi',
     keyMetrics: 'Kluczowe wskaźniki',
+    setupGoals: 'Ustaw swoje dzienne cele',
+    setupGoalsHint: 'Uzupełnij swój profil, aby otrzymać spersonalizowane cele kaloryczne i makroskładnikowe.',
+    noGoalSet: 'Brak ustawionego celu',
   },
   auth: {
     login: 'Zaloguj się',

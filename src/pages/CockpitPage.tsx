@@ -16,6 +16,8 @@ import {
   Bell,
   Check,
   Share2,
+  Target,
+  ChevronRight,
 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
@@ -116,7 +118,10 @@ export function CockpitPage() {
     localStorage.setItem(waterKey, waterGlasses.toString());
   }, [waterGlasses, waterKey]);
 
-  // Profile-based goals with defaults
+  // Profile data sufficient for personalized goals?
+  const profileComplete = !!(profile?.height_cm && profile?.birth_date && latestBody?.weight_kg);
+
+  // Profile-based goals with defaults (only meaningful when profileComplete)
   const caloriesGoal = profile?.daily_calories_goal ?? DEFAULT_CALORIES_GOAL;
   const proteinGoal = profile?.daily_protein_goal ?? DEFAULT_PROTEIN_GOAL;
   const waterGoal = profile?.daily_water_goal ?? DEFAULT_WATER_GOAL;
@@ -128,7 +133,7 @@ export function CockpitPage() {
   let bmrResult: { bmr: number; formula: string } | null = null;
   let tdee: number | null = null;
 
-  if (profile?.height_cm && profile?.birth_date && latestBody?.weight_kg) {
+  if (profileComplete) {
     const age = calculateAge(profile.birth_date);
     bmrResult = calculateBMR(
       {
@@ -165,16 +170,16 @@ export function CockpitPage() {
 
   const visibleInsights = insights.slice(0, 4);
 
-  // Celebrate when calorie or protein goal is reached
+  // Celebrate when calorie or protein goal is reached (only with real goals)
   useEffect(() => {
-    if (totals.calories > 0 && totals.calories >= caloriesGoal) {
+    if (profileComplete && totals.calories > 0 && totals.calories >= caloriesGoal) {
       celebrateCalorieGoal(1); // Single day achievement
     }
-    if (totals.protein > 0 && totals.protein >= proteinGoal) {
+    if (profileComplete && totals.protein > 0 && totals.protein >= proteinGoal) {
       celebrateProteinGoal();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totals.calories >= caloriesGoal, totals.protein >= proteinGoal]);
+  }, [profileComplete, totals.calories >= caloriesGoal, totals.protein >= proteinGoal]);
 
   const stats = [
     {
@@ -283,10 +288,27 @@ export function CockpitPage() {
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />
 
+        {/* Setup Goals CTA — shown when profile is incomplete */}
+        {!profileComplete && (
+          <button
+            onClick={() => navigate('/profile')}
+            className="w-full bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-4 shadow-sm flex items-center gap-3 hover:from-teal-100 hover:to-emerald-100 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+              <Target className="h-5 w-5 text-teal-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-teal-800">{t.cockpit.setupGoals}</p>
+              <p className="text-xs text-teal-600 mt-0.5">{t.cockpit.setupGoalsHint}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-teal-400 flex-shrink-0" />
+          </button>
+        )}
+
         {/* Macro Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           {stats.map((stat) => {
-            const pct = stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
+            const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
             return (
               <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm">
                 <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
@@ -294,18 +316,24 @@ export function CockpitPage() {
                   {stat.value}
                   <span className="text-sm font-normal text-gray-400 ml-1">{stat.unit}</span>
                 </p>
-                <div className="mt-2 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className={`bg-gradient-to-r ${stat.color} rounded-full h-1.5 transition-all duration-500`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  {stat.goal - stat.value > 0
-                    ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
-                    : `${t.dashboard.goal} ${t.dashboard.consumed}`
-                  }
-                </p>
+                {profileComplete ? (
+                  <>
+                    <div className="mt-2 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={`bg-gradient-to-r ${stat.color} rounded-full h-1.5 transition-all duration-500`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      {stat.goal - stat.value > 0
+                        ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
+                        : `${t.dashboard.goal} ${t.dashboard.consumed}`
+                      }
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-[10px] text-gray-400 mt-2">{t.cockpit.noGoalSet}</p>
+                )}
               </div>
             );
           })}
@@ -358,7 +386,7 @@ export function CockpitPage() {
               <p className="text-xs text-gray-500 font-medium">{t.dashboard.balance}</p>
             </div>
             <div className="text-center">
-              <p className={`text-2xl font-bold ${netCalories > caloriesGoal ? 'text-red-500' : 'text-gray-900'}`}>
+              <p className={`text-2xl font-bold ${profileComplete && netCalories > caloriesGoal ? 'text-red-500' : 'text-gray-900'}`}>
                 {netCalories}
               </p>
               <p className="text-[10px] text-gray-400">{t.dashboard.net} kcal</p>
@@ -376,12 +404,12 @@ export function CockpitPage() {
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
               {t.cockpit.weeklyCalories}
             </p>
-            <CalorieChart data={weekMeals.data} calorieGoal={caloriesGoal} language={language} />
+            <CalorieChart data={weekMeals.data} calorieGoal={profileComplete ? caloriesGoal : 0} language={language} />
           </div>
         )}
 
-        {/* BMR/TDEE Card */}
-        {bmrResult && tdee ? (
+        {/* BMR/TDEE Card — only shown when profile has enough data */}
+        {bmrResult && tdee && (
           <div className="bg-white rounded-xl p-4 shadow-sm">
             <div className="flex items-center gap-1.5 mb-2">
               <Zap className="h-4 w-4 text-yellow-500" />
@@ -402,14 +430,6 @@ export function CockpitPage() {
               </div>
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => navigate('/profile')}
-            className="w-full bg-yellow-50 rounded-xl p-3 shadow-sm text-center hover:bg-yellow-100 transition-colors"
-          >
-            <Zap className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
-            <p className="text-xs text-yellow-700 font-medium">{t.dashboard.completeProfile}</p>
-          </button>
         )}
 
         {/* Weight Trend Chart */}

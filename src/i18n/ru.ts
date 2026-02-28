@@ -55,6 +55,9 @@ export const ru: TranslationKeys = {
     weeklyCalories: 'Калории за неделю',
     weightTrend: 'Динамика веса',
     keyMetrics: 'Ключевые показатели',
+    setupGoals: 'Настройте свои дневные цели',
+    setupGoalsHint: 'Заполните профиль, чтобы получить персонализированные цели по калориям и макронутриентам.',
+    noGoalSet: 'Цель не задана',
   },
   auth: {
     login: 'Войти',

@@ -55,6 +55,9 @@ export const fil: TranslationKeys = {
     weeklyCalories: 'Calories Ngayong Linggo',
     weightTrend: 'Trend ng Timbang',
     keyMetrics: 'Mga Pangunahing Sukatan',
+    setupGoals: 'I-set Up ang Iyong Mga Daily Goal',
+    setupGoalsHint: 'Kumpletuhin ang iyong profile para makakuha ng personalized na calorie at macro target.',
+    noGoalSet: 'Walang naka-set na layunin',
   },
   auth: {
     login: 'Mag-log In',

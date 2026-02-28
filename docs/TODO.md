@@ -193,7 +193,7 @@
 - [ ] **Onboarding-Wizard nach Registrierung** (~8h) — Gefuehrter 5-Schritt-Setup: Name → Alter/Groesse/Geschlecht/Gewicht → Ziel → Erfahrung/Modus → Equipment → Fertig. Aktuell: Leere Seiten, nur gelber Banner "Profil ausfuellen". Betroffene Twins: A1-A5, E2
   - WICHTIG: Geschlecht + Trainingsmodus muessen im Wizard abgefragt werden → steuert Feature-Sichtbarkeit (Zyklus-Tracker, Power+ Features etc.)
   - Modus-Erklaerung: Standard ("Allgemein"), Power ("Wettkampf, Natural"), Power+ ("Enhanced, Substanzen") mit kurzem Disclaimer
-- [ ] **Cockpit: Keine Standard-Ziele ohne Profil** (~2h) — 2000 kcal / 150g Protein anzeigen obwohl Profil leer → irrefuehrend fuer Viktor (4000 kcal) und Karim (1800 kcal). Stattdessen: "Profil ausfuellen" CTA bis Daten vorhanden. Betroffene Twins: Alle ohne Profil
+- [x] ~~**Cockpit: Keine Standard-Ziele ohne Profil**~~ ✅ (2026-02-28, v11.6) — profileComplete-Check (height+birth_date+weight), CTA-Card "Tagesziele einrichten" mit Profil-Link, Makro-Werte ohne Fortschrittsbalken/Verbleibend bei leerem Profil, Celebrations nur mit Profil, CalorieChart ohne Ziellinie. 17 Sprachen.
 
 #### Geschlechts- und Modus-basierte Feature-Sichtbarkeit
 - [x] ~~**Gender-basiertes Feature-Gating**~~ ✅ (2026-02-28, v11.4) — `useGenderFeatures()` Hook mit 12 Feature-Flags (CycleTracker, SymptomTracker, REDSWarning, Breastfeeding, DiastasisRecti, ProstateMarkers, MaleTestosteroneRef). Pattern: Analog useTrainingMode(). Commit: 6703b90

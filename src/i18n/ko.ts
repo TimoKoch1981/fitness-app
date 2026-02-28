@@ -55,6 +55,9 @@ export const ko: TranslationKeys = {
     weeklyCalories: '이번 주 칼로리',
     weightTrend: '체중 추이',
     keyMetrics: '주요 지표',
+    setupGoals: '일일 목표를 설정하세요',
+    setupGoalsHint: '프로필을 완성하면 맞춤형 칼로리 및 매크로 목표를 받을 수 있습니다.',
+    noGoalSet: '목표 미설정',
   },
   auth: {
     login: '로그인',

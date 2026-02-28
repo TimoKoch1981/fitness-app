@@ -54,6 +54,9 @@ export const de = {
     weeklyCalories: 'Kalorien diese Woche',
     weightTrend: 'Gewichtsverlauf',
     keyMetrics: 'Kennzahlen',
+    setupGoals: 'Persönliche Tagesziele einrichten',
+    setupGoalsHint: 'Fülle dein Profil aus, um personalisierte Kalorien- und Makroziele zu erhalten.',
+    noGoalSet: 'Kein Ziel gesetzt',
   },
   auth: {
     login: 'Anmelden',

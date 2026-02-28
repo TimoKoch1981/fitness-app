@@ -55,6 +55,9 @@ export const fa: TranslationKeys = {
     weeklyCalories: 'کالری این هفته',
     weightTrend: 'روند وزن',
     keyMetrics: 'شاخص‌های کلیدی',
+    setupGoals: 'اهداف روزانه خود را تنظیم کنید',
+    setupGoalsHint: 'پروفایل خود را تکمیل کنید تا اهداف شخصی‌سازی‌شده کالری و درشت‌مغذی‌ها دریافت کنید.',
+    noGoalSet: 'هدفی تعیین نشده',
   },
   auth: {
     login: 'ورود',

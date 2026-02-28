@@ -55,6 +55,9 @@ export const ro: TranslationKeys = {
     weeklyCalories: 'Calorii săptămâna aceasta',
     weightTrend: 'Evoluția greutății',
     keyMetrics: 'Indicatori cheie',
+    setupGoals: 'Setează-ți obiectivele zilnice',
+    setupGoalsHint: 'Completează-ți profilul pentru a primi obiective personalizate de calorii și macronutrienți.',
+    noGoalSet: 'Niciun obiectiv setat',
   },
   auth: {
     login: 'Conectare',

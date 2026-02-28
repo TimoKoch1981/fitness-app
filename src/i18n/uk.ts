@@ -55,6 +55,9 @@ export const uk: TranslationKeys = {
     weeklyCalories: 'Калорії за тиждень',
     weightTrend: 'Динаміка ваги',
     keyMetrics: 'Ключові показники',
+    setupGoals: 'Налаштуйте свої денні цілі',
+    setupGoalsHint: 'Заповніть профіль, щоб отримати персоналізовані цілі калорій та макронутрієнтів.',
+    noGoalSet: 'Мету не встановлено',
   },
   auth: {
     login: 'Увійти',

@@ -55,6 +55,9 @@ export const tr: TranslationKeys = {
     weeklyCalories: 'Bu Haftanın Kalorileri',
     weightTrend: 'Kilo Seyri',
     keyMetrics: 'Temel Değerler',
+    setupGoals: 'Günlük Hedeflerini Belirle',
+    setupGoalsHint: 'Kişiselleştirilmiş kalori ve makro hedefleri almak için profilini tamamla.',
+    noGoalSet: 'Hedef belirlenmedi',
   },
   auth: {
     login: 'Giriş Yap',

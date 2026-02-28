@@ -95,6 +95,25 @@
 
 ---
 
+### 2026-02-28 - v11.6: Cockpit Standard-Ziele ohne Profil (P1-4)
+
+**Problem:** Cockpit zeigte 2000 kcal / 150g Protein als Ziele, obwohl Profil leer — irrefuehrend.
+
+**Loesung:**
+- `profileComplete`-Check: height_cm + birth_date + weight_kg muessen vorhanden sein
+- CTA-Card "Persoenliche Tagesziele einrichten" (Target-Icon, Link zu /profile) bei leerem Profil
+- Makro-Werte weiterhin sichtbar, aber OHNE Fortschrittsbalken und "verbleibend"-Text
+- "Kein Ziel gesetzt" statt irrefuehrender Default-Ziele
+- Celebrations nur bei profileComplete (keine falschen Goal-Achievements)
+- CalorieChart ohne Ziellinie bei leerem Profil
+- Energy Balance ohne rot-Markierung bei leerem Profil
+- BMR/TDEE-CTA durch oberen CTA ersetzt (kein doppelter CTA)
+- i18n: 3 neue cockpit-Keys in 17 Sprachen
+
+**Dateien:** CockpitPage.tsx (modifiziert), de.ts + en.ts + 15 weitere (3 Keys)
+
+---
+
 ### 2026-02-28 - v11.5: DSGVO-Komplett (5 Rechtskonformitaets-Features)
 
 **E.1.2+E.1.1: Impressum + Datenschutzerklaerung:**

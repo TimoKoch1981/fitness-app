@@ -55,6 +55,9 @@ export const zh: TranslationKeys = {
     weeklyCalories: '本周热量',
     weightTrend: '体重趋势',
     keyMetrics: '关键指标',
+    setupGoals: '设置你的每日目标',
+    setupGoalsHint: '完善个人资料以获取个性化的热量和宏量营养素目标。',
+    noGoalSet: '未设置目标',
   },
   auth: {
     login: '登录',
