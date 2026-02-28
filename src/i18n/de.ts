@@ -685,6 +685,16 @@ export const de = {
     stopwatch: 'Stoppuhr',
     countdown: 'Countdown',
     timerSetDuration: 'Dauer einstellen',
+    // Music player
+    music: 'Musik',
+    musicPlaying: 'Musik l\u00e4uft',
+    musicWorkout: 'Workout-Musik',
+    musicChoose: 'Playlist w\u00e4hlen',
+    musicCustom: 'YouTube-Link einf\u00fcgen',
+    musicVolume: 'Lautst\u00e4rke',
+    musicError: 'Wiedergabe fehlgeschlagen',
+    musicRetry: 'Erneut versuchen',
+    musicLoading: 'Wird geladen...',
   },
   share: {
     title: 'Fortschritt teilen',

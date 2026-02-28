@@ -23,7 +23,7 @@ import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/a
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
 import { useLogAiUsage } from '../../admin/hooks/useAiUsageLog';
 import { lookupProduct } from '../../../lib/ai/actions/productLookup';
-import type { AgentContext, AgentType } from '../../../lib/ai/agents/types';
+import type { AgentContext } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
 
@@ -173,7 +173,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
       if (parsedActions.length === 0) {
         const searchPhraseMatch = result.content.match(/(?:Ich suche|suche ich|recherchiere).*?(?:für|nach)\s+["""„]?(.+?)[""""]?\s*(?:\.\.\.|…|$)/i);
         if (searchPhraseMatch && searchPhraseMatch[1]?.length > 3) {
-          const extractedQuery = searchPhraseMatch[1].trim().replace(/["""„…\.]+$/, '');
+          const extractedQuery = searchPhraseMatch[1].trim().replace(/["""„….]+$/, '');
           console.warn(`[BuddyChat] No ACTION block found, but search phrase detected: "${extractedQuery}"`);
           parsedActions = [{ type: 'search_product', data: { query: extractedQuery }, rawJson: `{"query":"${extractedQuery}"}` }];
         }

@@ -663,6 +663,16 @@ export const es: TranslationKeys = {
     stopwatch: 'Cronómetro',
     countdown: 'Cuenta atrás',
     timerSetDuration: 'Establecer duración',
+    // Music player
+    music: 'Música',
+    musicPlaying: 'Reproduciendo música',
+    musicWorkout: 'Música de entrenamiento',
+    musicChoose: 'Elegir playlist',
+    musicCustom: 'Pegar enlace de YouTube',
+    musicVolume: 'Volumen',
+    musicError: 'Error de reproducción',
+    musicRetry: 'Reintentar',
+    musicLoading: 'Cargando...',
   },
   share: {
     title: 'Compartir progreso',

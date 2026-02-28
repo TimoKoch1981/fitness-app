@@ -663,6 +663,16 @@ export const ja: TranslationKeys = {
     stopwatch: 'ストップウォッチ',
     countdown: 'カウントダウン',
     timerSetDuration: '時間を設定',
+    // Music player
+    music: '音楽',
+    musicPlaying: '再生中',
+    musicWorkout: 'ワークアウト音楽',
+    musicChoose: 'プレイリストを選択',
+    musicCustom: 'YouTubeリンクを貼り付け',
+    musicVolume: '音量',
+    musicError: '再生に失敗しました',
+    musicRetry: '再試行',
+    musicLoading: '読み込み中...',
   },
   share: {
     title: '進捗をシェア',

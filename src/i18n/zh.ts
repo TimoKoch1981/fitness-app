@@ -663,6 +663,16 @@ export const zh: TranslationKeys = {
     stopwatch: '秒表',
     countdown: '倒计时',
     timerSetDuration: '设置时长',
+    // Music player
+    music: '音乐',
+    musicPlaying: '正在播放音乐',
+    musicWorkout: '训练音乐',
+    musicChoose: '选择播放列表',
+    musicCustom: '粘贴YouTube链接',
+    musicVolume: '音量',
+    musicError: '播放失败',
+    musicRetry: '重试',
+    musicLoading: '加载中...',
   },
   share: {
     title: '分享进度',

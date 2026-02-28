@@ -663,6 +663,16 @@ export const fil: TranslationKeys = {
     stopwatch: 'Stopwatch',
     countdown: 'Countdown',
     timerSetDuration: 'I-set ang Tagal',
+    // Music player
+    music: 'Musika',
+    musicPlaying: 'Nagpe-play ang musika',
+    musicWorkout: 'Workout Music',
+    musicChoose: 'Pumili ng playlist',
+    musicCustom: 'I-paste ang YouTube link',
+    musicVolume: 'Volume',
+    musicError: 'Hindi ma-play',
+    musicRetry: 'Subukan muli',
+    musicLoading: 'Naglo-load...',
   },
   share: {
     title: 'I-share ang Progreso',

@@ -663,6 +663,16 @@ export const ko: TranslationKeys = {
     stopwatch: '스톱워치',
     countdown: '카운트다운',
     timerSetDuration: '시간 설정',
+    // Music player
+    music: '음악',
+    musicPlaying: '음악 재생 중',
+    musicWorkout: '운동 음악',
+    musicChoose: '플레이리스트 선택',
+    musicCustom: 'YouTube 링크 붙여넣기',
+    musicVolume: '볼륨',
+    musicError: '재생 실패',
+    musicRetry: '다시 시도',
+    musicLoading: '로딩 중...',
   },
   share: {
     title: '진행 상황 공유',

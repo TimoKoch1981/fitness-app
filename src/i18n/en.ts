@@ -684,6 +684,16 @@ export const en: TranslationKeys = {
     stopwatch: 'Stopwatch',
     countdown: 'Countdown',
     timerSetDuration: 'Set duration',
+    // Music player
+    music: 'Music',
+    musicPlaying: 'Music playing',
+    musicWorkout: 'Workout Music',
+    musicChoose: 'Choose playlist',
+    musicCustom: 'Paste YouTube link',
+    musicVolume: 'Volume',
+    musicError: 'Playback failed',
+    musicRetry: 'Try again',
+    musicLoading: 'Loading...',
   },
   share: {
     title: 'Share Progress',

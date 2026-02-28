@@ -13,7 +13,7 @@
  * - Cancel method to abort pending calls
  */
 
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useMemo } from 'react';
 
 export interface DebouncedFn {
   (): void;
@@ -47,16 +47,20 @@ export function useDebouncedCallback(
     }
   }, [cancel]);
 
-  const debounced = useCallback(() => {
-    cancel();
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null;
-      fnRef.current();
-    }, delay);
-  }, [delay, cancel]) as DebouncedFn;
-
-  debounced.flush = flush;
-  debounced.cancel = cancel;
+  // Use useMemo to create a callable object with flush/cancel properties
+  // (useCallback return values are immutable under React compiler rules)
+  const debounced = useMemo(() => {
+    const trigger = (() => {
+      cancel();
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        fnRef.current();
+      }, delay);
+    }) as DebouncedFn;
+    trigger.flush = flush;
+    trigger.cancel = cancel;
+    return trigger;
+  }, [delay, cancel, flush]);
 
   // Cleanup on unmount — flush pending save
   useEffect(() => {

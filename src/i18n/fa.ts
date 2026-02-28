@@ -663,6 +663,16 @@ export const fa: TranslationKeys = {
     stopwatch: 'کرنومتر',
     countdown: 'شمارش معکوس',
     timerSetDuration: 'تنظیم مدت',
+    // Music player
+    music: 'موسیقی',
+    musicPlaying: 'در حال پخش موسیقی',
+    musicWorkout: 'موسیقی تمرین',
+    musicChoose: 'انتخاب لیست پخش',
+    musicCustom: 'لینک یوتیوب را جایگذاری کنید',
+    musicVolume: 'حجم صدا',
+    musicError: 'پخش ناموفق بود',
+    musicRetry: 'تلاش مجدد',
+    musicLoading: 'در حال بارگذاری...',
   },
   share: {
     title: 'اشتراک‌گذاری پیشرفت',

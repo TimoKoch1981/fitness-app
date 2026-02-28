@@ -663,6 +663,16 @@ export const tr: TranslationKeys = {
     stopwatch: 'Kronometre',
     countdown: 'Geri Sayım',
     timerSetDuration: 'Süre Ayarla',
+    // Music player
+    music: 'Müzik',
+    musicPlaying: 'Müzik çalıyor',
+    musicWorkout: 'Antrenman Müziği',
+    musicChoose: 'Playlist seç',
+    musicCustom: 'YouTube linkini yapıştır',
+    musicVolume: 'Ses',
+    musicError: 'Oynatma başarısız',
+    musicRetry: 'Tekrar dene',
+    musicLoading: 'Yükleniyor...',
   },
   share: {
     title: 'İlerlemeyi Paylaş',

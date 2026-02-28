@@ -96,7 +96,7 @@ export function detectDataType(mappings: CsvColumnMapping[]): ImportDataType {
 export function parseNumber(value: string): number | undefined {
   if (!value || value.trim() === '' || value === '-') return undefined;
   // Replace comma with dot for German decimals
-  const cleaned = value.replace(',', '.').replace(/[^\d.\-]/g, '');
+  const cleaned = value.replace(',', '.').replace(/[^\d.-]/g, '');
   const num = parseFloat(cleaned);
   return isNaN(num) ? undefined : num;
 }

@@ -663,6 +663,16 @@ export const ro: TranslationKeys = {
     stopwatch: 'Cronometru',
     countdown: 'Numărătoare inversă',
     timerSetDuration: 'Setează durata',
+    // Music player
+    music: 'Muzică',
+    musicPlaying: 'Muzică în curs',
+    musicWorkout: 'Muzică de antrenament',
+    musicChoose: 'Alege playlist',
+    musicCustom: 'Lipește link YouTube',
+    musicVolume: 'Volum',
+    musicError: 'Redare eșuată',
+    musicRetry: 'Încearcă din nou',
+    musicLoading: 'Se încarcă...',
   },
   share: {
     title: 'Distribuie progresul',

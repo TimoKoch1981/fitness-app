@@ -41,6 +41,19 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const exercise = state.exercises[state.currentExerciseIndex];
+
+  // AI rest time suggestion (must be before early return to satisfy rules-of-hooks)
+  const restSuggestion = useMemo(() => {
+    if (!exercise) return { restSeconds: 90, warmupMinutes: 5, reason: '', reasonEN: '' };
+    return suggestRestTime({
+      exerciseName: exercise.name,
+      repsTarget: exercise.sets[0]?.target_reps ? Number(exercise.sets[0].target_reps) : undefined,
+      durationSeconds: exercise.duration_minutes ? exercise.duration_minutes * 60 : undefined,
+      isTimedExercise: exercise.exercise_type === 'flexibility' ||
+        (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg),
+    });
+  }, [exercise]);
+
   if (!exercise) return null;
 
   const lastExercises = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
@@ -52,15 +65,6 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const hasVideo = catalogEntry && (catalogEntry.video_url_de || catalogEntry.video_url_en);
 
   const allSetsComplete = exercise.sets.every(s => s.completed || s.skipped);
-
-  // AI rest time suggestion
-  const restSuggestion = useMemo(() => suggestRestTime({
-    exerciseName: exercise.name,
-    repsTarget: exercise.sets[0]?.target_reps ? Number(exercise.sets[0].target_reps) : undefined,
-    durationSeconds: exercise.duration_minutes ? exercise.duration_minutes * 60 : undefined,
-    isTimedExercise: exercise.exercise_type === 'flexibility' ||
-      (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg),
-  }), [exercise.name, exercise.sets, exercise.duration_minutes, exercise.exercise_type]);
 
   // Use AI suggestion if no explicit rest_seconds on exercise
   const effectiveRestSeconds = exercise.rest_seconds ?? restSuggestion.restSeconds;

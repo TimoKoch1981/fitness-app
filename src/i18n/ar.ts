@@ -663,6 +663,16 @@ export const ar: TranslationKeys = {
     stopwatch: 'ساعة إيقاف',
     countdown: 'العد التنازلي',
     timerSetDuration: 'ضبط المدة',
+    // Music player
+    music: 'موسيقى',
+    musicPlaying: 'الموسيقى قيد التشغيل',
+    musicWorkout: 'موسيقى التمرين',
+    musicChoose: 'اختر قائمة تشغيل',
+    musicCustom: 'الصق رابط يوتيوب',
+    musicVolume: 'مستوى الصوت',
+    musicError: 'فشل التشغيل',
+    musicRetry: 'إعادة المحاولة',
+    musicLoading: 'جارٍ التحميل...',
   },
   share: {
     title: 'مشاركة التقدم',

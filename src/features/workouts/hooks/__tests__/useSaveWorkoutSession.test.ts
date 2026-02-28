@@ -5,13 +5,13 @@
  * the plan weight should be updated. Reps never change automatically.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock Supabase before imports
 const mockSelect = vi.fn().mockReturnThis();
 const mockSingle = vi.fn();
 const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
-const mockEq = vi.fn();
+const _mockEq = vi.fn();
 const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
 
 mockSelect.mockReturnValue({ single: mockSingle });
@@ -63,7 +63,6 @@ vi.mock('../../utils/calorieCalculation', () => ({
 // we test it through the mutation function by extracting the core logic.
 // For a clean unit test, let's extract and test the progression detection logic.
 
-import type { ActiveWorkoutState } from '../../context/ActiveWorkoutContext';
 import type { SetResult, WorkoutExerciseResult, PlanExercise } from '../../../../types/health';
 
 /**

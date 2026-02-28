@@ -663,6 +663,16 @@ export const ru: TranslationKeys = {
     stopwatch: 'Секундомер',
     countdown: 'Обратный отсчёт',
     timerSetDuration: 'Установить длительность',
+    // Music player
+    music: 'Музыка',
+    musicPlaying: 'Музыка играет',
+    musicWorkout: 'Музыка для тренировки',
+    musicChoose: 'Выбрать плейлист',
+    musicCustom: 'Вставить ссылку YouTube',
+    musicVolume: 'Громкость',
+    musicError: 'Ошибка воспроизведения',
+    musicRetry: 'Повторить',
+    musicLoading: 'Загрузка...',
   },
   share: {
     title: 'Поделиться прогрессом',

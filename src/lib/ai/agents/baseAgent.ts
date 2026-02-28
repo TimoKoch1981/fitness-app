@@ -12,7 +12,7 @@
 
 import type { AgentConfig, AgentContext, AgentResult } from './types';
 import type { ChatMessage, StreamCallback } from '../types';
-import { getSkillContent, getSkillsForAgent, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
+import { getSkillContent, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
 import type { TrainingMode } from '../../../types/health';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';

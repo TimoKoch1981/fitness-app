@@ -43,8 +43,6 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   });
   const [showPedDisclaimer, setShowPedDisclaimer] = useState(false);
 
-  if (!open) return null;
-
   // Get filtered presets for current category
   const presets = useMemo(() =>
     getFilteredPresets(category, searchQuery, pedEnabled),
@@ -62,6 +60,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   }, [presets]);
 
   const hasPresets = presets.length > 0;
+
+  if (!open) return null;
 
   // Apply a preset to the form
   const applyPreset = (preset: SubstancePreset) => {

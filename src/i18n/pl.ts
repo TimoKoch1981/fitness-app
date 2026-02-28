@@ -663,6 +663,16 @@ export const pl: TranslationKeys = {
     stopwatch: 'Stoper',
     countdown: 'Odliczanie',
     timerSetDuration: 'Ustaw czas trwania',
+    // Music player
+    music: 'Muzyka',
+    musicPlaying: 'Muzyka gra',
+    musicWorkout: 'Muzyka treningowa',
+    musicChoose: 'Wybierz playlist\u0119',
+    musicCustom: 'Wklej link YouTube',
+    musicVolume: 'G\u0142o\u015bno\u015b\u0107',
+    musicError: 'Odtwarzanie nie powiod\u0142o si\u0119',
+    musicRetry: 'Spr\u00f3buj ponownie',
+    musicLoading: '\u0141adowanie...',
   },
   share: {
     title: 'Udostępnij postęp',

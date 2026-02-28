@@ -10,7 +10,7 @@
  */
 
 import { BaseAgent } from './baseAgent';
-import type { AgentConfig, AgentContext } from './types';
+import type { AgentConfig } from './types';
 import type { TrainingMode } from '../../../types/health';
 
 const CONFIG: AgentConfig = {

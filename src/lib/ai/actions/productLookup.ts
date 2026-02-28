@@ -75,7 +75,7 @@ async function fetchWithProxyFallback(
       throw new Error('proxy-not-available');
     }
     return response;
-  } catch (proxyErr) {
+  } catch {
     // Proxy failed → try direct URL (may fail with CORS in browser, but works in some configs)
     console.log(`[ProductLookup] Proxy unavailable, trying direct: ${directUrl.slice(0, 80)}...`);
     return fetch(directUrl, { signal: AbortSignal.timeout(timeoutMs) });

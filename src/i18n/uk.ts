@@ -663,6 +663,16 @@ export const uk: TranslationKeys = {
     stopwatch: 'Секундомір',
     countdown: 'Зворотний відлік',
     timerSetDuration: 'Встановити тривалість',
+    // Music player
+    music: 'Музика',
+    musicPlaying: 'Музика грає',
+    musicWorkout: 'Музика для тренування',
+    musicChoose: 'Обрати плейлист',
+    musicCustom: 'Вставити посилання YouTube',
+    musicVolume: 'Гучність',
+    musicError: 'Помилка відтворення',
+    musicRetry: 'Спробувати знову',
+    musicLoading: 'Завантаження...',
   },
   share: {
     title: 'Поділитися прогресом',
