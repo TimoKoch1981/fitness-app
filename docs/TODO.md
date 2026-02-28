@@ -273,6 +273,11 @@
 - [x] ~~Erweiterte KI-Analyse und Prognosen~~ ✅ — Lineare Regression, Moving Average, Plateau-Erkennung, ProgressionCard
 - [x] ~~Koerper-Silhouette fuer Masse-Visualisierung~~ ✅ — SVG BodySilhouette mit dynamischer Skalierung + KFA-Farben
 
+#### ~~Glossar-Skill~~ ✅ (2026-02-28, v11.1)
+- [x] ~~400+ Fachbegriffe in 12 Kategorien~~ ✅ — Training, Ernaehrung, Koerperzusammensetzung, Supplements, PEDs, PCT, Medizin/Labor, Schlaf, Wettkampf, Female Fitness, Beauty, Abkuerzungen
+- [x] ~~Allen 8 Agents zugewiesen~~ ✅ — Universelle Referenz (~4.500 Tokens)
+- [x] ~~Aus 15 bestehenden Skills extrahiert~~ ✅ — Konsistente Terminologie
+
 #### Auth-Erweiterungen
 - [ ] OAuth / Social Login (Google, Apple) — alle Provider in config.toml disabled
 - [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled

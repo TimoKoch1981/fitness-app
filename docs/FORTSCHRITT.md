@@ -87,8 +87,18 @@
 | 10.9    | 2026-02-27 | Power/Power+ Modus — Phase A komplett                                    | Erledigt   |
 | 10.9a   | 2026-02-27 | Musik/Timer Analyse + Konzept (MUSIK_TIMER_KONZEPT.md)                   | Erledigt   |
 | 11.0    | 2026-02-28 | Musik & Timer Overhaul komplett (4 Phasen, +32 Tests, Spotify SDK)       | Erledigt   |
+| 11.1    | 2026-02-28 | Glossar-Skill: 400+ Fachbegriffe in 12 Kategorien, allen Agents zugewiesen | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.1: Glossar-Skill (Fachwoerterbuch)
+
+400+ Fachbegriffe in 12 Kategorien: Training, Ernaehrung, Koerperzusammensetzung,
+Supplements, PEDs, PCT, Medizin/Labor, Schlaf, Wettkampf, Female Fitness, Beauty, Abkuerzungen.
+Extrahiert aus allen 15 bestehenden Skills. Allen 8 Agents zugewiesen.
+
+Neue Datei: `src/lib/ai/skills/glossary.ts` (~4.500 Tokens)
+Commit: de14bdd
 
 ### 2026-02-28 - v11.0: Musik & Timer Overhaul (4 Phasen)
 
