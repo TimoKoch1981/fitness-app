@@ -139,6 +139,25 @@ export function generateProfileSkill(data: UserSkillData): string {
     if (goals.notes) skill += `- Notizen: "${goals.notes}"\n`;
   }
 
+  // Dietary preferences, allergies & health restrictions — SAFETY-CRITICAL
+  // Agents MUST consider these when making recommendations (e.g. no peanuts for allergy!)
+  const hasDietary = profile.dietary_preferences && profile.dietary_preferences.length > 0;
+  const hasAllergies = profile.allergies && profile.allergies.length > 0;
+  const hasRestrictions = profile.health_restrictions && profile.health_restrictions.length > 0;
+
+  if (hasDietary || hasAllergies || hasRestrictions) {
+    skill += `\n### Ernaehrung & Gesundheit\n`;
+    if (hasDietary) {
+      skill += `- Ernaehrungsform: ${profile.dietary_preferences!.join(', ')}\n`;
+    }
+    if (hasAllergies) {
+      skill += `- ⚠️ ALLERGIEN: ${profile.allergies!.join(', ')} — NIEMALS Lebensmittel/Rezepte mit diesen Allergenen empfehlen!\n`;
+    }
+    if (hasRestrictions) {
+      skill += `- ⚠️ GESUNDHEITLICHE EINSCHRAENKUNGEN: ${profile.health_restrictions!.join(', ')} — Bei Trainingsempfehlungen IMMER beruecksichtigen!\n`;
+    }
+  }
+
   return skill;
 }
 

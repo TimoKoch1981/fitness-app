@@ -16,7 +16,28 @@
   - ~~Disclaimer-Text auch in Profil/Einstellungen einsehbar~~ ✅ — ReadOnly-Modus im Profil
   - DB-Migration: `disclaimer_accepted_at TIMESTAMPTZ` in profiles
   - Dual-Storage: localStorage (fast-check) + Supabase DB (source of truth)
-  - [ ] Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)
+  - [x] ~~Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)~~ ✅ (2026-02-27) — Umfassende Analyse in `docs/RECHTSKONFORMITAET.md` (498 Zeilen, 23 Action Items, 4 Rechtsbereiche: DSGVO, MDR, HWG, ePrivacy)
+
+#### Rechtskonformitaet — Umsetzung (aus RECHTSKONFORMITAET.md Aktionsplan E.1-E.3)
+> Analyse FERTIG. Umsetzung der identifizierten Massnahmen:
+
+**Phase 1 — Kritisch (vor kommerziellem Launch):**
+- [ ] **E.1.2: Impressum erstellen** (~1h) — Pflichtangaben auf fudda.de (Name, Anschrift, Kontakt, ggf. Register). Braucht: /impressum Route + statische Seite
+- [ ] **E.1.1: Datenschutzerklaerung erstellen** (~4-8h) — Vollstaendige DSGVO Art. 13/14 Erklaerung. 12 Pflichtabschnitte. EMPFEHLUNG: Anwalt konsultieren, dann als /datenschutz Route einbinden
+- [ ] **E.1.3: Einwilligung granularisieren** (~4-6h Code) — Aktuell: 1 Checkbox fuer alles. Braucht: Separate Einwilligungen fuer (1) Gesundheitsdaten, (2) KI-Verarbeitung, (3) Drittlandtransfer. DisclaimerModal erweitern.
+- [ ] **E.1.4: AVV mit OpenAI abschliessen** (~2h) — OpenAI DPA unterschreiben, SCCs pruefen. MANUELL, kein Code.
+- [ ] **E.1.5: AVV mit Hetzner pruefen** (~1h) — Hetzner Standard-AVV pruefen. MANUELL.
+- [ ] **E.1.6: Account-Loeschung implementieren** (~4-6h Code) — Vollstaendige Kaskaden-Loeschung aller Nutzerdaten (DSGVO Art. 17). Braucht: Edge Function oder DB-Function + Profil-Button "Account loeschen"
+- [ ] **E.1.7: Widerrufsrecht implementieren** (~2-4h Code) — Einwilligung pro Kategorie zurueckziehen koennen. Profil-Sektion "Datenschutz-Einstellungen"
+- [ ] **E.1.8: DSFA dokumentieren** (~4-8h Doku) — Datenschutz-Folgenabschaetzung. MANUELL/Doku, kein Code.
+
+**Phase 2 — Zeitnah (nach Launch):**
+- [ ] **E.2.1: Datenexport-Funktion** (~4-6h Code) — DSGVO Art. 20 Portabilitaet. Export aller Nutzerdaten als JSON/CSV
+- [ ] **E.2.2: KI-Disclaimer erweitern** (~1h) — "KI kann Fehler machen" bei jeder KI-Antwort
+- [ ] **E.2.3: BP-Klassifikation kennzeichnen** (~1h) — "Informativ, keine Diagnose" bei Blutdruck-Anzeige
+- [ ] **E.2.4: PED-Disclaimer verstaerken** (~1-2h) — Zusaetzlicher Warnhinweis bei jeder PED-Interaktion
+- [ ] **E.2.5: Substanz-Agent System-Prompt haerten** (~1-2h) — Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen
+- [ ] **E.2.7: Security Headers in Caddyfile** (~1h) — CSP, HSTS, X-Frame-Options, Referrer-Policy
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)
