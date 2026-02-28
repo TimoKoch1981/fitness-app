@@ -40,6 +40,10 @@ interface UpdateProfileInput {
   personal_goals?: PersonalGoals;
   avatar_url?: string | null;
   disclaimer_accepted_at?: string;
+  // Granulare DSGVO-Einwilligungen
+  consent_health_data_at?: string;
+  consent_ai_processing_at?: string;
+  consent_third_country_at?: string;
   // Training mode fields (Power/Power+)
   training_mode?: TrainingMode;
   current_phase?: TrainingPhase;

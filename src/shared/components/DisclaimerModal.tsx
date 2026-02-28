@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ShieldAlert, Heart, Pill, Activity, Database, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, Heart, Pill, Activity, Database, AlertTriangle, Brain, Globe, Link as LinkIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n';
 
 interface DisclaimerModalProps {
@@ -26,13 +27,61 @@ function Section({ icon, title, text }: SectionProps) {
   );
 }
 
+/**
+ * ConsentCheckbox — eine einzelne granulare Einwilligung mit Label.
+ * DSGVO-konform: Jede Einwilligung einzeln und freiwillig.
+ */
+function ConsentCheckbox({
+  checked,
+  onChange,
+  label,
+  sublabel,
+  required = true,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  sublabel?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500 flex-shrink-0"
+        required={required}
+      />
+      <div>
+        <span className="text-xs font-medium text-gray-800 leading-relaxed">
+          {label}
+        </span>
+        {sublabel && (
+          <span className="block text-[10px] text-gray-500 mt-0.5">{sublabel}</span>
+        )}
+      </div>
+    </label>
+  );
+}
+
 export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: DisclaimerModalProps) {
   const { t } = useTranslation();
+
+  // Legacy single checkbox (fuer ReadOnly-Modus)
   const [checked, setChecked] = useState(false);
+
+  // Granulare Einwilligungen (DSGVO E.1.3)
+  const [consentHealthData, setConsentHealthData] = useState(false);
+  const [consentAiProcessing, setConsentAiProcessing] = useState(false);
+  const [consentThirdCountry, setConsentThirdCountry] = useState(false);
+
   const [saving, setSaving] = useState(false);
 
+  const allConsentsGranted = checked && consentHealthData && consentAiProcessing && consentThirdCountry;
+
   const handleAccept = async () => {
-    if (!checked || saving) return;
+    if (!allConsentsGranted || saving) return;
     setSaving(true);
     onAccepted();
   };
@@ -70,7 +119,7 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
           )}
         </div>
 
-        {/* Content */}
+        {/* Content — Informative Sections */}
         <div className="px-6 py-4 space-y-3">
           <Section
             icon={<Heart className={iconSize} />}
@@ -99,26 +148,63 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
           />
         </div>
 
-        {/* Footer — only in acceptance mode */}
+        {/* Footer — Consent Checkboxes + Accept (only in acceptance mode) */}
         {!readOnly && (
           <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 space-y-3">
-            {/* Checkbox */}
-            <label className="flex items-start gap-3 cursor-pointer select-none">
-              <input
-                type="checkbox"
+            {/* Granulare Einwilligungen */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                {t.disclaimer.consentTitle}
+              </p>
+
+              {/* 1. Haftungshinweise gelesen (Legacy) */}
+              <ConsentCheckbox
                 checked={checked}
-                onChange={(e) => setChecked(e.target.checked)}
-                className="mt-0.5 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                onChange={setChecked}
+                label={t.disclaimer.checkboxLabel}
               />
-              <span className="text-xs text-gray-700 leading-relaxed">
-                {t.disclaimer.checkboxLabel}
-              </span>
-            </label>
+
+              {/* 2. Gesundheitsdaten (Art. 9 DSGVO) */}
+              <ConsentCheckbox
+                checked={consentHealthData}
+                onChange={setConsentHealthData}
+                label={t.disclaimer.consentHealthData}
+                sublabel={t.disclaimer.consentHealthDataSub}
+              />
+
+              {/* 3. KI-Verarbeitung */}
+              <ConsentCheckbox
+                checked={consentAiProcessing}
+                onChange={setConsentAiProcessing}
+                label={t.disclaimer.consentAiProcessing}
+                sublabel={t.disclaimer.consentAiProcessingSub}
+              />
+
+              {/* 4. Drittlandtransfer */}
+              <ConsentCheckbox
+                checked={consentThirdCountry}
+                onChange={setConsentThirdCountry}
+                label={t.disclaimer.consentThirdCountry}
+                sublabel={t.disclaimer.consentThirdCountrySub}
+              />
+            </div>
+
+            {/* Link zu Datenschutzerklaerung */}
+            <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
+              <LinkIcon className="h-3 w-3" />
+              <Link to="/datenschutz" target="_blank" className="hover:text-teal-600 underline">
+                {t.legal.privacyPolicy}
+              </Link>
+              <span className="mx-1">|</span>
+              <Link to="/impressum" target="_blank" className="hover:text-teal-600 underline">
+                {t.legal.impressumTitle}
+              </Link>
+            </div>
 
             {/* Accept Button */}
             <button
               onClick={handleAccept}
-              disabled={!checked || saving}
+              disabled={!allConsentsGranted || saving}
               className="w-full py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-teal-600 hover:bg-teal-700 active:scale-[0.98]"
             >
               {saving ? t.common.loading : t.disclaimer.accept}

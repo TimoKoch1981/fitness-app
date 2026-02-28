@@ -584,6 +584,13 @@ export const ru: TranslationKeys = {
     accept: 'Принять и продолжить',
     viewTitle: 'Отказ от ответственности',
     viewLink: 'Просмотреть отказ от ответственности',
+    consentTitle: 'Согласия',
+    consentHealthData: 'Я даю согласие на обработку моих данных о здоровье (вес, артериальное давление, измерения тела, аллергии, питание).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Явное согласие на обработку особых категорий данных. Может быть отозвано в любое время.',
+    consentAiProcessing: 'Я даю согласие на обработку моих данных системами ИИ (OpenAI) для получения персонализированных рекомендаций.',
+    consentAiProcessingSub: 'Передаются только данные, необходимые для запроса. Не используются для обучения ИИ.',
+    consentThirdCountry: 'Я даю согласие на передачу моих данных в США (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Передача в третью страну на основании явного согласия. Standard Contractual Clauses (SCCs) с OpenAI.',
   },
   workout: {
     startWorkout: 'Начать тренировку',

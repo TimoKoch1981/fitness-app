@@ -594,6 +594,13 @@ export const de = {
     accept: 'Akzeptieren und fortfahren',
     viewTitle: 'Haftungshinweise',
     viewLink: 'Haftungshinweise anzeigen',
+    consentTitle: 'Einwilligungen',
+    consentHealthData: 'Ich willige in die Verarbeitung meiner Gesundheitsdaten (Gewicht, Blutdruck, Körpermaße, Allergien, Ernährung) ein.',
+    consentHealthDataSub: 'Art. 9 Abs. 2 lit. a DSGVO — Ausdrückliche Einwilligung für besondere Datenkategorien. Widerruf jederzeit möglich.',
+    consentAiProcessing: 'Ich willige ein, dass meine Daten durch KI-Systeme (OpenAI) verarbeitet werden, um personalisierte Empfehlungen zu erhalten.',
+    consentAiProcessingSub: 'Nur für die Anfrage nötige Daten werden übermittelt. Keine Nutzung zum KI-Training.',
+    consentThirdCountry: 'Ich willige in die Übermittlung meiner Daten in die USA (OpenAI) ein.',
+    consentThirdCountrySub: 'Art. 49 Abs. 1 lit. a DSGVO — Drittlandtransfer auf Basis ausdrücklicher Einwilligung. Standard Contractual Clauses (SCCs) mit OpenAI.',
   },
   workout: {
     // Session

@@ -1,16 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useProfile, useUpdateProfile } from '../../features/auth/hooks/useProfile';
 
-const STORAGE_KEY_PREFIX = 'fitbuddy-disclaimer-';
+const STORAGE_KEY_PREFIX = 'fitbuddy-consent-v2-';
 
 function getStorageKey(userId: string): string {
   return `${STORAGE_KEY_PREFIX}${userId}`;
 }
 
 /**
- * Checks whether the user has accepted the disclaimer.
+ * Checks whether the user has accepted ALL granular consents.
+ *
+ * DSGVO-konform: 3 separate Einwilligungen erforderlich:
+ * 1. consent_health_data_at  — Art. 9 Abs. 2 lit. a (Gesundheitsdaten)
+ * 2. consent_ai_processing_at — KI-Verarbeitung (Daten an LLM)
+ * 3. consent_third_country_at — Art. 49 (Drittlandtransfer USA)
+ *
+ * Alle 3 muessen gesetzt sein → App nutzbar.
+ *
  * Fast path: localStorage (no network). Slow path: profile DB.
  * Returns accepted=null while loading.
+ *
+ * NOTE: Users who accepted the old single disclaimer (disclaimer_accepted_at)
+ * but NOT the granular consents will see the modal again.
  */
 export function useDisclaimerCheck(userId: string | undefined) {
   const { data: profile, isLoading: profileLoading } = useProfile();
@@ -23,9 +34,9 @@ export function useDisclaimerCheck(userId: string | undefined) {
       return;
     }
 
-    // Fast path: check localStorage
+    // Fast path: check localStorage for v2 consent
     const cached = localStorage.getItem(getStorageKey(userId));
-    if (cached) {
+    if (cached === 'all_consents_granted') {
       setAccepted(true);
       return;
     }
@@ -33,9 +44,15 @@ export function useDisclaimerCheck(userId: string | undefined) {
     // Slow path: wait for profile from DB
     if (profileLoading) return;
 
-    if (profile?.disclaimer_accepted_at) {
-      // DB says accepted → warm up localStorage cache
-      localStorage.setItem(getStorageKey(userId), profile.disclaimer_accepted_at);
+    // Check ALL 3 granular consents
+    const allConsentsGranted =
+      !!profile?.consent_health_data_at &&
+      !!profile?.consent_ai_processing_at &&
+      !!profile?.consent_third_country_at;
+
+    if (allConsentsGranted) {
+      // DB says all consents granted → warm up localStorage cache
+      localStorage.setItem(getStorageKey(userId), 'all_consents_granted');
       setAccepted(true);
     } else {
       setAccepted(false);
@@ -46,10 +63,15 @@ export function useDisclaimerCheck(userId: string | undefined) {
     if (!userId) return;
     const now = new Date().toISOString();
     // Optimistic: update localStorage + state immediately
-    localStorage.setItem(getStorageKey(userId), now);
+    localStorage.setItem(getStorageKey(userId), 'all_consents_granted');
     setAccepted(true);
-    // Persist to DB
-    updateProfile.mutate({ disclaimer_accepted_at: now });
+    // Persist ALL consents + legacy disclaimer_accepted_at to DB
+    updateProfile.mutate({
+      disclaimer_accepted_at: now,
+      consent_health_data_at: now,
+      consent_ai_processing_at: now,
+      consent_third_country_at: now,
+    });
   }, [userId, updateProfile]);
 
   return { accepted, markAccepted };

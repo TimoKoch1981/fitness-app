@@ -584,6 +584,13 @@ export const pl: TranslationKeys = {
     accept: 'Akceptuj i kontynuuj',
     viewTitle: 'Zastrzeżenia prawne',
     viewLink: 'Wyświetl zastrzeżenia prawne',
+    consentTitle: 'Zgody',
+    consentHealthData: 'Wyrażam zgodę na przetwarzanie moich danych zdrowotnych (waga, ciśnienie krwi, pomiary ciała, alergie, żywienie).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Wyraźna zgoda na szczególne kategorie danych. Możliwość odwołania w każdej chwili.',
+    consentAiProcessing: 'Wyrażam zgodę na przetwarzanie moich danych przez systemy AI (OpenAI) w celu otrzymywania spersonalizowanych rekomendacji.',
+    consentAiProcessingSub: 'Przesyłane są tylko dane niezbędne do realizacji zapytania. Nie są wykorzystywane do trenowania AI.',
+    consentThirdCountry: 'Wyrażam zgodę na przekazanie moich danych do USA (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Transfer do kraju trzeciego na podstawie wyraźnej zgody. Standard Contractual Clauses (SCCs) z OpenAI.',
   },
   workout: {
     startWorkout: 'Rozpocznij trening',

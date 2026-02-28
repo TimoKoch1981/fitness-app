@@ -584,6 +584,13 @@ export const fa: TranslationKeys = {
     accept: 'پذیرش و ادامه',
     viewTitle: 'شرایط مسئولیت',
     viewLink: 'مشاهده شرایط مسئولیت',
+    consentTitle: 'رضایت‌نامه‌ها',
+    consentHealthData: 'من با پردازش داده‌های سلامتی خود (وزن، فشار خون، اندازه‌های بدن، آلرژی‌ها، تغذیه) موافقت می‌کنم.',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — رضایت صریح برای دسته‌های خاص داده‌ها. قابل لغو در هر زمان.',
+    consentAiProcessing: 'من با پردازش داده‌هایم توسط سیستم‌های هوش مصنوعی (OpenAI) برای دریافت توصیه‌های شخصی‌سازی‌شده موافقت می‌کنم.',
+    consentAiProcessingSub: 'فقط داده‌های لازم برای درخواست ارسال می‌شود. برای آموزش هوش مصنوعی استفاده نمی‌شود.',
+    consentThirdCountry: 'من با انتقال داده‌هایم به ایالات متحده آمریکا (OpenAI) موافقت می‌کنم.',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — انتقال به کشور ثالث بر اساس رضایت صریح. Standard Contractual Clauses (SCCs) با OpenAI.',
   },
   workout: {
     startWorkout: 'شروع تمرین',

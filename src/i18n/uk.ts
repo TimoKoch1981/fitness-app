@@ -584,6 +584,13 @@ export const uk: TranslationKeys = {
     accept: 'Прийняти та продовжити',
     viewTitle: 'Застереження',
     viewLink: 'Переглянути застереження',
+    consentTitle: 'Згоди',
+    consentHealthData: 'Я даю згоду на обробку моїх даних про здоров\'я (вага, артеріальний тиск, виміри тіла, алергії, харчування).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Явна згода на обробку особливих категорій даних. Може бути відкликана в будь-який час.',
+    consentAiProcessing: 'Я даю згоду на обробку моїх даних системами ШІ (OpenAI) для отримання персоналізованих рекомендацій.',
+    consentAiProcessingSub: 'Передаються лише дані, необхідні для запиту. Не використовуються для навчання ШІ.',
+    consentThirdCountry: 'Я даю згоду на передачу моїх даних до США (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Передача до третьої країни на підставі явної згоди. Standard Contractual Clauses (SCCs) з OpenAI.',
   },
   workout: {
     startWorkout: 'Почати тренування',

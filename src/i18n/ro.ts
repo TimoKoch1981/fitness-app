@@ -584,6 +584,13 @@ export const ro: TranslationKeys = {
     accept: 'Acceptă și continuă',
     viewTitle: 'Declinarea responsabilității',
     viewLink: 'Vizualizează declinarea responsabilității',
+    consentTitle: 'Consimțăminte',
+    consentHealthData: 'Consent la prelucrarea datelor mele de sănătate (greutate, tensiune arterială, măsurători corporale, alergii, nutriție).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Consimțământ explicit pentru categorii speciale de date. Revocabil în orice moment.',
+    consentAiProcessing: 'Consent ca datele mele să fie prelucrate de sisteme AI (OpenAI) pentru a primi recomandări personalizate.',
+    consentAiProcessingSub: 'Sunt transmise doar datele necesare pentru solicitare. Nu sunt utilizate pentru antrenarea AI.',
+    consentThirdCountry: 'Consent la transferul datelor mele în SUA (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Transfer către o țară terță pe baza consimțământului explicit. Standard Contractual Clauses (SCCs) cu OpenAI.',
   },
   workout: {
     startWorkout: 'Începe antrenamentul',

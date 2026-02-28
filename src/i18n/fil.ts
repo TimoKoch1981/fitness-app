@@ -584,6 +584,13 @@ export const fil: TranslationKeys = {
     accept: 'Tanggapin at Magpatuloy',
     viewTitle: 'Mga Tuntunin ng Pananagutan',
     viewLink: 'Tingnan ang Mga Tuntunin ng Pananagutan',
+    consentTitle: 'Mga Pahintulot',
+    consentHealthData: 'Pumapayag ako sa pagproseso ng aking datos pangkalusugan (timbang, presyon ng dugo, sukat ng katawan, mga alerhiya, nutrisyon).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Malinaw na pahintulot para sa mga espesyal na kategorya ng datos. Maaaring bawiin anumang oras.',
+    consentAiProcessing: 'Pumapayag ako na iproseso ang aking datos ng mga sistema ng AI (OpenAI) upang makatanggap ng mga personalisadong rekomendasyon.',
+    consentAiProcessingSub: 'Ang datos na kinakailangan lamang para sa kahilingan ang ipinapadala. Hindi ginagamit para sa pagsasanay ng AI.',
+    consentThirdCountry: 'Pumapayag ako sa paglipat ng aking datos sa USA (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Paglipat sa ikatlong bansa batay sa malinaw na pahintulot. Standard Contractual Clauses (SCCs) sa OpenAI.',
   },
   workout: {
     startWorkout: 'Simulan ang Training',

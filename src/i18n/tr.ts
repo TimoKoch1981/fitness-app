@@ -584,6 +584,13 @@ export const tr: TranslationKeys = {
     accept: 'Kabul Et ve Devam Et',
     viewTitle: 'Sorumluluk Reddi',
     viewLink: 'Sorumluluk reddini görüntüle',
+    consentTitle: 'Onaylar',
+    consentHealthData: 'Sağlık verilerimin (kilo, tansiyon, vücut ölçüleri, alerjiler, beslenme) işlenmesine onay veriyorum.',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Özel veri kategorileri için açık onay. Her zaman geri alınabilir.',
+    consentAiProcessing: 'Kişiselleştirilmiş öneriler almak için verilerimin AI sistemleri (OpenAI) tarafından işlenmesine onay veriyorum.',
+    consentAiProcessingSub: 'Yalnızca istek için gerekli veriler iletilir. AI eğitimi için kullanılmaz.',
+    consentThirdCountry: 'Verilerimin ABD\'ye (OpenAI) aktarılmasına onay veriyorum.',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Açık onaya dayalı üçüncü ülkeye aktarım. OpenAI ile Standard Contractual Clauses (SCCs).',
   },
   workout: {
     startWorkout: 'Antrenmana Başla',

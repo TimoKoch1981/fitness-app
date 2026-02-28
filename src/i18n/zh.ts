@@ -584,6 +584,13 @@ export const zh: TranslationKeys = {
     accept: '接受并继续',
     viewTitle: '免责声明',
     viewLink: '查看免责声明',
+    consentTitle: '同意事项',
+    consentHealthData: '我同意处理我的健康数据（体重、血压、身体测量、过敏、营养）。',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — 对特殊类别数据的明确同意。可随时撤回。',
+    consentAiProcessing: '我同意我的数据由AI系统（OpenAI）处理，以获得个性化推荐。',
+    consentAiProcessingSub: '仅传输请求所需的数据。不用于AI训练。',
+    consentThirdCountry: '我同意将我的数据传输到美国（OpenAI）。',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — 基于明确同意的第三国传输。与OpenAI的Standard Contractual Clauses (SCCs)。',
   },
   workout: {
     startWorkout: '开始训练',

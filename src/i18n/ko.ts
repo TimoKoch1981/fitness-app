@@ -584,6 +584,13 @@ export const ko: TranslationKeys = {
     accept: '동의하고 계속하기',
     viewTitle: '면책 조항',
     viewLink: '면책 조항 보기',
+    consentTitle: '동의 사항',
+    consentHealthData: '건강 데이터(체중, 혈압, 신체 측정, 알레르기, 영양)의 처리에 동의합니다.',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — 특수 범주 데이터에 대한 명시적 동의. 언제든지 철회 가능.',
+    consentAiProcessing: '맞춤형 추천을 받기 위해 AI 시스템(OpenAI)이 내 데이터를 처리하는 것에 동의합니다.',
+    consentAiProcessingSub: '요청에 필요한 데이터만 전송됩니다. AI 학습에 사용되지 않습니다.',
+    consentThirdCountry: '내 데이터가 미국(OpenAI)으로 전송되는 것에 동의합니다.',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — 명시적 동의에 기반한 제3국 이전. OpenAI와의 Standard Contractual Clauses (SCCs).',
   },
   workout: {
     startWorkout: '운동 시작',

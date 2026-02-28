@@ -593,6 +593,13 @@ export const en: TranslationKeys = {
     accept: 'Accept and continue',
     viewTitle: 'Liability Notices',
     viewLink: 'View liability notices',
+    consentTitle: 'Consents',
+    consentHealthData: 'I consent to the processing of my health data (weight, blood pressure, body measurements, allergies, nutrition).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Explicit consent for special categories of data. Revocable at any time.',
+    consentAiProcessing: 'I consent to my data being processed by AI systems (OpenAI) to receive personalized recommendations.',
+    consentAiProcessingSub: 'Only data necessary for the request is transmitted. Not used for AI training.',
+    consentThirdCountry: 'I consent to the transfer of my data to the USA (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Third-country transfer based on explicit consent. Standard Contractual Clauses (SCCs) with OpenAI.',
   },
   workout: {
     // Session

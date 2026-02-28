@@ -584,6 +584,13 @@ export const it: TranslationKeys = {
     accept: 'Accetta e continua',
     viewTitle: 'Avvisi di responsabilità',
     viewLink: 'Visualizza avvisi di responsabilità',
+    consentTitle: 'Consensi',
+    consentHealthData: 'Acconsento al trattamento dei miei dati sanitari (peso, pressione sanguigna, misure corporee, allergie, nutrizione).',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — Consenso esplicito per categorie speciali di dati. Revocabile in qualsiasi momento.',
+    consentAiProcessing: 'Acconsento al trattamento dei miei dati da parte di sistemi di IA (OpenAI) per ricevere raccomandazioni personalizzate.',
+    consentAiProcessingSub: 'Vengono trasmessi solo i dati necessari per la richiesta. Non utilizzati per l\'addestramento dell\'IA.',
+    consentThirdCountry: 'Acconsento al trasferimento dei miei dati negli Stati Uniti (OpenAI).',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Trasferimento verso un paese terzo basato su consenso esplicito. Standard Contractual Clauses (SCCs) con OpenAI.',
   },
   workout: {
     startWorkout: "Inizia l'allenamento",

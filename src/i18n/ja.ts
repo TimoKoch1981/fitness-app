@@ -584,6 +584,13 @@ export const ja: TranslationKeys = {
     accept: '同意して続ける',
     viewTitle: '免責事項',
     viewLink: '免責事項を表示',
+    consentTitle: '同意事項',
+    consentHealthData: '健康データ（体重、血圧、体の測定値、アレルギー、栄養）の処理に同意します。',
+    consentHealthDataSub: 'Art. 9(2)(a) GDPR — 特別カテゴリーのデータに対する明示的な同意。いつでも撤回可能。',
+    consentAiProcessing: 'パーソナライズされた推奨を受けるために、AIシステム（OpenAI）によるデータ処理に同意します。',
+    consentAiProcessingSub: 'リクエストに必要なデータのみが送信されます。AIトレーニングには使用されません。',
+    consentThirdCountry: 'データの米国（OpenAI）への転送に同意します。',
+    consentThirdCountrySub: 'Art. 49(1)(a) GDPR — 明示的な同意に基づく第三国への移転。OpenAIとのStandard Contractual Clauses (SCCs)。',
   },
   workout: {
     startWorkout: 'トレーニングを開始',

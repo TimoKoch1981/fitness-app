@@ -266,6 +266,10 @@ export interface UserProfile {
   avatar_url?: string;
   is_admin?: boolean;
   disclaimer_accepted_at?: string;
+  // Granulare DSGVO-Einwilligungen (E.1.3)
+  consent_health_data_at?: string;
+  consent_ai_processing_at?: string;
+  consent_third_country_at?: string;
   // Training Mode (Power/Power+)
   training_mode?: TrainingMode;
   show_date?: string;
