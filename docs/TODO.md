@@ -196,16 +196,11 @@
 - [ ] **Cockpit: Keine Standard-Ziele ohne Profil** (~2h) — 2000 kcal / 150g Protein anzeigen obwohl Profil leer → irrefuehrend fuer Viktor (4000 kcal) und Karim (1800 kcal). Stattdessen: "Profil ausfuellen" CTA bis Daten vorhanden. Betroffene Twins: Alle ohne Profil
 
 #### Geschlechts- und Modus-basierte Feature-Sichtbarkeit
-- [ ] **Gender-basiertes Feature-Gating** (~4h) — Aktuell: Geschlecht NUR fuer BMR-Berechnung genutzt, KEINE UI-Sichtbarkeitssteuerung. Braucht: `useGenderFeatures()` Hook analog zu `useTrainingMode()` Hook.
-  - Frauen-Features (gender === 'female'): Menstruationszyklus-Tracker, Symptom-Tracker (Hitzewallungen), RED-S-Warnung, Stillzeit-Kalorienzuschlag, Rektusdiastase-Option
-  - Maenner-Features (gender === 'male'): Prostata-Marker (PSA bei >40), Testosteron-Referenzwerte maennlich
-  - Geschlecht 'other': Alle Features sichtbar, Nutzer waehlt selbst was relevant ist
-  - Pattern: Wie `useTrainingMode()` — returned Feature-Flags (`showCycleTracker`, `showProstataMarkers` etc.)
-  - Abhaengigkeit: Geschlecht muss im Profil gesetzt sein → Onboarding-Wizard fragen!
+- [x] ~~**Gender-basiertes Feature-Gating**~~ ✅ (2026-02-28, v11.4) — `useGenderFeatures()` Hook mit 12 Feature-Flags (CycleTracker, SymptomTracker, REDSWarning, Breastfeeding, DiastasisRecti, ProstateMarkers, MaleTestosteroneRef). Pattern: Analog useTrainingMode(). Commit: 6703b90
 - [ ] **Modus-Erklaerung im Onboarding verbessern** (~1h) — TrainingModeSelector existiert (3 Karten mit Icons), aber wird erst im Profil gezeigt. Muss frueher kommen (Onboarding Schritt 4). Erklaerungstext erweitern: Was bedeutet Power+? Wer braucht das? Was wird freigeschaltet?
 
 #### KI-Buddy Verbesserungen
-- [ ] **Profil-Daten an KI-Context uebergeben** (~3h) — Allergien, Ernaehrungsform, Gesundheitseinschraenkungen (seit v11.3 in DB) werden NICHT an Agents uebergeben. Buddy weiss nichts von Erdnussallergie, Vegetarismus, Rektusdiastase. SICHERHEITSRELEVANT! Betroffene: A4, A5, E2, E4
+- [x] ~~**Profil-Daten an KI-Context uebergeben**~~ ✅ (2026-02-28, v11.4) — Allergien (WARNING-Direktive), Ernaehrungsform, Gesundheitseinschraenkungen in generateProfileSkill() ergaenzt. Commit: 86c75b7
 - [ ] **Proaktives Warnsystem** (~6h) — Buddy warnt nur wenn gefragt, nicht automatisch bei gefaehrlichen Mustern (Unterkalorisch, Uebertraining 7x/Woche, HDL<25, Hkt>52%). Braucht: Schwellenwert-Regeln + automatische Buddy-Nachrichten. Betroffene: A5, E1, D2, D4
 - [ ] **Kontext-Persistence ueber Sessions** (~4h) — Buddy "vergisst" Praeferenzen zwischen Sessions (sessionStorage). Elena (A4, Vegetarierin) muss es jedes Mal neu sagen. Loesung: Profil-Daten + Chat-History aus DB laden. Betroffene: A4, E2, B4
 - [ ] **Quellenangaben in Buddy-Antworten** (~3h) — Skills haben 73+ PMIDs, aber Buddy zitiert sie nie in Antworten. Petra (C5, Aerztin) erwartet Quellen. Loesung: Agent-Prompt erweitern → "Zitiere relevante PMIDs". Betroffene: C5, B2

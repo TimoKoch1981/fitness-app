@@ -90,8 +90,29 @@
 | 11.1    | 2026-02-28 | Glossar-Skill: 400+ Fachbegriffe in 12 Kategorien, allen Agents zugewiesen | Erledigt   |
 | 11.2    | 2026-02-28 | Digital Twins: 25 Personas + Testing Report (10 UX-Issues, 5 Safety, 17 Feature-Requests) | Erledigt   |
 | 11.3    | 2026-02-28 | Twin-Testing Sofortmassnahmen: 5 Fixes (KI-Mahlzeit, Profil-Felder, Reminder, Disclaimer, Datum) | Erledigt   |
+| 11.4    | 2026-02-28 | Profil-Daten an KI-Context + Gender Feature-Gating Hook                  | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.4: Profil-Daten an KI-Context + Gender Feature-Gating
+
+**Profil-Daten an KI-Agents (SICHERHEITSRELEVANT):**
+- `generateProfileSkill()` in userSkills.ts erweitert
+- Allergien mit WARNING-Direktive: "NIEMALS Allergene empfehlen!"
+- Gesundheitseinschraenkungen mit WARNING: "IMMER beruecksichtigen!"
+- Ernaehrungsform (Vegetarisch etc.) als Kontext
+- Buddy kennt jetzt Erdnussallergie, Rektusdiastase, Vegetarismus
+
+**Gender-basiertes Feature-Gating:**
+- Neuer Hook: `useGenderFeatures()` in `src/shared/hooks/useGenderFeatures.ts`
+- 12 Feature-Flags: showCycleTracker, showSymptomTracker, showREDSWarning, showBreastfeedingToggle, showDiastasisRecti, showProstateMarkers, useMaleTestosteroneRef, etc.
+- Pattern: Analog zu useTrainingMode() — liest Gender aus useProfile()
+- female: Zyklus, Symptome, RED-S, Stillen, Rektusdiastase
+- male: Prostata (nur >40), Testosteron-Referenzen
+- other: ALLE Features sichtbar (Nutzer waehlt)
+- Altersberechnung aus birth_date fuer Prostata-Marker
+
+Commits: 86c75b7 (Profil-Daten), 6703b90 (Gender Hook)
 
 ### 2026-02-28 - v11.3: Twin-Testing Sofortmassnahmen
 
