@@ -180,49 +180,20 @@
   - Kaloriendefizit eingehalten
   - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
 
-### P1 — UX-Ueberarbeitung Workout-Session ⚠️
+### ~~P1 — UX-Ueberarbeitung Workout-Session~~ ✅ (2026-02-28, v11.0)
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
-> Analyse: 2026-02-27, Status: Konzept fertig, User-Diskussion ausstehend
 
-#### Musik-Integration komplett ueberarbeiten
-- [ ] **M1: YouTube IFrame API fixen** — Sound reparieren (aktuell kein Audio!)
-  - YouTube IFrame Player API korrekt laden (`new YT.Player()`)
-  - Problem: iframe unsichtbar (`w-0 h-0 opacity-0`) → Browser blockt Autoplay
-  - Problem: `postMessage()` ohne geladene API → Mute/Unmute wirkungslos
-  - Loesung: Sichtbarer Mini-Player mit Thumbnail + Titel
-- [ ] **M2: Sichtbarer Mini-Player** — Floating Player am unteren Rand
-  - Play/Pause/Skip/Lautstaerke als echte YT.Player API-Calls
-  - Error-Handling: Fallback-Meldung wenn Playback fehlschlaegt
-  - Autoplay nur nach User-Interaktion (Playlist-Klick)
-- [ ] **M3: Spotify Deep-Links** — "In Spotify oeffnen" als Alternative
-  - Kuratierte Spotify-Playlists parallel zu YouTube
-  - Deep-Links (`spotify:playlist:...`) oeffnen Spotify-App direkt
-  - Kein SDK/OAuth noetig, kein Premium noetig
+#### ~~Musik-Integration komplett ueberarbeiten~~ ✅
+- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — YT.Player, sichtbarer Mini-Player
+- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — Play/Pause/Stop/Volume als YT API Calls
+- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — OAuth + Edge Function + Tab-Toggle
 
-#### Timer komplett ueberarbeiten — Tabellarischer Multi-Timer
-- [ ] **T1: useWorkoutTimers Hook** — 5 unabhaengige Timer-States
-  - Gesamttraining (Countdown/Stopwatch, default 60min)
-  - Aktuelle Uebung (Countdown/Stopwatch, default 5min)
-  - Pause zwischen Uebungen (Countdown, default 2min)
-  - Aktuelles Set (Countdown/Stopwatch, default 45s)
-  - Pause zwischen Sets (Countdown, default suggestRestTime())
-  - Jede Sektion separat aktivierbar/deaktivierbar
-- [ ] **T2: WorkoutTimerPanel UI** — Grosse tabellarische Uhr
-  - Tabelle: Checkbox | Sektion | Soll-Zeit (editierbar) | Ist-Zeit (laufend)
-  - Prominente Buttons: START, PAUSE, RESET, SKIP
-  - Global ON/OFF Switch (deutlich sichtbar, nicht kleiner Icon-Button)
-- [ ] **T3: ActiveWorkoutContext umbauen** — Phase-System erweitern
-  - Von 3-Phasen (warmup/exercise/rest) zu Sektions-basiert
-  - Optional: Auto-Advance zwischen Phasen (zuschaltbar)
-- [ ] **T4: Skip + Timer-Toggle UX** — Prominente Bedienelemente
-  - Skip-Button als grosser Button in der Button-Leiste (nicht im ⋮ Menu!)
-  - Timer ON/OFF als Switch mit Label (nicht nur Icon)
-  - Vibration + Sound bei Timer-Ablauf (konfigurierbar)
-- [ ] **T5: Alte Timer entfernen + Tests** — Migration
-  - RestTimer.tsx → ersetzt durch TimerSectionRow #5
-  - ManualTimer.tsx → ersetzt durch WorkoutTimerPanel
-  - ExerciseTimer.tsx → ersetzt durch TimerSectionRow #2/#4
-  - Neue Tests fuer useWorkoutTimers + WorkoutTimerPanel
+#### ~~Timer komplett ueberarbeiten~~ ✅
+- [x] ~~**T1: useWorkoutTimers Hook**~~ ✅ — 5 Sektionen, je aktivierbar
+- [x] ~~**T2: WorkoutTimerPanel UI**~~ ✅ — Tabelle, Settings, Alert-Mode
+- [x] ~~**T3: Context Integration**~~ ✅ — Auto-Timer-Transitionen, Auto-Advance
+- [x] ~~**T4: Timer Alerts**~~ ✅ — Web Audio + Vibration, 4 Modi
+- [x] ~~**T5: Alte Timer entfernt + 32 Tests**~~ ✅
 
 ### P2 — Power/Power+ Modus
 > **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)
@@ -382,4 +353,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-28 (v11.0 — nutritionScience Skill, Musik/Timer Implementierung laeuft)*
+*Letzte Aktualisierung: 2026-02-28 (v11.0 — Musik & Timer Overhaul komplett, Spotify SDK, 2.127 Tests)*

@@ -86,8 +86,19 @@
 | 10.8    | 2026-02-27 | Celebrations (Konfetti+Toast), 24 Substanz-Presets                       | Erledigt   |
 | 10.9    | 2026-02-27 | Power/Power+ Modus — Phase A komplett                                    | Erledigt   |
 | 10.9a   | 2026-02-27 | Musik/Timer Analyse + Konzept (MUSIK_TIMER_KONZEPT.md)                   | Erledigt   |
+| 11.0    | 2026-02-28 | Musik & Timer Overhaul komplett (4 Phasen, +32 Tests, Spotify SDK)       | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.0: Musik & Timer Overhaul (4 Phasen)
+
+**Phase 1:** YouTube IFrame API Fix (YT.Player, sichtbarer Mini-Player), ESLint 5→0 Errors
+**Phase 2:** Tabellarischer Multi-Timer (5 Sektionen, Auto-Advance, Web Audio Alerts)
+**Phase 3:** Alte Timer entfernt + 32 neue Tests (alle gruen)
+**Phase 4:** Spotify Web Playback SDK (OAuth, Edge Function, Tab-Toggle YouTube/Spotify)
+
+Neue Dateien: 10, Modifizierte: 28+, Tests: 2.127 (2.095 + 32)
+Commits: 5f631d7, 512b40a, b007fba, 96bea23
 
 ## Log
 
