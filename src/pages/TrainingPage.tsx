@@ -15,6 +15,10 @@ import { CompetitionCountdown } from '../features/workouts/components/power/Comp
 import { PhaseProgressBar } from '../features/workouts/components/power/PhaseProgressBar';
 import { NaturalLimitCalc } from '../features/workouts/components/power/NaturalLimitCalc';
 import { RefeedPlanner } from '../features/workouts/components/power/RefeedPlanner';
+import { CycleWidget } from '../features/workouts/components/powerplus/CycleWidget';
+import { PCTCountdown } from '../features/workouts/components/powerplus/PCTCountdown';
+import { HematocritAlert } from '../features/workouts/components/powerplus/HematocritAlert';
+import { BloodWorkDashboard } from '../features/workouts/components/powerplus/BloodWorkDashboard';
 
 export function TrainingPage() {
   const { t } = useTranslation();
@@ -24,9 +28,14 @@ export function TrainingPage() {
     showPhaseProgress,
     showNaturalLimits,
     showRefeedPlanner,
+    showCycleTracker,
+    showPCTCountdown,
+    showHematocritAlert,
+    showBloodWorkDashboard,
   } = useTrainingMode();
 
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
+  const showPowerPlusWidgets = showCycleTracker || showPCTCountdown || showHematocritAlert || showBloodWorkDashboard;
 
   return (
     <PageShell
@@ -47,6 +56,16 @@ export function TrainingPage() {
           {showPhaseProgress && <PhaseProgressBar />}
           {showNaturalLimits && <NaturalLimitCalc />}
           {showRefeedPlanner && <RefeedPlanner />}
+        </div>
+      )}
+
+      {/* Power+ Mode Widgets */}
+      {showPowerPlusWidgets && (
+        <div className="space-y-3 mb-4">
+          {showHematocritAlert && <HematocritAlert />}
+          {showCycleTracker && <CycleWidget />}
+          {showPCTCountdown && <PCTCountdown />}
+          {showBloodWorkDashboard && <BloodWorkDashboard />}
         </div>
       )}
 

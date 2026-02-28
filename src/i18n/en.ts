@@ -988,4 +988,32 @@ export const en: TranslationKeys = {
     dietBreakDesc: '7-14 days at maintenance calories. Leptin, T3, and cortisol normalize (MATADOR study).',
     refeedSource: 'Byrne et al. 2018, Int J Obes (MATADOR) — Intermittent Energy Restriction',
   },
+  powerPlus: {
+    // Cycle Tracker
+    cycleTracker: 'Cycle Tracker',
+    remaining: 'remaining',
+    cycleEndingSoon: 'Cycle ending soon',
+    // PCT Countdown
+    pctCountdown: 'PCT Countdown',
+    pctRecovery: 'Recovery Progress',
+    pctBloodWorkReminder: 'Blood work recommended — check hormone levels and hematocrit.',
+    pctDisclaimer: 'For informational purposes only. Not a substitute for medical supervision.',
+    // Hematocrit Alert
+    hematocritAlert: 'Hematocrit Elevated',
+    hematocritWarning: 'Your hematocrit is above 52%. Increased thrombosis risk. Stay hydrated, consult your doctor.',
+    hematocritDanger: 'Hematocrit above 54%! Urgent medical evaluation recommended. Phlebotomy may be necessary.',
+    bloodWorkAge: 'Blood work age',
+    daysAgo: 'days',
+    // Blood Work Dashboard
+    bloodWorkDashboard: 'Blood Work Overview',
+    outOfRange: 'flagged',
+    showAll: 'Show all',
+    showLess: 'Show less',
+    testosterone: 'Testosterone',
+    estradiol: 'Estradiol',
+    hematocrit: 'Hematocrit',
+    hemoglobin: 'Hemoglobin',
+    creatinine: 'Creatinine',
+    noBloodWork: 'No blood work data yet',
+  },
 } as const;

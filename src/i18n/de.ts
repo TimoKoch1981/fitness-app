@@ -994,6 +994,34 @@ export const de = {
     dietBreakDesc: '7-14 Tage auf Erhaltungskalorien. Leptin, T3 und Cortisol normalisieren sich (MATADOR-Studie).',
     refeedSource: 'Byrne et al. 2018, Int J Obes (MATADOR) — Intermittent Energy Restriction',
   },
+  powerPlus: {
+    // Cycle Tracker
+    cycleTracker: 'Zyklus-Tracker',
+    remaining: 'verbleibend',
+    cycleEndingSoon: 'Zyklus endet bald',
+    // PCT Countdown
+    pctCountdown: 'PCT-Countdown',
+    pctRecovery: 'Recovery-Fortschritt',
+    pctBloodWorkReminder: 'Blutbild empfohlen — prüfe Hormonspiegel und Hämatokrit.',
+    pctDisclaimer: 'Informationszweck. Kein Ersatz für ärztliche Begleitung.',
+    // Hematocrit Alert
+    hematocritAlert: 'Hämatokrit erhöht',
+    hematocritWarning: 'Dein Hämatokrit liegt über 52%. Erhöhtes Thromboserisiko. Ausreichend trinken, Arzt konsultieren.',
+    hematocritDanger: 'Hämatokrit über 54%! Dringend ärztliche Abklärung empfohlen. Phlebotomie kann notwendig sein.',
+    bloodWorkAge: 'Blutbild-Alter',
+    daysAgo: 'Tage',
+    // Blood Work Dashboard
+    bloodWorkDashboard: 'Blutbild-Übersicht',
+    outOfRange: 'auffällig',
+    showAll: 'Alle anzeigen',
+    showLess: 'Weniger anzeigen',
+    testosterone: 'Testosteron',
+    estradiol: 'Estradiol',
+    hematocrit: 'Hämatokrit',
+    hemoglobin: 'Hämoglobin',
+    creatinine: 'Kreatinin',
+    noBloodWork: 'Noch kein Blutbild vorhanden',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility
