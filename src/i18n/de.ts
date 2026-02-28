@@ -602,6 +602,20 @@ export const de = {
     consentThirdCountry: 'Ich willige in die Übermittlung meiner Daten in die USA (OpenAI) ein.',
     consentThirdCountrySub: 'Art. 49 Abs. 1 lit. a DSGVO — Drittlandtransfer auf Basis ausdrücklicher Einwilligung. Standard Contractual Clauses (SCCs) mit OpenAI.',
   },
+  deleteAccount: {
+    title: 'Account löschen',
+    subtitle: 'Diese Aktion ist unwiderruflich',
+    warning: 'Folgende Daten werden dauerhaft gelöscht:',
+    deleteProfile: 'Profil und persönliche Einstellungen',
+    deleteMeals: 'Alle Mahlzeiten und Ernährungsdaten',
+    deleteTraining: 'Trainingspläne, Workout-Sessions und Übungshistorie',
+    deleteMedical: 'Blutdruck, Körpermaße und Gesundheitsdaten',
+    deleteSubstances: 'Substanzen und Erinnerungen',
+    deleteAll: 'Chat-Verläufe, Feedback und alle weiteren Daten',
+    confirmLabel: 'Tippe "{word}" ein um zu bestätigen:',
+    deleteButton: 'Account löschen',
+    profileButton: 'Account dauerhaft löschen',
+  },
   workout: {
     // Session
     startWorkout: 'Training starten',

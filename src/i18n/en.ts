@@ -601,6 +601,20 @@ export const en: TranslationKeys = {
     consentThirdCountry: 'I consent to the transfer of my data to the USA (OpenAI).',
     consentThirdCountrySub: 'Art. 49(1)(a) GDPR — Third-country transfer based on explicit consent. Standard Contractual Clauses (SCCs) with OpenAI.',
   },
+  deleteAccount: {
+    title: 'Delete Account',
+    subtitle: 'This action is irreversible',
+    warning: 'The following data will be permanently deleted:',
+    deleteProfile: 'Profile and personal settings',
+    deleteMeals: 'All meals and nutrition data',
+    deleteTraining: 'Training plans, workout sessions and exercise history',
+    deleteMedical: 'Blood pressure, body measurements and health data',
+    deleteSubstances: 'Substances and reminders',
+    deleteAll: 'Chat history, feedback and all other data',
+    confirmLabel: 'Type "{word}" to confirm:',
+    deleteButton: 'Delete Account',
+    profileButton: 'Permanently delete account',
+  },
   workout: {
     // Session
     startWorkout: 'Start Workout',

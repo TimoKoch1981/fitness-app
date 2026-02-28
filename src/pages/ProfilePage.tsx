@@ -15,6 +15,7 @@ import type { RecommendedGoals } from '../lib/calculations';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
 import { PAL_FACTORS } from '../lib/constants';
 import { DisclaimerModal as DisclaimerModalView } from '../shared/components/DisclaimerModal';
+import { DeleteAccountDialog } from '../features/auth/components/DeleteAccountDialog';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 
@@ -48,6 +49,8 @@ export function ProfilePage() {
   const [showBmrHelp, setShowBmrHelp] = useState(false);
   // Disclaimer viewer
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  // Delete account dialog
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   // Feedback dialog
   const [showFeedback, setShowFeedback] = useState(false);
   // Goal recommendation
@@ -781,6 +784,29 @@ export function ProfilePage() {
             onAccepted={() => {}}
             onClose={() => setShowDisclaimer(false)}
           />
+        )}
+
+        {/* Legal Links */}
+        <div className="flex justify-center gap-4 text-xs text-gray-400">
+          <Link to="/impressum" className="hover:text-teal-600 transition-colors">
+            {t.legal.impressumTitle}
+          </Link>
+          <span>|</span>
+          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">
+            {t.legal.privacyPolicy}
+          </Link>
+        </div>
+
+        {/* Delete Account */}
+        <button
+          onClick={() => setShowDeleteAccount(true)}
+          className="w-full flex items-center justify-center gap-2 py-2 text-xs text-red-400 hover:text-red-600 transition-colors"
+        >
+          {t.deleteAccount.profileButton}
+        </button>
+
+        {showDeleteAccount && (
+          <DeleteAccountDialog onClose={() => setShowDeleteAccount(false)} />
         )}
       </div>
     </PageShell>
