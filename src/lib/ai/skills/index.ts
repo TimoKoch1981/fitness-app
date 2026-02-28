@@ -60,26 +60,29 @@ interface AgentSkillMap {
  * Agents only get the knowledge they need → token-efficient.
  *
  * v2.0.0: Extended with 5 new skills (sleep, supplements, pct, competition, femaleFitness)
+ * v3.1.0: Glossary removed from domain agents (they define their terms inline).
+ *         Glossary now only loaded for general & lifestyle agents.
+ *         Saves ~27,000 tokens/session across 6 agents.
  */
 const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   nutrition: {
-    staticSkills: ['nutrition', 'supplements', 'nutritionScience', 'glossary'],
+    staticSkills: ['nutrition', 'supplements', 'nutritionScience'],
     userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
   },
   training: {
-    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'glossary'],
+    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience'],
     userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
   },
   substance: {
-    staticSkills: ['substances', 'anabolics', 'pct', 'glossary'],
+    staticSkills: ['substances', 'anabolics', 'pct'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   analysis: {
-    staticSkills: ['analysis', 'glossary'],
+    staticSkills: ['analysis'],
     userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
   },
   beauty: {
-    staticSkills: ['beauty', 'glossary'],
+    staticSkills: ['beauty'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   lifestyle: {
@@ -87,11 +90,11 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'glossary'],
+    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   general: {
-    staticSkills: ['glossary'],  // glossary as lightweight reference
+    staticSkills: ['glossary'],  // glossary as lightweight reference for general queries
     userSkills: ['daily_summary'],
   },
 };
