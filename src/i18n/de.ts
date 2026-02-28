@@ -1021,6 +1021,15 @@ export const de = {
     hemoglobin: 'Hämoglobin',
     creatinine: 'Kreatinin',
     noBloodWork: 'Noch kein Blutbild vorhanden',
+    // Doctor Report
+    doctorReport: 'Arztbericht PDF',
+    doctorReportDesc: 'Generiert einen PDF-Bericht mit Blutbild, Substanzen und Vitalwerten fuer deinen Arzt.',
+    // Posing Photos
+    posingPhotos: 'Posing-Fotos',
+    uploadPhoto: 'Foto hochladen',
+    noPhotos: 'Keine Fotos fuer diese Pose',
+    comparePhotos: 'Fotos vergleichen',
+    photoCount: 'Fotos',
   },
 } as const;
 

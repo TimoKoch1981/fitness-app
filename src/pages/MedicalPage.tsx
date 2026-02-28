@@ -16,10 +16,13 @@ import { ReminderCard } from '../features/reminders/components/ReminderCard';
 import { classifyBloodPressure } from '../lib/calculations';
 import type { Reminder } from '../types/health';
 import { formatDate, formatTime } from '../lib/utils';
+import { useTrainingMode } from '../shared/hooks/useTrainingMode';
+import { DoctorReportButton } from '../features/medical/components/DoctorReportButton';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
   const medicalSuggestions = usePageBuddySuggestions('medical', language as 'de' | 'en');
+  const { showDoctorReport } = useTrainingMode();
   const [showBPDialog, setShowBPDialog] = useState(false);
   const [showAddSubstanceDialog, setShowAddSubstanceDialog] = useState(false);
   const [showLogSubstanceDialog, setShowLogSubstanceDialog] = useState(false);
@@ -53,6 +56,11 @@ export function MedicalPage() {
       <div className="space-y-4">
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={medicalSuggestions} />
+
+        {/* Doctor Report Button — Power+ Mode */}
+        {showDoctorReport && (
+          <DoctorReportButton />
+        )}
 
         {/* Blood Pressure Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

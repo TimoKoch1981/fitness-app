@@ -1015,5 +1015,14 @@ export const en: TranslationKeys = {
     hemoglobin: 'Hemoglobin',
     creatinine: 'Creatinine',
     noBloodWork: 'No blood work data yet',
+    // Doctor Report
+    doctorReport: 'Doctor Report PDF',
+    doctorReportDesc: 'Generates a PDF report with blood work, substances, and vitals for your doctor.',
+    // Posing Photos
+    posingPhotos: 'Posing Photos',
+    uploadPhoto: 'Upload Photo',
+    noPhotos: 'No photos for this pose',
+    comparePhotos: 'Compare Photos',
+    photoCount: 'photos',
   },
 } as const;

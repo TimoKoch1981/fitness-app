@@ -19,6 +19,7 @@ import { CycleWidget } from '../features/workouts/components/powerplus/CycleWidg
 import { PCTCountdown } from '../features/workouts/components/powerplus/PCTCountdown';
 import { HematocritAlert } from '../features/workouts/components/powerplus/HematocritAlert';
 import { BloodWorkDashboard } from '../features/workouts/components/powerplus/BloodWorkDashboard';
+import { PosingPhotos } from '../features/workouts/components/powerplus/PosingPhotos';
 
 export function TrainingPage() {
   const { t } = useTranslation();
@@ -32,6 +33,7 @@ export function TrainingPage() {
     showPCTCountdown,
     showHematocritAlert,
     showBloodWorkDashboard,
+    showPosingPhotos,
   } = useTrainingMode();
 
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
@@ -68,6 +70,9 @@ export function TrainingPage() {
           {showBloodWorkDashboard && <BloodWorkDashboard />}
         </div>
       )}
+
+      {/* Posing Photos — Power/Power+ */}
+      {showPosingPhotos && <PosingPhotos />}
 
       <WorkoutsTabContent
         showAddDialog={showWorkoutDialog}
