@@ -88,8 +88,21 @@
 | 10.9a   | 2026-02-27 | Musik/Timer Analyse + Konzept (MUSIK_TIMER_KONZEPT.md)                   | Erledigt   |
 | 11.0    | 2026-02-28 | Musik & Timer Overhaul komplett (4 Phasen, +32 Tests, Spotify SDK)       | Erledigt   |
 | 11.1    | 2026-02-28 | Glossar-Skill: 400+ Fachbegriffe in 12 Kategorien, allen Agents zugewiesen | Erledigt   |
+| 11.2    | 2026-02-28 | Digital Twins: 25 Personas + Testing Report (10 UX-Issues, 5 Safety, 17 Feature-Requests) | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.2: Digital Twins Testing
+
+25 detaillierte Nutzer-Personas in 5 Gruppen (Einsteiger/Fortgeschrittene/Power/Enhanced/Frauen).
+Systematisches Testing via Preview + Source-Code-Analyse. Ergebnis:
+- 10 kritische UX-Findings (Mahlzeit-Dialog, Onboarding, Allergien, Zyklus-Tracking)
+- 5 sicherheitsrelevante Findings (Allergie-Risiko, RED-S, Rektusdiastase, Haematokrit)
+- 17 priorisierte Feature-Requests (P0-P2)
+- Top-5 Sofort-Massnahmen identifiziert
+
+Neue Dokumente: `DIGITAL_TWINS.md`, `TWIN_TESTING_REPORT.md`
+Commits: 2b48ebe, e1d9dfc
 
 ### 2026-02-28 - v11.1: Glossar-Skill (Fachwoerterbuch)
 
