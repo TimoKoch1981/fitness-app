@@ -15,7 +15,6 @@ import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseC
 import { SetBySetTracker } from './SetBySetTracker';
 import { ExerciseOverviewTracker } from './ExerciseOverviewTracker';
 import { ExerciseTimer } from './ExerciseTimer';
-import { ManualTimer } from './ManualTimer';
 import { ExerciseVideoModal } from './ExerciseVideoModal';
 import { ExerciseModifyDialog } from './ExerciseModifyDialog';
 import { AddExerciseDialog } from './AddExerciseDialog';
@@ -219,11 +218,6 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
           />
         )}
       </div>
-
-      {/* Manual Timer (always available for any exercise) */}
-      {!isTimedExercise && (
-        <ManualTimer initialSeconds={effectiveRestSeconds} />
-      )}
 
       {/* Navigation (visible in set-by-set when all sets done) */}
       {state.mode === 'set-by-set' && allSetsComplete && (
