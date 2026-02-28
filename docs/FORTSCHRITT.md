@@ -89,8 +89,26 @@
 | 11.0    | 2026-02-28 | Musik & Timer Overhaul komplett (4 Phasen, +32 Tests, Spotify SDK)       | Erledigt   |
 | 11.1    | 2026-02-28 | Glossar-Skill: 400+ Fachbegriffe in 12 Kategorien, allen Agents zugewiesen | Erledigt   |
 | 11.2    | 2026-02-28 | Digital Twins: 25 Personas + Testing Report (10 UX-Issues, 5 Safety, 17 Feature-Requests) | Erledigt   |
+| 11.3    | 2026-02-28 | Twin-Testing Sofortmassnahmen: 5 Fixes (KI-Mahlzeit, Profil-Felder, Reminder, Disclaimer, Datum) | Erledigt   |
 
 ---
+
+### 2026-02-28 - v11.3: Twin-Testing Sofortmassnahmen
+
+5 Top-Priority-Fixes aus dem Digital-Twin-Testing-Report implementiert:
+
+1. **Fix #3: PED-Disclaimer** — Disclaimer wird bei Tab-Wechsel korrekt zurueckgesetzt (nur bei TRT/PED)
+2. **Fix #9: Datumsformat** — Mahlzeit-Tab zeigt jetzt de-DE Format (28.02.2026 statt ISO)
+3. **Fix #8: Mahlzeit-Reminder** — Neuer Typ `meal_logging` mit i18n in 17 Sprachen + 5er-Grid
+4. **Fix #1: KI-Mahlzeit-Schaetzung** — Sparkles-Button im Mahlzeit-Dialog: Name eingeben, KI schaetzt Kalorien/Makros via ai-proxy
+5. **Fix #2+#4: Profil Ernaehrung & Gesundheit** — Neue Sektion mit Chip-Auswahl:
+   - Ernaehrungsform (Vegetarisch, Vegan, Pescatarisch, Halal, Koscher, Laktosefrei, Glutenfrei)
+   - Allergien (Nuesse, Gluten, Laktose, Schalentiere, Eier, Soja, Weizen)
+   - Gesundheitliche Einschraenkungen (Ruecken, Schulter, Knie, Huefte, Handgelenk, Nacken, Rektusdiastase)
+
+Neue Dateien: `useEstimateMealNutrition.ts`, DB-Migration `20260228000001_profile_dietary_health.sql`
+Geaenderte Dateien: 25 (17 i18n + 8 Components/Types)
+Commit: 99175bf
 
 ### 2026-02-28 - v11.2: Digital Twins Testing
 

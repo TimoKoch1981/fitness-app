@@ -278,6 +278,13 @@
 - [x] ~~Allen 8 Agents zugewiesen~~ ✅ — Universelle Referenz (~4.500 Tokens)
 - [x] ~~Aus 15 bestehenden Skills extrahiert~~ ✅ — Konsistente Terminologie
 
+#### ~~Twin-Testing Sofortmassnahmen~~ ✅ (2026-02-28, v11.3)
+- [x] ~~Fix #3: PED-Disclaimer bei Tab-Wechsel zuruecksetzen~~ ✅ — Nur bei TRT/PED sichtbar
+- [x] ~~Fix #9: Datumsformat de-DE im Mahlzeit-Tab~~ ✅ — 28.02.2026 statt ISO
+- [x] ~~Fix #8: Mahlzeit-Reminder-Typ~~ ✅ — `meal_logging` mit i18n (17 Sprachen) + 5er-Grid
+- [x] ~~Fix #1: KI-Schaetzung im Mahlzeit-Dialog~~ ✅ — Sparkles-Button, ai-proxy, Auto-Fill Makros
+- [x] ~~Fix #2+#4: Profil Ernaehrung & Gesundheit~~ ✅ — Ernaehrungsform (7), Allergien (7), Einschraenkungen (7) als Chip-Auswahl + DB-Migration
+
 #### Auth-Erweiterungen
 - [ ] OAuth / Social Login (Google, Apple) — alle Provider in config.toml disabled
 - [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
