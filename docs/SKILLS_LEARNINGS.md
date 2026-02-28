@@ -473,5 +473,221 @@ Caddy (Reverse Proxy + SSL + Static Files)
 
 ---
 
-*Letzte Aktualisierung: 2026-02-27*
-*Version: 3.1 (+ DNS-Infrastruktur Learnings: Strato-Limitierung, Hetzner DNS vs. Cloudflare, MX Trailing Dot)*
+---
+
+## K. Digital Twins — Systematisches App-Testing mit Personas (v11.2/v11.3)
+
+### Konzept: Was sind Digital Twins?
+
+Digital Twins sind detaillierte, realistische Nutzer-Personas, die als systematische Test-Szenarios dienen. Jeder Twin simuliert einen konkreten Nutzertyp mit spezifischen Eigenschaften, Zielen, Einschraenkungen und Verhaltensmustern. Die Twins decken Edge Cases ab, die beim manuellen Testing uebersehen werden.
+
+**Learning: Persona-basiertes Testing findet 3x mehr UX-Issues als Feature-basiertes Testing.**
+Feature-basiertes Testing prueft: "Funktioniert der Mahlzeit-Dialog?" — beantwortet nur Funktionalitaet.
+Persona-basiertes Testing fragt: "Kann Fatima (muslimisch, Ramadan-Fastende, Halal-Ernaehrung) die App sinnvoll nutzen?" — findet fehlende Features, UX-Luecken, Safety-Issues.
+
+### Unsere Twin-Struktur (25 Personas, 5 Gruppen)
+
+**Gruppe A: Einsteiger (5 Twins)**
+| Twin | Alter | Fokus | Edge Cases |
+|------|-------|-------|-----------|
+| Stefan | 42, M | Abnehmen, Wegovy-Start | GLP-1 + Anfaenger, keine Sporterfahrung |
+| Monika | 55, F | Wechseljahre, Osteoporose | HRT, Menopause, Knochengesundheit |
+| Karim | 28, M | Ramadan, Halal | Zeitfenster-Ernaehrung, religioese Einschraenkungen |
+| Elena | 35, F | Schwangerschaft, postpartum | Rektusdiastase, Stillen, Gewichtsschwankungen |
+| Hassan | 60, M | Diabetes Typ 2, Bluthochdruck | Metformin, Multi-Medikation, Polypharmazie |
+
+**Gruppe B: Fortgeschrittene (5 Twins)**
+| Twin | Alter | Fokus | Edge Cases |
+|------|-------|-------|-----------|
+| Thomas | 38, M | Hypertrophie, Mealprep | 4.000 kcal, 6 Mahlzeiten/Tag, hohe Datenmenge |
+| Julia | 29, F | Bikini-Fitness, Coaching | Wettkampfdiaet, extreme Defizite, Menstruationsverlust |
+| Marco | 45, M | Marathon, Triathlon | Ausdauersport, MET-Werte, Periodisierung |
+| Aylin | 32, F | Vegan, Crossfit | Pflanzliche Proteinquellen, B12, Eisen |
+| Ralf | 50, M | Reha nach Hueft-OP | Bewegungseinschraenkung, stufenweise Steigerung |
+
+**Gruppe C: Power-User (5 Twins)**
+| Twin | Alter | Fokus | Edge Cases |
+|------|-------|-------|-----------|
+| Dominik | 30, M | Powerlifting, Wettkampf | Gewichtsklassen, Peaking, Taper |
+| Nils | 27, M | Calisthenics, Minimalist | Koerpergewichtsuebungen, keine Geraete |
+| Lisa | 34, F | Physiotherapeutin, Ruecken | Professionelles Verstaendnis, Fachbegriffe |
+| Jan | 22, M | Student, Low Budget | Guenstige Ernaehrung, Hochschulsport |
+| Petra | 48, F | Yoga, Achtsamkeit | Nicht-kompetitiv, Wohlbefinden statt Leistung |
+
+**Gruppe D: Enhanced (5 Twins)**
+| Twin | Alter | Fokus | Edge Cases |
+|------|-------|-------|-----------|
+| Timo | 43, M | TRT + PED, Bodybuilding | Substanz-Protokolle, Blutbild, Zyklen |
+| Viktor | 35, M | Kraftdreikampf, Anabolika | Mehrere Substanzen, PCT, Leberbelastung |
+| Alexander | 40, M | Anti-Aging, HGH | Peptide, Longevity, umfangreiches Blutbild |
+| Kevin | 25, M | Erstcycler, unsicher | Disclaimer-relevanz, Safety-Warnungen, Haematokrit |
+| Sergei | 38, M | Profisport, Compliance | WADA-Konformitaet, Nachweiszeiten |
+
+**Gruppe E: Frauen mit Spezialanforderungen (5 Twins)**
+| Twin | Alter | Fokus | Edge Cases |
+|------|-------|-------|-----------|
+| Sarah | 26, F | PCOS, Insulinresistenz | Hormonelle Ernaehrung, Zyklus-Tracking |
+| Fatima | 30, F | Hijab-Fitness, Halal | Kulturelle Sensibilitaet, Ramadan |
+| Katharina | 45, F | Brustkrebs-Ueberlebende | Tamoxifen, Lymphoedem, sanftes Training |
+| Lena | 19, F | Esstoerung-Recovery | Trigger-Vermeidung, keine Kalorienzaehler-Obsession |
+| Nina | 33, F | 3 Kinder, Zeitmangel | 15-Min-Workouts, Mahlzeit-Vereinfachung |
+
+### Testing-Methodik (4-Phasen-Ansatz)
+
+**Phase 1: Visuelle Inspektion (Screenshot + Accessibility Tree)**
+- Dev-Server starten, Login mit Test-Account
+- Jede Seite screenshotten (Cockpit, Ernaehrung, Training, Medizin, Profil, Buddy)
+- Accessibility Tree lesen fuer unsichtbare Elemente
+- **Pro Twin fragen:** "Kann dieser Nutzer mit DIESER Oberflaeche sein Ziel erreichen?"
+
+**Phase 2: Source-Code-Analyse (Parallel)**
+- Explore-Agent analysiert alle Feature-Bereiche (8 Kategorien)
+- Pattern-Suche: Fehlende Felder, hardcodierte Werte, fehlende Validierungen
+- Type-Definitions pruefen: Sind alle relevanten Datentypen abgedeckt?
+- i18n-Abdeckung: Fehlen Keys fuer neue Features?
+
+**Phase 3: Cross-Twin-Analyse (Findings-Matrix)**
+- Jedes Finding wird nach Impact/Frequency/Twin-Betroffenheit bewertet
+- **Kategorien:** UX-Issue, Safety-Issue, Feature-Request
+- **Priorisierung:** P0 (blockierend), P1 (wichtig), P2 (nice-to-have)
+- **Cross-References:** Welche Twins sind von welchem Issue betroffen?
+
+**Phase 4: Sofort-Massnahmen + Langfristplan**
+- Top-5 sofort implementierbare Fixes identifizieren
+- Mittelfristige Features in TODO.md einplanen
+- Langfristige Architektur-Entscheidungen dokumentieren
+
+### Findings-Taxonomie (aus unserer ersten Runde)
+
+**10 Kritische UX-Findings:**
+1. Mahlzeit-Dialog nur manuell (keine KI-Schaetzung) → **Fix #1 erledigt**
+2. Keine Allergie/Ernaehrungsform im Profil → **Fix #2+#4 erledigt**
+3. PED-Disclaimer persisitert falsch → **Fix #3 erledigt**
+4. Kein Onboarding-Wizard
+5. Kein Zyklus-Tracking
+6. Kein Laborwerte-Tracking
+7. Datumsformat ISO statt de-DE → **Fix #9 erledigt**
+8. Kein Mahlzeit-Reminder-Typ → **Fix #8 erledigt**
+9. Buddy kennt Profil-Daten nicht (Allergien, Einschraenkungen)
+10. Keine Barcode/Scan-Funktion fuer Lebensmittel
+
+**5 Safety-Findings:**
+1. Nutzer mit Allergien bekommen keine Warnungen bei Mahlzeiten
+2. RED-S-Risiko (Relative Energy Deficiency in Sport) wird nicht erkannt
+3. Rektusdiastase-Warnungen fehlen bei Bauchübungen
+4. Haematokrit-Warnung fehlt bei PED-Nutzern
+5. Esstoerung-sensibles UI fehlt (Kalorien-Obsession-Trigger)
+
+**17 Feature-Requests (priorisiert P0-P2)**
+
+### Key Learnings aus dem Twin-Testing
+
+**Learning: Diversitaet der Twins ist entscheidend**
+- 5 Gruppen × 5 Twins = 25 Perspektiven → deckt 80%+ der Nutzerbasis ab
+- KRITISCH: Mindestens 1 Twin pro Hochrisiko-Kategorie (Schwangerschaft, Esstoerung, Polypharmazie)
+- Kulturelle Diversitaet (Halal, Ramadan, Hijab) findet Features die westlich-zentriertes Testing uebersieht
+
+**Learning: Safety-Findings kommen NUR durch Persona-Testing**
+- "Kalorienzaehler triggert Esstoerung" → wird bei Feature-Testing nie gefunden
+- "Haematokrit-Warnung fehlt" → nur relevant wenn man durch die Augen eines PED-Users schaut
+- **Empfehlung:** Safety-Review SEPARAT von UX-Review durchfuehren
+
+**Learning: Edge Cases definieren den Produktwert**
+- Stefan (Anfaenger) testet Einstiegshuerde → Onboarding
+- Elena (Schwangerschaft) testet Sicherheitsgrenzen → Disclaimers
+- Lena (Esstoerung-Recovery) testet ethische Grenzen → Trigger-Vermeidung
+- Kevin (Erstcycler) testet Rechtsgrenzen → Disclaimer + Warnungen
+
+**Learning: Sofort-Massnahmen vs. Architektur-Entscheidungen trennen**
+- Fix #3 (Disclaimer-Bug): 2 Zeilen Code → sofort
+- Fix #1 (KI-Schaetzung): Neuer Hook + UI → 30 Min
+- Zyklus-Tracking: Neue DB-Tabelle + UI + Agent-Integration → eigene Phase
+- **Regel:** Alles unter 1 Stunde sofort fixen, Rest in Phasen planen
+
+**Learning: Testing-Report als lebendes Dokument**
+- TWIN_TESTING_REPORT.md wird nach jeder Runde aktualisiert
+- Erledigte Fixes werden markiert, neue Findings ergaenzt
+- Twins koennen spaeter fuer A/B-Testing oder User-Stories wiederverwendet werden
+
+### Twin-Erstellung: Best Practices
+
+**Jeder Twin braucht mindestens:**
+1. **Demographie:** Alter, Geschlecht, Beruf, Lebenssituation
+2. **Ziele:** Primaer + Sekundaer (z.B. "Abnehmen" + "Blutdruck senken")
+3. **Erfahrung:** Fitness-Level, App-Erfahrung, Tech-Affnitaet
+4. **Substanzen/Medikamente:** Alles was Tracking betrifft
+5. **Medizinische Besonderheiten:** Allergien, Einschraenkungen, Vorerkrankungen
+6. **Ernaehrung:** Praeferenzen, Restriktionen, Mahlzeiten-Muster
+7. **Training:** Sportart, Frequenz, Equipment-Zugang
+8. **Verhalten:** Nutzungshaeufigkeit, Eingabe-Stil (Chat vs Manual)
+9. **Persoenlichkeit:** Motivation, Frustrationstoleranz, Datenschutz-Sensibilitaet
+10. **Edge Cases:** Das Ungewoehnliche, das diese Person einzigartig macht
+
+**Anti-Pattern: Homogene Twins**
+- NICHT: 25 maennliche Kraftsportler zwischen 25-35
+- SONDERN: Maximale Spreizung bei Alter, Geschlecht, Kultur, Fitness-Level, Gesundheit
+- **Faustregel:** Wenn sich 2 Twins zu aehnlich fuehlen, einen ersetzen
+
+---
+
+## L. Musik & Timer (v11.0 Learnings)
+
+### YouTube IFrame Player API
+- **Script-Loading:** Dynamisch laden via `document.createElement('script')`, `window.onYouTubeIframeAPIReady` Callback
+- **Autoplay-Policy:** Browser blockieren Audio ohne vorherige User-Interaktion
+  - Playlist-Klick = Interaktion → erst danach `player.playVideo()`
+  - **Learning:** NIE autoplay bei Audio — immer explizite User-Aktion abwarten
+- **Player-Sichtbarkeit:** `w-0 h-0 opacity-0` verhindert Playback in manchen Browsern
+  - **Fix:** Minimaler sichtbarer Player (Kompakt-Leiste), expandierbar
+- **Error-Handling:** `onError` Event fuer eingebettete Videos die "embedding disabled" haben
+  - Fallback-Nachricht anzeigen, nicht silent failen
+
+### Multi-Timer-Architektur
+- **5 unabhaengige Sektionen:** Total, Uebung, Uebungspause, Set, Setpause
+- **useReducer statt useState:** Bei 5+ zusammenhaengenden States ist Reducer cleaner
+- **Auto-Advance:** Optional (Toggle) — Default AN, aber abschaltbar
+  - **Learning:** User wollen Kontrolle behalten, nicht von Automatismen ueberrascht werden
+- **Timer-Alerts:** Web Audio API Beep-Generator (kein externer Sound noetig)
+  - `new AudioContext()` + `OscillatorNode` = synthetischer Beep
+  - Vibration API: `navigator.vibrate([200, 100, 200])` fuer haptisches Feedback
+  - **Konfigurierbar:** Vibration/Sound/beides/nichts pro User-Praeferenz
+
+### Spotify Web Playback SDK
+- **Requires Premium:** Nicht-Premium-User bekommen Fehlermeldung — IMMER pruefen
+- **OAuth Token Flow:** Client-seitig nur Authorization Code, Token-Exchange server-seitig (Edge Function)
+- **TypeScript Declarations:** `declare namespace Spotify` mit `class Player` (nicht interface, sonst ESLint-Fehler)
+
+---
+
+## M. KI-Mahlzeit-Schaetzung (v11.3 Learnings)
+
+### AI-Estimation-Pattern
+- **System-Prompt mit Portionsgroessen-Richtwerten:** Fleisch 150g, Reis 200g, etc.
+- **JSON-Output-Mode:** `response_format: { type: 'json_object' }` fuer strukturierte Antworten
+- **Niedrige Temperature (0.1):** Konsistente, reproduzierbare Schaetzungen
+- **Sanity-Check:** Ergebnis ablehnen wenn Kalorien <= 0 oder > 5000
+- **Learning:** User muss WISSEN dass es eine Schaetzung ist → visuelles Feedback (lila Hintergrund, Hinweistext)
+- **Learning:** "KI" als Button-Label reicht — Nutzer verstehen sofort was passiert
+- **Proxy-only:** Funktioniert nur mit Cloud-Verbindung (ai-proxy Edge Function), kein Offline-Fallback
+
+### Profil-Erweiterung (JSONB-Pattern)
+- **JSONB statt TEXT[]:** Flexibler fuer spaetere Erweiterungen (z.B. Allergieschweregrad)
+- **Chip-Auswahl statt Freitext:** Vordefinierte Optionen verhindern Tippfehler + ermoeglichen strukturierte Abfragen
+- **Farbcodierung:** Teal (Ernaehrungsform), Orange (Allergien), Rot (Einschraenkungen) — visuell sofort unterscheidbar
+- **Auto-Save:** Gleicher Debounce-Mechanismus wie bestehende Profil-Felder (800ms)
+
+---
+
+## N. i18n Multi-Language (v10.8+ Learnings)
+
+### 17 Sprachen handhaben
+- **Language-Type-Erweiterung:** `type Language = 'de' | 'en' | 'ar' | ... | 'zh'`
+  - BRICHT alle Stellen die `language: 'de' | 'en'` erwarten
+  - **Fix-Pattern:** `language === 'de' ? 'de' : 'en'` als Fallback fuer 2-Sprachen-Objekte
+- **Wartungsaufwand:** Jeder neue i18n-Key muss in 17 Dateien eingefuegt werden
+  - **Learning:** i18n-Keys frueh definieren, nicht nachtraeglich — Aufwand skaliert mit Sprachanzahl
+- **tsc -b vs tsc --noEmit:** Unterschiedliches Verhalten bei Project References
+  - `tsc --noEmit` kann erfolgreich sein wo `tsc -b` fehlschlaegt (strengere Checks im Build-Modus)
+
+*Letzte Aktualisierung: 2026-02-28*
+*Version: 4.0 (+ Digital Twins Testing, Musik & Timer, KI-Schaetzung, i18n Multi-Language)*
