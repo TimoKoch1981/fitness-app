@@ -4,7 +4,7 @@
  *
  * Roles: Personal Trainer, Sportmediziner, Trainingsplaner
  *
- * @version 2.0.0
+ * @version 3.0.0
  * @see docs/WISSENSCHAFTLICHE_GRUNDLAGEN.md
  */
 
@@ -13,8 +13,8 @@ import type { SkillMeta } from './types';
 export const TRAINING_SKILL_META: SkillMeta = {
   id: 'training',
   name: 'Trainingswissenschaft',
-  version: '2.0.0',
-  updatedAt: '2026-02-27',
+  version: '3.0.0',
+  updatedAt: '2026-02-28',
   sources: [
     'Adult Compendium of Physical Activities (Herrmann et al. 2024, PMID:38242596)',
     'NSCA Strength Training Guidelines',
@@ -26,9 +26,15 @@ export const TRAINING_SKILL_META: SkillMeta = {
     'Tanaka et al. 2001, JACC, PMID:11153730 — HRmax Formula',
     'Mujika & Padilla 2000, Sports Med, PMID:11015553 — Detraining timelines',
     'Jeffreys 2007, NSCA Strength Cond J — RAMP warm-up protocol',
+    'Harries et al. 2015, Sports Med, PMID:25370203 — Periodisation Systematic Review',
   ],
-  tokenEstimate: 3200,
+  tokenEstimate: 6200,
   changelog: [
+    {
+      version: '3.0.0',
+      date: '2026-02-28',
+      changes: 'Major: Periodisierungsmodelle (Linear, DUP, Block mit Wochen-Beispielen), Superkompensation (4 Phasen, Timing, visuelles Modell), Mobilitaet & Flexibility (Definitionen, 6-Uebungen-Routine, Foam Rolling), Verletzungspraevention (5 Sportarten, Schmerz-Ampel, Arzt-Entscheidung)',
+    },
     {
       version: '2.0.0',
       date: '2026-02-27',
@@ -290,6 +296,167 @@ Statisches Dehnen nur NACH dem Training.
 | BJJ / Ringen | 7.8 |
 | MMA | 8.0 |
 - split_type: "martial_arts"
+
+## PERIODISIERUNGSMODELLE (erweitert)
+
+### Lineare Periodisierung
+Schrittweise Steigerung der Intensitaet bei sinkendem Volumen ueber einen Mesozyklus.
+
+| Woche | Intensitaet (%1RM) | Reps | Sets/Uebung | Fokus |
+|-------|-------------------|------|-------------|-------|
+| 1 | 60-65% | 12-15 | 3 | Anpassung, Technik |
+| 2 | 65-70% | 10-12 | 3-4 | Hypertrophie |
+| 3 | 70-75% | 8-10 | 4 | Hypertrophie |
+| 4 | 75-80% | 6-8 | 4 | Kraft-Hypertrophie |
+| 5 | 80-85% | 4-6 | 4-5 | Maximalkraft |
+| 6 | 85-90% | 3-5 | 3-5 | Maximalkraft |
+| 7 (Deload) | 50-60% | 8-10 | 2-3 | Erholung |
+
+**Geeignet fuer:** Anfaenger und leicht Fortgeschrittene (<2 Jahre Trainingserfahrung).
+
+### Daily Undulating Periodization (DUP)
+Taeglicher Wechsel der Trainingsparameter innerhalb einer Woche.
+
+| Tag | Fokus | Intensitaet | Reps | Pause |
+|-----|-------|------------|------|-------|
+| Montag | Hypertrophie | 65-75% 1RM | 8-12 | 60-90s |
+| Mittwoch | Kraft | 80-88% 1RM | 3-6 | 3-5 min |
+| Freitag | Metabolisch/Leicht | 55-65% 1RM | 12-20 | 30-60s |
+
+**Vorteil:** Staendige Variation verhindert Adaptation.
+**Geeignet fuer:** Fortgeschrittene (1-4 Jahre Erfahrung).
+
+### Block-Periodisierung
+Aufeinanderfolgende Bloecke mit jeweils einem dominanten Trainingsziel.
+
+| Block | Dauer | Volumen | Intensitaet | Ziel |
+|-------|-------|---------|------------|------|
+| 1: Akkumulation | 3-4 Wochen | Hoch (16-24 Sets/Muskel) | Moderat (60-75%) | Arbeitskapazitaet, Hypertrophie |
+| 2: Transmutation | 3-4 Wochen | Mittel (12-16 Sets/Muskel) | Hoch (75-85%) | Kraft, Conversion |
+| 3: Realisation | 1-2 Wochen | Niedrig (6-10 Sets/Muskel) | Sehr hoch (85-95%) | Peaking, Testmaxima |
+| Deload | 1 Woche | Minimal | Niedrig | Vollstaendige Erholung |
+
+**Geeignet fuer:** Erfahrene Athleten (>3 Jahre), Wettkampfvorbereitung.
+
+### Welches Modell fuer wen?
+| Level | Empfohlenes Modell | Begruendung |
+|-------|-------------------|-------------|
+| Anfaenger (<1 J) | Linear | Einfach, prognostizierbar, kontinuierliche Progression |
+| Fortgeschritten (1-3 J) | DUP | Variation noetig, schnellere Adaptation an lineares Modell |
+| Erfahren (>3 J) | Block | Gezielte Phasen noetig, Wettkampf-Periodisierung |
+| Enhanced (TRT+) | DUP oder Block | Schnellere Regeneration erlaubt hoehere Frequenz/Varianz |
+
+Quelle: Harries et al. 2015, Sports Med (PMID:25370203) — Systematic Review Periodisation
+
+## SUPERKOMPENSATION
+
+### Die 4 Phasen
+1. **Trainingsstimulus (Belastung):** Muskulaere Ermuedung, Gewebeabbau, Glykogendepletion
+2. **Erschoepfung (Fatigue):** Leistungsfaehigkeit sinkt unter Ausgangsniveau (0-24h post-Training)
+3. **Erholung (Recovery):** Reparaturprozesse, Ausgangsniveau wird wiederhergestellt (24-48h)
+4. **Superkompensation:** Leistungsfaehigkeit UEBER Ausgangsniveau (48-72h fuer Kraft)
+
+### Zeitliche Orientierung
+\`\`\`
+Leistung
+  ^
+  |          ****
+  |        *      *  ← Superkompensation (optimales Fenster)
+  |------*----------*---------- Ausgangsniveau
+  |    *              *
+  |  *                  *  ← Detraining (zu spaet)
+  | *
+  |*  ← Erschoepfung
+  +--------------------------------→ Zeit
+  Training    24-48h    48-72h    >96h
+\`\`\`
+
+### Optimales Timing
+| Trainingstyp | Superkompensations-Peak | Naechstes Training |
+|-------------|------------------------|-------------------|
+| Leichtes Ausdauer | 12-24h | Taeglich moeglich |
+| Hypertrophie (moderat) | 48-72h | Alle 2-3 Tage |
+| Maximalkraft (schwer) | 72-96h | Alle 3-4 Tage |
+| ZNS-intensiv (Sprints, 1RM) | 96-120h | Alle 4-5 Tage |
+
+- **Uebertraining** = Naechster Stimulus VOR Erholung (kumulierte Erschoepfung)
+- **Detraining** = Naechster Stimulus ZU SPAET (Superkompensation verfallen)
+- **Enhanced (TRT+):** Superkompensations-Fenster oeffnet sich frueher (30-50% schnellere Recovery)
+
+## MOBILITAET & FLEXIBILITY
+
+### Definitionen
+- **Mobility:** Aktive Gelenkbeweglichkeit unter Last (kontrollierter Bewegungsumfang)
+- **Flexibility:** Passive Dehnfaehigkeit des Gewebes (Muskeln, Faszien, Baender)
+- **Stability:** Faehigkeit, Gelenke unter Last in sicherer Position zu kontrollieren
+
+**Zusammenspiel:** Mobility = Flexibility + Stability + motorische Kontrolle
+
+### Schluessel-Bereiche fuer Athleten
+| Bereich | Warum wichtig | Test |
+|---------|-------------|------|
+| Brustwirbelsaeule (BWS) | Overhead-Bewegungen, Kniebeuge-Tiefe | Wand-Engel (Arme flach an Wand) |
+| Huefte | Kniebeuge, Deadlift, Laufen | Tiefer Squat-Hold (Fersen am Boden) |
+| Sprunggelenk | Kniebeuge-Tiefe, Lauf-Mechanik | Knie-zur-Wand-Test (>10 cm) |
+| Schulter | Ueberkopfbewegungen, Bankdruecken | Schulterdislocation mit Stab |
+
+### Taegliche Mobility-Routine (5-10 min)
+1. **Cat-Cow (BWS):** 10 Wiederholungen, langsam und kontrolliert
+2. **90/90 Hip Switch:** 8 pro Seite, Hueftrotation
+3. **World's Greatest Stretch:** 5 pro Seite (Hueftbeuger + BWS + Hamstrings)
+4. **Ankle Rocks (Wadendehnung):** 10 pro Seite, Knie ueber Zehen schieben
+5. **Thread the Needle (BWS-Rotation):** 8 pro Seite
+6. **Shoulder Pass-Throughs (Stab/Band):** 10 Wiederholungen
+
+### Timing-Regeln
+| Wann | Methode | Dauer | Wirkung |
+|------|---------|-------|---------|
+| VOR Training | Dynamisches Dehnen, Mobility Drills | 5-10 min | ROM erhoehen, Aufwaermen |
+| NACH Training | Statisches Dehnen | 5-10 min | Flexibilitaet verbessern, Cool-down |
+| Separate Session | Yoga, Mobility Flow | 20-45 min | Langfristige Beweglichkeit |
+
+### Foam Rolling (Evidenzbasiert)
+- **Dauer:** 2-3 Minuten pro Muskelgruppe
+- **Pre-Training:** Kurzfristige ROM-Verbesserung OHNE Kraftverlust (anders als statisches Dehnen)
+- **Post-Training:** Reduktion von DOMS (Muskelkater) um 20-30%
+- **Haeufige Bereiche:** IT-Band, Quadrizeps, Latissimus, Wadenmuskulatur, Piriformis
+- **Intensitaet:** Moderat (schmerzhafte Punkte 30-60s halten, nicht brutal drueckerrollen)
+
+## VERLETZUNGSPRAEVENTION (erweitert)
+
+### Haeufige Verletzungen nach Sportart
+| Sportart | Haeufige Verletzungen | Praevention |
+|----------|----------------------|------------|
+| Kraftsport | Schulter-Impingement, Knie (Patella), LWS-Bandscheibe | Rotatorenmanschette staerken, Technik priorisieren, Core staerken |
+| Laufen | Shin Splints, IT-Band-Syndrom, Plantarfasziitis, Runner's Knee | Laufschuhe, 10%-Regel, Hueftstaerke, Lauf-ABC |
+| Schwimmen | Schwimmerschulter, LWS (Brust/Schmetterling) | Schulter-Prehab, Techniktraining, Variation der Stile |
+| CrossFit | Schulter (Kipping), LWS (hohe Reps unter Ermuedung), Handgelenk | Technik vor Tempo, Ego-Check, angemessene Skalierung |
+| Kampfsport | Knie (ACL/MCL), Schulter (Ausrenken), Gehirnerschuetterung | Staerketraining, Nackenstaerke, Schutzausruestung |
+
+### Praeventions-Prinzipien
+- **10%-Regel:** Trainingsvolumen (Gewicht ODER Umfang) max. 10% pro Woche steigern
+- **Agonist/Antagonist-Balance:** Ruecken:Brust = 1:1, Hamstrings:Quadrizeps >= 0.6:1
+- **Aufwaermen:** RAMP-Protokoll IMMER (siehe oben) — reduziert Verletzungsrisiko um 30-50%
+- **Technik vor Last:** Bewegung erst ohne Gewicht beherrschen, dann progressiv laden
+- **Ermuedungsmanagement:** Letzte 1-2 Sets NICHT bis zum Versagen (Verletzungsrisiko steigt exponentiell)
+- **Antagonisten-Training:** Fuer jede Drueckuebung eine Zuguebung (Schultergesundheit)
+
+### Return-from-Injury-Protokoll (Schmerz-Ampel)
+| Schmerz (0-10 NRS) | Ampel | Empfehlung |
+|--------------------|-------|-----------|
+| 0-3 (minimal) | GRUEN | Training erlaubt, Gewicht/Volumen moderat steigern |
+| 4-5 (merklich) | GELB | Gewicht reduzieren, ROM einschraenken, keine Steigerung |
+| 6+ (deutlich) | ROT | STOP — Uebung aussetzen, Alternative suchen, ggf. Arzt |
+
+### Arzt vs. Selbstmanagement
+| Arzt aufsuchen (PFLICHT) | Selbstmanagement moeglich |
+|-------------------------|--------------------------|
+| Akuter Schmerz mit Schwellung/Bluterguss | Leichter Muskelkater (DOMS) |
+| Gelenkblockade (kann nicht bewegen) | Leichte Muskelverspannung |
+| Schmerz >7/10 oder zunehmend | Bekannte chronische Einschraenkung |
+| Neurologische Symptome (Taubheit, Kribbeln) | Leichter Schmerz <4 der nach 48h besser wird |
+| Verdacht auf Fraktur, Riss, Ausrenkung | Ueberbelastungsschmerz der auf Ruhe reagiert |
+| Schmerz laenger als 2 Wochen ohne Besserung | — |
 
 ## RED FLAGS — SOFORTIGER TRAININGSABBRUCH
 - Brustschmerz / Brustdruck → SOFORT STOP + Rettungsdienst

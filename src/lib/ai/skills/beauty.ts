@@ -6,7 +6,7 @@
  * Roles: Plastischer Chirurg, Sportmediziner, Psychologe
  * SACHLICH — evidenzbasiert, kein Body-Shaming, realistische Erwartungen
  *
- * @version 2.0.0
+ * @version 3.0.0
  */
 
 import type { SkillMeta } from './types';
@@ -14,8 +14,8 @@ import type { SkillMeta } from './types';
 export const BEAUTY_SKILL_META: SkillMeta = {
   id: 'beauty',
   name: 'Aesthetische Eingriffe & Beauty',
-  version: '2.0.0',
-  updatedAt: '2026-02-27',
+  version: '3.0.0',
+  updatedAt: '2026-02-28',
   sources: [
     'ASPS (American Society of Plastic Surgeons) Guidelines',
     'ISAPS Global Survey on Aesthetic Procedures',
@@ -24,9 +24,15 @@ export const BEAUTY_SKILL_META: SkillMeta = {
     'Comerci et al. 2024, Aesthetic Surg J — Liposuction SR/MA (PMID:38563572)',
     'Willet et al. 2023, Plast Reconstr Surg — HD-Lipo SR (PMID:36728192)',
     'Kao et al. 2023, Healthcare — Pulmonale Fettembolie (PMID:37239677)',
+    'Kligman 2006, J Am Acad Dermatol — Retinoid Review (topische Wirkstoffe)',
   ],
-  tokenEstimate: 1300,
+  tokenEstimate: 3400,
   changelog: [
+    {
+      version: '3.0.0',
+      date: '2026-02-28',
+      changes: 'Major: Evidenzbasierte Hautpflege (6 Kernwirkstoffe, Training-Skincare, AAS-Hautprobleme), Haartransplantation & Haarausfall (Norwood, AAS/DHT, FUE/FUT, Behandlungsoptionen), Erweitertes Timing (Planungstabelle, saisonale Faktoren, Staging, Altersueberlegungen)',
+    },
     {
       version: '2.0.0',
       date: '2026-02-27',
@@ -138,6 +144,91 @@ Vor OP mit Chirurgen/Anaesthesisten abstimmen:
 | HD-Lipo | 3-4 Wochen | 8-10 Wochen |
 | Abdominoplastik | 4-6 Wochen | 10-12 Wochen |
 | Gynaekomastie-OP | 2-3 Wochen | 4-6 Wochen |
+
+## EVIDENZBASIERTE HAUTPFLEGE
+
+### Kernwirkstoffe mit Evidenz
+| Wirkstoff | Wirkung | Evidenzlevel | Timing | Haeufige Nebenwirkungen |
+|-----------|---------|-------------|--------|------------------------|
+| Retinoid (Tretinoin/Retinol) | Faltenreduktion, Texturverbesserung, Kollagenstimulation | Hoch (Goldstandard) | PM (photosensibilisierend) | Trockenheit, Schaelung, Retinoidderm (initial) |
+| Vitamin C (L-Ascorbinsaeure) | Antioxidativ, Aufhellung, Kollagensynthese | Hoch | AM (unter SPF) | Leichtes Kribbeln, Instabilitaet bei Licht/Luft |
+| Niacinamid (Vit. B3) | Barrierestärkung, Porenverfeinerung, Sebumregulation | Mittel-Hoch | AM oder PM | Sehr gut vertraeglich; selten Flush bei >5% |
+| AHA (Glykolsaeure) | Chemisches Peeling, Zellerneuerung, Hyperpigmentierung | Hoch | PM (photosensibilisierend) | Reizung, Sonnenempfindlichkeit |
+| BHA (Salicylsaeure) | Porenreinigung, antiinflammatorisch, komedolytisch | Hoch | PM | Trockenheit, leichte Reizung |
+| SPF (Sonnenschutz) | Photoaging-Praevention, Hautkrebsschutz | Sehr hoch (staerkste Evidenz) | AM (jeden Tag, auch bewoelkt) | Weisseln (mineralisch), komedogen (manche Formeln) |
+
+### Hautpflege + Training
+- **Post-Workout:** Gesicht innerhalb 15-30 Min. reinigen — Schweiss + Bakterien foerdern Akne
+- **Schweiss & Akne:** Mechanische Reibung (Stirnband, Helm) + Schweiss = Acne mechanica; atmungsaktive Kleidung verwenden
+- **Outdoor-Athleten:** SPF 30+ (LSF 50 optimal), wasserfest, alle 2h nachauftragen; Vitamin C morgens als zusaetzlicher Antioxidans-Schutz
+- **Sauna/Dampfbad:** Anschliessend milde Reinigung; Hitze kann Rosacea verschlechtern
+
+### AAS-bedingte Hautprobleme
+- **Akne (AAS-Akne):** Erhoehte Androgene → Talgproduktion steigt; v.a. Ruecken, Schultern, Brust
+  - Management: Salicylsaeure, Benzoylperoxid, retinoidhaltige Cremes; bei schwerer Akne → Dermatologie
+- **Fettige Haut:** DHT-mediiert; mattierendes Pflegeprogramm, Niacinamid hilfreich
+- **Dehnungsstreifen (Striae):** Schnelles Muskelwachstum; Prophylaxe begrenzt (Feuchtigkeitspflege), Behandlung: Laser, Microneedling
+- Quelle: Kligman 2006, J Am Acad Dermatol — Retinoid-Review zur Evidenzbasis topischer Wirkstoffe
+
+## HAARTRANSPLANTATION & HAARAUSFALL
+
+### Androgenetische Alopezie (Maennlicher Haarausfall)
+- Haeufigste Ursache: Genetische Empfindlichkeit der Haarfollikel gegenueber DHT (Dihydrotestosteron)
+- **Norwood-Skala:** Klassifikation Grad I-VII; fruehe Stadien besser behandelbar
+- Progression: Ohne Behandlung progressiv; Stabilisierung moeglich aber keine vollstaendige Umkehr
+
+### AAS/TRT & Haarausfall
+- **DHT-mediiert:** Testosteron wird durch 5-alpha-Reduktase in DHT umgewandelt → Miniaturisierung der Haarfollikel
+- **Besonders problematische Substanzen:** DHT-Derivate (Stanozolol, Mesterolon, Drostanolon) — direkte DHT-Rezeptor-Aktivierung
+- **Weniger problematisch:** Nandrolon (wird in schwaeecheres DHN umgewandelt), Oxandrolon (mild)
+- **TRT:** Moderates Risiko; abhaengig von genetischer Praedisposition
+- Bei genetischer Veranlagung: Jede supraphysiologische Androgen-Exposition beschleunigt MPB
+
+### Behandlungsoptionen
+| Therapie | Wirkung | Evidenz | Anmerkungen |
+|----------|---------|---------|-------------|
+| Minoxidil (topisch 5%) | Verlaengert Anagenphase, verbessert Durchblutung | Hoch | 2x taeglich; Effekt nach 3-6 Monaten; bei Absetzen Rueckfall |
+| Finasterid (1mg oral) | 5-alpha-Reduktase-Hemmer, senkt DHT ~70% | Hoch | Sexuelle Nebenwirkungen moeglich (2-5%); Kontraindikation bei Kinderwunsch |
+| PRP (Plättchenreiches Plasma) | Wachstumsfaktoren stimulieren Follikel | Mittel | 3-6 Sitzungen initial, dann Erhaltung; teuer |
+| Haartransplantation (FUE) | Einzelentnahme von Follikeln aus Donorzone | Hoch | Minimal-invasiv, keine lineare Narbe, laengere OP-Zeit |
+| Haartransplantation (FUT) | Streifenentnahme aus Donorzone | Hoch | Mehr Grafts pro Sitzung moeglich, lineare Narbe |
+
+### Haartransplantation — Details
+- **Geeignete Kandidaten:** Stabiler Haarausfall (Norwood III+), ausreichende Donorzone, realistische Erwartungen
+- **Kostenrahmen:** 3.000-10.000 EUR (abhaengig von Graft-Anzahl und Klinik)
+- **Recovery-Timeline:** 7-14 Tage Krusten/Schwellung, 2-3 Wochen sozial vorzeigbar, Shedding Phase Woche 2-6, Neuwachstum ab Monat 3-4, Endergebnis nach 12-18 Monaten
+- **Realistische Erwartungen:** Kein "volles Haar" — Verdichtung und natuerlichere Haarlinie; 2. Sitzung moeglich nach 12 Monaten
+→ Bei anhaltendem Haarausfall: Ueberweisung an Dermatologen/Trichologen fuer Gesamtkonzept
+
+## ERWEITERTES TIMING — DETAILLIERTE PLANUNGSTABELLE
+
+### Eingriffs-Timing nach Koerperstatus
+| Eingriff | Optimaler KFA | Min. stabiles Gewicht | Training wieder | Endergebnis |
+|----------|--------------|----------------------|-----------------|-------------|
+| Liposuktion (Standard) | 18-25% | 3 Monate | 6-8 Wochen | 3-6 Monate |
+| HD-Lipo / VASER | 12-18% | 6 Monate | 8-10 Wochen | 4-6 Monate |
+| Abdominoplastik | <30% (BMI <30) | 6 Monate | 10-12 Wochen | 6-12 Monate |
+| Gynaekomastie-OP | Egal (OP-spezifisch) | 3 Monate | 4-6 Wochen | 3-6 Monate |
+| Hautstraffung (Arme/Beine) | Stabil (nach Gewichtsverlust) | 6-12 Monate | 6-8 Wochen | 6-12 Monate |
+| Haartransplantation (FUE) | Egal | Egal | Sofort (leicht), 4 Wochen (intensiv) | 12-18 Monate |
+
+### Saisonale Ueberlegungen
+- **Winter:** Bevorzugt fuer Recovery — lange Kleidung verdeckt Schwellungen, Kompressionsmieder, Narben
+- **Sommer vermeiden:** Sonneneinstrahlung auf frische Narben → Hyperpigmentierung; Schwitzen + Kompression = Infektionsrisiko
+- **Urlaubs-Planung:** Mind. 3-4 Wochen Regeneration vor Strandurlaub (bei groesseren Eingriffen 8+ Wochen)
+
+### Mehrere Eingriffe (Staging)
+- **Grundregel:** Minimum 3 Monate zwischen Eingriffen, idealerweise 6 Monate
+- **Kombinierbar in einer Sitzung:** Lipo + Abdominoplastik (Lipo-Abdominoplastik), Gynaekomastie + Lipo Brust/Bauch
+- **Nicht kombinieren:** Grosse Eingriffe an verschiedenen Koerperzonen (zu hohe Belastung, Thromboserisiko)
+- **Staging-Reihenfolge:** Erst Fettreduktion (Lipo) → dann Straffung → dann Feinkonturierung
+
+### Altersueberlegungen
+- **Hautelastizitaet:** Nimmt mit dem Alter ab → Lipo-Ergebnisse bei juengerer Haut besser (weniger Nachstraffung noetig)
+- **Alter 30-40:** Meist beste Ergebnisse bei HD-Lipo (gute Hautelastizitaet + entwickelte Muskulatur)
+- **Alter 40-50:** Hautstraffung haeufiger zusaetzlich noetig; laengere Recovery einplanen
+- **Alter 50+:** Erhoehtes OP-Risiko (Komorbiditaeten); ausfuehrlichere praeoperative Diagnostik erforderlich
+- Fruehere Intervention kann bei bestimmten Eingriffen bessere Ergebnisse liefern — aber Entscheidung nie ueberhasten
 
 ## ARZT-AUSWAHL — KRITERIEN
 1. Facharzt fuer Plastische/Aesthetische Chirurgie (Board Certified)

@@ -6,7 +6,7 @@
  * Roles: Sportmediziner, Kardiologe, Endokrinologe/Diabetologe/Androloge, Ernaehrungsmediziner
  * SACHLICH — evidenzbasiert, nuechtern wie ein guter Oberarzt
  *
- * @version 2.0.0
+ * @version 3.0.0
  */
 
 import type { SkillMeta } from './types';
@@ -14,8 +14,8 @@ import type { SkillMeta } from './types';
 export const MEDICAL_SKILL_META: SkillMeta = {
   id: 'medical',
   name: 'Medizinische Wirkungen & Risiken',
-  version: '2.0.0',
-  updatedAt: '2026-02-27',
+  version: '3.0.0',
+  updatedAt: '2026-02-28',
   sources: [
     'ESC/ESH Guidelines for Arterial Hypertension 2023',
     'Endocrine Society Clinical Practice Guidelines — Testosterone Therapy (Bhasin et al. 2018, PMID:29562364)',
@@ -25,9 +25,17 @@ export const MEDICAL_SKILL_META: SkillMeta = {
     'TRAVERSE Trial 2023, NEJM — TRT CV Safety',
     'Wilding et al. 2021, NEJM — STEP 1 Trial (Semaglutide)',
     'Andrology 2025, PMID:40105090 — GLP-1 & Androgen Axis',
+    'Baggish et al. 2017, Circulation — AAS & Cardiac Structure/Function',
+    'Marso et al. 2016, NEJM — SUSTAIN-6 Trial (Semaglutide Renal Outcomes)',
+    'Antonio et al. 2021 — Creatine Supplementation & Kidney Function',
   ],
-  tokenEstimate: 2200,
+  tokenEstimate: 5200,
   changelog: [
+    {
+      version: '3.0.0',
+      date: '2026-02-28',
+      changes: 'Major: Sport-Kardiologie (Sportherz vs. pathologisch, Belastungs-Arrhythmien, AAS-Kardiorisiken), Schilddruese (TSH/T3/T4, TRT-Interaktion, Training), Leber-/Nierenwerte detailliert (Marker-Tabellen, Kreatin-Kreatinin, GLP-1 renoprotektiv), Hormonspiegel-Interpretation (Total/Free T, SHBG, Prolaktin, DHEA-S, IGF-1)',
+    },
     {
       version: '2.0.0',
       date: '2026-02-27',
@@ -166,6 +174,153 @@ KEINE AI-/Medikamentenvorschlaege (Anastrozol, etc.).
 - Insulinresistenz steigt → Kohlenhydrat-Timing wichtiger
 - Kardiovaskulaeres Basis-Risiko steigt → regelmaessiges BP-Monitoring
 - Hormonelle Veraenderungen: Testosteron sinkt ~1%/Jahr ab 30
+
+## SPORT-KARDIOLOGIE
+
+### Sportherz vs. pathologische Hypertrophie
+| Merkmal | Sportherz (physiologisch) | Pathologisch (z.B. HCM) |
+|---------|--------------------------|--------------------------|
+| Wanddicke | Gleichmaessig, <13mm | Asymmetrisch, oft >15mm |
+| Kammergroesse | Vergroessert (Volumenbelastung) | Normal oder verkleinert |
+| Diastolische Funktion | Normal | Eingeschraenkt |
+| EKG-Veraenderungen | Sinusbradykardie, inkompletter RSB | Tiefe Q-Zacken, ST-Hebungen |
+| Reversibilitaet | Rueckbildung bei Trainingspause | Keine Rueckbildung |
+| Familienanamnese SCD | Unauffaellig | Haeufig positiv |
+
+### Belastungsinduzierte Arrhythmien
+- Risikofaktoren: Familienanamnese ploetzlicher Herztod (SCD), Synkopen bei Belastung, strukturelle Herzerkrankung
+- Screening-Empfehlung: Ruhe-EKG + Belastungs-EKG; bei Auffaelligkeiten Echokardiographie
+- Praepartizipations-Screening empfohlen bei: Alter >35, positive Familienanamnese SCD, bekannte kardiale Vorerkrankung
+
+### Blutdruck-Antwort auf Belastung
+- **Normal:** Systolischer Anstieg auf 180-220 mmHg bei max. Belastung; diastolisch stabil oder leichter Abfall
+- **Abnormal:** Diastolischer Anstieg >10 mmHg, exzessiver systolischer Anstieg >250 mmHg, oder fehlender Anstieg
+- Ueberschiessende Belastungs-BP-Antwort ist Praediktor fuer spaetere Hypertonie
+
+### AAS-spezifische kardiale Risiken
+- **LVH:** Linksventrikulaere Hypertrophie — AAS-Nutzer zeigen signifikant dickere Waende als naturale Athleten
+- **Diastolische Dysfunktion:** Eingeschraenkte Relaxation auch nach AAS-Absetzung moeglich
+- **Koronare Kalzifikation:** Fruehzeitige Atherosklerose bei langfristigem AAS-Gebrauch
+- **Evidenz:** Baggish et al. 2017, Circulation — AAS assoziiert mit reduzierten systolischen und diastolischen Parametern, dosisabhaengig
+→ AAS-Nutzer: Echokardiographie-Screening alle 1-2 Jahre empfohlen
+
+## SCHILDDRUESE (THYROID)
+
+### TSH-Interpretation
+| TSH (mU/L) | Bewertung | Klinische Bedeutung |
+|-------------|-----------|---------------------|
+| <0.1 | Stark erniedrigt | Manifeste Hyperthyreose → DRINGEND Abklaerung |
+| 0.1-0.4 | Leicht erniedrigt | Subklinische Hyperthyreose → Kontrolle + fT3/fT4 |
+| 0.4-4.0 | Normalbereich | Euthyreot |
+| 4.0-10.0 | Leicht erhoeht | Subklinische Hypothyreose → Verlaufskontrolle |
+| >10.0 | Stark erhoeht | Manifeste Hypothyreose → DRINGEND Abklaerung |
+
+### T3/T4 — wann TSH allein nicht reicht
+- Subklinische Stoerungen: TSH grenzwertig, aber Symptome vorhanden → fT3 + fT4 bestimmen
+- Zentrale Hypothyreose: TSH normal, aber fT4 niedrig (Hypophysen-Pathologie)
+- Non-Thyroidal Illness (NTI): Niedriges T3 bei schwerer Erkrankung oder starkem Kaloriendefizit
+
+### Stoffwechsel-Auswirkungen
+- **Hypothyreose:** BMR-Reduktion 15-40%, Gewichtszunahme (meist Wasser + moderate Fettmasse), Muedigkeit, Kaelteempfindlichkeit, verlangsamte Regeneration
+- **Hyperthyreose:** BMR-Erhoehung, Gewichtsverlust trotz Appetit, Tachykardie, Waermeintoleranz, Muskelabbau
+
+### Schilddruese + TRT Interaktion
+- TRT kann SHBG beeinflussen → Aenderung der Bindung von Schilddruesenhormonen
+- Schilddruesenhormone beeinflussen SHBG-Synthese in der Leber
+- Bei TRT-Start: Schilddruesenwerte mitbestimmen (TSH + fT3/fT4)
+
+### Schilddruese + Training
+- Moderates Training verbessert Schilddruesenfunktion (erhoehte T3/T4-Sensitivitaet)
+- Uebertraining/starkes Kaloriendefizit kann T3 supprimieren ("Low T3 Syndrome")
+- Bei unerwartetem Leistungsknick trotz gutem Training: Schilddruese pruefen
+
+### Wann testen?
+- Unerklaerliche Muedigkeit trotz ausreichend Schlaf
+- Gewichtsveraenderungen trotz guter Adherenz (Ernaehrung + Training)
+- Kaelteintoleranz, trockene Haut, Haarausfall
+- Neue Bradykardie oder Tachykardie
+- **Red Flags:** TSH >10 oder <0.1 → dringende aerztliche Ueberweisung
+
+## LEBER- & NIERENWERTE DETAILLIERT
+
+### Lebermarker
+| Parameter | Normalbereich | Klinische Bedeutung |
+|-----------|--------------|---------------------|
+| AST (GOT) | <50 U/L | Leber + Muskel (auch nach Training erhoeht!) |
+| ALT (GPT) | <50 U/L | Leberspezifischer als AST |
+| GGT | <60 U/L | Cholestase, Alkohol, Medikamente |
+| AP (Alk. Phosphatase) | 40-129 U/L | Cholestase, Knochen |
+| Bilirubin (gesamt) | <1.2 mg/dL | Haemolyse, Leberfunktion, Gilbert-Syndrom |
+
+**Wichtig:** AST/ALT koennen nach intensivem Training 2-3x erhoeht sein → Laborkontrolle nach 48-72h Trainingspause fuer valide Leberwerte
+
+### Leberspezifische Risiken
+- **Orale AAS (C17-alpha-alkyliert):** Cholestase, Peliosis hepatis, Hepatozellulaere Adenome — hoehere Hepatotoxizitaet als injizierbare AAS
+- **Alkohol:** Synergistische Leberschaedigung mit AAS; bei AAS-Nutzung Alkohol minimieren
+- **Supplements mit Lebertoxizitaet:** Hochdosis Vitamin A (>10.000 IE/Tag), Kava, Gruener-Tee-Extrakt (hochdosiert), Niacin (hochdosiert)
+→ Bei GPT >3x Normwert: Training als Ursache ausschliessen, dann aerztliche Abklaerung
+
+### Nierenmarker
+| Parameter | Normalbereich | Klinische Bedeutung |
+|-----------|--------------|---------------------|
+| Kreatinin | 0.7-1.3 mg/dL (Maenner) | Filtrationsleistung; abhaengig von Muskelmasse |
+| BUN (Harnstoff-N) | 7-20 mg/dL | Nierenfunktion + Proteinzufuhr + Hydration |
+| eGFR | >90 mL/min | Geschaetzte glomerulaere Filtrationsrate |
+| Harnsaeure | 3.5-7.0 mg/dL | Gicht-Risiko, Nierensteine |
+
+### Kreatinin & Kreatin-Supplementierung
+- Kreatin-Supplementierung erhoet Serum-Kreatinin um ~15-20%
+- Dies spiegelt KEINEN Nierenschaden wider — rein durch erhoehte Kreatin-zu-Kreatinin-Konversion
+- Bei Kreatin-Nutzern: Cystatin C als alternativer GFR-Marker erwaegen
+- Studie: Antonio et al. 2021 — kein negativer Effekt auf Nierenfunktion bei gesunden Erwachsenen
+
+### AAS/TRT & Nierenfunktion
+- Direkte Nephrotoxizitaet von Testosteron: gering bis minimal
+- Indirekter Schaden moeglich ueber: chronische Hypertonie (BP-mediated), Dehydration, NSAID-Komedikation
+- Regelmaessige eGFR-Kontrolle bei AAS-Nutzern empfohlen
+
+### GLP-1 & Nierenfunktion
+- SUSTAIN-6 (Marso et al. 2016, NEJM): Semaglutid zeigte signifikante Reduktion der Nephropathie-Progression
+- Mechanismus: Verbesserte Glukosekontrolle + direkte tubuloglomerulaere Effekte
+- GLP-1RAs gelten als renoprotektiv bei Typ-2-Diabetes
+
+## HORMONSPIEGEL-INTERPRETATION
+
+### Testosteron — welcher Wert wann?
+| Parameter | Wann verwenden | Besonderheiten |
+|-----------|---------------|----------------|
+| Gesamt-Testosteron | Erstscreening, Verlaufskontrolle | Morgens nuechtern; beeinflusst durch SHBG |
+| Freies Testosteron | Bei abnormalem SHBG, Grenzwert-Gesamt-T | Berechnung (Vermeulen) zuverlaessiger als direkter Assay |
+| Bioverfuegbares T | Klinisch relevant bei SHBG-Stoerungen | Albumin-gebunden + freies T |
+
+### SHBG (Sexualhormon-bindendes Globulin)
+- **SHBG erhoeht bei:** Hyperthyreose, Alter, Lebererkrankung, Oestrogen-Therapie, Antikonvulsiva
+- **SHBG erniedrigt bei:** Adipositas, Insulinresistenz, Hypothyreose, Androgen-Exzess, nephrotisches Syndrom
+- SHBG bestimmt bioverfuegbares Testosteron — hohes SHBG kann bei normalem Gesamt-T klinischen Hypogonadismus maskieren
+
+### Prolaktin
+- Normalbereich: <20 ng/mL (Maenner)
+- Erhoehte Werte: Prolaktinom, Medikamente (Neuroleptika, Metoclopramid), Stress, AAS (19-Nor-Derivate wie Nandrolon/Trenbolon)
+- Bei Prolaktin >50 ng/mL: Hypophysen-MRT zum Prolaktinom-Ausschluss
+- Symptome bei Erhoehung: Libidoverlust, Gynaekomastie, Galaktorrhoe (selten bei Maennern)
+
+### DHEA-S (Dehydroepiandrosteron-Sulfat)
+- Nebennieren-Androgenmarker; sinkt ab ~30 kontinuierlich
+- Niedrige Werte: Nebennieren-Insuffizienz, chronischer Stress
+- Klinische Relevanz: Screening bei Fatigue + niedrigem Testosteron bei normalem LH/FSH
+
+### IGF-1 (Insulinaehnlicher Wachstumsfaktor)
+- Surrogatmarker fuer Wachstumshormon (GH)-Sekretion
+- Altersabhaengige Normwerte (sinkt mit dem Alter)
+- Erhoehte Werte: Exogene GH-Zufuhr, Akromegalie
+- Erniedrigte Werte: GH-Mangel, Unterernaehrung, Lebererkrankung
+
+### Interpretations-Hierarchie
+1. **Symptome** > Laborwerte > Referenzbereiche
+2. Laborwerte IMMER im klinischen Kontext bewerten
+3. Einzelwerte nie isoliert beurteilen — Trends sind aussagekraeftiger
+4. Referenzbereiche sind populationsbasiert — individueller "Normalwert" kann abweichen
+5. Bei Diskrepanz Symptome vs. Labor: Wiederholung unter standardisierten Bedingungen
 
 ## WARNSIGNALE → SOFORT AERZTLICHE HILFE
 
