@@ -160,25 +160,47 @@
 - [x] ~~**KI-Vorschlag fuer Zeiten**~~ ✅ (2026-02-26, v9.7) — suggestRestTimes Utility: Automatische Erkennung von Uebungstyp (Verbund/Isolation/Cardio/Flex/Isometrisch), Ziel aus Reps (Kraft/Hypertrophie/Ausdauer), Empfohlene-Pause-Badge in ExerciseTracker, KI-Preset fuer ManualTimer, 21 Tests
 - [x] ~~**Audio-Steuerung ueber Agent**~~ ✅ (2026-02-26, v9.8) — useWorkoutVoiceCommands Hook mit Regex-basiertem Command-Parser (DE+EN), WorkoutVoiceControl Floating-Mic-Button, TTS-Feedback via speechSynthesis, 35 Tests. Befehle: Naechste/Vorherige Uebung, Skip, Reps+Gewicht loggen, Timer starten/stoppen, Training beenden, Pause
 
-### P1 — Internationalisierung (i18n)
+### ~~P1 — Internationalisierung (i18n)~~ ✅ (2026-02-27, v10.7)
 
-#### Sprachen deutlich erweitern
-- [ ] **15+ neue Sprachen hinzufuegen** — Aktuell nur DE + EN. Geplant:
-  - Ukrainisch, Polnisch, Russisch, Rumaenisch
-  - Italienisch, Spanisch, Franzoesisch, Portugiesisch
-  - Arabisch, Tuerkisch, Marokkanisch, Persisch
-  - Chinesisch, Japanisch, Koreanisch
-  - Eigener i18n-Context muss erweitert werden (~300 Schluessel pro Sprache)
+#### ~~Sprachen deutlich erweitern~~ ✅
+- [x] ~~**17 Sprachen implementiert**~~ ✅ — DE, EN, AR, ES, FA, FIL, FR, IT, JA, KO, PL, PT, RO, RU, TR, UK, ZH (610+ Keys pro Sprache)
+
+### P1 — Digital-Twin-Testing Findings (TWIN_TESTING_REPORT.md)
+> Quelle: 25-Persona-Testing (2026-02-28, v11.1). Sofortmassnahmen ✅ erledigt, restliche Findings hier.
+
+#### Onboarding & Erstnutzer-Erlebnis
+- [ ] **Onboarding-Wizard nach Registrierung** (~8h) — Gefuehrter 5-Schritt-Setup: Name → Alter/Groesse/Gewicht → Ziel → Erfahrung → Equipment → Fertig. Aktuell: Leere Seiten, nur gelber Banner "Profil ausfuellen". Betroffene Twins: A1-A5, E2
+- [ ] **Cockpit: Keine Standard-Ziele ohne Profil** (~2h) — 2000 kcal / 150g Protein anzeigen obwohl Profil leer → irrefuehrend fuer Viktor (4000 kcal) und Karim (1800 kcal). Stattdessen: "Profil ausfuellen" CTA bis Daten vorhanden. Betroffene Twins: Alle ohne Profil
+
+#### KI-Buddy Verbesserungen
+- [ ] **Profil-Daten an KI-Context uebergeben** (~3h) — Allergien, Ernaehrungsform, Gesundheitseinschraenkungen (seit v11.3 in DB) werden NICHT an Agents uebergeben. Buddy weiss nichts von Erdnussallergie, Vegetarismus, Rektusdiastase. SICHERHEITSRELEVANT! Betroffene: A4, A5, E2, E4
+- [ ] **Proaktives Warnsystem** (~6h) — Buddy warnt nur wenn gefragt, nicht automatisch bei gefaehrlichen Mustern (Unterkalorisch, Uebertraining 7x/Woche, HDL<25, Hkt>52%). Braucht: Schwellenwert-Regeln + automatische Buddy-Nachrichten. Betroffene: A5, E1, D2, D4
+- [ ] **Kontext-Persistence ueber Sessions** (~4h) — Buddy "vergisst" Praeferenzen zwischen Sessions (sessionStorage). Elena (A4, Vegetarierin) muss es jedes Mal neu sagen. Loesung: Profil-Daten + Chat-History aus DB laden. Betroffene: A4, E2, B4
+- [ ] **Quellenangaben in Buddy-Antworten** (~3h) — Skills haben 73+ PMIDs, aber Buddy zitiert sie nie in Antworten. Petra (C5, Aerztin) erwartet Quellen. Loesung: Agent-Prompt erweitern → "Zitiere relevante PMIDs". Betroffene: C5, B2
+- [ ] **Buddy-Kommunikationsstil** (~3h) — Einstellung: Knapp/Normal/Ausfuehrlich + Fachsprache-Level (Anfaenger/Fortgeschritten). Stefan (A1) braucht einfache Sprache, Dominik (C1) will Fachtiefe. Betroffene: A1, A3, C5
+
+#### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
+- [ ] **🔴 RED-S/Untergewicht-Warnsystem** (~4h) — Keine automatische Warnung bei BMI <18.5 ODER Kaloriendefizit >1000 kcal ODER <1200 kcal bei Frauen + hohes Volumen. Sarah (E1) koennte in gefaehrlich tiefes Defizit rutschen. Betroffene: E1, E4, B4
+- [ ] **🟡 Rektusdiastase-Kontraindikations-Check** (~3h) — KI-Trainingsplaene enthalten keine Kontraindikations-Warnungen. Lena (E4) koennte Crunches im Plan bekommen. Loesung: Gesundheits-Tags → Trainingsplan-Filter (keine Crunches bei Rektusdiastase, keine Deadlifts bei Bandscheibe). Betroffene: E4, A2
+
+#### Frauen-spezifische Features
+- [ ] **Menstruationszyklus-Tracker** (~10h) — Kein Zyklus-Tracking. Keine Korrelation Zyklus↔Leistung. Kein RED-S/FAT/Amenorrhoe-Warnsystem. Braucht: Phaseneingabe (Follikel/Luteal/Menstruation), Symptome, Leistungskorrelation-Graph. Betroffene: E1-E5, B2, C3, C5
+- [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Betroffene: E3, E5, C5
+
+#### Medizin-Erweiterungen
+- [ ] **Blutbild/Laborwerte-Tracking** (~12h) — Nur Blutdruck wird getrackt. Keine Laborwerte (Testosteron, LH, FSH, Haematokrit, HDL, LDL, Leberwerte, PSA, IGF-1). Braucht: Vordefinierte Felder + Trends + Warnschwellen (Hkt>54%, HDL<25). Fuer Enhanced-User essentiell. Betroffene: D1-D5, C2, C5
+- [ ] **Arztbericht-PDF-Export** (~6h) — Kein PDF-Arztbericht. Timo (D1) will strukturierten Report fuer seinen Arzt mit Substanzen, Blutdruck, Gewichtsverlauf, Blutwerten. Betroffene: D1, D3, C5
 
 ### P1 — UX/Gamification
 
 #### Erfolgs-Lob fuer den Nutzer
-- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden
+- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden. CelebrationProvider + CelebrationOverlay existieren bereits (Konfetti+Toast, 4 Level, 6 Kategorien) — nur Trigger fehlen!
   - Trainings-PRs (neues Maximalgewicht, mehr Reps)
   - Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)
   - Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)
   - Kaloriendefizit eingehalten
-  - Kann als Toast/Konfetti-Animation oder Buddy-Nachricht umgesetzt werden
+  - Luecken-Erkennung: "Du hast 3 Tage nicht geloggt — alles OK?" (Re-Engagement)
+  - Betroffene Twins: A5 (Gamification), A1 (Motivation), B3 (Re-Engagement)
 
 ### ~~P1 — UX-Ueberarbeitung Workout-Session~~ ✅ (2026-02-28, v11.0)
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
@@ -209,6 +231,26 @@
 - [ ] **Phase B: Power Features** — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc
 - [ ] **Phase C: Power+ Features** — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert
 - [ ] **Phase D: Shared** — DoctorReport PDF, PosingPhotos, i18n trainingMode Keys fuer 15 Sprachen, Tests
+
+### P2 — Digital-Twin-Testing Findings (Nice-to-Have)
+> Aus Sektion 3 des TWIN_TESTING_REPORT.md — Priorisierte Feature-Requests P2
+
+- [ ] **Wettkampf-Countdown Widget** (~6h) — Zieldatum → Dashboard-Widget mit Tagen bis Wettkampf, Phase-Tracker. Dominik (C1), Sarah (E1), Viktor (D2). Competition-Skill hat Wissen, aber kein UI.
+- [ ] **Blast/Cruise/PCT-Zyklus-Kalender** (~8h) — Visuelle Timeline fuer AAS-Phasen, Clearance-Timer, Blutbild-Faelligkeiten. Betroffene: D2, D4, D5
+- [ ] **CSV-Export eigener Daten** (~4h) — Mahlzeiten, Training, Koerper, Substanzen als CSV/JSON Download. Thomas (B1) will Daten exportieren. Kein DSGVO-Datenportabilitaet ohne Export.
+- [ ] **Schriftgroessen-Option** (~2h) — Klein/Normal/Gross in Profil-Einstellungen. Ralf (B5, technik-scheu) braucht grosse Schrift.
+- [ ] **Schlaf-Tracking (Zeiten)** (~6h) — Einschlaf-/Aufwachzeit, Qualitaet (nicht nur Emoji). Korrelation mit Training. Betroffene: A4, E5, D4
+- [ ] **Mahlzeit-Kategorien erweitern** (~2h) — 6 statt 4: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Spaet. Dominik (C1) loggt 6 Mahlzeiten/Tag. Marco (B3) hat bei Schichtarbeit keine festen Zeiten.
+- [ ] **Foto-basiertes Mahlzeit-Logging** (~8h) — Essen fotografieren → KI erkennt Mahlzeit → Auto-Fill Makros. Aylin (B4) fotografiert lieber statt zu wiegen. Braucht Vision-API Integration.
+- [ ] **MFP-Import (MyFitnessPal)** (~6h) — CSV/API-Import von MyFitnessPal-Daten. Lisa (C3) trackt Ernaehrung dort. Kein einfacher Wechsel moeglich.
+- [ ] **Prognose-Funktion** (~4h) — "In X Wochen erreichst du Y kg bei aktuellem Trend". Karim (A3) will sehen wann er 80kg erreicht. Lineare Regression existiert schon (ProgressionCard) — UI-Erweiterung.
+
+### P2 — Technische Schulden
+
+- [ ] **`tsc -b` Build-Fix** (~2h) — 52 pre-existing Language-Type-Errors seit 17-Sprachen-Expansion. `tsc --noEmit` = 0 Fehler, aber `tsc -b` (project references) hat 52 Fehler wegen `Language` Type (17 Werte) vs `{de: string; en: string}` Pattern.
+- [ ] **Production-Deployment v11.3** — Neue Features (KI-Mahlzeit, Profil-Dietary, Timer, Musik, Spotify) auf fudda.de deployen
+- [ ] **Production DB-Migration** — `20260228000001_profile_dietary_health.sql` auf Production anwenden
+- [ ] **Code-TODO: baseAgent.ts:269** — `bodyHistory` Array hardcoded als `[]`, sollte aus BodyMeasurements Hook befuellt werden
 
 ### P2 — Nice-to-Have
 
@@ -365,4 +407,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-28 (v11.0 — Musik & Timer Overhaul komplett, Spotify SDK, 2.127 Tests)*
+*Letzte Aktualisierung: 2026-02-28 (v11.3 — Twin-Testing-Findings komplett aufgenommen, Sofortmassnahmen erledigt, i18n 17 Sprachen ✅)*
