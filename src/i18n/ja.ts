@@ -223,6 +223,8 @@ export const ja: TranslationKeys = {
     bp_hypertension_1: '高血圧グレード1',
     bp_hypertension_2: '高血圧グレード2',
     bp_hypertension_3: '高血圧グレード3',
+    bpDisclaimer: 'ESC/ESH 2023に基づく分類。情報提供のみを目的としており、診断ではありません。異常がある場合は医師にご相談ください。',
+    pedDisclaimer: '記録とハームリダクションのみを目的としています。推奨やガイドではありません。医師の監督を強くお勧めします。',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: '医薬品',
@@ -275,6 +277,7 @@ export const ja: TranslationKeys = {
     capSubstance: 'サブスタンスの追跡',
     capScreenshot: '体重計のスクリーンショットを取り込み',
     capAnalysis: '週間分析＆アドバイス',
+    aiDisclaimer: 'AI生成 — 誤りを含む可能性があります。医療アドバイスではありません。',
   },
   reminders: {
     title: 'リマインダー',

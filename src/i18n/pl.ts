@@ -223,6 +223,8 @@ export const pl: TranslationKeys = {
     bp_hypertension_1: 'Nadciśnienie stopnia 1',
     bp_hypertension_2: 'Nadciśnienie stopnia 2',
     bp_hypertension_3: 'Nadciśnienie stopnia 3',
+    bpDisclaimer: 'Klasyfikacja wg ESC/ESH 2023. Wyłącznie informacyjnie, nie stanowi diagnozy. W razie nieprawidłowości skonsultuj się z lekarzem.',
+    pedDisclaimer: 'Wyłącznie do dokumentacji i redukcji szkód. Nie jest zaleceniem ani przewodnikiem. Zdecydowanie zalecana kontrola lekarska.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Lek',
@@ -275,6 +277,7 @@ export const pl: TranslationKeys = {
     capSubstance: 'Śledzenie substancji',
     capScreenshot: 'Import zrzutu ekranu wagi',
     capAnalysis: 'Analiza tygodniowa i porady',
+    aiDisclaimer: 'Wygenerowane przez AI — może zawierać błędy. To nie jest porada medyczna.',
   },
   reminders: {
     title: 'Przypomnienia',

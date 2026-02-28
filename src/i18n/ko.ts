@@ -223,6 +223,8 @@ export const ko: TranslationKeys = {
     bp_hypertension_1: '고혈압 1단계',
     bp_hypertension_2: '고혈압 2단계',
     bp_hypertension_3: '고혈압 3단계',
+    bpDisclaimer: 'ESC/ESH 2023 기준 분류. 정보 제공 목적이며 진단이 아닙니다. 이상이 있을 경우 의사와 상담하세요.',
+    pedDisclaimer: '기록 및 피해 감소 목적으로만 사용됩니다. 권장 사항이나 가이드가 아닙니다. 의료 감독을 강력히 권장합니다.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: '의약품',
@@ -275,6 +277,7 @@ export const ko: TranslationKeys = {
     capSubstance: '물질 추적',
     capScreenshot: '체중계 스크린샷 가져오기',
     capAnalysis: '주간 분석 & 조언',
+    aiDisclaimer: 'AI 생성 — 오류가 포함될 수 있습니다. 의학적 조언이 아닙니다.',
   },
   reminders: {
     title: '알림',

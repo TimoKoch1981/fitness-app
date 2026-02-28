@@ -33,10 +33,10 @@
 
 **Phase 2 — Zeitnah (nach Launch):**
 - [ ] **E.2.1: Datenexport-Funktion** (~4-6h Code) — DSGVO Art. 20 Portabilitaet. Export aller Nutzerdaten als JSON/CSV
-- [ ] **E.2.2: KI-Disclaimer erweitern** (~1h) — "KI kann Fehler machen" bei jeder KI-Antwort
-- [ ] **E.2.3: BP-Klassifikation kennzeichnen** (~1h) — "Informativ, keine Diagnose" bei Blutdruck-Anzeige
-- [ ] **E.2.4: PED-Disclaimer verstaerken** (~1-2h) — Zusaetzlicher Warnhinweis bei jeder PED-Interaktion
-- [ ] **E.2.5: Substanz-Agent System-Prompt haerten** (~1-2h) — Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen
+- [x] ~~**E.2.2: KI-Disclaimer erweitern**~~ ✅ (2026-02-28, v11.7) — "KI-generiert — kann Fehler enthalten. Keine medizinische Beratung." unter jeder ChatMessageBubble. 17 Sprachen.
+- [x] ~~**E.2.3: BP-Klassifikation kennzeichnen**~~ ✅ (2026-02-28, v11.7) — "Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose." bei MedicalPage + AddBloodPressureDialog. 17 Sprachen.
+- [x] ~~**E.2.4: PED-Disclaimer verstaerken**~~ ✅ (2026-02-28, v11.7) — Amber PED-Badge, PED-Disclaimer-Footer bei MedicalPage + LogSubstanceDialog. 17 Sprachen.
+- [x] ~~**E.2.5: Substanz-Agent System-Prompt haerten**~~ ✅ (2026-02-28, v11.7) — HAFTUNGS-REGELN Block: Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen, Pflicht-Disclaimer. DE+EN.
 - [ ] **E.2.7: Security Headers in Caddyfile** (~1h) — CSP, HSTS, X-Frame-Options, Referrer-Policy
 
 #### Email & Registrierung

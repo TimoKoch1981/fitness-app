@@ -223,6 +223,8 @@ export const uk: TranslationKeys = {
     bp_hypertension_1: 'Гіпертензія 1 ступеня',
     bp_hypertension_2: 'Гіпертензія 2 ступеня',
     bp_hypertension_3: 'Гіпертензія 3 ступеня',
+    bpDisclaimer: 'Класифікація за ESC/ESH 2023. Лише для інформації, не є діагнозом. У разі відхилень зверніться до лікаря.',
+    pedDisclaimer: 'Лише для документування та зменшення шкоди. Не є рекомендацією чи посібником. Наполегливо рекомендується медичний нагляд.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Медикамент',
@@ -275,6 +277,7 @@ export const uk: TranslationKeys = {
     capSubstance: 'Відстеження субстанцій',
     capScreenshot: 'Імпорт знімка екрана ваг',
     capAnalysis: 'Тижневий аналіз та поради',
+    aiDisclaimer: 'Згенеровано ШІ — може містити помилки. Не є медичною порадою.',
   },
   reminders: {
     title: 'Нагадування',

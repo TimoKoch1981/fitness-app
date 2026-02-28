@@ -223,6 +223,8 @@ export const it: TranslationKeys = {
     bp_hypertension_1: 'Ipertensione grado 1',
     bp_hypertension_2: 'Ipertensione grado 2',
     bp_hypertension_3: 'Ipertensione grado 3',
+    bpDisclaimer: 'Classificazione secondo ESC/ESH 2023. Solo a scopo informativo, non una diagnosi. Consultare un medico in caso di anomalie.',
+    pedDisclaimer: 'Solo per documentazione e riduzione del danno. Non è una raccomandazione né una guida. Supervisione medica fortemente consigliata.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Farmaco',
@@ -275,6 +277,7 @@ export const it: TranslationKeys = {
     capSubstance: 'Monitoraggio delle sostanze',
     capScreenshot: 'Importare screenshot della bilancia',
     capAnalysis: 'Analisi settimanale e consigli',
+    aiDisclaimer: 'Generato dall\'IA — può contenere errori. Non è un consiglio medico.',
   },
   reminders: {
     title: 'Promemoria',

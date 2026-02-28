@@ -225,6 +225,8 @@ export const de = {
     bp_hypertension_1: 'Hypertonie Grad 1',
     bp_hypertension_2: 'Hypertonie Grad 2',
     bp_hypertension_3: 'Hypertonie Grad 3',
+    bpDisclaimer: 'Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose. Bei Auffälligkeiten Arzt konsultieren.',
+    pedDisclaimer: 'Nur zur Dokumentation und Harm Reduction. Keine Empfehlung oder Anleitung. Ärztliche Begleitung dringend empfohlen.',
     // Substance categories
     cat_trt: 'TRT',
     cat_ped: 'PED',
@@ -280,6 +282,7 @@ export const de = {
     capSubstance: 'Substanzen tracken',
     capScreenshot: 'Waage-Screenshot importieren',
     capAnalysis: 'Wochenanalyse & Tipps',
+    aiDisclaimer: 'KI-generiert — kann Fehler enthalten. Keine medizinische Beratung.',
   },
   reminders: {
     title: 'Erinnerungen',

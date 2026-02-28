@@ -95,6 +95,35 @@
 
 ---
 
+### 2026-02-28 - v11.7: Rechtskonformitaet Phase 2 — Disclaimer-Suite (E.2.2-E.2.5)
+
+**E.2.2: KI-Disclaimer:**
+- ChatMessageBubble: "KI-generiert — kann Fehler enthalten. Keine medizinische Beratung." unter jeder KI-Antwort
+- Nur bei fertigen (nicht streamenden), fehlerfreien Nachrichten
+- 17 Sprachen (buddy.aiDisclaimer Key)
+
+**E.2.3: BP-Klassifikation:**
+- MedicalPage: Disclaimer-Footer unter Blutdruck-Liste "Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose."
+- AddBloodPressureDialog: Disclaimer unter Live-Preview
+- 17 Sprachen (medical.bpDisclaimer Key)
+
+**E.2.4: PED-Disclaimer:**
+- MedicalPage: PED-Substanzen mit Amber-Badge (⚠ PED) statt grauem Badge
+- MedicalPage + LogSubstanceDialog: Amber PED-Disclaimer-Footer wenn PED/TRT vorhanden
+- LogSubstanceDialog: PED-Substanzen mit Amber-Rahmen + ⚠ PED Badge
+- 17 Sprachen (medical.pedDisclaimer Key)
+
+**E.2.5: Substanz-Agent Haertung:**
+- Neuer HAFTUNGS-REGELN Block im System-Prompt (DE + EN):
+  - KEINE Dosierungsempfehlungen (nur Nutzer-genannte Dosen dokumentieren)
+  - KEINE Wirksamkeitsaussagen — stattdessen "Studien zeigen..."
+  - KEINE Zyklus-Planung (außer Power+ Modus)
+  - Pflicht-Disclaimer am Ende jeder PED-Antwort
+
+**Dateien:** ChatMessage.tsx, MedicalPage.tsx, AddBloodPressureDialog.tsx, LogSubstanceDialog.tsx, substanceAgent.ts, 17 i18n-Dateien
+
+---
+
 ### 2026-02-28 - v11.6: Cockpit Standard-Ziele ohne Profil (P1-4)
 
 **Problem:** Cockpit zeigte 2000 kcal / 150g Protein als Ziele, obwohl Profil leer — irrefuehrend.

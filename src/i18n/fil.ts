@@ -223,6 +223,8 @@ export const fil: TranslationKeys = {
     bp_hypertension_1: 'Hypertension Grade 1',
     bp_hypertension_2: 'Hypertension Grade 2',
     bp_hypertension_3: 'Hypertension Grade 3',
+    bpDisclaimer: 'Klasipikasyon ayon sa ESC/ESH 2023. Para sa impormasyon lamang, hindi diagnosis. Kumonsulta sa doktor kung may abnormal na halaga.',
+    pedDisclaimer: 'Para sa dokumentasyon at harm reduction lamang. Hindi rekomendasyon o gabay. Mahigpit na inirerekomenda ang medikal na superbisyon.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Gamot',
@@ -275,6 +277,7 @@ export const fil: TranslationKeys = {
     capSubstance: 'Mag-track ng mga substance',
     capScreenshot: 'Mag-import ng screenshot mula sa weighing scale',
     capAnalysis: 'Weekly analysis at mga tip',
+    aiDisclaimer: 'Gawa ng AI — maaaring may mga pagkakamali. Hindi medikal na payo.',
   },
   reminders: {
     title: 'Mga Reminder',

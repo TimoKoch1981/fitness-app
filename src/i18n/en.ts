@@ -226,6 +226,8 @@ export const en: TranslationKeys = {
     bp_hypertension_1: 'Hypertension Grade 1',
     bp_hypertension_2: 'Hypertension Grade 2',
     bp_hypertension_3: 'Hypertension Grade 3',
+    bpDisclaimer: 'Classification per ESC/ESH 2023. For information only, not a diagnosis. Consult a doctor if abnormal.',
+    pedDisclaimer: 'For documentation and harm reduction only. Not a recommendation or guide. Medical supervision strongly advised.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Medication',
@@ -279,6 +281,7 @@ export const en: TranslationKeys = {
     capSubstance: 'Track substances',
     capScreenshot: 'Import scale screenshots',
     capAnalysis: 'Weekly analysis & tips',
+    aiDisclaimer: 'AI-generated — may contain errors. Not medical advice.',
   },
   reminders: {
     title: 'Reminders',

@@ -74,37 +74,43 @@ export function MedicalPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
             </div>
           ) : bpLogs && bpLogs.length > 0 ? (
-            <div className="divide-y divide-gray-50">
-              {bpLogs.slice(0, 5).map((bp) => {
-                const { color } = classifyBloodPressure(bp.systolic, bp.diastolic);
-                const classKey = `bp_${bp.classification}` as keyof typeof t.medical;
-                const classLabel = t.medical[classKey] ?? bp.classification;
-                return (
-                  <div key={bp.id} className="px-4 py-2.5 flex items-center gap-3 group">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      color === 'green' ? 'bg-green-500' :
-                      color === 'yellow' ? 'bg-yellow-500' :
-                      color === 'orange' ? 'bg-orange-500' : 'bg-red-500'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {bp.systolic}/{bp.diastolic}
-                        {bp.pulse && <span className="text-gray-400 font-normal"> · {bp.pulse} bpm</span>}
-                      </p>
-                      <p className="text-[10px] text-gray-400">
-                        {formatDate(bp.date, locale)} {formatTime(bp.time, locale)} — {classLabel}
-                      </p>
+            <>
+              <div className="divide-y divide-gray-50">
+                {bpLogs.slice(0, 5).map((bp) => {
+                  const { color } = classifyBloodPressure(bp.systolic, bp.diastolic);
+                  const classKey = `bp_${bp.classification}` as keyof typeof t.medical;
+                  const classLabel = t.medical[classKey] ?? bp.classification;
+                  return (
+                    <div key={bp.id} className="px-4 py-2.5 flex items-center gap-3 group">
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        color === 'green' ? 'bg-green-500' :
+                        color === 'yellow' ? 'bg-yellow-500' :
+                        color === 'orange' ? 'bg-orange-500' : 'bg-red-500'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">
+                          {bp.systolic}/{bp.diastolic}
+                          {bp.pulse && <span className="text-gray-400 font-normal"> · {bp.pulse} bpm</span>}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          {formatDate(bp.date, locale)} {formatTime(bp.time, locale)} — {classLabel}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteBP.mutate(bp.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => deleteBP.mutate(bp.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+              {/* BP classification disclaimer — ESC/ESH reference, not a diagnosis */}
+              <p className="px-4 py-2 text-[9px] text-gray-300 border-t border-gray-50 select-none">
+                ⓘ {t.medical.bpDisclaimer}
+              </p>
+            </>
           ) : (
             <div className="p-4 text-center">
               <p className="text-sm text-gray-400">{t.common.noData}</p>
@@ -156,8 +162,12 @@ export function MedicalPage() {
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-gray-900">{sub.name}</p>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-                          {catLabel}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          sub.category === 'ped' ? 'bg-amber-100 text-amber-700' :
+                          sub.category === 'trt' ? 'bg-amber-50 text-amber-600' :
+                          'bg-gray-100 text-gray-500'
+                        }`}>
+                          {sub.category === 'ped' ? `⚠ ${catLabel}` : catLabel}
                         </span>
                         {linkedReminder && (
                           <Bell className={`h-3 w-3 ${linkedReminder.is_active ? 'text-teal-500' : 'text-gray-300'}`} />
@@ -182,6 +192,12 @@ export function MedicalPage() {
                   </div>
                 );
               })}
+              {/* PED disclaimer — shown when any PED/TRT substance exists */}
+              {substances.some(s => s.category === 'ped' || s.category === 'trt') && (
+                <p className="px-4 py-2 text-[9px] text-amber-400 border-t border-gray-50 select-none">
+                  ⚠ {t.medical.pedDisclaimer}
+                </p>
+              )}
             </div>
           ) : (
             <div className="p-4 text-center">

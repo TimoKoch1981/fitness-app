@@ -88,27 +88,39 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                 {t.medical.substances}
               </label>
               <div className="space-y-2">
-                {substances.map((sub) => (
-                  <button
-                    key={sub.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(sub.id);
-                      // Pre-fill dosage from substance definition
-                      if (sub.dosage) setDosageTaken(sub.dosage);
-                    }}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
-                      selectedId === sub.id
-                        ? 'border-teal-500 bg-teal-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <p className="text-sm font-medium text-gray-900">{sub.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {sub.dosage} {sub.unit} · {sub.frequency}
-                    </p>
-                  </button>
-                ))}
+                {substances.map((sub) => {
+                  const isPed = sub.category === 'ped' || sub.category === 'trt';
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedId(sub.id);
+                        // Pre-fill dosage from substance definition
+                        if (sub.dosage) setDosageTaken(sub.dosage);
+                      }}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
+                        selectedId === sub.id
+                          ? isPed ? 'border-amber-500 bg-amber-50' : 'border-teal-500 bg-teal-50'
+                          : isPed ? 'border-amber-200 hover:border-amber-300' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900">{sub.name}</p>
+                        {isPed && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600">⚠ PED</span>}
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {sub.dosage} {sub.unit} · {sub.frequency}
+                      </p>
+                    </button>
+                  );
+                })}
+                {/* PED disclaimer when PED substances exist */}
+                {substances.some(s => s.category === 'ped' || s.category === 'trt') && (
+                  <p className="text-[9px] text-amber-400 select-none mt-1">
+                    ⚠ {t.medical.pedDisclaimer}
+                  </p>
+                )}
               </div>
             </div>
           ) : (

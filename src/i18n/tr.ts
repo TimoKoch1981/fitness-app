@@ -223,6 +223,8 @@ export const tr: TranslationKeys = {
     bp_hypertension_1: 'Hipertansiyon Evre 1',
     bp_hypertension_2: 'Hipertansiyon Evre 2',
     bp_hypertension_3: 'Hipertansiyon Evre 3',
+    bpDisclaimer: 'ESC/ESH 2023 sınıflandırmasına göre. Yalnızca bilgi amaçlıdır, tanı değildir. Anormal değerlerde bir doktora başvurun.',
+    pedDisclaimer: 'Yalnızca belgeleme ve zarar azaltma amaçlıdır. Öneri veya kılavuz değildir. Tıbbi gözetim şiddetle tavsiye edilir.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'İlaç',
@@ -275,6 +277,7 @@ export const tr: TranslationKeys = {
     capSubstance: 'Madde takibi',
     capScreenshot: 'Tartı ekran görüntüsü içe aktarma',
     capAnalysis: 'Haftalık analiz ve öneriler',
+    aiDisclaimer: 'Yapay zeka tarafından oluşturuldu — hatalar içerebilir. Tıbbi tavsiye değildir.',
   },
   reminders: {
     title: 'Hatırlatmalar',

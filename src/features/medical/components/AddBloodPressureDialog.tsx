@@ -131,13 +131,18 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
 
           {/* Live Classification Preview */}
           {preview && (
-            <div className={`p-3 rounded-lg text-center text-sm font-medium ${
-              preview.color === 'green' ? 'bg-green-50 text-green-700' :
-              preview.color === 'yellow' ? 'bg-yellow-50 text-yellow-700' :
-              preview.color === 'orange' ? 'bg-orange-50 text-orange-700' :
-              'bg-red-50 text-red-700'
-            }`}>
-              {sys}/{dia} {t.medical.mmHg} — {classLabel}
+            <div>
+              <div className={`p-3 rounded-lg text-center text-sm font-medium ${
+                preview.color === 'green' ? 'bg-green-50 text-green-700' :
+                preview.color === 'yellow' ? 'bg-yellow-50 text-yellow-700' :
+                preview.color === 'orange' ? 'bg-orange-50 text-orange-700' :
+                'bg-red-50 text-red-700'
+              }`}>
+                {sys}/{dia} {t.medical.mmHg} — {classLabel}
+              </div>
+              <p className="text-[9px] text-gray-300 text-center mt-1 select-none">
+                ⓘ {t.medical.bpDisclaimer}
+              </p>
             </div>
           )}
 

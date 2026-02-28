@@ -223,6 +223,8 @@ export const ro: TranslationKeys = {
     bp_hypertension_1: 'Hipertensiune gradul 1',
     bp_hypertension_2: 'Hipertensiune gradul 2',
     bp_hypertension_3: 'Hipertensiune gradul 3',
+    bpDisclaimer: 'Clasificare conform ESC/ESH 2023. Doar informativ, nu un diagnostic. Consultați un medic în caz de valori anormale.',
+    pedDisclaimer: 'Doar pentru documentare și reducerea riscurilor. Nu este o recomandare sau un ghid. Supravegherea medicală este puternic recomandată.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'Medicament',
@@ -275,6 +277,7 @@ export const ro: TranslationKeys = {
     capSubstance: 'Monitorizare substanțe',
     capScreenshot: 'Import captură cântar',
     capAnalysis: 'Analiză săptămânală și sfaturi',
+    aiDisclaimer: 'Generat de IA — poate conține erori. Nu constituie sfat medical.',
   },
   reminders: {
     title: 'Memento-uri',

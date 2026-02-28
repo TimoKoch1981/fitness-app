@@ -223,6 +223,8 @@ export const ar: TranslationKeys = {
     bp_hypertension_1: 'ارتفاع ضغط الدم - الدرجة 1',
     bp_hypertension_2: 'ارتفاع ضغط الدم - الدرجة 2',
     bp_hypertension_3: 'ارتفاع ضغط الدم - الدرجة 3',
+    bpDisclaimer: 'التصنيف وفقًا لـ ESC/ESH 2023. للمعلومات فقط، وليس تشخيصًا. استشر طبيبًا عند وجود قيم غير طبيعية.',
+    pedDisclaimer: 'للتوثيق والحد من الأضرار فقط. ليست توصية أو دليلًا. يُنصح بشدة بالإشراف الطبي.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'دواء',
@@ -275,6 +277,7 @@ export const ar: TranslationKeys = {
     capSubstance: 'تتبع المواد',
     capScreenshot: 'استيراد لقطة شاشة الميزان',
     capAnalysis: 'تحليل أسبوعي ونصائح',
+    aiDisclaimer: 'تم الإنشاء بالذكاء الاصطناعي — قد يحتوي على أخطاء. ليس نصيحة طبية.',
   },
   reminders: {
     title: 'التذكيرات',

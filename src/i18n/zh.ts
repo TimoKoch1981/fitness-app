@@ -223,6 +223,8 @@ export const zh: TranslationKeys = {
     bp_hypertension_1: '高血压 1 级',
     bp_hypertension_2: '高血压 2 级',
     bp_hypertension_3: '高血压 3 级',
+    bpDisclaimer: '依据 ESC/ESH 2023 分类标准。仅供参考，非诊断依据。如数值异常，请咨询医生。',
+    pedDisclaimer: '仅用于记录和减害目的。非建议或指南。强烈建议在医疗监督下进行。',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: '药物',
@@ -275,6 +277,7 @@ export const zh: TranslationKeys = {
     capSubstance: '追踪物质',
     capScreenshot: '导入体重秤截图',
     capAnalysis: '周分析与建议',
+    aiDisclaimer: 'AI 生成内容——可能存在错误，不构成医疗建议。',
   },
   reminders: {
     title: '提醒',

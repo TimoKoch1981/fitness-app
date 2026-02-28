@@ -223,6 +223,8 @@ export const fa: TranslationKeys = {
     bp_hypertension_1: 'فشار خون بالا درجه ۱',
     bp_hypertension_2: 'فشار خون بالا درجه ۲',
     bp_hypertension_3: 'فشار خون بالا درجه ۳',
+    bpDisclaimer: 'طبقه‌بندی بر اساس ESC/ESH 2023. فقط جنبه اطلاعاتی دارد، تشخیص پزشکی نیست. در صورت مقادیر غیرعادی با پزشک مشورت کنید.',
+    pedDisclaimer: 'فقط برای مستندسازی و کاهش آسیب. توصیه یا راهنما نیست. نظارت پزشکی اکیداً توصیه می‌شود.',
     cat_trt: 'TRT',
     cat_ped: 'PED',
     cat_medication: 'دارو',
@@ -275,6 +277,7 @@ export const fa: TranslationKeys = {
     capSubstance: 'ردیابی مواد',
     capScreenshot: 'وارد کردن اسکرین‌شات ترازو',
     capAnalysis: 'تحلیل هفتگی و نکات',
+    aiDisclaimer: 'تولید شده توسط هوش مصنوعی — ممکن است خطا داشته باشد. توصیه پزشکی نیست.',
   },
   reminders: {
     title: 'یادآوری‌ها',

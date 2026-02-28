@@ -1,5 +1,6 @@
 import { AlertCircle } from 'lucide-react';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
+import { useTranslation } from '../../../i18n';
 import type { DisplayMessage } from '../hooks/useBuddyChat';
 
 /** Hide ACTION blocks from the display during streaming */
@@ -14,6 +15,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
 
   // Loading state: show bouncing dots while waiting for first token
@@ -81,6 +83,12 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
           {/* Blinking cursor during streaming */}
           {message.isStreaming && <span className="inline-block w-1.5 h-4 bg-teal-500 animate-pulse ml-0.5 align-text-bottom" />}
         </p>
+        {/* AI accuracy disclaimer — shown on completed, non-error messages */}
+        {!message.isStreaming && !message.isError && !message.isLoading && (
+          <p className="text-[9px] text-gray-300 mt-1.5 select-none">
+            ⚠ {t.buddy.aiDisclaimer}
+          </p>
+        )}
       </div>
     </div>
   );
