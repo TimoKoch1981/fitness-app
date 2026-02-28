@@ -16,6 +16,7 @@ import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurem
 import { PAL_FACTORS } from '../lib/constants';
 import { DisclaimerModal as DisclaimerModalView } from '../shared/components/DisclaimerModal';
 import { DeleteAccountDialog } from '../features/auth/components/DeleteAccountDialog';
+import { PrivacySettings } from '../features/auth/components/PrivacySettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 
@@ -759,6 +760,11 @@ export function ProfilePage() {
             {t.admin.adminLink}
           </Link>
         )}
+
+        {/* Privacy Settings (DSGVO Art. 7 Abs. 3 — Widerrufsrecht) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <PrivacySettings />
+        </div>
 
         {/* Logout */}
         <button
