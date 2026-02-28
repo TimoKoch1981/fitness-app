@@ -46,7 +46,8 @@ export type SkillId =
   | 'pct'
   | 'competition'
   | 'femaleFitness'
-  | 'nutritionScience';
+  | 'nutritionScience'
+  | 'glossary';
 
 /** Metadata for the dynamic user skill generator */
 export interface UserSkillsMeta {

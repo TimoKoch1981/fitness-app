@@ -24,6 +24,7 @@ import { PCT_SKILL, PCT_SKILL_META } from './pct';
 import { COMPETITION_SKILL, COMPETITION_SKILL_META } from './competition';
 import { FEMALE_FITNESS_SKILL, FEMALE_FITNESS_SKILL_META } from './femaleFitness';
 import { NUTRITION_SCIENCE_SKILL, NUTRITION_SCIENCE_SKILL_META } from './nutritionScience';
+import { GLOSSARY_SKILL, GLOSSARY_SKILL_META } from './glossary';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -44,6 +45,7 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   femaleFitness: { meta: FEMALE_FITNESS_SKILL_META, content: FEMALE_FITNESS_SKILL },
   anabolics_powerplus: { meta: ANABOLICS_POWERPLUS_SKILL_META, content: ANABOLICS_POWERPLUS_SKILL },
   nutritionScience: { meta: NUTRITION_SCIENCE_SKILL_META, content: NUTRITION_SCIENCE_SKILL },
+  glossary: { meta: GLOSSARY_SKILL_META, content: GLOSSARY_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -61,35 +63,35 @@ interface AgentSkillMap {
  */
 const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   nutrition: {
-    staticSkills: ['nutrition', 'supplements', 'nutritionScience'],
+    staticSkills: ['nutrition', 'supplements', 'nutritionScience', 'glossary'],
     userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
   },
   training: {
-    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience'],
+    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'glossary'],
     userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
   },
   substance: {
-    staticSkills: ['substances', 'anabolics', 'pct'],
+    staticSkills: ['substances', 'anabolics', 'pct', 'glossary'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   analysis: {
-    staticSkills: ['analysis'],
+    staticSkills: ['analysis', 'glossary'],
     userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
   },
   beauty: {
-    staticSkills: ['beauty'],
+    staticSkills: ['beauty', 'glossary'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   lifestyle: {
-    staticSkills: ['attractiveness'],
+    staticSkills: ['attractiveness', 'glossary'],
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience'],
+    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'glossary'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   general: {
-    staticSkills: [],  // no heavy skills — lightweight fallback
+    staticSkills: ['glossary'],  // glossary as lightweight reference
     userSkills: ['daily_summary'],
   },
 };
