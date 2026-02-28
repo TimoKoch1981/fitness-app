@@ -49,6 +49,10 @@ interface UpdateProfileInput {
   cycle_start_date?: string;
   cycle_planned_weeks?: number;
   power_plus_accepted_at?: string;
+  // Dietary & Health
+  dietary_preferences?: string[];
+  allergies?: string[];
+  health_restrictions?: string[];
 }
 
 export function useUpdateProfile() {

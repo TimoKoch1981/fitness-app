@@ -19,6 +19,7 @@ interface Props {
 
 const TYPE_OPTIONS: { type: ReminderType; icon: string; labelKey: string }[] = [
   { type: 'substance', icon: '💊', labelKey: 'substance' },
+  { type: 'meal_logging', icon: '🍽️', labelKey: 'mealLogging' },
   { type: 'blood_pressure', icon: '❤️', labelKey: 'bloodPressure' },
   { type: 'body_measurement', icon: '⚖️', labelKey: 'bodyMeasurement' },
   { type: 'custom', icon: '📌', labelKey: 'custom' },
@@ -29,6 +30,7 @@ const DAY_LABELS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 const DEFAULT_TITLES: Record<ReminderType, { de: string; en: string }> = {
   substance: { de: 'Substanz einnehmen', en: 'Take substance' },
+  meal_logging: { de: 'Mahlzeit loggen', en: 'Log meal' },
   blood_pressure: { de: 'Blutdruck messen', en: 'Measure blood pressure' },
   body_measurement: { de: 'Körperwerte messen', en: 'Measure body stats' },
   custom: { de: '', en: '' },
@@ -62,7 +64,8 @@ export function AddReminderDialog({ open, onClose }: Props) {
     );
   };
 
-  const effectiveTitle = title || DEFAULT_TITLES[type][language];
+  const lang = language === 'de' ? 'de' : 'en';
+  const effectiveTitle = title || DEFAULT_TITLES[type][lang];
 
   const handleTypeChange = (newType: ReminderType) => {
     setType(newType);
@@ -120,7 +123,7 @@ export function AddReminderDialog({ open, onClose }: Props) {
           {/* Type Selection */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-2">Typ</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {TYPE_OPTIONS.map(opt => (
                 <button
                   key={opt.type}
@@ -163,7 +166,7 @@ export function AddReminderDialog({ open, onClose }: Props) {
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder={DEFAULT_TITLES[type][language]}
+              placeholder={DEFAULT_TITLES[type][lang]}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
             />
           </div>

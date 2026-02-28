@@ -206,7 +206,7 @@ export interface TrainingGoal {
 }
 
 // === REMINDERS ===
-export type ReminderType = 'substance' | 'blood_pressure' | 'body_measurement' | 'custom';
+export type ReminderType = 'substance' | 'blood_pressure' | 'body_measurement' | 'meal_logging' | 'custom';
 export type RepeatMode = 'weekly' | 'interval';
 export type TimePeriod = 'morning' | 'noon' | 'evening';
 
@@ -275,9 +275,17 @@ export interface UserProfile {
   cycle_start_date?: string;
   cycle_planned_weeks?: number;
   power_plus_accepted_at?: string;
+  // Dietary & Health
+  dietary_preferences?: string[];
+  allergies?: string[];
+  health_restrictions?: string[];
   created_at: string;
   updated_at: string;
 }
+
+export type DietaryPreference = 'vegetarian' | 'vegan' | 'pescatarian' | 'halal' | 'kosher' | 'lactose_free' | 'gluten_free';
+export type FoodAllergy = 'nuts' | 'gluten' | 'lactose' | 'shellfish' | 'eggs' | 'soy' | 'wheat';
+export type HealthRestriction = 'back' | 'shoulder' | 'knee' | 'hip' | 'wrist' | 'neck' | 'diastasis_recti';
 
 // === BLOOD WORK (Power+ Modus) ===
 export interface BloodWork {

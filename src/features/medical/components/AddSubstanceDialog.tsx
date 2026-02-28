@@ -87,9 +87,12 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     setCategory(cat);
     setSearchQuery('');
     setShowPresets(true);
-    // Show PED disclaimer if selecting PED for first time
-    if (cat === 'ped' && !pedEnabled) {
+    // Show PED disclaimer if selecting PED or TRT for first time
+    // NOT for medication, supplement, or other — those are harmless categories
+    if ((cat === 'ped' || cat === 'trt') && !pedEnabled) {
       setShowPedDisclaimer(true);
+    } else {
+      setShowPedDisclaimer(false);
     }
   };
 
@@ -268,7 +271,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                     {Object.entries(groupedPresets).map(([groupKey, items]) => (
                       <div key={groupKey}>
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                          {PRESET_GROUP_LABELS[groupKey]?.[language] || groupKey}
+                          {PRESET_GROUP_LABELS[groupKey]?.[language === 'de' ? 'de' : 'en'] || groupKey}
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {items.map((preset) => (

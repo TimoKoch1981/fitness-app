@@ -4,8 +4,8 @@
  */
 
 declare namespace Spotify {
-  interface Player {
-    new (options: PlayerOptions): Player;
+  class Player {
+    constructor(options: PlayerOptions);
 
     connect(): Promise<boolean>;
     disconnect(): void;

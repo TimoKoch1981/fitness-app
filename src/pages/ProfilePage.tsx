@@ -40,6 +40,10 @@ export function ProfilePage() {
   const [targetBodyFat, setTargetBodyFat] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [goalNotes, setGoalNotes] = useState('');
+  // Dietary & Health
+  const [dietaryPreferences, setDietaryPreferences] = useState<string[]>([]);
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [healthRestrictions, setHealthRestrictions] = useState<string[]>([]);
   // BMR Help toggle
   const [showBmrHelp, setShowBmrHelp] = useState(false);
   // Disclaimer viewer
@@ -74,6 +78,9 @@ export function ProfilePage() {
       setTargetBodyFat(profile.personal_goals?.target_body_fat_pct?.toString() ?? '');
       setTargetDate(profile.personal_goals?.target_date ?? '');
       setGoalNotes(profile.personal_goals?.notes ?? '');
+      setDietaryPreferences(profile.dietary_preferences ?? []);
+      setAllergies(profile.allergies ?? []);
+      setHealthRestrictions(profile.health_restrictions ?? []);
       // Mark hydrated after a longer delay so all React state batching + renders complete.
       // requestAnimationFrame was too short (single frame) and could race with auto-save.
       setTimeout(() => {
@@ -89,6 +96,7 @@ export function ProfilePage() {
     caloriesGoal: '', proteinGoal: '', waterGoal: '',
     primaryGoal: '' as PrimaryGoal | '', targetWeight: '', targetBodyFat: '',
     targetDate: '', goalNotes: '',
+    dietaryPreferences: [] as string[], allergies: [] as string[], healthRestrictions: [] as string[],
   });
 
   // Keep formRef in sync
@@ -96,6 +104,7 @@ export function ProfilePage() {
     displayName, heightCm, birthDate, gender, activityLevel, bmrFormula,
     caloriesGoal, proteinGoal, waterGoal,
     primaryGoal, targetWeight, targetBodyFat, targetDate, goalNotes,
+    dietaryPreferences, allergies, healthRestrictions,
   };
 
   const showSaveStatus = useCallback((status: 'saved' | 'error') => {
@@ -126,6 +135,9 @@ export function ProfilePage() {
           target_date: f.targetDate || undefined,
           notes: f.goalNotes || undefined,
         },
+        dietary_preferences: f.dietaryPreferences,
+        allergies: f.allergies,
+        health_restrictions: f.healthRestrictions,
       });
       showSaveStatus('saved');
     } catch {
@@ -328,6 +340,137 @@ export function ProfilePage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Dietary & Health */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-semibold text-gray-900 mb-3">
+            {language === 'de' ? 'Ernährung & Gesundheit' : 'Diet & Health'}
+          </h3>
+
+          <div className="space-y-4">
+            {/* Dietary Preferences */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-2">
+                {language === 'de' ? 'Ernährungsform' : 'Dietary Preferences'}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { value: 'vegetarian', de: 'Vegetarisch', en: 'Vegetarian' },
+                  { value: 'vegan', de: 'Vegan', en: 'Vegan' },
+                  { value: 'pescatarian', de: 'Pescatarisch', en: 'Pescatarian' },
+                  { value: 'halal', de: 'Halal', en: 'Halal' },
+                  { value: 'kosher', de: 'Koscher', en: 'Kosher' },
+                  { value: 'lactose_free', de: 'Laktosefrei', en: 'Lactose-free' },
+                  { value: 'gluten_free', de: 'Glutenfrei', en: 'Gluten-free' },
+                ] as const).map((opt) => {
+                  const isSelected = dietaryPreferences.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        const next = isSelected
+                          ? dietaryPreferences.filter(v => v !== opt.value)
+                          : [...dietaryPreferences, opt.value];
+                        handleChange(setDietaryPreferences)(next);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-teal-500 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {language === 'de' ? opt.de : opt.en}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Allergies */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-2">
+                {language === 'de' ? 'Allergien & Unverträglichkeiten' : 'Allergies & Intolerances'}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { value: 'nuts', de: 'Nüsse', en: 'Nuts' },
+                  { value: 'gluten', de: 'Gluten', en: 'Gluten' },
+                  { value: 'lactose', de: 'Laktose', en: 'Lactose' },
+                  { value: 'shellfish', de: 'Schalentiere', en: 'Shellfish' },
+                  { value: 'eggs', de: 'Eier', en: 'Eggs' },
+                  { value: 'soy', de: 'Soja', en: 'Soy' },
+                  { value: 'wheat', de: 'Weizen', en: 'Wheat' },
+                ] as const).map((opt) => {
+                  const isSelected = allergies.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        const next = isSelected
+                          ? allergies.filter(v => v !== opt.value)
+                          : [...allergies, opt.value];
+                        handleChange(setAllergies)(next);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {language === 'de' ? opt.de : opt.en}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Health Restrictions */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-2">
+                {language === 'de' ? 'Gesundheitliche Einschränkungen' : 'Health Restrictions'}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { value: 'back', de: 'Rücken', en: 'Back' },
+                  { value: 'shoulder', de: 'Schulter', en: 'Shoulder' },
+                  { value: 'knee', de: 'Knie', en: 'Knee' },
+                  { value: 'hip', de: 'Hüfte', en: 'Hip' },
+                  { value: 'wrist', de: 'Handgelenk', en: 'Wrist' },
+                  { value: 'neck', de: 'Nacken', en: 'Neck' },
+                  { value: 'diastasis_recti', de: 'Rektusdiastase', en: 'Diastasis Recti' },
+                ] as const).map((opt) => {
+                  const isSelected = healthRestrictions.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        const next = isSelected
+                          ? healthRestrictions.filter(v => v !== opt.value)
+                          : [...healthRestrictions, opt.value];
+                        handleChange(setHealthRestrictions)(next);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-red-500 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {language === 'de' ? opt.de : opt.en}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">
+                {language === 'de'
+                  ? 'Der KI-Assistent berücksichtigt diese Einschränkungen bei Trainingsempfehlungen.'
+                  : 'The AI assistant considers these restrictions when recommending exercises.'}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Daily Goals */}

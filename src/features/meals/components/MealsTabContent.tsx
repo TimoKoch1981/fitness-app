@@ -71,7 +71,11 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           <p className="text-sm font-semibold text-gray-900">
             {isToday ? t.common.today : formatDate(selectedDate)}
           </p>
-          <p className="text-xs text-gray-400">{selectedDate}</p>
+          <p className="text-xs text-gray-400">
+            {new Date(selectedDate).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+            })}
+          </p>
         </div>
         <button
           onClick={() => changeDate(+1)}

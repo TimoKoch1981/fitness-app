@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Sparkles, Loader2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddMeal } from '../hooks/useMeals';
+import { useEstimateMealNutrition } from '../hooks/useEstimateMealNutrition';
 import { today } from '../../../lib/utils';
 import type { MealType } from '../../../types/health';
 
@@ -13,8 +14,9 @@ interface AddMealDialogProps {
 }
 
 export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: AddMealDialogProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const addMeal = useAddMeal();
+  const { estimate, isEstimating, estimateError } = useEstimateMealNutrition();
 
   const [name, setName] = useState('');
   const [type, setType] = useState<MealType>(defaultType);
@@ -23,8 +25,21 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [error, setError] = useState('');
+  const [isEstimated, setIsEstimated] = useState(false);
 
   if (!open) return null;
+
+  const handleEstimate = async () => {
+    if (!name.trim()) return;
+    const result = await estimate(name, language);
+    if (result) {
+      setCalories(String(result.calories));
+      setProtein(String(result.protein));
+      setCarbs(String(result.carbs));
+      setFat(String(result.fat));
+      setIsEstimated(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +63,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
       setProtein('');
       setCarbs('');
       setFat('');
+      setIsEstimated(false);
       onClose();
     } catch {
       setError(t.common.saveError);
@@ -95,20 +111,44 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             ))}
           </div>
 
-          {/* Name */}
+          {/* Name + AI Estimate */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.meals.name}
             </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="z.B. Hähnchenbrust mit Reis"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
-              required
-              autoFocus
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); setIsEstimated(false); }}
+                placeholder={language === 'de' ? 'z.B. Hähnchenbrust mit Reis' : 'e.g. Chicken breast with rice'}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                required
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={handleEstimate}
+                disabled={isEstimating || !name.trim()}
+                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-medium rounded-lg hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 transition-all whitespace-nowrap"
+                title={language === 'de' ? 'KI-Schätzung der Nährwerte' : 'AI nutrition estimate'}
+              >
+                {isEstimating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {language === 'de' ? 'KI' : 'AI'}
+              </button>
+            </div>
+            {estimateError && (
+              <p className="text-[10px] text-red-400 mt-1">{estimateError}</p>
+            )}
+            {isEstimated && !estimateError && (
+              <p className="text-[10px] text-violet-500 mt-1">
+                {language === 'de' ? 'KI-Schätzung — bitte prüfen & anpassen' : 'AI estimate — please review & adjust'}
+              </p>
+            )}
           </div>
 
           {/* Macros Grid */}
@@ -122,7 +162,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                  isEstimated ? 'border-violet-300 bg-violet-50' : 'border-gray-300'
+                }`}
                 required
                 min="0"
               />
@@ -136,7 +178,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
                 placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                  isEstimated ? 'border-violet-300 bg-violet-50' : 'border-gray-300'
+                }`}
                 min="0"
                 step="0.1"
               />
@@ -150,7 +194,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 value={carbs}
                 onChange={(e) => setCarbs(e.target.value)}
                 placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                  isEstimated ? 'border-violet-300 bg-violet-50' : 'border-gray-300'
+                }`}
                 min="0"
                 step="0.1"
               />
@@ -164,7 +210,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 value={fat}
                 onChange={(e) => setFat(e.target.value)}
                 placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                  isEstimated ? 'border-violet-300 bg-violet-50' : 'border-gray-300'
+                }`}
                 min="0"
                 step="0.1"
               />
