@@ -35,6 +35,8 @@ import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
 import { AdminUsagePage } from '../pages/admin/AdminUsagePage';
 import { AdminFeedbackPage } from '../pages/admin/AdminFeedbackPage';
 import { FeatureVotingPage } from '../pages/FeatureVotingPage';
+import { ImpressumPage } from '../pages/ImpressumPage';
+import { DatenschutzPage } from '../pages/DatenschutzPage';
 
 function AppRoutes() {
   return (
@@ -44,6 +46,8 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/impressum" element={<ImpressumPage />} />
+      <Route path="/datenschutz" element={<DatenschutzPage />} />
 
       {/* Protected routes */}
       <Route

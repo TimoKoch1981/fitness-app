@@ -165,6 +165,17 @@ export function RegisterPage() {
             </Link>
           </p>
         </form>
+
+        {/* Legal Links */}
+        <div className="mt-6 flex justify-center gap-4 text-xs text-gray-400">
+          <Link to="/impressum" className="hover:text-teal-600 transition-colors">
+            {t.legal.impressumTitle}
+          </Link>
+          <span>|</span>
+          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">
+            {t.legal.privacyPolicy}
+          </Link>
+        </div>
       </div>
     </div>
   );
