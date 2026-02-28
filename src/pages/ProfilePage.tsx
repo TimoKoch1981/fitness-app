@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation, LANGUAGE_OPTIONS, type Language } from '../i18n';
@@ -16,6 +16,7 @@ import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurem
 import { PAL_FACTORS } from '../lib/constants';
 import { DisclaimerModal as DisclaimerModalView } from '../shared/components/DisclaimerModal';
 import { DeleteAccountDialog } from '../features/auth/components/DeleteAccountDialog';
+import { DataExportDialog } from '../features/auth/components/DataExportDialog';
 import { PrivacySettings } from '../features/auth/components/PrivacySettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
@@ -52,6 +53,8 @@ export function ProfilePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   // Delete account dialog
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  // Data export dialog
+  const [showDataExport, setShowDataExport] = useState(false);
   // Feedback dialog
   const [showFeedback, setShowFeedback] = useState(false);
   // Goal recommendation
@@ -802,6 +805,19 @@ export function ProfilePage() {
             {t.legal.privacyPolicy}
           </Link>
         </div>
+
+        {/* Data Export (DSGVO Art. 20) */}
+        <button
+          onClick={() => setShowDataExport(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-teal-500 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" />
+          {t.dataExport.profileButton}
+        </button>
+
+        {showDataExport && (
+          <DataExportDialog open={showDataExport} onClose={() => setShowDataExport(false)} />
+        )}
 
         {/* Delete Account */}
         <button
