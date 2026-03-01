@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddSymptomLog, getSymptomEmoji, getSeverityEmoji } from '../hooks/useSymptomLogs';
+import { useProfile } from '../../auth/hooks/useProfile';
 import type { SymptomKey } from '../../../types/health';
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
 }
 
 // Grouped symptom keys for UI layout
-const SYMPTOM_GROUPS: { label_de: string; label_en: string; icon: string; keys: SymptomKey[] }[] = [
+const SYMPTOM_GROUPS: { label_de: string; label_en: string; icon: string; keys: SymptomKey[]; genderGated?: boolean }[] = [
   {
     label_de: 'Schmerz',
     label_en: 'Pain',
@@ -47,7 +48,20 @@ const SYMPTOM_GROUPS: { label_de: string; label_en: string; icon: string; keys: 
     label_de: 'Neuro',
     label_en: 'Neuro',
     icon: '🧠',
-    keys: ['brain_fog', 'dizziness', 'fatigue', 'insomnia'],
+    keys: ['brain_fog', 'dizziness', 'fatigue', 'insomnia', 'concentration_issues'],
+  },
+  {
+    label_de: 'Stimmung',
+    label_en: 'Mood',
+    icon: '🎭',
+    keys: ['mood_swings', 'anxiety', 'depressed_mood', 'irritability', 'crying_spells'],
+  },
+  {
+    label_de: 'Hormonal / Perimenopause',
+    label_en: 'Hormonal / Perimenopause',
+    icon: '🔥',
+    keys: ['hot_flashes', 'night_sweats', 'low_libido', 'vaginal_dryness'],
+    genderGated: true,
   },
   {
     label_de: 'Sonstige',
@@ -57,13 +71,20 @@ const SYMPTOM_GROUPS: { label_de: string; label_en: string; icon: string; keys: 
   },
 ];
 
+const MOOD_EMOJIS = ['😢', '😔', '😐', '🙂', '😄'];
+const ENERGY_EMOJIS = ['🪫', '😴', '😐', '⚡', '🔥'];
+
 export function AddSymptomDialog({ open, onClose }: Props) {
   const { t, language } = useTranslation();
   const addLog = useAddSymptomLog();
+  const { data: profile } = useProfile();
   const de = language === 'de';
+  const isFemale = profile?.gender === 'female' || profile?.gender === 'other';
 
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomKey[]>([]);
   const [severity, setSeverity] = useState(3);
+  const [mood, setMood] = useState(3);
+  const [energy, setEnergy] = useState(3);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
@@ -88,10 +109,14 @@ export function AddSymptomDialog({ open, onClose }: Props) {
       await addLog.mutateAsync({
         symptoms: selectedSymptoms,
         severity,
+        mood,
+        energy,
         notes: notes.trim() || undefined,
       });
       setSelectedSymptoms([]);
       setSeverity(3);
+      setMood(3);
+      setEnergy(3);
       setNotes('');
       setError('');
       onClose();
@@ -114,9 +139,49 @@ export function AddSymptomDialog({ open, onClose }: Props) {
           </button>
         </div>
 
+        {/* Mood & Energy Rating */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1.5">{de ? 'Stimmung' : 'Mood'}</p>
+            <div className="flex gap-1">
+              {MOOD_EMOJIS.map((emoji, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setMood(i + 1)}
+                  className={`flex-1 py-1.5 rounded-lg text-center text-lg transition-colors ${
+                    mood === i + 1 ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1.5">{de ? 'Energie' : 'Energy'}</p>
+            <div className="flex gap-1">
+              {ENERGY_EMOJIS.map((emoji, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setEnergy(i + 1)}
+                  className={`flex-1 py-1.5 rounded-lg text-center text-lg transition-colors ${
+                    energy === i + 1 ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Symptom Groups */}
         <div className="space-y-3 mb-4">
-          {SYMPTOM_GROUPS.map(group => (
+          {SYMPTOM_GROUPS
+            .filter(group => !group.genderGated || isFemale)
+            .map(group => (
             <div key={group.label_en}>
               <p className="text-xs text-gray-500 font-medium mb-1.5">
                 {group.icon} {de ? group.label_de : group.label_en}

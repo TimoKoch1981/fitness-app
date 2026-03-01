@@ -1133,6 +1133,18 @@ export const ko: TranslationKeys = {
     insomnia: '불면증',
     palpitations: '심장 두근거림',
     fever: '발열',
+    // Hormonal / Perimenopause
+    hot_flashes: '안면홍조',
+    night_sweats: '야간 발한',
+    low_libido: '성욕 저하',
+    vaginal_dryness: '질 건조',
+    // Mood & Mental Health
+    mood_swings: '기분 변화',
+    anxiety: '불안',
+    depressed_mood: '우울한 기분',
+    irritability: '짜증',
+    crying_spells: '울음 발작',
+    concentration_issues: '집중력 문제',
   },
   sleep: {
     title: '수면 & 회복',

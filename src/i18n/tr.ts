@@ -1133,6 +1133,18 @@ export const tr: TranslationKeys = {
     insomnia: 'Uykusuzluk',
     palpitations: 'Carpinti',
     fever: 'Ates',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Sicak Basmalari',
+    night_sweats: 'Gece Terlemesi',
+    low_libido: 'Dusuk Libido',
+    vaginal_dryness: 'Vajinal Kuruluk',
+    // Mood & Mental Health
+    mood_swings: 'Ruh Hali Degisimleri',
+    anxiety: 'Kaygi',
+    depressed_mood: 'Depresif Ruh Hali',
+    irritability: 'Sinirlilik',
+    crying_spells: 'Aglama Nobetleri',
+    concentration_issues: 'Konsantrasyon Sorunlari',
   },
   sleep: {
     title: 'Uyku & Toparlanma',

@@ -56,6 +56,8 @@ interface AddSymptomLogInput {
   date?: string;
   symptoms: SymptomKey[];
   severity?: number;
+  mood?: number;
+  energy?: number;
   notes?: string;
 }
 
@@ -76,6 +78,8 @@ export function useAddSymptomLog() {
             date: input.date ?? today(),
             symptoms: input.symptoms,
             severity: input.severity ?? null,
+            mood: input.mood ?? null,
+            energy: input.energy ?? null,
             notes: input.notes ?? null,
           },
           { onConflict: 'user_id,date' },
@@ -137,6 +141,18 @@ export function getSymptomEmoji(key: SymptomKey): string {
     insomnia: '🌙',
     palpitations: '💓',
     fever: '🌡️',
+    // Hormonal / Perimenopause
+    hot_flashes: '🔥',
+    night_sweats: '🌙💦',
+    mood_swings: '🎭',
+    anxiety: '😰',
+    low_libido: '💔',
+    vaginal_dryness: '🏜️',
+    // Mood & Mental Health
+    depressed_mood: '😢',
+    irritability: '😤',
+    crying_spells: '😭',
+    concentration_issues: '🧠❌',
   };
   return map[key] ?? '❓';
 }

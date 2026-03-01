@@ -1133,6 +1133,18 @@ export const ru: TranslationKeys = {
     insomnia: 'Бессонница',
     palpitations: 'Учащённое сердцебиение',
     fever: 'Жар',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Приливы жара',
+    night_sweats: 'Ночная потливость',
+    low_libido: 'Снижение либидо',
+    vaginal_dryness: 'Сухость влагалища',
+    // Mood & Mental Health
+    mood_swings: 'Перепады настроения',
+    anxiety: 'Тревожность',
+    depressed_mood: 'Подавленное настроение',
+    irritability: 'Раздражительность',
+    crying_spells: 'Приступы плача',
+    concentration_issues: 'Проблемы с концентрацией',
   },
   sleep: {
     title: 'Сон & Восстановление',

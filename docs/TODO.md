@@ -211,7 +211,7 @@
 > VORAUSSETZUNG: Gender-basiertes Feature-Gating (siehe oben). Features nur sichtbar wenn `gender === 'female'` oder `gender === 'other'`.
 
 - [x] ~~**Menstruationszyklus-Tracker**~~ ✅ (2026-03-01, v12.7) — menstrual_cycle_logs Tabelle (phase, flow_intensity, symptoms JSONB, energy, mood), useMenstrualCycle Hook (CRUD + Phasen-Helpers), AddCycleLogDialog (4 Phasen, 3 Flow, 8 Symptome, Mood+Energy Emoji), Gender-Gating (female/other), MedicalPage Integration, AI-Kontext, 17 Sprachen (24 Keys), 22 Unit-Tests. RED-S/Kalender = separater Task.
-- [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Nur sichtbar bei gender=female/other. Betroffene: E3, E5, C5
+- [x] ~~**Symptom-Tracker (Hitzewallungen, Stimmung)**~~ ✅ (2026-03-01, v12.27) — 10 neue Symptome (Hormonal/Perimenopause: Hitzewallungen, Nachtschweiss, Stimmungsschwankungen, Angst, niedrige Libido, vaginale Trockenheit; Mood: depressive Stimmung, Reizbarkeit, Weinanfaelle, Konzentrationsprobleme). Mood+Energy Emoji-Rating (1-5). Gender-Gating (Perimenopause nur female/other). DB-Migration mood/energy Spalten. 17 Sprachen (10 neue Symptom-Keys). MedicalPage Mood/Energy Anzeige.
 - [x] ~~**Stillzeit-Kalorienzuschlag**~~ ✅ (bereits implementiert) — is_breastfeeding Boolean in Profil, BREASTFEEDING_CALORIE_BOOST=400 kcal/Tag (Dewey 2003, PMID:14506247), Gender-Gating (nur female), Pink-Toggle in ProfilePage, Cockpit-Badge, Goal-Calculator Integration.
 
 #### Medizin-Erweiterungen

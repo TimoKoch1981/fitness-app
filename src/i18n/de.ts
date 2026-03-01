@@ -1178,6 +1178,18 @@ export const de = {
     insomnia: 'Schlaflosigkeit',
     palpitations: 'Herzklopfen',
     fever: 'Fieber',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Hitzewallungen',
+    night_sweats: 'Nachtschweiss',
+    low_libido: 'Geringe Libido',
+    vaginal_dryness: 'Vaginale Trockenheit',
+    // Mood & Mental Health
+    mood_swings: 'Stimmungsschwankungen',
+    anxiety: 'Angst',
+    depressed_mood: 'Depressive Stimmung',
+    irritability: 'Reizbarkeit',
+    crying_spells: 'Weinanfaelle',
+    concentration_issues: 'Konzentrationsprobleme',
   },
   sleep: {
     title: 'Schlaf & Recovery',

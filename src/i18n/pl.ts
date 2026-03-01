@@ -1133,6 +1133,18 @@ export const pl: TranslationKeys = {
     insomnia: 'Bezsennosc',
     palpitations: 'Kolatanie serca',
     fever: 'Goraczka',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Uderzenia goraca',
+    night_sweats: 'Nocne poty',
+    low_libido: 'Niskie libido',
+    vaginal_dryness: 'Suchosc pochwy',
+    // Mood & Mental Health
+    mood_swings: 'Wahania nastroju',
+    anxiety: 'Lek',
+    depressed_mood: 'Obnizony nastroj',
+    irritability: 'Drazliwosc',
+    crying_spells: 'Napady placu',
+    concentration_issues: 'Problemy z koncentracja',
   },
   sleep: {
     title: 'Sen & Regeneracja',

@@ -1133,6 +1133,18 @@ export const fil: TranslationKeys = {
     insomnia: 'Hindi makatulog',
     palpitations: 'Kabog ng dibdib',
     fever: 'Lagnat',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Hot Flashes',
+    night_sweats: 'Pagpapawis sa Gabi',
+    low_libido: 'Mababang Libido',
+    vaginal_dryness: 'Pagkatuyo ng Vagina',
+    // Mood & Mental Health
+    mood_swings: 'Pagbabago ng Mood',
+    anxiety: 'Pagkabalisa',
+    depressed_mood: 'Malungkot na Mood',
+    irritability: 'Pagkamayamutin',
+    crying_spells: 'Pag-iyak',
+    concentration_issues: 'Problema sa Konsentrasyon',
   },
   sleep: {
     title: 'Tulog & Recovery',

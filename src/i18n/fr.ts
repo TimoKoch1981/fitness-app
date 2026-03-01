@@ -1133,6 +1133,18 @@ export const fr: TranslationKeys = {
     insomnia: 'Insomnie',
     palpitations: 'Palpitations',
     fever: 'Fievre',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Bouffees de chaleur',
+    night_sweats: 'Sueurs nocturnes',
+    low_libido: 'Baisse de libido',
+    vaginal_dryness: 'Secheresse vaginale',
+    // Mood & Mental Health
+    mood_swings: 'Sautes d\'humeur',
+    anxiety: 'Anxiete',
+    depressed_mood: 'Humeur depressive',
+    irritability: 'Irritabilite',
+    crying_spells: 'Crises de larmes',
+    concentration_issues: 'Troubles de la concentration',
   },
   sleep: {
     title: 'Sommeil & Récupération',

@@ -1133,6 +1133,18 @@ export const ro: TranslationKeys = {
     insomnia: 'Insomnie',
     palpitations: 'Palpitatii',
     fever: 'Febra',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Bufeuri',
+    night_sweats: 'Transpiratii nocturne',
+    low_libido: 'Libido scazut',
+    vaginal_dryness: 'Uscaciune vaginala',
+    // Mood & Mental Health
+    mood_swings: 'Schimbari de dispozitie',
+    anxiety: 'Anxietate',
+    depressed_mood: 'Dispozitie depresiva',
+    irritability: 'Iritabilitate',
+    crying_spells: 'Episoade de plans',
+    concentration_issues: 'Probleme de concentrare',
   },
   sleep: {
     title: 'Somn & Recuperare',

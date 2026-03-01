@@ -1133,6 +1133,18 @@ export const zh: TranslationKeys = {
     insomnia: '失眠',
     palpitations: '心悸',
     fever: '发烧',
+    // Hormonal / Perimenopause
+    hot_flashes: '潮热',
+    night_sweats: '盗汗',
+    low_libido: '性欲低下',
+    vaginal_dryness: '阴道干燥',
+    // Mood & Mental Health
+    mood_swings: '情绪波动',
+    anxiety: '焦虑',
+    depressed_mood: '情绪低落',
+    irritability: '易怒',
+    crying_spells: '哭泣发作',
+    concentration_issues: '注意力问题',
   },
   sleep: {
     title: '睡眠与恢复',

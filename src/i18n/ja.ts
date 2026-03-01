@@ -1133,6 +1133,18 @@ export const ja: TranslationKeys = {
     insomnia: '不眠症',
     palpitations: '動悸',
     fever: '発熱',
+    // Hormonal / Perimenopause
+    hot_flashes: 'ほてり',
+    night_sweats: '寝汗',
+    low_libido: '性欲低下',
+    vaginal_dryness: '膣の乾燥',
+    // Mood & Mental Health
+    mood_swings: '気分の変動',
+    anxiety: '不安',
+    depressed_mood: '憂うつな気分',
+    irritability: 'イライラ',
+    crying_spells: '泣き発作',
+    concentration_issues: '集中力の問題',
   },
   sleep: {
     title: '睡眠＆リカバリー',

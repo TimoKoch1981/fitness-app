@@ -1133,6 +1133,18 @@ export const uk: TranslationKeys = {
     insomnia: 'Безсоння',
     palpitations: 'Прискорене серцебиття',
     fever: 'Жар',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Припливи жару',
+    night_sweats: 'Нічна пітливість',
+    low_libido: 'Зниження лібідо',
+    vaginal_dryness: 'Сухість піхви',
+    // Mood & Mental Health
+    mood_swings: 'Перепади настрою',
+    anxiety: 'Тривожність',
+    depressed_mood: 'Пригнічений настрій',
+    irritability: 'Дратівливість',
+    crying_spells: 'Напади плачу',
+    concentration_issues: 'Проблеми з концентрацією',
   },
   sleep: {
     title: 'Сон & Відновлення',

@@ -1133,6 +1133,18 @@ export const pt: TranslationKeys = {
     insomnia: 'Insonia',
     palpitations: 'Palpitacoes',
     fever: 'Febre',
+    // Hormonal / Perimenopause
+    hot_flashes: 'Ondas de calor',
+    night_sweats: 'Suores noturnos',
+    low_libido: 'Baixa libido',
+    vaginal_dryness: 'Secura vaginal',
+    // Mood & Mental Health
+    mood_swings: 'Alteracoes de humor',
+    anxiety: 'Ansiedade',
+    depressed_mood: 'Humor deprimido',
+    irritability: 'Irritabilidade',
+    crying_spells: 'Crises de choro',
+    concentration_issues: 'Problemas de concentracao',
   },
   sleep: {
     title: 'Sono & Recuperação',

@@ -477,8 +477,12 @@ export type SymptomKey =
   | 'rash' | 'acne' | 'dry_skin' | 'itching'
   // Neurological
   | 'brain_fog' | 'dizziness' | 'fatigue' | 'insomnia'
-  // Other
-  | 'palpitations' | 'fever';
+  // Cardiovascular
+  | 'palpitations' | 'fever'
+  // Hormonal / Perimenopause (v12.27)
+  | 'hot_flashes' | 'night_sweats' | 'mood_swings' | 'anxiety' | 'low_libido' | 'vaginal_dryness'
+  // Mood & Mental Health (v12.27)
+  | 'depressed_mood' | 'irritability' | 'crying_spells' | 'concentration_issues';
 
 export interface SymptomLog {
   id: string;
@@ -486,6 +490,8 @@ export interface SymptomLog {
   date: string;
   symptoms: SymptomKey[];
   severity: number | null;    // 1-5
+  mood: number | null;        // 1-5 (v12.27: mood tracking)
+  energy: number | null;      // 1-5 (v12.27: energy level)
   notes: string | null;
   created_at: string;
 }

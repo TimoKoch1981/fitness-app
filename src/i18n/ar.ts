@@ -1133,6 +1133,18 @@ export const ar: TranslationKeys = {
     insomnia: 'أرق',
     palpitations: 'خفقان القلب',
     fever: 'حمى',
+    // Hormonal / Perimenopause
+    hot_flashes: 'هبات ساخنة',
+    night_sweats: 'تعرق ليلي',
+    low_libido: 'انخفاض الرغبة الجنسية',
+    vaginal_dryness: 'جفاف مهبلي',
+    // Mood & Mental Health
+    mood_swings: 'تقلبات المزاج',
+    anxiety: 'قلق',
+    depressed_mood: 'مزاج مكتئب',
+    irritability: 'سرعة الانفعال',
+    crying_spells: 'نوبات بكاء',
+    concentration_issues: 'مشاكل في التركيز',
   },
   sleep: {
     title: 'النوم والتعافي',

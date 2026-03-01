@@ -1133,6 +1133,18 @@ export const fa: TranslationKeys = {
     insomnia: 'بی‌خوابی',
     palpitations: 'تپش قلب',
     fever: 'تب',
+    // Hormonal / Perimenopause
+    hot_flashes: 'گرگرفتگی',
+    night_sweats: 'عرق شبانه',
+    low_libido: 'کاهش میل جنسی',
+    vaginal_dryness: 'خشکی واژن',
+    // Mood & Mental Health
+    mood_swings: 'نوسانات خلقی',
+    anxiety: 'اضطراب',
+    depressed_mood: 'خلق افسرده',
+    irritability: 'تحریک‌پذیری',
+    crying_spells: 'حملات گریه',
+    concentration_issues: 'مشکلات تمرکز',
   },
   sleep: {
     title: 'خواب و بازیابی',

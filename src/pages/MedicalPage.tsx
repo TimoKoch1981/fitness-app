@@ -198,6 +198,8 @@ export function MedicalPage() {
                       </div>
                       <p className="text-[10px] text-gray-400 mt-0.5">
                         {formatDate(log.date, locale)}
+                        {log.mood && ` · ${['😢','😔','😐','🙂','😄'][log.mood - 1]}`}
+                        {log.energy && ` · ${['🪫','😴','😐','⚡','🔥'][log.energy - 1]}`}
                         {log.notes && ` · ${log.notes.slice(0, 30)}${log.notes.length > 30 ? '...' : ''}`}
                       </p>
                     </div>
