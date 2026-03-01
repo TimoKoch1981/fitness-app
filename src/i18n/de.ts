@@ -1052,6 +1052,27 @@ export const de = {
     title: 'Logging-Pause erkannt',
     message: 'Alles OK? Jeder Eintrag hilft deinem Fortschritt!',
   },
+  sleep: {
+    title: 'Schlaf & Recovery',
+    addSleep: 'Schlaf eintragen',
+    bedtime: 'Schlafenszeit',
+    wakeTime: 'Aufwachzeit',
+    duration: 'Dauer',
+    quality: 'Schlafqualität',
+    veryPoor: 'Sehr schlecht',
+    poor: 'Schlecht',
+    fair: 'Mittel',
+    good: 'Gut',
+    veryGood: 'Sehr gut',
+    durationOptimal: 'Im optimalen Bereich (7-9h)',
+    durationShort: 'Unter 7h — Erholung beachten',
+    durationLong: 'Über 9h — Qualität prüfen',
+    lastNight: 'Letzte Nacht',
+    avgDuration: 'Ø Schlafdauer',
+    avgQuality: 'Ø Qualität',
+    noData: 'Noch kein Schlaf eingetragen',
+    weekChart: 'Schlaf diese Woche',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

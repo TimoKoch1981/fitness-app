@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Heart, Pill, Trash2, ClipboardList, Bell } from 'lucide-react';
+import { Plus, Heart, Pill, Trash2, ClipboardList, Bell, Moon } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
@@ -18,6 +18,8 @@ import type { Reminder } from '../types/health';
 import { formatDate, formatTime } from '../lib/utils';
 import { useTrainingMode } from '../shared/hooks/useTrainingMode';
 import { DoctorReportButton } from '../features/medical/components/DoctorReportButton';
+import { useSleepLogs, useDeleteSleepLog, formatSleepDuration } from '../features/sleep/hooks/useSleep';
+import { AddSleepDialog } from '../features/sleep/components/AddSleepDialog';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -27,9 +29,12 @@ export function MedicalPage() {
   const [showAddSubstanceDialog, setShowAddSubstanceDialog] = useState(false);
   const [showLogSubstanceDialog, setShowLogSubstanceDialog] = useState(false);
   const [showReminderDialog, setShowReminderDialog] = useState(false);
+  const [showSleepDialog, setShowSleepDialog] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
 
   const { data: bpLogs, isLoading: bpLoading } = useBloodPressureLogs(10);
+  const { data: sleepLogs, isLoading: sleepLoading } = useSleepLogs(10);
+  const deleteSleep = useDeleteSleepLog();
   const { data: substances } = useSubstances(true);
   const { data: substanceLogs } = useSubstanceLogs(10);
   const deleteBP = useDeleteBloodPressure();
@@ -127,6 +132,67 @@ export function MedicalPage() {
                 className="mt-2 text-xs text-teal-600 hover:underline"
               >
                 {t.medical.addBP}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Sleep & Recovery Section */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-center gap-2">
+              <Moon className="h-4 w-4 text-indigo-500" />
+              <h3 className="font-semibold text-gray-900">{t.sleep.title}</h3>
+            </div>
+            <button
+              onClick={() => setShowSleepDialog(true)}
+              className="p-1.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {sleepLoading ? (
+            <div className="p-4 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto" />
+            </div>
+          ) : sleepLogs && sleepLogs.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {sleepLogs.slice(0, 5).map((log) => {
+                const qualityEmoji = ['', '\u{1F62B}', '\u{1F615}', '\u{1F610}', '\u{1F642}', '\u{1F634}'][log.quality ?? 3];
+                const qualityKeys = ['', 'veryPoor', 'poor', 'fair', 'good', 'veryGood'] as const;
+                const qualityLabel = log.quality ? t.sleep[qualityKeys[log.quality] as keyof typeof t.sleep] : '';
+                return (
+                  <div key={log.id} className="px-4 py-2.5 flex items-center gap-3 group">
+                    <span className="text-lg flex-shrink-0">{qualityEmoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">
+                        {log.duration_minutes ? formatSleepDuration(log.duration_minutes) : '--'}
+                        {qualityLabel && <span className="text-gray-400 font-normal"> · {qualityLabel}</span>}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        {formatDate(log.date, locale)}
+                        {log.bedtime && log.wake_time && ` · ${log.bedtime.slice(0, 5)} → ${log.wake_time.slice(0, 5)}`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteSleep.mutate(log.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-sm text-gray-400">{t.sleep.noData}</p>
+              <button
+                onClick={() => setShowSleepDialog(true)}
+                className="mt-2 text-xs text-indigo-600 hover:underline"
+              >
+                {t.sleep.addSleep}
               </button>
             </div>
           )}
@@ -294,6 +360,10 @@ export function MedicalPage() {
         </div>
       </div>
 
+      <AddSleepDialog
+        open={showSleepDialog}
+        onClose={() => setShowSleepDialog(false)}
+      />
       <AddBloodPressureDialog
         open={showBPDialog}
         onClose={() => setShowBPDialog(false)}

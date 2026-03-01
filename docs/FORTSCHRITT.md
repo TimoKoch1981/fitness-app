@@ -104,8 +104,28 @@
 | 12.3    | 2026-03-01 | Schriftgroessen-Option (Klein/Normal/Gross/Sehr Gross, 17 Sprachen)       | Erledigt   |
 | 12.4    | 2026-03-01 | Luecken-Erkennung (GapAlertBanner, useGapDetection, 17 Sprachen)          | Erledigt   |
 | 12.5    | 2026-03-01 | Buddy-Kommunikationsstil (Verbosity + Expertise, BaseAgent-Injection)     | Erledigt   |
+| 12.6    | 2026-03-01 | Schlaf-Tracking (Zeiten, Qualitaet, DB, 17 Sprachen, 15 Tests)           | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.6: Schlaf-Tracking (Zeiten)
+
+**Twin-Testing Finding:** Mehrere Personas (A4 Maria, E5 David, D4 Marcel) wollen Schlaf-/Aufwachzeiten statt nur Qualitaet.
+
+**Aenderungen (24 Dateien):**
+- DB-Migration: `sleep_logs` Tabelle (bedtime TIME, wake_time TIME, duration_minutes, quality 1-5, notes)
+- UNIQUE CONSTRAINT `(user_id, date)` fuer Upsert-Support
+- RLS: 4 Policies (SELECT, INSERT, UPDATE, DELETE)
+- `SleepLog` Type in health.ts, `recentSleepLogs` in HealthContext
+- `useSleep.ts` Hook: `calculateSleepDuration()` (overnight-aware), `formatSleepDuration()`, `getSleepQualityKey()`, `useSleepLogs()`, `useAddSleepLog()` (Upsert), `useDeleteSleepLog()`
+- `AddSleepDialog.tsx`: Zeit-Inputs (23:00/07:00 Default), Dauer-Preview (optimal/kurz/lang), Emoji-Rating (5 Level), Indigo-Gradient
+- MedicalPage: Sleep-Sektion mit Moon-Icon, Eintrags-Liste, Delete
+- BuddyPage + InlineBuddyChat: `recentSleepLogs` im AI-Kontext
+- 17 Sprachen: 19 neue Keys (sleep.title, bedtime, wakeTime, duration, quality, veryPoor...veryGood, etc.)
+- 15 Unit-Tests (calculateSleepDuration, formatSleepDuration, getSleepQualityKey)
+- Tests: 2.801 (51 Dateien), alle gruen
+
+**Learning:** Supabase Upsert (`onConflict`) braucht UNIQUE CONSTRAINT, nicht nur UNIQUE INDEX!
 
 ### 2026-03-01 - v12.5: Buddy-Kommunikationsstil
 

@@ -20,6 +20,7 @@ import { useActivePlan } from '../features/workouts/hooks/useTrainingPlans';
 import { useStandardProducts, useUserProducts } from '../features/meals/hooks/useProducts';
 import { useUserEquipmentResolved } from '../features/equipment/hooks/useEquipment';
 import { useTodayCheckin } from '../features/checkin/hooks/useDailyCheckin';
+import { useSleepLogs } from '../features/sleep/hooks/useSleep';
 import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
@@ -87,6 +88,7 @@ export function BuddyPage() {
   const { data: userProducts } = useUserProducts();
   const { equipment: availableEquipment } = useUserEquipmentResolved();
   const { data: dailyCheckin } = useTodayCheckin();
+  const { data: sleepLogs } = useSleepLogs(7);
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -113,6 +115,7 @@ export function BuddyPage() {
     standardProducts: standardProducts ?? [],
     availableEquipment: availableEquipment ?? [],
     dailyCheckin: dailyCheckin ?? undefined,
+    recentSleepLogs: sleepLogs ?? [],
   };
 
   // Proactive suggestion chips (rule-based, no LLM)

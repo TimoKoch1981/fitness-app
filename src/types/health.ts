@@ -414,6 +414,19 @@ export interface DailyStats {
   waterGoal: number;
 }
 
+// === SLEEP LOGS ===
+export interface SleepLog {
+  id: string;
+  user_id: string;
+  date: string;          // ISO date YYYY-MM-DD (the night this refers to)
+  bedtime?: string;      // HH:mm
+  wake_time?: string;    // HH:mm
+  duration_minutes?: number;
+  quality?: number;      // 1-5 (1=very poor, 5=very good)
+  notes?: string;
+  created_at: string;
+}
+
 // === DAILY CHECK-IN ===
 export interface DailyCheckin {
   id: string;
@@ -445,6 +458,7 @@ export interface HealthContext {
   standardProducts?: ProductNutrition[];
   availableEquipment?: Equipment[];
   dailyCheckin?: DailyCheckin;
+  recentSleepLogs?: SleepLog[];
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }
