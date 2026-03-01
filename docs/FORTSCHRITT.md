@@ -110,6 +110,25 @@
 | 12.8b   | 2026-03-01 | P0: DSFA dokumentiert (Art. 35 DSGVO, 12 Risiken, Restrisiko-Bewertung)  | Erledigt   |
 | 12.9    | 2026-03-01 | Onboarding-Wizard (5 Schritte, OnboardingGuard, 17 Sprachen, 38 Keys)    | Erledigt   |
 | 12.10   | 2026-03-01 | RED-S/Untergewicht-Warnsystem (BMI, Defizit, EA, 17 Sprachen, 8 Keys)    | Erledigt   |
+| 12.11   | 2026-03-01 | Rektusdiastase-Kontraindikations-Check (Skill-Matrix, Agent-Rules, i18n)  | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.11: Rektusdiastase-Kontraindikations-Check (P1)
+
+**Problem:** KI-Trainingsplaene enthielten keine Kontraindikations-Warnungen bei gesundheitlichen Einschraenkungen. Nutzerin mit Rektusdiastase koennte Crunches im Plan bekommen.
+
+**Loesung — 4 Aenderungen:**
+
+1. **Training Skill** (training.ts): Neue Kontraindikations-Matrix mit 6 Regionen (diastasis_recti, back, shoulder, knee, neck, heart). Je Region: kontraindizierte Uebungen + sichere Alternativen + Pflicht-Hinweise. Diastasis-Regeln: Keine Crunches/Sit-ups/V-Ups/Rollouts → Dead Bugs, Pallof Press, Bird Dogs.
+
+2. **Female Fitness Skill** (femaleFitness.ts): Diastasis-Sektion erweitert (vorher 1 Zeile → jetzt 25 Zeilen). Definition, Messung (IRD per Finger), 3 Schweregrade, Risikofaktoren, kontraindizierte Uebungen, 3-Phasen-Progressive-Rehabilitation. Ref: Benjamin et al. 2014, PMID:24996567.
+
+3. **Training Agent** (trainingAgent.ts): Explizite Kontraindikations-Anweisung in DE + EN Agent-Instructions. Pflicht: Bei diastasis_recti immer Physio-Hinweis + keine Crunches.
+
+4. **Onboarding Wizard** (OnboardingWizardPage.tsx): HEALTH_RESTRICTION_OPTIONS um `neck` + `diastasis_recti` ergaenzt (vorher 7, jetzt 9 Optionen). 9 neue i18n-Keys (restriction_*) in 17 Sprachen.
+
+**Tests:** 2.990 bestanden, Build OK
 
 ---
 

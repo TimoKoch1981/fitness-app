@@ -133,7 +133,32 @@ Drei zusammenhaengende Probleme:
 | Progressive Phase | 12-24 Wochen | Normales Training aufbauen |
 | Vollstaendig | >24 Wochen | Alle Aktivitaeten |
 
-**Diastasis Recti**: Rektusdiastase pruefen lassen (>2 Finger breit = physio-Bedarf)
+### Rektusdiastase (Diastasis Recti) — Erweitert
+
+**Definition:** Auseinanderweichen der geraden Bauchmuskulatur (Rectus abdominis) entlang der Linea Alba.
+**Haeufigkeit:** ~60% aller Schwangeren, ~30% persistieren >12 Monate postpartum.
+**Messung:** Inter-Recti-Distanz (IRD) per Finger- oder Ultraschall-Test:
+- < 2 Finger (< 2 cm): Normal / leicht
+- 2-3 Finger (2-3 cm): Moderat — Physiotherapie empfohlen
+- > 3 Finger (> 3 cm): Schwer — Physiotherapie PFLICHT
+
+**Risikofaktoren:** Mehrfachschwangerschaften, Alter >35, schwere Babys (>4 kg), C-Sektion, schwaches Bindegewebe.
+
+**KONTRAINDIZIERTE Uebungen:**
+- Crunches, Sit-ups, V-Ups — erzeugen Doming (Vorwoelbung der Linea Alba)
+- Schwere Planks (>30s oder gewichtet) — erhoehter intraabdominaler Druck
+- Ab Wheel Rollouts — extreme Belastung der Linea Alba
+- Doppelte Beinheber — erzeugen Scherbelastung
+- Alles was sichtbares "Doming" der Mittellinie verursacht
+
+**SICHERE Uebungen (Progressiv):**
+1. Phase 1 (0-6 Wochen): Diaphragmatische Atmung, Beckenboden-Aktivierung, Heel Slides
+2. Phase 2 (6-12 Wochen): Dead Bugs (einseitig), Bird Dogs, Glute Bridges, Seitenplanke auf Knien
+3. Phase 3 (>12 Wochen, nach Physio-OK): Pallof Press, Farmer's Walk, modifizierte Planks, Cable Chops
+
+**PFLICHT-HINWEIS:** "Bitte lasse deine Rektusdiastase von einer Physiotherapeut:in beurteilen. Die Uebungsauswahl ist an deine Situation angepasst."
+
+Quelle: Benjamin et al. 2014, Physiotherapy, PMID:24996567 — Diastasis Recti Abdominis Rehabilitation
 
 ### Perimenopause & Menopause (ab ~45-55 Jahre)
 - Oestrogen sinkt → viszerales Fett ↑, Muskelmasse ↓, Knochenabbau ↑

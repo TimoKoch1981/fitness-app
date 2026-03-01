@@ -62,7 +62,7 @@ const ALLERGY_OPTIONS = [
 ] as const;
 
 const HEALTH_RESTRICTION_OPTIONS = [
-  'back', 'shoulder', 'knee', 'hip', 'wrist', 'ankle', 'heart',
+  'back', 'shoulder', 'knee', 'hip', 'wrist', 'ankle', 'heart', 'neck', 'diastasis_recti',
 ] as const;
 
 const GENDERS: Gender[] = ['male', 'female', 'other'];

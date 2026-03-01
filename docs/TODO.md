@@ -197,7 +197,7 @@
 
 #### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
 - [x] ~~**🔴 RED-S/Untergewicht-Warnsystem**~~ ✅ (2026-03-01, v12.10) — useREDSWarning Hook (5 Schwellen: BMI<18.5, BMI<17.0, Defizit>1000kcal, EA<30kcal/kg FFM, <1200kcal aktive Frauen). REDSWarningBanner (Amber/Rot, dismissable). CockpitPage + MedicalPage Integration. Gender-Gating via useGenderFeatures. 17 Sprachen (8 Keys). 2.972 Tests bestanden.
-- [ ] **🟡 Rektusdiastase-Kontraindikations-Check** (~3h) — KI-Trainingsplaene enthalten keine Kontraindikations-Warnungen. Lena (E4) koennte Crunches im Plan bekommen. Loesung: Gesundheits-Tags → Trainingsplan-Filter (keine Crunches bei Rektusdiastase, keine Deadlifts bei Bandscheibe). Betroffene: E4, A2
+- [x] ~~**🟡 Rektusdiastase-Kontraindikations-Check**~~ ✅ (2026-03-01, v12.11) — Kontraindikations-Matrix in training.ts (6 Regionen: diastasis_recti, back, shoulder, knee, neck, heart). femaleFitness.ts: Diastasis-Sektion 25 Zeilen (3 Schweregrade, 3-Phasen-Rehab, PMID:24996567). TrainingAgent: Explizite Kontraindikations-Regeln DE+EN. OnboardingWizard: +2 Restriction-Optionen (neck, diastasis_recti). 9 neue i18n-Keys in 17 Sprachen. 2.990 Tests bestanden.
 
 #### Frauen-spezifische Features
 > VORAUSSETZUNG: Gender-basiertes Feature-Gating (siehe oben). Features nur sichtbar wenn `gender === 'female'` oder `gender === 'other'`.
