@@ -280,7 +280,7 @@
 - [ ] **`tsc -b` Build-Fix** (~2h) — 52 pre-existing Language-Type-Errors seit 17-Sprachen-Expansion. `tsc --noEmit` = 0 Fehler, aber `tsc -b` (project references) hat 52 Fehler wegen `Language` Type (17 Werte) vs `{de: string; en: string}` Pattern.
 - [ ] **Production-Deployment v12.1** — Alle Features seit v10.1 auf fudda.de deployen (Twin-Fixes, Power/Power+, Skills v3.0, Timer/Musik, DSGVO)
 - [ ] **Production DB-Migrationen** — Alle neuen Migrationen auf Production anwenden (dietary/health fields, blood_work, training_mode, consents, etc.)
-- [ ] **Code-TODO: baseAgent.ts:269** — `bodyHistory` Array hardcoded als `[]`, sollte aus BodyMeasurements Hook befuellt werden
+- [x] ~~**Code-TODO: baseAgent.ts:269**~~ ✅ (2026-03-01, v12.30) — `bodyHistory` jetzt aus `useBodyMeasurements(30)` befuellt statt `[]`. HealthContext um `bodyHistory` erweitert. BuddyPage + InlineBuddyChat: Hook-Integration. baseAgent: `hc.bodyHistory` statt hardcoded `[]`. KI-Buddy hat jetzt Zugriff auf Gewichts-/KFA-Trends der letzten 30 Messungen.
 
 ### P2 — Nice-to-Have
 

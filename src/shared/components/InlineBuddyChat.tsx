@@ -23,7 +23,7 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { useProfile } from '../../features/auth/hooks/useProfile';
 import { useOnboarding } from '../../features/buddy/hooks/useOnboarding';
 import { useDailyMealTotals } from '../../features/meals/hooks/useMeals';
-import { useLatestBodyMeasurement } from '../../features/body/hooks/useBodyMeasurements';
+import { useLatestBodyMeasurement, useBodyMeasurements } from '../../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../../features/medical/hooks/useSubstances';
 import { useLatestBloodWork } from '../../features/medical/hooks/useBloodWork';
 import { useActivePlan } from '../../features/workouts/hooks/useTrainingPlans';
@@ -102,6 +102,7 @@ function InlineBuddyChatContent() {
   // ── Health Context ──────────────────────────────────────────────────────
   const { data: profile } = useProfile();
   const { data: latestBody } = useLatestBodyMeasurement();
+  const { data: bodyHistory } = useBodyMeasurements(30);
   const { needsOnboarding } = useOnboarding(profile, latestBody);
   const { totals } = useDailyMealTotals(today());
   const { data: activeSubstances } = useSubstances(true);
@@ -135,6 +136,7 @@ function InlineBuddyChatContent() {
     recentSubstanceLogs: [],
     trainingGoals: [],
     latestBodyMeasurement: latestBody ?? undefined,
+    bodyHistory: bodyHistory ?? [],
     activeSubstances: activeSubstances ?? [],
     activePlan: activePlan ?? undefined,
     userProducts: userProducts ?? [],

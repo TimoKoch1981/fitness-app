@@ -502,6 +502,8 @@ export interface HealthContext {
   recentMeals: Meal[];
   recentWorkouts: Workout[];
   latestBodyMeasurement?: BodyMeasurement;
+  /** Recent body measurement history for trend analysis (default: last 30) */
+  bodyHistory?: BodyMeasurement[];
   recentBloodPressure: BloodPressure[];
   activeSubstances: Substance[];
   recentSubstanceLogs: SubstanceLog[];

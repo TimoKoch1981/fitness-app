@@ -332,7 +332,7 @@ When the user makes progress or achieves milestones:
       recentMeals: hc.recentMeals,
       recentWorkouts: hc.recentWorkouts,
       latestBody: hc.latestBodyMeasurement,
-      bodyHistory: [], // TODO: expose from BodyMeasurements hook when available
+      bodyHistory: hc.bodyHistory ?? [],
       activeSubstances: hc.activeSubstances,
       recentSubstanceLogs: hc.recentSubstanceLogs,
       recentBloodPressure: hc.recentBloodPressure,
