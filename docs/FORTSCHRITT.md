@@ -117,6 +117,26 @@
 | 12.21   | 2026-03-01 | Loeschkonzept (TTL, cleanup_expired_data, Data Retention UI, 17 Sprachen)| Erledigt   |
 | 12.22   | 2026-03-01 | Audit-Trail (audit_logs, 14 Trigger, 180d TTL, blood_work/sleep/cycle deployed) | Erledigt   |
 | 12.23   | 2026-03-01 | OAuth / Social Login (Google + Apple Buttons, AuthCallback, 17 Sprachen)  | Erledigt   |
+| 12.24   | 2026-03-01 | MFA/TOTP (useMFA, Setup/Verify/Settings Dialoge, ProfilePage, 17 Sprachen) | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.24: MFA / Zwei-Faktor-Authentifizierung (P2)
+
+**Feature:** TOTP-basierte Zwei-Faktor-Authentifizierung (2FA)
+
+**Umsetzung:**
+- **useMFA Hook:** enrollMFA, verifyEnrollment, unenrollMFA, verifyChallenge, getMFAFactors
+- **MFASetupDialog:** QR-Code-Anzeige, manueller Secret-Copy, 6-Digit Verify, Success-State
+- **MFAVerificationDialog:** Login-Challenge (6-Digit TOTP Code Eingabe)
+- **MFASettings:** ProfilePage Karte (Status, Aktivieren, Deaktivieren mit Bestaetigung)
+- **config.toml:** TOTP enroll + verify enabled
+- **i18n:** 19 mfa-Keys in allen 17 Sprachen
+- **Tests:** 3.099 — alle gruen
+
+**Setup-Anleitung fuer Production:**
+- GoTrue Umgebungsvariable: `GOTRUE_MFA_ENABLED=true`
+- Auth-Container neu starten
 
 ---
 

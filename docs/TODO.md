@@ -45,6 +45,7 @@
 
 **P2 — Auth-Erweiterungen:**
 - [x] ~~**P2: OAuth / Social Login (Google, Apple)**~~ ✅ (2026-03-01, v12.23) — AuthProvider: signInWithOAuth Methode, LoginPage: Google + Apple Buttons mit SVG Icons, Divider "oder mit E-Mail", AuthCallbackPage fuer OAuth Redirect, App.tsx /auth/callback Route, config.toml Google + Apple Provider (disabled, braucht Credentials). 17 Sprachen (signInWithGoogle, signInWithApple, orWithEmail). Tests angepasst (12/12). HINWEIS: Google Cloud Console + Apple Developer Account Setup manuell erforderlich!
+- [x] ~~**P2: MFA (TOTP)**~~ ✅ (2026-03-01, v12.24) — useMFA Hook (enroll, verify, unenroll, challenge), MFASetupDialog (QR-Code + Secret + Verify), MFAVerificationDialog (Login-Challenge), MFASettings Karte in ProfilePage (aktivieren/deaktivieren), config.toml TOTP enabled. 17 Sprachen (19 mfa-Keys). 3.099 Tests gruen. HINWEIS: Auf Production GOTRUE MFA-Konfiguration noetig!
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)

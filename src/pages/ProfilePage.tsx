@@ -18,6 +18,7 @@ import { DisclaimerModal as DisclaimerModalView } from '../shared/components/Dis
 import { DeleteAccountDialog } from '../features/auth/components/DeleteAccountDialog';
 import { DataExportDialog } from '../features/auth/components/DataExportDialog';
 import { PrivacySettings } from '../features/auth/components/PrivacySettings';
+import { MFASettings } from '../features/auth/components/MFASettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 
@@ -896,6 +897,9 @@ export function ProfilePage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
           <PrivacySettings />
         </div>
+
+        {/* MFA / Zwei-Faktor-Authentifizierung */}
+        <MFASettings />
 
         {/* Data Retention / Loeschkonzept (DSGVO Art. 5(1)(e)) */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
