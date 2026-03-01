@@ -400,7 +400,7 @@ Als kommerziell geplante App (100+ Nutzer, EU/Deutschland) besteht **Impressumsp
 |---|---|---|---|---|
 | E.3.1 | **Verarbeitungsverzeichnis** | DSGVO Art. 30 | Mittel | Dokumentation aller Verarbeitungstaetigkeiten |
 | E.3.2 | **Loeschkonzept** ✅ | DSGVO Art. 5(1)(e) | Mittel | TTL-Spalten (ai_usage_logs 90d, reminder_logs 180d), User-konfigurierbare Gesundheitsdaten-Retention (1/3/5 Jahre), cleanup_expired_data() Funktion, ProfilePage Selektor, 17 Sprachen. Migration 20260301000007. |
-| E.3.3 | **Audit-Trail erweitern** | DSGVO Art. 5 | Mittel | Vollstaendige Protokollierung aller Datenzugriffe |
+| E.3.3 | **Audit-Trail erweitern** ✅ | DSGVO Art. 5(1)(f) | Mittel | audit_logs Tabelle, audit_trigger_fn() generische Trigger-Funktion, 14 Trigger auf allen Gesundheits-/Profiltabellen. INSERT/UPDATE/DELETE mit old_values/new_values JSONB. TTL 180 Tage, cleanup integriert. Migration 20260301000008. |
 | E.3.4 | **Penetration Test** | DSGVO Art. 32 | Hoch | Sicherheitstest durch externen Dienstleister |
 | E.3.5 | **Backup-Verschluesselung pruefen** | DSGVO Art. 32 | Niedrig | PostgreSQL-Backup-Verschluesselung auf Hetzner verifizieren |
 | E.3.6 | **Incident-Response-Plan** | DSGVO Art. 33/34 | Mittel | Meldeverfahren bei Datenschutzverletzungen (72h an Aufsichtsbehoerde) |

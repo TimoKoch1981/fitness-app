@@ -41,6 +41,7 @@
 
 **Phase 3 — Mittelfristig:**
 - [x] ~~**E.3.2: Loeschkonzept (automatische Fristen)**~~ ✅ (2026-03-01, v12.21) — DSGVO Art. 5(1)(e) Speicherbegrenzung. TTL-Spalten (ai_usage_logs 90d, reminder_logs 180d, buddy_context_notes 30d), User-konfigurierbare Gesundheitsdaten-Aufbewahrung (1/3/5 Jahre oder unbegrenzt), cleanup_expired_data() Funktion, ProfilePage Data-Retention-Selektor, 17 Sprachen. Migration 20260301000007.
+- [x] ~~**E.3.3: Audit-Trail erweitern**~~ ✅ (2026-03-01, v12.22) — DSGVO Art. 5(1)(f) Integritaet/Vertraulichkeit. audit_logs Tabelle, audit_trigger_fn() generische Trigger-Funktion, 14 Trigger auf Profil-/Gesundheitstabellen (INSERT/UPDATE/DELETE → JSONB old_values/new_values). TTL 180 Tage, cleanup_expired_data() erweitert. Auch: blood_work, sleep_logs, menstrual_cycle_logs auf Production deployed. Migration 20260301000008.
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)

@@ -115,6 +115,27 @@
 | 12.18   | 2026-03-01 | AVV/DPA (OpenAI Ireland + Hetzner, RECHTSKONFORMITAET.md aktualisiert)   | Erledigt   |
 | 12.19   | 2026-03-01 | DSGVO Consent + Account-Loeschung auf Production deployed                | Erledigt   |
 | 12.21   | 2026-03-01 | Loeschkonzept (TTL, cleanup_expired_data, Data Retention UI, 17 Sprachen)| Erledigt   |
+| 12.22   | 2026-03-01 | Audit-Trail (audit_logs, 14 Trigger, 180d TTL, blood_work/sleep/cycle deployed) | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.22: Audit-Trail (DSGVO Art. 5(1)(f))
+
+**Massnahme:** E.3.3 — Vollstaendige Protokollierung aller Datenveraenderungen
+
+**Umsetzung:**
+- **DB-Migration** `20260301000008_audit_trail.sql`:
+  - `audit_logs` Tabelle (user_id, table_name, operation, record_id, old_values JSONB, new_values JSONB, expires_at 180d)
+  - `audit_trigger_fn()` generische Trigger-Funktion (SECURITY DEFINER)
+  - 14 Trigger auf: profiles, body_measurements, meals, blood_pressure_logs, substances, substance_logs, blood_work, sleep_logs, menstrual_cycle_logs, symptom_logs, workouts, daily_checkins, training_goals, reminders
+  - RLS: User sieht eigene Eintraege, System kann einfuegen
+  - `cleanup_expired_data()` erweitert um `deleted_audit_logs` Spalte
+- **Fehlende Production-Tabellen deployed:**
+  - `blood_work` (Blutwerte, 26 Marker)
+  - `sleep_logs` (Schlaf-Tracking)
+  - `menstrual_cycle_logs` (Zyklus-Tracking)
+- **Production:** 29 Tabellen, 14 Audit-Trigger, alle verifiziert
+- **Tests:** 3.058 — alle gruen
 
 ---
 
