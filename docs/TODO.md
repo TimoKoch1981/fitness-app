@@ -226,7 +226,7 @@
   - ~~Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)~~ ✅
   - ~~Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)~~ ✅
   - ~~Kaloriendefizit eingehalten~~ ✅
-  - [ ] **Luecken-Erkennung**: "Du hast 3 Tage nicht geloggt — alles OK?" (Re-Engagement) — NOCH OFFEN
+  - [x] ~~**Luecken-Erkennung**~~ ✅ (2026-03-01, v12.4) — GapAlertBanner auf CockpitPage, useGapDetection Hook (2+ Tage), 17 Sprachen, 10 Tests.
 
 ### ~~P1 — UX-Ueberarbeitung Workout-Session~~ ✅ (2026-02-28, v11.0)
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`

@@ -102,8 +102,20 @@
 | 12.1    | 2026-02-28 | Skills-Konzept + Glossar-Optimierung (~27.000 Token/Session gespart)     | Erledigt   |
 | 12.2    | 2026-03-01 | Mahlzeit-Kategorien 4→6 (morning_snack + afternoon_snack, 17 Sprachen)   | Erledigt   |
 | 12.3    | 2026-03-01 | Schriftgroessen-Option (Klein/Normal/Gross/Sehr Gross, 17 Sprachen)       | Erledigt   |
+| 12.4    | 2026-03-01 | Luecken-Erkennung (GapAlertBanner, useGapDetection, 17 Sprachen)          | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.4: Luecken-Erkennung
+
+**Twin-Testing Finding:** Ralf (B5) loggt sporadisch, kein Re-Engagement bei Pausen. Auch A1, B3, E4 betroffen.
+
+**Aenderungen (21 Dateien):**
+- `useGapDetection` Hook: Supabase-Queries fuer letzte Mahlzeit/Workout-Daten, 2-Tage-Schwelle
+- `GapAlertBanner` Komponente: Amber-Banner, weg-klickbar (Session-Dismiss), zeigt Tage seit letztem Log
+- CockpitPage: Banner nach DailyCheckinCard eingefuegt
+- i18n: 17 Sprachen (+2 Keys: gaps.title, gaps.message)
+- Tests: 2.732+ bestanden (50 Dateien, +10 neue Gap-Detection-Tests)
 
 ### 2026-03-01 - v12.3: Schriftgroessen-Option
 
