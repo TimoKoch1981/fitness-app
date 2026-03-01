@@ -8,6 +8,7 @@ import { CelebrationProvider } from '../features/celebrations/CelebrationProvide
 import { InlineBuddyChatProvider } from '../shared/components/InlineBuddyChatContext';
 import { InlineBuddyChat } from '../shared/components/InlineBuddyChat';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
+import { OnboardingGuard } from '../shared/components/OnboardingGuard';
 import { Navigation } from '../shared/components/Navigation';
 
 // Pages
@@ -21,6 +22,7 @@ import { NutritionPage } from '../pages/NutritionPage';
 import { TrainingPage } from '../pages/TrainingPage';
 import { MedicalPage } from '../pages/MedicalPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { OnboardingWizardPage } from '../pages/OnboardingWizardPage';
 
 // Workout Session
 import { ActiveWorkoutProvider } from '../features/workouts/context/ActiveWorkoutContext';
@@ -49,13 +51,15 @@ function AppRoutes() {
       <Route path="/impressum" element={<ImpressumPage />} />
       <Route path="/datenschutz" element={<DatenschutzPage />} />
 
-      {/* Protected routes */}
+      {/* Protected routes (with onboarding guard) */}
       <Route
         path="/buddy"
         element={
           <ProtectedRoute>
-            <BuddyPage />
-            <Navigation />
+            <OnboardingGuard>
+              <BuddyPage />
+              <Navigation />
+            </OnboardingGuard>
           </ProtectedRoute>
         }
       />
@@ -63,8 +67,10 @@ function AppRoutes() {
         path="/cockpit"
         element={
           <ProtectedRoute>
-            <CockpitPage />
-            <Navigation />
+            <OnboardingGuard>
+              <CockpitPage />
+              <Navigation />
+            </OnboardingGuard>
           </ProtectedRoute>
         }
       />
@@ -148,6 +154,16 @@ function AppRoutes() {
           <AdminRoute>
             <AdminFeedbackPage />
           </AdminRoute>
+        }
+      />
+
+      {/* Onboarding Wizard (no Navigation — full-screen, like workout) */}
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <OnboardingWizardPage />
+          </ProtectedRoute>
         }
       />
 

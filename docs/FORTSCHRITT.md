@@ -108,6 +108,7 @@
 | 12.7    | 2026-03-01 | Menstruationszyklus-Tracker (Phasen, Symptome, Gender-Gating, 22 Tests)  | Erledigt   |
 | 12.8    | 2026-03-01 | P0: Email-Verifizierung Production + email_not_confirmed UX              | Erledigt   |
 | 12.8b   | 2026-03-01 | P0: DSFA dokumentiert (Art. 35 DSGVO, 12 Risiken, Restrisiko-Bewertung)  | Erledigt   |
+| 12.9    | 2026-03-01 | Onboarding-Wizard (5 Schritte, OnboardingGuard, 17 Sprachen, 38 Keys)    | Erledigt   |
 
 ---
 

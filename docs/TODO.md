@@ -181,14 +181,12 @@
 > Quelle: 25-Persona-Testing (2026-02-28, v11.1). Sofortmassnahmen ✅ erledigt, restliche Findings hier.
 
 #### Onboarding & Erstnutzer-Erlebnis
-- [ ] **Onboarding-Wizard nach Registrierung** (~8h) — Gefuehrter 5-Schritt-Setup: Name → Alter/Groesse/Geschlecht/Gewicht → Ziel → Erfahrung/Modus → Equipment → Fertig. Aktuell: Leere Seiten, nur gelber Banner "Profil ausfuellen". Betroffene Twins: A1-A5, E2
-  - WICHTIG: Geschlecht + Trainingsmodus muessen im Wizard abgefragt werden → steuert Feature-Sichtbarkeit (Zyklus-Tracker, Power+ Features etc.)
-  - Modus-Erklaerung: Standard ("Allgemein"), Power ("Wettkampf, Natural"), Power+ ("Enhanced, Substanzen") mit kurzem Disclaimer
+- [x] ~~**Onboarding-Wizard nach Registrierung**~~ ✅ (2026-03-01, v12.9) — OnboardingWizardPage (530 Zeilen, 5 Schritte), OnboardingGuard (Redirect), /onboarding Route. Schritte: Willkommen → Koerperdaten (Name, Groesse, Geburt, Geschlecht, Gewicht) → Ziel & Modus (5 Goals, 5 Activity Levels, TrainingModeSelector) → Ernaehrung & Gesundheit (7+7+7 Chip-Selects) → Fertig. 38 i18n-Keys in 17 Sprachen. 2.956 Tests.
 - [x] ~~**Cockpit: Keine Standard-Ziele ohne Profil**~~ ✅ (2026-02-28, v11.6) — profileComplete-Check (height+birth_date+weight), CTA-Card "Tagesziele einrichten" mit Profil-Link, Makro-Werte ohne Fortschrittsbalken/Verbleibend bei leerem Profil, Celebrations nur mit Profil, CalorieChart ohne Ziellinie. 17 Sprachen.
 
 #### Geschlechts- und Modus-basierte Feature-Sichtbarkeit
 - [x] ~~**Gender-basiertes Feature-Gating**~~ ✅ (2026-02-28, v11.4) — `useGenderFeatures()` Hook mit 12 Feature-Flags (CycleTracker, SymptomTracker, REDSWarning, Breastfeeding, DiastasisRecti, ProstateMarkers, MaleTestosteroneRef). Pattern: Analog useTrainingMode(). Commit: 6703b90
-- [ ] **Modus-Erklaerung im Onboarding verbessern** (~1h) — TrainingModeSelector existiert (3 Karten mit Icons), aber wird erst im Profil gezeigt. Muss frueher kommen (Onboarding Schritt 4). Erklaerungstext erweitern: Was bedeutet Power+? Wer braucht das? Was wird freigeschaltet?
+- [x] ~~**Modus-Erklaerung im Onboarding verbessern**~~ ✅ (2026-03-01, v12.9) — TrainingModeSelector jetzt in Onboarding-Wizard Schritt 3 integriert (Standard/Power/Power+ mit Disclaimer).
 
 #### KI-Buddy Verbesserungen
 - [x] ~~**Profil-Daten an KI-Context uebergeben**~~ ✅ (2026-02-28, v11.4) — Allergien (WARNING-Direktive), Ernaehrungsform, Gesundheitseinschraenkungen in generateProfileSkill() ergaenzt. Commit: 86c75b7
