@@ -23,6 +23,14 @@ import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/a
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
 import { useLogAiUsage } from '../../admin/hooks/useAiUsageLog';
 import { lookupProduct } from '../../../lib/ai/actions/productLookup';
+import {
+  loadPersistentContext,
+  extractFromUserMessage,
+  extractFromAgentResponse,
+  saveContextNotes,
+  cleanupExpiredNotes,
+} from '../../../lib/ai/contextExtractor';
+import { useAuth } from '../../../app/providers/AuthProvider';
 import type { AgentContext, CommunicationStyle } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
@@ -59,6 +67,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const logAiUsage = useLogAiUsage();
+  const { user } = useAuth();
 
   // Refs to avoid stale closures in sendMessage (#7, #8)
   const messagesRef = useRef(messages);
@@ -102,6 +111,16 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     }]);
 
     try {
+      // Load persistent context from previous sessions (fire-and-forget on failure)
+      let persistedCtx: string | null = null;
+      if (user?.id) {
+        try {
+          persistedCtx = await loadPersistentContext(user.id, activeThread, language as 'de' | 'en');
+        } catch {
+          // Non-critical — continue without persistent context
+        }
+      }
+
       // Build agent context from health data + conversation history
       const agentContext: AgentContext = {
         healthContext: context ?? {},
@@ -111,6 +130,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         })),
         language,
         communicationStyle,
+        persistentContext: persistedCtx,
       };
 
       // Context with user message appended (needed for direct agent calls)
@@ -311,6 +331,30 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         ));
       }
 
+      // Extract and persist context from this conversation turn (fire-and-forget)
+      if (user?.id) {
+        try {
+          const lang = language as 'de' | 'en';
+          const agentType = result.agentType ?? activeThread;
+          const userNotes = extractFromUserMessage(userMessage.trim(), lang, agentType);
+          const agentNotes = extractFromAgentResponse(
+            result.content,
+            lang,
+            agentType,
+          );
+          const allNotes = [...userNotes, ...agentNotes];
+          if (allNotes.length > 0) {
+            saveContextNotes(user.id, allNotes); // fire-and-forget
+          }
+          // Cleanup expired notes occasionally (1 in 10 chance)
+          if (Math.random() < 0.1) {
+            cleanupExpiredNotes(user.id); // fire-and-forget
+          }
+        } catch {
+          // Non-critical
+        }
+      }
+
       setIsConnected(true);
     } catch (error) {
       // Replace streaming message with error
@@ -332,7 +376,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     } finally {
       setIsLoading(false);
     }
-  }, [context, language]);
+  }, [context, language, user?.id, activeThread]);
 
   /** Clear the pending actions from a specific message (after execution/rejection) */
   const clearAction = useCallback((messageId: string) => {

@@ -78,6 +78,11 @@ export abstract class BaseAgent {
       parts.push(deviationBlock);
     }
 
+    // 5.5 Persistent context from previous sessions
+    if (context.persistentContext) {
+      parts.push(context.persistentContext);
+    }
+
     // 6. Onboarding mode: prepend onboarding instructions when user profile is incomplete
     if (context.healthContext.onboardingMode) {
       parts.unshift(getOnboardingPrompt(context.language));

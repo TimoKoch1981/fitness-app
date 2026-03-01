@@ -50,6 +50,8 @@ export interface AgentContext {
   conversationHistory: ChatMessage[];
   language: 'de' | 'en';
   communicationStyle?: CommunicationStyle;
+  /** Pre-loaded persistent context from previous sessions (loaded async before agent call) */
+  persistentContext?: string | null;
 }
 
 /** Structured result from an agent execution */
