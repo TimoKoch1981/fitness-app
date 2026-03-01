@@ -12,6 +12,7 @@ import {
   detectPlateau,
   calculateWeeklyRate,
   estimateTimeToTarget,
+  calculateGoalDate,
   datesToNumericPoints,
   type RegressionResult,
   type PlateauResult,
@@ -24,10 +25,12 @@ export interface ProgressionData {
   weightPlateau: PlateauResult;
   weightWeeklyRate: number | null;
   weightTimeToTarget: number | null;
+  weightGoalDate: string | null;      // ISO date when target weight will be reached
   // Body Fat
   bodyFatRegression: RegressionResult | null;
   bodyFatPrediction30d: number | null;
   bodyFatTimeToTarget: number | null;
+  bodyFatGoalDate: string | null;     // ISO date when target body fat will be reached
   // Chart data (historical + MA)
   weightChartData: { date: string; label: string; weight_kg: number | null; ma7: number | null }[];
   bodyFatChartData: { date: string; label: string; body_fat_pct: number | null; ma7: number | null }[];
@@ -140,9 +143,11 @@ export function useProgression() {
       weightPlateau,
       weightWeeklyRate,
       weightTimeToTarget,
+      weightGoalDate: calculateGoalDate(weightTimeToTarget),
       bodyFatRegression,
       bodyFatPrediction30d,
       bodyFatTimeToTarget,
+      bodyFatGoalDate: calculateGoalDate(bodyFatTimeToTarget),
       weightChartData,
       bodyFatChartData,
       targetWeight,

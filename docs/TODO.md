@@ -269,7 +269,7 @@
 - [x] ~~**Mahlzeit-Kategorien erweitern**~~ ✅ (2026-03-01, v12.2) — 6 Kategorien: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Snack. 27 Dateien, 17 Sprachen, DB-Migration, 2.705 Tests.
 - [ ] **Foto-basiertes Mahlzeit-Logging** (~8h) — Essen fotografieren → KI erkennt Mahlzeit → Auto-Fill Makros. Aylin (B4) fotografiert lieber statt zu wiegen. Braucht Vision-API Integration.
 - [ ] **MFP-Import (MyFitnessPal)** (~6h) — CSV/API-Import von MyFitnessPal-Daten. Lisa (C3) trackt Ernaehrung dort. Kein einfacher Wechsel moeglich.
-- [ ] **Prognose-Funktion** (~4h) — "In X Wochen erreichst du Y kg bei aktuellem Trend". Karim (A3) will sehen wann er 80kg erreicht. Lineare Regression existiert schon (ProgressionCard) — UI-Erweiterung.
+- [x] ~~**Prognose-Funktion**~~ ✅ (2026-03-01, v12.29) — calculateGoalDate() + formatDaysAsDuration() in progression.ts. ProgressionCard zeigt jetzt Ziel-Datum (z.B. "30. Apr. 2026") statt nur Tage, plus Dauer (~8 Wochen) und Trend-Info. useProgression erweitert um weightGoalDate/bodyFatGoalDate. 9 neue Tests (32 gesamt).
 
 ### P2 — Digital-Twin-Konzept verbessern
 

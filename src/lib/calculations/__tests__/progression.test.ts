@@ -6,6 +6,8 @@ import {
   detectPlateau,
   calculateWeeklyRate,
   estimateTimeToTarget,
+  calculateGoalDate,
+  formatDaysAsDuration,
   datesToNumericPoints,
 } from '../progression';
 
@@ -211,5 +213,56 @@ describe('datesToNumericPoints', () => {
     expect(numeric[0].y).toBe(90);
     expect(numeric[1].y).toBe(89);
     expect(numeric[2].y).toBe(88);
+  });
+});
+
+describe('calculateGoalDate', () => {
+  it('returns ISO date string for valid days', () => {
+    const result = calculateGoalDate(30, '2026-03-01');
+    // March 1 + 30 days = March 31 (or March 30 depending on timezone)
+    expect(result).toMatch(/^2026-03-3[01]$/);
+  });
+
+  it('returns null for null input', () => {
+    expect(calculateGoalDate(null)).toBeNull();
+  });
+
+  it('returns null for zero or negative days', () => {
+    expect(calculateGoalDate(0)).toBeNull();
+    expect(calculateGoalDate(-5)).toBeNull();
+  });
+
+  it('handles long durations correctly', () => {
+    const result = calculateGoalDate(365, '2026-01-01');
+    expect(result).toBe('2027-01-01');
+  });
+
+  it('handles leap year', () => {
+    // 2028 is a leap year
+    const result = calculateGoalDate(1, '2028-02-28');
+    expect(result).toBe('2028-02-29');
+  });
+});
+
+describe('formatDaysAsDuration', () => {
+  it('returns days for < 14 days', () => {
+    expect(formatDaysAsDuration(10, 'de')).toBe('~10 Tage');
+    expect(formatDaysAsDuration(10, 'en')).toBe('~10 days');
+  });
+
+  it('returns weeks for 14-89 days', () => {
+    expect(formatDaysAsDuration(56, 'de')).toBe('~8 Wochen');
+    expect(formatDaysAsDuration(56, 'en')).toBe('~8 weeks');
+  });
+
+  it('returns months for 90+ days', () => {
+    expect(formatDaysAsDuration(180, 'de')).toBe('~6 Monate');
+    expect(formatDaysAsDuration(180, 'en')).toBe('~6 months');
+  });
+
+  it('returns null for null or zero', () => {
+    expect(formatDaysAsDuration(null)).toBeNull();
+    expect(formatDaysAsDuration(0)).toBeNull();
+    expect(formatDaysAsDuration(-5)).toBeNull();
   });
 });

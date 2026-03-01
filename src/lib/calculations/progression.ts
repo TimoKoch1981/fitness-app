@@ -168,6 +168,45 @@ export function estimateTimeToTarget(
 }
 
 /**
+ * Calculate the calendar date when a goal will be reached.
+ * Returns ISO date string (YYYY-MM-DD) or null if days is null/invalid.
+ *
+ * @param days - Days until goal (from estimateTimeToTarget)
+ * @param fromDate - Reference date, defaults to today
+ */
+export function calculateGoalDate(
+  days: number | null,
+  fromDate?: string
+): string | null {
+  if (days === null || days <= 0) return null;
+  const base = fromDate ? new Date(fromDate) : new Date();
+  base.setDate(base.getDate() + days);
+  return base.toISOString().split('T')[0];
+}
+
+/**
+ * Format days into a human-readable duration (weeks or months).
+ * @returns e.g., "~8 Wochen" / "~8 weeks" or "~3 Monate" / "~3 months"
+ */
+export function formatDaysAsDuration(
+  days: number | null,
+  language: 'de' | 'en' = 'de'
+): string | null {
+  if (days === null || days <= 0) return null;
+  const de = language === 'de';
+
+  if (days < 14) {
+    return `~${days} ${de ? 'Tage' : 'days'}`;
+  }
+  if (days < 90) {
+    const weeks = Math.round(days / 7);
+    return `~${weeks} ${de ? 'Wochen' : 'weeks'}`;
+  }
+  const months = Math.round(days / 30);
+  return `~${months} ${de ? 'Monate' : 'months'}`;
+}
+
+/**
  * Convert date-value pairs to regression-ready numeric points.
  * Uses day offsets from the first date.
  */

@@ -13,9 +13,9 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Target, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Target, AlertTriangle, Calendar } from 'lucide-react';
 import { useProgression } from '../hooks/useProgression';
-import { predictValue } from '../../../lib/calculations/progression';
+import { predictValue, formatDaysAsDuration } from '../../../lib/calculations/progression';
 
 interface ProgressionCardProps {
   language: 'de' | 'en';
@@ -26,6 +26,7 @@ const t_de = {
   weeklyRate: 'Wochenrate',
   prediction30d: 'In 30 Tagen',
   timeToTarget: 'Ziel erreicht in',
+  goalDate: 'Ziel erreicht am',
   days: 'Tagen',
   plateau: 'Plateau erkannt',
   plateauSince: 'seit',
@@ -36,6 +37,7 @@ const t_de = {
   target: 'Ziel',
   perWeek: '/Woche',
   bodyFat: 'Koerperfett',
+  atCurrentRate: 'bei aktuellem Trend',
 };
 
 const t_en = {
@@ -43,6 +45,7 @@ const t_en = {
   weeklyRate: 'Weekly Rate',
   prediction30d: 'In 30 Days',
   timeToTarget: 'Target reached in',
+  goalDate: 'Goal date',
   days: 'days',
   plateau: 'Plateau detected',
   plateauSince: 'for',
@@ -53,6 +56,7 @@ const t_en = {
   target: 'Target',
   perWeek: '/week',
   bodyFat: 'Body Fat',
+  atCurrentRate: 'at current rate',
 };
 
 export function ProgressionCard({ language }: ProgressionCardProps) {
@@ -217,16 +221,24 @@ export function ProgressionCard({ language }: ProgressionCardProps) {
           </div>
         )}
 
-        {/* Time to target */}
+        {/* Time to target + goal date */}
         {data.weightTimeToTarget !== null && (
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-[10px] text-gray-500 uppercase">{t.timeToTarget}</p>
+          <div className="bg-indigo-50 rounded-lg p-3">
+            <p className="text-[10px] text-indigo-500 uppercase">{t.goalDate}</p>
             <div className="flex items-center gap-1 mt-1">
-              <Target className="h-3.5 w-3.5 text-indigo-500" />
-              <span className="text-sm font-bold text-indigo-600">
-                ~{data.weightTimeToTarget} {t.days}
+              <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+              <span className="text-sm font-bold text-indigo-700">
+                {data.weightGoalDate
+                  ? new Date(data.weightGoalDate).toLocaleDateString(
+                      language === 'de' ? 'de-DE' : 'en-US',
+                      { day: 'numeric', month: 'short', year: 'numeric' }
+                    )
+                  : `~${data.weightTimeToTarget} ${t.days}`}
               </span>
             </div>
+            <p className="text-[9px] text-indigo-400 mt-0.5">
+              {formatDaysAsDuration(data.weightTimeToTarget, language)} · {data.targetWeight} kg · {t.atCurrentRate}
+            </p>
           </div>
         )}
 
