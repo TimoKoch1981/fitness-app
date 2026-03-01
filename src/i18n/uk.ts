@@ -336,6 +336,15 @@ export const uk: TranslationKeys = {
     bmrHelpAuto: 'Автоматично: Обирає найкращу формулу на основі ваших даних. З відсотком жиру → Katch-McArdle (точніше), без → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Стандартна формула на основі ваги, зросту, віку та статі. Досить точна для більшості людей.',
     bmrHelpKatch: 'Katch-McArdle: Використовує суху масу тіла. Точніша при відомому відсотку жиру, особливо для спортсменів.',
+    // Buddy Communication Style
+    buddyStyle: 'Комунікація Buddy',
+    verbosity: 'Довжина відповіді',
+    verbosityBrief: 'Коротко',
+    verbosityNormal: 'Звичайно',
+    verbosityDetailed: 'Детально',
+    expertise: 'Рівень мови',
+    expertiseBeginner: 'Просто',
+    expertiseAdvanced: 'Фахово',
     // Font Size
     fontSize: 'Розмір шрифту',
     fontSizeSmall: 'Малий',

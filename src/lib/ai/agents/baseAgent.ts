@@ -10,7 +10,7 @@
  * 3. execute() sends prompt + history to AI provider → returns AgentResult
  */
 
-import type { AgentConfig, AgentContext, AgentResult } from './types';
+import type { AgentConfig, AgentContext, AgentResult, CommunicationStyle } from './types';
 import type { ChatMessage, StreamCallback } from '../types';
 import { getSkillContent, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
 import type { TrainingMode } from '../../../types/health';
@@ -47,6 +47,10 @@ export abstract class BaseAgent {
 
     // 1.5 Training mode context (tells agent which mode the user is in)
     parts.push(this.getTrainingModeContext(trainingMode, context.language));
+
+    // 1.7 Communication style guidance (verbosity + expertise level)
+    const stylePrompt = this.getCommunicationStylePrompt(context.communicationStyle, context.language);
+    if (stylePrompt) parts.push(stylePrompt);
 
     // 2. Static knowledge-base skills (versioned, domain-specific, mode-aware)
     const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
@@ -247,6 +251,40 @@ When the user makes progress or achieves milestones:
       ctx += `- Phase-aware advice: Blast/Cruise/PCT/Off affects nutrition + training.`;
     }
     return ctx;
+  }
+
+  /**
+   * Generate communication style guidance based on user preferences.
+   * Injected into the system prompt so the AI adapts its tone and depth.
+   */
+  protected getCommunicationStylePrompt(style: CommunicationStyle | undefined, language: 'de' | 'en'): string | null {
+    if (!style) return null;
+    // Skip if both are defaults
+    if (style.verbosity === 'normal' && style.expertise === 'advanced') return null;
+
+    const parts: string[] = [];
+
+    if (language === 'de') {
+      if (style.verbosity === 'brief') {
+        parts.push('## KOMMUNIKATIONSSTIL: KURZ\nAntworte extrem kompakt. Maximal 1-3 Sätze. Nur essenzielle Infos. Keine Einleitungen oder Floskeln.');
+      } else if (style.verbosity === 'detailed') {
+        parts.push('## KOMMUNIKATIONSSTIL: AUSFÜHRLICH\nGib umfassende, detaillierte Antworten. Erkläre dein Reasoning. Verwende Beispiele und Hintergründe.');
+      }
+      if (style.expertise === 'beginner') {
+        parts.push('## ZIELGRUPPE: ANFÄNGER\nVerwende einfache, verständliche Sprache. Erkläre Fachbegriffe bei Erstnennung. Keine Abkürzungen ohne Erklärung. Vermeide Fachjargon wo möglich.');
+      }
+    } else {
+      if (style.verbosity === 'brief') {
+        parts.push('## COMMUNICATION STYLE: BRIEF\nRespond extremely concisely. Max 1-3 sentences. Only essential info. No introductions or filler.');
+      } else if (style.verbosity === 'detailed') {
+        parts.push('## COMMUNICATION STYLE: DETAILED\nProvide comprehensive, detailed answers. Explain your reasoning. Use examples and background context.');
+      }
+      if (style.expertise === 'beginner') {
+        parts.push('## TARGET AUDIENCE: BEGINNER\nUse simple, easy-to-understand language. Explain technical terms on first use. No abbreviations without explanation. Avoid jargon where possible.');
+      }
+    }
+
+    return parts.length > 0 ? parts.join('\n\n') : null;
   }
 
   /** Override in subclass: define the agent's role and personality */

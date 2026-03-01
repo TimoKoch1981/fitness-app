@@ -336,6 +336,15 @@ export const pt: TranslationKeys = {
     bmrHelpAuto: 'Automático: Escolhe a melhor fórmula com base nos teus dados. Com percentagem de gordura corporal → Katch-McArdle (mais precisa), sem → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Fórmula padrão baseada em peso, altura, idade e sexo. Suficientemente precisa para a maioria das pessoas.',
     bmrHelpKatch: 'Katch-McArdle: Usa a massa magra. Mais precisa com percentagem de gordura corporal conhecida, especialmente para desportistas.',
+    // Buddy Communication Style
+    buddyStyle: 'Comunicação Buddy',
+    verbosity: 'Comprimento da resposta',
+    verbosityBrief: 'Breve',
+    verbosityNormal: 'Normal',
+    verbosityDetailed: 'Detalhado',
+    expertise: 'Nível de linguagem',
+    expertiseBeginner: 'Simples',
+    expertiseAdvanced: 'Técnico',
     // Font Size
     fontSize: 'Tamanho da fonte',
     fontSizeSmall: 'Pequeno',

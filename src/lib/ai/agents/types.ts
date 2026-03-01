@@ -35,11 +35,21 @@ export interface AgentConfig {
   description: string;             // what this agent does (DE)
 }
 
+/** User's preferred communication style for AI responses */
+export type BuddyVerbosity = 'brief' | 'normal' | 'detailed';
+export type BuddyExpertise = 'beginner' | 'advanced';
+
+export interface CommunicationStyle {
+  verbosity: BuddyVerbosity;
+  expertise: BuddyExpertise;
+}
+
 /** Runtime context passed to an agent for execution */
 export interface AgentContext {
   healthContext: Partial<HealthContext>;
   conversationHistory: ChatMessage[];
   language: 'de' | 'en';
+  communicationStyle?: CommunicationStyle;
 }
 
 /** Structured result from an agent execution */

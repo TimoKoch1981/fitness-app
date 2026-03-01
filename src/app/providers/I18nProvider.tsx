@@ -1,5 +1,5 @@
 import { useState, useCallback, type ReactNode } from 'react';
-import { I18nContext, type Language, type FontSize, FONT_SIZE_SCALE, getTranslations } from '../../i18n';
+import { I18nContext, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise, FONT_SIZE_SCALE, getTranslations } from '../../i18n';
 
 interface I18nProviderProps {
   children: ReactNode;
@@ -7,6 +7,8 @@ interface I18nProviderProps {
 }
 
 const VALID_FONT_SIZES: string[] = ['small', 'normal', 'large', 'xlarge'];
+const VALID_VERBOSITIES: string[] = ['brief', 'normal', 'detailed'];
+const VALID_EXPERTISES: string[] = ['beginner', 'advanced'];
 
 export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderProps) {
   const [language, setLanguageState] = useState<Language>(() => {
@@ -45,10 +47,37 @@ export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderP
     applyFontSize(size);
   }, [applyFontSize]);
 
+  // Buddy communication style
+  const [buddyVerbosity, setBuddyVerbosityState] = useState<BuddyVerbosity>(() => {
+    const saved = localStorage.getItem('fitbuddy-buddy-verbosity');
+    return (saved && VALID_VERBOSITIES.includes(saved)) ? saved as BuddyVerbosity : 'normal';
+  });
+
+  const [buddyExpertise, setBuddyExpertiseState] = useState<BuddyExpertise>(() => {
+    const saved = localStorage.getItem('fitbuddy-buddy-expertise');
+    return (saved && VALID_EXPERTISES.includes(saved)) ? saved as BuddyExpertise : 'advanced';
+  });
+
+  const setBuddyVerbosity = useCallback((v: BuddyVerbosity) => {
+    setBuddyVerbosityState(v);
+    localStorage.setItem('fitbuddy-buddy-verbosity', v);
+  }, []);
+
+  const setBuddyExpertise = useCallback((e: BuddyExpertise) => {
+    setBuddyExpertiseState(e);
+    localStorage.setItem('fitbuddy-buddy-expertise', e);
+  }, []);
+
   const t = getTranslations(language);
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, fontSize, setFontSize, t }}>
+    <I18nContext.Provider value={{
+      language, setLanguage,
+      fontSize, setFontSize,
+      buddyVerbosity, setBuddyVerbosity,
+      buddyExpertise, setBuddyExpertise,
+      t,
+    }}>
       {children}
     </I18nContext.Provider>
   );

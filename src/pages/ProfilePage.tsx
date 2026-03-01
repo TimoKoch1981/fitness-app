@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
-import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize } from '../i18n';
+import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
@@ -23,7 +23,7 @@ import { TrainingModeSelector } from '../shared/components/TrainingModeSelector'
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
-  const { t, language, setLanguage, fontSize, setFontSize } = useTranslation();
+  const { t, language, setLanguage, fontSize, setFontSize, buddyVerbosity, setBuddyVerbosity, buddyExpertise, setBuddyExpertise } = useTranslation();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
 
@@ -243,6 +243,60 @@ export function ProfilePage() {
                   {label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Buddy Communication Style */}
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <p className="text-sm font-medium text-gray-700 mb-2">{t.profile.buddyStyle}</p>
+
+            {/* Verbosity */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">{t.profile.verbosity}</span>
+              <div className="flex gap-1">
+                {([
+                  ['brief', t.profile.verbosityBrief],
+                  ['normal', t.profile.verbosityNormal],
+                  ['detailed', t.profile.verbosityDetailed],
+                ] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setBuddyVerbosity(v as BuddyVerbosity)}
+                    className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      buddyVerbosity === v
+                        ? 'bg-violet-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Expertise */}
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-sm text-gray-600">{t.profile.expertise}</span>
+              <div className="flex gap-1">
+                {([
+                  ['beginner', t.profile.expertiseBeginner],
+                  ['advanced', t.profile.expertiseAdvanced],
+                ] as const).map(([e, label]) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => setBuddyExpertise(e as BuddyExpertise)}
+                    className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      buddyExpertise === e
+                        ? 'bg-violet-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

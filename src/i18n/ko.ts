@@ -336,6 +336,15 @@ export const ko: TranslationKeys = {
     bmrHelpAuto: '자동: 데이터에 기반하여 최적의 공식을 선택합니다. 체지방률 있음 → Katch-McArdle (더 정확), 없음 → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: 체중, 키, 나이, 성별에 기반한 표준 공식. 대부분의 사람에게 충분히 정확합니다.',
     bmrHelpKatch: 'Katch-McArdle: 제지방 체중을 사용합니다. 체지방률을 알고 있을 때, 특히 운동선수에게 더 정확합니다.',
+    // Buddy Communication Style
+    buddyStyle: 'Buddy 커뮤니케이션',
+    verbosity: '답변 길이',
+    verbosityBrief: '간단',
+    verbosityNormal: '보통',
+    verbosityDetailed: '상세',
+    expertise: '언어 수준',
+    expertiseBeginner: '쉽게',
+    expertiseAdvanced: '전문적',
     // Font Size
     fontSize: '글꼴 크기',
     fontSizeSmall: '작게',

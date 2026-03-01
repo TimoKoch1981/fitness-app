@@ -28,7 +28,7 @@ import { CapabilitiesSheet } from '../features/buddy/components/CapabilitiesShee
 import type { HealthContext } from '../types/health';
 
 export function BuddyPage() {
-  const { t, language } = useTranslation();
+  const { t, language, buddyVerbosity, buddyExpertise } = useTranslation();
   const { user } = useAuth();
   const location = useLocation();
   const [input, setInput] = useState('');
@@ -151,7 +151,7 @@ export function BuddyPage() {
     activeThread,
     setActiveThread,
     threads,
-  } = useBuddyChat({ context: healthContext, language });
+  } = useBuddyChat({ context: healthContext, language, communicationStyle: { verbosity: buddyVerbosity, expertise: buddyExpertise } });
 
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);

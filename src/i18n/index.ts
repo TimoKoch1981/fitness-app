@@ -41,11 +41,18 @@ export const FONT_SIZE_SCALE: Record<FontSize, number> = {
   xlarge: 20,
 };
 
+export type BuddyVerbosity = 'brief' | 'normal' | 'detailed';
+export type BuddyExpertise = 'beginner' | 'advanced';
+
 export interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
+  buddyVerbosity: BuddyVerbosity;
+  setBuddyVerbosity: (v: BuddyVerbosity) => void;
+  buddyExpertise: BuddyExpertise;
+  setBuddyExpertise: (e: BuddyExpertise) => void;
   t: TranslationKeys;
 }
 
@@ -54,6 +61,10 @@ export const I18nContext = createContext<I18nContextType>({
   setLanguage: () => {},
   fontSize: 'normal',
   setFontSize: () => {},
+  buddyVerbosity: 'normal',
+  setBuddyVerbosity: () => {},
+  buddyExpertise: 'advanced',
+  setBuddyExpertise: () => {},
   t: de,
 });
 

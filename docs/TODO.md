@@ -271,6 +271,10 @@
 - [ ] **MFP-Import (MyFitnessPal)** (~6h) — CSV/API-Import von MyFitnessPal-Daten. Lisa (C3) trackt Ernaehrung dort. Kein einfacher Wechsel moeglich.
 - [ ] **Prognose-Funktion** (~4h) — "In X Wochen erreichst du Y kg bei aktuellem Trend". Karim (A3) will sehen wann er 80kg erreicht. Lineare Regression existiert schon (ProgressionCard) — UI-Erweiterung.
 
+### P2 — Digital-Twin-Konzept verbessern
+
+- [ ] **Digital-Twin-Konzept mit Learnings aus anderem Projekt verbessern** — Erkenntnisse aus externem Projekt einfliessen lassen: Persona-Design, Test-Methodik, Auswertung, Coverage-Analyse. DIGITAL_TWINS.md + TWIN_TESTING_REPORT.md aktualisieren.
+
 ### P2 — Technische Schulden
 
 - [ ] **`tsc -b` Build-Fix** (~2h) — 52 pre-existing Language-Type-Errors seit 17-Sprachen-Expansion. `tsc --noEmit` = 0 Fehler, aber `tsc -b` (project references) hat 52 Fehler wegen `Language` Type (17 Werte) vs `{de: string; en: string}` Pattern.

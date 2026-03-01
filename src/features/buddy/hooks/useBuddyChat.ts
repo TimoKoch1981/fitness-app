@@ -23,7 +23,7 @@ import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/a
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
 import { useLogAiUsage } from '../../admin/hooks/useAiUsageLog';
 import { lookupProduct } from '../../../lib/ai/actions/productLookup';
-import type { AgentContext } from '../../../lib/ai/agents/types';
+import type { AgentContext, CommunicationStyle } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
 
@@ -50,9 +50,10 @@ export interface DisplayMessage {
 interface UseBuddyChatOptions {
   context?: Partial<HealthContext>;
   language?: 'de' | 'en';
+  communicationStyle?: CommunicationStyle;
 }
 
-export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions = {}) {
+export function useBuddyChat({ context, language = 'de', communicationStyle }: UseBuddyChatOptions = {}) {
   // Messages live in BuddyChatProvider context (survives route changes + page refresh)
   const { messages, setMessages, clearMessages, activeThread, setActiveThread, threads } = useBuddyChatMessages();
   const [isLoading, setIsLoading] = useState(false);
@@ -109,6 +110,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
           content: m.rawContent ?? m.content, // Use raw content (incl. ACTION blocks) so agent knows what was already done
         })),
         language,
+        communicationStyle,
       };
 
       // Context with user message appended (needed for direct agent calls)
@@ -234,6 +236,7 @@ export function useBuddyChat({ context, language = 'de' }: UseBuddyChatOptions =
             },
           ],
           language,
+          communicationStyle,
         };
 
         // Stream the follow-up response

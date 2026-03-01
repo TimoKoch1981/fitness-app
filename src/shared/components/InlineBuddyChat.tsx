@@ -82,7 +82,7 @@ export function InlineBuddyChat() {
 // ---------------------------------------------------------------------------
 
 function InlineBuddyChatContent() {
-  const { t, language } = useTranslation();
+  const { t, language, buddyVerbosity, buddyExpertise } = useTranslation();
   const { user } = useAuth();
   const { autoMessage, targetAgent, closeBuddyChat, clearAutoMessage } = useInlineBuddyChat();
 
@@ -144,7 +144,7 @@ function InlineBuddyChatContent() {
     activeThread,
     setActiveThread,
     threads,
-  } = useBuddyChat({ context: healthContext, language });
+  } = useBuddyChat({ context: healthContext, language, communicationStyle: { verbosity: buddyVerbosity, expertise: buddyExpertise } });
 
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
