@@ -201,7 +201,7 @@
 - [ ] **Proaktives Warnsystem** (~6h) — Buddy warnt nur wenn gefragt, nicht automatisch bei gefaehrlichen Mustern (Unterkalorisch, Uebertraining 7x/Woche, HDL<25, Hkt>52%). Braucht: Schwellenwert-Regeln + automatische Buddy-Nachrichten. Betroffene: A5, E1, D2, D4
 - [ ] **Kontext-Persistence ueber Sessions** (~4h) — Buddy "vergisst" Praeferenzen zwischen Sessions (sessionStorage). Elena (A4, Vegetarierin) muss es jedes Mal neu sagen. Loesung: Profil-Daten + Chat-History aus DB laden. Betroffene: A4, E2, B4
 - [ ] **Quellenangaben in Buddy-Antworten** (~3h) — Skills haben 73+ PMIDs, aber Buddy zitiert sie nie in Antworten. Petra (C5, Aerztin) erwartet Quellen. Loesung: Agent-Prompt erweitern → "Zitiere relevante PMIDs". Betroffene: C5, B2
-- [ ] **Buddy-Kommunikationsstil** (~3h) — Einstellung: Knapp/Normal/Ausfuehrlich + Fachsprache-Level (Anfaenger/Fortgeschritten). Stefan (A1) braucht einfache Sprache, Dominik (C1) will Fachtiefe. Betroffene: A1, A3, C5
+- [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.5) — Kurz/Normal/Ausführlich + Einfach/Fachlich. BaseAgent-Prompt-Injection, I18nProvider, ProfilePage UI. 17 Sprachen, 26 Dateien.
 
 #### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
 - [ ] **🔴 RED-S/Untergewicht-Warnsystem** (~4h) — Keine automatische Warnung bei BMI <18.5 ODER Kaloriendefizit >1000 kcal ODER <1200 kcal bei Frauen + hohes Volumen. Sarah (E1) koennte in gefaehrlich tiefes Defizit rutschen. Betroffene: E1, E4, B4

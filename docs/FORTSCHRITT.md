@@ -103,8 +103,23 @@
 | 12.2    | 2026-03-01 | Mahlzeit-Kategorien 4→6 (morning_snack + afternoon_snack, 17 Sprachen)   | Erledigt   |
 | 12.3    | 2026-03-01 | Schriftgroessen-Option (Klein/Normal/Gross/Sehr Gross, 17 Sprachen)       | Erledigt   |
 | 12.4    | 2026-03-01 | Luecken-Erkennung (GapAlertBanner, useGapDetection, 17 Sprachen)          | Erledigt   |
+| 12.5    | 2026-03-01 | Buddy-Kommunikationsstil (Verbosity + Expertise, BaseAgent-Injection)     | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.5: Buddy-Kommunikationsstil
+
+**Twin-Testing Finding:** Stefan (A1, Anfaenger) braucht einfache Sprache, Dominik (C1, Profi) will Fachtiefe.
+
+**Aenderungen (26 Dateien):**
+- `CommunicationStyle` Type: verbosity (brief/normal/detailed) + expertise (beginner/advanced)
+- `BaseAgent.getCommunicationStylePrompt()`: Injiziert Stil-Guidance in System-Prompt (DE+EN)
+- `AgentContext.communicationStyle`: Runtime-Kontext fuer alle Agenten
+- `I18nProvider`: buddyVerbosity + buddyExpertise State (localStorage)
+- ProfilePage: 2 Button-Reihen (Antwortlaenge + Fachsprache) in violet
+- useBuddyChat + InlineBuddyChat + BuddyPage: Stil wird an AgentContext durchgereicht
+- i18n: 17 Sprachen (+8 Keys pro Sprache: buddyStyle, verbosity, expertise)
+- Tests: 2.748 bestanden (50 Dateien)
 
 ### 2026-03-01 - v12.4: Luecken-Erkennung
 
