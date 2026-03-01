@@ -266,7 +266,7 @@
 - [x] ~~**Daten-Export**~~ ✅ (2026-02-28, v11.8) — DSGVO Art. 20, useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download
 - [ ] **Schriftgroessen-Option** (~2h) — Klein/Normal/Gross in Profil-Einstellungen. Ralf (B5, technik-scheu) braucht grosse Schrift.
 - [ ] **Schlaf-Tracking (Zeiten)** (~6h) — Einschlaf-/Aufwachzeit, Qualitaet (nicht nur Emoji). Korrelation mit Training. Betroffene: A4, E5, D4
-- [ ] **Mahlzeit-Kategorien erweitern** (~2h) — 6 statt 4: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Spaet. Dominik (C1) loggt 6 Mahlzeiten/Tag. Marco (B3) hat bei Schichtarbeit keine festen Zeiten.
+- [x] ~~**Mahlzeit-Kategorien erweitern**~~ ✅ (2026-03-01, v12.2) — 6 Kategorien: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Snack. 27 Dateien, 17 Sprachen, DB-Migration, 2.705 Tests.
 - [ ] **Foto-basiertes Mahlzeit-Logging** (~8h) — Essen fotografieren → KI erkennt Mahlzeit → Auto-Fill Makros. Aylin (B4) fotografiert lieber statt zu wiegen. Braucht Vision-API Integration.
 - [ ] **MFP-Import (MyFitnessPal)** (~6h) — CSV/API-Import von MyFitnessPal-Daten. Lisa (C3) trackt Ernaehrung dort. Kein einfacher Wechsel moeglich.
 - [ ] **Prognose-Funktion** (~4h) — "In X Wochen erreichst du Y kg bei aktuellem Trend". Karim (A3) will sehen wann er 80kg erreicht. Lineare Regression existiert schon (ProgressionCard) — UI-Erweiterung.

@@ -100,8 +100,23 @@
 | 11.9b   | 2026-02-28 | Power Phase B: 4 Widgets (CompetitionCountdown, PhaseProgress, FFMI, Refeed) | Erledigt |
 | 12.0    | 2026-02-28 | Phase D: DoctorReport PDF, PosingPhotos, trainingMode i18n (15 Sprachen) | Erledigt   |
 | 12.1    | 2026-02-28 | Skills-Konzept + Glossar-Optimierung (~27.000 Token/Session gespart)     | Erledigt   |
+| 12.2    | 2026-03-01 | Mahlzeit-Kategorien 4→6 (morning_snack + afternoon_snack, 17 Sprachen)   | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.2: Mahlzeit-Kategorien 4→6
+
+**Twin-Testing Finding:** Dominik (C1) loggt 6 Mahlzeiten/Tag, Marco (B3) hat Schichtarbeit ohne feste Zeiten.
+
+**Aenderungen (27 Dateien):**
+- `MealType` erweitert: +morning_snack, +afternoon_snack
+- `inferMealType()`: Zeitbasierte Zuordnung 6 Kategorien (6-10-12-14-17-21h)
+- AddMealDialog: 6 Typ-Buttons, MealsTabContent: 6 Gruppierungen
+- MealCard: Neue Emojis (☕ Vormittag, 🍵 Nachmittag)
+- Zod-Schemas + nutritionAgent Prompts aktualisiert
+- DB-Migration: `20260301000001_meal_categories_expand.sql`
+- i18n: 17 Sprachen (+2 Keys pro Sprache)
+- Tests: 2.705 bestanden (49 Dateien)
 
 ### 2026-02-28 - v11.7: Rechtskonformitaet Phase 2 — Disclaimer-Suite (E.2.2-E.2.5)
 
