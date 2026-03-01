@@ -25,7 +25,9 @@ import { useOnboarding } from '../../features/buddy/hooks/useOnboarding';
 import { useDailyMealTotals } from '../../features/meals/hooks/useMeals';
 import { useLatestBodyMeasurement } from '../../features/body/hooks/useBodyMeasurements';
 import { useSubstances } from '../../features/medical/hooks/useSubstances';
+import { useLatestBloodWork } from '../../features/medical/hooks/useBloodWork';
 import { useActivePlan } from '../../features/workouts/hooks/useTrainingPlans';
+import { useRecentWorkouts } from '../../features/workouts/hooks/useWorkouts';
 import { useStandardProducts, useUserProducts } from '../../features/meals/hooks/useProducts';
 import { useUserEquipmentResolved } from '../../features/equipment/hooks/useEquipment';
 import { useTodayCheckin } from '../../features/checkin/hooks/useDailyCheckin';
@@ -107,6 +109,8 @@ function InlineBuddyChatContent() {
   const { data: dailyCheckin } = useTodayCheckin();
   const { data: sleepLogs } = useSleepLogs(7);
   const { data: cycleLogs } = useMenstrualCycleLogs(7);
+  const { data: latestBloodWork } = useLatestBloodWork();
+  const { data: recentWorkouts } = useRecentWorkouts(14);
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -122,7 +126,7 @@ function InlineBuddyChatContent() {
       waterGoal: profile?.daily_water_goal ?? 8,
     },
     recentMeals: [],
-    recentWorkouts: [],
+    recentWorkouts: recentWorkouts ?? [],
     recentBloodPressure: [],
     recentSubstanceLogs: [],
     trainingGoals: [],
@@ -135,6 +139,7 @@ function InlineBuddyChatContent() {
     dailyCheckin: dailyCheckin ?? undefined,
     recentSleepLogs: sleepLogs ?? [],
     recentCycleLogs: cycleLogs ?? [],
+    latestBloodWork: latestBloodWork ?? undefined,
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────

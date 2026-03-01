@@ -478,6 +478,8 @@ export interface HealthContext {
   dailyCheckin?: DailyCheckin;
   recentSleepLogs?: SleepLog[];
   recentCycleLogs?: MenstrualCycleLog[];
+  /** Latest blood work entry (for Power+ proactive warnings) */
+  latestBloodWork?: BloodWork;
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }

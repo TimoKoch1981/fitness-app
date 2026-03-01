@@ -220,6 +220,87 @@ export function analyzeDeviations(
           icon: '💪',
         });
       }
+
+      // Overtraining detection: 7+ workouts in last 7 days
+      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const workoutsLast7Days = workouts.filter(
+        w => new Date(w.date).getTime() >= sevenDaysAgo
+      ).length;
+
+      if (workoutsLast7Days >= 7) {
+        const isHighStress = checkin?.stress_level && checkin.stress_level >= 4;
+        const isLowEnergy = checkin?.energy_level && checkin.energy_level <= 2;
+        const isPoorSleep = checkin?.sleep_quality && checkin.sleep_quality <= 2;
+
+        deviations.push({
+          type: 'warning',
+          agent: 'training',
+          message: `Uebertrainings-Risiko: ${workoutsLast7Days} Einheiten in 7 Tagen${isLowEnergy ? ' + niedrige Energie' : ''}${isPoorSleep ? ' + schlechter Schlaf' : ''}${isHighStress ? ' + hoher Stress' : ''} — Ruhetag oder Deload empfehlen`,
+          messageEN: `Overtraining risk: ${workoutsLast7Days} sessions in 7 days${isLowEnergy ? ' + low energy' : ''}${isPoorSleep ? ' + poor sleep' : ''}${isHighStress ? ' + high stress' : ''} — recommend rest day or deload`,
+          priority: 2,
+          icon: '🔥',
+        });
+      }
+    }
+  }
+
+  // ── Blood work deviations (Power+ mode) ─────────────────────────────
+
+  if (context.latestBloodWork) {
+    const bw = context.latestBloodWork;
+
+    // Low HDL (<25 mg/dL) — cardiovascular risk, common with AAS
+    if (bw.hdl !== undefined && bw.hdl !== null && bw.hdl < 25) {
+      deviations.push({
+        type: 'warning',
+        agent: 'medical',
+        message: `HDL kritisch niedrig: ${bw.hdl} mg/dL (<25) — erhoehtes kardiovaskulaeres Risiko. Kardiologische Kontrolle empfohlen.`,
+        messageEN: `HDL critically low: ${bw.hdl} mg/dL (<25) — elevated cardiovascular risk. Cardiological check recommended.`,
+        priority: 1,
+        icon: '🫀',
+      });
+    } else if (bw.hdl !== undefined && bw.hdl !== null && bw.hdl < 40) {
+      deviations.push({
+        type: 'info',
+        agent: 'medical',
+        message: `HDL niedrig: ${bw.hdl} mg/dL (<40) — Ziel: >40 mg/dL. Omega-3, Cardio, ggf. Substanz-Pause erwaegen.`,
+        messageEN: `HDL low: ${bw.hdl} mg/dL (<40) — target: >40 mg/dL. Consider omega-3, cardio, or substance break.`,
+        priority: 3,
+        icon: '🫀',
+      });
+    }
+
+    // Elevated hematocrit (≥52%) — thrombosis risk with AAS/TRT
+    if (bw.hematocrit !== undefined && bw.hematocrit !== null && bw.hematocrit >= 54) {
+      deviations.push({
+        type: 'warning',
+        agent: 'medical',
+        message: `Haematokrit GEFAEHRLICH: ${bw.hematocrit}% (>=54%) — Phlebotomie erwaegen, Arzt aufsuchen!`,
+        messageEN: `Hematocrit DANGEROUS: ${bw.hematocrit}% (>=54%) — consider phlebotomy, see doctor!`,
+        priority: 1,
+        icon: '🩸',
+      });
+    } else if (bw.hematocrit !== undefined && bw.hematocrit !== null && bw.hematocrit >= 52) {
+      deviations.push({
+        type: 'warning',
+        agent: 'medical',
+        message: `Haematokrit erhoet: ${bw.hematocrit}% (>=52%) — Polyzythaemie-Risiko, regelmaessig kontrollieren.`,
+        messageEN: `Hematocrit elevated: ${bw.hematocrit}% (>=52%) — polycythemia risk, monitor regularly.`,
+        priority: 2,
+        icon: '🩸',
+      });
+    }
+
+    // Elevated liver values (ALT/AST >3x upper normal)
+    if (bw.alt !== undefined && bw.alt !== null && bw.alt > 150) {
+      deviations.push({
+        type: 'warning',
+        agent: 'medical',
+        message: `Leberwert ALT stark erhoet: ${bw.alt} U/L (>150) — hepatotoxische Substanzen ggf. absetzen, Arzt konsultieren.`,
+        messageEN: `Liver ALT severely elevated: ${bw.alt} U/L (>150) — consider stopping hepatotoxic substances, consult doctor.`,
+        priority: 1,
+        icon: '🔬',
+      });
     }
   }
 
@@ -315,6 +396,27 @@ export function getDeviationSuggestions(
         label: de ? 'Kalorien nachholen' : 'Catch up calories',
         message: de ? 'Ich habe heute noch wenig gegessen. Was schlägst du vor?' : 'I haven\'t eaten much today. What do you suggest?',
         icon: '🍽️',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('uebertraining')) {
+      suggestions.push({
+        id: 'dev_overtraining',
+        label: de ? 'Übertraining?' : 'Overtraining?',
+        message: de ? 'Ich trainiere viel. Bin ich im Übertraining?' : 'I\'ve been training a lot. Am I overtraining?',
+        icon: '🔥',
+      });
+    } else if (d.agent === 'medical' && msgLower.includes('hdl')) {
+      suggestions.push({
+        id: 'dev_hdl',
+        label: de ? 'HDL besprechen' : 'Discuss HDL',
+        message: de ? 'Mein HDL ist niedrig. Was kann ich tun?' : 'My HDL is low. What can I do?',
+        icon: '🫀',
+      });
+    } else if (d.agent === 'medical' && msgLower.includes('haematokrit')) {
+      suggestions.push({
+        id: 'dev_hematocrit',
+        label: de ? 'Hämatokrit besprechen' : 'Discuss hematocrit',
+        message: de ? 'Mein Hämatokrit ist erhöht. Was bedeutet das?' : 'My hematocrit is elevated. What does it mean?',
+        icon: '🩸',
       });
     }
   }

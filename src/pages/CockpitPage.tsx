@@ -38,6 +38,7 @@ import { InsightCard } from '../shared/components/InsightCard';
 import { DailyCheckinCard } from '../features/checkin/components/DailyCheckinCard';
 import { GapAlertBanner } from '../shared/components/GapAlertBanner';
 import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
+import { ProactiveWarningCard } from '../shared/components/ProactiveWarningCard';
 import { today } from '../lib/utils';
 import { useAuth } from '../app/providers/AuthProvider';
 import {
@@ -296,6 +297,9 @@ export function CockpitPage() {
 
         {/* Gap Alert — re-engagement when user hasn't logged for 2+ days */}
         <GapAlertBanner />
+
+        {/* Proactive Warnings — overtraining, blood work, check-in anomalies */}
+        <ProactiveWarningCard />
 
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />
