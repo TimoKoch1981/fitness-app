@@ -101,8 +101,21 @@
 | 12.0    | 2026-02-28 | Phase D: DoctorReport PDF, PosingPhotos, trainingMode i18n (15 Sprachen) | Erledigt   |
 | 12.1    | 2026-02-28 | Skills-Konzept + Glossar-Optimierung (~27.000 Token/Session gespart)     | Erledigt   |
 | 12.2    | 2026-03-01 | Mahlzeit-Kategorien 4→6 (morning_snack + afternoon_snack, 17 Sprachen)   | Erledigt   |
+| 12.3    | 2026-03-01 | Schriftgroessen-Option (Klein/Normal/Gross/Sehr Gross, 17 Sprachen)       | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.3: Schriftgroessen-Option
+
+**Twin-Testing Finding:** Ralf (B5, 62J, technik-scheu) braucht groessere Schrift fuer Lesbarkeit.
+
+**Aenderungen (21 Dateien):**
+- `FontSize` Typ: small (14px) / normal (16px) / large (18px) / xlarge (20px)
+- `FONT_SIZE_SCALE` Map in i18n/index.ts
+- I18nProvider: fontSize-State + localStorage-Persistenz + `document.documentElement.style.fontSize`
+- ProfilePage: 4-Button-Selector neben Sprachauswahl in Einstellungen
+- i18n: 17 Sprachen (+5 Keys: fontSize, fontSizeSmall, fontSizeNormal, fontSizeLarge, fontSizeXLarge)
+- Tests: 2.718 bestanden (49 Dateien, +3 neue Font-Size-Tests)
 
 ### 2026-03-01 - v12.2: Mahlzeit-Kategorien 4→6
 

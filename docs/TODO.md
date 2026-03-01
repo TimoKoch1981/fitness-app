@@ -264,7 +264,7 @@
 - [x] ~~**Wettkampf-Countdown Widget**~~ ✅ (2026-02-28, v11.9b) — CompetitionCountdown (Power Mode), Zieldatum → Wochen/Tage, Phase-Hinweise (Peak Week, Cut, Prep, Off-Season)
 - [x] ~~**Blast/Cruise/PCT-Zyklus-Kalender**~~ ✅ (2026-02-28, v11.9) — CycleWidget (Power+ Mode), Blast/Cruise/PCT Status, Progress-Bar, PCTCountdown
 - [x] ~~**Daten-Export**~~ ✅ (2026-02-28, v11.8) — DSGVO Art. 20, useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download
-- [ ] **Schriftgroessen-Option** (~2h) — Klein/Normal/Gross in Profil-Einstellungen. Ralf (B5, technik-scheu) braucht grosse Schrift.
+- [x] ~~**Schriftgroessen-Option**~~ ✅ (2026-03-01, v12.3) — Klein/Normal/Gross/Sehr Gross in Profil-Einstellungen. Root-Font-Size via CSS, localStorage, 17 Sprachen, 3 Tests.
 - [ ] **Schlaf-Tracking (Zeiten)** (~6h) — Einschlaf-/Aufwachzeit, Qualitaet (nicht nur Emoji). Korrelation mit Training. Betroffene: A4, E5, D4
 - [x] ~~**Mahlzeit-Kategorien erweitern**~~ ✅ (2026-03-01, v12.2) — 6 Kategorien: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Snack. 27 Dateien, 17 Sprachen, DB-Migration, 2.705 Tests.
 - [ ] **Foto-basiertes Mahlzeit-Logging** (~8h) — Essen fotografieren → KI erkennt Mahlzeit → Auto-Fill Makros. Aylin (B4) fotografiert lieber statt zu wiegen. Braucht Vision-API Integration.
