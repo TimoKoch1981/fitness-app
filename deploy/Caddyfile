@@ -49,13 +49,35 @@ www.{$DOMAIN} {
 		reverse_proxy kong:8000
 	}
 
-	# Security Headers
+	# Security Headers (hardened, 2026-03-01)
 	header {
+		# Prevent MIME-type sniffing
 		X-Content-Type-Options nosniff
+		# Prevent clickjacking
 		X-Frame-Options DENY
+		# Referrer policy — send origin only for cross-origin requests
 		Referrer-Policy strict-origin-when-cross-origin
-		Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+		# Permissions Policy — camera/microphone for voice input + video
+		Permissions-Policy "camera=(self), microphone=(self), geolocation=(), payment=()"
+		# Remove server identification
 		-Server
+
+		# HSTS — Force HTTPS for 1 year, include subdomains
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		# Legacy XSS Protection (still useful for older browsers)
+		X-XSS-Protection "1; mode=block"
+		# Cross-Origin Opener Policy — isolate browsing context
+		Cross-Origin-Opener-Policy same-origin-allow-popups
+		# Cross-Origin Resource Policy — only same-origin can load resources
+		Cross-Origin-Resource-Policy same-origin
+
+		# Content-Security-Policy (CSP)
+		# - self: SPA assets, API calls via same-origin proxy
+		# - YouTube/Spotify frames: Workout music player
+		# - blob:/data: for image uploads, QR codes, share cards
+		# - unsafe-inline styles: Tailwind CSS + Framer Motion + inline styles
+		# - wss: for Supabase Realtime websockets
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://world.openfoodfacts.org; font-src 'self'; connect-src 'self' wss://{$DOMAIN}; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://accounts.spotify.com; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 	}
 
 	# Compression
