@@ -336,6 +336,13 @@ export const fr: TranslationKeys = {
     bmrHelpAuto: 'Automatique : Choisit la meilleure formule selon tes données. Avec taux de masse grasse → Katch-McArdle (plus précise), sans → Mifflin-St Jeor.',
     bmrHelpMifflin: "Mifflin-St Jeor : Formule standard basée sur le poids, la taille, l'âge et le sexe. Suffisamment précise pour la plupart des gens.",
     bmrHelpKatch: 'Katch-McArdle : Utilise la masse maigre. Plus précise avec un taux de masse grasse connu, surtout pour les sportifs.',
+    // Font Size
+    fontSize: 'Taille de police',
+    fontSizeSmall: 'Petit',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Grand',
+    fontSizeXLarge: 'Très grand',
+    // Auto-Save
     autoSaved: 'Enregistré ✓',
     calculateGoals: 'Calculer les valeurs recommandées',
     recommendedValues: 'Objectifs quotidiens recommandés',

@@ -343,6 +343,12 @@ export const de = {
     bmrHelpAuto: 'Automatisch: Wählt die beste Formel basierend auf deinen Daten. Mit Körperfettanteil → Katch-McArdle (genauer), ohne → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standardformel basierend auf Gewicht, Größe, Alter und Geschlecht. Für die meisten Menschen ausreichend genau.',
     bmrHelpKatch: 'Katch-McArdle: Nutzt die fettfreie Masse (Lean Body Mass). Genauer bei bekanntem Körperfettanteil, besonders für Sportler.',
+    // Font Size
+    fontSize: 'Schriftgröße',
+    fontSizeSmall: 'Klein',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Groß',
+    fontSizeXLarge: 'Sehr groß',
     // Auto-Save
     autoSaved: 'Gespeichert ✓',
     // Goal Calculation

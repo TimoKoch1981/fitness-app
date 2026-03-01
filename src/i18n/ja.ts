@@ -336,6 +336,13 @@ export const ja: TranslationKeys = {
     bmrHelpAuto: '自動：データに基づいて最適な計算式を選択します。体脂肪率あり → Katch-McArdle（より正確）、なし → Mifflin-St Jeor。',
     bmrHelpMifflin: 'Mifflin-St Jeor：体重、身長、年齢、性別に基づく標準的な計算式。ほとんどの方に十分な精度です。',
     bmrHelpKatch: 'Katch-McArdle：除脂肪体重を使用します。体脂肪率が分かっている場合、特にアスリートに対してより正確です。',
+    // Font Size
+    fontSize: '文字サイズ',
+    fontSizeSmall: '小',
+    fontSizeNormal: '標準',
+    fontSizeLarge: '大',
+    fontSizeXLarge: '特大',
+    // Auto-Save
     autoSaved: '保存済み ✓',
     calculateGoals: '推奨値を計算',
     recommendedValues: '推奨1日目標',

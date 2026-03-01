@@ -336,6 +336,13 @@ export const zh: TranslationKeys = {
     bmrHelpAuto: '自动：根据你的数据选择最佳公式。有体脂率 → Katch-McArdle（更精确），无体脂率 → Mifflin-St Jeor。',
     bmrHelpMifflin: 'Mifflin-St Jeor：基于体重、身高、年龄和性别的标准公式。对大多数人足够准确。',
     bmrHelpKatch: 'Katch-McArdle：基于瘦体重计算。已知体脂率时更准确，尤其适合运动员。',
+    // Font Size
+    fontSize: '字体大小',
+    fontSizeSmall: '小',
+    fontSizeNormal: '正常',
+    fontSizeLarge: '大',
+    fontSizeXLarge: '特大',
+    // Auto-Save
     autoSaved: '已保存 ✓',
     calculateGoals: '计算推荐值',
     recommendedValues: '推荐每日目标',

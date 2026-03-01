@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { de } from '../de';
 import { en } from '../en';
+import { FONT_SIZE_SCALE, type FontSize } from '../index';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -146,5 +147,34 @@ describe('i18n — content sanity', () => {
     });
     const hasUmlaut = enValues.some((v) => /[äöüÄÖÜß]/.test(v));
     expect(hasUmlaut).toBe(false);
+  });
+});
+
+describe('i18n — font size', () => {
+  it('FONT_SIZE_SCALE has all 4 sizes', () => {
+    const sizes: FontSize[] = ['small', 'normal', 'large', 'xlarge'];
+    for (const size of sizes) {
+      expect(FONT_SIZE_SCALE[size]).toBeTypeOf('number');
+      expect(FONT_SIZE_SCALE[size]).toBeGreaterThan(0);
+    }
+  });
+
+  it('font sizes are in ascending order', () => {
+    expect(FONT_SIZE_SCALE.small).toBeLessThan(FONT_SIZE_SCALE.normal);
+    expect(FONT_SIZE_SCALE.normal).toBeLessThan(FONT_SIZE_SCALE.large);
+    expect(FONT_SIZE_SCALE.large).toBeLessThan(FONT_SIZE_SCALE.xlarge);
+  });
+
+  it('DE and EN have font size translation keys', () => {
+    expect(de.profile.fontSize).toBeTruthy();
+    expect(de.profile.fontSizeSmall).toBeTruthy();
+    expect(de.profile.fontSizeNormal).toBeTruthy();
+    expect(de.profile.fontSizeLarge).toBeTruthy();
+    expect(de.profile.fontSizeXLarge).toBeTruthy();
+    expect(en.profile.fontSize).toBeTruthy();
+    expect(en.profile.fontSizeSmall).toBeTruthy();
+    expect(en.profile.fontSizeNormal).toBeTruthy();
+    expect(en.profile.fontSizeLarge).toBeTruthy();
+    expect(en.profile.fontSizeXLarge).toBeTruthy();
   });
 });

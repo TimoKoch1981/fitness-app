@@ -32,15 +32,28 @@ const translations: Record<Language, TranslationKeys> = {
   fa, fil,
 };
 
+export type FontSize = 'small' | 'normal' | 'large' | 'xlarge';
+
+export const FONT_SIZE_SCALE: Record<FontSize, number> = {
+  small: 14,
+  normal: 16,
+  large: 18,
+  xlarge: 20,
+};
+
 export interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  fontSize: FontSize;
+  setFontSize: (size: FontSize) => void;
   t: TranslationKeys;
 }
 
 export const I18nContext = createContext<I18nContextType>({
   language: 'de',
   setLanguage: () => {},
+  fontSize: 'normal',
+  setFontSize: () => {},
   t: de,
 });
 

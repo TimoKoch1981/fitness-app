@@ -336,6 +336,13 @@ export const ar: TranslationKeys = {
     bmrHelpAuto: 'تلقائي: يختار أفضل معادلة بناءً على بياناتك. مع نسبة الدهون ← Katch-McArdle (أدق)، بدونها ← Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: المعادلة القياسية بناءً على الوزن والطول والعمر والجنس. دقيقة بما يكفي لمعظم الأشخاص.',
     bmrHelpKatch: 'Katch-McArdle: تستخدم الكتلة الخالية من الدهون. أدق عند معرفة نسبة الدهون، خاصة للرياضيين.',
+    // Font Size
+    fontSize: 'حجم الخط',
+    fontSizeSmall: 'صغير',
+    fontSizeNormal: 'عادي',
+    fontSizeLarge: 'كبير',
+    fontSizeXLarge: 'كبير جداً',
+    // Auto-Save
     autoSaved: 'تم الحفظ ✓',
     calculateGoals: 'حساب القيم الموصى بها',
     recommendedValues: 'الأهداف اليومية الموصى بها',

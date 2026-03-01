@@ -336,6 +336,13 @@ export const fil: TranslationKeys = {
     bmrHelpAuto: 'Awtomatiko: Pinipili ang pinakamainam na formula batay sa iyong data. Kung may body fat percentage → Katch-McArdle (mas tumpak), kung wala → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standard na formula batay sa timbang, taas, edad, at kasarian. Sapat na tumpak para sa karamihan ng mga tao.',
     bmrHelpKatch: 'Katch-McArdle: Gumagamit ng lean body mass. Mas tumpak kapag alam ang body fat percentage, lalo na para sa mga atleta.',
+    // Font Size
+    fontSize: 'Laki ng Font',
+    fontSizeSmall: 'Maliit',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Malaki',
+    fontSizeXLarge: 'Napakalaki',
+    // Auto-Save
     autoSaved: 'Na-save na ✓',
     calculateGoals: 'Kalkulahin ang mga inirerekomendang halaga',
     recommendedValues: 'Mga Inirerekomendang Daily Goal',

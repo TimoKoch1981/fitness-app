@@ -336,6 +336,13 @@ export const tr: TranslationKeys = {
     bmrHelpAuto: 'Otomatik: Verilerine göre en uygun formülü seçer. Vücut yağ oranı varsa → Katch-McArdle (daha doğru), yoksa → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Kilo, boy, yaş ve cinsiyete dayalı standart formül. Çoğu kişi için yeterince doğrudur.',
     bmrHelpKatch: 'Katch-McArdle: Yağsız vücut kütlesini kullanır. Vücut yağ oranı bilindiğinde daha doğrudur, özellikle sporcular için.',
+    // Font Size
+    fontSize: 'Yazı Boyutu',
+    fontSizeSmall: 'Küçük',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Büyük',
+    fontSizeXLarge: 'Çok Büyük',
+    // Auto-Save
     autoSaved: 'Kaydedildi ✓',
     calculateGoals: 'Önerilen değerleri hesapla',
     recommendedValues: 'Önerilen Günlük Hedefler',

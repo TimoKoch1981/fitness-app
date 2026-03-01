@@ -336,6 +336,13 @@ export const pl: TranslationKeys = {
     bmrHelpAuto: 'Automatycznie: Wybiera najlepszą formułę na podstawie Twoich danych. Z procentem tkanki tłuszczowej → Katch-McArdle (dokładniejsza), bez → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standardowa formuła oparta na wadze, wzroście, wieku i płci. Wystarczająco dokładna dla większości osób.',
     bmrHelpKatch: 'Katch-McArdle: Wykorzystuje masę beztłuszczową. Dokładniejsza przy znanym % tkanki tłuszczowej, szczególnie dla sportowców.',
+    // Font Size
+    fontSize: 'Rozmiar czcionki',
+    fontSizeSmall: 'Mały',
+    fontSizeNormal: 'Normalny',
+    fontSizeLarge: 'Duży',
+    fontSizeXLarge: 'Bardzo duży',
+    // Auto-Save
     autoSaved: 'Zapisano ✓',
     calculateGoals: 'Oblicz zalecane wartości',
     recommendedValues: 'Zalecane dzienne cele',

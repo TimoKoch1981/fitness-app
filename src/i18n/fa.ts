@@ -336,6 +336,13 @@ export const fa: TranslationKeys = {
     bmrHelpAuto: 'خودکار: بهترین فرمول را بر اساس داده‌های شما انتخاب می‌کند. با درصد چربی بدن → Katch-McArdle (دقیق‌تر)، بدون آن → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: فرمول استاندارد بر اساس وزن، قد، سن و جنسیت. برای اکثر افراد به اندازه کافی دقیق است.',
     bmrHelpKatch: 'Katch-McArdle: از توده بدون چربی استفاده می‌کند. با درصد چربی بدن مشخص دقیق‌تر است، به‌ویژه برای ورزشکاران.',
+    // Font Size
+    fontSize: 'اندازه فونت',
+    fontSizeSmall: 'کوچک',
+    fontSizeNormal: 'معمولی',
+    fontSizeLarge: 'بزرگ',
+    fontSizeXLarge: 'بسیار بزرگ',
+    // Auto-Save
     autoSaved: 'ذخیره شد ✓',
     calculateGoals: 'محاسبه مقادیر پیشنهادی',
     recommendedValues: 'اهداف روزانه پیشنهادی',

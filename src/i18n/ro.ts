@@ -336,6 +336,13 @@ export const ro: TranslationKeys = {
     bmrHelpAuto: 'Automat: Alege cea mai bună formulă pe baza datelor tale. Cu procent de grăsime → Katch-McArdle (mai precisă), fără → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Formulă standard bazată pe greutate, înălțime, vârstă și gen. Suficient de precisă pentru majoritatea oamenilor.',
     bmrHelpKatch: 'Katch-McArdle: Folosește masa corporală slabă. Mai precisă când se cunoaște procentul de grăsime, mai ales pentru sportivi.',
+    // Font Size
+    fontSize: 'Dimensiune font',
+    fontSizeSmall: 'Mic',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Mare',
+    fontSizeXLarge: 'Foarte mare',
+    // Auto-Save
     autoSaved: 'Salvat ✓',
     calculateGoals: 'Calculează valorile recomandate',
     recommendedValues: 'Obiective zilnice recomandate',

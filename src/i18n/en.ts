@@ -342,6 +342,12 @@ export const en: TranslationKeys = {
     bmrHelpAuto: 'Automatic: Selects the best formula based on your data. With body fat percentage → Katch-McArdle (more accurate), without → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standard formula based on weight, height, age, and gender. Sufficiently accurate for most people.',
     bmrHelpKatch: 'Katch-McArdle: Uses fat-free mass (Lean Body Mass). More accurate when body fat percentage is known, especially for athletes.',
+    // Font Size
+    fontSize: 'Font Size',
+    fontSizeSmall: 'Small',
+    fontSizeNormal: 'Normal',
+    fontSizeLarge: 'Large',
+    fontSizeXLarge: 'Extra Large',
     // Auto-Save
     autoSaved: 'Saved ✓',
     // Goal Calculation

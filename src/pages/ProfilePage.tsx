@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
-import { useTranslation, LANGUAGE_OPTIONS, type Language } from '../i18n';
+import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize } from '../i18n';
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
@@ -23,7 +23,7 @@ import { TrainingModeSelector } from '../shared/components/TrainingModeSelector'
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
-  const { t, language, setLanguage } = useTranslation();
+  const { t, language, setLanguage, fontSize, setFontSize } = useTranslation();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
 
@@ -218,6 +218,32 @@ export function ProfilePage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Font Size */}
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-sm text-gray-600">{t.profile.fontSize}</span>
+            <div className="flex gap-1">
+              {([
+                ['small', t.profile.fontSizeSmall],
+                ['normal', t.profile.fontSizeNormal],
+                ['large', t.profile.fontSizeLarge],
+                ['xlarge', t.profile.fontSizeXLarge],
+              ] as const).map(([size, label]) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setFontSize(size as FontSize)}
+                  className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    fontSize === size
+                      ? 'bg-teal-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
