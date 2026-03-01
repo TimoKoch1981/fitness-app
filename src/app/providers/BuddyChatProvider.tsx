@@ -6,13 +6,18 @@
  * The active thread determines which messages are displayed and which
  * agent receives new messages.
  *
- * Backed by sessionStorage so threads survive full page refreshes.
- * Migration from the old single-array format is handled transparently.
+ * Storage layers (v12.26):
+ * 1. sessionStorage — fast local cache, survives route changes within session
+ * 2. Supabase buddy_chat_messages — persistent cross-session history (90d expiry)
+ *
+ * On mount: If sessionStorage is empty but user is logged in, hydrate from DB.
+ * On send: Messages saved to both sessionStorage (debounced) and DB (async).
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo, type ReactNode } from 'react';
 import type { DisplayMessage } from '../../features/buddy/hooks/useBuddyChat';
 import type { AgentType } from '../../lib/ai/agents/types';
+import { supabase } from '../../lib/supabase';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -172,9 +177,88 @@ function saveThreadsToStorage(threads: ThreadMessages): void {
 // Provider
 // ---------------------------------------------------------------------------
 
+const DB_HYDRATED_KEY = 'fitbuddy_chat_db_hydrated';
+
 export function BuddyChatProvider({ children }: { children: ReactNode }) {
   const [threads, setThreads] = useState<ThreadMessages>(loadThreadsFromStorage);
   const [activeThread, setActiveThreadState] = useState<AgentType>(loadActiveThreadFromStorage);
+
+  // Hydrate from DB on first mount if sessionStorage is empty
+  const dbHydratedRef = useRef(false);
+  useEffect(() => {
+    if (dbHydratedRef.current) return;
+    // Only hydrate if we haven't already this session
+    const alreadyHydrated = sessionStorage.getItem(DB_HYDRATED_KEY);
+    if (alreadyHydrated) {
+      dbHydratedRef.current = true;
+      return;
+    }
+
+    // Check if there are any messages in sessionStorage already
+    const hasSessionMessages = ALL_AGENT_TYPES.some(
+      agent => threads[agent] && threads[agent].length > 0
+    );
+    if (hasSessionMessages) {
+      // Session has messages, mark as hydrated
+      dbHydratedRef.current = true;
+      try { sessionStorage.setItem(DB_HYDRATED_KEY, '1'); } catch { /* */ }
+      return;
+    }
+
+    // No session messages — try to load from DB
+    dbHydratedRef.current = true;
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.id) return;
+
+        const { data, error } = await supabase
+          .from('buddy_chat_messages')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(MAX_MESSAGES_PER_THREAD * 8);
+
+        if (error || !data || data.length === 0) {
+          try { sessionStorage.setItem(DB_HYDRATED_KEY, '1'); } catch { /* */ }
+          return;
+        }
+
+        // Group by agent_type and convert to DisplayMessages
+        const dbThreads = createEmptyThreads();
+        const rows = [...data].reverse(); // oldest first
+        for (const row of rows) {
+          const agent = (row.agent_type as AgentType) || 'general';
+          const validAgent = ALL_AGENT_TYPES.includes(agent) ? agent : 'general';
+          if (dbThreads[validAgent].length < MAX_MESSAGES_PER_THREAD) {
+            dbThreads[validAgent].push({
+              id: row.id,
+              role: row.role as 'user' | 'assistant',
+              content: row.content,
+              rawContent: row.raw_content ?? undefined,
+              timestamp: new Date(row.created_at),
+              agentType: row.agent_type,
+              agentName: row.agent_name ?? undefined,
+              agentIcon: row.agent_icon ?? undefined,
+              skillVersions: row.skill_versions ?? undefined,
+              isLoading: false,
+              isStreaming: false,
+            } as DisplayMessage);
+          }
+        }
+
+        // Only apply if we actually got messages
+        const hasDbMessages = ALL_AGENT_TYPES.some(a => dbThreads[a].length > 0);
+        if (hasDbMessages) {
+          setThreads(dbThreads);
+        }
+        try { sessionStorage.setItem(DB_HYDRATED_KEY, '1'); } catch { /* */ }
+      } catch {
+        // Non-critical — continue without DB history
+        try { sessionStorage.setItem(DB_HYDRATED_KEY, '1'); } catch { /* */ }
+      }
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derived: messages for the active thread
   const messages = useMemo(() => threads[activeThread], [threads, activeThread]);

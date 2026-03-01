@@ -119,6 +119,23 @@
 | 12.23   | 2026-03-01 | OAuth / Social Login (Google + Apple Buttons, AuthCallback, 17 Sprachen)  | Erledigt   |
 | 12.24   | 2026-03-01 | MFA/TOTP (useMFA, Setup/Verify/Settings Dialoge, ProfilePage, 17 Sprachen) | Erledigt   |
 | 12.25   | 2026-03-01 | Buddy Quellenangaben (getSkillContentWithSources, PMID-Injection, Facts Codex verstaerkt) | Erledigt   |
+| 12.26   | 2026-03-01 | Buddy Kontext-Persistence (buddy_chat_messages, useChatHistory, DB-Hydration, Dual-Storage) | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.26: KI-Buddy Kontext-Persistence ueber Sessions
+
+**Feature:** Chat-History wird jetzt persistent in der Datenbank gespeichert und beim naechsten Session-Start automatisch geladen.
+
+**Aenderungen:**
+- `buddy_chat_messages` DB-Tabelle (UUID PK, user_id, agent_type, role, content, raw_content, skill_versions JSONB, 90d TTL, RLS)
+- `useChatHistory` Hook — loadChatHistory, loadAllThreadHistory, saveUserMessage, saveAssistantMessage
+- `BuddyChatProvider` — DB-Hydration bei Session-Start (wenn sessionStorage leer + User eingeloggt)
+- `useBuddyChat` — Speichert User- und Assistant-Messages async in DB (fire-and-forget)
+- Dual-Storage-Architektur: sessionStorage (schnell, within-session) + DB (persistent, cross-session)
+- cleanup_expired_chat_messages() Funktion fuer Cron-Job
+
+**Tests:** 3.099 bestanden (52 Dateien)
 
 ---
 

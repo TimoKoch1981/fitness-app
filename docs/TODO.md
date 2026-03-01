@@ -199,7 +199,7 @@
 #### KI-Buddy Verbesserungen
 - [x] ~~**Profil-Daten an KI-Context uebergeben**~~ ✅ (2026-02-28, v11.4) — Allergien (WARNING-Direktive), Ernaehrungsform, Gesundheitseinschraenkungen in generateProfileSkill() ergaenzt. Commit: 86c75b7
 - [ ] **Proaktives Warnsystem** (~6h) — Buddy warnt nur wenn gefragt, nicht automatisch bei gefaehrlichen Mustern (Unterkalorisch, Uebertraining 7x/Woche, HDL<25, Hkt>52%). Braucht: Schwellenwert-Regeln + automatische Buddy-Nachrichten. Betroffene: A5, E1, D2, D4
-- [ ] **Kontext-Persistence ueber Sessions** (~4h) — Buddy "vergisst" Praeferenzen zwischen Sessions (sessionStorage). Elena (A4, Vegetarierin) muss es jedes Mal neu sagen. Loesung: Profil-Daten + Chat-History aus DB laden. Betroffene: A4, E2, B4
+- [x] ~~**Kontext-Persistence ueber Sessions**~~ ✅ (2026-03-01, v12.26) — buddy_chat_messages Tabelle (90d TTL, RLS), useChatHistory Hook (save/load), BuddyChatProvider DB-Hydration bei Session-Start, useBuddyChat speichert User+Assistant Messages async in DB. Dual-Storage: sessionStorage (schnell) + DB (persistent). Migration 20260301000009.
 - [x] ~~**Quellenangaben in Buddy-Antworten**~~ ✅ (2026-03-01, v12.25) — getSkillContentWithSources() injiziert PMID-Referenzen aus Skill-Metadaten in Prompt-Text. Facts Codex Quellenangaben-Sektion verstaerkt (Pflicht 1-2 PMIDs pro Antwort, Beispiel-Format, DE+EN). 124 PMIDs in 14 Skills jetzt fuer LLM sichtbar. ChatMessage.tsx rendert PMIDs als klickbare PubMed-Links.
 - [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.5) — Kurz/Normal/Ausführlich + Einfach/Fachlich. BaseAgent-Prompt-Injection, I18nProvider, ProfilePage UI. 17 Sprachen, 26 Dateien.
 
@@ -212,7 +212,7 @@
 
 - [x] ~~**Menstruationszyklus-Tracker**~~ ✅ (2026-03-01, v12.7) — menstrual_cycle_logs Tabelle (phase, flow_intensity, symptoms JSONB, energy, mood), useMenstrualCycle Hook (CRUD + Phasen-Helpers), AddCycleLogDialog (4 Phasen, 3 Flow, 8 Symptome, Mood+Energy Emoji), Gender-Gating (female/other), MedicalPage Integration, AI-Kontext, 17 Sprachen (24 Keys), 22 Unit-Tests. RED-S/Kalender = separater Task.
 - [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Nur sichtbar bei gender=female/other. Betroffene: E3, E5, C5
-- [ ] **Stillzeit-Kalorienzuschlag** (~2h) — TDEE-Berechnung beruecksichtigt Stillen nicht (+300-500 kcal/Tag). Lena (E4) stillt noch. Braucht: Profil-Toggle "Stillend" → TDEE-Aufschlag. Nur bei gender=female. Betroffene: E4
+- [x] ~~**Stillzeit-Kalorienzuschlag**~~ ✅ (bereits implementiert) — is_breastfeeding Boolean in Profil, BREASTFEEDING_CALORIE_BOOST=400 kcal/Tag (Dewey 2003, PMID:14506247), Gender-Gating (nur female), Pink-Toggle in ProfilePage, Cockpit-Badge, Goal-Calculator Integration.
 
 #### Medizin-Erweiterungen
 - [x] ~~**Blutbild/Laborwerte-Tracking**~~ ✅ (2026-02-28, v11.9) — BloodWorkDashboard (10 Marker, farbcodiert), useBloodWork Hook, Warnschwellen, Power+ Mode

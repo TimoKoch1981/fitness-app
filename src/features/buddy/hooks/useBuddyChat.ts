@@ -30,6 +30,7 @@ import {
   saveContextNotes,
   cleanupExpiredNotes,
 } from '../../../lib/ai/contextExtractor';
+import { useChatHistory } from './useChatHistory';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import type { AgentContext, CommunicationStyle } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
@@ -68,6 +69,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const logAiUsage = useLogAiUsage();
   const { user } = useAuth();
+  const { saveUserMessage, saveAssistantMessage } = useChatHistory();
 
   // Refs to avoid stale closures in sendMessage (#7, #8)
   const messagesRef = useRef(messages);
@@ -98,6 +100,11 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     // Add user message
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
+
+    // Persist user message to DB (fire-and-forget)
+    if (user?.id) {
+      saveUserMessage(user.id, activeThread, userMsg).catch(() => {});
+    }
 
     // Add streaming placeholder (shows "thinking..." initially)
     const streamId = crypto.randomUUID();
@@ -305,6 +312,21 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               }
             : m
         ));
+
+        // Persist assistant message to DB (fire-and-forget)
+        if (user?.id) {
+          saveAssistantMessage(user.id, followUpResult.agentType as AgentType ?? activeThread, {
+            id: streamId,
+            role: 'assistant',
+            content: followUpClean,
+            rawContent: followUpResult.content,
+            timestamp: new Date(),
+            agentType: followUpResult.agentType,
+            agentName: followUpResult.agentName,
+            agentIcon: followUpResult.agentIcon,
+            skillVersions: followUpResult.skillVersions,
+          }).catch(() => {});
+        }
       } else {
         // Normal flow — no search_product, just show the response
         const cleanContent = regularActions.length > 0
@@ -329,6 +351,21 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               }
             : m
         ));
+
+        // Persist assistant message to DB (fire-and-forget)
+        if (user?.id) {
+          saveAssistantMessage(user.id, (result.agentType as AgentType) ?? activeThread, {
+            id: streamId,
+            role: 'assistant',
+            content: cleanContent,
+            rawContent: result.content,
+            timestamp: new Date(),
+            agentType: result.agentType,
+            agentName: result.agentName,
+            agentIcon: result.agentIcon,
+            skillVersions: result.skillVersions,
+          }).catch(() => {});
+        }
       }
 
       // Extract and persist context from this conversation turn (fire-and-forget)
