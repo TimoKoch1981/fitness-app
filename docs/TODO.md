@@ -210,7 +210,7 @@
 #### Frauen-spezifische Features
 > VORAUSSETZUNG: Gender-basiertes Feature-Gating (siehe oben). Features nur sichtbar wenn `gender === 'female'` oder `gender === 'other'`.
 
-- [ ] **Menstruationszyklus-Tracker** (~10h) — Kein Zyklus-Tracking. Keine Korrelation Zyklus↔Leistung. Kein RED-S/FAT/Amenorrhoe-Warnsystem. Braucht: Phaseneingabe (Follikel/Luteal/Menstruation), Symptome, Leistungskorrelation-Graph. Nur sichtbar bei gender=female/other. Betroffene: E1-E5, B2, C3, C5
+- [x] ~~**Menstruationszyklus-Tracker**~~ ✅ (2026-03-01, v12.7) — menstrual_cycle_logs Tabelle (phase, flow_intensity, symptoms JSONB, energy, mood), useMenstrualCycle Hook (CRUD + Phasen-Helpers), AddCycleLogDialog (4 Phasen, 3 Flow, 8 Symptome, Mood+Energy Emoji), Gender-Gating (female/other), MedicalPage Integration, AI-Kontext, 17 Sprachen (24 Keys), 22 Unit-Tests. RED-S/Kalender = separater Task.
 - [ ] **Symptom-Tracker (Hitzewallungen, Stimmung)** (~4h) — Nur Tagesform-Emoji. Katharina (E3) und Nina (E5) koennen Perimenopause-Symptome nicht loggen. Kein Korrelations-Dashboard. Nur sichtbar bei gender=female/other. Betroffene: E3, E5, C5
 - [ ] **Stillzeit-Kalorienzuschlag** (~2h) — TDEE-Berechnung beruecksichtigt Stillen nicht (+300-500 kcal/Tag). Lena (E4) stillt noch. Braucht: Profil-Toggle "Stillend" → TDEE-Aufschlag. Nur bei gender=female. Betroffene: E4
 

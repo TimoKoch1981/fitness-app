@@ -105,8 +105,28 @@
 | 12.4    | 2026-03-01 | Luecken-Erkennung (GapAlertBanner, useGapDetection, 17 Sprachen)          | Erledigt   |
 | 12.5    | 2026-03-01 | Buddy-Kommunikationsstil (Verbosity + Expertise, BaseAgent-Injection)     | Erledigt   |
 | 12.6    | 2026-03-01 | Schlaf-Tracking (Zeiten, Qualitaet, DB, 17 Sprachen, 15 Tests)           | Erledigt   |
+| 12.7    | 2026-03-01 | Menstruationszyklus-Tracker (Phasen, Symptome, Gender-Gating, 22 Tests)  | Erledigt   |
 
 ---
+
+### 2026-03-01 - v12.7: Menstruationszyklus-Tracker
+
+**Twin-Testing Finding:** 8 Personas (E1-E5, B2, C3, C5) brauchen Zyklus-Tracking. Keine Korrelation Zyklus↔Leistung. Kein RED-S-Warnsystem.
+
+**Aenderungen (28 Dateien):**
+- DB-Migration: `menstrual_cycle_logs` Tabelle (phase, flow_intensity, symptoms JSONB, energy_level, mood, notes)
+- UNIQUE CONSTRAINT `(user_id, date)` fuer Upsert + 4 RLS Policies
+- `MenstrualCycleLog`, `CyclePhase`, `FlowIntensity`, `CycleSymptom` Types in health.ts
+- `useMenstrualCycle.ts` Hook: getCyclePhaseKey/Emoji/Color, getFlowIntensityKey, getSymptomKey, estimateCyclePhase, daysBetweenDates, CRUD Hooks
+- `AddCycleLogDialog.tsx`: 4 Phasen-Buttons, 3 Flow-Levels (conditional), 8 Symptom-Chips, Mood+Energy Emoji-Rating, Rose/Pink Styling
+- Gender-Gating: `showCycleTracker = gender === 'female' || gender === 'other'` — Sektion + Dialog nur bei passendem Geschlecht
+- MedicalPage: Zyklus-Sektion mit 🩸 Icon, Rose-Farbschema, Symptom-Count, Mood/Energy Display
+- BuddyPage + InlineBuddyChat: `recentCycleLogs` im AI-Kontext (femaleFitness Skill awareness)
+- 17 Sprachen: 24 neue Keys (cycle.title, phase, menstruation, follicular, ovulation, luteal, flowIntensity, flowLight/Normal/Heavy, symptoms, 8 Symptom-Keys, mood, energyLevel, noData, logCycle)
+- 22 Unit-Tests (Phase/Emoji/Color/Flow/Symptom-Key Mappings, estimateCyclePhase, daysBetweenDates)
+- Tests: 2.864 (52 Dateien), alle gruen
+
+**Gender-Gating verifiziert:** male → Sektion versteckt, female → Sektion sichtbar.
 
 ### 2026-03-01 - v12.6: Schlaf-Tracking (Zeiten)
 

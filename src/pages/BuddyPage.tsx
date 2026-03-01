@@ -21,6 +21,7 @@ import { useStandardProducts, useUserProducts } from '../features/meals/hooks/us
 import { useUserEquipmentResolved } from '../features/equipment/hooks/useEquipment';
 import { useTodayCheckin } from '../features/checkin/hooks/useDailyCheckin';
 import { useSleepLogs } from '../features/sleep/hooks/useSleep';
+import { useMenstrualCycleLogs } from '../features/medical/hooks/useMenstrualCycle';
 import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
@@ -89,6 +90,7 @@ export function BuddyPage() {
   const { equipment: availableEquipment } = useUserEquipmentResolved();
   const { data: dailyCheckin } = useTodayCheckin();
   const { data: sleepLogs } = useSleepLogs(7);
+  const { data: cycleLogs } = useMenstrualCycleLogs(7);
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -116,6 +118,7 @@ export function BuddyPage() {
     availableEquipment: availableEquipment ?? [],
     dailyCheckin: dailyCheckin ?? undefined,
     recentSleepLogs: sleepLogs ?? [],
+    recentCycleLogs: cycleLogs ?? [],
   };
 
   // Proactive suggestion chips (rule-based, no LLM)

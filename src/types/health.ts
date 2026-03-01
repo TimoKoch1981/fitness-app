@@ -427,6 +427,24 @@ export interface SleepLog {
   created_at: string;
 }
 
+// === MENSTRUAL CYCLE TYPES ===
+export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal';
+export type FlowIntensity = 'light' | 'normal' | 'heavy';
+export type CycleSymptom = 'cramping' | 'bloating' | 'mood_changes' | 'fatigue' | 'acne' | 'headache' | 'breast_tenderness' | 'water_retention';
+
+export interface MenstrualCycleLog {
+  id: string;
+  user_id: string;
+  date: string;                    // ISO date YYYY-MM-DD
+  phase: CyclePhase;
+  flow_intensity?: FlowIntensity;  // relevant during menstruation
+  symptoms?: CycleSymptom[];
+  energy_level?: number;           // 1-5
+  mood?: number;                   // 1-5
+  notes?: string;
+  created_at: string;
+}
+
 // === DAILY CHECK-IN ===
 export interface DailyCheckin {
   id: string;
@@ -459,6 +477,7 @@ export interface HealthContext {
   availableEquipment?: Equipment[];
   dailyCheckin?: DailyCheckin;
   recentSleepLogs?: SleepLog[];
+  recentCycleLogs?: MenstrualCycleLog[];
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }
