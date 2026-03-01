@@ -52,7 +52,9 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
   // Group meals by type
   const grouped = {
     breakfast: meals?.filter((m) => m.type === 'breakfast') ?? [],
+    morning_snack: meals?.filter((m) => m.type === 'morning_snack') ?? [],
     lunch: meals?.filter((m) => m.type === 'lunch') ?? [],
+    afternoon_snack: meals?.filter((m) => m.type === 'afternoon_snack') ?? [],
     dinner: meals?.filter((m) => m.type === 'dinner') ?? [],
     snack: meals?.filter((m) => m.type === 'snack') ?? [],
   };

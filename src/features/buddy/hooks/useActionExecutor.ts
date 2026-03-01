@@ -147,7 +147,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
         case 'log_meal': {
           await addMeal.mutateAsync({
             name: d.name as string,
-            type: d.type as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+            type: d.type as 'breakfast' | 'morning_snack' | 'lunch' | 'afternoon_snack' | 'dinner' | 'snack',
             calories: d.calories as number,
             protein: d.protein as number,
             carbs: d.carbs as number,

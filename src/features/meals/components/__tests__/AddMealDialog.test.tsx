@@ -44,7 +44,9 @@ describe('AddMealDialog', () => {
   it('renders meal type buttons', () => {
     renderWithProviders(<AddMealDialog {...defaultProps} />);
     expect(screen.getByText('Frühstück')).toBeInTheDocument();
+    expect(screen.getByText('Vormittag')).toBeInTheDocument();
     expect(screen.getByText('Mittagessen')).toBeInTheDocument();
+    expect(screen.getByText('Nachmittag')).toBeInTheDocument();
     expect(screen.getByText('Abendessen')).toBeInTheDocument();
     expect(screen.getByText('Snack')).toBeInTheDocument();
   });

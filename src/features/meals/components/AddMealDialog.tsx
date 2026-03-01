@@ -72,7 +72,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
   const mealTypes: { value: MealType; label: string }[] = [
     { value: 'breakfast', label: t.meals.breakfast },
+    { value: 'morning_snack', label: t.meals.morning_snack },
     { value: 'lunch', label: t.meals.lunch },
+    { value: 'afternoon_snack', label: t.meals.afternoon_snack },
     { value: 'dinner', label: t.meals.dinner },
     { value: 'snack', label: t.meals.snack },
   ];

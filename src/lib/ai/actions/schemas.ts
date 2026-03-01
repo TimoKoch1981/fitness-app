@@ -20,12 +20,14 @@ function nowTime(): string {
 }
 
 /** Infer meal type from current hour if not provided by LLM */
-function inferMealType(): 'breakfast' | 'lunch' | 'dinner' | 'snack' {
+function inferMealType(): 'breakfast' | 'morning_snack' | 'lunch' | 'afternoon_snack' | 'dinner' | 'snack' {
   const hour = new Date().getHours();
   if (hour < 10) return 'breakfast';
+  if (hour < 12) return 'morning_snack';
   if (hour < 14) return 'lunch';
-  if (hour < 17) return 'snack';
-  return 'dinner';
+  if (hour < 17) return 'afternoon_snack';
+  if (hour < 21) return 'dinner';
+  return 'snack';
 }
 
 // ── Schemas ─────────────────────────────────────────────────────────────
@@ -33,7 +35,7 @@ function inferMealType(): 'breakfast' | 'lunch' | 'dinner' | 'snack' {
 const LogMealSchema = z.object({
   date: z.string().default(today),
   name: z.string().min(1),
-  type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).default(inferMealType),
+  type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).default(inferMealType),
   calories: z.number().nonnegative(),
   protein: z.number().nonnegative(),
   carbs: z.number().nonnegative(),
@@ -232,7 +234,7 @@ const UpdateEquipmentSchema = z.object({
 const SearchProductSchema = z.object({
   query: z.string().min(1),
   portion_g: z.number().positive().optional(),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+  meal_type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).optional(),
 });
 
 // ── Schema Registry ─────────────────────────────────────────────────────

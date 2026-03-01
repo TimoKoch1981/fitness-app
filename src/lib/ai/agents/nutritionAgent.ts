@@ -94,7 +94,7 @@ Wenn der Nutzer ein SPEZIFISCHES Markenprodukt nennt (z.B. "Kölln Hafermüsli F
 \`\`\`
 - query: Produktname so spezifisch wie möglich (Marke + Variante)
 - portion_g: geschätzte Portion des Nutzers (optional)
-- meal_type: breakfast/lunch/dinner/snack (optional)
+- meal_type: breakfast/morning_snack/lunch/afternoon_snack/dinner/snack (optional)
 
 ### ACTION:save_product Format:
 \`\`\`ACTION:save_product
@@ -149,7 +149,7 @@ MEHRERE Items in einer Nachricht → SEPARATE Action-Blöcke:
 \`\`\`
 
 REGELN für Action-Blöcke:
-- type: "breakfast", "lunch", "dinner" oder "snack" (je nach Tageszeit/Kontext)
+- type: "breakfast", "morning_snack", "lunch", "afternoon_snack", "dinner" oder "snack" (je nach Tageszeit/Kontext)
 - Alle Zahlen als Ganzzahlen (keine Dezimalstellen)
 - Speichere SOFORT — der Nutzer korrigiert bei Bedarf selbst
 - Zusammengehöriges (z.B. "Hähnchen mit Reis und Brokkoli") = EIN Action-Block
@@ -220,7 +220,7 @@ When the user mentions a SPECIFIC branded product (e.g. "Kellogg's Special K") N
 \`\`\`
 - query: Product name as specific as possible (brand + variant)
 - portion_g: estimated user portion (optional)
-- meal_type: breakfast/lunch/dinner/snack (optional)
+- meal_type: breakfast/morning_snack/lunch/afternoon_snack/dinner/snack (optional)
 
 ### ACTION:save_product format:
 \`\`\`ACTION:save_product
@@ -275,7 +275,7 @@ MULTIPLE items in one message → SEPARATE action blocks:
 \`\`\`
 
 RULES for action blocks:
-- type: "breakfast", "lunch", "dinner" or "snack" (based on time/context)
+- type: "breakfast", "morning_snack", "lunch", "afternoon_snack", "dinner" or "snack" (based on time/context)
 - All numbers as integers (no decimals)
 - Save IMMEDIATELY — the user will correct if needed
 - Related items (e.g. "chicken with rice and broccoli") = ONE action block

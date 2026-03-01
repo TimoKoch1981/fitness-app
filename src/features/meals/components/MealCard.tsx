@@ -9,7 +9,9 @@ interface MealCardProps {
 
 const mealTypeEmojis: Record<string, string> = {
   breakfast: '🌅',
+  morning_snack: '☕',
   lunch: '☀️',
+  afternoon_snack: '🍵',
   dinner: '🌙',
   snack: '🍪',
 };

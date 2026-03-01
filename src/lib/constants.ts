@@ -24,7 +24,7 @@ export const PAL_FACTORS = {
 export const DEFAULT_PAL = PAL_FACTORS.lightly_active;
 
 // === MEAL TYPES ===
-export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+export const MEAL_TYPES = ['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack'] as const;
 
 // === WORKOUT TYPES ===
 export const WORKOUT_TYPES = [
