@@ -994,4 +994,8 @@ export const fa: TranslationKeys = {
     creatinine: 'کراتینین',
     noBloodWork: 'هنوز داده آزمایش خون موجود نیست',
   },
+  gaps: {
+    title: 'وقفه در ثبت تشخیص داده شد',
+    message: 'همه چیز خوبه؟ هر ثبت به پیشرفت شما کمک می‌کنه!',
+  },
 } as const;

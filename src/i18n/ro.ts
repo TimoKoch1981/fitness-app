@@ -994,4 +994,8 @@ export const ro: TranslationKeys = {
     creatinine: 'Creatinină',
     noBloodWork: 'Nu există date de analize de sânge',
   },
+  gaps: {
+    title: 'Pauză de înregistrare detectată',
+    message: 'Totul OK? Fiecare înregistrare ajută la progresul tău!',
+  },
 } as const;

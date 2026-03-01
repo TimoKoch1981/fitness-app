@@ -1033,4 +1033,8 @@ export const en: TranslationKeys = {
     comparePhotos: 'Compare Photos',
     photoCount: 'photos',
   },
+  gaps: {
+    title: 'Logging gap detected',
+    message: 'Everything OK? Every entry helps your progress!',
+  },
 } as const;

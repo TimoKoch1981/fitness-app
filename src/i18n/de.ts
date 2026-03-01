@@ -1039,6 +1039,10 @@ export const de = {
     comparePhotos: 'Fotos vergleichen',
     photoCount: 'Fotos',
   },
+  gaps: {
+    title: 'Logging-Pause erkannt',
+    message: 'Alles OK? Jeder Eintrag hilft deinem Fortschritt!',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

@@ -994,4 +994,8 @@ export const fil: TranslationKeys = {
     creatinine: 'Creatinine',
     noBloodWork: 'Wala pang blood work data',
   },
+  gaps: {
+    title: 'Nakitang gap sa pag-log',
+    message: 'OK ka ba? Bawat entry ay nakakatulong sa iyong pag-unlad!',
+  },
 } as const;

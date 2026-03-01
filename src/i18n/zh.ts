@@ -994,4 +994,8 @@ export const zh: TranslationKeys = {
     creatinine: '肌酐',
     noBloodWork: '暂无血液检查数据',
   },
+  gaps: {
+    title: '检测到记录间断',
+    message: '一切还好吗？每次记录都有助于你的进步！',
+  },
 } as const;

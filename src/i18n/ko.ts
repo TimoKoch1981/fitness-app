@@ -994,4 +994,8 @@ export const ko: TranslationKeys = {
     creatinine: '크레아티닌',
     noBloodWork: '아직 혈액 검사 데이터가 없습니다',
   },
+  gaps: {
+    title: '기록 공백 감지',
+    message: '괜찮으세요? 매번 기록이 발전에 도움이 됩니다!',
+  },
 } as const;

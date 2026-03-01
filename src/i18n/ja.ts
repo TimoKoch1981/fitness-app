@@ -994,4 +994,8 @@ export const ja: TranslationKeys = {
     creatinine: 'クレアチニン',
     noBloodWork: '血液検査データはまだありません',
   },
+  gaps: {
+    title: '記録の空白を検出',
+    message: '大丈夫ですか？毎回の記録があなたの進歩を助けます！',
+  },
 } as const;

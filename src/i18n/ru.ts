@@ -994,4 +994,8 @@ export const ru: TranslationKeys = {
     creatinine: 'Креатинин',
     noBloodWork: 'Данные анализов крови отсутствуют',
   },
+  gaps: {
+    title: 'Обнаружен перерыв в записях',
+    message: 'Всё в порядке? Каждая запись помогает твоему прогрессу!',
+  },
 } as const;

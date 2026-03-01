@@ -994,4 +994,8 @@ export const fr: TranslationKeys = {
     creatinine: 'Créatinine',
     noBloodWork: 'Pas encore de bilan sanguin',
   },
+  gaps: {
+    title: 'Pause de suivi détectée',
+    message: 'Tout va bien ? Chaque entrée aide ta progression !',
+  },
 } as const;

@@ -36,6 +36,7 @@ import { classifyBMI, calculateFFMI, classifyFFMI } from '../lib/calculations/bo
 import { generateInsights } from '../lib/insights';
 import { InsightCard } from '../shared/components/InsightCard';
 import { DailyCheckinCard } from '../features/checkin/components/DailyCheckinCard';
+import { GapAlertBanner } from '../shared/components/GapAlertBanner';
 import { today } from '../lib/utils';
 import { useAuth } from '../app/providers/AuthProvider';
 import {
@@ -284,6 +285,9 @@ export function CockpitPage() {
 
         {/* Daily Check-in */}
         <DailyCheckinCard />
+
+        {/* Gap Alert — re-engagement when user hasn't logged for 2+ days */}
+        <GapAlertBanner />
 
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />

@@ -994,4 +994,8 @@ export const ar: TranslationKeys = {
     creatinine: 'كرياتينين',
     noBloodWork: 'لا توجد بيانات تحليل دم بعد',
   },
+  gaps: {
+    title: 'تم اكتشاف فجوة في التسجيل',
+    message: 'كل شيء على ما يرام؟ كل إدخال يساعد في تقدمك!',
+  },
 } as const;

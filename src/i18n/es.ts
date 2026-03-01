@@ -994,4 +994,8 @@ export const es: TranslationKeys = {
     creatinine: 'Creatinina',
     noBloodWork: 'Aún no hay datos de análisis de sangre',
   },
+  gaps: {
+    title: 'Pausa de registro detectada',
+    message: '¿Todo bien? ¡Cada registro ayuda a tu progreso!',
+  },
 } as const;

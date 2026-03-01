@@ -994,4 +994,8 @@ export const tr: TranslationKeys = {
     creatinine: 'Kreatinin',
     noBloodWork: 'Henüz kan tahlili verisi yok',
   },
+  gaps: {
+    title: 'Kayıt boşluğu algılandı',
+    message: 'Her şey yolunda mı? Her kayıt ilerlemene yardımcı olur!',
+  },
 } as const;
