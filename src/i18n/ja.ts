@@ -1051,6 +1051,16 @@ export const ja: TranslationKeys = {
     creatinine: 'クレアチニン',
     noBloodWork: '血液検査データはまだありません',
   },
+  reds: {
+    warningTitle: '低体重 / エネルギー警告',
+    dangerTitle: '重大エネルギー警告',
+    underweight: 'あなたのBMI ({bmi}) は18.5未満です — 低体重に分類されます。',
+    severeUnderweight: 'あなたのBMI ({bmi}) は17.0未満です — 重度の低体重です。医師にご相談ください。',
+    lowEnergyAvailability: 'エネルギー利用可能量 ({ea} kcal/kg FFM) がRED-S閾値の30 kcal/kgを下回っています。',
+    excessiveDeficit: 'カロリー不足 ({deficit} kcal) が非常に大きいです。1,000 kcalを超える不足は筋肉の減少を招く可能性があります。',
+    dangerouslyLowIntake: 'カロリー目標が高活動レベルで1,200 kcal未満です。健康に悪影響を及ぼす可能性があります。',
+    disclaimer: '自動検出 — 診断ではありません。心配な場合は医師または栄養士にご相談ください。',
+  },
   gaps: {
     title: '記録の空白を検出',
     message: '大丈夫ですか？毎回の記録があなたの進歩を助けます！',

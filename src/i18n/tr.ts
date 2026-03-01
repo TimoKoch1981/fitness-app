@@ -1051,6 +1051,16 @@ export const tr: TranslationKeys = {
     creatinine: 'Kreatinin',
     noBloodWork: 'Henüz kan tahlili verisi yok',
   },
+  reds: {
+    warningTitle: 'Düşük kilo / enerji uyarısı',
+    dangerTitle: 'Kritik enerji uyarısı',
+    underweight: 'BMI değeriniz ({bmi}) 18,5\'in altında — bu düşük kilolu olarak sınıflandırılır.',
+    severeUnderweight: 'BMI değeriniz ({bmi}) 17,0\'nin altında — ciddi düşük kilo. Lütfen bir doktora danışın.',
+    lowEnergyAvailability: 'Enerji kullanılabilirliğiniz ({ea} kcal/kg YVK) RED-S eşiği olan 30 kcal/kg\'ın altında.',
+    excessiveDeficit: 'Kalori açığınız ({deficit} kcal) çok yüksek. 1.000 kcal\'den fazla açık kas kaybına yol açabilir.',
+    dangerouslyLowIntake: 'Kalori hedefiniz yüksek aktivite seviyesinde 1.200 kcal\'nin altında. Bu sağlığınıza zarar verebilir.',
+    disclaimer: 'Otomatik algılama — teşhis değildir. Endişeniz varsa doktor veya diyetisyene danışın.',
+  },
   gaps: {
     title: 'Kayıt boşluğu algılandı',
     message: 'Her şey yolunda mı? Her kayıt ilerlemene yardımcı olur!',

@@ -1051,6 +1051,16 @@ export const ro: TranslationKeys = {
     creatinine: 'Creatinină',
     noBloodWork: 'Nu există date de analize de sânge',
   },
+  reds: {
+    warningTitle: 'Avertizare subpondere / energie',
+    dangerTitle: 'Avertizare energie critică',
+    underweight: 'IMC-ul tău ({bmi}) este sub 18,5 — aceasta este clasificată ca subpondere.',
+    severeUnderweight: 'IMC-ul tău ({bmi}) este sub 17,0 — subpondere severă. Consultă un medic.',
+    lowEnergyAvailability: 'Disponibilitatea ta energetică ({ea} kcal/kg MLG) este sub pragul RED-S de 30 kcal/kg.',
+    excessiveDeficit: 'Deficitul tău caloric ({deficit} kcal) este foarte mare. Un deficit peste 1.000 kcal poate cauza pierdere musculară.',
+    dangerouslyLowIntake: 'Obiectivul tău caloric este sub 1.200 kcal cu nivel de activitate ridicat. Acest lucru poate fi dăunător.',
+    disclaimer: 'Detectare automată — nu este un diagnostic. Consultă un medic sau nutriționist dacă ai îngrijorări.',
+  },
   gaps: {
     title: 'Pauză de înregistrare detectată',
     message: 'Totul OK? Fiecare înregistrare ajută la progresul tău!',

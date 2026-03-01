@@ -1051,6 +1051,16 @@ export const fil: TranslationKeys = {
     creatinine: 'Creatinine',
     noBloodWork: 'Wala pang blood work data',
   },
+  reds: {
+    warningTitle: 'Babala sa Underweight / Enerhiya',
+    dangerTitle: 'Kritikal na Babala sa Enerhiya',
+    underweight: 'Ang iyong BMI ({bmi}) ay nasa ibaba ng 18.5 — ito ay classified bilang underweight.',
+    severeUnderweight: 'Ang iyong BMI ({bmi}) ay nasa ibaba ng 17.0 — ito ay malubhang underweight. Kumonsulta sa doktor.',
+    lowEnergyAvailability: 'Ang iyong energy availability ({ea} kcal/kg FFM) ay nasa ibaba ng RED-S threshold na 30 kcal/kg.',
+    excessiveDeficit: 'Ang iyong calorie deficit ({deficit} kcal) ay napakataas. Ang deficit na higit sa 1,000 kcal ay maaaring magdulot ng pagkawala ng kalamnan.',
+    dangerouslyLowIntake: 'Ang iyong calorie target ay nasa ibaba ng 1,200 kcal sa mataas na activity level. Ito ay maaaring makapinsala sa kalusugan.',
+    disclaimer: 'Automatikong detection — hindi diagnosis. Kumonsulta sa doktor o nutritionist kung may alalahanin.',
+  },
   gaps: {
     title: 'Nakitang gap sa pag-log',
     message: 'OK ka ba? Bawat entry ay nakakatulong sa iyong pag-unlad!',

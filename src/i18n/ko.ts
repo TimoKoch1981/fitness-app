@@ -1051,6 +1051,16 @@ export const ko: TranslationKeys = {
     creatinine: '크레아티닌',
     noBloodWork: '아직 혈액 검사 데이터가 없습니다',
   },
+  reds: {
+    warningTitle: '저체중 / 에너지 경고',
+    dangerTitle: '위험 에너지 경고',
+    underweight: 'BMI ({bmi})가 18.5 미만입니다 — 저체중으로 분류됩니다.',
+    severeUnderweight: 'BMI ({bmi})가 17.0 미만입니다 — 심각한 저체중입니다. 의사와 상담하세요.',
+    lowEnergyAvailability: '에너지 가용성 ({ea} kcal/kg FFM)이 RED-S 임계값 30 kcal/kg 미만입니다.',
+    excessiveDeficit: '칼로리 적자 ({deficit} kcal)가 매우 높습니다. 1,000 kcal 이상의 적자는 근육 손실을 촉진할 수 있습니다.',
+    dangerouslyLowIntake: '높은 활동 수준에서 칼로리 목표가 1,200 kcal 미만입니다. 건강에 해로울 수 있습니다.',
+    disclaimer: '자동 감지 — 진단이 아닙니다. 우려 사항이 있으면 의사 또는 영양사와 상담하세요.',
+  },
   gaps: {
     title: '기록 공백 감지',
     message: '괜찮으세요? 매번 기록이 발전에 도움이 됩니다!',

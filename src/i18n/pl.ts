@@ -1051,6 +1051,16 @@ export const pl: TranslationKeys = {
     creatinine: 'Kreatynina',
     noBloodWork: 'Brak danych z badań krwi',
   },
+  reds: {
+    warningTitle: 'Ostrzeżenie o niedowadze / energii',
+    dangerTitle: 'Krytyczne ostrzeżenie energetyczne',
+    underweight: 'Twoje BMI ({bmi}) jest poniżej 18,5 — to klasyfikuje się jako niedowaga.',
+    severeUnderweight: 'Twoje BMI ({bmi}) jest poniżej 17,0 — to ciężka niedowaga. Skonsultuj się z lekarzem.',
+    lowEnergyAvailability: 'Twoja dostępność energetyczna ({ea} kcal/kg FFM) jest poniżej progu RED-S wynoszącego 30 kcal/kg.',
+    excessiveDeficit: 'Twój deficyt kaloryczny ({deficit} kcal) jest bardzo wysoki. Deficyt powyżej 1000 kcal może prowadzić do utraty mięśni.',
+    dangerouslyLowIntake: 'Twój cel kaloryczny jest poniżej 1200 kcal przy wysokim poziomie aktywności. To może być szkodliwe dla zdrowia.',
+    disclaimer: 'Automatyczne wykrywanie — to nie jest diagnoza. W razie wątpliwości skonsultuj się z lekarzem lub dietetykiem.',
+  },
   gaps: {
     title: 'Wykryto przerwę w logowaniu',
     message: 'Wszystko OK? Każdy wpis pomaga w postępach!',

@@ -23,6 +23,7 @@ import { AddSleepDialog } from '../features/sleep/components/AddSleepDialog';
 import { useMenstrualCycleLogs, useDeleteCycleLog, getCyclePhaseEmoji } from '../features/medical/hooks/useMenstrualCycle';
 import { AddCycleLogDialog } from '../features/medical/components/AddCycleLogDialog';
 import { useProfile } from '../features/auth/hooks/useProfile';
+import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -74,6 +75,9 @@ export function MedicalPage() {
         {showDoctorReport && (
           <DoctorReportButton />
         )}
+
+        {/* RED-S / Underweight Warning */}
+        <REDSWarningBanner />
 
         {/* Blood Pressure Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

@@ -1051,6 +1051,16 @@ export const zh: TranslationKeys = {
     creatinine: '肌酐',
     noBloodWork: '暂无血液检查数据',
   },
+  reds: {
+    warningTitle: '体重不足 / 能量警告',
+    dangerTitle: '严重能量警告',
+    underweight: '您的BMI ({bmi}) 低于18.5 — 这被归类为体重不足。',
+    severeUnderweight: '您的BMI ({bmi}) 低于17.0 — 这是严重体重不足。请咨询医生。',
+    lowEnergyAvailability: '您的能量可用性 ({ea} kcal/kg FFM) 低于RED-S阈值30 kcal/kg。',
+    excessiveDeficit: '您的热量缺口 ({deficit} kcal) 非常大。超过1,000 kcal的缺口可能导致肌肉流失。',
+    dangerouslyLowIntake: '您的热量目标低于1,200 kcal，但活动水平较高。这可能有害健康。',
+    disclaimer: '自动检测 — 非诊断。如有疑虑请咨询医生或营养师。',
+  },
   gaps: {
     title: '检测到记录间断',
     message: '一切还好吗？每次记录都有助于你的进步！',

@@ -37,6 +37,7 @@ import { generateInsights } from '../lib/insights';
 import { InsightCard } from '../shared/components/InsightCard';
 import { DailyCheckinCard } from '../features/checkin/components/DailyCheckinCard';
 import { GapAlertBanner } from '../shared/components/GapAlertBanner';
+import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
 import { today } from '../lib/utils';
 import { useAuth } from '../app/providers/AuthProvider';
 import {
@@ -285,6 +286,13 @@ export function CockpitPage() {
 
         {/* Daily Check-in */}
         <DailyCheckinCard />
+
+        {/* RED-S / Underweight Warning — energy availability risk detection */}
+        <REDSWarningBanner
+          caloriesConsumed={totals.calories}
+          caloriesGoal={caloriesGoal}
+          tdee={tdee}
+        />
 
         {/* Gap Alert — re-engagement when user hasn't logged for 2+ days */}
         <GapAlertBanner />

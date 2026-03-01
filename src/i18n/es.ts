@@ -1051,6 +1051,16 @@ export const es: TranslationKeys = {
     creatinine: 'Creatinina',
     noBloodWork: 'Aún no hay datos de análisis de sangre',
   },
+  reds: {
+    warningTitle: 'Advertencia de bajo peso / energía',
+    dangerTitle: 'Advertencia de energía crítica',
+    underweight: 'Tu IMC ({bmi}) está por debajo de 18,5 — esto se clasifica como bajo peso.',
+    severeUnderweight: 'Tu IMC ({bmi}) está por debajo de 17,0 — esto es bajo peso severo. Consulta a un médico.',
+    lowEnergyAvailability: 'Tu disponibilidad energética ({ea} kcal/kg MLG) está por debajo del umbral RED-S de 30 kcal/kg.',
+    excessiveDeficit: 'Tu déficit calórico ({deficit} kcal) es muy alto. Un déficit superior a 1.000 kcal puede causar pérdida muscular y deficiencia nutricional.',
+    dangerouslyLowIntake: 'Tu objetivo calórico está por debajo de 1.200 kcal con un nivel de actividad alto. Esto puede ser perjudicial para tu salud.',
+    disclaimer: 'Detección automática — no es un diagnóstico. Consulta a un médico o nutricionista si tienes dudas.',
+  },
   gaps: {
     title: 'Pausa de registro detectada',
     message: '¿Todo bien? ¡Cada registro ayuda a tu progreso!',

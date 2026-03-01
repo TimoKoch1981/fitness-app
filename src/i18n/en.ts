@@ -1090,6 +1090,16 @@ export const en: TranslationKeys = {
     comparePhotos: 'Compare Photos',
     photoCount: 'photos',
   },
+  reds: {
+    warningTitle: 'Underweight / Energy Warning',
+    dangerTitle: 'Critical Energy Warning',
+    underweight: 'Your BMI ({bmi}) is below 18.5 — this is classified as underweight.',
+    severeUnderweight: 'Your BMI ({bmi}) is below 17.0 — this is severe underweight. Please consult a doctor.',
+    lowEnergyAvailability: 'Your energy availability ({ea} kcal/kg FFM) is below the RED-S threshold of 30 kcal/kg.',
+    excessiveDeficit: 'Your calorie deficit ({deficit} kcal) is very high. A deficit over 1,000 kcal may promote muscle loss and nutrient deficiency.',
+    dangerouslyLowIntake: 'Your calorie target is below 1,200 kcal with high activity level. This can be harmful to your health.',
+    disclaimer: 'Automatic detection — not a diagnosis. Please consult a doctor or nutritionist if concerned.',
+  },
   gaps: {
     title: 'Logging gap detected',
     message: 'Everything OK? Every entry helps your progress!',

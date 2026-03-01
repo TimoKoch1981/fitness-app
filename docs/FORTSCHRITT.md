@@ -109,6 +109,32 @@
 | 12.8    | 2026-03-01 | P0: Email-Verifizierung Production + email_not_confirmed UX              | Erledigt   |
 | 12.8b   | 2026-03-01 | P0: DSFA dokumentiert (Art. 35 DSGVO, 12 Risiken, Restrisiko-Bewertung)  | Erledigt   |
 | 12.9    | 2026-03-01 | Onboarding-Wizard (5 Schritte, OnboardingGuard, 17 Sprachen, 38 Keys)    | Erledigt   |
+| 12.10   | 2026-03-01 | RED-S/Untergewicht-Warnsystem (BMI, Defizit, EA, 17 Sprachen, 8 Keys)    | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.10: RED-S/Untergewicht-Warnsystem (P1)
+
+**Wissenschaftliche Grundlage:** Mountjoy et al. (2018) IOC RED-S Konsensus, Loucks (2004) Energy Availability.
+
+**5 Warnschwellen:**
+1. BMI < 18,5 → Amber-Warnung (WHO Untergewicht)
+2. BMI < 17,0 → Rot-Warnung (schweres Untergewicht, Arzt-Empfehlung)
+3. Kaloriendefizit > 1.000 kcal → Amber-Warnung
+4. Energieverfuegbarkeit < 30 kcal/kg FFM → Rot-Warnung (RED-S Schwelle)
+5. < 1.200 kcal Ziel bei aktivem Lebensstil (Frauen) → Amber-Warnung
+
+**Neue Dateien:**
+- `useREDSWarning.ts` (135 Zeilen): Hook mit 5 Checks, Schweregrad-Berechnung, Gender-Gating via useGenderFeatures
+- `REDSWarningBanner.tsx` (115 Zeilen): Amber/Rot Banner, per-Session dismissable, dynamische Nachrichten mit Parametern
+
+**Integration:**
+- CockpitPage: Banner nach Share-Button, vor GapAlertBanner (erhaelt calories/tdee Props)
+- MedicalPage: Banner nach DoctorReportButton, vor Blood Pressure (ohne Props = nur BMI-Check)
+
+**i18n:** 8 neue Keys (reds.*) in 17 Sprachen (warningTitle, dangerTitle, underweight, severeUnderweight, lowEnergyAvailability, excessiveDeficit, dangerouslyLowIntake, disclaimer)
+
+**Tests:** 2.972 bestanden, Build OK
 
 ---
 

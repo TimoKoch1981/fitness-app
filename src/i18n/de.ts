@@ -1096,6 +1096,16 @@ export const de = {
     comparePhotos: 'Fotos vergleichen',
     photoCount: 'Fotos',
   },
+  reds: {
+    warningTitle: 'Untergewicht / Energie-Warnung',
+    dangerTitle: 'Kritische Energie-Warnung',
+    underweight: 'Dein BMI ({bmi}) liegt unter 18,5 — das gilt als Untergewicht.',
+    severeUnderweight: 'Dein BMI ({bmi}) liegt unter 17,0 — das ist starkes Untergewicht. Bitte konsultiere einen Arzt.',
+    lowEnergyAvailability: 'Deine Energieverfuegbarkeit ({ea} kcal/kg FFM) liegt unter dem RED-S-Schwellenwert von 30 kcal/kg.',
+    excessiveDeficit: 'Dein Kaloriendefizit ({deficit} kcal) ist sehr hoch. Ein Defizit ueber 1.000 kcal kann Muskelabbau und Naehrstoffmangel foerdern.',
+    dangerouslyLowIntake: 'Dein Kalorienziel liegt unter 1.200 kcal bei hohem Aktivitaetslevel. Das kann gesundheitsschaedlich sein.',
+    disclaimer: 'Automatische Erkennung — keine Diagnose. Bei Bedenken bitte Arzt oder Ernaehrungsberater konsultieren.',
+  },
   gaps: {
     title: 'Logging-Pause erkannt',
     message: 'Alles OK? Jeder Eintrag hilft deinem Fortschritt!',

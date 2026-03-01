@@ -1051,6 +1051,16 @@ export const it: TranslationKeys = {
     creatinine: 'Creatinina',
     noBloodWork: 'Nessun dato sulle analisi del sangue',
   },
+  reds: {
+    warningTitle: 'Avviso sottopeso / energia',
+    dangerTitle: 'Avviso energia critico',
+    underweight: 'Il tuo BMI ({bmi}) è inferiore a 18,5 — questo è classificato come sottopeso.',
+    severeUnderweight: 'Il tuo BMI ({bmi}) è inferiore a 17,0 — sottopeso grave. Consulta un medico.',
+    lowEnergyAvailability: 'La tua disponibilità energetica ({ea} kcal/kg MLG) è inferiore alla soglia RED-S di 30 kcal/kg.',
+    excessiveDeficit: 'Il tuo deficit calorico ({deficit} kcal) è molto alto. Un deficit superiore a 1.000 kcal può causare perdita muscolare.',
+    dangerouslyLowIntake: 'Il tuo obiettivo calorico è inferiore a 1.200 kcal con livello di attività elevato. Questo può essere dannoso.',
+    disclaimer: 'Rilevamento automatico — non una diagnosi. Consulta un medico o nutrizionista in caso di dubbi.',
+  },
   gaps: {
     title: 'Pausa di registrazione rilevata',
     message: 'Tutto OK? Ogni registrazione aiuta il tuo progresso!',

@@ -196,7 +196,7 @@
 - [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.5) — Kurz/Normal/Ausführlich + Einfach/Fachlich. BaseAgent-Prompt-Injection, I18nProvider, ProfilePage UI. 17 Sprachen, 26 Dateien.
 
 #### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
-- [ ] **🔴 RED-S/Untergewicht-Warnsystem** (~4h) — Keine automatische Warnung bei BMI <18.5 ODER Kaloriendefizit >1000 kcal ODER <1200 kcal bei Frauen + hohes Volumen. Sarah (E1) koennte in gefaehrlich tiefes Defizit rutschen. Betroffene: E1, E4, B4
+- [x] ~~**🔴 RED-S/Untergewicht-Warnsystem**~~ ✅ (2026-03-01, v12.10) — useREDSWarning Hook (5 Schwellen: BMI<18.5, BMI<17.0, Defizit>1000kcal, EA<30kcal/kg FFM, <1200kcal aktive Frauen). REDSWarningBanner (Amber/Rot, dismissable). CockpitPage + MedicalPage Integration. Gender-Gating via useGenderFeatures. 17 Sprachen (8 Keys). 2.972 Tests bestanden.
 - [ ] **🟡 Rektusdiastase-Kontraindikations-Check** (~3h) — KI-Trainingsplaene enthalten keine Kontraindikations-Warnungen. Lena (E4) koennte Crunches im Plan bekommen. Loesung: Gesundheits-Tags → Trainingsplan-Filter (keine Crunches bei Rektusdiastase, keine Deadlifts bei Bandscheibe). Betroffene: E4, A2
 
 #### Frauen-spezifische Features

@@ -1051,6 +1051,16 @@ export const fr: TranslationKeys = {
     creatinine: 'Créatinine',
     noBloodWork: 'Pas encore de bilan sanguin',
   },
+  reds: {
+    warningTitle: 'Alerte insuffisance pondérale / énergie',
+    dangerTitle: 'Alerte énergie critique',
+    underweight: 'Votre IMC ({bmi}) est inférieur à 18,5 — cela correspond à une insuffisance pondérale.',
+    severeUnderweight: 'Votre IMC ({bmi}) est inférieur à 17,0 — insuffisance pondérale sévère. Consultez un médecin.',
+    lowEnergyAvailability: 'Votre disponibilité énergétique ({ea} kcal/kg MLG) est inférieure au seuil RED-S de 30 kcal/kg.',
+    excessiveDeficit: 'Votre déficit calorique ({deficit} kcal) est très élevé. Un déficit supérieur à 1 000 kcal peut entraîner une perte musculaire.',
+    dangerouslyLowIntake: 'Votre objectif calorique est inférieur à 1 200 kcal avec un niveau d\'activité élevé. Cela peut nuire à votre santé.',
+    disclaimer: 'Détection automatique — pas un diagnostic. Consultez un médecin ou nutritionniste en cas de doute.',
+  },
   gaps: {
     title: 'Pause de suivi détectée',
     message: 'Tout va bien ? Chaque entrée aide ta progression !',
