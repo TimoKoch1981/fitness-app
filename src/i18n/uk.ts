@@ -80,6 +80,10 @@ export const uk: TranslationKeys = {
     passwordMismatch: 'Паролі не збігаються',
     passwordTooShort: 'Пароль повинен містити щонайменше 6 символів',
     registerSuccess: 'Реєстрація успішна! Будь ласка, перевірте пошту та підтвердіть обліковий запис.',
+    emailNotConfirmedTitle: 'Email ще не підтверджено',
+    emailNotConfirmedMessage: 'Будь ласка, натисніть на посилання підтвердження у вашому листі, щоб активувати обліковий запис.',
+    resendConfirmation: 'Надіслати лист підтвердження повторно',
+    confirmationResent: 'Лист підтвердження надіслано повторно!',
   },
   dashboard: {
     title: 'Огляд дня',

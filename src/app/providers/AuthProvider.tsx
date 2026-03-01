@@ -7,11 +7,12 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; errorCode?: string }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; autoConfirmed: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (password: string) => Promise<{ error: Error | null }>;
+  resendConfirmation: (email: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -148,7 +149,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ? new Error(error.message) : null };
+    return {
+      error: error ? new Error(error.message) : null,
+      errorCode: error?.code,
+    };
   };
 
   const signUp = async (email: string, password: string) => {
@@ -173,8 +177,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return { error: error ? new Error(error.message) : null };
   };
 
+  const resendConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    return { error: error ? new Error(error.message) : null };
+  };
+
   const value = useMemo(
-    () => ({ user, session, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword }),
+    () => ({ user, session, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword, resendConfirmation }),
     [user, session, loading, isAdmin],
   );
 

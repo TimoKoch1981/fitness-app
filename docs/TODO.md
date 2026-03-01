@@ -45,22 +45,16 @@
 - [x] ~~**site_url korrigieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**ResetPasswordPage implementieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**Email-Templates anpassen**~~ ✅ (2026-02-21, v6.1)
-- [ ] **Resend Domain-Validierung** — fudda.de bei Resend verifizieren (fuer Produktion)
+- [x] ~~**Resend Domain-Validierung + Email-Verifizierung**~~ ✅ (2026-03-01, v12.8)
   - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
-  - Produktion: AUTOCONFIRM=true als Workaround ✅ (2026-02-27)
-  - Registrierung funktioniert ohne Email-Bestaetigung ✅ (verifiziert 2026-02-27)
-  - ~~**DNS von Strato zu Hetzner DNS umziehen**~~ ✅ (2026-02-27)
-    - Hetzner DNS Zone erstellt (ID: 919094, Projekt: 13589003)
-    - Strato Nameserver umgestellt auf: hydrogen.ns.hetzner.com, oxygen.ns.hetzner.com, helium.ns.hetzner.de
-  - ~~**SPF, DKIM, MX Records eintragen**~~ ✅ (2026-02-27)
-    - TXT: resend._domainkey → DKIM Public Key
-    - TXT: send → v=spf1 include:amazonses.com ~all
-    - MX: send → 10 feedback-smtp.eu-west-1.amazonses.com. (Trailing Dot Fix)
-    - A: @ → 46.225.228.12, CNAME: www → fudda.de
-  - ~~**DNS-Propagation**~~ ✅ (2026-03-01) — SPF, DKIM, MX alle propagiert und verifiziert
-  - **Naechster Schritt:** AUTOCONFIRM=false auf Hetzner setzen + Email-Flow testen
-  - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
-  - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
+  - ~~DNS von Strato zu Hetzner DNS umziehen~~ ✅ (2026-02-27)
+  - ~~SPF, DKIM, MX Records eintragen~~ ✅ (2026-02-27)
+  - ~~DNS-Propagation~~ ✅ (2026-03-01)
+  - ~~**AUTOCONFIRM=false auf Hetzner + Email-Flow testen**~~ ✅ (2026-03-01, v12.8)
+    - SMTP Port 465→587 (STARTTLS, GoTrue v2.172 Kompatibilitaet)
+    - GOTRUE_MAILER_EXTERNAL_HOSTS=fudda.de
+    - Auth-Container recreated, Confirmation-Email verifiziert
+    - LoginPage: email_not_confirmed UX + Resend-Button, 17 Sprachen
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
   - Edge Function: send-welcome-email (Resend HTTP API)
   - Template: welcome.html (gleiches Design wie confirmation.html)
@@ -335,7 +329,7 @@
 - [x] ~~deploy-frontend.sh auf fudda.de aktualisiert~~ ✅ (2026-02-25) — Default-Domain, Server-IP
 - [x] ~~Caddyfile: Cache-Header fuer index.html~~ ✅ (2026-02-25) — no-cache/no-store fuer HTML, immutable fuer Assets
 - [x] ~~Caddyfile: Permissions-Policy camera/microphone~~ ✅ (2026-02-25) — camera=(self), microphone=(self) statt Blockierung
-- [ ] Resend Domain-Validierung (fudda.de — DNS umgezogen, wartet auf Propagation)
+- [x] ~~Resend Domain-Validierung (fudda.de)~~ ✅ (2026-03-01, v12.8) — SMTP Port 587, AUTOCONFIRM=false, Emails verifiziert
 - [x] ~~Monitoring aufsetzen (Error Tracking, Uptime)~~ ✅ (2026-02-26, v9.4) — monitor.sh (Docker, Disk, Memory, Service-Health)
 - [x] ~~Backup-Strategie fuer Supabase-DB (pg_dump Cronjob → Hetzner Storage Box)~~ ✅ (2026-02-26, v9.4) — backup-db.sh Script
 

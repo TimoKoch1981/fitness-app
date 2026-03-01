@@ -80,6 +80,10 @@ export const ro: TranslationKeys = {
     passwordMismatch: 'Parolele nu se potrivesc',
     passwordTooShort: 'Parola trebuie să aibă cel puțin 6 caractere',
     registerSuccess: 'Înregistrare reușită! Te rugăm să verifici e-mailul și să confirmi contul.',
+    emailNotConfirmedTitle: 'E-mail neconfirmat încă',
+    emailNotConfirmedMessage: 'Te rugăm să dai clic pe linkul de confirmare din e-mail pentru a-ți activa contul.',
+    resendConfirmation: 'Retrimite e-mailul de confirmare',
+    confirmationResent: 'E-mailul de confirmare a fost retrimis!',
   },
   dashboard: {
     title: 'Rezumatul zilei',

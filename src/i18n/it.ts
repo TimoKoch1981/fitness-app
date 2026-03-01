@@ -80,6 +80,10 @@ export const it: TranslationKeys = {
     passwordMismatch: 'Le password non corrispondono',
     passwordTooShort: 'La password deve avere almeno 6 caratteri',
     registerSuccess: 'Registrazione riuscita! Controlla la tua e-mail e conferma il tuo account.',
+    emailNotConfirmedTitle: 'Email non ancora confermata',
+    emailNotConfirmedMessage: 'Clicca sul link di conferma nella tua email per attivare il tuo account.',
+    resendConfirmation: 'Reinvia email di conferma',
+    confirmationResent: 'Email di conferma reinviata!',
   },
   dashboard: {
     title: 'Riepilogo giornaliero',

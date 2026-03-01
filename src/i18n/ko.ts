@@ -80,6 +80,10 @@ export const ko: TranslationKeys = {
     passwordMismatch: '비밀번호가 일치하지 않습니다',
     passwordTooShort: '비밀번호는 최소 6자 이상이어야 합니다',
     registerSuccess: '가입 완료! 이메일을 확인하여 계정을 인증해 주세요.',
+    emailNotConfirmedTitle: '이메일이 아직 확인되지 않았습니다',
+    emailNotConfirmedMessage: '이메일의 확인 링크를 클릭하여 계정을 활성화하세요.',
+    resendConfirmation: '확인 이메일 다시 보내기',
+    confirmationResent: '확인 이메일이 다시 전송되었습니다!',
   },
   dashboard: {
     title: '오늘의 개요',

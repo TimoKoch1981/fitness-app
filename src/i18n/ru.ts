@@ -80,6 +80,10 @@ export const ru: TranslationKeys = {
     passwordMismatch: 'Пароли не совпадают',
     passwordTooShort: 'Пароль должен содержать не менее 6 символов',
     registerSuccess: 'Регистрация прошла успешно! Проверьте почту и подтвердите аккаунт.',
+    emailNotConfirmedTitle: 'Email ещё не подтверждён',
+    emailNotConfirmedMessage: 'Пожалуйста, нажмите на ссылку подтверждения в вашем письме, чтобы активировать аккаунт.',
+    resendConfirmation: 'Отправить письмо подтверждения повторно',
+    confirmationResent: 'Письмо подтверждения отправлено повторно!',
   },
   dashboard: {
     title: 'Обзор дня',

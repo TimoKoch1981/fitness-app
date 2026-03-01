@@ -79,6 +79,10 @@ export const de = {
     passwordMismatch: 'Passwörter stimmen nicht überein',
     passwordTooShort: 'Passwort muss mindestens 6 Zeichen lang sein',
     registerSuccess: 'Registrierung erfolgreich! Bitte überprüfe deine E-Mail und bestätige dein Konto.',
+    emailNotConfirmedTitle: 'E-Mail noch nicht bestätigt',
+    emailNotConfirmedMessage: 'Bitte klicke auf den Bestätigungslink in deiner E-Mail, um dein Konto zu aktivieren.',
+    resendConfirmation: 'Bestätigungsmail erneut senden',
+    confirmationResent: 'Bestätigungsmail wurde erneut gesendet!',
   },
   dashboard: {
     title: 'Tagesübersicht',

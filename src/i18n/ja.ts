@@ -80,6 +80,10 @@ export const ja: TranslationKeys = {
     passwordMismatch: 'パスワードが一致しません',
     passwordTooShort: 'パスワードは6文字以上必要です',
     registerSuccess: '登録完了！メールを確認してアカウントを認証してください。',
+    emailNotConfirmedTitle: 'メールが未確認です',
+    emailNotConfirmedMessage: 'メール内の確認リンクをクリックして、アカウントを有効化してください。',
+    resendConfirmation: '確認メールを再送信',
+    confirmationResent: '確認メールを再送信しました！',
   },
   dashboard: {
     title: '今日の概要',

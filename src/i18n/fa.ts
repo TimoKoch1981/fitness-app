@@ -80,6 +80,10 @@ export const fa: TranslationKeys = {
     passwordMismatch: 'رمزهای عبور مطابقت ندارند',
     passwordTooShort: 'رمز عبور باید حداقل ۶ کاراکتر باشد',
     registerSuccess: 'ثبت‌نام موفق! لطفاً ایمیل خود را بررسی کرده و حساب خود را تأیید کنید.',
+    emailNotConfirmedTitle: 'ایمیل هنوز تایید نشده است',
+    emailNotConfirmedMessage: 'لطفاً روی لینک تایید در ایمیل خود کلیک کنید تا حساب شما فعال شود.',
+    resendConfirmation: 'ارسال مجدد ایمیل تایید',
+    confirmationResent: 'ایمیل تایید مجدداً ارسال شد!',
   },
   dashboard: {
     title: 'خلاصه روزانه',

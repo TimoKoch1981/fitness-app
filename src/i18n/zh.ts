@@ -80,6 +80,10 @@ export const zh: TranslationKeys = {
     passwordMismatch: '两次输入的密码不一致',
     passwordTooShort: '密码至少需要6个字符',
     registerSuccess: '注册成功！请查收邮件并验证你的账号。',
+    emailNotConfirmedTitle: '邮箱尚未验证',
+    emailNotConfirmedMessage: '请点击邮件中的确认链接以激活您的账户。',
+    resendConfirmation: '重新发送确认邮件',
+    confirmationResent: '确认邮件已重新发送！',
   },
   dashboard: {
     title: '每日概览',

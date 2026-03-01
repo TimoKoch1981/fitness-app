@@ -80,6 +80,10 @@ export const tr: TranslationKeys = {
     passwordMismatch: 'Şifreler uyuşmuyor',
     passwordTooShort: 'Şifre en az 6 karakter olmalıdır',
     registerSuccess: 'Kayıt başarılı! Lütfen e-postanı kontrol edip hesabını onayla.',
+    emailNotConfirmedTitle: 'E-posta henüz onaylanmadı',
+    emailNotConfirmedMessage: 'Hesabınızı etkinleştirmek için e-postanızdaki onay bağlantısına tıklayın.',
+    resendConfirmation: 'Onay e-postasını tekrar gönder',
+    confirmationResent: 'Onay e-postası tekrar gönderildi!',
   },
   dashboard: {
     title: 'Günlük Özet',

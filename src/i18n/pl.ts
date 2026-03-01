@@ -80,6 +80,10 @@ export const pl: TranslationKeys = {
     passwordMismatch: 'Hasła nie są zgodne',
     passwordTooShort: 'Hasło musi mieć co najmniej 6 znaków',
     registerSuccess: 'Rejestracja udana! Sprawdź swoją skrzynkę e-mail i potwierdź konto.',
+    emailNotConfirmedTitle: 'E-mail jeszcze nie potwierdzony',
+    emailNotConfirmedMessage: 'Kliknij link potwierdzający w wiadomości e-mail, aby aktywować konto.',
+    resendConfirmation: 'Wyślij ponownie e-mail potwierdzający',
+    confirmationResent: 'E-mail potwierdzający został wysłany ponownie!',
   },
   dashboard: {
     title: 'Przegląd dnia',

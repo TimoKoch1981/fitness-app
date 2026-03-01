@@ -5,11 +5,14 @@ import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
 
 export function LoginPage() {
-  const { signIn, user, loading } = useAuth();
+  const { signIn, resendConfirmation, user, loading } = useAuth();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resending, setResending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
@@ -18,13 +21,31 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailNotConfirmed(false);
+    setResendSuccess(false);
     setSubmitting(true);
 
-    const { error } = await signIn(email, password);
+    const { error, errorCode } = await signIn(email, password);
     if (error) {
-      setError(error.message);
+      if (errorCode === 'email_not_confirmed') {
+        setEmailNotConfirmed(true);
+      } else {
+        setError(error.message);
+      }
     }
     setSubmitting(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    setResending(true);
+    setResendSuccess(false);
+    const { error } = await resendConfirmation(email);
+    if (error) {
+      setError(error.message);
+    } else {
+      setResendSuccess(true);
+    }
+    setResending(false);
   };
 
   return (
@@ -46,6 +67,32 @@ export function LoginPage() {
           {error && (
             <div role="alert" aria-live="assertive" className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
               {error}
+            </div>
+          )}
+
+          {emailNotConfirmed && (
+            <div role="alert" aria-live="assertive" className="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-lg space-y-2">
+              <div className="flex items-start gap-2">
+                <span className="text-lg leading-none">✉️</span>
+                <div>
+                  <p className="font-medium">{t.auth.emailNotConfirmedTitle}</p>
+                  <p className="text-amber-700 mt-0.5">{t.auth.emailNotConfirmedMessage}</p>
+                </div>
+              </div>
+              {resendSuccess ? (
+                <p className="text-emerald-600 font-medium text-center">
+                  {t.auth.confirmationResent}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={resending}
+                  className="w-full py-1.5 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {resending ? t.common.loading : t.auth.resendConfirmation}
+                </button>
+              )}
             </div>
           )}
 

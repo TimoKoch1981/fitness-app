@@ -80,6 +80,10 @@ export const ar: TranslationKeys = {
     passwordMismatch: 'كلمتا المرور غير متطابقتين',
     passwordTooShort: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
     registerSuccess: 'تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني وتأكيد حسابك.',
+    emailNotConfirmedTitle: 'لم يتم تأكيد البريد الإلكتروني بعد',
+    emailNotConfirmedMessage: 'يرجى النقر على رابط التأكيد في بريدك الإلكتروني لتفعيل حسابك.',
+    resendConfirmation: 'إعادة إرسال بريد التأكيد',
+    confirmationResent: 'تم إعادة إرسال بريد التأكيد!',
   },
   dashboard: {
     title: 'نظرة عامة يومية',

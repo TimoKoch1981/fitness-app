@@ -106,6 +106,32 @@
 | 12.5    | 2026-03-01 | Buddy-Kommunikationsstil (Verbosity + Expertise, BaseAgent-Injection)     | Erledigt   |
 | 12.6    | 2026-03-01 | Schlaf-Tracking (Zeiten, Qualitaet, DB, 17 Sprachen, 15 Tests)           | Erledigt   |
 | 12.7    | 2026-03-01 | Menstruationszyklus-Tracker (Phasen, Symptome, Gender-Gating, 22 Tests)  | Erledigt   |
+| 12.8    | 2026-03-01 | P0: Email-Verifizierung Production + email_not_confirmed UX              | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.8: Email-Verifizierung Production (P0)
+
+**P0 Blocker behoben:** AUTOCONFIRM=false auf Production aktiviert + Email-Flow getestet.
+
+**Server-Aenderungen:**
+- SMTP Port 465→587 (STARTTLS statt implicit TLS, GoTrue v2.172 Kompatibilitaet)
+- GOTRUE_MAILER_EXTERNAL_HOSTS=fudda.de (behebt Log-Warnung)
+- Auth-Container recreated (alte Config war cached mit AUTOCONFIRM=true)
+
+**Verifizierte Ergebnisse:**
+- Signup sendet Confirmation-Email via Resend SMTP ✅
+- Login gibt "email_not_confirmed" zurueck wenn unbestaetigt ✅
+- Kein Timeout mehr (Port 587 statt 465) ✅
+
+**Frontend-Verbesserungen:**
+- LoginPage: email_not_confirmed Erkennung mit freundlicher Amber-Box
+- "Bestaetigungsmail erneut senden" Button (supabase.auth.resend)
+- AuthProvider: resendConfirmation() Methode + errorCode Weitergabe
+- 4 neue i18n-Keys in 17 Sprachen
+
+**Dateien:** AuthProvider.tsx, LoginPage.tsx, 17 i18n-Dateien
+**Tests:** 2.872 bestanden, Build OK
 
 ---
 

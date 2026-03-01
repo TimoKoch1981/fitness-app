@@ -80,6 +80,10 @@ export const fil: TranslationKeys = {
     passwordMismatch: 'Hindi magkatugma ang mga password',
     passwordTooShort: 'Ang password ay dapat na hindi bababa sa 6 na character',
     registerSuccess: 'Matagumpay ang registration! Pakitingnan ang iyong email at i-confirm ang iyong account.',
+    emailNotConfirmedTitle: 'Hindi pa nakumpirma ang email',
+    emailNotConfirmedMessage: 'Pakipindot ang confirmation link sa iyong email para ma-activate ang iyong account.',
+    resendConfirmation: 'Ipadala muli ang confirmation email',
+    confirmationResent: 'Naipadala muli ang confirmation email!',
   },
   dashboard: {
     title: 'Buod ng Araw',

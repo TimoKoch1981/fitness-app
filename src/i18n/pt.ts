@@ -80,6 +80,10 @@ export const pt: TranslationKeys = {
     passwordMismatch: 'As palavras-passe não coincidem',
     passwordTooShort: 'A palavra-passe deve ter pelo menos 6 caracteres',
     registerSuccess: 'Registo concluído! Por favor, verifica o teu e-mail e confirma a tua conta.',
+    emailNotConfirmedTitle: 'E-mail ainda não confirmado',
+    emailNotConfirmedMessage: 'Clique no link de confirmação no seu e-mail para ativar sua conta.',
+    resendConfirmation: 'Reenviar e-mail de confirmação',
+    confirmationResent: 'E-mail de confirmação reenviado!',
   },
   dashboard: {
     title: 'Resumo do dia',
