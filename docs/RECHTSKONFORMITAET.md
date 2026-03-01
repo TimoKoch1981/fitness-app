@@ -3,7 +3,7 @@
 > Umfassende Analyse der regulatorischen Anforderungen fuer eine Gesundheits- und Fitness-App
 > mit KI-Komponenten, Gesundheitsdatenverarbeitung und Substanz-Tracking.
 >
-> Stand: 2026-02-27 | Jurisdiktion: Deutschland / EU
+> Stand: 2026-03-01 | Jurisdiktion: Deutschland / EU
 
 ---
 
@@ -95,8 +95,8 @@ Fuer jeden externen Dienstleister, an den personenbezogene Daten uebermittelt we
 
 | Dienstleister | Zweck | Datenfluss | AVV noetig? | Status |
 |---|---|---|---|---|
-| Hetzner Cloud | Hosting (VPS CX33, Nuernberg) | Alle Daten auf Server | Ja | PRUEFEN (Hetzner bietet Standard-AVV) |
-| OpenAI (gpt-4o-mini) | KI-Analyse via ai-proxy | Chat-Nachrichten + Kontext | **Ja (kritisch!)** | OFFEN |
+| Hetzner Cloud | Hosting (VPS CX33, Nuernberg) | Alle Daten auf Server | Ja | ✅ AVV abgeschlossen (2026-03-01) |
+| OpenAI (gpt-4o-mini) | KI-Analyse via ai-proxy | Chat-Nachrichten + Kontext | **Ja (kritisch!)** | ✅ DPA abgeschlossen (OpenAI Ireland Ltd.) |
 | Resend | Email-Versand | Email-Adressen | Ja | OFFEN |
 | Open Food Facts | Naehrwert-Lookup | Suchanfragen (keine PII) | Nein* | - |
 | Strato | Domain-Registrar | WHOIS-Daten | Ja (Bestandskunde) | PRUEFEN |
@@ -325,25 +325,28 @@ Das TTDSG (seit 01.12.2021) regelt den Zugriff auf Endgeraeteinformationen:
 
 **Empfehlung:** Wenn Analytics eingefuehrt wird, **Matomo** (self-hosted auf Hetzner) verwenden — dann bleiben alle Daten in Deutschland und Consent-Anforderungen sind vereinfacht.
 
-### D.3 Caddyfile Headers (aktueller Stand)
+### D.3 Caddyfile Headers (aktueller Stand) ✅ KOMPLETT (v12.17, 2026-03-01)
+
+Alle Security Headers sind konfiguriert und verifiziert auf fudda.de:
 
 ```
-# Bereits konfiguriert:
-- Cache: no-store fuer HTML, immutable fuer Assets
-- Permissions-Policy: camera=(self), microphone=(self)
-```
-
-Zusaetzlich empfohlen:
-
-```
-# Security Headers (in Caddyfile ergaenzen)
+# Konfiguriert in /opt/fitbuddy/Caddyfile + deploy/Caddyfile (Repo)
 header {
-    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-    Referrer-Policy "strict-origin-when-cross-origin"
-    Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.openai.com"
+    X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy strict-origin-when-cross-origin
     Permissions-Policy "camera=(self), microphone=(self), geolocation=(), payment=()"
+    -Server
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection "1; mode=block"
+    Cross-Origin-Opener-Policy same-origin-allow-popups
+    Cross-Origin-Resource-Policy same-origin
+    Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob: https://world.openfoodfacts.org; font-src 'self';
+      connect-src 'self' wss://{$DOMAIN}; frame-src https://www.youtube.com
+      https://www.youtube-nocookie.com https://open.spotify.com https://accounts.spotify.com;
+      media-src 'self' blob:; worker-src 'self' blob:; object-src 'none';
+      base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 }
 ```
 
@@ -373,8 +376,8 @@ Als kommerziell geplante App (100+ Nutzer, EU/Deutschland) besteht **Impressumsp
 | E.1.1 | **Datenschutzerklaerung erstellen** | DSGVO Art. 13/14 | Hoch | Vollstaendige Datenschutzerklaerung mit allen Pflichtangaben, Drittlandtransfer-Info, KI-Hinweis |
 | E.1.2 | **Impressum erstellen** | TMG/DDG | Niedrig | Pflichtangaben auf fudda.de |
 | E.1.3 | **Einwilligung granularisieren** | DSGVO Art. 9 | Mittel | Separate Einwilligungen: (1) Gesundheitsdaten, (2) KI-Verarbeitung, (3) Drittlandtransfer |
-| E.1.4 | **AVV mit OpenAI abschliessen** | DSGVO Art. 28 | Mittel | OpenAI DPA unterschreiben, SCCs pruefen, TIA durchfuehren |
-| E.1.5 | **AVV mit Hetzner pruefen** | DSGVO Art. 28 | Niedrig | Hetzner Standard-AVV pruefen und unterzeichnen |
+| E.1.4 | ~~**AVV mit OpenAI abschliessen**~~ ✅ | DSGVO Art. 28 | Mittel | ✅ DPA mit OpenAI Ireland Ltd. abgeschlossen (2026-03-01) |
+| E.1.5 | ~~**AVV mit Hetzner pruefen**~~ ✅ | DSGVO Art. 28 | Niedrig | ✅ AVV mit Hetzner Online GmbH abgeschlossen (2026-03-01) |
 | E.1.6 | **Account-Loeschung implementieren** | DSGVO Art. 17 | Mittel | Vollstaendige Kaskaden-Loeschung aller Nutzerdaten |
 | E.1.7 | **Widerrufsrecht implementieren** | DSGVO Art. 7 Abs. 3 | Mittel | Einwilligung zurueckziehen koennen (pro Kategorie) |
 | E.1.8 | **DSFA durchfuehren** | DSGVO Art. 35 | Hoch | Datenschutz-Folgenabschaetzung dokumentieren |
@@ -383,13 +386,13 @@ Als kommerziell geplante App (100+ Nutzer, EU/Deutschland) besteht **Impressumsp
 
 | # | Massnahme | Bereich | Aufwand | Beschreibung |
 |---|---|---|---|---|
-| E.2.1 | **Datenexport-Funktion** | DSGVO Art. 20 | Mittel | Export aller Nutzerdaten in JSON/CSV/PDF |
-| E.2.2 | **KI-Disclaimer erweitern** | MDR/DSGVO | Niedrig | "KI-Empfehlungen sind keine medizinische Beratung, KI kann Fehler machen" |
-| E.2.3 | **BP-Klassifikation kennzeichnen** | MDR | Niedrig | "Informative Einordnung, keine Diagnose" bei jeder Anzeige |
-| E.2.4 | **PED-Disclaimer verstaerken** | HWG | Niedrig | Zusaetzlicher Warnhinweis bei jeder PED-Interaktion |
-| E.2.5 | **Substanz-Agent System-Prompt haerten** | HWG | Niedrig | Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen |
+| E.2.1 | ~~**Datenexport-Funktion**~~ ✅ | DSGVO Art. 20 | Mittel | ✅ useDataExport Hook, 16 Tabellen, JSON-Download (2026-02-28) |
+| E.2.2 | ~~**KI-Disclaimer erweitern**~~ ✅ | MDR/DSGVO | Niedrig | ✅ "KI-generiert — keine medizinische Beratung" unter jeder AI-Antwort (2026-02-28) |
+| E.2.3 | ~~**BP-Klassifikation kennzeichnen**~~ ✅ | MDR | Niedrig | ✅ ESC/ESH 2023 Hinweis in MedicalPage + AddBloodPressureDialog (2026-02-28) |
+| E.2.4 | ~~**PED-Disclaimer verstaerken**~~ ✅ | HWG | Niedrig | ✅ Amber-Badge, Harm-Reduction-Hinweis bei PED/TRT (2026-02-28) |
+| E.2.5 | ~~**Substanz-Agent System-Prompt haerten**~~ ✅ | HWG | Niedrig | ✅ Haftungsregeln-Block, keine Dosierungsempfehlungen (2026-02-28) |
 | E.2.6 | **AVV mit Resend pruefen** | DSGVO Art. 28 | Niedrig | Resend DPA pruefen (EU-Region: eu-west-1) |
-| E.2.7 | **Security Headers ergaenzen** | ePrivacy/Sicherheit | Niedrig | CSP, HSTS, X-Frame-Options in Caddyfile |
+| E.2.7 | ~~**Security Headers ergaenzen**~~ ✅ | ePrivacy/Sicherheit | Niedrig | ✅ CSP, HSTS, COOP, CORP, XSS-Protection in Caddyfile (v12.17, 2026-03-01) |
 
 ### E.3 Empfohlen (mittelfristig)
 
