@@ -460,6 +460,32 @@ export interface DailyCheckin {
   created_at: string;
 }
 
+// === SYMPTOM LOGS ===
+
+export type SymptomKey =
+  // Pain & Discomfort
+  | 'headache' | 'back_pain' | 'neck_pain' | 'joint_pain' | 'muscle_soreness'
+  // Digestive
+  | 'bloating' | 'nausea' | 'diarrhea' | 'constipation' | 'loss_of_appetite'
+  // Respiratory
+  | 'cough' | 'sore_throat' | 'congestion' | 'shortness_of_breath'
+  // Skin & Allergies
+  | 'rash' | 'acne' | 'dry_skin' | 'itching'
+  // Neurological
+  | 'brain_fog' | 'dizziness' | 'fatigue' | 'insomnia'
+  // Other
+  | 'palpitations' | 'fever';
+
+export interface SymptomLog {
+  id: string;
+  user_id: string;
+  date: string;
+  symptoms: SymptomKey[];
+  severity: number | null;    // 1-5
+  notes: string | null;
+  created_at: string;
+}
+
 // === HEALTH CONTEXT (for AI) ===
 export interface HealthContext {
   dailyStats: DailyStats;
@@ -478,6 +504,7 @@ export interface HealthContext {
   dailyCheckin?: DailyCheckin;
   recentSleepLogs?: SleepLog[];
   recentCycleLogs?: MenstrualCycleLog[];
+  recentSymptomLogs?: SymptomLog[];
   /** Latest blood work entry (for Power+ proactive warnings) */
   latestBloodWork?: BloodWork;
   /** When true, agents prepend onboarding instructions to their system prompt */

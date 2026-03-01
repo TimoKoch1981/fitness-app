@@ -24,6 +24,7 @@ import { useUserEquipmentResolved } from '../features/equipment/hooks/useEquipme
 import { useTodayCheckin } from '../features/checkin/hooks/useDailyCheckin';
 import { useSleepLogs } from '../features/sleep/hooks/useSleep';
 import { useMenstrualCycleLogs } from '../features/medical/hooks/useMenstrualCycle';
+import { useSymptomLogs } from '../features/medical/hooks/useSymptomLogs';
 import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
@@ -95,6 +96,7 @@ export function BuddyPage() {
   const { data: cycleLogs } = useMenstrualCycleLogs(7);
   const { data: latestBloodWork } = useLatestBloodWork();
   const { data: recentWorkouts } = useRecentWorkouts(14); // 14 for overtraining detection
+  const { data: symptomLogs } = useSymptomLogs(7);
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -124,6 +126,7 @@ export function BuddyPage() {
     recentSleepLogs: sleepLogs ?? [],
     recentCycleLogs: cycleLogs ?? [],
     latestBloodWork: latestBloodWork ?? undefined,
+    recentSymptomLogs: symptomLogs ?? [],
   };
 
   // Proactive suggestion chips (rule-based, no LLM)

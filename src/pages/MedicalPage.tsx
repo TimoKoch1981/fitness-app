@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Heart, Pill, Trash2, ClipboardList, Bell, Moon } from 'lucide-react';
+import { Plus, Heart, Pill, Trash2, ClipboardList, Bell, Moon, Stethoscope } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
@@ -24,6 +24,8 @@ import { useMenstrualCycleLogs, useDeleteCycleLog, getCyclePhaseEmoji } from '..
 import { AddCycleLogDialog } from '../features/medical/components/AddCycleLogDialog';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
+import { useSymptomLogs, useDeleteSymptomLog, getSymptomEmoji, getSeverityEmoji } from '../features/medical/hooks/useSymptomLogs';
+import { AddSymptomDialog } from '../features/medical/components/AddSymptomDialog';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -35,6 +37,7 @@ export function MedicalPage() {
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [showSleepDialog, setShowSleepDialog] = useState(false);
   const [showCycleDialog, setShowCycleDialog] = useState(false);
+  const [showSymptomDialog, setShowSymptomDialog] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
 
   const { data: profile } = useProfile();
@@ -44,6 +47,8 @@ export function MedicalPage() {
   const deleteSleep = useDeleteSleepLog();
   const { data: cycleLogs, isLoading: cycleLoading } = useMenstrualCycleLogs(10);
   const deleteCycle = useDeleteCycleLog();
+  const { data: symptomLogs, isLoading: symptomLoading } = useSymptomLogs(10);
+  const deleteSymptom = useDeleteSymptomLog();
   const { data: substances } = useSubstances(true);
   const { data: substanceLogs } = useSubstanceLogs(10);
   const deleteBP = useDeleteBloodPressure();
@@ -145,6 +150,72 @@ export function MedicalPage() {
               >
                 {t.medical.addBP}
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Symptom Tracker Section */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="h-4 w-4 text-amber-500" />
+              <h3 className="font-semibold text-gray-900">
+                {((t as Record<string, unknown>).symptoms as Record<string, string>)?.title ?? 'Symptom-Tracker'}
+              </h3>
+            </div>
+            <button
+              onClick={() => setShowSymptomDialog(true)}
+              className="p-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {symptomLoading ? (
+            <div className="p-4 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto" />
+            </div>
+          ) : symptomLogs && symptomLogs.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {symptomLogs.slice(0, 5).map((log) => {
+                const symptoms = (log.symptoms ?? []) as string[];
+                const sym = (t as Record<string, unknown>).symptoms as Record<string, string> | undefined;
+                return (
+                  <div key={log.id} className="px-4 py-2.5 flex items-center gap-3 group">
+                    <span className="text-lg flex-shrink-0">
+                      {log.severity ? getSeverityEmoji(log.severity) : '🩺'}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap gap-1">
+                        {symptoms.slice(0, 4).map((s) => (
+                          <span key={s} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-medium">
+                            {getSymptomEmoji(s as import('../types/health').SymptomKey)} {sym?.[s] ?? s.replace(/_/g, ' ')}
+                          </span>
+                        ))}
+                        {symptoms.length > 4 && (
+                          <span className="text-[10px] text-gray-400">+{symptoms.length - 4}</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {formatDate(log.date, locale)}
+                        {log.notes && ` · ${log.notes.slice(0, 30)}${log.notes.length > 30 ? '...' : ''}`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteSymptom.mutate(log.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-sm text-gray-400">
+                {((t as Record<string, unknown>).symptoms as Record<string, string>)?.noData ?? 'Keine Symptome erfasst'}
+              </p>
             </div>
           )}
         </div>
@@ -461,6 +532,10 @@ export function MedicalPage() {
       <LogSubstanceDialog
         open={showLogSubstanceDialog}
         onClose={() => setShowLogSubstanceDialog(false)}
+      />
+      <AddSymptomDialog
+        open={showSymptomDialog}
+        onClose={() => setShowSymptomDialog(false)}
       />
       <AddReminderDialog
         open={showReminderDialog}

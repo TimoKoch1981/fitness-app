@@ -33,6 +33,7 @@ import { useUserEquipmentResolved } from '../../features/equipment/hooks/useEqui
 import { useTodayCheckin } from '../../features/checkin/hooks/useDailyCheckin';
 import { useSleepLogs } from '../../features/sleep/hooks/useSleep';
 import { useMenstrualCycleLogs } from '../../features/medical/hooks/useMenstrualCycle';
+import { useSymptomLogs } from '../../features/medical/hooks/useSymptomLogs';
 import { today } from '../../lib/utils';
 import { getActionDisplayInfo } from '../../lib/ai/actions/types';
 import type { HealthContext } from '../../types/health';
@@ -111,6 +112,7 @@ function InlineBuddyChatContent() {
   const { data: cycleLogs } = useMenstrualCycleLogs(7);
   const { data: latestBloodWork } = useLatestBloodWork();
   const { data: recentWorkouts } = useRecentWorkouts(14);
+  const { data: symptomLogs } = useSymptomLogs(7);
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -140,6 +142,7 @@ function InlineBuddyChatContent() {
     recentSleepLogs: sleepLogs ?? [],
     recentCycleLogs: cycleLogs ?? [],
     latestBloodWork: latestBloodWork ?? undefined,
+    recentSymptomLogs: symptomLogs ?? [],
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────
