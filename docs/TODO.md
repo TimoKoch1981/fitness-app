@@ -29,7 +29,7 @@
 - [ ] **E.1.5: AVV mit Hetzner pruefen** (~1h) — Hetzner Standard-AVV pruefen. MANUELL.
 - [x] ~~**E.1.6: Account-Loeschung implementieren**~~ ✅ (2026-02-28, v11.4) — DB-Funktion delete_user_account() (SECURITY DEFINER, CASCADE), useDeleteAccount Hook, DeleteAccountDialog mit Bestaetigungswort, ProfilePage Button. 17 Sprachen. Commit: 025a5f7
 - [x] ~~**E.1.7: Widerrufsrecht implementieren**~~ ✅ (2026-02-28, v11.4) — PrivacySettings Komponente, 3 Consent-Karten einzeln widerrufbar, ProfilePage integriert. 17 Sprachen. Commit: 284aade
-- [ ] **E.1.8: DSFA dokumentieren** (~4-8h Doku) — Datenschutz-Folgenabschaetzung. MANUELL/Doku, kein Code.
+- [x] ~~**E.1.8: DSFA dokumentieren**~~ ✅ (2026-03-01, v12.8) — `docs/DSFA.md`: 12 Risiken, Risikomatrix, 12 techn. + 10 org. Massnahmen, Restrisiko-Bewertung. HINWEIS: Anwaltliche Pruefung empfohlen.
 
 **Phase 2 — Zeitnah (nach Launch):**
 - [x] ~~**E.2.1: Datenexport-Funktion**~~ ✅ (2026-02-28, v11.8) — useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download, ProfilePage Button

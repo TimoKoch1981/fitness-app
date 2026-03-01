@@ -107,6 +107,7 @@
 | 12.6    | 2026-03-01 | Schlaf-Tracking (Zeiten, Qualitaet, DB, 17 Sprachen, 15 Tests)           | Erledigt   |
 | 12.7    | 2026-03-01 | Menstruationszyklus-Tracker (Phasen, Symptome, Gender-Gating, 22 Tests)  | Erledigt   |
 | 12.8    | 2026-03-01 | P0: Email-Verifizierung Production + email_not_confirmed UX              | Erledigt   |
+| 12.8b   | 2026-03-01 | P0: DSFA dokumentiert (Art. 35 DSGVO, 12 Risiken, Restrisiko-Bewertung)  | Erledigt   |
 
 ---
 
