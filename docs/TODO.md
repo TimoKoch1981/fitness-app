@@ -32,7 +32,7 @@
 - [ ] **E.1.8: DSFA dokumentieren** (~4-8h Doku) — Datenschutz-Folgenabschaetzung. MANUELL/Doku, kein Code.
 
 **Phase 2 — Zeitnah (nach Launch):**
-- [ ] **E.2.1: Datenexport-Funktion** (~4-6h Code) — DSGVO Art. 20 Portabilitaet. Export aller Nutzerdaten als JSON/CSV
+- [x] ~~**E.2.1: Datenexport-Funktion**~~ ✅ (2026-02-28, v11.8) — useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download, ProfilePage Button
 - [x] ~~**E.2.2: KI-Disclaimer erweitern**~~ ✅ (2026-02-28, v11.7) — "KI-generiert — kann Fehler enthalten. Keine medizinische Beratung." unter jeder ChatMessageBubble. 17 Sprachen.
 - [x] ~~**E.2.3: BP-Klassifikation kennzeichnen**~~ ✅ (2026-02-28, v11.7) — "Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose." bei MedicalPage + AddBloodPressureDialog. 17 Sprachen.
 - [x] ~~**E.2.4: PED-Disclaimer verstaerken**~~ ✅ (2026-02-28, v11.7) — Amber PED-Badge, PED-Disclaimer-Footer bei MedicalPage + LogSubstanceDialog. 17 Sprachen.
@@ -57,8 +57,8 @@
     - TXT: send → v=spf1 include:amazonses.com ~all
     - MX: send → 10 feedback-smtp.eu-west-1.amazonses.com. (Trailing Dot Fix)
     - A: @ → 46.225.228.12, CNAME: www → fudda.de
-  - **Naechster Schritt:** DNS-Propagation abwarten (bis 24h nach NS-Umstellung)
-  - Dann: Resend Domain verifizieren (Restart klicken) + AUTOCONFIRM wieder auf false
+  - ~~**DNS-Propagation**~~ ✅ (2026-03-01) — SPF, DKIM, MX alle propagiert und verifiziert
+  - **Naechster Schritt:** AUTOCONFIRM=false auf Hetzner setzen + Email-Flow testen
   - Anleitung: `docs/RESEND_DOMAIN_SETUP.md` ✅ (2026-02-26)
   - config.toml: admin_email auf noreply@fudda.de aktualisiert ✅ (2026-02-26)
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
@@ -88,11 +88,8 @@
 ### P1 — Neue Features
 
 #### Supplement- & Substanz-Auswahlvorschlaege
-- [ ] **Supplement-Listen als Auswahlvorschlag** — Gaengige Supplements (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.) als vordefinierte Auswahl beim Anlegen einer Substanz
-- [ ] **Doping/Anabolika-Liste als Auswahlvorschlag** — PED-Liste (Testosteron, Trenbolon, Anavar, Deca, etc.) als Auswahlvorschlag
-  - Muss explizit unter Medizin durch den Nutzer aktiviert werden
-  - Disclaimer erforderlich bei Aktivierung
-  - Skill-Dateien werden Detailinfos enthalten (Halbwertszeiten, Dosierungen, Nebenwirkungen)
+- [x] ~~**Supplement-Listen als Auswahlvorschlag**~~ ✅ (2026-02-27, v10.8) — 12 Supplement-Presets (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.)
+- [x] ~~**Doping/Anabolika-Liste als Auswahlvorschlag**~~ ✅ (2026-02-27, v10.8) — 12 PED-Presets (Testosteron, Trenbolon, Anavar, Deca, etc.) mit Disclaimer, Power/Power+ Modus
 
 ### P1 — Wichtig
 
@@ -141,14 +138,14 @@
 > **Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.
 > **Diskussionsbedarf:** Struktur, Quellen-Qualitaet, Fach-Tiefe, Token-Budget.
 
-- [ ] **Konzeptionelle Diskussion** — Wie tief sollen Skills sein? Token-Budget vs. Qualitaet. RAG-Alternative? Skill-Versioning-Strategie.
+- [x] ~~**Konzeptionelle Diskussion**~~ ✅ (2026-02-28, v12.1) — SKILLS_KONZEPT.md erstellt: 16 Skills, 56.700 Token, 8 Agenten. Quick Win: Glossar-Optimierung (~27k Token/Session gespart). Roadmap: Section-Level Loading → RAG.
 - [x] ~~**Neuer Skill: Ernaehrungswissenschaft (nutritionScience)**~~ ✅ (2026-02-28) — 3 Spiegel-Artikel ausgewertet, 33 PMIDs, 9 Forscher (Michalsen, Longo, Blueher, Rubino, Stamatakis, Ekelund, Ding etc.), Themen: Langlebigkeit, Fasten 16:8, Adipositas-Neudefinition (Lancet 2025), VILPA, 10.000-Schritte-Mythos
-- [ ] **Nutrition-Skill erweitern** — Mikronaehrstoffe, Meal-Timing, Sport-spezifische Ernaehrung, Diaet-Strategien (Cutting/Bulking), Alkohol-Impact, Hydration
-- [ ] **Training-Skill erweitern** — Periodisierung (linear/undulierend/block), Deload-Wochen, RPE/RIR-Skala, Superkompensation, Aufwaermprogramme, Mobilitaet, Verletzungspraevention
-- [ ] **Substances-Skill erweitern** — Blutbild-Interpretation (detailliert), Wechselwirkungen, Halbwertszeit-Kurven, Ester-Vergleich, Nebenwirkungs-Management
-- [ ] **Analysis-Skill erweitern** — Plateau-Erkennung, Prognose-Modelle, Wochen-/Monats-Trends, Anomalie-Erkennung, Vergleich mit Referenzwerten
-- [ ] **Medical-Skill erweitern** — Laborwerte-Referenzbereiche (detailliert), Sport-Kardiologie, Hormonspiegel-Interpretation, Schilddruese, Leber/Niere-Marker
-- [ ] **Beauty/Lifestyle erweitern** — Mehr Studien-Referenzen, evidenzbasierte Empfehlungen, Timing-Tabellen
+- [x] ~~**Nutrition-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Mikronaehrstoffe (10), Alkohol & Fitness (Parr 2014), Sport-Ernaehrung, Carb-Loading
+- [x] ~~**Training-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Periodisierung (Linear/DUP/Block, Harries 2015), Superkompensation, Mobilitaet, Verletzungspraevention
+- [x] ~~**Substances-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Blutbild-Interpretation, Wechselwirkungen (6 Kombis), Ester-Vergleich, Nebenwirkungs-Management
+- [x] ~~**Analysis-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Prognose-Modelle (McDonald), Trends, Anomalie-Erkennung (9 Anomalien)
+- [x] ~~**Medical-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Sport-Kardiologie, Schilddruese, Leber/Niere, Hormonspiegel-Interpretation
+- [x] ~~**Beauty/Lifestyle erweitern**~~ ✅ (2026-02-28, v11.9a) — +Evidenzbasierte Hautpflege, Haartransplantation, Saisonalitaet
 - [x] ~~**Neuer Skill: Schlaf & Regeneration**~~ ✅ (2026-02-27, v10.4) — sleep.ts: Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
 - [x] ~~**Neuer Skill: Supplements**~~ ✅ (2026-02-27, v10.4) — supplements.ts: 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen
 - [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
@@ -218,19 +215,18 @@
 - [ ] **Stillzeit-Kalorienzuschlag** (~2h) — TDEE-Berechnung beruecksichtigt Stillen nicht (+300-500 kcal/Tag). Lena (E4) stillt noch. Braucht: Profil-Toggle "Stillend" → TDEE-Aufschlag. Nur bei gender=female. Betroffene: E4
 
 #### Medizin-Erweiterungen
-- [ ] **Blutbild/Laborwerte-Tracking** (~12h) — Nur Blutdruck wird getrackt. Keine Laborwerte (Testosteron, LH, FSH, Haematokrit, HDL, LDL, Leberwerte, PSA, IGF-1). Braucht: Vordefinierte Felder + Trends + Warnschwellen (Hkt>54%, HDL<25). Fuer Enhanced-User essentiell. Betroffene: D1-D5, C2, C5
-- [ ] **Arztbericht-PDF-Export** (~6h) — Kein PDF-Arztbericht. Timo (D1) will strukturierten Report fuer seinen Arzt mit Substanzen, Blutdruck, Gewichtsverlauf, Blutwerten. Betroffene: D1, D3, C5
+- [x] ~~**Blutbild/Laborwerte-Tracking**~~ ✅ (2026-02-28, v11.9) — BloodWorkDashboard (10 Marker, farbcodiert), useBloodWork Hook, Warnschwellen, Power+ Mode
+- [x] ~~**Arztbericht-PDF-Export**~~ ✅ (2026-02-28, v12.0) — DoctorReport PDF (jsPDF, Profil, 23 Blutmarker + Referenzbereiche, Substanzen, Blutdruck, Koerpermasse)
 
 ### P1 — UX/Gamification
 
 #### Erfolgs-Lob fuer den Nutzer
-- [ ] **Zwischen-Lob bei Erfolgen einbauen** — Nutzer soll bei Fortschritten aktiv gelobt werden. CelebrationProvider + CelebrationOverlay existieren bereits (Konfetti+Toast, 4 Level, 6 Kategorien) — nur Trigger fehlen!
-  - Trainings-PRs (neues Maximalgewicht, mehr Reps)
-  - Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)
-  - Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)
-  - Kaloriendefizit eingehalten
-  - Luecken-Erkennung: "Du hast 3 Tage nicht geloggt — alles OK?" (Re-Engagement)
-  - Betroffene Twins: A5 (Gamification), A1 (Motivation), B3 (Re-Engagement)
+- [x] ~~**Zwischen-Lob bei Erfolgen einbauen**~~ ✅ (2026-02-27, v10.8) — CelebrationProvider + CelebrationOverlay (Konfetti+Toast, 4 Level, 6 Kategorien)
+  - ~~Trainings-PRs (neues Maximalgewicht, mehr Reps)~~ ✅
+  - ~~Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)~~ ✅
+  - ~~Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)~~ ✅
+  - ~~Kaloriendefizit eingehalten~~ ✅
+  - [ ] **Luecken-Erkennung**: "Du hast 3 Tage nicht geloggt — alles OK?" (Re-Engagement) — NOCH OFFEN
 
 ### ~~P1 — UX-Ueberarbeitung Workout-Session~~ ✅ (2026-02-28, v11.0)
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
@@ -258,16 +254,16 @@
 - [x] ~~**Phase A2: Anabolika-Skill erweitern**~~ ✅ — Zyklen, Dosierungen, Wechselwirkungen nach Ziel
 - [x] ~~**Phase A3: Skill-Anpassung**~~ ✅ — Agent-Instructions nach Modus, modus-bewusstes Loading
 - [x] ~~**Phase A4: ProfilePage Integration**~~ ✅ — TrainingModeSelector eingebunden, useUpdateProfile erweitert
-- [ ] **Phase B: Power Features** — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc
-- [ ] **Phase C: Power+ Features** — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert
-- [ ] **Phase D: Shared** — DoctorReport PDF, PosingPhotos, i18n trainingMode Keys fuer 15 Sprachen, Tests
+- [x] ~~**Phase B: Power Features**~~ ✅ (2026-02-28, v11.9b) — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc. 4 Widgets, 39 i18n-Keys
+- [x] ~~**Phase C: Power+ Features**~~ ✅ (2026-02-28, v11.9) — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert. 4 Widgets, useBloodWork Hook
+- [x] ~~**Phase D: Shared**~~ ✅ (2026-02-28, v12.0) — DoctorReport PDF (jsPDF, 23 Blutmarker), PosingPhotos (7 Posen, WebP), trainingMode i18n (42+5 Keys in 15 Sprachen)
 
 ### P2 — Digital-Twin-Testing Findings (Nice-to-Have)
 > Aus Sektion 3 des TWIN_TESTING_REPORT.md — Priorisierte Feature-Requests P2
 
-- [ ] **Wettkampf-Countdown Widget** (~6h) — Zieldatum → Dashboard-Widget mit Tagen bis Wettkampf, Phase-Tracker. Dominik (C1), Sarah (E1), Viktor (D2). Competition-Skill hat Wissen, aber kein UI.
-- [ ] **Blast/Cruise/PCT-Zyklus-Kalender** (~8h) — Visuelle Timeline fuer AAS-Phasen, Clearance-Timer, Blutbild-Faelligkeiten. Betroffene: D2, D4, D5
-- [ ] **CSV-Export eigener Daten** (~4h) — Mahlzeiten, Training, Koerper, Substanzen als CSV/JSON Download. Thomas (B1) will Daten exportieren. Kein DSGVO-Datenportabilitaet ohne Export.
+- [x] ~~**Wettkampf-Countdown Widget**~~ ✅ (2026-02-28, v11.9b) — CompetitionCountdown (Power Mode), Zieldatum → Wochen/Tage, Phase-Hinweise (Peak Week, Cut, Prep, Off-Season)
+- [x] ~~**Blast/Cruise/PCT-Zyklus-Kalender**~~ ✅ (2026-02-28, v11.9) — CycleWidget (Power+ Mode), Blast/Cruise/PCT Status, Progress-Bar, PCTCountdown
+- [x] ~~**Daten-Export**~~ ✅ (2026-02-28, v11.8) — DSGVO Art. 20, useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download
 - [ ] **Schriftgroessen-Option** (~2h) — Klein/Normal/Gross in Profil-Einstellungen. Ralf (B5, technik-scheu) braucht grosse Schrift.
 - [ ] **Schlaf-Tracking (Zeiten)** (~6h) — Einschlaf-/Aufwachzeit, Qualitaet (nicht nur Emoji). Korrelation mit Training. Betroffene: A4, E5, D4
 - [ ] **Mahlzeit-Kategorien erweitern** (~2h) — 6 statt 4: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Spaet. Dominik (C1) loggt 6 Mahlzeiten/Tag. Marco (B3) hat bei Schichtarbeit keine festen Zeiten.
@@ -278,8 +274,8 @@
 ### P2 — Technische Schulden
 
 - [ ] **`tsc -b` Build-Fix** (~2h) — 52 pre-existing Language-Type-Errors seit 17-Sprachen-Expansion. `tsc --noEmit` = 0 Fehler, aber `tsc -b` (project references) hat 52 Fehler wegen `Language` Type (17 Werte) vs `{de: string; en: string}` Pattern.
-- [ ] **Production-Deployment v11.3** — Neue Features (KI-Mahlzeit, Profil-Dietary, Timer, Musik, Spotify) auf fudda.de deployen
-- [ ] **Production DB-Migration** — `20260228000001_profile_dietary_health.sql` auf Production anwenden
+- [ ] **Production-Deployment v12.1** — Alle Features seit v10.1 auf fudda.de deployen (Twin-Fixes, Power/Power+, Skills v3.0, Timer/Musik, DSGVO)
+- [ ] **Production DB-Migrationen** — Alle neuen Migrationen auf Production anwenden (dietary/health fields, blood_work, training_mode, consents, etc.)
 - [ ] **Code-TODO: baseAgent.ts:269** — `bodyHistory` Array hardcoded als `[]`, sollte aus BodyMeasurements Hook befuellt werden
 
 ### P2 — Nice-to-Have

@@ -92,6 +92,14 @@
 | 11.3    | 2026-02-28 | Twin-Testing Sofortmassnahmen: 5 Fixes (KI-Mahlzeit, Profil-Felder, Reminder, Disclaimer, Datum) | Erledigt   |
 | 11.4    | 2026-02-28 | Profil-Daten an KI-Context + Gender Feature-Gating Hook                  | Erledigt   |
 | 11.5    | 2026-02-28 | DSGVO-Komplett: Impressum, Datenschutz, Granulare Consents, Account-Löschung, Widerrufsrecht | Erledigt   |
+| 11.6    | 2026-02-28 | Cockpit Standard-Ziele ohne Profil fixen (P1-4)                          | Erledigt   |
+| 11.7    | 2026-02-28 | Rechtskonformitaet Phase 2 Disclaimer-Suite (E.2.2-E.2.5)               | Erledigt   |
+| 11.8    | 2026-02-28 | Datenexport Art. 20 DSGVO (E.2.1) — 16 Tabellen, JSON-Download          | Erledigt   |
+| 11.9    | 2026-02-28 | Power+ Phase C: BloodWork-Dashboard, Cycle, PCT, Hematocrit (4 Widgets)  | Erledigt   |
+| 11.9a   | 2026-02-28 | Skills v3.0.0: 6 Skills erweitert (+946 Zeilen Fachwissen)               | Erledigt   |
+| 11.9b   | 2026-02-28 | Power Phase B: 4 Widgets (CompetitionCountdown, PhaseProgress, FFMI, Refeed) | Erledigt |
+| 12.0    | 2026-02-28 | Phase D: DoctorReport PDF, PosingPhotos, trainingMode i18n (15 Sprachen) | Erledigt   |
+| 12.1    | 2026-02-28 | Skills-Konzept + Glossar-Optimierung (~27.000 Token/Session gespart)     | Erledigt   |
 
 ---
 
