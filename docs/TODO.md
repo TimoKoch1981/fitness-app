@@ -200,7 +200,7 @@
 - [x] ~~**Profil-Daten an KI-Context uebergeben**~~ ✅ (2026-02-28, v11.4) — Allergien (WARNING-Direktive), Ernaehrungsform, Gesundheitseinschraenkungen in generateProfileSkill() ergaenzt. Commit: 86c75b7
 - [ ] **Proaktives Warnsystem** (~6h) — Buddy warnt nur wenn gefragt, nicht automatisch bei gefaehrlichen Mustern (Unterkalorisch, Uebertraining 7x/Woche, HDL<25, Hkt>52%). Braucht: Schwellenwert-Regeln + automatische Buddy-Nachrichten. Betroffene: A5, E1, D2, D4
 - [ ] **Kontext-Persistence ueber Sessions** (~4h) — Buddy "vergisst" Praeferenzen zwischen Sessions (sessionStorage). Elena (A4, Vegetarierin) muss es jedes Mal neu sagen. Loesung: Profil-Daten + Chat-History aus DB laden. Betroffene: A4, E2, B4
-- [ ] **Quellenangaben in Buddy-Antworten** (~3h) — Skills haben 73+ PMIDs, aber Buddy zitiert sie nie in Antworten. Petra (C5, Aerztin) erwartet Quellen. Loesung: Agent-Prompt erweitern → "Zitiere relevante PMIDs". Betroffene: C5, B2
+- [x] ~~**Quellenangaben in Buddy-Antworten**~~ ✅ (2026-03-01, v12.25) — getSkillContentWithSources() injiziert PMID-Referenzen aus Skill-Metadaten in Prompt-Text. Facts Codex Quellenangaben-Sektion verstaerkt (Pflicht 1-2 PMIDs pro Antwort, Beispiel-Format, DE+EN). 124 PMIDs in 14 Skills jetzt fuer LLM sichtbar. ChatMessage.tsx rendert PMIDs als klickbare PubMed-Links.
 - [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.5) — Kurz/Normal/Ausführlich + Einfach/Fachlich. BaseAgent-Prompt-Injection, I18nProvider, ProfilePage UI. 17 Sprachen, 26 Dateien.
 
 #### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
@@ -357,9 +357,9 @@
 - [x] ~~Fix #1: KI-Schaetzung im Mahlzeit-Dialog~~ ✅ — Sparkles-Button, ai-proxy, Auto-Fill Makros
 - [x] ~~Fix #2+#4: Profil Ernaehrung & Gesundheit~~ ✅ — Ernaehrungsform (7), Allergien (7), Einschraenkungen (7) als Chip-Auswahl + DB-Migration
 
-#### Auth-Erweiterungen
-- [ ] OAuth / Social Login (Google, Apple) — alle Provider in config.toml disabled
-- [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
+#### ~~Auth-Erweiterungen~~ ✅ (2026-03-01)
+- [x] ~~OAuth / Social Login (Google, Apple)~~ ✅ (v12.23) — AuthProvider signInWithOAuth, LoginPage Google+Apple Buttons, AuthCallbackPage, config.toml Provider (disabled, braucht Credentials)
+- [x] ~~MFA (TOTP)~~ ✅ (v12.24) — useMFA Hook, MFASetupDialog, MFAVerificationDialog, MFASettings in ProfilePage, config.toml TOTP enabled
 
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
@@ -405,8 +405,8 @@
 | SMTP-Provider (Prod) | ✅ Aktiv | Resend SMTP, API Key konfiguriert, Domain-Validierung noetig |
 | Email-Templates | ✅ Deutsch | confirmation.html + recovery.html |
 | site_url | ✅ Korrekt | Port 5173 |
-| OAuth | DEAKTIVIERT | Alle Provider disabled (P2) |
-| MFA | DEAKTIVIERT | TOTP/Phone/WebAuthn alle disabled (P2) |
+| OAuth | ✅ UI Fertig (v12.23) | Google + Apple Buttons, AuthCallbackPage. Provider in config.toml disabled — braucht Google Cloud Console + Apple Dev Credentials |
+| MFA (TOTP) | ✅ UI Fertig (v12.24) | useMFA Hook, Setup/Verify/Settings Dialoge, config.toml TOTP enabled. Production: GoTrue MFA-Config noetig |
 
 ---
 
@@ -437,4 +437,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-02-28 (v11.3 — Twin-Testing-Findings komplett aufgenommen, Sofortmassnahmen erledigt, i18n 17 Sprachen ✅)*
+*Letzte Aktualisierung: 2026-03-01 (v12.24 — E.3.2 Loeschkonzept, E.3.3 Audit-Trail, OAuth, MFA, Auth-Erweiterungen ✅)*

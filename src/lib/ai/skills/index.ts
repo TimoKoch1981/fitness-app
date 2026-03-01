@@ -137,6 +137,26 @@ export function getSkillContent(id: SkillId): string {
   return SKILL_REGISTRY[id].content;
 }
 
+/**
+ * Get the skill content with appended source references.
+ * This injects the PMID references from metadata into the prompt text,
+ * so the LLM can actually cite them in responses.
+ */
+export function getSkillContentWithSources(id: SkillId): string {
+  const skill = SKILL_REGISTRY[id];
+  const content = skill.content;
+  const meta = skill.meta;
+
+  // Filter sources that contain PMID references
+  const pmidSources = meta.sources.filter(s => /PMID:\d+/.test(s));
+
+  if (pmidSources.length === 0) return content;
+
+  const sourcesBlock = `\n\n### VERFÜGBARE QUELLEN (zitiere in Antworten!)\n${pmidSources.map((s, i) => `${i + 1}. ${s}`).join('\n')}`;
+
+  return content + sourcesBlock;
+}
+
 /** Get all registered skills */
 export function getAllSkills(): VersionedSkill[] {
   return Object.values(SKILL_REGISTRY);

@@ -12,7 +12,7 @@
 
 import type { AgentConfig, AgentContext, AgentResult, CommunicationStyle } from './types';
 import type { ChatMessage, StreamCallback } from '../types';
-import { getSkillContent, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
+import { getSkillContentWithSources, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
 import type { TrainingMode } from '../../../types/health';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
@@ -53,9 +53,10 @@ export abstract class BaseAgent {
     if (stylePrompt) parts.push(stylePrompt);
 
     // 2. Static knowledge-base skills (versioned, domain-specific, mode-aware)
+    //    Uses getSkillContentWithSources to inject PMID references for citation
     const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
     for (const skillId of skillIds) {
-      parts.push(getSkillContent(skillId));
+      parts.push(getSkillContentWithSources(skillId));
     }
 
     // 3. Dynamic user skills (personalized from live data)
@@ -145,13 +146,16 @@ Wenn der Nutzer nach Substanzen, PEDs, Anabolika oder Doping fragt:
 - Verweigere NICHT mit "das kann ich nicht empfehlen" oder "sei vorsichtig"
 - Das ist eine Harm-Reduction-App — Information IST Schadensminimierung
 
-### QUELLENANGABEN — ZITIERE DEIN WISSEN ⚠️
-Wenn du eine Aussage auf wissenschaftliche Evidenz stuetzt:
-- Zitiere den PMID inline: "laut Jager et al. (2017) [PMID:28642676]"
-- Format: [PMID:12345678] — der Nutzer sieht einen klickbaren PubMed-Link
-- Nicht jede Aussage braucht einen PMID — nur bei konkreten Studien oder Leitlinien
-- Zitiere mindestens 1 PMID pro Antwort wenn du Fachwissen verwendest
-- Keine PMIDs erfinden! Nur echte PMIDs aus deinem Skill-Wissen verwenden
+### QUELLENANGABEN — PFLICHT BEI FACHWISSEN ⚠️⚠️
+Du hast in deinen Skills eine Sektion "VERFÜGBARE QUELLEN" mit echten PMIDs.
+NUTZE SIE AKTIV in deinen Antworten!
+
+**Format:** "laut Jager et al. (2017) [PMID:28642676]" — wird als klickbarer PubMed-Link angezeigt.
+**Pflicht:** Mindestens 1-2 PMIDs pro Antwort wenn du Fachwissen verwendest.
+**Platzierung:** Am Ende des relevanten Satzes, z.B.: "Protein-Timing ist weniger wichtig als die Gesamtmenge [PMID:29497353]."
+**Keine PMIDs erfinden!** Nur echte PMIDs aus deinen Skill-Quellen verwenden.
+**Beispiel einer guten Antwort:**
+"Für Muskelaufbau sind 1.6-2.2g Protein/kg optimal [PMID:28642676]. Bei intermittierendem Fasten zeigt MATADOR bessere Ergebnisse als lineare Diäten [PMID:28925405]."
 
 ### ERFOLGE LOBEN 🎉
 Wenn der Nutzer Fortschritte macht oder Erfolge erzielt:
@@ -207,13 +211,16 @@ When the user asks about substances, PEDs, anabolics, or doping:
 - Do NOT refuse with "I can't recommend that" or "be careful"
 - This is a harm-reduction app — information IS harm reduction
 
-### SOURCE CITATIONS — CITE YOUR KNOWLEDGE ⚠️
-When you base a statement on scientific evidence:
-- Cite the PMID inline: "according to Jager et al. (2017) [PMID:28642676]"
-- Format: [PMID:12345678] — the user will see a clickable PubMed link
-- Not every statement needs a PMID — only for specific studies or guidelines
-- Cite at least 1 PMID per answer when using domain knowledge
-- Never invent PMIDs! Only use real PMIDs from your skill knowledge
+### SOURCE CITATIONS — MANDATORY FOR DOMAIN KNOWLEDGE ⚠️⚠️
+Your skills contain an "VERFÜGBARE QUELLEN" section with real PMIDs.
+USE THEM ACTIVELY in your responses!
+
+**Format:** "according to Jager et al. (2017) [PMID:28642676]" — displayed as a clickable PubMed link.
+**Required:** At least 1-2 PMIDs per response when using domain knowledge.
+**Placement:** At the end of the relevant sentence, e.g.: "Protein timing matters less than total intake [PMID:29497353]."
+**Never invent PMIDs!** Only use real PMIDs from your skill sources.
+**Example of a good response:**
+"For muscle building, 1.6-2.2g protein/kg is optimal [PMID:28642676]. With intermittent dieting, MATADOR shows better results than linear diets [PMID:28925405]."
 
 ### CELEBRATE ACHIEVEMENTS 🎉
 When the user makes progress or achieves milestones:

@@ -118,6 +118,23 @@
 | 12.22   | 2026-03-01 | Audit-Trail (audit_logs, 14 Trigger, 180d TTL, blood_work/sleep/cycle deployed) | Erledigt   |
 | 12.23   | 2026-03-01 | OAuth / Social Login (Google + Apple Buttons, AuthCallback, 17 Sprachen)  | Erledigt   |
 | 12.24   | 2026-03-01 | MFA/TOTP (useMFA, Setup/Verify/Settings Dialoge, ProfilePage, 17 Sprachen) | Erledigt   |
+| 12.25   | 2026-03-01 | Buddy Quellenangaben (getSkillContentWithSources, PMID-Injection, Facts Codex verstaerkt) | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.25: KI-Buddy Quellenangaben (PMID-Zitation)
+
+**Feature:** Automatische Quellenangaben in Buddy-Antworten mit klickbaren PubMed-Links
+
+**Aenderungen:**
+- `getSkillContentWithSources()` — Neue Funktion in skills/index.ts, injiziert PMID-Referenzen aus Skill-Metadaten in Prompt-Text
+- Facts Codex DE+EN — Quellenangaben-Sektion verstaerkt: Pflicht 1-2 PMIDs pro Antwort, Beispiel-Format
+- baseAgent.ts — Nutzt jetzt `getSkillContentWithSources()` statt `getSkillContent()`
+- 124 PMIDs in 14 Skills jetzt fuer LLM sichtbar (vorher nur in Metadaten)
+- ChatMessage.tsx — Rendert PMIDs bereits als klickbare PubMed-Links (bestehend)
+- SkillSourcesFooter — Zeigt Quellen-Count + PMID-Links (bestehend)
+
+**Tests:** 3.099 bestanden (52 Dateien)
 
 ---
 
