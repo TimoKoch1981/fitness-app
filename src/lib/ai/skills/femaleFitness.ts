@@ -133,6 +133,34 @@ Drei zusammenhaengende Probleme:
 | Progressive Phase | 12-24 Wochen | Normales Training aufbauen |
 | Vollstaendig | >24 Wochen | Alle Aktivitaeten |
 
+### Stillen / Laktation — Energiebedarf [PMID:14506247]
+#### Kalorienbedarf in der Stillzeit:
+- **Exklusives Stillen:** +500 kcal/Tag (Dewey et al. 2003)
+- **Teilweises Stillen:** +300 kcal/Tag
+- **FitBuddy verwendet:** +400 kcal/Tag als konservativen Mittelwert
+- NICHT aggressiv Defizit fahren waehrend Stillzeit (<1500 kcal/Tag vermeiden)
+- Gewichtsverlust von max. 0.5 kg/Woche ist waehrend Stillen sicher
+
+#### Makronaehrstoffe waehrend Stillzeit:
+- Protein: 1.3 g/kg Koerpergewicht (vs. 0.8 g/kg Normalwert) [PMID:29773536]
+- Kalzium: 1000 mg/Tag (Knochen-Remineralisierung)
+- Eisen: 9 mg/Tag (weniger als waehrend Schwangerschaft)
+- Vitamin D: 600 IU/Tag, besser 1000-2000 IU
+- DHA/Omega-3: 200-300 mg/Tag (Muttermilch-Qualitaet)
+- Fluessigkeit: mind. 3L/Tag (Milchproduktion)
+
+#### Training waehrend Stillen:
+- Moderates Training hat KEINEN negativen Einfluss auf Milchproduktion oder -qualitaet [PMID:32661839]
+- Hydration VOR und NACH dem Training besonders wichtig
+- Stillen NACH dem Training (nicht direkt vorher — Milchsaeure in Muttermilch kurzzeitig erhoeht)
+- Sport-BH mit gutem Halt empfohlen (vergroesserte Brust)
+
+#### WICHTIG — Stillzeit-Toggle in FitBuddy:
+- Nutzerin kann im Profil "Ich stille aktuell" aktivieren
+- Kalorienziel wird automatisch um +400 kcal/Tag erhoeht
+- Bei Zielen berechnen wird der Zuschlag beruecksichtigt
+- Warnung: Keine Crash-Diaeten empfehlen waehrend Stillzeit!
+
 ### Rektusdiastase (Diastasis Recti) — Erweitert
 
 **Definition:** Auseinanderweichen der geraden Bauchmuskulatur (Rectus abdominis) entlang der Linea Alba.

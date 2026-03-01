@@ -184,6 +184,8 @@ export function CockpitPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileComplete, totals.calories >= caloriesGoal, totals.protein >= proteinGoal]);
 
+  const isBreastfeeding = profile?.is_breastfeeding === true;
+
   const stats = [
     {
       label: t.dashboard.calories,
@@ -191,6 +193,7 @@ export function CockpitPage() {
       goal: caloriesGoal,
       unit: 'kcal',
       color: 'from-teal-400 to-teal-500',
+      badge: isBreastfeeding ? (language === 'de' ? '🤱 inkl. Stillzeit' : '🤱 incl. lactation') : undefined,
     },
     {
       label: t.dashboard.protein,
@@ -346,6 +349,9 @@ export function CockpitPage() {
                         : `${t.dashboard.goal} ${t.dashboard.consumed}`
                       }
                     </p>
+                    {(stat as { badge?: string }).badge && (
+                      <p className="text-[9px] text-pink-500 mt-0.5 font-medium">{(stat as { badge?: string }).badge}</p>
+                    )}
                   </>
                 ) : (
                   <p className="text-[10px] text-gray-400 mt-2">{t.cockpit.noGoalSet}</p>

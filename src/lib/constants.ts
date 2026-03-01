@@ -11,6 +11,10 @@ export const DEFAULT_WATER_GOAL = 8; // glasses (250ml each = 2L)
 export const DEFAULT_CARBS_GOAL = 250; // grams
 export const DEFAULT_FAT_GOAL = 65; // grams
 
+// === BREASTFEEDING / LACTATION (Dewey 2003, PMID:14506247) ===
+/** Average additional energy cost of exclusive breastfeeding in kcal/day */
+export const BREASTFEEDING_CALORIE_BOOST = 400; // 300-500 range, midpoint used
+
 // === PAL FACTORS (WHO/FAO/UNU 2004) ===
 export const PAL_FACTORS = {
   bedridden: 1.2,

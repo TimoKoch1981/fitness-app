@@ -47,6 +47,8 @@ export function ProfilePage() {
   const [dietaryPreferences, setDietaryPreferences] = useState<string[]>([]);
   const [allergies, setAllergies] = useState<string[]>([]);
   const [healthRestrictions, setHealthRestrictions] = useState<string[]>([]);
+  // Breastfeeding
+  const [isBreastfeeding, setIsBreastfeeding] = useState(false);
   // BMR Help toggle
   const [showBmrHelp, setShowBmrHelp] = useState(false);
   // Disclaimer viewer
@@ -88,6 +90,7 @@ export function ProfilePage() {
       setDietaryPreferences(profile.dietary_preferences ?? []);
       setAllergies(profile.allergies ?? []);
       setHealthRestrictions(profile.health_restrictions ?? []);
+      setIsBreastfeeding(profile.is_breastfeeding ?? false);
       // Mark hydrated after a longer delay so all React state batching + renders complete.
       // requestAnimationFrame was too short (single frame) and could race with auto-save.
       setTimeout(() => {
@@ -104,6 +107,7 @@ export function ProfilePage() {
     primaryGoal: '' as PrimaryGoal | '', targetWeight: '', targetBodyFat: '',
     targetDate: '', goalNotes: '',
     dietaryPreferences: [] as string[], allergies: [] as string[], healthRestrictions: [] as string[],
+    isBreastfeeding: false,
   });
 
   // Keep formRef in sync
@@ -112,6 +116,7 @@ export function ProfilePage() {
     caloriesGoal, proteinGoal, waterGoal,
     primaryGoal, targetWeight, targetBodyFat, targetDate, goalNotes,
     dietaryPreferences, allergies, healthRestrictions,
+    isBreastfeeding,
   };
 
   const showSaveStatus = useCallback((status: 'saved' | 'error') => {
@@ -145,6 +150,7 @@ export function ProfilePage() {
         dietary_preferences: f.dietaryPreferences,
         allergies: f.allergies,
         health_restrictions: f.healthRestrictions,
+        is_breastfeeding: f.isBreastfeeding,
       });
       showSaveStatus('saved');
     } catch {
@@ -557,6 +563,44 @@ export function ProfilePage() {
                   : 'The AI assistant considers these restrictions when recommending exercises.'}
               </p>
             </div>
+
+            {/* Breastfeeding Toggle — only for female */}
+            {gender === 'female' && (
+              <div className="pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      {language === 'de' ? '🤱 Ich stille aktuell' : '🤱 Currently breastfeeding'}
+                    </label>
+                    <p className="text-[10px] text-gray-400 mt-0.5">
+                      {language === 'de'
+                        ? '+400 kcal/Tag Kalorienzuschlag (Dewey et al. 2003)'
+                        : '+400 kcal/day calorie supplement (Dewey et al. 2003)'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleChange(setIsBreastfeeding)(!isBreastfeeding)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${
+                      isBreastfeeding ? 'bg-pink-500' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                      isBreastfeeding ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
+                  </button>
+                </div>
+                {isBreastfeeding && (
+                  <div className="mt-2 p-2 bg-pink-50 rounded-lg">
+                    <p className="text-[10px] text-pink-700">
+                      {language === 'de'
+                        ? '✅ Stillzeit-Zuschlag aktiv. Dein Kalorienziel wird automatisch um +400 kcal erhoeht wenn du "Ziele berechnen" nutzt.'
+                        : '✅ Breastfeeding supplement active. Your calorie goal will automatically increase by +400 kcal when using "Calculate Goals".'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -637,6 +681,7 @@ export function ProfilePage() {
                   body_fat_pct: latestBody.body_fat_pct,
                   primary_goal: (primaryGoal || undefined) as PrimaryGoal | undefined,
                   lean_mass_kg: latestBody.lean_mass_kg,
+                  is_breastfeeding: isBreastfeeding,
                 });
                 setRecommendedGoals(result);
               }}
@@ -671,6 +716,9 @@ export function ProfilePage() {
                 </div>
                 <div className="text-[9px] text-teal-500">
                   BMR: {recommendedGoals.bmr} kcal ({recommendedGoals.bmr_formula === 'katch' ? t.profile.katch : t.profile.mifflin}) | TDEE: {recommendedGoals.tdee} kcal
+                  {isBreastfeeding && (
+                    <span className="ml-1 text-pink-500 font-medium">| 🤱 +400 kcal {language === 'de' ? 'Stillzeit' : 'Lactation'}</span>
+                  )}
                 </div>
                 <button
                   type="button"

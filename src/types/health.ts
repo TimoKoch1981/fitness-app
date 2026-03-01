@@ -283,6 +283,8 @@ export interface UserProfile {
   dietary_preferences?: string[];
   allergies?: string[];
   health_restrictions?: string[];
+  // Breastfeeding / Stillzeit (+300-500 kcal/day, Dewey 2003)
+  is_breastfeeding?: boolean;
   created_at: string;
   updated_at: string;
 }

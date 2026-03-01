@@ -57,6 +57,8 @@ interface UpdateProfileInput {
   dietary_preferences?: string[];
   allergies?: string[];
   health_restrictions?: string[];
+  // Breastfeeding / Stillzeit
+  is_breastfeeding?: boolean;
 }
 
 export function useUpdateProfile() {

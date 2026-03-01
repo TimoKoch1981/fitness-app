@@ -17,6 +17,7 @@ import { calculateTDEE_PAL } from './tdee';
 import { getCalorieRecommendation, calculateProteinRecommendation } from './protein';
 import type { FitnessGoal } from './protein';
 import type { Gender, PrimaryGoal, BMRFormula } from '../../types/health';
+import { BREASTFEEDING_CALORIE_BOOST } from '../constants';
 
 export interface GoalCalculationInput {
   weight_kg: number;
@@ -28,6 +29,8 @@ export interface GoalCalculationInput {
   body_fat_pct?: number;
   primary_goal?: PrimaryGoal;
   lean_mass_kg?: number;
+  /** Breastfeeding adds +400 kcal/day (Dewey 2003, PMID:14506247) */
+  is_breastfeeding?: boolean;
 }
 
 export interface RecommendedGoals {
@@ -121,7 +124,13 @@ export function calculateRecommendedGoals(
   const fitnessGoal = mapPrimaryGoalToFitnessGoal(input.primary_goal);
   const calorieRec = getCalorieRecommendation(tdee, fitnessGoal);
   // Use midpoint of recommendation range
-  const calories = Math.round((calorieRec.min_kcal + calorieRec.max_kcal) / 2);
+  let calories = Math.round((calorieRec.min_kcal + calorieRec.max_kcal) / 2);
+
+  // Step 3b: Breastfeeding calorie supplement (Dewey 2003, PMID:14506247)
+  // Exclusive lactation costs ~500 kcal/day; we use 400 as conservative midpoint
+  if (input.is_breastfeeding) {
+    calories += BREASTFEEDING_CALORIE_BOOST;
+  }
 
   // Step 4: Protein goal
   const proteinContext = mapPrimaryGoalToProteinContext(input.primary_goal);
