@@ -897,6 +897,33 @@ export function ProfilePage() {
           <PrivacySettings />
         </div>
 
+        {/* Data Retention / Loeschkonzept (DSGVO Art. 5(1)(e)) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            {t.dataRetention?.title || 'Datenaufbewahrung'}
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">
+            {t.dataRetention?.subtitle || 'Wie lange sollen deine Gesundheitsdaten gespeichert werden? System-Logs werden automatisch nach 90 Tagen geloescht.'}
+          </p>
+          <select
+            value={profile?.data_retention_months ?? ''}
+            onChange={(e) => {
+              const val = e.target.value === '' ? null : parseInt(e.target.value);
+              updateProfile.mutate({ data_retention_months: val });
+            }}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          >
+            <option value="">{t.dataRetention?.unlimited || 'Unbegrenzt (Standard)'}</option>
+            <option value="12">{t.dataRetention?.months12 || '1 Jahr'}</option>
+            <option value="36">{t.dataRetention?.months36 || '3 Jahre'}</option>
+            <option value="60">{t.dataRetention?.months60 || '5 Jahre'}</option>
+          </select>
+          <p className="text-xs text-gray-400 mt-2">
+            {t.dataRetention?.info || 'Aeltere Gesundheitsdaten werden automatisch geloescht. Dies betrifft: Koerpermasse, Blutdruck, Blutwerte, Schlaf, Symptome, Mahlzeiten, Workouts.'}
+          </p>
+        </div>
+
         {/* Logout */}
         <button
           onClick={signOut}

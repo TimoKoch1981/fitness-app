@@ -706,6 +706,15 @@ export const it: TranslationKeys = {
     confirmRevoke: 'Revocare davvero',
     infoNote: 'La revoca del consenso si applica solo al trattamento futuro. I dati già elaborati non vengono interessati (Art. 7(3) frase 2 GDPR). La revoca di un consenso essenziale limiterà le funzionalità dell\'app.',
   },
+  dataRetention: {
+    title: 'Conservazione dei dati',
+    subtitle: 'Per quanto tempo devono essere conservati i tuoi dati sanitari? I log di sistema vengono eliminati automaticamente dopo 90 giorni.',
+    unlimited: 'Illimitato (Predefinito)',
+    months12: '1 Anno',
+    months36: '3 Anni',
+    months60: '5 Anni',
+    info: 'I dati sanitari più vecchi verranno eliminati automaticamente. Questo riguarda: misurazioni corporee, pressione sanguigna, analisi del sangue, sonno, sintomi, pasti, allenamenti.',
+  },
   workout: {
     startWorkout: "Inizia l'allenamento",
     cancelWorkout: "Annullare l'allenamento?",

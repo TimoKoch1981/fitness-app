@@ -706,6 +706,15 @@ export const ro: TranslationKeys = {
     confirmRevoke: 'Chiar revoci',
     infoNote: 'Retragerea consimțământului se aplică doar procesărilor viitoare. Datele deja procesate rămân neafectate (Art. 7(3) propoziția 2 GDPR). Revocarea unui consimțământ esențial va restricționa funcționalitatea aplicației.',
   },
+  dataRetention: {
+    title: 'Păstrarea datelor',
+    subtitle: 'Cât timp trebuie stocate datele tale de sănătate? Jurnalele de sistem sunt șterse automat după 90 de zile.',
+    unlimited: 'Nelimitat (Implicit)',
+    months12: '1 An',
+    months36: '3 Ani',
+    months60: '5 Ani',
+    info: 'Datele de sănătate mai vechi vor fi șterse automat. Aceasta afectează: măsurători corporale, tensiune arterială, analize de sânge, somn, simptome, mese, antrenamente.',
+  },
   workout: {
     startWorkout: 'Începe antrenamentul',
     cancelWorkout: 'Anulezi antrenamentul?',

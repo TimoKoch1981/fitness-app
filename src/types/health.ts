@@ -285,6 +285,8 @@ export interface UserProfile {
   health_restrictions?: string[];
   // Breastfeeding / Stillzeit (+300-500 kcal/day, Dewey 2003)
   is_breastfeeding?: boolean;
+  // Data Retention / Loeschkonzept (DSGVO Art. 5(1)(e))
+  data_retention_months?: number | null; // NULL = unbegrenzt, 12/36/60 = Monate
   created_at: string;
   updated_at: string;
 }

@@ -706,6 +706,15 @@ export const fil: TranslationKeys = {
     confirmRevoke: 'Talagang bawiin',
     infoNote: 'Ang pagbawi ng pahintulot ay nalalapat lamang sa hinaharap na pagproseso. Ang data na naiproseso na ay hindi maaapektuhan (Art. 7(3) pangungusap 2 GDPR). Ang pagbawi ng isang mahalagang pahintulot ay maglilimita sa functionality ng app.',
   },
+  dataRetention: {
+    title: 'Pagpapanatili ng Data',
+    subtitle: 'Gaano katagal dapat iimbak ang iyong data ng kalusugan? Ang mga system log ay awtomatikong tinatanggal pagkatapos ng 90 araw.',
+    unlimited: 'Walang Limitasyon (Default)',
+    months12: '1 Taon',
+    months36: '3 Taon',
+    months60: '5 Taon',
+    info: 'Ang mas lumang data ng kalusugan ay awtomatikong tatanggalin. Kasama dito: sukat ng katawan, presyon ng dugo, pagsusuri ng dugo, tulog, sintomas, pagkain, ehersisyo.',
+  },
   workout: {
     startWorkout: 'Simulan ang Training',
     cancelWorkout: 'Kanselahin ang Training?',

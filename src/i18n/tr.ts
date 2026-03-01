@@ -706,6 +706,15 @@ export const tr: TranslationKeys = {
     confirmRevoke: 'Gerçekten geri çek',
     infoNote: 'Onayın geri çekilmesi yalnızca gelecekteki işlemler için geçerlidir. Halihazırda işlenmiş veriler etkilenmez (Art. 7(3) cümle 2 GDPR). Temel bir onayın geri çekilmesi uygulama işlevselliğini kısıtlayacaktır.',
   },
+  dataRetention: {
+    title: 'Veri Saklama',
+    subtitle: 'Sağlık verileriniz ne kadar süre saklanmalı? Sistem günlükleri 90 gün sonra otomatik olarak silinir.',
+    unlimited: 'Sınırsız (Varsayılan)',
+    months12: '1 Yıl',
+    months36: '3 Yıl',
+    months60: '5 Yıl',
+    info: 'Eski sağlık verileri otomatik olarak silinecektir. Bu şunları etkiler: vücut ölçümleri, tansiyon, kan tahlilleri, uyku, semptomlar, öğünler, antrenmanlar.',
+  },
   workout: {
     startWorkout: 'Antrenmana Başla',
     cancelWorkout: 'Antrenmanı İptal Et?',

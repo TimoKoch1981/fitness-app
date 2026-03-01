@@ -706,6 +706,15 @@ export const fr: TranslationKeys = {
     confirmRevoke: 'Vraiment révoquer',
     infoNote: 'Le retrait du consentement ne s\'applique qu\'aux traitements futurs. Les données déjà traitées ne sont pas affectées (Art. 7(3) phrase 2 GDPR). La révocation d\'un consentement essentiel limitera les fonctionnalités de l\'application.',
   },
+  dataRetention: {
+    title: 'Conservation des données',
+    subtitle: 'Combien de temps vos données de santé doivent-elles être conservées ? Les journaux système sont automatiquement supprimés après 90 jours.',
+    unlimited: 'Illimité (Par défaut)',
+    months12: '1 An',
+    months36: '3 Ans',
+    months60: '5 Ans',
+    info: 'Les données de santé plus anciennes seront automatiquement supprimées. Cela concerne : mensurations, tension artérielle, analyses sanguines, sommeil, symptômes, repas, entraînements.',
+  },
   workout: {
     startWorkout: "Démarrer l'entraînement",
     cancelWorkout: "Annuler l'entraînement ?",

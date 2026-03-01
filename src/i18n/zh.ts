@@ -706,6 +706,15 @@ export const zh: TranslationKeys = {
     confirmRevoke: '确认撤回',
     infoNote: '撤回同意仅适用于未来的处理。已处理的数据不受影响（Art. 7(3) 第2句 GDPR）。撤回基本同意将限制应用功能。',
   },
+  dataRetention: {
+    title: '数据保留',
+    subtitle: '您的健康数据应该保存多长时间？系统日志会在90天后自动删除。',
+    unlimited: '无限制（默认）',
+    months12: '1年',
+    months36: '3年',
+    months60: '5年',
+    info: '较旧的健康数据将被自动删除。这包括：身体测量、血压、血液检查、睡眠、症状、膳食、锻炼。',
+  },
   workout: {
     startWorkout: '开始训练',
     cancelWorkout: '取消训练？',

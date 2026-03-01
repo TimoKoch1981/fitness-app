@@ -714,6 +714,15 @@ export const en: TranslationKeys = {
     confirmRevoke: 'Really revoke',
     infoNote: 'Withdrawal of consent only applies to future processing. Data already processed remains unaffected (Art. 7(3) sentence 2 GDPR). Revoking an essential consent will restrict app functionality.',
   },
+  dataRetention: {
+    title: 'Data Retention',
+    subtitle: 'How long should your health data be stored? System logs are automatically deleted after 90 days.',
+    unlimited: 'Unlimited (Default)',
+    months12: '1 Year',
+    months36: '3 Years',
+    months60: '5 Years',
+    info: 'Older health data will be automatically deleted. This affects: body measurements, blood pressure, blood work, sleep, symptoms, meals, workouts.',
+  },
   workout: {
     // Session
     startWorkout: 'Start Workout',

@@ -25,8 +25,8 @@
 - [x] ~~**E.1.2: Impressum erstellen**~~ ✅ (2026-02-28, v11.4) — /impressum Route, §5 DDG Pflichtangaben, Haftung, Urheberrecht, Medizin-Disclaimer. 17 Sprachen. Commit: a1d1d2f
 - [x] ~~**E.1.1: Datenschutzerklaerung erstellen**~~ ✅ (2026-02-28, v11.4) — /datenschutz Route, 10 Abschnitte (Verantwortlicher, Art.9 Gesundheitsdaten, KI, Hosting DE, Cookies, Drittdienste, Betroffenenrechte). 17 Sprachen. HINWEIS: Anwalts-Pruefung empfohlen! Commit: a1d1d2f
 - [x] ~~**E.1.3: Einwilligung granularisieren**~~ ✅ (2026-02-28, v11.4) — 3 granulare Consents (Gesundheitsdaten Art.9, KI-Verarbeitung, Drittlandtransfer Art.49). DB-Migration, DisclaimerModal mit 4 Checkboxen, useDisclaimerCheck v2. Commit: b92e5c0
-- [ ] **E.1.4: AVV mit OpenAI abschliessen** (~2h) — OpenAI DPA unterschreiben, SCCs pruefen. MANUELL, kein Code.
-- [ ] **E.1.5: AVV mit Hetzner pruefen** (~1h) — Hetzner Standard-AVV pruefen. MANUELL.
+- [x] ~~**E.1.4: AVV mit OpenAI abschliessen**~~ ✅ (2026-03-01, v12.18) — OpenAI Ireland Ltd. DPA unterzeichnet, SCCs inkl. EU-Standardvertragsklauseln. Dokumentiert in RECHTSKONFORMITAET.md.
+- [x] ~~**E.1.5: AVV mit Hetzner pruefen**~~ ✅ (2026-03-01, v12.18) — Hetzner Online GmbH AVV unterzeichnet (DSGVO Art. 28). Dokumentiert in RECHTSKONFORMITAET.md.
 - [x] ~~**E.1.6: Account-Loeschung implementieren**~~ ✅ (2026-02-28, v11.4) — DB-Funktion delete_user_account() (SECURITY DEFINER, CASCADE), useDeleteAccount Hook, DeleteAccountDialog mit Bestaetigungswort, ProfilePage Button. 17 Sprachen. Commit: 025a5f7
 - [x] ~~**E.1.7: Widerrufsrecht implementieren**~~ ✅ (2026-02-28, v11.4) — PrivacySettings Komponente, 3 Consent-Karten einzeln widerrufbar, ProfilePage integriert. 17 Sprachen. Commit: 284aade
 - [x] ~~**E.1.8: DSFA dokumentieren**~~ ✅ (2026-03-01, v12.8) — `docs/DSFA.md`: 12 Risiken, Risikomatrix, 12 techn. + 10 org. Massnahmen, Restrisiko-Bewertung. HINWEIS: Anwaltliche Pruefung empfohlen.
@@ -37,7 +37,10 @@
 - [x] ~~**E.2.3: BP-Klassifikation kennzeichnen**~~ ✅ (2026-02-28, v11.7) — "Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose." bei MedicalPage + AddBloodPressureDialog. 17 Sprachen.
 - [x] ~~**E.2.4: PED-Disclaimer verstaerken**~~ ✅ (2026-02-28, v11.7) — Amber PED-Badge, PED-Disclaimer-Footer bei MedicalPage + LogSubstanceDialog. 17 Sprachen.
 - [x] ~~**E.2.5: Substanz-Agent System-Prompt haerten**~~ ✅ (2026-02-28, v11.7) — HAFTUNGS-REGELN Block: Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen, Pflicht-Disclaimer. DE+EN.
-- [ ] **E.2.7: Security Headers in Caddyfile** (~1h) — CSP, HSTS, X-Frame-Options, Referrer-Policy
+- [x] ~~**E.2.7: Security Headers in Caddyfile**~~ ✅ (2026-03-01, v12.17) — CSP, HSTS, X-Frame-Options, Referrer-Policy, COOP, CORP in Caddy deployed
+
+**Phase 3 — Mittelfristig:**
+- [x] ~~**E.3.2: Loeschkonzept (automatische Fristen)**~~ ✅ (2026-03-01, v12.21) — DSGVO Art. 5(1)(e) Speicherbegrenzung. TTL-Spalten (ai_usage_logs 90d, reminder_logs 180d, buddy_context_notes 30d), User-konfigurierbare Gesundheitsdaten-Aufbewahrung (1/3/5 Jahre oder unbegrenzt), cleanup_expired_data() Funktion, ProfilePage Data-Retention-Selektor, 17 Sprachen. Migration 20260301000007.
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)

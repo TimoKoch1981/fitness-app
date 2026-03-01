@@ -706,6 +706,15 @@ export const ko: TranslationKeys = {
     confirmRevoke: '정말 철회하기',
     infoNote: '동의 철회는 향후 처리에만 적용됩니다. 이미 처리된 데이터는 영향을 받지 않습니다 (Art. 7(3) 제2문 GDPR). 필수 동의를 철회하면 앱 기능이 제한됩니다.',
   },
+  dataRetention: {
+    title: '데이터 보존',
+    subtitle: '건강 데이터를 얼마나 오래 저장할까요? 시스템 로그는 90일 후 자동으로 삭제됩니다.',
+    unlimited: '무제한 (기본값)',
+    months12: '1년',
+    months36: '3년',
+    months60: '5년',
+    info: '오래된 건강 데이터는 자동으로 삭제됩니다. 대상: 신체 측정, 혈압, 혈액 검사, 수면, 증상, 식사, 운동.',
+  },
   workout: {
     startWorkout: '운동 시작',
     cancelWorkout: '운동을 취소하시겠습니까?',

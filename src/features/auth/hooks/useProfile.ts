@@ -59,6 +59,8 @@ interface UpdateProfileInput {
   health_restrictions?: string[];
   // Breastfeeding / Stillzeit
   is_breastfeeding?: boolean;
+  // Data Retention / Loeschkonzept
+  data_retention_months?: number | null;
 }
 
 export function useUpdateProfile() {

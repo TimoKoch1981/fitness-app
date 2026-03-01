@@ -706,6 +706,15 @@ export const ja: TranslationKeys = {
     confirmRevoke: '本当に撤回する',
     infoNote: '同意の撤回は将来の処理にのみ適用されます。既に処理されたデータには影響しません（Art. 7(3) 第2文 GDPR）。必須の同意を撤回すると、アプリの機能が制限されます。',
   },
+  dataRetention: {
+    title: 'データ保持',
+    subtitle: '健康データをどのくらい保存しますか？システムログは90日後に自動的に削除されます。',
+    unlimited: '無制限（デフォルト）',
+    months12: '1年',
+    months36: '3年',
+    months60: '5年',
+    info: '古い健康データは自動的に削除されます。対象：体測定、血圧、血液検査、睡眠、症状、食事、ワークアウト。',
+  },
   workout: {
     startWorkout: 'トレーニングを開始',
     cancelWorkout: 'トレーニングを中止しますか？',

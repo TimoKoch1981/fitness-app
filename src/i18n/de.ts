@@ -715,6 +715,15 @@ export const de = {
     confirmRevoke: 'Wirklich widerrufen',
     infoNote: 'Der Widerruf einer Einwilligung wirkt nur für die Zukunft. Bereits verarbeitete Daten bleiben von der Rücknahme unberührt (Art. 7 Abs. 3 Satz 2 DSGVO). Bei Widerruf einer essentiellen Einwilligung wird die Nutzung der App eingeschränkt.',
   },
+  dataRetention: {
+    title: 'Datenaufbewahrung',
+    subtitle: 'Wie lange sollen deine Gesundheitsdaten gespeichert werden? System-Logs werden automatisch nach 90 Tagen gelöscht.',
+    unlimited: 'Unbegrenzt (Standard)',
+    months12: '1 Jahr',
+    months36: '3 Jahre',
+    months60: '5 Jahre',
+    info: 'Ältere Gesundheitsdaten werden automatisch gelöscht. Dies betrifft: Körpermaße, Blutdruck, Blutwerte, Schlaf, Symptome, Mahlzeiten, Workouts.',
+  },
   workout: {
     // Session
     startWorkout: 'Training starten',

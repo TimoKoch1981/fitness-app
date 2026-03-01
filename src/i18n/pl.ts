@@ -706,6 +706,15 @@ export const pl: TranslationKeys = {
     confirmRevoke: 'Naprawdę wycofać',
     infoNote: 'Wycofanie zgody dotyczy wyłącznie przyszłego przetwarzania. Już przetworzone dane pozostają nienaruszone (Art. 7(3) zdanie 2 GDPR). Wycofanie istotnej zgody ograniczy funkcjonalność aplikacji.',
   },
+  dataRetention: {
+    title: 'Przechowywanie danych',
+    subtitle: 'Jak długo powinny być przechowywane Twoje dane zdrowotne? Logi systemowe są automatycznie usuwane po 90 dniach.',
+    unlimited: 'Bez limitu (Domyślnie)',
+    months12: '1 Rok',
+    months36: '3 Lata',
+    months60: '5 Lat',
+    info: 'Starsze dane zdrowotne zostaną automatycznie usunięte. Dotyczy to: pomiarów ciała, ciśnienia krwi, wyników badań krwi, snu, objawów, posiłków, treningów.',
+  },
   workout: {
     startWorkout: 'Rozpocznij trening',
     cancelWorkout: 'Anulować trening?',

@@ -111,6 +111,39 @@
 | 12.9    | 2026-03-01 | Onboarding-Wizard (5 Schritte, OnboardingGuard, 17 Sprachen, 38 Keys)    | Erledigt   |
 | 12.10   | 2026-03-01 | RED-S/Untergewicht-Warnsystem (BMI, Defizit, EA, 17 Sprachen, 8 Keys)    | Erledigt   |
 | 12.11   | 2026-03-01 | Rektusdiastase-Kontraindikations-Check (Skill-Matrix, Agent-Rules, i18n)  | Erledigt   |
+| 12.17   | 2026-03-01 | Security Headers (CSP, HSTS, COOP, CORP in Caddyfile)                    | Erledigt   |
+| 12.18   | 2026-03-01 | AVV/DPA (OpenAI Ireland + Hetzner, RECHTSKONFORMITAET.md aktualisiert)   | Erledigt   |
+| 12.19   | 2026-03-01 | DSGVO Consent + Account-Loeschung auf Production deployed                | Erledigt   |
+| 12.21   | 2026-03-01 | Loeschkonzept (TTL, cleanup_expired_data, Data Retention UI, 17 Sprachen)| Erledigt   |
+
+---
+
+### 2026-03-01 - v12.21: Loeschkonzept / Data Retention (DSGVO Art. 5(1)(e))
+
+**Massnahme:** E.3.2 — Speicherbegrenzung nach DSGVO Art. 5 Abs. 1 lit. e
+
+**Umsetzung:**
+- **DB-Migration** `20260301000007_retention_policy.sql`:
+  - TTL-Spalte `expires_at` auf `ai_usage_logs` (90 Tage), `reminder_logs` (180 Tage)
+  - Indexes fuer schnelle Cleanup-Queries
+  - `data_retention_months` Spalte auf `profiles` (User-konfigurierbar)
+  - `cleanup_expired_data()` PostgreSQL-Funktion (SECURITY DEFINER)
+    - Bereinigt: ai_usage_logs, reminder_logs, buddy_context_notes (System)
+    - Bereinigt: body_measurements, meals, blood_pressure_logs, substance_logs, blood_work, sleep_logs, menstrual_cycle_logs, symptom_logs, workouts, daily_checkins (User-Daten)
+- **Frontend:** ProfilePage Data-Retention-Selektor (Unbegrenzt / 1 / 3 / 5 Jahre)
+- **Types:** `data_retention_months` in UserProfile + UpdateProfileInput
+- **i18n:** `dataRetention` Section in allen 17 Sprachen
+- **Production:** Migration deployed, Funktion + Spalten verifiziert
+- **Tests:** 3.058 — alle gruen
+
+**Datenkategorien und Fristen:**
+| Kategorie | Frist | Konfigurierbar |
+|---|---|---|
+| System-Logs (ai_usage_logs) | 90 Tage | Nein (fest) |
+| Reminder-Logs | 180 Tage | Nein (fest) |
+| Buddy-Context-Notes | 30 Tage | Nein (fest) |
+| Gesundheitsdaten | User-Wahl | Ja (1/3/5 Jahre oder unbegrenzt) |
+| Nutzerdaten | Bis Account-Loeschung | Nein (Art. 17) |
 
 ---
 

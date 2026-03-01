@@ -706,6 +706,15 @@ export const pt: TranslationKeys = {
     confirmRevoke: 'Revogar mesmo',
     infoNote: 'A revogação do consentimento aplica-se apenas ao processamento futuro. Os dados já processados não são afetados (Art. 7(3) frase 2 GDPR). Revogar um consentimento essencial restringirá a funcionalidade da aplicação.',
   },
+  dataRetention: {
+    title: 'Retenção de dados',
+    subtitle: 'Por quanto tempo os seus dados de saúde devem ser armazenados? Os registros do sistema são automaticamente excluídos após 90 dias.',
+    unlimited: 'Ilimitado (Padrão)',
+    months12: '1 Ano',
+    months36: '3 Anos',
+    months60: '5 Anos',
+    info: 'Dados de saúde mais antigos serão automaticamente excluídos. Isso afeta: medidas corporais, pressão arterial, exames de sangue, sono, sintomas, refeições, treinos.',
+  },
   workout: {
     startWorkout: 'Iniciar treino',
     cancelWorkout: 'Cancelar treino?',
