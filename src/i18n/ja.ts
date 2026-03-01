@@ -84,6 +84,9 @@ export const ja: TranslationKeys = {
     emailNotConfirmedMessage: 'メール内の確認リンクをクリックして、アカウントを有効化してください。',
     resendConfirmation: '確認メールを再送信',
     confirmationResent: '確認メールを再送信しました！',
+    signInWithGoogle: 'Googleでログイン',
+    signInWithApple: 'Appleでログイン',
+    orWithEmail: 'またはメールで',
   },
   onboarding: {
     stepOf: 'ステップ {step} / {total}',

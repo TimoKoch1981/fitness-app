@@ -84,6 +84,9 @@ export const ar: TranslationKeys = {
     emailNotConfirmedMessage: 'يرجى النقر على رابط التأكيد في بريدك الإلكتروني لتفعيل حسابك.',
     resendConfirmation: 'إعادة إرسال بريد التأكيد',
     confirmationResent: 'تم إعادة إرسال بريد التأكيد!',
+    signInWithGoogle: 'تسجيل الدخول بواسطة Google',
+    signInWithApple: 'تسجيل الدخول بواسطة Apple',
+    orWithEmail: 'أو بالبريد الإلكتروني',
   },
   onboarding: {
     stepOf: 'الخطوة {step} من {total}',

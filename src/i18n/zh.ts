@@ -84,6 +84,9 @@ export const zh: TranslationKeys = {
     emailNotConfirmedMessage: '请点击邮件中的确认链接以激活您的账户。',
     resendConfirmation: '重新发送确认邮件',
     confirmationResent: '确认邮件已重新发送！',
+    signInWithGoogle: '使用Google登录',
+    signInWithApple: '使用Apple登录',
+    orWithEmail: '或使用邮箱',
   },
   onboarding: {
     stepOf: '第 {step} 步，共 {total} 步',

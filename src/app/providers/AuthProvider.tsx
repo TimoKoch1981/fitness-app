@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, useMemo, type ReactNode
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
+export type OAuthProvider = 'google' | 'apple';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -9,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; errorCode?: string }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; autoConfirmed: boolean }>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (password: string) => Promise<{ error: Error | null }>;
@@ -182,8 +185,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return { error: error ? new Error(error.message) : null };
   };
 
+  const signInWithOAuth = async (provider: OAuthProvider) => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    return { error: error ? new Error(error.message) : null };
+  };
+
   const value = useMemo(
-    () => ({ user, session, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword, resendConfirmation }),
+    () => ({ user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, resetPassword, updatePassword, resendConfirmation }),
     [user, session, loading, isAdmin],
   );
 

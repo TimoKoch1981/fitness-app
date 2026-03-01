@@ -83,6 +83,9 @@ export const de = {
     emailNotConfirmedMessage: 'Bitte klicke auf den Bestätigungslink in deiner E-Mail, um dein Konto zu aktivieren.',
     resendConfirmation: 'Bestätigungsmail erneut senden',
     confirmationResent: 'Bestätigungsmail wurde erneut gesendet!',
+    signInWithGoogle: 'Mit Google anmelden',
+    signInWithApple: 'Mit Apple anmelden',
+    orWithEmail: 'oder mit E-Mail',
   },
   onboarding: {
     stepOf: 'Schritt {step} von {total}',

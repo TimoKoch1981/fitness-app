@@ -84,6 +84,9 @@ export const fil: TranslationKeys = {
     emailNotConfirmedMessage: 'Pakipindot ang confirmation link sa iyong email para ma-activate ang iyong account.',
     resendConfirmation: 'Ipadala muli ang confirmation email',
     confirmationResent: 'Naipadala muli ang confirmation email!',
+    signInWithGoogle: 'Mag-sign in gamit ang Google',
+    signInWithApple: 'Mag-sign in gamit ang Apple',
+    orWithEmail: 'o gamit ang email',
   },
   onboarding: {
     stepOf: 'Hakbang {step} ng {total}',

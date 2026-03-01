@@ -11,6 +11,8 @@ import { LoginPage } from '../LoginPage';
 
 // Mock useAuth
 const mockSignIn = vi.fn();
+const mockSignInWithOAuth = vi.fn();
+const mockResendConfirmation = vi.fn();
 const mockUseAuth = vi.fn();
 vi.mock('../../app/providers/AuthProvider', () => ({
   useAuth: () => mockUseAuth(),
@@ -32,8 +34,12 @@ describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSignIn.mockResolvedValue({ error: null });
+    mockSignInWithOAuth.mockResolvedValue({ error: null });
+    mockResendConfirmation.mockResolvedValue({ error: null });
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
+      signInWithOAuth: mockSignInWithOAuth,
+      resendConfirmation: mockResendConfirmation,
       user: null,
       loading: false,
     });
@@ -100,6 +106,8 @@ describe('LoginPage', () => {
   it('redirects to /buddy when user is already logged in', () => {
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
+      signInWithOAuth: mockSignInWithOAuth,
+      resendConfirmation: mockResendConfirmation,
       user: { id: 'u1', email: 'test@test.com' },
       loading: false,
     });
@@ -111,6 +119,8 @@ describe('LoginPage', () => {
   it('returns null while loading', () => {
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
+      signInWithOAuth: mockSignInWithOAuth,
+      resendConfirmation: mockResendConfirmation,
       user: null,
       loading: true,
     });
@@ -131,8 +141,15 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: 'Anmelden' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button')).toBeDisabled();
+      // Submit button shows loading text while submitting
+      expect(screen.getByRole('button', { name: 'Laden...' })).toBeDisabled();
     });
+  });
+
+  it('renders OAuth social login buttons', () => {
+    renderWithProviders(<LoginPage />, { initialRoute: '/login' });
+    expect(screen.getByRole('button', { name: /Google/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Apple/i })).toBeInTheDocument();
   });
 
   it('email field has correct type attribute', () => {

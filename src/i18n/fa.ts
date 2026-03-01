@@ -84,6 +84,9 @@ export const fa: TranslationKeys = {
     emailNotConfirmedMessage: 'لطفاً روی لینک تایید در ایمیل خود کلیک کنید تا حساب شما فعال شود.',
     resendConfirmation: 'ارسال مجدد ایمیل تایید',
     confirmationResent: 'ایمیل تایید مجدداً ارسال شد!',
+    signInWithGoogle: 'ورود با Google',
+    signInWithApple: 'ورود با Apple',
+    orWithEmail: 'یا با ایمیل',
   },
   onboarding: {
     stepOf: 'مرحله {step} از {total}',

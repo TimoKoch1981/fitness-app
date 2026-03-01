@@ -84,6 +84,9 @@ export const ru: TranslationKeys = {
     emailNotConfirmedMessage: 'Пожалуйста, нажмите на ссылку подтверждения в вашем письме, чтобы активировать аккаунт.',
     resendConfirmation: 'Отправить письмо подтверждения повторно',
     confirmationResent: 'Письмо подтверждения отправлено повторно!',
+    signInWithGoogle: 'Войти через Google',
+    signInWithApple: 'Войти через Apple',
+    orWithEmail: 'или по электронной почте',
   },
   onboarding: {
     stepOf: 'Шаг {step} из {total}',

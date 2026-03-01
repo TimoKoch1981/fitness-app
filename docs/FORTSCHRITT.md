@@ -116,6 +116,24 @@
 | 12.19   | 2026-03-01 | DSGVO Consent + Account-Loeschung auf Production deployed                | Erledigt   |
 | 12.21   | 2026-03-01 | Loeschkonzept (TTL, cleanup_expired_data, Data Retention UI, 17 Sprachen)| Erledigt   |
 | 12.22   | 2026-03-01 | Audit-Trail (audit_logs, 14 Trigger, 180d TTL, blood_work/sleep/cycle deployed) | Erledigt   |
+| 12.23   | 2026-03-01 | OAuth / Social Login (Google + Apple Buttons, AuthCallback, 17 Sprachen)  | Erledigt   |
+
+---
+
+### 2026-03-01 - v12.23: OAuth / Social Login (P2)
+
+**Feature:** Google + Apple Social Login Integration (Code-seitig komplett)
+
+**Umsetzung:**
+- **AuthProvider.tsx:** `signInWithOAuth(provider)` Methode, `OAuthProvider` Type Export
+- **LoginPage.tsx:** Google + Apple OAuth Buttons (SVG Icons), "oder mit E-Mail" Divider
+- **AuthCallbackPage.tsx:** OAuth Callback Handler (/auth/callback)
+- **App.tsx:** /auth/callback Route
+- **config.toml:** Google + Apple Provider (disabled, braucht Credentials)
+- **i18n:** 3 Keys in 17 Sprachen
+- **Tests:** 12/12 LoginPage Tests gruen
+
+**Setup-Anleitung:** Google Cloud Console + Apple Developer Account manuell konfigurieren.
 
 ---
 

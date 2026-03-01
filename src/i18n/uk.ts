@@ -84,6 +84,9 @@ export const uk: TranslationKeys = {
     emailNotConfirmedMessage: 'Будь ласка, натисніть на посилання підтвердження у вашому листі, щоб активувати обліковий запис.',
     resendConfirmation: 'Надіслати лист підтвердження повторно',
     confirmationResent: 'Лист підтвердження надіслано повторно!',
+    signInWithGoogle: 'Увійти через Google',
+    signInWithApple: 'Увійти через Apple',
+    orWithEmail: 'або через електронну пошту',
   },
   onboarding: {
     stepOf: 'Крок {step} з {total}',

@@ -84,6 +84,9 @@ export const ko: TranslationKeys = {
     emailNotConfirmedMessage: '이메일의 확인 링크를 클릭하여 계정을 활성화하세요.',
     resendConfirmation: '확인 이메일 다시 보내기',
     confirmationResent: '확인 이메일이 다시 전송되었습니다!',
+    signInWithGoogle: 'Google로 로그인',
+    signInWithApple: 'Apple로 로그인',
+    orWithEmail: '또는 이메일로',
   },
   onboarding: {
     stepOf: '{total}단계 중 {step}단계',

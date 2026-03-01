@@ -39,6 +39,7 @@ import { AdminFeedbackPage } from '../pages/admin/AdminFeedbackPage';
 import { FeatureVotingPage } from '../pages/FeatureVotingPage';
 import { ImpressumPage } from '../pages/ImpressumPage';
 import { DatenschutzPage } from '../pages/DatenschutzPage';
+import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 
 function AppRoutes() {
   return (
@@ -50,6 +51,7 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/impressum" element={<ImpressumPage />} />
       <Route path="/datenschutz" element={<DatenschutzPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       {/* Protected routes (with onboarding guard) */}
       <Route

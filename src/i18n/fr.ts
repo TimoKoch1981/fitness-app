@@ -84,6 +84,9 @@ export const fr: TranslationKeys = {
     emailNotConfirmedMessage: 'Veuillez cliquer sur le lien de confirmation dans votre e-mail pour activer votre compte.',
     resendConfirmation: 'Renvoyer l\'e-mail de confirmation',
     confirmationResent: 'E-mail de confirmation renvoyé !',
+    signInWithGoogle: 'Se connecter avec Google',
+    signInWithApple: 'Se connecter avec Apple',
+    orWithEmail: 'ou par e-mail',
   },
   onboarding: {
     stepOf: 'Étape {step} sur {total}',

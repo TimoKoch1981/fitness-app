@@ -84,6 +84,9 @@ export const ro: TranslationKeys = {
     emailNotConfirmedMessage: 'Te rugăm să dai clic pe linkul de confirmare din e-mail pentru a-ți activa contul.',
     resendConfirmation: 'Retrimite e-mailul de confirmare',
     confirmationResent: 'E-mailul de confirmare a fost retrimis!',
+    signInWithGoogle: 'Conectare cu Google',
+    signInWithApple: 'Conectare cu Apple',
+    orWithEmail: 'sau cu email',
   },
   onboarding: {
     stepOf: 'Pasul {step} din {total}',

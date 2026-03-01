@@ -84,6 +84,9 @@ export const tr: TranslationKeys = {
     emailNotConfirmedMessage: 'Hesabınızı etkinleştirmek için e-postanızdaki onay bağlantısına tıklayın.',
     resendConfirmation: 'Onay e-postasını tekrar gönder',
     confirmationResent: 'Onay e-postası tekrar gönderildi!',
+    signInWithGoogle: 'Google ile giriş yap',
+    signInWithApple: 'Apple ile giriş yap',
+    orWithEmail: 'veya e-posta ile',
   },
   onboarding: {
     stepOf: 'Adım {step} / {total}',
