@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   analyzeDeviations,
   formatDeviationsForAgent,
@@ -206,6 +206,101 @@ describe('analyzeDeviations', () => {
     const result = analyzeDeviations({}, null);
     expect(result).toEqual([]);
   });
+
+  // New: undereating & deficit tests
+  it('detects critical undereating (<1200 kcal) after 6 PM', () => {
+    // Mock time to 19:00
+    const originalDate = Date;
+    const mockDate = new Date(2026, 2, 1, 19, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockDate);
+
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 800, caloriesGoal: 2000,
+        protein: 40, proteinGoal: 150,
+        carbs: 100, fat: 20, water: 3, waterGoal: 8,
+      },
+    });
+    const result = analyzeDeviations(ctx, null);
+    const undereating = result.find(d => d.message.includes('kritisch niedrig'));
+    expect(undereating).toBeDefined();
+    expect(undereating!.priority).toBe(1);
+    expect(undereating!.icon).toBe('🚨');
+
+    vi.useRealTimers();
+  });
+
+  it('detects severe calorie deficit >1000 kcal', () => {
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 500, caloriesGoal: 2000, // deficit = 1500
+        protein: 30, proteinGoal: 150,
+        carbs: 50, fat: 10, water: 2, waterGoal: 8,
+      },
+    });
+    const result = analyzeDeviations(ctx, null);
+    const deficit = result.find(d => d.message.includes('defizit ueber 1000'));
+    expect(deficit).toBeDefined();
+    expect(deficit!.priority).toBe(2);
+    expect(deficit!.agent).toBe('nutrition');
+  });
+
+  it('does NOT flag deficit when it is under 1000 kcal', () => {
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 1200, caloriesGoal: 2000, // deficit = 800
+        protein: 60, proteinGoal: 150,
+        carbs: 150, fat: 30, water: 4, waterGoal: 8,
+      },
+    });
+    const result = analyzeDeviations(ctx, null);
+    const deficit = result.find(d => d.message.includes('defizit ueber 1000'));
+    expect(deficit).toBeUndefined();
+  });
+
+  // Blood work deviations (Power+ mode)
+  it('detects HDL <25 → medical warning', () => {
+    const ctx = makeContext({
+      latestBloodWork: { hdl: 22 } as any,
+    });
+    const result = analyzeDeviations(ctx, null);
+    const hdl = result.find(d => d.message.includes('HDL kritisch'));
+    expect(hdl).toBeDefined();
+    expect(hdl!.priority).toBe(1);
+  });
+
+  it('detects hematocrit ≥54% → dangerous warning', () => {
+    const ctx = makeContext({
+      latestBloodWork: { hematocrit: 55 } as any,
+    });
+    const result = analyzeDeviations(ctx, null);
+    const hct = result.find(d => d.message.includes('GEFAEHRLICH'));
+    expect(hct).toBeDefined();
+    expect(hct!.priority).toBe(1);
+  });
+
+  it('detects hematocrit ≥52% → elevated warning', () => {
+    const ctx = makeContext({
+      latestBloodWork: { hematocrit: 53 } as any,
+    });
+    const result = analyzeDeviations(ctx, null);
+    const hct = result.find(d => d.message.includes('Haematokrit erhoet'));
+    expect(hct).toBeDefined();
+    expect(hct!.priority).toBe(2);
+  });
+
+  it('detects overtraining: 7+ workouts in 7 days', () => {
+    const now = Date.now();
+    const workouts = Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(now - i * 24 * 60 * 60 * 1000).toISOString(),
+    }));
+    const ctx = makeContext({ recentWorkouts: workouts as any });
+    const result = analyzeDeviations(ctx, null);
+    const overtraining = result.find(d => d.message.includes('Uebertrainings-Risiko'));
+    expect(overtraining).toBeDefined();
+    expect(overtraining!.priority).toBe(2);
+  });
 });
 
 // ── formatDeviationsForAgent ────────────────────────────────────────────
@@ -293,5 +388,39 @@ describe('getDeviationSuggestions', () => {
     const chips = getDeviationSuggestions(deviations, 'en');
     const illnessChip = chips.find(c => c.id === 'dev_illness');
     expect(illnessChip?.label).toContain('sick');
+  });
+
+  it('generates undereating chip', () => {
+    // Mock time to 19:00 for undereating detection
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 1, 19, 0, 0));
+
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 700, caloriesGoal: 2000,
+        protein: 30, proteinGoal: 150,
+        carbs: 80, fat: 15, water: 2, waterGoal: 8,
+      },
+    });
+    const deviations = analyzeDeviations(ctx, null);
+    const chips = getDeviationSuggestions(deviations, 'de');
+    const undereatingChip = chips.find(c => c.id === 'dev_undereating');
+    expect(undereatingChip).toBeDefined();
+
+    vi.useRealTimers();
+  });
+
+  it('generates deficit chip for >1000 kcal deficit', () => {
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 500, caloriesGoal: 2000,
+        protein: 20, proteinGoal: 150,
+        carbs: 60, fat: 10, water: 1, waterGoal: 8,
+      },
+    });
+    const deviations = analyzeDeviations(ctx, null);
+    const chips = getDeviationSuggestions(deviations, 'de');
+    const deficitChip = chips.find(c => c.id === 'dev_deficit');
+    expect(deficitChip).toBeDefined();
   });
 });

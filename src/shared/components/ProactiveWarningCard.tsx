@@ -58,6 +58,12 @@ function getDeviationChatMessage(d: Deviation, lang: 'de' | 'en'): string {
   if (msgLower.includes('blutdruck')) {
     return de ? 'Mein Blutdruck war hoch. Was bedeutet das?' : 'My blood pressure was high. What does that mean?';
   }
+  if (msgLower.includes('kritisch niedrig')) {
+    return de ? 'Ich habe heute sehr wenig gegessen. Ist das gefaehrlich?' : "I've eaten very little today. Is that dangerous?";
+  }
+  if (msgLower.includes('defizit ueber 1000') || msgLower.includes('deficit over 1000')) {
+    return de ? 'Mein Kaloriendefizit ist sehr gross. Was soll ich tun?' : 'My calorie deficit is very large. What should I do?';
+  }
   if (msgLower.includes('protein')) {
     return de ? 'Wie kann ich heute noch mein Protein erreichen?' : 'How can I still hit my protein target today?';
   }

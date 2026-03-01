@@ -140,6 +140,30 @@ export function analyzeDeviations(
       });
     }
 
+    // Critical undereating: <1200 kcal logged AND past noon (to avoid false alarms in AM)
+    if (hour >= 18 && stats.calories > 0 && stats.calories < 1200) {
+      deviations.push({
+        type: 'warning',
+        agent: 'nutrition',
+        message: `Kalorienaufnahme kritisch niedrig: nur ${stats.calories} kcal — unter 1200 kcal erhoet RED-S-Risiko`,
+        messageEN: `Calorie intake critically low: only ${stats.calories} kcal — under 1200 kcal increases RED-S risk`,
+        priority: 1,
+        icon: '🚨',
+      });
+    }
+
+    // Severe calorie deficit: >1000 kcal below goal
+    if (stats.calories > 0 && calGoal - stats.calories > 1000) {
+      deviations.push({
+        type: 'warning',
+        agent: 'nutrition',
+        message: `Kaloriendefizit ueber 1000 kcal: ${calGoal - stats.calories} kcal Defizit — Unterernaehrungsrisiko`,
+        messageEN: `Calorie deficit over 1000 kcal: ${calGoal - stats.calories} kcal deficit — undereating risk`,
+        priority: 2,
+        icon: '⚠️',
+      });
+    }
+
     // Protein <60% but calories >70% → protein warning
     if (stats.calories > calGoal * 0.7 && stats.protein < protGoal * 0.6) {
       deviations.push({
@@ -389,6 +413,20 @@ export function getDeviationSuggestions(
         label: de ? 'Training nachholen' : 'Catch up training',
         message: de ? 'Ich habe lange nicht trainiert. Wie steige ich wieder ein?' : 'I haven\'t trained in a while. How do I get back into it?',
         icon: '💪',
+      });
+    } else if (d.agent === 'nutrition' && msgLower.includes('kritisch niedrig')) {
+      suggestions.push({
+        id: 'dev_undereating',
+        label: de ? 'Unterkalorien!' : 'Undereating!',
+        message: de ? 'Ich habe heute sehr wenig gegessen. Ist das gefaehrlich?' : "I've eaten very little today. Is that dangerous?",
+        icon: '🚨',
+      });
+    } else if (d.agent === 'nutrition' && msgLower.includes('defizit ueber 1000')) {
+      suggestions.push({
+        id: 'dev_deficit',
+        label: de ? 'Grosses Defizit' : 'Large deficit',
+        message: de ? 'Mein Kaloriendefizit ist sehr gross. Was soll ich tun?' : 'My calorie deficit is very large. What should I do?',
+        icon: '⚠️',
       });
     } else if (d.agent === 'nutrition' && msgLower.includes('kalorien')) {
       suggestions.push({

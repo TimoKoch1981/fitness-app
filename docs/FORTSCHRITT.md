@@ -121,6 +121,7 @@
 | 12.25   | 2026-03-01 | Buddy Quellenangaben (getSkillContentWithSources, PMID-Injection, Facts Codex verstaerkt) | Erledigt   |
 | 12.26   | 2026-03-01 | Buddy Kontext-Persistence (buddy_chat_messages, useChatHistory, DB-Hydration, Dual-Storage) | Erledigt   |
 | 12.27   | 2026-03-01 | Symptom-Tracker Erweiterung (10 neue Symptome, Mood/Energy Rating, Gender-Gating, 17 Sprachen) | Erledigt   |
+| 12.28   | 2026-03-01 | Proaktives Warnsystem (useProactiveWarnings, Auto-Chat-Injection, 2 neue Schwellenwerte, 9 Tests) | Erledigt   |
 
 ---
 

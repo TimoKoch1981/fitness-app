@@ -26,6 +26,7 @@ import { useSleepLogs } from '../features/sleep/hooks/useSleep';
 import { useMenstrualCycleLogs } from '../features/medical/hooks/useMenstrualCycle';
 import { useSymptomLogs } from '../features/medical/hooks/useSymptomLogs';
 import { analyzeDeviations, getDeviationSuggestions } from '../lib/ai/deviations';
+import { useProactiveWarnings } from '../features/buddy/hooks/useProactiveWarnings';
 import { today } from '../lib/utils';
 import { getActionDisplayInfo } from '../lib/ai/actions/types';
 import { FeatureTour, isFeatureTourCompleted } from '../features/buddy/components/FeatureTour';
@@ -169,6 +170,10 @@ export function BuddyPage() {
 
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
+
+  // Proactive warnings — auto-inject critical health alerts into chat
+  const isDataReady = !!(profile && (recentWorkouts || latestBloodWork || dailyCheckin));
+  useProactiveWarnings(deviations, addSystemMessage, language as 'de' | 'en', isDataReady);
 
   // Wire sendMessage ref for voice auto-send
   sendMessageRef.current = sendMessage;

@@ -34,6 +34,8 @@ import { useTodayCheckin } from '../../features/checkin/hooks/useDailyCheckin';
 import { useSleepLogs } from '../../features/sleep/hooks/useSleep';
 import { useMenstrualCycleLogs } from '../../features/medical/hooks/useMenstrualCycle';
 import { useSymptomLogs } from '../../features/medical/hooks/useSymptomLogs';
+import { analyzeDeviations } from '../../lib/ai/deviations';
+import { useProactiveWarnings } from '../../features/buddy/hooks/useProactiveWarnings';
 import { today } from '../../lib/utils';
 import { getActionDisplayInfo } from '../../lib/ai/actions/types';
 import type { HealthContext } from '../../types/health';
@@ -162,6 +164,11 @@ function InlineBuddyChatContent() {
 
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
+
+  // Proactive warnings — auto-inject critical health alerts into chat
+  const deviations = analyzeDeviations(healthContext, dailyCheckin);
+  const isDataReady = !!(profile && (recentWorkouts || latestBloodWork || dailyCheckin));
+  useProactiveWarnings(deviations, addSystemMessage, language as 'de' | 'en', isDataReady);
 
   // Switch to target agent when inline chat opens with a specific agent
   const targetAgentAppliedRef = useRef(false);
