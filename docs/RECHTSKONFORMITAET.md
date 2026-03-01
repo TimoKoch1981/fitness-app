@@ -375,11 +375,11 @@ Als kommerziell geplante App (100+ Nutzer, EU/Deutschland) besteht **Impressumsp
 |---|---|---|---|---|
 | E.1.1 | **Datenschutzerklaerung erstellen** | DSGVO Art. 13/14 | Hoch | Vollstaendige Datenschutzerklaerung mit allen Pflichtangaben, Drittlandtransfer-Info, KI-Hinweis |
 | E.1.2 | **Impressum erstellen** | TMG/DDG | Niedrig | Pflichtangaben auf fudda.de |
-| E.1.3 | **Einwilligung granularisieren** | DSGVO Art. 9 | Mittel | Separate Einwilligungen: (1) Gesundheitsdaten, (2) KI-Verarbeitung, (3) Drittlandtransfer |
+| E.1.3 | ~~**Einwilligung granularisieren**~~ ✅ | DSGVO Art. 9 | Mittel | ✅ 3 Consent-Felder, DisclaimerModal 4 Checkboxen, useDisclaimerCheck, Production deployed (2026-03-01) |
 | E.1.4 | ~~**AVV mit OpenAI abschliessen**~~ ✅ | DSGVO Art. 28 | Mittel | ✅ DPA mit OpenAI Ireland Ltd. abgeschlossen (2026-03-01) |
 | E.1.5 | ~~**AVV mit Hetzner pruefen**~~ ✅ | DSGVO Art. 28 | Niedrig | ✅ AVV mit Hetzner Online GmbH abgeschlossen (2026-03-01) |
 | E.1.6 | **Account-Loeschung implementieren** | DSGVO Art. 17 | Mittel | Vollstaendige Kaskaden-Loeschung aller Nutzerdaten |
-| E.1.7 | **Widerrufsrecht implementieren** | DSGVO Art. 7 Abs. 3 | Mittel | Einwilligung zurueckziehen koennen (pro Kategorie) |
+| E.1.7 | ~~**Widerrufsrecht implementieren**~~ ✅ | DSGVO Art. 7 Abs. 3 | Mittel | ✅ PrivacySettings Komponente, pro-Consent Revoke, Re-Consent-Flow (2026-02-28) |
 | E.1.8 | **DSFA durchfuehren** | DSGVO Art. 35 | Hoch | Datenschutz-Folgenabschaetzung dokumentieren |
 
 ### E.2 Wichtig (zeitnah nach Launch)
