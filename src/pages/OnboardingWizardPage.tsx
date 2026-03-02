@@ -67,6 +67,45 @@ const HEALTH_RESTRICTION_OPTIONS = [
 
 const GENDERS: Gender[] = ['male', 'female', 'other'];
 
+/** Map internal goal keys to i18n keys */
+const GOAL_I18N: Record<string, string> = {
+  muscle_gain: 'goalMusclGain',
+  fat_loss: 'goalFatLoss',
+  health: 'goalHealth',
+  performance: 'goalPerformance',
+  body_recomp: 'goalBodyRecomp',
+};
+
+/** Map internal activity keys to i18n keys */
+const ACTIVITY_I18N: Record<string, string> = {
+  sedentary: 'activitySedentary',
+  lightly_active: 'activityLight',
+  moderately_active: 'activityModerate',
+  very_active: 'activityVery',
+  extremely_active: 'activityExtreme',
+};
+
+/** Map internal diet/allergy keys to i18n keys */
+const DIET_I18N: Record<string, string> = {
+  vegetarian: 'diet_vegetarian',
+  vegan: 'diet_vegan',
+  pescatarian: 'diet_pescatarian',
+  keto: 'diet_keto',
+  paleo: 'diet_paleo',
+  glutenFree: 'diet_glutenFree',
+  lactoseFree: 'diet_lactoseFree',
+};
+
+const ALLERGY_I18N: Record<string, string> = {
+  nuts: 'allergy_nuts',
+  gluten: 'allergy_gluten',
+  lactose: 'allergy_lactose',
+  shellfish: 'allergy_shellfish',
+  soy: 'allergy_soy',
+  eggs: 'allergy_eggs',
+  fructose: 'allergy_fructose',
+};
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 /** Toggle a value in an array (add if absent, remove if present). */
@@ -158,7 +197,9 @@ export function OnboardingWizardPage() {
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
             <span>
-              {label('stepOf', 'Schritt')} {step} / {TOTAL_STEPS - 1}
+              {label('stepOf', 'Schritt {step} von {total}')
+                .replace('{step}', String(step))
+                .replace('{total}', String(TOTAL_STEPS - 1))}
             </span>
             <div className="flex gap-1.5">
               {Array.from({ length: TOTAL_STEPS - 1 }, (_, i) => {
@@ -233,7 +274,7 @@ export function OnboardingWizardPage() {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {label('name', 'Name')} <span className="text-gray-400 text-xs">({label('optional', 'optional')})</span>
+                  {label('nameLabel', 'Name (optional)')}
                 </label>
                 <input
                   type="text"
@@ -248,7 +289,7 @@ export function OnboardingWizardPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {label('height', 'Groesse (cm)')} <span className="text-red-400">*</span>
+                    {label('heightLabel', 'Größe (cm)')} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="number"
@@ -262,7 +303,7 @@ export function OnboardingWizardPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {label('weight', 'Gewicht (kg)')}
+                    {label('weightLabel', 'Gewicht (kg)')}
                   </label>
                   <input
                     type="number"
@@ -280,7 +321,7 @@ export function OnboardingWizardPage() {
               {/* Birth date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {label('birthDate', 'Geburtsdatum')} <span className="text-red-400">*</span>
+                  {label('birthDateLabel', 'Geburtsdatum')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="date"
@@ -294,7 +335,7 @@ export function OnboardingWizardPage() {
               {/* Gender cards */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {label('gender', 'Geschlecht')} <span className="text-red-400">*</span>
+                  {label('genderLabel', 'Geschlecht')} <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {GENDERS.map((g) => (
@@ -307,7 +348,7 @@ export function OnboardingWizardPage() {
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
-                      {label(`gender_${g}`, g === 'male' ? 'Maennlich' : g === 'female' ? 'Weiblich' : 'Divers')}
+                      {label(g === 'male' ? 'genderMale' : g === 'female' ? 'genderFemale' : 'genderOther', g === 'male' ? 'Männlich' : g === 'female' ? 'Weiblich' : 'Divers')}
                     </button>
                   ))}
                 </div>
@@ -330,7 +371,7 @@ export function OnboardingWizardPage() {
               {/* Primary Goal */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  {label('primaryGoal', 'Hauptziel')}
+                  {label('primaryGoalLabel', 'Hauptziel')}
                 </label>
                 {PRIMARY_GOALS.map((goal) => (
                   <button
@@ -343,7 +384,7 @@ export function OnboardingWizardPage() {
                     }`}
                   >
                     <span className="font-medium text-sm">
-                      {label(`goal_${goal}`, goal.replace(/_/g, ' '))}
+                      {label(GOAL_I18N[goal] ?? goal, goal.replace(/_/g, ' '))}
                     </span>
                   </button>
                 ))}
@@ -352,7 +393,7 @@ export function OnboardingWizardPage() {
               {/* Activity Level */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  {label('activityLevel', 'Aktivitaetslevel')}
+                  {label('activityLabel', 'Aktivitätslevel')}
                 </label>
                 {ACTIVITY_LEVELS.map(({ key, pal }) => (
                   <button
@@ -365,7 +406,7 @@ export function OnboardingWizardPage() {
                     }`}
                   >
                     <span className="font-medium text-sm">
-                      {label(`activity_${key}`, key.replace(/_/g, ' '))}
+                      {label(ACTIVITY_I18N[key] ?? key, key.replace(/_/g, ' '))}
                     </span>
                     <span className="text-xs text-gray-400 ml-2">PAL {pal}</span>
                   </button>
@@ -396,27 +437,27 @@ export function OnboardingWizardPage() {
 
               {/* Dietary Preferences */}
               <ChipSection
-                title={label('dietaryPreferences', 'Ernaehrungspraeferenzen')}
+                title={label('dietaryLabel', 'Ernährungsform')}
                 icon={<Utensils className="w-4 h-4 text-emerald-500" />}
                 options={DIET_OPTIONS}
                 selected={dietPrefs}
                 onToggle={(v) => setDietPrefs(toggleChip(dietPrefs, v))}
-                labelFn={(key) => label(`diet_${key}`, key)}
+                labelFn={(key) => label(DIET_I18N[key] ?? key, key)}
               />
 
               {/* Allergies */}
               <ChipSection
-                title={label('allergies', 'Allergien / Unvertraeglichkeiten')}
+                title={label('allergiesLabel', 'Allergien & Unverträglichkeiten')}
                 icon={<Heart className="w-4 h-4 text-red-400" />}
                 options={ALLERGY_OPTIONS}
                 selected={allergies}
                 onToggle={(v) => setAllergies(toggleChip(allergies, v))}
-                labelFn={(key) => label(`allergy_${key}`, key)}
+                labelFn={(key) => label(ALLERGY_I18N[key] ?? key, key)}
               />
 
               {/* Health Restrictions */}
               <ChipSection
-                title={label('healthRestrictions', 'Einschraenkungen / Verletzungen')}
+                title={label('restrictionsLabel', 'Gesundheitliche Einschränkungen')}
                 icon={<Heart className="w-4 h-4 text-amber-500" />}
                 options={HEALTH_RESTRICTION_OPTIONS}
                 selected={healthRestrictions}

@@ -68,10 +68,10 @@ DECLARE
   _old JSONB;
   _new JSONB;
 BEGIN
-  -- User-ID ermitteln
+  -- User-ID ermitteln (to_jsonb fuer Tabellen ohne user_id Spalte, z.B. profiles)
   _user_id := COALESCE(
-    CASE WHEN TG_OP IN ('UPDATE', 'DELETE') THEN (OLD).user_id ELSE NULL END,
-    CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN (NEW).user_id ELSE NULL END,
+    CASE WHEN TG_OP IN ('UPDATE', 'DELETE') THEN (to_jsonb(OLD)->>'user_id')::UUID ELSE NULL END,
+    CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN (to_jsonb(NEW)->>'user_id')::UUID ELSE NULL END,
     auth.uid()
   );
 
