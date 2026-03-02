@@ -146,10 +146,10 @@ describe('LoginPage', () => {
     });
   });
 
-  it('renders OAuth social login buttons', () => {
+  it('hides OAuth buttons when VITE_OAUTH_ENABLED is not set', () => {
     renderWithProviders(<LoginPage />, { initialRoute: '/login' });
-    expect(screen.getByRole('button', { name: /Google/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Apple/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Google/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Apple/i })).not.toBeInTheDocument();
   });
 
   it('email field has correct type attribute', () => {

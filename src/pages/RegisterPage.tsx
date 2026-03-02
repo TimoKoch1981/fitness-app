@@ -22,18 +22,22 @@ export function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (password !== confirmPassword) {
+    // Trim to avoid invisible whitespace from autofill/paste
+    const pw = password.trim();
+    const cpw = confirmPassword.trim();
+
+    if (pw !== cpw) {
       setError(language === 'de' ? 'Passwörter stimmen nicht überein' : 'Passwords do not match');
       return;
     }
 
-    if (password.length < 6) {
+    if (pw.length < 6) {
       setError(language === 'de' ? 'Passwort muss mindestens 6 Zeichen lang sein' : 'Password must be at least 6 characters');
       return;
     }
 
     setSubmitting(true);
-    const { error, autoConfirmed } = await signUp(email, password);
+    const { error, autoConfirmed } = await signUp(email.trim(), pw);
     if (error) {
       setError(error.message);
     } else if (autoConfirmed) {
@@ -117,6 +121,7 @@ export function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
               required
             />
@@ -130,6 +135,7 @@ export function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
               required
               minLength={6}
@@ -144,6 +150,7 @@ export function RegisterPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
               required
               minLength={6}
