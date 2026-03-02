@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 export function RegisterPage() {
   const { signUp, user, loading } = useAuth();
@@ -10,6 +12,8 @@ export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [autoLogging, setAutoLogging] = useState(false);
@@ -37,20 +41,23 @@ export function RegisterPage() {
     }
 
     setSubmitting(true);
-    const { error, autoConfirmed } = await signUp(email.trim(), pw);
-    if (error) {
-      setError(error.message);
-    } else if (autoConfirmed) {
-      // AUTOCONFIRM active: user is already logged in, wait for redirect
-      setAutoLogging(true);
-      return; // Navigate to /buddy will trigger via AuthProvider
-    } else {
-      setSuccess(true);
+    try {
+      const { error, autoConfirmed } = await signUp(email.trim(), pw);
+      if (error) {
+        setError(error.message);
+      } else if (autoConfirmed) {
+        setAutoLogging(true);
+        return;
+      } else {
+        setSuccess(true);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registrierung fehlgeschlagen');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
-  // Auto-login spinner while auth state propagates
   if (autoLogging) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
@@ -80,13 +87,8 @@ export function RegisterPage() {
               ? 'Bitte überprüfe deine E-Mail und bestätige dein Konto.'
               : 'Please check your email and confirm your account.'}
           </p>
-          <p className="text-sm font-medium text-teal-600 mb-4">
-            {email}
-          </p>
-          <Link
-            to="/login"
-            className="inline-block py-2 px-6 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-          >
+          <p className="text-sm font-medium text-teal-600 mb-4">{email}</p>
+          <Link to="/login" className="inline-block py-2 px-6 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
             {t.auth.login}
           </Link>
         </div>
@@ -95,7 +97,12 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4 relative">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector />
+      </div>
+
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
@@ -108,15 +115,11 @@ export function RegisterPage() {
           <h2 className="text-lg font-semibold text-gray-900">{t.auth.register}</h2>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
-              {error}
-            </div>
+            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">{error}</div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.auth.email}
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.auth.email}</label>
             <input
               type="email"
               value={email}
@@ -127,34 +130,54 @@ export function RegisterPage() {
             />
           </div>
 
+          {/* Password with toggle */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.auth.password}
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
-              required
-              minLength={6}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.auth.password}</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
+          {/* Confirm Password with toggle */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.auth.confirmPassword}
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
-              required
-              minLength={6}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.auth.confirmPassword}</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                tabIndex={-1}
+                aria-label={showConfirmPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -167,21 +190,15 @@ export function RegisterPage() {
 
           <p className="text-center text-sm text-gray-500">
             {t.auth.hasAccount}{' '}
-            <Link to="/login" className="text-teal-600 font-medium hover:underline">
-              {t.auth.login}
-            </Link>
+            <Link to="/login" className="text-teal-600 font-medium hover:underline">{t.auth.login}</Link>
           </p>
         </form>
 
         {/* Legal Links */}
         <div className="mt-6 flex justify-center gap-4 text-xs text-gray-400">
-          <Link to="/impressum" className="hover:text-teal-600 transition-colors">
-            {t.legal.impressumTitle}
-          </Link>
+          <Link to="/impressum" className="hover:text-teal-600 transition-colors">{t.legal.impressumTitle}</Link>
           <span>|</span>
-          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">
-            {t.legal.privacyPolicy}
-          </Link>
+          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">{t.legal.privacyPolicy}</Link>
         </div>
       </div>
     </div>

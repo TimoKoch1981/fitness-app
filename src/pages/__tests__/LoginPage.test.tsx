@@ -18,13 +18,22 @@ vi.mock('../../app/providers/AuthProvider', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-/** Helper: find input after a label text */
+// Mock LanguageSelector (to avoid complex i18n context dependencies)
+vi.mock('../../components/LanguageSelector', () => ({
+  LanguageSelector: () => <div data-testid="language-selector">DE</div>,
+}));
+
+/** Helper: find input by its associated label text */
 function getInputByLabel(container: HTMLElement, labelText: string): HTMLInputElement {
   const labels = container.querySelectorAll('label');
   for (const label of labels) {
     if (label.textContent?.trim() === labelText) {
-      const input = label.parentElement?.querySelector('input');
-      if (input) return input as HTMLInputElement;
+      // Input might be a direct sibling or inside a wrapper div
+      const parent = label.parentElement;
+      if (parent) {
+        const input = parent.querySelector('input');
+        if (input) return input as HTMLInputElement;
+      }
     }
   }
   throw new Error(`Input for label "${labelText}" not found`);
@@ -70,6 +79,17 @@ describe('LoginPage', () => {
     expect(screen.getByText('Passwort vergessen?')).toBeInTheDocument();
   });
 
+  it('renders OAuth buttons (Google and Apple)', () => {
+    renderWithProviders(<LoginPage />, { initialRoute: '/login' });
+    expect(screen.getByRole('button', { name: /Google/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Apple/i })).toBeInTheDocument();
+  });
+
+  it('renders language selector', () => {
+    renderWithProviders(<LoginPage />, { initialRoute: '/login' });
+    expect(screen.getByTestId('language-selector')).toBeInTheDocument();
+  });
+
   it('calls signIn with email and password on submit', async () => {
     const user = userEvent.setup();
     const { container } = renderWithProviders(<LoginPage />, { initialRoute: '/login' });
@@ -103,7 +123,7 @@ describe('LoginPage', () => {
     });
   });
 
-  it('redirects to /buddy when user is already logged in', () => {
+  it('redirects to /cockpit when user is already logged in', () => {
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
       signInWithOAuth: mockSignInWithOAuth,
@@ -146,21 +166,33 @@ describe('LoginPage', () => {
     });
   });
 
-  it('hides OAuth buttons when VITE_OAUTH_ENABLED is not set', () => {
-    renderWithProviders(<LoginPage />, { initialRoute: '/login' });
-    expect(screen.queryByRole('button', { name: /Google/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Apple/i })).not.toBeInTheDocument();
-  });
-
   it('email field has correct type attribute', () => {
     const { container } = renderWithProviders(<LoginPage />, { initialRoute: '/login' });
     const emailInput = getInputByLabel(container, 'E-Mail');
     expect(emailInput).toHaveAttribute('type', 'email');
   });
 
-  it('password field has correct type attribute', () => {
+  it('password field defaults to password type', () => {
     const { container } = renderWithProviders(<LoginPage />, { initialRoute: '/login' });
     const pwInput = getInputByLabel(container, 'Passwort');
+    expect(pwInput).toHaveAttribute('type', 'password');
+  });
+
+  it('toggles password visibility', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithProviders(<LoginPage />, { initialRoute: '/login' });
+
+    const pwInput = getInputByLabel(container, 'Passwort');
+    expect(pwInput).toHaveAttribute('type', 'password');
+
+    // Click the eye toggle button
+    const toggleBtn = screen.getByLabelText('Passwort anzeigen');
+    await user.click(toggleBtn);
+    expect(pwInput).toHaveAttribute('type', 'text');
+
+    // Click again to hide
+    const hideBtn = screen.getByLabelText('Passwort verbergen');
+    await user.click(hideBtn);
     expect(pwInput).toHaveAttribute('type', 'password');
   });
 });

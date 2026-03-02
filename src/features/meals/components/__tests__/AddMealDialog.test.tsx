@@ -18,6 +18,15 @@ vi.mock('../../hooks/useMeals', () => ({
   }),
 }));
 
+// Mock MealPhotoCapture (to avoid complex dependencies in unit tests)
+vi.mock('../MealPhotoCapture', () => ({
+  MealPhotoCapture: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="meal-photo-capture">
+      <button onClick={onClose}>Close Photo</button>
+    </div>
+  ),
+}));
+
 describe('AddMealDialog', () => {
   const defaultProps = {
     open: true,
@@ -167,5 +176,27 @@ describe('AddMealDialog', () => {
     // The X button should exist in the header
     const header = screen.getByText('Mahlzeit hinzufügen').parentElement;
     expect(header?.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders photo capture button', () => {
+    renderWithProviders(<AddMealDialog {...defaultProps} />);
+    // Photo button has Camera icon — find by title attribute
+    const photoBtn = screen.getByTitle(/Mahlzeit per Foto/i);
+    expect(photoBtn).toBeInTheDocument();
+  });
+
+  it('toggles photo capture panel', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AddMealDialog {...defaultProps} />);
+
+    // Photo capture should not be visible initially
+    expect(screen.queryByTestId('meal-photo-capture')).not.toBeInTheDocument();
+
+    // Click photo button
+    const photoBtn = screen.getByTitle(/Mahlzeit per Foto/i);
+    await user.click(photoBtn);
+
+    // Photo capture should now be visible
+    expect(screen.getByTestId('meal-photo-capture')).toBeInTheDocument();
   });
 });

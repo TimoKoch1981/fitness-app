@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { X, Sparkles, Loader2 } from 'lucide-react';
+import { X, Sparkles, Loader2, Camera } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddMeal } from '../hooks/useMeals';
 import { useEstimateMealNutrition } from '../hooks/useEstimateMealNutrition';
+import { MealPhotoCapture } from './MealPhotoCapture';
 import { today } from '../../../lib/utils';
 import type { MealType } from '../../../types/health';
+import type { MealPhotoAnalysisResult } from '../../../lib/ai/mealVision';
 
 interface AddMealDialogProps {
   open: boolean;
@@ -26,8 +28,19 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const [fat, setFat] = useState('');
   const [error, setError] = useState('');
   const [isEstimated, setIsEstimated] = useState(false);
+  const [showPhotoCapture, setShowPhotoCapture] = useState(false);
 
   if (!open) return null;
+
+  const handlePhotoResult = (result: MealPhotoAnalysisResult) => {
+    setName(result.name);
+    setCalories(String(result.calories));
+    setProtein(String(result.protein));
+    setCarbs(String(result.carbs));
+    setFat(String(result.fat));
+    setIsEstimated(true);
+    setShowPhotoCapture(false);
+  };
 
   const handleEstimate = async () => {
     if (!name.trim()) return;
@@ -55,6 +68,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
         protein: parseFloat(protein) || 0,
         carbs: parseFloat(carbs) || 0,
         fat: parseFloat(fat) || 0,
+        ...(isEstimated ? { source: 'ai' as const } : {}),
       });
 
       // Reset and close
@@ -113,7 +127,15 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             ))}
           </div>
 
-          {/* Name + AI Estimate */}
+          {/* Photo Capture Section */}
+          {showPhotoCapture && (
+            <MealPhotoCapture
+              onAccept={handlePhotoResult}
+              onClose={() => setShowPhotoCapture(false)}
+            />
+          )}
+
+          {/* Name + AI Estimate + Photo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.meals.name}
@@ -128,6 +150,20 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 required
                 autoFocus
               />
+              {/* Photo button */}
+              <button
+                type="button"
+                onClick={() => setShowPhotoCapture(!showPhotoCapture)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
+                  showPhotoCapture
+                    ? 'bg-teal-600'
+                    : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700'
+                }`}
+                title={language === 'de' ? 'Mahlzeit per Foto erfassen' : 'Log meal by photo'}
+              >
+                <Camera className="h-4 w-4" />
+              </button>
+              {/* AI text estimate button */}
               <button
                 type="button"
                 onClick={handleEstimate}

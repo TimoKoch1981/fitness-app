@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+import { Trash2, Camera } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { Meal } from '../../../types/health';
 
@@ -54,7 +54,8 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
 
       {/* Source indicator */}
       {meal.source === 'ai' && (
-        <span className="text-[10px] text-amber-500 font-medium absolute top-1 right-1">
+        <span className="text-[10px] text-amber-500 font-medium absolute top-1 right-1 flex items-center gap-0.5">
+          <Camera className="h-2.5 w-2.5" />
           {t.common.estimated}
         </span>
       )}
