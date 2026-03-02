@@ -690,6 +690,7 @@ export const ko: TranslationKeys = {
     riskText: 'FitBuddy 사용은 자기 책임입니다. 앱 사용이나 AI 생성 권장 사항 준수로 인한 건강상의 손해에 대해 책임지지 않습니다.',
     checkboxLabel: '위의 안내사항을 읽고 이해했습니다. FitBuddy를 자기 책임 하에 사용하며 건강 관련 질문은 의사와 상담하겠습니다.',
     accept: '동의하고 계속하기',
+    validationHint: '모든 동의를 확인해 주세요',
     viewTitle: '면책 조항',
     viewLink: '면책 조항 보기',
     consentTitle: '동의 사항',

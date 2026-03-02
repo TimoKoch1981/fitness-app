@@ -690,6 +690,7 @@ export const tr: TranslationKeys = {
     riskText: 'FitBuddy kullanımı kendi sorumluluğunuzdadır. Uygulamanın kullanımından veya yapay zeka tarafından oluşturulan önerilerin takibinden kaynaklanan sağlık sorunlarından sorumluluk kabul edilmez.',
     checkboxLabel: 'Uyarıları okudum ve anladım. FitBuddy\'yi kendi sorumluluğumda kullanıyorum ve sağlıkla ilgili sorularda bir doktora danışacağım.',
     accept: 'Kabul Et ve Devam Et',
+    validationHint: 'Lütfen tüm onayları onaylayın',
     viewTitle: 'Sorumluluk Reddi',
     viewLink: 'Sorumluluk reddini görüntüle',
     consentTitle: 'Onaylar',

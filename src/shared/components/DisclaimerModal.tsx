@@ -37,24 +37,27 @@ function ConsentCheckbox({
   label,
   sublabel,
   required = true,
+  highlight = false,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
   sublabel?: string;
   required?: boolean;
+  highlight?: boolean;
 }) {
+  const needsAttention = highlight && !checked;
   return (
-    <label className="flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
+    <label className={`flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl border transition-colors ${needsAttention ? 'border-red-400 bg-red-50 animate-[pulse_0.5s_ease-in-out_1]' : 'border-gray-200 hover:border-teal-300'}`}>
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500 flex-shrink-0"
+        className={`mt-0.5 h-5 w-5 rounded text-teal-600 focus:ring-teal-500 flex-shrink-0 ${needsAttention ? 'border-red-400' : 'border-gray-300'}`}
         required={required}
       />
       <div>
-        <span className="text-xs font-medium text-gray-800 leading-relaxed">
+        <span className={`text-xs font-medium leading-relaxed ${needsAttention ? 'text-red-700' : 'text-gray-800'}`}>
           {label}
         </span>
         {sublabel && (
@@ -77,11 +80,16 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
   const [consentThirdCountry, setConsentThirdCountry] = useState(false);
 
   const [saving, setSaving] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
 
   const allConsentsGranted = checked && consentHealthData && consentAiProcessing && consentThirdCountry;
 
   const handleAccept = async () => {
-    if (!allConsentsGranted || saving) return;
+    if (!allConsentsGranted) {
+      setShowValidation(true);
+      return;
+    }
+    if (saving) return;
     setSaving(true);
     onAccepted();
   };
@@ -160,32 +168,36 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
               {/* 1. Haftungshinweise gelesen (Legacy) */}
               <ConsentCheckbox
                 checked={checked}
-                onChange={setChecked}
+                onChange={(v) => { setChecked(v); if (v) setShowValidation(false); }}
                 label={t.disclaimer.checkboxLabel}
+                highlight={showValidation}
               />
 
               {/* 2. Gesundheitsdaten (Art. 9 DSGVO) */}
               <ConsentCheckbox
                 checked={consentHealthData}
-                onChange={setConsentHealthData}
+                onChange={(v) => { setConsentHealthData(v); if (v) setShowValidation(false); }}
                 label={t.disclaimer.consentHealthData}
                 sublabel={t.disclaimer.consentHealthDataSub}
+                highlight={showValidation}
               />
 
               {/* 3. KI-Verarbeitung */}
               <ConsentCheckbox
                 checked={consentAiProcessing}
-                onChange={setConsentAiProcessing}
+                onChange={(v) => { setConsentAiProcessing(v); if (v) setShowValidation(false); }}
                 label={t.disclaimer.consentAiProcessing}
                 sublabel={t.disclaimer.consentAiProcessingSub}
+                highlight={showValidation}
               />
 
               {/* 4. Drittlandtransfer */}
               <ConsentCheckbox
                 checked={consentThirdCountry}
-                onChange={setConsentThirdCountry}
+                onChange={(v) => { setConsentThirdCountry(v); if (v) setShowValidation(false); }}
                 label={t.disclaimer.consentThirdCountry}
                 sublabel={t.disclaimer.consentThirdCountrySub}
+                highlight={showValidation}
               />
             </div>
 
@@ -201,11 +213,18 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
               </Link>
             </div>
 
+            {/* Validation hint */}
+            {showValidation && !allConsentsGranted && (
+              <p className="text-xs text-red-600 text-center font-medium">
+                {t.disclaimer.validationHint}
+              </p>
+            )}
+
             {/* Accept Button */}
             <button
               onClick={handleAccept}
-              disabled={!allConsentsGranted || saving}
-              className="w-full py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-teal-600 hover:bg-teal-700 active:scale-[0.98]"
+              disabled={saving}
+              className={`w-full py-3 rounded-xl font-semibold text-white transition-all active:scale-[0.98] ${allConsentsGranted ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-400 hover:bg-gray-500'}`}
             >
               {saving ? t.common.loading : t.disclaimer.accept}
             </button>

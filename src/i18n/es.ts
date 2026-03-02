@@ -690,6 +690,7 @@ export const es: TranslationKeys = {
     riskText: 'El uso de FitBuddy es bajo tu propia responsabilidad. No se asume responsabilidad por daños a la salud derivados del uso de la app o del seguimiento de recomendaciones generadas por IA.',
     checkboxLabel: 'He leído y comprendido los avisos. Uso FitBuddy bajo mi propia responsabilidad y consultaré a un médico ante cualquier duda de salud.',
     accept: 'Aceptar y continuar',
+    validationHint: 'Por favor, confirma todos los consentimientos',
     viewTitle: 'Avisos de responsabilidad',
     viewLink: 'Ver avisos de responsabilidad',
     consentTitle: 'Consentimientos',

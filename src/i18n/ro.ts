@@ -690,6 +690,7 @@ export const ro: TranslationKeys = {
     riskText: 'Utilizarea FitBuddy se face pe proprie răspundere. Nu se asumă responsabilitatea pentru daunele aduse sănătății rezultate din utilizarea aplicației sau urmarea recomandărilor generate de AI.',
     checkboxLabel: 'Am citit și am înțeles avertismentele. Utilizez FitBuddy pe proprie răspundere și voi consulta un medic pentru întrebări legate de sănătate.',
     accept: 'Acceptă și continuă',
+    validationHint: 'Vă rugăm să confirmați toate consimțămintele',
     viewTitle: 'Declinarea responsabilității',
     viewLink: 'Vizualizează declinarea responsabilității',
     consentTitle: 'Consimțăminte',

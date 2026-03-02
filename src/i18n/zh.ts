@@ -690,6 +690,7 @@ export const zh: TranslationKeys = {
     riskText: '使用 FitBuddy 的风险由用户自行承担。对于因使用本应用或遵循 AI 生成的建议而造成的健康损害，我们不承担责任。',
     checkboxLabel: '我已阅读并理解以上提示。我自行承担使用 FitBuddy 的风险，并将就健康问题咨询医生。',
     accept: '接受并继续',
+    validationHint: '请确认所有同意事项',
     viewTitle: '免责声明',
     viewLink: '查看免责声明',
     consentTitle: '同意事项',

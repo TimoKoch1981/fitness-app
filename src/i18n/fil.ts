@@ -690,6 +690,7 @@ export const fil: TranslationKeys = {
     riskText: 'Ang paggamit ng FitBuddy ay sa sariling pananagutan. Walang pananagutan na tatanggapin para sa mga pinsala sa kalusugan na maaaring magresulta mula sa paggamit ng app o pagsunod sa mga rekomendasyong gawa ng AI.',
     checkboxLabel: 'Nabasa ko na at naintindihan ang mga paalala. Ginagamit ko ang FitBuddy sa sarili kong pananagutan at kokonsulta ako sa doktor para sa mga tanong tungkol sa kalusugan.',
     accept: 'Tanggapin at Magpatuloy',
+    validationHint: 'Pakikumpirma ang lahat ng mga pahintulot',
     viewTitle: 'Mga Tuntunin ng Pananagutan',
     viewLink: 'Tingnan ang Mga Tuntunin ng Pananagutan',
     consentTitle: 'Mga Pahintulot',

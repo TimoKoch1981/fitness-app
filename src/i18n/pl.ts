@@ -690,6 +690,7 @@ export const pl: TranslationKeys = {
     riskText: 'Korzystanie z FitBuddy odbywa się na własne ryzyko. Nie ponosimy odpowiedzialności za szkody zdrowotne wynikające z użytkowania aplikacji lub stosowania się do zaleceń generowanych przez AI.',
     checkboxLabel: 'Przeczytałem/am i zrozumiałem/am powyższe uwagi. Korzystam z FitBuddy na własne ryzyko i w kwestiach zdrowotnych będę konsultować się z lekarzem.',
     accept: 'Akceptuj i kontynuuj',
+    validationHint: 'Proszę potwierdzić wszystkie zgody',
     viewTitle: 'Zastrzeżenia prawne',
     viewLink: 'Wyświetl zastrzeżenia prawne',
     consentTitle: 'Zgody',

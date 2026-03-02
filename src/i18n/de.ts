@@ -699,6 +699,7 @@ export const de = {
     riskText: 'Die Nutzung von FitBuddy erfolgt auf eigenes Risiko. Fuer gesundheitliche Schaeden, die aus der Nutzung der App oder der Befolgung von KI-generierten Empfehlungen entstehen, wird keine Haftung uebernommen.',
     checkboxLabel: 'Ich habe die Hinweise gelesen und verstanden. Ich nutze FitBuddy auf eigenes Risiko und werde bei gesundheitlichen Fragen einen Arzt konsultieren.',
     accept: 'Akzeptieren und fortfahren',
+    validationHint: 'Bitte alle Einwilligungen bestätigen',
     viewTitle: 'Haftungshinweise',
     viewLink: 'Haftungshinweise anzeigen',
     consentTitle: 'Einwilligungen',
