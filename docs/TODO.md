@@ -16,36 +16,18 @@
   - ~~Disclaimer-Text auch in Profil/Einstellungen einsehbar~~ ✅ — ReadOnly-Modus im Profil
   - DB-Migration: `disclaimer_accepted_at TIMESTAMPTZ` in profiles
   - Dual-Storage: localStorage (fast-check) + Supabase DB (source of truth)
-  - [x] ~~Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)~~ ✅ (2026-02-27) — Umfassende Analyse in `docs/RECHTSKONFORMITAET.md` (498 Zeilen, 23 Action Items, 4 Rechtsbereiche: DSGVO, MDR, HWG, ePrivacy)
-
-#### Rechtskonformitaet — Umsetzung (aus RECHTSKONFORMITAET.md Aktionsplan E.1-E.3)
-> Analyse FERTIG. Umsetzung der identifizierten Massnahmen:
-
-**Phase 1 — Kritisch (vor kommerziellem Launch):**
-- [x] ~~**E.1.2: Impressum erstellen**~~ ✅ (2026-02-28, v11.4) — /impressum Route, §5 DDG Pflichtangaben, Haftung, Urheberrecht, Medizin-Disclaimer. 17 Sprachen. Commit: a1d1d2f
-- [x] ~~**E.1.1: Datenschutzerklaerung erstellen**~~ ✅ (2026-02-28, v11.4) — /datenschutz Route, 10 Abschnitte (Verantwortlicher, Art.9 Gesundheitsdaten, KI, Hosting DE, Cookies, Drittdienste, Betroffenenrechte). 17 Sprachen. HINWEIS: Anwalts-Pruefung empfohlen! Commit: a1d1d2f
-- [x] ~~**E.1.3: Einwilligung granularisieren**~~ ✅ (2026-02-28, v11.4) — 3 granulare Consents (Gesundheitsdaten Art.9, KI-Verarbeitung, Drittlandtransfer Art.49). DB-Migration, DisclaimerModal mit 4 Checkboxen, useDisclaimerCheck v2. Commit: b92e5c0
-- [x] ~~**E.1.4: AVV mit OpenAI abschliessen**~~ ✅ (2026-03-01, v12.18) — OpenAI Ireland Ltd. DPA unterzeichnet, SCCs inkl. EU-Standardvertragsklauseln. Dokumentiert in RECHTSKONFORMITAET.md.
-- [x] ~~**E.1.5: AVV mit Hetzner pruefen**~~ ✅ (2026-03-01, v12.18) — Hetzner Online GmbH AVV unterzeichnet (DSGVO Art. 28). Dokumentiert in RECHTSKONFORMITAET.md.
-- [x] ~~**E.1.6: Account-Loeschung implementieren**~~ ✅ (2026-02-28, v11.4) — DB-Funktion delete_user_account() (SECURITY DEFINER, CASCADE), useDeleteAccount Hook, DeleteAccountDialog mit Bestaetigungswort, ProfilePage Button. 17 Sprachen. Commit: 025a5f7
-- [x] ~~**E.1.7: Widerrufsrecht implementieren**~~ ✅ (2026-02-28, v11.4) — PrivacySettings Komponente, 3 Consent-Karten einzeln widerrufbar, ProfilePage integriert. 17 Sprachen. Commit: 284aade
-- [x] ~~**E.1.8: DSFA dokumentieren**~~ ✅ (2026-03-01, v12.8) — `docs/DSFA.md`: 12 Risiken, Risikomatrix, 12 techn. + 10 org. Massnahmen, Restrisiko-Bewertung. HINWEIS: Anwaltliche Pruefung empfohlen.
-
-**Phase 2 — Zeitnah (nach Launch):**
-- [x] ~~**E.2.1: Datenexport-Funktion**~~ ✅ (2026-02-28, v11.8) — useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download, ProfilePage Button
-- [x] ~~**E.2.2: KI-Disclaimer erweitern**~~ ✅ (2026-02-28, v11.7) — "KI-generiert — kann Fehler enthalten. Keine medizinische Beratung." unter jeder ChatMessageBubble. 17 Sprachen.
-- [x] ~~**E.2.3: BP-Klassifikation kennzeichnen**~~ ✅ (2026-02-28, v11.7) — "Klassifikation nach ESC/ESH 2023. Informativ, keine Diagnose." bei MedicalPage + AddBloodPressureDialog. 17 Sprachen.
-- [x] ~~**E.2.4: PED-Disclaimer verstaerken**~~ ✅ (2026-02-28, v11.7) — Amber PED-Badge, PED-Disclaimer-Footer bei MedicalPage + LogSubstanceDialog. 17 Sprachen.
-- [x] ~~**E.2.5: Substanz-Agent System-Prompt haerten**~~ ✅ (2026-02-28, v11.7) — HAFTUNGS-REGELN Block: Keine Dosierungsempfehlungen, keine Wirksamkeitsaussagen, Pflicht-Disclaimer. DE+EN.
-- [x] ~~**E.2.7: Security Headers in Caddyfile**~~ ✅ (2026-03-01, v12.17) — CSP, HSTS, X-Frame-Options, Referrer-Policy, COOP, CORP in Caddy deployed
-
-**Phase 3 — Mittelfristig:**
-- [x] ~~**E.3.2: Loeschkonzept (automatische Fristen)**~~ ✅ (2026-03-01, v12.21) — DSGVO Art. 5(1)(e) Speicherbegrenzung. TTL-Spalten (ai_usage_logs 90d, reminder_logs 180d, buddy_context_notes 30d), User-konfigurierbare Gesundheitsdaten-Aufbewahrung (1/3/5 Jahre oder unbegrenzt), cleanup_expired_data() Funktion, ProfilePage Data-Retention-Selektor, 17 Sprachen. Migration 20260301000007.
-- [x] ~~**E.3.3: Audit-Trail erweitern**~~ ✅ (2026-03-01, v12.22) — DSGVO Art. 5(1)(f) Integritaet/Vertraulichkeit. audit_logs Tabelle, audit_trigger_fn() generische Trigger-Funktion, 14 Trigger auf Profil-/Gesundheitstabellen (INSERT/UPDATE/DELETE → JSONB old_values/new_values). TTL 180 Tage, cleanup_expired_data() erweitert. Auch: blood_work, sleep_logs, menstrual_cycle_logs auf Production deployed. Migration 20260301000008.
-
-**P2 — Auth-Erweiterungen:**
-- [x] ~~**P2: OAuth / Social Login (Google, Apple)**~~ ✅ (2026-03-01, v12.23) — AuthProvider: signInWithOAuth Methode, LoginPage: Google + Apple Buttons mit SVG Icons, Divider "oder mit E-Mail", AuthCallbackPage fuer OAuth Redirect, App.tsx /auth/callback Route, config.toml Google + Apple Provider (disabled, braucht Credentials). 17 Sprachen (signInWithGoogle, signInWithApple, orWithEmail). Tests angepasst (12/12). HINWEIS: Google Cloud Console + Apple Developer Account Setup manuell erforderlich!
-- [x] ~~**P2: MFA (TOTP)**~~ ✅ (2026-03-01, v12.24) — useMFA Hook (enroll, verify, unenroll, challenge), MFASetupDialog (QR-Code + Secret + Verify), MFAVerificationDialog (Login-Challenge), MFASettings Karte in ProfilePage (aktivieren/deaktivieren), config.toml TOTP enabled. 17 Sprachen (19 mfa-Keys). 3.099 Tests gruen. HINWEIS: Auf Production GOTRUE MFA-Konfiguration noetig!
+  - [x] ~~Rechtskonformitaet pruefen (DSGVO, Medizinprodukte-Abgrenzung)~~ ✅ (2026-02-28) — RECHTSKONFORMITAET.md erstellt, 23 Action Items definiert
+  - [x] ~~**E.2.1: Datenexport (Art. 20 DSGVO)**~~ ✅ (2026-02-28) — useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download, ProfilePage-Button
+  - [x] ~~**E.2.2: KI-Disclaimer**~~ ✅ (2026-02-28) — "KI-generiert — keine medizinische Beratung" unter jeder AI-Antwort
+  - [x] ~~**E.2.3: BP-Klassifikation Disclaimer**~~ ✅ (2026-02-28) — ESC/ESH 2023 Hinweis in MedicalPage + AddBloodPressureDialog
+  - [x] ~~**E.2.4: PED-Disclaimer**~~ ✅ (2026-02-28) — Amber-Badge, Harm-Reduction-Hinweis bei PED/TRT
+  - [x] ~~**E.2.5: Substanz-Agent Prompt Haertung**~~ ✅ (2026-02-28) — Haftungsregeln-Block, keine Dosierungsempfehlungen
+  - [x] ~~**E.1.4: AVV mit OpenAI abschliessen (Art. 28 DSGVO)**~~ ✅ (2026-03-01) — DPA mit OpenAI Ireland Ltd. unterzeichnet, Processor fuer KI-Analyse via ai-proxy
+  - [x] ~~**E.1.5: AVV mit Hetzner pruefen (Art. 28 DSGVO)**~~ ✅ (2026-03-01) — AVV mit Hetzner Online GmbH abgeschlossen, Datenverarbeitung ausschliesslich EU/EWR (§3)
+  - [x] ~~**E.2.7: Security Headers in Caddyfile**~~ ✅ (2026-03-01, v12.17) — CSP, HSTS, COOP, CORP, XSS-Protection
+  - [x] ~~**E.1.3: Einwilligung granularisieren (Art. 9 DSGVO)**~~ ✅ (2026-02-28 Code, 2026-03-01 Production-Deploy) — 3 Consent-Felder (Gesundheitsdaten, KI, Drittland), DisclaimerModal 4 Checkboxen, useDisclaimerCheck, ProtectedRoute-Gating
+  - [x] ~~**E.1.7: Widerrufsrecht (Art. 7 Abs. 3 DSGVO)**~~ ✅ (2026-02-28) — PrivacySettings Komponente, pro-Consent Revoke-Buttons, localStorage-Cache-Clear, Re-Consent-Flow
+  - [x] ~~**E.1.6: Account-Loeschung (Art. 17 DSGVO)**~~ ✅ (2026-02-28 Code, 2026-03-01 Production-Deploy) — delete_user_account() RPC, CASCADE auth.users→alle Tabellen, Storage-Cleanup, DeleteAccountDialog, useDeleteAccount Hook
 
 #### Email & Registrierung
 - [x] ~~**Resend als SMTP-Provider konfigurieren**~~ ✅ (2026-02-21, v6.1)
@@ -53,16 +35,7 @@
 - [x] ~~**site_url korrigieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**ResetPasswordPage implementieren**~~ ✅ (2026-02-21, v6.1)
 - [x] ~~**Email-Templates anpassen**~~ ✅ (2026-02-21, v6.1)
-- [x] ~~**Resend Domain-Validierung + Email-Verifizierung**~~ ✅ (2026-03-01, v12.8)
-  - Lokal: Emails gehen an Mailpit (SMTP disabled) ✅
-  - ~~DNS von Strato zu Hetzner DNS umziehen~~ ✅ (2026-02-27)
-  - ~~SPF, DKIM, MX Records eintragen~~ ✅ (2026-02-27)
-  - ~~DNS-Propagation~~ ✅ (2026-03-01)
-  - ~~**AUTOCONFIRM=false auf Hetzner + Email-Flow testen**~~ ✅ (2026-03-01, v12.8)
-    - SMTP Port 465→587 (STARTTLS, GoTrue v2.172 Kompatibilitaet)
-    - GOTRUE_MAILER_EXTERNAL_HOSTS=fudda.de
-    - Auth-Container recreated, Confirmation-Email verifiziert
-    - LoginPage: email_not_confirmed UX + Resend-Button, 17 Sprachen
+- [x] ~~**Resend Domain-Validierung**~~ ✅ (2026-03-01, v12.8) — DNS umgezogen (Hetzner), SPF/DKIM/MX verifiziert, AUTOCONFIRM=false, Email-Verifizierung auf Production aktiv
 - [x] ~~**Welcome-Email nach Account-Aktivierung**~~ ✅ (2026-02-26, v10.0)
   - Edge Function: send-welcome-email (Resend HTTP API)
   - Template: welcome.html (gleiches Design wie confirmation.html)
@@ -91,7 +64,10 @@
 
 #### Supplement- & Substanz-Auswahlvorschlaege
 - [x] ~~**Supplement-Listen als Auswahlvorschlag**~~ ✅ (2026-02-27, v10.8) — 12 Supplement-Presets (Kreatin, Omega-3, Vitamin D, Zink, Magnesium, Whey, etc.)
-- [x] ~~**Doping/Anabolika-Liste als Auswahlvorschlag**~~ ✅ (2026-02-27, v10.8) — 12 PED-Presets (Testosteron, Trenbolon, Anavar, Deca, etc.) mit Disclaimer, Power/Power+ Modus
+- [x] ~~**Doping/Anabolika-Liste als Auswahlvorschlag**~~ ✅ (2026-02-27, v10.8) — 12 PED-Presets (Testosteron, Trenbolon, Anavar, Deca, etc.) mit Disclaimer
+  - ~~Muss explizit unter Medizin durch den Nutzer aktiviert werden~~ ✅ — Power/Power+ Modus
+  - ~~Disclaimer erforderlich bei Aktivierung~~ ✅ — PED-Disclaimer
+  - ~~Skill-Dateien werden Detailinfos enthalten~~ ✅ — anabolics_powerplus Skill
 
 ### P1 — Wichtig
 
@@ -108,6 +84,30 @@
   - ~~Temporaeres Pausieren/Anpassen von Trainingsplaenen bei Bedarf~~
   - ~~Kontext-Awareness: Schlaf, Stress, Krankheit, Verletzung beruecksichtigen~~
   - ~~Tagesform-Abfrage: Buddy fragt morgens optional nach Befinden~~
+- [x] ~~**Proaktives Warnsystem v2 (Cockpit + Blutwerte + Uebertraining)**~~ ✅ (2026-03-01, v12.12)
+  - ~~Deviations Engine: +Uebertraining (7+/Woche), +HDL (<25/<40), +Haematokrit (>=52%/>=54%), +ALT (>150)~~
+  - ~~BuddyPage + InlineBuddyChat: latestBloodWork + recentWorkouts verdrahtet (vorher leer)~~
+  - ~~ProactiveWarningCard: Cockpit-Karte mit Amber/Blue Warnungen, "Buddy fragen" Button~~
+- [x] ~~**Kontext-Persistence ueber Sessions**~~ ✅ (2026-03-01, v12.13)
+  - ~~buddy_context_notes Tabelle (30-Tage TTL, RLS), contextExtractor.ts (regelbasiert, DE+EN)~~
+  - ~~baseAgent: Persistent Context als neuer Prompt-Abschnitt 5.5~~
+  - ~~useBuddyChat: Laedt Context VOR Agent-Call, extrahiert+speichert NACH Antwort~~
+- [x] ~~**Quellenangaben in Buddy-Antworten**~~ ✅ (2026-03-01, v12.14)
+  - ~~ChatMessage: PMID-Parsing → klickbare PubMed-Links (Teal-Badge)~~
+  - ~~SkillSourcesFooter: Aufklappbar (Wissensbasis-Version + PMID-Links)~~
+  - ~~baseAgent Facts Codex: Zitations-Pflicht (mind. 1 PMID/Antwort bei Fachwissen)~~
+- [x] ~~**Symptom-Tracker**~~ ✅ (2026-03-01, v12.15)
+  - ~~symptom_logs Tabelle (24 Symptome JSONB, Severity 1-5, RLS), deployed auf Production~~
+  - ~~AddSymptomDialog: 6 Gruppen, Multi-Select, Severity-Emoji, Notizen~~
+  - ~~MedicalPage: Amber-Theme Sektion mit Symptom-Tags~~
+  - ~~BuddyPage + InlineBuddyChat: recentSymptomLogs verdrahtet~~
+  - ~~i18n: 28 Keys in 17 Sprachen~~
+- [x] ~~**Stillzeit-Kalorienzuschlag**~~ ✅ (2026-03-01, v12.16)
+  - ~~is_breastfeeding Boolean in profiles, deployed auf Production~~
+  - ~~+400 kcal/Tag in goals.ts (Dewey 2003, PMID:14506247)~~
+  - ~~ProfilePage: Pink Toggle fuer female, Auto-Save, Info-Box~~
+  - ~~CockpitPage: "🤱 inkl. Stillzeit" Badge~~
+  - ~~Female Fitness Skill: Laktation-Sektion mit PMIDs~~
 
 ### ~~P1 — UX-Feedback aus Live-Test~~ ✅ (2026-02-22, v7.0)
 > Alle 7 UX-Punkte umgesetzt:
@@ -140,14 +140,14 @@
 > **Stand v10.4:** 13 statische Skills mit ~1.900 Zeilen Fachwissen. 5 neue Skills hinzugefuegt.
 > **Diskussionsbedarf:** Struktur, Quellen-Qualitaet, Fach-Tiefe, Token-Budget.
 
-- [x] ~~**Konzeptionelle Diskussion**~~ ✅ (2026-02-28, v12.1) — SKILLS_KONZEPT.md erstellt: 16 Skills, 56.700 Token, 8 Agenten. Quick Win: Glossar-Optimierung (~27k Token/Session gespart). Roadmap: Section-Level Loading → RAG.
+- [x] ~~**Konzeptionelle Diskussion**~~ ✅ (2026-02-28) — SKILLS_KONZEPT.md erstellt: 16 Skills, 56.700 Token, 8 Agenten. Quick Win: Glossar aus 6 Domain-Agenten entfernt (spart ~27.000 Token/Session). Roadmap: Section-Level Loading → RAG (pgvector) bei 100+ Usern. Fazit: Architektur ist SOLIDE fuer aktuelle Phase.
 - [x] ~~**Neuer Skill: Ernaehrungswissenschaft (nutritionScience)**~~ ✅ (2026-02-28) — 3 Spiegel-Artikel ausgewertet, 33 PMIDs, 9 Forscher (Michalsen, Longo, Blueher, Rubino, Stamatakis, Ekelund, Ding etc.), Themen: Langlebigkeit, Fasten 16:8, Adipositas-Neudefinition (Lancet 2025), VILPA, 10.000-Schritte-Mythos
-- [x] ~~**Nutrition-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Mikronaehrstoffe (10), Alkohol & Fitness (Parr 2014), Sport-Ernaehrung, Carb-Loading
-- [x] ~~**Training-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Periodisierung (Linear/DUP/Block, Harries 2015), Superkompensation, Mobilitaet, Verletzungspraevention
-- [x] ~~**Substances-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Blutbild-Interpretation, Wechselwirkungen (6 Kombis), Ester-Vergleich, Nebenwirkungs-Management
-- [x] ~~**Analysis-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Prognose-Modelle (McDonald), Trends, Anomalie-Erkennung (9 Anomalien)
-- [x] ~~**Medical-Skill erweitern**~~ ✅ (2026-02-28, v11.9a) — +Sport-Kardiologie, Schilddruese, Leber/Niere, Hormonspiegel-Interpretation
-- [x] ~~**Beauty/Lifestyle erweitern**~~ ✅ (2026-02-28, v11.9a) — +Evidenzbasierte Hautpflege, Haartransplantation, Saisonalitaet
+- [x] ~~**Nutrition-Skill erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Mikronaehrstoffe (10 Eintraege), Alkohol & Fitness (Parr 2014), Sport-spezifische Ernaehrung, Carb-Loading, Weight-Cut
+- [x] ~~**Training-Skill erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Periodisierungsmodelle (Linear/DUP/Block, Harries 2015), Superkompensation, Mobilitaet (6-Uebungs-Routine), Verletzungspraevention (Pain-Traffic-Light)
+- [x] ~~**Substances-Skill erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Detaillierte Blutbild-Interpretation (CBC/Leber/Niere/Advanced Lipids), Wechselwirkungen (6 Kombis), Ester-Vergleich (Serum-Kurven), Nebenwirkungs-Management (5 Bereiche)
+- [x] ~~**Analysis-Skill erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Prognose-Modelle (McDonald Muskelaufbau-Raten, Fettabbau-Raten), Wochen-/Monats-Trends, Anomalie-Erkennung (9 Anomalien + Action-Trigger)
+- [x] ~~**Medical-Skill erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Sport-Kardiologie (Sportherz vs. LVH, Baggish 2017), Schilddruese, Leber/Nierenwerte detailliert, Hormonspiegel-Interpretation (T/E2/SHBG/Prolaktin/IGF-1)
+- [x] ~~**Beauty/Lifestyle erweitern**~~ ✅ (2026-02-28, v3.0.0) — +Evidenzbasierte Hautpflege (Retinoid/VitC/Niacinamid), Haartransplantation (FUE/FUT), Erweitertes Timing mit Saisonalitaet
 - [x] ~~**Neuer Skill: Schlaf & Regeneration**~~ ✅ (2026-02-27, v10.4) — sleep.ts: Schlafphasen, Schlafhygiene, Overreaching vs Overtraining, HRV, Erholungsstrategien
 - [x] ~~**Neuer Skill: Supplements**~~ ✅ (2026-02-27, v10.4) — supplements.ts: 30+ Supplements, A/B/C/D Evidence-Grading, Interaktionen
 - [x] ~~**Neuer Skill: PCT**~~ ✅ (2026-02-27, v10.4) — pct.ts: HPG-Achse, ASIH, Recovery-Timelines, Laborkontrolle
@@ -180,43 +180,10 @@
 - [x] ~~**KI-Vorschlag fuer Zeiten**~~ ✅ (2026-02-26, v9.7) — suggestRestTimes Utility: Automatische Erkennung von Uebungstyp (Verbund/Isolation/Cardio/Flex/Isometrisch), Ziel aus Reps (Kraft/Hypertrophie/Ausdauer), Empfohlene-Pause-Badge in ExerciseTracker, KI-Preset fuer ManualTimer, 21 Tests
 - [x] ~~**Audio-Steuerung ueber Agent**~~ ✅ (2026-02-26, v9.8) — useWorkoutVoiceCommands Hook mit Regex-basiertem Command-Parser (DE+EN), WorkoutVoiceControl Floating-Mic-Button, TTS-Feedback via speechSynthesis, 35 Tests. Befehle: Naechste/Vorherige Uebung, Skip, Reps+Gewicht loggen, Timer starten/stoppen, Training beenden, Pause
 
-### ~~P1 — Internationalisierung (i18n)~~ ✅ (2026-02-27, v10.7)
+### P1 — Internationalisierung (i18n)
 
-#### ~~Sprachen deutlich erweitern~~ ✅
-- [x] ~~**17 Sprachen implementiert**~~ ✅ — DE, EN, AR, ES, FA, FIL, FR, IT, JA, KO, PL, PT, RO, RU, TR, UK, ZH (610+ Keys pro Sprache)
-
-### P1 — Digital-Twin-Testing Findings (TWIN_TESTING_REPORT.md)
-> Quelle: 25-Persona-Testing (2026-02-28, v11.1). Sofortmassnahmen ✅ erledigt, restliche Findings hier.
-
-#### Onboarding & Erstnutzer-Erlebnis
-- [x] ~~**Onboarding-Wizard nach Registrierung**~~ ✅ (2026-03-01, v12.9) — OnboardingWizardPage (530 Zeilen, 5 Schritte), OnboardingGuard (Redirect), /onboarding Route. Schritte: Willkommen → Koerperdaten (Name, Groesse, Geburt, Geschlecht, Gewicht) → Ziel & Modus (5 Goals, 5 Activity Levels, TrainingModeSelector) → Ernaehrung & Gesundheit (7+7+7 Chip-Selects) → Fertig. 38 i18n-Keys in 17 Sprachen. 2.956 Tests.
-- [x] ~~**Cockpit: Keine Standard-Ziele ohne Profil**~~ ✅ (2026-02-28, v11.6) — profileComplete-Check (height+birth_date+weight), CTA-Card "Tagesziele einrichten" mit Profil-Link, Makro-Werte ohne Fortschrittsbalken/Verbleibend bei leerem Profil, Celebrations nur mit Profil, CalorieChart ohne Ziellinie. 17 Sprachen.
-
-#### Geschlechts- und Modus-basierte Feature-Sichtbarkeit
-- [x] ~~**Gender-basiertes Feature-Gating**~~ ✅ (2026-02-28, v11.4) — `useGenderFeatures()` Hook mit 12 Feature-Flags (CycleTracker, SymptomTracker, REDSWarning, Breastfeeding, DiastasisRecti, ProstateMarkers, MaleTestosteroneRef). Pattern: Analog useTrainingMode(). Commit: 6703b90
-- [x] ~~**Modus-Erklaerung im Onboarding verbessern**~~ ✅ (2026-03-01, v12.9) — TrainingModeSelector jetzt in Onboarding-Wizard Schritt 3 integriert (Standard/Power/Power+ mit Disclaimer).
-
-#### KI-Buddy Verbesserungen
-- [x] ~~**Profil-Daten an KI-Context uebergeben**~~ ✅ (2026-02-28, v11.4) — Allergien (WARNING-Direktive), Ernaehrungsform, Gesundheitseinschraenkungen in generateProfileSkill() ergaenzt. Commit: 86c75b7
-- [x] ~~**Proaktives Warnsystem**~~ ✅ (2026-03-01, v12.28) — useProactiveWarnings Hook injiziert kritische Gesundheitswarnungen automatisch in Buddy-Chat (priority 1-2 Deviations). 2 neue Schwellenwerte: Unterkalorien <1200 kcal (P1), Kaloriendefizit >1000 kcal (P2). Bestehend: HDL<25, Hkt>=52%, Uebertraining 7x/Woche, BP-Krise, ALT>150. Pro Session einmalig, reset taeglich. Integration: BuddyPage + InlineBuddyChat + ProactiveWarningCard. 9 neue Tests (35 gesamt).
-- [x] ~~**Kontext-Persistence ueber Sessions**~~ ✅ (2026-03-01, v12.26) — buddy_chat_messages Tabelle (90d TTL, RLS), useChatHistory Hook (save/load), BuddyChatProvider DB-Hydration bei Session-Start, useBuddyChat speichert User+Assistant Messages async in DB. Dual-Storage: sessionStorage (schnell) + DB (persistent). Migration 20260301000009.
-- [x] ~~**Quellenangaben in Buddy-Antworten**~~ ✅ (2026-03-01, v12.25) — getSkillContentWithSources() injiziert PMID-Referenzen aus Skill-Metadaten in Prompt-Text. Facts Codex Quellenangaben-Sektion verstaerkt (Pflicht 1-2 PMIDs pro Antwort, Beispiel-Format, DE+EN). 124 PMIDs in 14 Skills jetzt fuer LLM sichtbar. ChatMessage.tsx rendert PMIDs als klickbare PubMed-Links.
-- [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.5) — Kurz/Normal/Ausführlich + Einfach/Fachlich. BaseAgent-Prompt-Injection, I18nProvider, ProfilePage UI. 17 Sprachen, 26 Dateien.
-
-#### Sicherheitsrelevante Findings (aus Sektion 4 des Reports)
-- [x] ~~**🔴 RED-S/Untergewicht-Warnsystem**~~ ✅ (2026-03-01, v12.10) — useREDSWarning Hook (5 Schwellen: BMI<18.5, BMI<17.0, Defizit>1000kcal, EA<30kcal/kg FFM, <1200kcal aktive Frauen). REDSWarningBanner (Amber/Rot, dismissable). CockpitPage + MedicalPage Integration. Gender-Gating via useGenderFeatures. 17 Sprachen (8 Keys). 2.972 Tests bestanden.
-- [x] ~~**🟡 Rektusdiastase-Kontraindikations-Check**~~ ✅ (2026-03-01, v12.11) — Kontraindikations-Matrix in training.ts (6 Regionen: diastasis_recti, back, shoulder, knee, neck, heart). femaleFitness.ts: Diastasis-Sektion 25 Zeilen (3 Schweregrade, 3-Phasen-Rehab, PMID:24996567). TrainingAgent: Explizite Kontraindikations-Regeln DE+EN. OnboardingWizard: +2 Restriction-Optionen (neck, diastasis_recti). 9 neue i18n-Keys in 17 Sprachen. 2.990 Tests bestanden.
-
-#### Frauen-spezifische Features
-> VORAUSSETZUNG: Gender-basiertes Feature-Gating (siehe oben). Features nur sichtbar wenn `gender === 'female'` oder `gender === 'other'`.
-
-- [x] ~~**Menstruationszyklus-Tracker**~~ ✅ (2026-03-01, v12.7) — menstrual_cycle_logs Tabelle (phase, flow_intensity, symptoms JSONB, energy, mood), useMenstrualCycle Hook (CRUD + Phasen-Helpers), AddCycleLogDialog (4 Phasen, 3 Flow, 8 Symptome, Mood+Energy Emoji), Gender-Gating (female/other), MedicalPage Integration, AI-Kontext, 17 Sprachen (24 Keys), 22 Unit-Tests. RED-S/Kalender = separater Task.
-- [x] ~~**Symptom-Tracker (Hitzewallungen, Stimmung)**~~ ✅ (2026-03-01, v12.27) — 10 neue Symptome (Hormonal/Perimenopause: Hitzewallungen, Nachtschweiss, Stimmungsschwankungen, Angst, niedrige Libido, vaginale Trockenheit; Mood: depressive Stimmung, Reizbarkeit, Weinanfaelle, Konzentrationsprobleme). Mood+Energy Emoji-Rating (1-5). Gender-Gating (Perimenopause nur female/other). DB-Migration mood/energy Spalten. 17 Sprachen (10 neue Symptom-Keys). MedicalPage Mood/Energy Anzeige.
-- [x] ~~**Stillzeit-Kalorienzuschlag**~~ ✅ (bereits implementiert) — is_breastfeeding Boolean in Profil, BREASTFEEDING_CALORIE_BOOST=400 kcal/Tag (Dewey 2003, PMID:14506247), Gender-Gating (nur female), Pink-Toggle in ProfilePage, Cockpit-Badge, Goal-Calculator Integration.
-
-#### Medizin-Erweiterungen
-- [x] ~~**Blutbild/Laborwerte-Tracking**~~ ✅ (2026-02-28, v11.9) — BloodWorkDashboard (10 Marker, farbcodiert), useBloodWork Hook, Warnschwellen, Power+ Mode
-- [x] ~~**Arztbericht-PDF-Export**~~ ✅ (2026-02-28, v12.0) — DoctorReport PDF (jsPDF, Profil, 23 Blutmarker + Referenzbereiche, Substanzen, Blutdruck, Koerpermasse)
+#### Sprachen deutlich erweitern
+- [x] ~~**15+ neue Sprachen hinzufuegen**~~ ✅ (2026-02-27, v10.6) — 17 Sprachen implementiert (DE, EN, AR, ES, FA, FIL, FR, IT, JA, KO, PL, PT, RO, RU, TR, UK, ZH), 610+ Keys pro Sprache
 
 ### P1 — UX/Gamification
 
@@ -226,22 +193,23 @@
   - ~~Gewichtsverlust-Meilensteine (jedes kg, 5kg, 10kg)~~ ✅
   - ~~Streak-Tage (7 Tage am Stueck trainiert, 30 Tage geloggt)~~ ✅
   - ~~Kaloriendefizit eingehalten~~ ✅
-  - [x] ~~**Luecken-Erkennung**~~ ✅ (2026-03-01, v12.4) — GapAlertBanner auf CockpitPage, useGapDetection Hook (2+ Tage), 17 Sprachen, 10 Tests.
+  - ~~Konfetti-Animation + Toast~~ ✅
 
-### ~~P1 — UX-Ueberarbeitung Workout-Session~~ ✅ (2026-02-28, v11.0)
+### P1 — UX-Ueberarbeitung Workout-Session ⚠️
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
+> Analyse: 2026-02-27, Status: Konzept fertig, User-Diskussion ausstehend
 
-#### ~~Musik-Integration komplett ueberarbeiten~~ ✅
-- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — YT.Player, sichtbarer Mini-Player
-- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — Play/Pause/Stop/Volume als YT API Calls
-- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — OAuth + Edge Function + Tab-Toggle
+#### ~~Musik-Integration komplett ueberarbeiten~~ ✅ (2026-02-28, v11.0)
+- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — WorkoutMusicPlayer komplett neu geschrieben mit echtem `YT.Player()`
+- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — Floating Player, Play/Pause/Stop/Volume als YT API Calls
+- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — Volles SDK (OAuth + Playback), Edge Function spotify-proxy, YouTube/Spotify Tab-Toggle
 
-#### ~~Timer komplett ueberarbeiten~~ ✅
-- [x] ~~**T1: useWorkoutTimers Hook**~~ ✅ — 5 Sektionen, je aktivierbar
-- [x] ~~**T2: WorkoutTimerPanel UI**~~ ✅ — Tabelle, Settings, Alert-Mode
-- [x] ~~**T3: Context Integration**~~ ✅ — Auto-Timer-Transitionen, Auto-Advance
-- [x] ~~**T4: Timer Alerts**~~ ✅ — Web Audio + Vibration, 4 Modi
-- [x] ~~**T5: Alte Timer entfernt + 32 Tests**~~ ✅
+#### ~~Timer komplett ueberarbeiten — Tabellarischer Multi-Timer~~ ✅ (2026-02-28, v11.0)
+- [x] ~~**T1: useWorkoutTimers Hook**~~ ✅ — 5 Sektionen (Gesamt, Uebung, Ueb.-Pause, Satz, Satzpause), je aktivierbar/deaktivierbar
+- [x] ~~**T2: WorkoutTimerPanel UI**~~ ✅ — Tabelle (Checkbox | Label | Soll | Ist), Settings-Dropdown, Alert-Mode-Cycle
+- [x] ~~**T3: ActiveWorkoutContext Integration**~~ ✅ — Auto-Timer-Transitionen, Auto-Advance (zuschaltbar)
+- [x] ~~**T4: Timer Alerts**~~ ✅ — Web Audio API Beep + Vibration, 4 Modi (both/vibration/sound/none), Warning-Beep bei 3s
+- [x] ~~**T5: Alte Timer entfernen + 32 Tests**~~ ✅ — ManualTimer entfernt, 21+5+6 Tests (alle gruen)
 
 ### P2 — Power/Power+ Modus
 > **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)
@@ -254,33 +222,9 @@
 - [x] ~~**Phase A2: Anabolika-Skill erweitern**~~ ✅ — Zyklen, Dosierungen, Wechselwirkungen nach Ziel
 - [x] ~~**Phase A3: Skill-Anpassung**~~ ✅ — Agent-Instructions nach Modus, modus-bewusstes Loading
 - [x] ~~**Phase A4: ProfilePage Integration**~~ ✅ — TrainingModeSelector eingebunden, useUpdateProfile erweitert
-- [x] ~~**Phase B: Power Features**~~ ✅ (2026-02-28, v11.9b) — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc. 4 Widgets, 39 i18n-Keys
-- [x] ~~**Phase C: Power+ Features**~~ ✅ (2026-02-28, v11.9) — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert. 4 Widgets, useBloodWork Hook
-- [x] ~~**Phase D: Shared**~~ ✅ (2026-02-28, v12.0) — DoctorReport PDF (jsPDF, 23 Blutmarker), PosingPhotos (7 Posen, WebP), trainingMode i18n (42+5 Keys in 15 Sprachen)
-
-### P2 — Digital-Twin-Testing Findings (Nice-to-Have)
-> Aus Sektion 3 des TWIN_TESTING_REPORT.md — Priorisierte Feature-Requests P2
-
-- [x] ~~**Wettkampf-Countdown Widget**~~ ✅ (2026-02-28, v11.9b) — CompetitionCountdown (Power Mode), Zieldatum → Wochen/Tage, Phase-Hinweise (Peak Week, Cut, Prep, Off-Season)
-- [x] ~~**Blast/Cruise/PCT-Zyklus-Kalender**~~ ✅ (2026-02-28, v11.9) — CycleWidget (Power+ Mode), Blast/Cruise/PCT Status, Progress-Bar, PCTCountdown
-- [x] ~~**Daten-Export**~~ ✅ (2026-02-28, v11.8) — DSGVO Art. 20, useDataExport Hook (16 Tabellen), DataExportDialog, JSON-Download
-- [x] ~~**Schriftgroessen-Option**~~ ✅ (2026-03-01, v12.3) — Klein/Normal/Gross/Sehr Gross in Profil-Einstellungen. Root-Font-Size via CSS, localStorage, 17 Sprachen, 3 Tests.
-- [x] ~~**Schlaf-Tracking (Zeiten)**~~ ✅ (2026-03-01, v12.6) — sleep_logs Tabelle (bedtime/wake_time/duration/quality 1-5), useSleep Hook (CRUD + Upsert), AddSleepDialog (Zeit-Inputs, Dauer-Preview, Emoji-Rating), MedicalPage Integration, AI-Kontext (BuddyPage + InlineBuddyChat), 17 Sprachen (19 Keys), 15 Unit-Tests. DB-Migration + RLS.
-- [x] ~~**Mahlzeit-Kategorien erweitern**~~ ✅ (2026-03-01, v12.2) — 6 Kategorien: Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Snack. 27 Dateien, 17 Sprachen, DB-Migration, 2.705 Tests.
-- [ ] **Foto-basiertes Mahlzeit-Logging** (~8h) — Essen fotografieren → KI erkennt Mahlzeit → Auto-Fill Makros. Aylin (B4) fotografiert lieber statt zu wiegen. Braucht Vision-API Integration.
-- [ ] **MFP-Import (MyFitnessPal)** (~6h) — CSV/API-Import von MyFitnessPal-Daten. Lisa (C3) trackt Ernaehrung dort. Kein einfacher Wechsel moeglich.
-- [x] ~~**Prognose-Funktion**~~ ✅ (2026-03-01, v12.29) — calculateGoalDate() + formatDaysAsDuration() in progression.ts. ProgressionCard zeigt jetzt Ziel-Datum (z.B. "30. Apr. 2026") statt nur Tage, plus Dauer (~8 Wochen) und Trend-Info. useProgression erweitert um weightGoalDate/bodyFatGoalDate. 9 neue Tests (32 gesamt).
-
-### P2 — Digital-Twin-Konzept verbessern
-
-- [ ] **Digital-Twin-Konzept mit Learnings aus anderem Projekt verbessern** — Erkenntnisse aus externem Projekt einfliessen lassen: Persona-Design, Test-Methodik, Auswertung, Coverage-Analyse. DIGITAL_TWINS.md + TWIN_TESTING_REPORT.md aktualisieren.
-
-### P2 — Technische Schulden
-
-- [x] ~~**`tsc -b` Build-Fix**~~ ✅ (2026-03-02, v12.31) — Alle 52 pre-existing Type-Errors behoben. Language-Type von `'de'|'en'` auf `string` in 40+ Dateien gewidened, fehlende i18n-Keys (power.doctorReport etc.) in 15 Sprachen ergaenzt, WorkoutMusicPlayer t()-Calls auf t.section.key migriert, MFA-Casts korrigiert, NotificationType um meal_logging erweitert, unused Imports entfernt. `tsc -b` = 0 Fehler.
-- [x] ~~**Production-Deployment v12.32**~~ ✅ (2026-03-02) — v10.1→v12.31 auf fudda.de deployed. 7 DB-Migrationen, Frontend v12.31 Build. 31 Tabellen, 11 Docker-Container, 0 Fehler.
-- [x] ~~**Production DB-Migrationen**~~ ✅ (2026-03-02) — Im Rahmen von v12.32 komplett angewendet.
-- [x] ~~**Code-TODO: baseAgent.ts:269**~~ ✅ (2026-03-01, v12.30) — `bodyHistory` jetzt aus `useBodyMeasurements(30)` befuellt statt `[]`. HealthContext um `bodyHistory` erweitert. BuddyPage + InlineBuddyChat: Hook-Integration. baseAgent: `hc.bodyHistory` statt hardcoded `[]`. KI-Buddy hat jetzt Zugriff auf Gewichts-/KFA-Trends der letzten 30 Messungen.
+- [x] ~~**Phase B: Power Features**~~ ✅ (2026-02-28) — CompetitionCountdown, PhaseProgressBar, RefeedPlanner, NaturalLimitCalc. 4 Widgets auf TrainingPage, 39 i18n-Keys in 17 Sprachen
+- [x] ~~**Phase C: Power+ Features**~~ ✅ (2026-02-28) — BloodWorkDashboard, CycleWidget, PCTCountdown, HematocritAlert. 4 Widgets auf TrainingPage (conditional Power+ Mode), useBloodWork Hook, 22 i18n-Keys in 17 Sprachen
+- [x] ~~**Phase D: Shared**~~ ✅ (2026-02-28) — DoctorReport PDF (jsPDF, 23 Blutmarker, Referenzbereiche, Substanzen, Blutdruck), PosingPhotos (7 Posen, Supabase Storage, WebP, Fullscreen), trainingMode i18n (42 Keys in 15 Sprachen), +5 powerPlus Keys
 
 ### P2 — Nice-to-Have
 
@@ -335,7 +279,8 @@
 - [x] ~~deploy-frontend.sh auf fudda.de aktualisiert~~ ✅ (2026-02-25) — Default-Domain, Server-IP
 - [x] ~~Caddyfile: Cache-Header fuer index.html~~ ✅ (2026-02-25) — no-cache/no-store fuer HTML, immutable fuer Assets
 - [x] ~~Caddyfile: Permissions-Policy camera/microphone~~ ✅ (2026-02-25) — camera=(self), microphone=(self) statt Blockierung
-- [x] ~~Resend Domain-Validierung (fudda.de)~~ ✅ (2026-03-01, v12.8) — SMTP Port 587, AUTOCONFIRM=false, Emails verifiziert
+- [x] ~~**Security Headers in Caddyfile**~~ ✅ (2026-03-01, v12.17) — CSP (self + YouTube/Spotify/blob/wss), HSTS (31536000s + preload), X-XSS-Protection, COOP, CORP, payment=() blocked
+- [x] ~~Resend Domain-Validierung~~ ✅ (2026-03-01, v12.8) — DNS propagiert, SPF/DKIM/MX verifiziert, AUTOCONFIRM=false, Email aktiv
 - [x] ~~Monitoring aufsetzen (Error Tracking, Uptime)~~ ✅ (2026-02-26, v9.4) — monitor.sh (Docker, Disk, Memory, Service-Health)
 - [x] ~~Backup-Strategie fuer Supabase-DB (pg_dump Cronjob → Hetzner Storage Box)~~ ✅ (2026-02-26, v9.4) — backup-db.sh Script
 
@@ -345,21 +290,46 @@
 - [x] ~~Erweiterte KI-Analyse und Prognosen~~ ✅ — Lineare Regression, Moving Average, Plateau-Erkennung, ProgressionCard
 - [x] ~~Koerper-Silhouette fuer Masse-Visualisierung~~ ✅ — SVG BodySilhouette mit dynamischer Skalierung + KFA-Farben
 
-#### ~~Glossar-Skill~~ ✅ (2026-02-28, v11.1)
-- [x] ~~400+ Fachbegriffe in 12 Kategorien~~ ✅ — Training, Ernaehrung, Koerperzusammensetzung, Supplements, PEDs, PCT, Medizin/Labor, Schlaf, Wettkampf, Female Fitness, Beauty, Abkuerzungen
-- [x] ~~Allen 8 Agents zugewiesen~~ ✅ — Universelle Referenz (~4.500 Tokens)
-- [x] ~~Aus 15 bestehenden Skills extrahiert~~ ✅ — Konsistente Terminologie
+### P1 — Digital Twin Testing Features (v11.2 Report)
+> Quelle: `src/docs/TWIN_TESTING_REPORT.md` (25 Personas, 5 Gruppen)
 
-#### ~~Twin-Testing Sofortmassnahmen~~ ✅ (2026-02-28, v11.3)
-- [x] ~~Fix #3: PED-Disclaimer bei Tab-Wechsel zuruecksetzen~~ ✅ — Nur bei TRT/PED sichtbar
-- [x] ~~Fix #9: Datumsformat de-DE im Mahlzeit-Tab~~ ✅ — 28.02.2026 statt ISO
-- [x] ~~Fix #8: Mahlzeit-Reminder-Typ~~ ✅ — `meal_logging` mit i18n (17 Sprachen) + 5er-Grid
-- [x] ~~Fix #1: KI-Schaetzung im Mahlzeit-Dialog~~ ✅ — Sparkles-Button, ai-proxy, Auto-Fill Makros
-- [x] ~~Fix #2+#4: Profil Ernaehrung & Gesundheit~~ ✅ — Ernaehrungsform (7), Allergien (7), Einschraenkungen (7) als Chip-Auswahl + DB-Migration
+#### ~~Twin-P0: Sofortmassnahmen~~ ✅ (2026-02-28, v11.3)
+- [x] ~~**KI-Button im Mahlzeit-Dialog**~~ ✅ — useEstimateMealNutrition Hook (gpt-4o-mini, Sparkles-Button, Auto-Fill Makros)
+- [x] ~~**Profil: Ernaehrungspraeferenzen + Allergien**~~ ✅ — dietary_preferences, allergies als JSONB, Checkboxen in ProfilePage, an KI-Context uebergeben
+- [x] ~~**Medikament-Disclaimer fixen**~~ ✅ — PED-Disclaimer nur bei TRT/PED Tabs, nicht bei Medikament/Supplement/Sonstige
+- [x] ~~**Profil: Gesundheitliche Einschraenkungen**~~ ✅ — health_restrictions JSONB, Tags in ProfilePage, an KI-Context uebergeben
 
-#### ~~Auth-Erweiterungen~~ ✅ (2026-03-01)
-- [x] ~~OAuth / Social Login (Google, Apple)~~ ✅ (v12.23) — AuthProvider signInWithOAuth, LoginPage Google+Apple Buttons, AuthCallbackPage, config.toml Provider (disabled, braucht Credentials)
-- [x] ~~MFA (TOTP)~~ ✅ (v12.24) — useMFA Hook, MFASetupDialog, MFAVerificationDialog, MFASettings in ProfilePage, config.toml TOTP enabled
+#### Twin-P1: Wichtige Features
+- [x] ~~**Datumsformat de-DE**~~ ✅ — toLocaleDateString('de-DE') durchgehend implementiert
+- [x] ~~**Blutbild/Laborwerte-Tracking**~~ ✅ (v11.9) — BloodWorkDashboard (10 Marker, farbcodiert), useBloodWork Hook, Power+ Mode
+- [x] ~~**Mahlzeit-Reminder-Typ**~~ ✅ — ReminderType 'meal_logging' in health.ts definiert
+- [x] ~~**Menstruationszyklus-Tracker**~~ ✅ (2026-03-01, v12.x) — menstrual_cycle_logs (phase/flow/symptoms/mood/energy), Gender-Gating (female/other), AddCycleLogDialog, Rose/Pink Styling
+- [x] ~~**Onboarding-Wizard (Form-basiert)**~~ ✅ (2026-03-01, v12.9) — OnboardingWizardPage (5 Schritte), OnboardingGuard (Auto-Redirect), /onboarding Route, 38 i18n-Keys
+
+#### Twin-P2: Nice-to-Have
+- [x] ~~**Wettkampf-Countdown**~~ ✅ (v11.9b) — CompetitionCountdown Widget, Power Mode
+- [x] ~~**Zyklus-Kalender AAS**~~ ✅ (v11.9) — CycleWidget (blast/cruise/pct), Power+ Mode
+- [x] ~~**Daten-Export**~~ ✅ (v11.8) — DSGVO Art. 20, 16 Tabellen, JSON-Download
+- [x] ~~**Schriftgroessen-Option**~~ ✅ (2026-03-01, v12.x) — Klein/Normal/Gross in Profil-Einstellungen
+- [x] ~~**Luecken-Erkennung**~~ ✅ (2026-03-01, v12.x) — "Du hast X Tage nicht geloggt" In-App-Hinweis
+- [x] ~~**Schlaf-Tracking (Zeiten)**~~ ✅ (2026-03-01, v12.x) — sleep_logs (bedtime/wake_time/duration/quality), AddSleepDialog, MedicalPage
+- [x] ~~**Mahlzeit-Kategorien erweitern**~~ ✅ (2026-03-01, v12.x) — 6 Kategorien (Fruehstueck, Vormittag, Mittag, Nachmittag, Abend, Snack)
+- [x] ~~**Buddy-Kommunikationsstil**~~ ✅ (2026-03-01, v12.x) — Knapp/Normal/Ausfuehrlich + Fachsprache-Level
+
+#### Auth-Erweiterungen
+- [x] ~~**Login/Register auf Production fixen**~~ ✅ (2026-03-02, v12.35) — ROOT CAUSE: Fehlende `.env.production`, Vite baute mit localhost statt fudda.de
+- [x] ~~**Passwort-Sichtbarkeit Toggle**~~ ✅ (2026-03-02, v12.34) — Eye/EyeOff auf Login + Register
+- [x] ~~**Sprachauswahl auf Login/Register**~~ ✅ (2026-03-02, v12.34) — LanguageSelector Komponente (17 Sprachen, Flaggen)
+- [x] ~~**OAuth Buttons immer sichtbar**~~ ✅ (2026-03-02, v12.34) — Google/Apple Buttons ohne Feature-Gate
+- [ ] OAuth Provider konfigurieren (Google, Apple) — Credentials in config.toml + GoTrue eintragen
+- [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
+
+#### Foto-basiertes Mahlzeit-Logging
+- [x] ~~**Mahlzeit per Foto erfassen**~~ ✅ (2026-03-02, v12.34) — mealVision.ts + MealPhotoCapture + AddMealDialog Integration
+- [ ] MFP (MyFitnessPal) Import — Daten aus MFP importieren (nach Auth-Fix)
+
+#### Dependency-Tracking
+- [x] ~~**docs/DEPENDENCIES.md erstellen**~~ ✅ (2026-03-02, v12.35) — Praeambel + Ausfuellanweisung + 10 Sektionen
 
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
@@ -405,8 +375,8 @@
 | SMTP-Provider (Prod) | ✅ Aktiv | Resend SMTP, API Key konfiguriert, Domain-Validierung noetig |
 | Email-Templates | ✅ Deutsch | confirmation.html + recovery.html |
 | site_url | ✅ Korrekt | Port 5173 |
-| OAuth | ✅ UI Fertig (v12.23) | Google + Apple Buttons, AuthCallbackPage. Provider in config.toml disabled — braucht Google Cloud Console + Apple Dev Credentials |
-| MFA (TOTP) | ✅ UI Fertig (v12.24) | useMFA Hook, Setup/Verify/Settings Dialoge, config.toml TOTP enabled. Production: GoTrue MFA-Config noetig |
+| OAuth | DEAKTIVIERT | Alle Provider disabled (P2) |
+| MFA | DEAKTIVIERT | TOTP/Phone/WebAuthn alle disabled (P2) |
 
 ---
 
@@ -437,4 +407,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-03-02 (v12.32 — Production-Deployment + DB-Migrationen, alle v10.1→v12.31 Features auf fudda.de live ✅)*
+*Letzte Aktualisierung: 2026-03-01 (v12.18 — TODO bereinigt: 8 erledigte Tasks nachgetragen, konsolidierte offene Liste)*
