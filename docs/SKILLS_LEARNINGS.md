@@ -689,5 +689,51 @@ Persona-basiertes Testing fragt: "Kann Fatima (muslimisch, Ramadan-Fastende, Hal
 - **tsc -b vs tsc --noEmit:** Unterschiedliches Verhalten bei Project References
   - `tsc --noEmit` kann erfolgreich sein wo `tsc -b` fehlschlaegt (strengere Checks im Build-Modus)
 
-*Letzte Aktualisierung: 2026-02-28*
-*Version: 4.0 (+ Digital Twins Testing, Musik & Timer, KI-Schaetzung, i18n Multi-Language)*
+## O. Production Bugfixes (v12.39 Learnings)
+
+### React Anti-Pattern: DOM-Manipulation in React-Komponenten
+- **Problem:** `document.getElementById('btn').disabled = false` in einem `onChange`-Handler
+  - React kennt die DOM-Aenderung nicht → naechster Re-Render ueberschreibt sie
+  - Re-Render passiert oft automatisch (TanStack Query Refetch, Auto-Save, Context-Updates)
+- **Fix-Pattern:** IMMER `useState` + kontrollierte Props statt DOM-Manipulation
+  ```tsx
+  // SCHLECHT: DOM-Manipulation
+  onChange={() => document.getElementById('btn').disabled = false}
+  // GUT: React State
+  const [checked, setChecked] = useState(false);
+  onChange={(e) => setChecked(e.target.checked)}
+  <button disabled={!checked}>
+  ```
+- **Learning:** Jede `document.getElementById`/`querySelector` in React-Code ist ein Code-Smell
+- **Erkennungsmethode:** grep nach `document.getElementById|querySelector` in .tsx Dateien
+
+### Recharts Y-Achse: width + margin Zusammenspiel
+- **Problem:** `YAxis width={40}` + `LineChart margin={{ left: -15 }}` = nur 25px effektiv
+  - Reicht nicht fuer "107kg" (braucht ~45px)
+  - Symptom: Labels werden linksseitig abgeschnitten ("7kg" statt "107kg")
+- **Fix-Pattern:** `width={50}` + `margin={{ left: 0 }}` als sichere Defaults
+- **Learning:** Recharts margin ist ADDITIV zu width — negative Margins fressen den Label-Platz
+
+### Kontextabhaengige Warntitel statt statischer Labels
+- **Problem:** REDSWarningBanner verwendete statischen Titel "Untergewicht / Energie-Warnung" fuer ALLE Amber-Warnungen
+- **Fix-Pattern:** Warning-Objekt auswerten und Titel dynamisch waehlen
+  ```tsx
+  const hasUnderweightWarning = warning.isUnderweight || warning.isSevereUnderweight;
+  const title = hasUnderweightWarning ? reds.warningTitle : reds.energyWarningTitle;
+  ```
+- **Learning:** Warnsysteme muessen den KONTEXT der Warnung im Titel reflektieren, nicht alle moeglichen Warngruende auflisten
+
+### SSH-Key Deploy-Workflow (Multi-User Setup)
+- **Situation:** SSH-Key liegt auf Windows-User `server2`, Entwicklung auf User `test`
+- **Problem:** `scp` von User `test` bekommt Connection Timeout (Firewall oder anderer Netzwerk-Pfad)
+- **Workaround:** Anderes Claude-Code-Fenster (auf User `server2`) kann deployen
+- **Learning:** Bei Multi-User-Setups Deploy-Key an zentralem Ort ablegen oder in CI/CD auslagern
+- **Deploy-Befehl:**
+  ```bash
+  scp -i C:/Users/server2/Documents/fk_hetzner_key -r dist/* root@46.225.228.12:/opt/fitbuddy/frontend/
+  ```
+
+---
+
+*Letzte Aktualisierung: 2026-03-02*
+*Version: 5.0 (+ Production Bugfixes, React Anti-Patterns, Recharts, Deploy-Workflow)*
