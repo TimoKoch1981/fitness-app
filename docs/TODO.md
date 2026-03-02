@@ -278,8 +278,8 @@
 ### P2 — Technische Schulden
 
 - [x] ~~**`tsc -b` Build-Fix**~~ ✅ (2026-03-02, v12.31) — Alle 52 pre-existing Type-Errors behoben. Language-Type von `'de'|'en'` auf `string` in 40+ Dateien gewidened, fehlende i18n-Keys (power.doctorReport etc.) in 15 Sprachen ergaenzt, WorkoutMusicPlayer t()-Calls auf t.section.key migriert, MFA-Casts korrigiert, NotificationType um meal_logging erweitert, unused Imports entfernt. `tsc -b` = 0 Fehler.
-- [ ] **Production-Deployment v12.1** — Alle Features seit v10.1 auf fudda.de deployen (Twin-Fixes, Power/Power+, Skills v3.0, Timer/Musik, DSGVO)
-- [ ] **Production DB-Migrationen** — Alle neuen Migrationen auf Production anwenden (dietary/health fields, blood_work, training_mode, consents, etc.)
+- [x] ~~**Production-Deployment v12.32**~~ ✅ (2026-03-02) — v10.1→v12.31 auf fudda.de deployed. 7 DB-Migrationen, Frontend v12.31 Build. 31 Tabellen, 11 Docker-Container, 0 Fehler.
+- [x] ~~**Production DB-Migrationen**~~ ✅ (2026-03-02) — Im Rahmen von v12.32 komplett angewendet.
 - [x] ~~**Code-TODO: baseAgent.ts:269**~~ ✅ (2026-03-01, v12.30) — `bodyHistory` jetzt aus `useBodyMeasurements(30)` befuellt statt `[]`. HealthContext um `bodyHistory` erweitert. BuddyPage + InlineBuddyChat: Hook-Integration. baseAgent: `hc.bodyHistory` statt hardcoded `[]`. KI-Buddy hat jetzt Zugriff auf Gewichts-/KFA-Trends der letzten 30 Messungen.
 
 ### P2 — Nice-to-Have
@@ -437,4 +437,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-03-01 (v12.24 — E.3.2 Loeschkonzept, E.3.3 Audit-Trail, OAuth, MFA, Auth-Erweiterungen ✅)*
+*Letzte Aktualisierung: 2026-03-02 (v12.32 — Production-Deployment + DB-Migrationen, alle v10.1→v12.31 Features auf fudda.de live ✅)*

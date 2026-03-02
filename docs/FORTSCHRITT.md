@@ -125,6 +125,29 @@
 | 12.29   | 2026-03-01 | Prognose-Funktion (calculateGoalDate, formatDaysAsDuration, ProgressionCard Ziel-Datum, 9 Tests) | Erledigt   |
 | 12.30   | 2026-03-01 | Code-TODO Fix: bodyHistory in HealthContext+baseAgent (KI-Buddy hat jetzt Gewichts-/KFA-Trends der letzten 30 Messungen) | Erledigt   |
 | 12.31   | 2026-03-02 | tsc -b Build-Fix: 52 Type-Errors auf 0. Language-Type gewidened, i18n-Keys ergaenzt, WorkoutMusicPlayer t()-Pattern, MFA-Casts, NotificationType | Erledigt   |
+| 12.32   | 2026-03-02 | Production-Deployment: v10.1→v12.31 auf fudda.de. 7 DB-Migrationen (Feedback, TrainingMode, Dietary, MealCategories, BuddyChatMessages, SymptomMoodEnergy). Frontend v12.31 Build deployed. 31 Tabellen, 0 Konsolen-Fehler | Erledigt   |
+
+---
+
+### 2026-03-02 - v12.32: Production-Deployment v10.1→v12.31
+
+**Deployment:** Alle Features seit v10.1 auf fudda.de deployed (30+ Versionen).
+
+**DB-Migrationen (7 fehlende angewendet):**
+1. **Feedback System** — feedback, feature_requests, feature_votes Tabellen + RLS + Trigger
+2. **Training Mode / Power** — profiles: training_mode, show_date, current_phase, cycle_status, etc.
+3. **Dietary/Health** — profiles: dietary_preferences, allergies, health_restrictions (JSONB)
+4. **Meal Categories** — meals_type_check erweitert auf 6 Kategorien
+5. **Buddy Chat Messages** — buddy_chat_messages Tabelle (90d TTL, RLS)
+6. **Symptom Mood/Energy** — symptom_logs: mood + energy Spalten
+
+**Frontend:** Build v12.31 (tsc -b: 0 Errors), Bundle index-D3br0RF7.js deployed.
+
+**Verifiziert:**
+- 31 public Tabellen ✅
+- 11 Docker-Container laufen ✅
+- HTTPS 200 ✅, 0 Konsolen-Fehler ✅
+- Login-Page mit OAuth Buttons (Google/Apple) korrekt angezeigt ✅
 
 ---
 
