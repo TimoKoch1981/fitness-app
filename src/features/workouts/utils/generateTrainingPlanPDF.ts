@@ -17,7 +17,7 @@ function isEnduranceExercise(ex: PlanExercise): boolean {
 }
 
 /** Format exercise details for PDF: returns [detail, weight/info] tuple */
-function formatExerciseForPDF(ex: PlanExercise, _language?: 'de' | 'en'): { detail: string; info: string } {
+function formatExerciseForPDF(ex: PlanExercise, _language?: string): { detail: string; info: string } {
   if (isEnduranceExercise(ex)) {
     const parts: string[] = [];
     if (ex.duration_minutes != null) parts.push(`${ex.duration_minutes} Min`);
@@ -65,7 +65,7 @@ const SPLIT_LABELS: Record<string, Record<string, string>> = {
  */
 export function generateTrainingPlanPDF(
   plan: TrainingPlan,
-  language: 'de' | 'en' = 'de'
+  language: string = 'de'
 ): void {
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -267,7 +267,7 @@ export interface LastExerciseData {
 export function generateTrainingLogPDF(
   plan: TrainingPlan,
   lastWorkouts?: Map<string, LastExerciseData>,
-  language: 'de' | 'en' = 'de'
+  language: string = 'de'
 ): void {
   const doc = new jsPDF({
     orientation: 'landscape', // Landscape for more columns

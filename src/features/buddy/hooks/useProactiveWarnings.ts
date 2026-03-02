@@ -44,7 +44,7 @@ function getStorageKey(): string {
 export function useProactiveWarnings(
   deviations: Deviation[],
   addSystemMessage: (content: string, icon?: string) => void,
-  language: 'de' | 'en',
+  language: string,
   isDataReady: boolean,
 ) {
   const hasFiredRef = useRef(false);

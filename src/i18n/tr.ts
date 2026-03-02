@@ -1090,6 +1090,14 @@ export const tr: TranslationKeys = {
     hemoglobin: 'Hemoglobin',
     creatinine: 'Kreatinin',
     noBloodWork: 'Henüz kan tahlili verisi yok',
+    // Doctor Report
+    doctorReport: 'Doktor Raporu PDF',
+    doctorReportDesc: 'Kan tahlili, maddeler ve yaşamsal değerlerle doktorunuz için bir PDF raporu oluşturur.',
+    posingPhotos: 'Poz Fotoğrafları',
+    uploadPhoto: 'Fotoğraf Yükle',
+    noPhotos: 'Bu poz için fotoğraf yok',
+    comparePhotos: 'Fotoğrafları Karşılaştır',
+    photoCount: 'fotoğraf',
   },
   reds: {
     warningTitle: 'Düşük kilo / enerji uyarısı',

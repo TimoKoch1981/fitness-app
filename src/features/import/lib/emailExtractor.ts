@@ -42,7 +42,7 @@ let idCounter = 0;
 export async function extractHealthDataFromText(
   text: string,
   apiKey: string,
-  language: 'de' | 'en' = 'de'
+  language: string = 'de'
 ): Promise<ImportedRow[]> {
   const systemPrompt = language === 'de' ? EXTRACTION_PROMPT : EXTRACTION_PROMPT
     .replace('Du bist ein Gesundheitsdaten-Extraktor', 'You are a health data extractor')

@@ -41,7 +41,7 @@ export async function scheduleAllNotifications(
   completedReminderIds: Set<string>,
   prefs: NotificationPreferences,
   userId: string,
-  language: 'de' | 'en',
+  language: string,
 ): Promise<number> {
   // Cancel everything first (clean slate)
   await cancelAllPending();

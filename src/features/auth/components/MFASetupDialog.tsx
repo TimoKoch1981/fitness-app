@@ -20,7 +20,7 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const mfa = (t as Record<string, Record<string, string>>).mfa ?? {};
+  const mfa = (t as unknown as Record<string, Record<string, string>>).mfa ?? {};
 
   useEffect(() => {
     if (open) {

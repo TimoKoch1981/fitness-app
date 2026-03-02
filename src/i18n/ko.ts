@@ -1090,6 +1090,14 @@ export const ko: TranslationKeys = {
     hemoglobin: '헤모글로빈',
     creatinine: '크레아티닌',
     noBloodWork: '아직 혈액 검사 데이터가 없습니다',
+    // Doctor Report
+    doctorReport: '의사 보고서 PDF',
+    doctorReportDesc: '혈액 검사, 물질 및 활력 징후가 포함된 PDF 보고서를 의사를 위해 생성합니다.',
+    posingPhotos: '포징 사진',
+    uploadPhoto: '사진 업로드',
+    noPhotos: '이 포즈에 대한 사진이 없습니다',
+    comparePhotos: '사진 비교',
+    photoCount: '장',
   },
   reds: {
     warningTitle: '저체중 / 에너지 경고',

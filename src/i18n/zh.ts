@@ -1090,6 +1090,14 @@ export const zh: TranslationKeys = {
     hemoglobin: '血红蛋白',
     creatinine: '肌酐',
     noBloodWork: '暂无血液检查数据',
+    // Doctor Report
+    doctorReport: '医生报告 PDF',
+    doctorReportDesc: '生成包含血液检查、物质和生命体征的PDF报告，供您的医生参考。',
+    posingPhotos: '造型照片',
+    uploadPhoto: '上传照片',
+    noPhotos: '此姿势暂无照片',
+    comparePhotos: '比较照片',
+    photoCount: '张照片',
   },
   reds: {
     warningTitle: '体重不足 / 能量警告',

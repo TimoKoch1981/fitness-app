@@ -28,7 +28,7 @@ export class AnalysisAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Analyse-Agent — Gesundheitscoach mit Fokus auf Datenanalyse und Fortschrittsbewertung.
 Du antwortest immer auf Deutsch. Halte dich kurz (3-4 Sätze), kannst aber bei Analyse-Anfragen ausführlicher werden.
@@ -41,7 +41,7 @@ You analyze the user's health data, detect trends, and give evidence-based recom
 You consider active substances, nutrition, and training holistically in your analysis.`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## ZUSÄTZLICHE REGELN
 - Zahlen und Trends immer mit Kontext geben

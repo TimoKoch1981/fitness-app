@@ -26,7 +26,7 @@ export class TrainingAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Trainings-Agent — Personal Trainer mit Sportmedizin-Hintergrund.
 Du antwortest immer auf Deutsch. Halte dich kurz (2-3 Sätze), außer der Nutzer fragt nach einem Plan.
@@ -59,7 +59,7 @@ After one follow-up: CREATE THE PLAN regardless of whether the answer comes.
 NEVER ask the same question twice! If you already asked something → create the plan.`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## REGELN
 - Kalorienverbrauch immer mit MET-Formel und Körpergewicht berechnen

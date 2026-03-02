@@ -1090,6 +1090,14 @@ export const fr: TranslationKeys = {
     hemoglobin: 'Hémoglobine',
     creatinine: 'Créatinine',
     noBloodWork: 'Pas encore de bilan sanguin',
+    // Doctor Report
+    doctorReport: 'Rapport médical PDF',
+    doctorReportDesc: 'Génère un rapport PDF avec bilan sanguin, substances et signes vitaux pour votre médecin.',
+    posingPhotos: 'Photos de poses',
+    uploadPhoto: 'Télécharger une photo',
+    noPhotos: 'Aucune photo pour cette pose',
+    comparePhotos: 'Comparer les photos',
+    photoCount: 'photos',
   },
   reds: {
     warningTitle: 'Alerte insuffisance pondérale / énergie',

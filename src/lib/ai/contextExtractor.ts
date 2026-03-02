@@ -89,7 +89,7 @@ const SUBSTANCE_PATTERNS_EN = [
  */
 export function extractFromUserMessage(
   message: string,
-  language: 'de' | 'en',
+  language: string,
   agentType: string,
 ): ContextNote[] {
   const notes: ContextNote[] = [];
@@ -157,7 +157,7 @@ export function extractFromUserMessage(
  */
 export function extractFromAgentResponse(
   response: string,
-  language: 'de' | 'en',
+  language: string,
   agentType: string,
 ): ContextNote[] {
   const notes: ContextNote[] = [];
@@ -256,7 +256,7 @@ export async function saveContextNotes(
 export async function loadPersistentContext(
   userId: string,
   agentType: string,
-  language: 'de' | 'en' = 'de',
+  language: string = 'de',
   limit: number = 10,
 ): Promise<string | null> {
   try {

@@ -48,7 +48,7 @@ export interface CommunicationStyle {
 export interface AgentContext {
   healthContext: Partial<HealthContext>;
   conversationHistory: ChatMessage[];
-  language: 'de' | 'en';
+  language: string;
   communicationStyle?: CommunicationStyle;
   /** Pre-loaded persistent context from previous sessions (loaded async before agent call) */
   persistentContext?: string | null;

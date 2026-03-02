@@ -17,7 +17,7 @@ import type { BodyDataPoint } from '../hooks/useReportData';
 interface WeightChartProps {
   data: BodyDataPoint[];
   showBodyFat?: boolean;
-  language?: 'de' | 'en';
+  language?: string;
 }
 
 export function WeightChart({ data, showBodyFat = true, language = 'de' }: WeightChartProps) {

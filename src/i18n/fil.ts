@@ -1090,6 +1090,14 @@ export const fil: TranslationKeys = {
     hemoglobin: 'Hemoglobin',
     creatinine: 'Creatinine',
     noBloodWork: 'Wala pang blood work data',
+    // Doctor Report
+    doctorReport: 'Doctor Report PDF',
+    doctorReportDesc: 'Gumagawa ng PDF report na may blood work, substances, at vitals para sa iyong doktor.',
+    posingPhotos: 'Mga Posing Photo',
+    uploadPhoto: 'Mag-upload ng Photo',
+    noPhotos: 'Walang mga photo para sa pose na ito',
+    comparePhotos: 'Ihambing ang mga Photo',
+    photoCount: 'mga photo',
   },
   reds: {
     warningTitle: 'Babala sa Underweight / Enerhiya',

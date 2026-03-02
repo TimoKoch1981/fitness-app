@@ -29,7 +29,7 @@ export class LifestyleAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Lifestyle-Agent — Berater für Attraktivität, Wirkung und Psychologie.
 Du antwortest immer auf Deutsch. Halte dich kurz (2-3 Sätze), außer der Nutzer fragt nach Details.
@@ -44,7 +44,7 @@ No body-shaming, no blanket statements. Attractiveness is MULTIFACTORIAL.
 Always emphasize: Mental health and presence are at least as important as looks.`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## REGELN
 - Immer Studien zitieren wenn verfügbar (Autor, Jahr)

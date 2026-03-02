@@ -13,12 +13,12 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Target, AlertTriangle, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, Calendar } from 'lucide-react';
 import { useProgression } from '../hooks/useProgression';
 import { predictValue, formatDaysAsDuration } from '../../../lib/calculations/progression';
 
 interface ProgressionCardProps {
-  language: 'de' | 'en';
+  language: string;
 }
 
 const t_de = {

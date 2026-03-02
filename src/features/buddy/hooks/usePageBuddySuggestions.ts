@@ -33,7 +33,7 @@ export type PageId =
 
 export function usePageBuddySuggestions(
   pageId: PageId,
-  language: 'de' | 'en',
+  language: string,
 ): BuddySuggestion[] {
   return useMemo(() => {
     const de = language === 'de';

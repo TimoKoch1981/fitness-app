@@ -16,7 +16,7 @@ export function MFASettings() {
   const [confirmDisable, setConfirmDisable] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  const mfa = (t as Record<string, Record<string, string>>).mfa ?? {};
+  const mfa = (t as unknown as Record<string, Record<string, string>>).mfa ?? {};
   const isEnabled = factors.some((f) => f.status === 'verified');
 
   const loadFactors = useCallback(async () => {

@@ -188,7 +188,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
     const videoId = isRawPlaylistId ? undefined : extractYouTubeId(source);
 
     if (!playlistId && !videoId) {
-      setError(t('workout', 'musicError'));
+      setError(t.workout.musicError);
       setIsLoading(false);
       return;
     }
@@ -247,11 +247,11 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
           setIsPlaying(false);
           const code = event.data;
           if (code === 101 || code === 150) {
-            setError(t('workout', 'musicError') + ' (embedding disabled)');
+            setError(t.workout.musicError + ' (embedding disabled)');
           } else if (code === 100) {
-            setError(t('workout', 'musicError') + ' (video not found)');
+            setError(t.workout.musicError + ' (video not found)');
           } else {
-            setError(t('workout', 'musicError'));
+            setError(t.workout.musicError);
           }
         },
       },
@@ -276,7 +276,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
     const playlistId = extractPlaylistId(trimmed);
 
     if (!videoId && !playlistId) {
-      setError(t('workout', 'musicError'));
+      setError(t.workout.musicError);
       return;
     }
 
@@ -362,8 +362,8 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
         <Music className="h-4 w-4" />
         <span className="text-xs font-medium">
           {isPlaying
-            ? t('workout', 'musicPlaying')
-            : t('workout', 'music')}
+            ? t.workout.musicPlaying
+            : t.workout.music}
         </span>
         {isPlaying && <EqualizerBars animate />}
         {isLoading && <Loader2 className="h-3 w-3 animate-spin text-teal-400" />}
@@ -392,13 +392,13 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
         <div className="flex items-center gap-2">
           <Music className="h-4 w-4 text-teal-400" />
           <span className="text-sm font-medium">
-            {t('workout', 'musicWorkout')}
+            {t.workout.musicWorkout}
           </span>
         </div>
         <button
           onClick={() => setIsExpanded(false)}
           className="p-1 hover:bg-gray-700 rounded"
-          aria-label={t('common', 'close')}
+          aria-label={t.common.close}
         >
           <ChevronDown className="h-4 w-4" />
         </button>
@@ -407,7 +407,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
       {/* Playlists */}
       <div className="px-4 py-3">
         <p className="text-xs text-gray-400 mb-2">
-          {t('workout', 'musicChoose')}
+          {t.workout.musicChoose}
         </p>
         <div className="grid grid-cols-2 gap-2">
           {PLAYLISTS.map(pl => (
@@ -433,7 +433,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
       {/* Custom URL */}
       <div className="px-4 pb-3">
         <p className="text-xs text-gray-400 mb-1.5">
-          {t('workout', 'musicCustom')}
+          {t.workout.musicCustom}
         </p>
         <div className="flex gap-2">
           <input
@@ -585,7 +585,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
             <button
               onClick={handleRetry}
               className="p-1 hover:bg-red-500/20 rounded transition-colors"
-              title={t('workout', 'musicRetry')}
+              title={t.workout.musicRetry}
             >
               <RefreshCw className="h-3.5 w-3.5 text-red-400" />
             </button>
@@ -598,7 +598,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 text-xs text-gray-400">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            <span>{t('workout', 'musicLoading')}</span>
+            <span>{t.workout.musicLoading}</span>
           </div>
         </div>
       )}
@@ -611,7 +611,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
             <button
               onClick={togglePlayPause}
               className="p-1.5 bg-teal-500/20 text-teal-400 rounded-lg hover:bg-teal-500/30 transition-colors"
-              aria-label={isPlaying ? t('workout', 'timerPause') : t('workout', 'timerStart')}
+              aria-label={isPlaying ? t.workout.timerPause : t.workout.timerStart}
             >
               {isPlaying
                 ? <Pause className="h-4 w-4" />
@@ -620,14 +620,14 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
             <button
               onClick={handleStop}
               className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-              aria-label={t('common', 'close')}
+              aria-label={t.common.close}
             >
               <Square className="h-4 w-4" />
             </button>
             <button
               onClick={toggleMute}
               className="p-1.5 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
-              aria-label={t('workout', 'musicVolume')}
+              aria-label={t.workout.musicVolume}
             >
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
@@ -635,7 +635,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
               {isPlaying && <EqualizerBars count={5} barClass="w-1 bg-teal-400 rounded-full" animate />}
               {isPlaying && (
                 <span className="text-xs text-gray-400 ml-2">
-                  {t('workout', 'musicPlaying')}
+                  {t.workout.musicPlaying}
                 </span>
               )}
             </div>
@@ -644,7 +644,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
           {/* Volume slider */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-gray-500 w-14">
-              {t('workout', 'musicVolume')}
+              {t.workout.musicVolume}
             </span>
             <input
               type="range"

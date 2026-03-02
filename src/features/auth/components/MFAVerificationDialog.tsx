@@ -19,7 +19,7 @@ export function MFAVerificationDialog({ factorId, onSuccess, onCancel }: MFAVeri
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
-  const mfa = (t as Record<string, Record<string, string>>).mfa ?? {};
+  const mfa = (t as unknown as Record<string, Record<string, string>>).mfa ?? {};
 
   const handleVerify = async () => {
     if (code.length !== 6) return;

@@ -31,7 +31,7 @@ export type WorkoutCommand =
   | { type: 'unknown'; transcript: string };
 
 export interface UseWorkoutVoiceCommandsOptions {
-  language: 'de' | 'en';
+  language: string;
   onCommand: (command: WorkoutCommand) => void;
   onFeedback?: (message: string) => void;
   enabled?: boolean;

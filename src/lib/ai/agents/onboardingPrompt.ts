@@ -12,7 +12,7 @@
  * Get the onboarding system prompt based on language.
  * This is prepended to the general agent's prompt when onboarding is active.
  */
-export function getOnboardingPrompt(language: 'de' | 'en'): string {
+export function getOnboardingPrompt(language: string): string {
   if (language === 'de') {
     return `## ONBOARDING-MODUS (AKTIV)
 

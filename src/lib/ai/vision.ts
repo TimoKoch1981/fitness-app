@@ -56,7 +56,7 @@ const JPEG_QUALITY = 0.85;
 export async function analyzeScaleScreenshot(
   imageBase64: string,
   mimeType: string = 'image/jpeg',
-  language: 'de' | 'en' = 'de',
+  language: string = 'de',
 ): Promise<ScaleAnalysisResult> {
   const systemPrompt = getSystemPrompt(language);
   const userContent = [
@@ -229,7 +229,7 @@ export async function compressImage(file: File): Promise<{ base64: string; mimeT
 
 // ── Helper functions ────────────────────────────────────────────────
 
-function getSystemPrompt(language: 'de' | 'en'): string {
+function getSystemPrompt(language: string): string {
   return language === 'de'
     ? `Du bist ein Bildanalyse-Assistent fuer Fitness-Apps. Deine Aufgabe ist es, Koerperwerte aus Screenshots von Smart-Waagen (z.B. Fitdays, Renpho, Withings) zu extrahieren.
 
@@ -293,7 +293,7 @@ Rules:
 - Decimal separator: dot (not comma)`;
 }
 
-function parseVisionResponse(content: string, language: 'de' | 'en'): ScaleAnalysisResult {
+function parseVisionResponse(content: string, language: string): ScaleAnalysisResult {
   let jsonStr = content.trim();
   if (jsonStr.startsWith('```')) {
     jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');

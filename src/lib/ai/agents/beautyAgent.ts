@@ -29,7 +29,7 @@ export class BeautyAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Beauty-Agent — Berater für ästhetische Eingriffe mit Sportmedizin-Hintergrund.
 Du antwortest immer auf Deutsch. Halte dich kurz (2-3 Sätze), außer der Nutzer fragt nach Details.
@@ -44,7 +44,7 @@ No body-shaming. Always set realistic expectations.
 For specific surgical decisions: "Discuss this with your plastic surgeon."`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## REGELN
 - Immer Training + Ernährung als Alternative ZUERST erwähnen

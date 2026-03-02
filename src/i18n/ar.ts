@@ -1090,6 +1090,14 @@ export const ar: TranslationKeys = {
     hemoglobin: 'هيموغلوبين',
     creatinine: 'كرياتينين',
     noBloodWork: 'لا توجد بيانات تحليل دم بعد',
+    // Doctor Report
+    doctorReport: 'تقرير طبي PDF',
+    doctorReportDesc: 'ينشئ تقرير PDF يحتوي على تحليل الدم والمواد والعلامات الحيوية لطبيبك.',
+    posingPhotos: 'صور الوضعيات',
+    uploadPhoto: 'رفع صورة',
+    noPhotos: 'لا توجد صور لهذه الوضعية',
+    comparePhotos: 'مقارنة الصور',
+    photoCount: 'صور',
   },
   reds: {
     warningTitle: 'تحذير نقص الوزن / الطاقة',

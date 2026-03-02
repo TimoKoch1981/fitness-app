@@ -65,7 +65,7 @@ export function useDataExport() {
         const table = tables[i];
         setProgress({ current: i + 1, total: tables.length, currentTable: table.name });
 
-        if (table.single) {
+        if ('single' in table && table.single) {
           // Single row (profiles)
           const { data, error } = await supabase
             .from(table.name)

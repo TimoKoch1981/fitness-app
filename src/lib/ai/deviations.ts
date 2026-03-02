@@ -339,7 +339,7 @@ export function analyzeDeviations(
 export function formatDeviationsForAgent(
   deviations: Deviation[],
   agentType: string,
-  language: 'de' | 'en' = 'de',
+  language: string = 'de',
 ): string {
   const relevant = deviations.filter(
     d => d.agent === agentType || d.agent === 'general',
@@ -370,7 +370,7 @@ export function formatDeviationsForAgent(
  */
 export function getDeviationSuggestions(
   deviations: Deviation[],
-  language: 'de' | 'en' = 'de',
+  language: string = 'de',
 ): Array<{ id: string; label: string; message: string; icon: string }> {
   const suggestions: Array<{ id: string; label: string; message: string; icon: string }> = [];
   const de = language === 'de';

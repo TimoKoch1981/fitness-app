@@ -124,6 +124,7 @@
 | 12.28   | 2026-03-01 | Proaktives Warnsystem (useProactiveWarnings, Auto-Chat-Injection, 2 neue Schwellenwerte, 9 Tests) | Erledigt   |
 | 12.29   | 2026-03-01 | Prognose-Funktion (calculateGoalDate, formatDaysAsDuration, ProgressionCard Ziel-Datum, 9 Tests) | Erledigt   |
 | 12.30   | 2026-03-01 | Code-TODO Fix: bodyHistory in HealthContext+baseAgent (KI-Buddy hat jetzt Gewichts-/KFA-Trends der letzten 30 Messungen) | Erledigt   |
+| 12.31   | 2026-03-02 | tsc -b Build-Fix: 52 Type-Errors auf 0. Language-Type gewidened, i18n-Keys ergaenzt, WorkoutMusicPlayer t()-Pattern, MFA-Casts, NotificationType | Erledigt   |
 
 ---
 

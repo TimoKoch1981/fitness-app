@@ -5,6 +5,7 @@ export type NotificationType =
   | 'substance'
   | 'blood_pressure'
   | 'body_measurement'
+  | 'meal_logging'
   | 'custom'
   | 'daily_summary';
 
@@ -33,6 +34,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     substance: true,
     blood_pressure: true,
     body_measurement: true,
+    meal_logging: true,
     custom: true,
     daily_summary: true,
   },
@@ -59,6 +61,7 @@ export const NOTIFICATION_ROUTES: Record<NotificationType, string> = {
   substance: '/medical',
   blood_pressure: '/medical',
   body_measurement: '/tracking',
+  meal_logging: '/nutrition',
   custom: '/cockpit',
   daily_summary: '/cockpit',
 };

@@ -137,11 +137,11 @@ export function CockpitPage() {
   let tdee: number | null = null;
 
   if (profileComplete) {
-    const age = calculateAge(profile.birth_date);
+    const age = calculateAge(profile.birth_date!);
     bmrResult = calculateBMR(
       {
-        weight_kg: latestBody.weight_kg,
-        height_cm: profile.height_cm,
+        weight_kg: latestBody.weight_kg!,
+        height_cm: profile.height_cm!,
         age,
         gender: profile.gender ?? 'male',
         body_fat_pct: latestBody.body_fat_pct ?? undefined,

@@ -1090,6 +1090,14 @@ export const es: TranslationKeys = {
     hemoglobin: 'Hemoglobina',
     creatinine: 'Creatinina',
     noBloodWork: 'Aún no hay datos de análisis de sangre',
+    // Doctor Report
+    doctorReport: 'Informe médico PDF',
+    doctorReportDesc: 'Genera un informe PDF con análisis de sangre, sustancias y signos vitales para tu médico.',
+    posingPhotos: 'Fotos de poses',
+    uploadPhoto: 'Subir foto',
+    noPhotos: 'No hay fotos para esta pose',
+    comparePhotos: 'Comparar fotos',
+    photoCount: 'fotos',
   },
   reds: {
     warningTitle: 'Advertencia de bajo peso / energía',

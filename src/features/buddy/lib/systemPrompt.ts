@@ -16,7 +16,7 @@ import type { HealthContext } from '../../../types/health';
  * Build the system prompt with current health data context.
  * @deprecated Replaced by agent-specific prompt building in baseAgent.ts
  */
-export function buildSystemPrompt(context?: Partial<HealthContext>, language: 'de' | 'en' = 'de'): string {
+export function buildSystemPrompt(context?: Partial<HealthContext>, language: string = 'de'): string {
   const lang = language === 'de' ? 'Deutsch' : 'English';
 
   let prompt = language === 'de'

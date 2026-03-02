@@ -1090,6 +1090,14 @@ export const ja: TranslationKeys = {
     hemoglobin: 'ヘモグロビン',
     creatinine: 'クレアチニン',
     noBloodWork: '血液検査データはまだありません',
+    // Doctor Report
+    doctorReport: '医師レポート PDF',
+    doctorReportDesc: '血液検査、物質、バイタルを含むPDFレポートを医師向けに生成します。',
+    posingPhotos: 'ポージング写真',
+    uploadPhoto: '写真をアップロード',
+    noPhotos: 'このポーズの写真はありません',
+    comparePhotos: '写真を比較',
+    photoCount: '枚',
   },
   reds: {
     warningTitle: '低体重 / エネルギー警告',

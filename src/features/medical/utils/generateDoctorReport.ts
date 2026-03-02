@@ -27,7 +27,7 @@ interface DoctorReportData {
   recentBP: BloodPressure[];
   activeSubstances: Substance[];
   latestBody?: BodyMeasurement | null;
-  language: 'de' | 'en';
+  language: string;
 }
 
 const LABELS = {
@@ -158,7 +158,7 @@ function calculateAge(birthDate: string): number {
 
 export function generateDoctorReport(data: DoctorReportData): void {
   const { profile, latestBloodWork, recentBP, activeSubstances, latestBody, language } = data;
-  const l = LABELS[language];
+  const l = LABELS[language as keyof typeof LABELS] ?? LABELS.en;
   const isDE = language === 'de';
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });

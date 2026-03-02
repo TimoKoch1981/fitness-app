@@ -26,7 +26,7 @@ export class NutritionAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Ernährungs-Agent — Experte für Sporternährung, Nährwertanalyse und Mahlzeitenplanung.
 Du antwortest immer auf Deutsch. Halte dich kurz (2-3 Sätze), außer der Nutzer fragt nach Details.
@@ -43,7 +43,7 @@ You are HONEST — for unknown branded products, use ACTION:search_product inste
 You PROACTIVELY react to nutritional gaps: with low protein, calorie deficit, or illness, you adapt recommendations and actively ask follow-up questions.`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## REGELN
 - Format: Name — Xg Portion — X kcal | Xg P | Xg C | Xg F

@@ -37,7 +37,7 @@ export abstract class BaseAgent {
    */
   protected buildSystemPrompt(context: AgentContext): string {
     const parts: string[] = [];
-    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
+    const trainingMode: TrainingMode = (context.healthContext.profile as unknown as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
     // 0. Global Facts Codex (applies to ALL agents — facts > estimates)
     parts.push(this.getFactsCodex(context.language));
@@ -96,7 +96,7 @@ export abstract class BaseAgent {
    * Global Facts Codex — applies to ALL agents.
    * Core principle: Facts > Estimates. Always.
    */
-  protected getFactsCodex(language: 'de' | 'en'): string {
+  protected getFactsCodex(language: string): string {
     if (language === 'de') {
       return `## FAKTEN-CODEX (gilt für ALLE Agenten) ⚠️
 
@@ -233,7 +233,7 @@ When the user makes progress or achieves milestones:
    * Inject training mode context so agents know which mode the user is in.
    * This influences tone, content depth, and feature visibility.
    */
-  protected getTrainingModeContext(mode: TrainingMode, language: 'de' | 'en'): string {
+  protected getTrainingModeContext(mode: TrainingMode, language: string): string {
     if (language === 'de') {
       const modeLabels: Record<TrainingMode, string> = {
         standard: 'Standard (allgemeines Fitness-Tracking)',
@@ -285,7 +285,7 @@ When the user makes progress or achieves milestones:
    * Generate communication style guidance based on user preferences.
    * Injected into the system prompt so the AI adapts its tone and depth.
    */
-  protected getCommunicationStylePrompt(style: CommunicationStyle | undefined, language: 'de' | 'en'): string | null {
+  protected getCommunicationStylePrompt(style: CommunicationStyle | undefined, language: string): string | null {
     if (!style) return null;
     // Skip if both are defaults
     if (style.verbosity === 'normal' && style.expertise === 'advanced') return null;
@@ -316,10 +316,10 @@ When the user makes progress or achieves milestones:
   }
 
   /** Override in subclass: define the agent's role and personality */
-  protected abstract buildRoleHeader(language: 'de' | 'en'): string;
+  protected abstract buildRoleHeader(language: string): string;
 
   /** Override in subclass (optional): add extra agent-specific instructions */
-  protected getAgentInstructions(_language: 'de' | 'en', _trainingMode?: TrainingMode): string | null {
+  protected getAgentInstructions(_language: string, _trainingMode?: TrainingMode): string | null {
     return null;
   }
 
@@ -350,7 +350,7 @@ When the user makes progress or achieves milestones:
    */
   async execute(context: AgentContext): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
-    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
+    const trainingMode: TrainingMode = (context.healthContext.profile as unknown as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
     // Assemble messages: system prompt + last 8 conversation messages
     const messages: ChatMessage[] = [
@@ -385,7 +385,7 @@ When the user makes progress or achieves milestones:
     onChunk: StreamCallback,
   ): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
-    const trainingMode: TrainingMode = (context.healthContext.profile as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
+    const trainingMode: TrainingMode = (context.healthContext.profile as unknown as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
 
     console.log(`[Agent:${this.config.type}] Prompt: ${systemPrompt.length} chars (~${Math.round(systemPrompt.length / 4)} tokens), mode: ${trainingMode}`);
 

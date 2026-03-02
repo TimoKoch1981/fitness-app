@@ -27,7 +27,7 @@ export class GeneralAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist FitBuddy, ein freundlicher Fitness- und Gesundheitsassistent.
 Du antwortest immer auf Deutsch. Halte dich kurz und freundlich (1-2 Sätze).

@@ -39,7 +39,7 @@ const SEVERITY_STYLES: Record<InsightSeverity, { bg: string; border: string; tit
 
 interface Props {
   insight: Insight;
-  language: 'de' | 'en';
+  language: string;
 }
 
 export function InsightCard({ insight, language }: Props) {
@@ -51,10 +51,10 @@ export function InsightCard({ insight, language }: Props) {
         <span className="text-sm flex-shrink-0 mt-0.5">{insight.icon}</span>
         <div className="min-w-0">
           <p className={`text-xs font-semibold ${style.titleColor}`}>
-            {insight.title[language]}
+            {language === 'de' ? insight.title.de : insight.title.en}
           </p>
           <p className={`text-[10px] ${style.msgColor} mt-0.5 leading-relaxed`}>
-            {insight.message[language]}
+            {language === 'de' ? insight.message.de : insight.message.en}
           </p>
         </div>
       </div>

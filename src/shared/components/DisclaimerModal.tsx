@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldAlert, Heart, Pill, Activity, Database, AlertTriangle, Brain, Globe, Link as LinkIcon } from 'lucide-react';
+import { ShieldAlert, Heart, Pill, Activity, Database, AlertTriangle, Link as LinkIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n';
 

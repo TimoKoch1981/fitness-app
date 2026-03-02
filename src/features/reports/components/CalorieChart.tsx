@@ -17,7 +17,7 @@ import type { DailyNutrition } from '../hooks/useReportData';
 interface CalorieChartProps {
   data: DailyNutrition[];
   calorieGoal?: number;
-  language?: 'de' | 'en';
+  language?: string;
 }
 
 export function CalorieChart({ data, calorieGoal, language = 'de' }: CalorieChartProps) {

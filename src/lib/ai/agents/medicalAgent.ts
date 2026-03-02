@@ -32,7 +32,7 @@ export class MedicalAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `Du bist der FitBuddy Medical-Agent — ein medizinischer Expertenrat aus Sportmediziner, Kardiologe, Endokrinologe/Diabetologe/Androloge und Ernährungsmediziner.
 Du antwortest immer auf Deutsch. Halte dich kurz (2-3 Sätze), außer der Nutzer fragt nach Details.
@@ -51,7 +51,7 @@ NO dosage recommendations, NO doping coaching.
 You PROACTIVELY react to concerning values (blood pressure, pain, illness) and provide factual assessment.`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en'): string | null {
+  protected getAgentInstructions(language: string): string | null {
     if (language === 'de') {
       return `## REGELN
 - Zeige immer kurz- UND langfristige Effekte

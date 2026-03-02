@@ -21,7 +21,7 @@ export interface CelebrationEvent {
 
 interface CelebrationOverlayProps {
   event: CelebrationEvent | null;
-  language: 'de' | 'en';
+  language: string;
   onDismiss: () => void;
 }
 

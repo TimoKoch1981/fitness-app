@@ -190,7 +190,7 @@ export function calculateGoalDate(
  */
 export function formatDaysAsDuration(
   days: number | null,
-  language: 'de' | 'en' = 'de'
+  language: string = 'de'
 ): string | null {
   if (days === null || days <= 0) return null;
   const de = language === 'de';

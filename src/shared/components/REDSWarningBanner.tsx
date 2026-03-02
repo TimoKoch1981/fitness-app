@@ -28,7 +28,7 @@ export function REDSWarningBanner({
   caloriesGoal = 0,
   tdee = null,
 }: REDSWarningBannerProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
 
   const warning = useREDSWarning(caloriesConsumed, caloriesGoal, tdee);

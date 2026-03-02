@@ -1090,6 +1090,14 @@ export const pl: TranslationKeys = {
     hemoglobin: 'Hemoglobina',
     creatinine: 'Kreatynina',
     noBloodWork: 'Brak danych z badań krwi',
+    // Doctor Report
+    doctorReport: 'Raport lekarski PDF',
+    doctorReportDesc: 'Generuje raport PDF z wynikami badań krwi, substancjami i parametrami życiowymi dla Twojego lekarza.',
+    posingPhotos: 'Zdjęcia pozowania',
+    uploadPhoto: 'Prześlij zdjęcie',
+    noPhotos: 'Brak zdjęć dla tej pozy',
+    comparePhotos: 'Porównaj zdjęcia',
+    photoCount: 'zdjęć',
   },
   reds: {
     warningTitle: 'Ostrzeżenie o niedowadze / energii',

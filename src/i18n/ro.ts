@@ -1090,6 +1090,14 @@ export const ro: TranslationKeys = {
     hemoglobin: 'Hemoglobină',
     creatinine: 'Creatinină',
     noBloodWork: 'Nu există date de analize de sânge',
+    // Doctor Report
+    doctorReport: 'Raport medical PDF',
+    doctorReportDesc: 'Generează un raport PDF cu analize de sânge, substanțe și semne vitale pentru medicul tău.',
+    posingPhotos: 'Fotografii de posing',
+    uploadPhoto: 'Încarcă fotografie',
+    noPhotos: 'Nu există fotografii pentru această poză',
+    comparePhotos: 'Compară fotografii',
+    photoCount: 'fotografii',
   },
   reds: {
     warningTitle: 'Avertizare subpondere / energie',

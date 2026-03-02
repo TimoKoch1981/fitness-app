@@ -32,7 +32,7 @@ import {
 } from '../../../lib/ai/contextExtractor';
 import { useChatHistory } from './useChatHistory';
 import { useAuth } from '../../../app/providers/AuthProvider';
-import type { AgentContext, CommunicationStyle } from '../../../lib/ai/agents/types';
+import type { AgentContext, AgentType, CommunicationStyle } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
 import type { HealthContext } from '../../../types/health';
 
@@ -58,7 +58,7 @@ export interface DisplayMessage {
 
 interface UseBuddyChatOptions {
   context?: Partial<HealthContext>;
-  language?: 'de' | 'en';
+  language?: string;
   communicationStyle?: CommunicationStyle;
 }
 

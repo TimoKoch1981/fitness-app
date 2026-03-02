@@ -22,7 +22,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 export interface UseVoiceInputOptions {
   /** i18n language key ('de' or 'en') */
-  language: 'de' | 'en';
+  language: string;
   /** Called whenever transcript updates (interim or final) */
   onTranscript?: (text: string, isFinal: boolean) => void;
   /** Called when an error occurs */

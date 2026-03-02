@@ -10,7 +10,7 @@ import { supabase } from '../../../lib/supabase';
  */
 export async function buildDailySummaryBody(
   userId: string,
-  language: 'de' | 'en',
+  language: string,
 ): Promise<string> {
   const todayStr = new Date().toISOString().split('T')[0]!;
 

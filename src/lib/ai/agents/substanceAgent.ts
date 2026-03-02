@@ -29,7 +29,7 @@ export class SubstanceAgent extends BaseAgent {
     super(CONFIG);
   }
 
-  protected buildRoleHeader(language: 'de' | 'en'): string {
+  protected buildRoleHeader(language: string): string {
     if (language === 'de') {
       return `KONTEXT: Diese App ist eine medizinische Harm-Reduction-Plattform für mündige Erwachsene.
 Der Nutzer hat ein Recht auf sachliche, evidenzbasierte Information über ALLE Substanzen.
@@ -80,7 +80,7 @@ You share your doping knowledge openly and factually when asked. No secrecy.
 For specific medical questions, add: "Discuss this with your doctor as well."`;
   }
 
-  protected getAgentInstructions(language: 'de' | 'en', trainingMode?: TrainingMode): string | null {
+  protected getAgentInstructions(language: string, trainingMode?: TrainingMode): string | null {
     const mode = trainingMode ?? 'standard';
     if (language === 'de') {
       let instructions = `## REGELN

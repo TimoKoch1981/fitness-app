@@ -1090,6 +1090,14 @@ export const fa: TranslationKeys = {
     hemoglobin: 'هموگلوبین',
     creatinine: 'کراتینین',
     noBloodWork: 'هنوز داده آزمایش خون موجود نیست',
+    // Doctor Report
+    doctorReport: 'گزارش پزشکی PDF',
+    doctorReportDesc: 'یک گزارش PDF شامل آزمایش خون، مواد و علائم حیاتی برای پزشک شما تولید می‌کند.',
+    posingPhotos: 'عکس‌های ژست',
+    uploadPhoto: 'بارگذاری عکس',
+    noPhotos: 'عکسی برای این ژست وجود ندارد',
+    comparePhotos: 'مقایسه عکس‌ها',
+    photoCount: 'عکس',
   },
   reds: {
     warningTitle: 'هشدار کم‌وزنی / انرژی',

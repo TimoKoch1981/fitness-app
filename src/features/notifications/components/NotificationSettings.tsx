@@ -8,6 +8,7 @@ const TYPE_ICONS: Record<NotificationType, string> = {
   substance: '\uD83D\uDC8A',
   blood_pressure: '\u2764\uFE0F',
   body_measurement: '\u2696\uFE0F',
+  meal_logging: '\uD83C\uDF7D\uFE0F',
   custom: '\uD83D\uDCCC',
   daily_summary: '\uD83D\uDCCA',
 };

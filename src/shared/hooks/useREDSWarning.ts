@@ -96,7 +96,7 @@ export function useREDSWarning(
   if (isLoading || !profile || !latestBody) return noWarning;
 
   const bmi = latestBody.bmi ?? null;
-  const weightKg = latestBody.weight_kg;
+  // const _weightKg = latestBody.weight_kg;
   const leanMassKg = latestBody.lean_mass_kg ?? null;
 
   // ── Check 1 & 2: BMI underweight (ALL genders) ──

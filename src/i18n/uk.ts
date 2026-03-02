@@ -1090,6 +1090,14 @@ export const uk: TranslationKeys = {
     hemoglobin: 'Гемоглобін',
     creatinine: 'Креатинін',
     noBloodWork: 'Дані аналізів крові відсутні',
+    // Doctor Report
+    doctorReport: 'Звіт для лікаря PDF',
+    doctorReportDesc: 'Генерує PDF-звіт з аналізами крові, речовинами та показниками життєдіяльності для вашого лікаря.',
+    posingPhotos: 'Фото позування',
+    uploadPhoto: 'Завантажити фото',
+    noPhotos: 'Немає фото для цієї пози',
+    comparePhotos: 'Порівняти фото',
+    photoCount: 'фото',
   },
   reds: {
     warningTitle: 'Попередження про недостатню вагу / енергію',

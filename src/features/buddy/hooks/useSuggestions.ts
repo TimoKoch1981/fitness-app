@@ -27,7 +27,7 @@ interface UseSuggestionsOptions {
   dailyStats?: DailyStats;
   latestBody?: BodyMeasurement | null;
   activePlan?: TrainingPlan | null;
-  language: 'de' | 'en';
+  language: string;
 }
 
 export function useSuggestions({
