@@ -1126,6 +1126,7 @@ export const ja: TranslationKeys = {
   },
   reds: {
     warningTitle: '低体重 / エネルギー警告',
+    energyWarningTitle: 'エネルギー警告',
     dangerTitle: '重大エネルギー警告',
     underweight: 'あなたのBMI ({bmi}) は18.5未満です — 低体重に分類されます。',
     severeUnderweight: 'あなたのBMI ({bmi}) は17.0未満です — 重度の低体重です。医師にご相談ください。',

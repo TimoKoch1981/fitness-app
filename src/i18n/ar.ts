@@ -1126,6 +1126,7 @@ export const ar: TranslationKeys = {
   },
   reds: {
     warningTitle: 'تحذير نقص الوزن / الطاقة',
+    energyWarningTitle: 'تحذير الطاقة',
     dangerTitle: 'تحذير طاقة حرج',
     underweight: 'مؤشر كتلة جسمك ({bmi}) أقل من 18.5 — هذا يُصنف كنقص في الوزن.',
     severeUnderweight: 'مؤشر كتلة جسمك ({bmi}) أقل من 17.0 — هذا نقص حاد في الوزن. يرجى استشارة طبيب.',

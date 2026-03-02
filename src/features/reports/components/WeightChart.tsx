@@ -31,7 +31,7 @@ export function WeightChart({ data, showBodyFat = true, language = 'de' }: Weigh
         {language === 'de' ? 'Gewichtsverlauf' : 'Weight Trend'}
       </h3>
       <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: -15 }}>
+        <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
           <XAxis
             dataKey="label"
@@ -44,7 +44,7 @@ export function WeightChart({ data, showBodyFat = true, language = 'de' }: Weigh
             tick={{ fontSize: 11, fill: '#9ca3af' }}
             axisLine={false}
             tickLine={false}
-            width={40}
+            width={50}
             unit="kg"
             domain={['dataMin - 2', 'dataMax + 2']}
           />

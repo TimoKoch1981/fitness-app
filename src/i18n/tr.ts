@@ -1126,6 +1126,7 @@ export const tr: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Düşük kilo / enerji uyarısı',
+    energyWarningTitle: 'Enerji Uyarısı',
     dangerTitle: 'Kritik enerji uyarısı',
     underweight: 'BMI değeriniz ({bmi}) 18,5\'in altında — bu düşük kilolu olarak sınıflandırılır.',
     severeUnderweight: 'BMI değeriniz ({bmi}) 17,0\'nin altında — ciddi düşük kilo. Lütfen bir doktora danışın.',

@@ -1126,6 +1126,7 @@ export const fa: TranslationKeys = {
   },
   reds: {
     warningTitle: 'هشدار کم‌وزنی / انرژی',
+    energyWarningTitle: 'هشدار انرژی',
     dangerTitle: 'هشدار بحرانی انرژی',
     underweight: 'BMI شما ({bmi}) زیر 18.5 است — این به عنوان کم‌وزنی طبقه‌بندی می‌شود.',
     severeUnderweight: 'BMI شما ({bmi}) زیر 17.0 است — این کم‌وزنی شدید است. لطفاً با پزشک مشورت کنید.',

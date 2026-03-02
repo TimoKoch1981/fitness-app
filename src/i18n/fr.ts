@@ -1126,6 +1126,7 @@ export const fr: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Alerte insuffisance pondérale / énergie',
+    energyWarningTitle: 'Avertissement Énergie',
     dangerTitle: 'Alerte énergie critique',
     underweight: 'Votre IMC ({bmi}) est inférieur à 18,5 — cela correspond à une insuffisance pondérale.',
     severeUnderweight: 'Votre IMC ({bmi}) est inférieur à 17,0 — insuffisance pondérale sévère. Consultez un médecin.',

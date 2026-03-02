@@ -1126,6 +1126,7 @@ export const zh: TranslationKeys = {
   },
   reds: {
     warningTitle: '体重不足 / 能量警告',
+    energyWarningTitle: '能量警告',
     dangerTitle: '严重能量警告',
     underweight: '您的BMI ({bmi}) 低于18.5 — 这被归类为体重不足。',
     severeUnderweight: '您的BMI ({bmi}) 低于17.0 — 这是严重体重不足。请咨询医生。',

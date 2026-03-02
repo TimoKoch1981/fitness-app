@@ -127,7 +127,7 @@ export function ProgressionCard({ language }: ProgressionCardProps) {
       {/* Chart */}
       {chartData.length > 0 && (
         <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -15 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis
               dataKey="label"
@@ -140,7 +140,7 @@ export function ProgressionCard({ language }: ProgressionCardProps) {
               tick={{ fontSize: 11, fill: '#9ca3af' }}
               axisLine={false}
               tickLine={false}
-              width={40}
+              width={50}
               unit="kg"
               domain={['dataMin - 1', 'dataMax + 1']}
             />

@@ -1126,6 +1126,7 @@ export const fil: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Babala sa Underweight / Enerhiya',
+    energyWarningTitle: 'Babala sa Enerhiya',
     dangerTitle: 'Kritikal na Babala sa Enerhiya',
     underweight: 'Ang iyong BMI ({bmi}) ay nasa ibaba ng 18.5 — ito ay classified bilang underweight.',
     severeUnderweight: 'Ang iyong BMI ({bmi}) ay nasa ibaba ng 17.0 — ito ay malubhang underweight. Kumonsulta sa doktor.',

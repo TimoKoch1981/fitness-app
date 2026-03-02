@@ -1157,6 +1157,7 @@ export const en: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Underweight / Energy Warning',
+    energyWarningTitle: 'Energy Warning',
     dangerTitle: 'Critical Energy Warning',
     underweight: 'Your BMI ({bmi}) is below 18.5 — this is classified as underweight.',
     severeUnderweight: 'Your BMI ({bmi}) is below 17.0 — this is severe underweight. Please consult a doctor.',

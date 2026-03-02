@@ -1126,6 +1126,7 @@ export const ro: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Avertizare subpondere / energie',
+    energyWarningTitle: 'Avertisment Energie',
     dangerTitle: 'Avertizare energie critică',
     underweight: 'IMC-ul tău ({bmi}) este sub 18,5 — aceasta este clasificată ca subpondere.',
     severeUnderweight: 'IMC-ul tău ({bmi}) este sub 17,0 — subpondere severă. Consultă un medic.',

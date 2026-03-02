@@ -1163,6 +1163,7 @@ export const de = {
   },
   reds: {
     warningTitle: 'Untergewicht / Energie-Warnung',
+    energyWarningTitle: 'Energie-Warnung',
     dangerTitle: 'Kritische Energie-Warnung',
     underweight: 'Dein BMI ({bmi}) liegt unter 18,5 — das gilt als Untergewicht.',
     severeUnderweight: 'Dein BMI ({bmi}) liegt unter 17,0 — das ist starkes Untergewicht. Bitte konsultiere einen Arzt.',

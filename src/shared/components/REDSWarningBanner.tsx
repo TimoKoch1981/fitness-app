@@ -71,6 +71,14 @@ export function REDSWarningBanner({
 
   if (messages.length === 0) return null;
 
+  // Contextual title: only mention "Untergewicht" when actually underweight
+  const hasUnderweightWarning = warning.isUnderweight || warning.isSevereUnderweight;
+  const warningTitle = isDanger
+    ? reds.dangerTitle
+    : hasUnderweightWarning
+      ? reds.warningTitle
+      : (reds.energyWarningTitle ?? 'Energie-Warnung');
+
   return (
     <div
       className={`rounded-xl border p-3 ${
@@ -94,7 +102,7 @@ export function REDSWarningBanner({
             <h3 className={`text-sm font-semibold ${
               isDanger ? 'text-red-800' : 'text-amber-800'
             }`}>
-              {isDanger ? reds.dangerTitle : reds.warningTitle}
+              {warningTitle}
             </h3>
           </div>
           <div className="space-y-0.5">

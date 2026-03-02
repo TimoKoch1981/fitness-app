@@ -51,9 +51,11 @@ export function TrainingModeSelector({
 }: TrainingModeSelectorProps) {
   const { t } = useTranslation();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [disclaimerChecked, setDisclaimerChecked] = useState(false);
 
   const handleSelect = (mode: TrainingMode) => {
     if (mode === 'power_plus' && !powerPlusAccepted) {
+      setDisclaimerChecked(false);
       setShowDisclaimer(true);
       return;
     }
@@ -170,11 +172,9 @@ export function TrainingModeSelector({
               <input
                 type="checkbox"
                 id="power-plus-accept"
+                checked={disclaimerChecked}
                 className="mt-1 rounded border-gray-300 text-red-500 focus:ring-red-500"
-                onChange={(e) => {
-                  const btn = document.getElementById('power-plus-confirm-btn') as HTMLButtonElement;
-                  if (btn) btn.disabled = !e.target.checked;
-                }}
+                onChange={(e) => setDisclaimerChecked(e.target.checked)}
               />
               <span className="text-xs text-gray-600">
                 {t.trainingMode?.disclaimerCheckbox ??
@@ -191,7 +191,7 @@ export function TrainingModeSelector({
               </button>
               <button
                 id="power-plus-confirm-btn"
-                disabled
+                disabled={!disclaimerChecked}
                 onClick={handleAcceptDisclaimer}
                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

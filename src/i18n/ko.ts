@@ -1126,6 +1126,7 @@ export const ko: TranslationKeys = {
   },
   reds: {
     warningTitle: '저체중 / 에너지 경고',
+    energyWarningTitle: '에너지 경고',
     dangerTitle: '위험 에너지 경고',
     underweight: 'BMI ({bmi})가 18.5 미만입니다 — 저체중으로 분류됩니다.',
     severeUnderweight: 'BMI ({bmi})가 17.0 미만입니다 — 심각한 저체중입니다. 의사와 상담하세요.',

@@ -1126,6 +1126,7 @@ export const pt: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Aviso de baixo peso / energia',
+    energyWarningTitle: 'Aviso de Energia',
     dangerTitle: 'Aviso de energia crítico',
     underweight: 'Seu IMC ({bmi}) está abaixo de 18,5 — isso é classificado como baixo peso.',
     severeUnderweight: 'Seu IMC ({bmi}) está abaixo de 17,0 — baixo peso grave. Consulte um médico.',

@@ -1126,6 +1126,7 @@ export const pl: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Ostrzeżenie o niedowadze / energii',
+    energyWarningTitle: 'Ostrzeżenie energetyczne',
     dangerTitle: 'Krytyczne ostrzeżenie energetyczne',
     underweight: 'Twoje BMI ({bmi}) jest poniżej 18,5 — to klasyfikuje się jako niedowaga.',
     severeUnderweight: 'Twoje BMI ({bmi}) jest poniżej 17,0 — to ciężka niedowaga. Skonsultuj się z lekarzem.',

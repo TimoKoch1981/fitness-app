@@ -1126,6 +1126,7 @@ export const it: TranslationKeys = {
   },
   reds: {
     warningTitle: 'Avviso sottopeso / energia',
+    energyWarningTitle: 'Avviso Energia',
     dangerTitle: 'Avviso energia critico',
     underweight: 'Il tuo BMI ({bmi}) è inferiore a 18,5 — questo è classificato come sottopeso.',
     severeUnderweight: 'Il tuo BMI ({bmi}) è inferiore a 17,0 — sottopeso grave. Consulta un medico.',
