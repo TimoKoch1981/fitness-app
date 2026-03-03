@@ -8,9 +8,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Droplets,
-  Plus,
-  Minus,
   Flame,
   Zap,
   Bell,
@@ -40,7 +37,6 @@ import { GapAlertBanner } from '../shared/components/GapAlertBanner';
 import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
 import { ProactiveWarningCard } from '../shared/components/ProactiveWarningCard';
 import { today } from '../lib/utils';
-import { useAuth } from '../app/providers/AuthProvider';
 import {
   DEFAULT_CALORIES_GOAL,
   DEFAULT_PROTEIN_GOAL,
@@ -48,6 +44,8 @@ import {
   DEFAULT_FAT_GOAL,
   DEFAULT_WATER_GOAL,
 } from '../lib/constants';
+import { WaterWidget } from '../features/water/components/WaterWidget';
+import { useWaterIntake } from '../features/water/hooks/useWaterIntake';
 
 // Report data hooks & chart components
 import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
@@ -57,8 +55,9 @@ import { ShareCardDialog } from '../features/share/components/ShareCardDialog';
 import { ProgressionCard } from '../features/reports/components/ProgressionCard';
 import type { ShareCardData } from '../features/share/components/ShareProgressCard';
 import { useCelebrations } from '../features/celebrations/CelebrationProvider';
-
-const WATER_STORAGE_KEY = 'fitbuddy_water_';
+import { StreakDisplay } from '../features/gamification/components/StreakDisplay';
+import { BadgeGrid } from '../features/gamification/components/BadgeGrid';
+import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyChallengeCard';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -82,7 +81,6 @@ function useToday(): string {
 export function CockpitPage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const selectedDate = useToday();
   const cockpitSuggestions = usePageBuddySuggestions('cockpit', language as 'de' | 'en');
   const { celebrateCalorieGoal, celebrateProteinGoal } = useCelebrations();
@@ -110,16 +108,9 @@ export function CockpitPage() {
   const bodyTrendData = useBodyTrend(10);
   const [showShareCard, setShowShareCard] = useState(false);
 
-  // Water tracker (localStorage-based, scoped per user)
-  const waterKey = WATER_STORAGE_KEY + (user?.id ?? 'anon') + '_' + selectedDate;
-  const [waterGlasses, setWaterGlasses] = useState(() => {
-    const stored = localStorage.getItem(waterKey);
-    return stored ? parseInt(stored) : 0;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(waterKey, waterGlasses.toString());
-  }, [waterGlasses, waterKey]);
+  // Water tracking (new ml-based widget, backward-compatible with glass count)
+  const waterIntake = useWaterIntake(selectedDate);
+  const waterGlasses = waterIntake.glassCount;
 
   // Profile data sufficient for personalized goals?
   const profileComplete = !!(profile?.height_cm && profile?.birth_date && latestBody?.weight_kg);
@@ -217,8 +208,6 @@ export function CockpitPage() {
       color: 'from-amber-400 to-amber-500',
     },
   ];
-
-  const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterGlasses / waterGoal) * 100)) : 0;
 
   // Share card data
   const shareCardData: ShareCardData | null = (() => {
@@ -361,62 +350,24 @@ export function CockpitPage() {
           })}
         </div>
 
-        {/* Water Tracker + Energy Balance Row */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Water Tracker */}
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Droplets className="h-4 w-4 text-blue-500" />
-              <p className="text-xs text-gray-500 font-medium">{t.dashboard.water}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setWaterGlasses(Math.max(0, waterGlasses - 1))}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
-              >
-                <Minus className="h-3 w-3" />
-              </button>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{waterGlasses}</p>
-                <p className="text-[10px] text-gray-400">/ {waterGoal} {t.dashboard.glasses}</p>
-              </div>
-              <button
-                onClick={() => setWaterGlasses(waterGlasses + 1)}
-                className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-              </button>
-            </div>
-            <div className="mt-2 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-full h-1.5 transition-all duration-500"
-                style={{ width: `${waterPct}%` }}
-              />
-            </div>
-            <p className="text-[10px] text-gray-400 mt-1 text-center">
-              {waterGlasses >= waterGoal
-                ? t.dashboard.glassesDone
-                : `${waterGoal - waterGlasses} ${t.dashboard.glassesLeft}`
-              }
-            </p>
-          </div>
+        {/* Water Widget — Quick Water Tracking */}
+        <WaterWidget />
 
-          {/* Energy Balance */}
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Flame className="h-4 w-4 text-orange-500" />
-              <p className="text-xs text-gray-500 font-medium">{t.dashboard.balance}</p>
-            </div>
-            <div className="text-center">
-              <p className={`text-2xl font-bold ${profileComplete && netCalories > caloriesGoal ? 'text-red-500' : 'text-gray-900'}`}>
-                {netCalories}
-              </p>
-              <p className="text-[10px] text-gray-400">{t.dashboard.net} kcal</p>
-            </div>
-            <div className="mt-2 flex justify-between text-[10px] text-gray-400">
-              <span>+{totals.calories} {t.dashboard.consumed}</span>
-              <span>-{totalCaloriesBurned} {t.dashboard.burned}</span>
-            </div>
+        {/* Energy Balance */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Flame className="h-4 w-4 text-orange-500" />
+            <p className="text-xs text-gray-500 font-medium">{t.dashboard.balance}</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-2xl font-bold ${profileComplete && netCalories > caloriesGoal ? 'text-red-500' : 'text-gray-900'}`}>
+              {netCalories}
+            </p>
+            <p className="text-[10px] text-gray-400">{t.dashboard.net} kcal</p>
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-gray-400">
+            <span>+{totals.calories} {t.dashboard.consumed}</span>
+            <span>-{totalCaloriesBurned} {t.dashboard.burned}</span>
           </div>
         </div>
 
@@ -569,6 +520,11 @@ export function CockpitPage() {
             )}
           </div>
         )}
+
+        {/* Gamification — Streak, Weekly Challenge, Badges */}
+        <StreakDisplay />
+        <WeeklyChallengeCard />
+        <BadgeGrid />
 
         {/* Insights Widget */}
         {visibleInsights.length > 0 && (
