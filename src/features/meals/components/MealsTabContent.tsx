@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { UtensilsCrossed, ChevronLeft, ChevronRight, Copy, Loader2, Check } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
+import { ComponentErrorBoundary } from '../../../shared/components/ComponentErrorBoundary';
 import { useTranslation } from '../../../i18n';
 import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../hooks/useMeals';
 import { useCopyYesterdayMeals } from '../hooks/useCopyYesterdayMeals';
@@ -192,12 +193,14 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
         </div>
       )}
 
-      {/* Add Meal Dialog */}
-      <AddMealDialog
-        open={showAddDialog}
-        onClose={onCloseAddDialog}
-        date={selectedDate}
-      />
+      {/* Add Meal Dialog — wrapped in error boundary so a crash here doesn't take down the page */}
+      <ComponentErrorBoundary label="AddMealDialog" language={language as 'de' | 'en'}>
+        <AddMealDialog
+          open={showAddDialog}
+          onClose={onCloseAddDialog}
+          date={selectedDate}
+        />
+      </ComponentErrorBoundary>
     </>
   );
 }

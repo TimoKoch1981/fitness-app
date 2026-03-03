@@ -460,9 +460,12 @@ export function ProfilePage() {
               </label>
               <div className="flex flex-wrap gap-2">
                 {([
+                  { value: 'omnivore', de: 'Mischkost', en: 'Omnivore' },
                   { value: 'vegetarian', de: 'Vegetarisch', en: 'Vegetarian' },
                   { value: 'vegan', de: 'Vegan', en: 'Vegan' },
                   { value: 'pescatarian', de: 'Pescatarisch', en: 'Pescatarian' },
+                  { value: 'keto', de: 'Ketogen', en: 'Ketogenic' },
+                  { value: 'paleo', de: 'Paleo', en: 'Paleo' },
                   { value: 'halal', de: 'Halal', en: 'Halal' },
                   { value: 'kosher', de: 'Koscher', en: 'Kosher' },
                   { value: 'lactose_free', de: 'Laktosefrei', en: 'Lactose-free' },
@@ -500,11 +503,21 @@ export function ProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {([
                   { value: 'nuts', de: 'Nüsse', en: 'Nuts' },
+                  { value: 'peanuts', de: 'Erdnüsse', en: 'Peanuts' },
                   { value: 'gluten', de: 'Gluten', en: 'Gluten' },
                   { value: 'lactose', de: 'Laktose', en: 'Lactose' },
+                  { value: 'milk_protein', de: 'Milcheiweiß', en: 'Milk Protein' },
                   { value: 'shellfish', de: 'Schalentiere', en: 'Shellfish' },
+                  { value: 'mollusks', de: 'Weichtiere', en: 'Mollusks' },
                   { value: 'eggs', de: 'Eier', en: 'Eggs' },
                   { value: 'soy', de: 'Soja', en: 'Soy' },
+                  { value: 'fructose', de: 'Fruktose', en: 'Fructose' },
+                  { value: 'histamine', de: 'Histamin', en: 'Histamine' },
+                  { value: 'celery', de: 'Sellerie', en: 'Celery' },
+                  { value: 'mustard', de: 'Senf', en: 'Mustard' },
+                  { value: 'sesame', de: 'Sesam', en: 'Sesame' },
+                  { value: 'lupins', de: 'Lupinen', en: 'Lupins' },
+                  { value: 'sulfites', de: 'Sulfite', en: 'Sulfites' },
                   { value: 'wheat', de: 'Weizen', en: 'Wheat' },
                 ] as const).map((opt) => {
                   const isSelected = allergies.includes(opt.value);
@@ -542,8 +555,18 @@ export function ProfilePage() {
                   { value: 'shoulder', de: 'Schulter', en: 'Shoulder' },
                   { value: 'knee', de: 'Knie', en: 'Knee' },
                   { value: 'hip', de: 'Hüfte', en: 'Hip' },
+                  { value: 'elbow', de: 'Ellbogen', en: 'Elbow' },
                   { value: 'wrist', de: 'Handgelenk', en: 'Wrist' },
+                  { value: 'ankle', de: 'Sprunggelenk', en: 'Ankle' },
                   { value: 'neck', de: 'Nacken', en: 'Neck' },
+                  { value: 'disc', de: 'Bandscheibe', en: 'Disc' },
+                  { value: 'heart', de: 'Herz', en: 'Heart' },
+                  { value: 'hypertension', de: 'Bluthochdruck', en: 'Hypertension' },
+                  { value: 'diabetes_type1', de: 'Diabetes Typ 1', en: 'Diabetes Type 1' },
+                  { value: 'diabetes_type2', de: 'Diabetes Typ 2', en: 'Diabetes Type 2' },
+                  { value: 'asthma', de: 'Asthma', en: 'Asthma' },
+                  { value: 'thyroid', de: 'Schilddrüse', en: 'Thyroid' },
+                  { value: 'osteoporosis', de: 'Osteoporose', en: 'Osteoporosis' },
                   { value: 'diastasis_recti', de: 'Rektusdiastase', en: 'Diastasis Recti' },
                 ] as const).map((opt) => {
                   const isSelected = healthRestrictions.includes(opt.value);

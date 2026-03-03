@@ -54,15 +54,18 @@ const PRIMARY_GOALS: PrimaryGoal[] = [
 ];
 
 const DIET_OPTIONS = [
-  'vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'glutenFree', 'lactoseFree',
+  'omnivore', 'vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'glutenFree', 'lactoseFree',
 ] as const;
 
 const ALLERGY_OPTIONS = [
-  'nuts', 'gluten', 'lactose', 'shellfish', 'soy', 'eggs', 'fructose',
+  'nuts', 'peanuts', 'gluten', 'lactose', 'milk_protein', 'shellfish', 'mollusks', 'soy', 'eggs',
+  'fructose', 'histamine', 'celery', 'mustard', 'sesame', 'lupins', 'sulfites',
 ] as const;
 
 const HEALTH_RESTRICTION_OPTIONS = [
-  'back', 'shoulder', 'knee', 'hip', 'wrist', 'ankle', 'heart', 'neck', 'diastasis_recti',
+  'back', 'shoulder', 'knee', 'hip', 'elbow', 'wrist', 'ankle', 'neck', 'disc',
+  'heart', 'hypertension', 'diabetes_type1', 'diabetes_type2',
+  'asthma', 'thyroid', 'osteoporosis', 'diastasis_recti',
 ] as const;
 
 const GENDERS: Gender[] = ['male', 'female', 'other'];
@@ -87,6 +90,7 @@ const ACTIVITY_I18N: Record<string, string> = {
 
 /** Map internal diet/allergy keys to i18n keys */
 const DIET_I18N: Record<string, string> = {
+  omnivore: 'diet_omnivore',
   vegetarian: 'diet_vegetarian',
   vegan: 'diet_vegan',
   pescatarian: 'diet_pescatarian',
@@ -98,12 +102,21 @@ const DIET_I18N: Record<string, string> = {
 
 const ALLERGY_I18N: Record<string, string> = {
   nuts: 'allergy_nuts',
+  peanuts: 'allergy_peanuts',
   gluten: 'allergy_gluten',
   lactose: 'allergy_lactose',
+  milk_protein: 'allergy_milk_protein',
   shellfish: 'allergy_shellfish',
+  mollusks: 'allergy_mollusks',
   soy: 'allergy_soy',
   eggs: 'allergy_eggs',
   fructose: 'allergy_fructose',
+  histamine: 'allergy_histamine',
+  celery: 'allergy_celery',
+  mustard: 'allergy_mustard',
+  sesame: 'allergy_sesame',
+  lupins: 'allergy_lupins',
+  sulfites: 'allergy_sulfites',
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -438,6 +451,7 @@ export function OnboardingWizardPage() {
               {/* Dietary Preferences */}
               <ChipSection
                 title={label('dietaryLabel', 'Ernährungsform')}
+                subtitle={label('dietaryHint', 'Keine Auswahl = keine Einschränkung')}
                 icon={<Utensils className="w-4 h-4 text-emerald-500" />}
                 options={DIET_OPTIONS}
                 selected={dietPrefs}
@@ -529,6 +543,7 @@ export function OnboardingWizardPage() {
 
 function ChipSection({
   title,
+  subtitle,
   icon,
   options,
   selected,
@@ -536,6 +551,7 @@ function ChipSection({
   labelFn,
 }: {
   title: string;
+  subtitle?: string;
   icon: React.ReactNode;
   options: readonly string[];
   selected: string[];
@@ -544,10 +560,13 @@ function ChipSection({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1">
         {icon}
         <span className="text-sm font-medium text-gray-700">{title}</span>
       </div>
+      {subtitle && (
+        <p className="text-xs text-gray-400 mb-2 ml-6">{subtitle}</p>
+      )}
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const active = selected.includes(opt);

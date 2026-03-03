@@ -146,15 +146,20 @@ export function generateProfileSkill(data: UserSkillData): string {
   const hasRestrictions = profile.health_restrictions && profile.health_restrictions.length > 0;
 
   if (hasDietary || hasAllergies || hasRestrictions) {
-    skill += `\n### Ernaehrung & Gesundheit\n`;
+    skill += `\n### Ernaehrung & Gesundheit ⚠️ SICHERHEITSKRITISCH\n`;
     if (hasDietary) {
-      skill += `- Ernaehrungsform: ${profile.dietary_preferences!.join(', ')}\n`;
+      skill += `- Ernaehrungsform: ${profile.dietary_preferences!.map(d => dietLabelDE(d)).join(', ')}\n`;
     }
     if (hasAllergies) {
-      skill += `- ⚠️ ALLERGIEN: ${profile.allergies!.join(', ')} — NIEMALS Lebensmittel/Rezepte mit diesen Allergenen empfehlen!\n`;
+      skill += `- ⚠️ ALLERGIEN/UNVERTRAEGLICHKEITEN: ${profile.allergies!.map(a => allergyLabelDE(a)).join(', ')}\n`;
+      skill += `  → NIEMALS Lebensmittel/Rezepte mit diesen Allergenen empfehlen!\n`;
+      skill += `  → Bei Mahlzeiten-Logging WARNEN wenn ein Allergen enthalten sein koennte!\n`;
+      skill += `  → Beispiel: Bei Histaminintoleranz vor gereiftem Kaese, Rotwein, Salami, Sauerkraut warnen.\n`;
     }
     if (hasRestrictions) {
-      skill += `- ⚠️ GESUNDHEITLICHE EINSCHRAENKUNGEN: ${profile.health_restrictions!.join(', ')} — Bei Trainingsempfehlungen IMMER beruecksichtigen!\n`;
+      skill += `- ⚠️ GESUNDHEITLICHE EINSCHRAENKUNGEN: ${profile.health_restrictions!.map(r => restrictionLabelDE(r)).join(', ')}\n`;
+      skill += `  → Bei Trainingsempfehlungen IMMER beruecksichtigen!\n`;
+      skill += `  → Bei Ernaehrungsempfehlungen beruecksichtigen (z.B. Diabetes → Blutzucker-freundlich, Bluthochdruck → salzarm)!\n`;
     }
   }
 
@@ -683,4 +688,68 @@ function bpClassDE(classification: string): string {
     hypertension_3: 'Hypertonie Grad 3',
   };
   return map[classification] ?? classification;
+}
+
+function dietLabelDE(key: string): string {
+  const map: Record<string, string> = {
+    omnivore: 'Mischkost (isst alles)',
+    vegetarian: 'Vegetarisch',
+    vegan: 'Vegan',
+    pescatarian: 'Pescetarisch',
+    keto: 'Ketogen',
+    paleo: 'Paleo',
+    glutenFree: 'Glutenfrei',
+    gluten_free: 'Glutenfrei',
+    lactoseFree: 'Laktosefrei',
+    lactose_free: 'Laktosefrei',
+    halal: 'Halal',
+    kosher: 'Koscher',
+  };
+  return map[key] ?? key;
+}
+
+function allergyLabelDE(key: string): string {
+  const map: Record<string, string> = {
+    nuts: 'Nüsse (Baumnüsse)',
+    peanuts: 'Erdnüsse',
+    gluten: 'Gluten',
+    lactose: 'Laktose (Milchzucker)',
+    milk_protein: 'Milcheiweiß (Kasein/Molke)',
+    shellfish: 'Schalentiere (Krebstiere)',
+    mollusks: 'Weichtiere (Mollusken)',
+    soy: 'Soja',
+    eggs: 'Eier',
+    fructose: 'Fruktose (Fruchtzucker)',
+    histamine: 'Histamin (gereifter Käse, Rotwein, Salami, fermentierte Lebensmittel meiden!)',
+    celery: 'Sellerie',
+    mustard: 'Senf',
+    sesame: 'Sesam',
+    lupins: 'Lupinen',
+    sulfites: 'Sulfite (Schwefeldioxid, in Wein, Trockenfrüchten)',
+    wheat: 'Weizen',
+  };
+  return map[key] ?? key;
+}
+
+function restrictionLabelDE(key: string): string {
+  const map: Record<string, string> = {
+    back: 'Rückenprobleme',
+    shoulder: 'Schulterprobleme',
+    knee: 'Knieprobleme',
+    hip: 'Hüftprobleme',
+    elbow: 'Ellbogenprobleme',
+    wrist: 'Handgelenksprobleme',
+    ankle: 'Sprunggelenksprobleme',
+    neck: 'Nackenprobleme',
+    disc: 'Bandscheibenvorfall',
+    heart: 'Herzerkrankung',
+    hypertension: 'Bluthochdruck (Hypertonie)',
+    diabetes_type1: 'Diabetes Typ 1 (insulinpflichtig)',
+    diabetes_type2: 'Diabetes Typ 2',
+    asthma: 'Asthma',
+    thyroid: 'Schilddrüsenerkrankung (Hashimoto/Hypothyreose)',
+    osteoporosis: 'Osteoporose',
+    diastasis_recti: 'Rektusdiastase',
+  };
+  return map[key] ?? key;
 }

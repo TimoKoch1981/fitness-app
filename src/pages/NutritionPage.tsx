@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
+import { ComponentErrorBoundary } from '../shared/components/ComponentErrorBoundary';
 import { useTranslation } from '../i18n';
 import { cn } from '../lib/utils';
 
@@ -16,7 +17,7 @@ import { RecipesTabContent } from '../features/recipes/components/RecipesTabCont
 type NutritionTab = 'meals' | 'recipes' | 'body';
 
 export function NutritionPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<NutritionTab>('meals');
 
   const [showMealsDialog, setShowMealsDialog] = useState(false);
@@ -67,27 +68,33 @@ export function NutritionPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content — each tab wrapped in error boundary for isolation */}
       {activeTab === 'meals' && (
-        <MealsTabContent
-          showAddDialog={showMealsDialog}
-          onOpenAddDialog={() => setShowMealsDialog(true)}
-          onCloseAddDialog={() => setShowMealsDialog(false)}
-        />
+        <ComponentErrorBoundary label="MealsTabContent" language={language as 'de' | 'en'}>
+          <MealsTabContent
+            showAddDialog={showMealsDialog}
+            onOpenAddDialog={() => setShowMealsDialog(true)}
+            onCloseAddDialog={() => setShowMealsDialog(false)}
+          />
+        </ComponentErrorBoundary>
       )}
       {activeTab === 'recipes' && (
-        <RecipesTabContent
-          showAddDialog={showRecipesDialog}
-          onOpenAddDialog={() => setShowRecipesDialog(true)}
-          onCloseAddDialog={() => setShowRecipesDialog(false)}
-        />
+        <ComponentErrorBoundary label="RecipesTabContent" language={language as 'de' | 'en'}>
+          <RecipesTabContent
+            showAddDialog={showRecipesDialog}
+            onOpenAddDialog={() => setShowRecipesDialog(true)}
+            onCloseAddDialog={() => setShowRecipesDialog(false)}
+          />
+        </ComponentErrorBoundary>
       )}
       {activeTab === 'body' && (
-        <BodyTabContent
-          showAddDialog={showBodyDialog}
-          onOpenAddDialog={() => setShowBodyDialog(true)}
-          onCloseAddDialog={() => setShowBodyDialog(false)}
-        />
+        <ComponentErrorBoundary label="BodyTabContent" language={language as 'de' | 'en'}>
+          <BodyTabContent
+            showAddDialog={showBodyDialog}
+            onOpenAddDialog={() => setShowBodyDialog(true)}
+            onCloseAddDialog={() => setShowBodyDialog(false)}
+          />
+        </ComponentErrorBoundary>
       )}
     </PageShell>
   );

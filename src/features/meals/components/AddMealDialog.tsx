@@ -12,6 +12,13 @@ import type { MealType } from '../../../types/health';
 import type { MealPhotoAnalysisResult } from '../../../lib/ai/mealVision';
 import type { BarcodeProduct } from '../../../services/openFoodFactsBarcode';
 
+/** Safe accessor for translation keys — returns fallback if path is undefined */
+function safeT<T>(obj: T | undefined | null, fallback: string): string {
+  if (obj == null) return fallback;
+  if (typeof obj === 'string') return obj;
+  return fallback;
+}
+
 interface AddMealDialogProps {
   open: boolean;
   onClose: () => void;
@@ -25,6 +32,10 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const { estimate, isEstimating, estimateError } = useEstimateMealNutrition();
   const { data: userProducts } = useUserProducts();
   const addUserProduct = useAddUserProduct();
+
+  // Defensive: ensure t.meals and t.common exist even if translation context is broken
+  const meals = t?.meals ?? ({} as Record<string, string>);
+  const common = t?.common ?? ({} as Record<string, string>);
 
   const [name, setName] = useState('');
   const [type, setType] = useState<MealType>(defaultType);
@@ -44,23 +55,25 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   if (!open) return null;
 
   const handleSelectFavorite = (fav: MealFavorite) => {
-    setName(fav.name);
-    setType(fav.type);
-    setCalories(String(fav.calories));
-    setProtein(String(fav.protein));
-    setCarbs(String(fav.carbs));
-    setFat(String(fav.fat));
+    if (!fav) return;
+    setName(fav.name ?? '');
+    setType(fav.type ?? defaultType);
+    setCalories(String(fav.calories ?? 0));
+    setProtein(String(fav.protein ?? 0));
+    setCarbs(String(fav.carbs ?? 0));
+    setFat(String(fav.fat ?? 0));
     setIsEstimated(false);
     setBarcodeSource(false);
     setShowFavorites(false);
   };
 
   const handlePhotoResult = (result: MealPhotoAnalysisResult) => {
-    setName(result.name);
-    setCalories(String(result.calories));
-    setProtein(String(result.protein));
-    setCarbs(String(result.carbs));
-    setFat(String(result.fat));
+    if (!result) return;
+    setName(result.name ?? '');
+    setCalories(String(result.calories ?? 0));
+    setProtein(String(result.protein ?? 0));
+    setCarbs(String(result.carbs ?? 0));
+    setFat(String(result.fat ?? 0));
     setIsEstimated(true);
     setShowPhotoCapture(false);
   };
@@ -88,8 +101,9 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
   /** Handle accepted barcode scan result */
   const handleBarcodeResult = useCallback(async (result: BarcodeScanResult) => {
+    if (!result?.product) return;
     const { product, fromUserProducts } = result;
-    setName(product.name + (product.brand ? ` (${product.brand})` : ''));
+    setName((product.name ?? '') + (product.brand ? ` (${product.brand})` : ''));
     setCalories(String(product.calories));
     setProtein(String(product.protein));
     setCarbs(String(product.carbs));
@@ -164,17 +178,17 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
       setBarcodeSource(false);
       onClose();
     } catch {
-      setError(t.common.saveError);
+      setError(safeT(common?.saveError, 'Speichern fehlgeschlagen'));
     }
   };
 
   const mealTypes: { value: MealType; label: string }[] = [
-    { value: 'breakfast', label: t.meals.breakfast },
-    { value: 'morning_snack', label: t.meals.morning_snack },
-    { value: 'lunch', label: t.meals.lunch },
-    { value: 'afternoon_snack', label: t.meals.afternoon_snack },
-    { value: 'dinner', label: t.meals.dinner },
-    { value: 'snack', label: t.meals.snack },
+    { value: 'breakfast', label: safeT(meals?.breakfast, 'Breakfast') },
+    { value: 'morning_snack', label: safeT(meals?.morning_snack, 'Morning Snack') },
+    { value: 'lunch', label: safeT(meals?.lunch, 'Lunch') },
+    { value: 'afternoon_snack', label: safeT(meals?.afternoon_snack, 'Afternoon Snack') },
+    { value: 'dinner', label: safeT(meals?.dinner, 'Dinner') },
+    { value: 'snack', label: safeT(meals?.snack, 'Snack') },
   ];
 
   return (
@@ -186,7 +200,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-2xl flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">{t.meals.addMeal}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{safeT(meals?.addMeal, 'Mahlzeit hinzufuegen')}</h2>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
@@ -223,13 +237,13 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
               }`}
             >
               <Star className={`h-4 w-4 ${showFavorites ? 'fill-amber-400' : ''}`} />
-              {t.meals.favorites}
+              {safeT(meals?.favorites, 'Favoriten')}
             </button>
             {showFavorites && (
               <div className="mt-2 bg-gray-50 rounded-lg p-2 max-h-48 overflow-y-auto">
                 {favorites && favorites.length > 0 ? (
                   <div className="space-y-1">
-                    {favorites.map((fav, i) => (
+                    {favorites?.map((fav, i) => (
                       <button
                         key={i}
                         type="button"
@@ -237,20 +251,20 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                         className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-left"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-700 truncate">{fav.name}</p>
+                          <p className="text-sm text-gray-700 truncate">{fav?.name ?? ''}</p>
                           <p className="text-[10px] text-gray-400">
-                            {fav.calories} kcal &middot; {fav.protein}g P &middot; {fav.carbs}g C &middot; {fav.fat}g F
+                            {fav?.calories ?? 0} kcal &middot; {fav?.protein ?? 0}g P &middot; {fav?.carbs ?? 0}g C &middot; {fav?.fat ?? 0}g F
                           </p>
                         </div>
                         <span className="text-[10px] text-gray-300 ml-2 flex-shrink-0">
-                          {fav.frequency}x
+                          {fav?.frequency ?? 0}x
                         </span>
                       </button>
                     ))}
                   </div>
                 ) : (
                   <p className="text-xs text-gray-400 text-center py-3">
-                    {t.meals.noFavorites}
+                    {safeT(meals?.noFavorites, 'Keine Favoriten')}
                   </p>
                 )}
               </div>
@@ -277,7 +291,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
           {/* Name + AI Estimate + Photo + Barcode */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.meals.name}
+              {safeT(meals?.name, 'Name')}
             </label>
             <div className="flex gap-2">
               <input
@@ -347,7 +361,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t.meals.calories} (kcal)
+                {safeT(meals?.calories, 'Kalorien')} (kcal)
               </label>
               <input
                 type="number"
@@ -363,7 +377,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t.meals.protein} (g)
+                {safeT(meals?.protein, 'Protein')} (g)
               </label>
               <input
                 type="number"
@@ -379,7 +393,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t.meals.carbs} (g)
+                {safeT(meals?.carbs, 'Kohlenhydrate')} (g)
               </label>
               <input
                 type="number"
@@ -395,7 +409,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t.meals.fat} (g)
+                {safeT(meals?.fat, 'Fett')} (g)
               </label>
               <input
                 type="number"
@@ -422,7 +436,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
             disabled={addMeal.isPending || !name || !calories}
             className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
           >
-            {addMeal.isPending ? t.common.loading : t.common.save}
+            {addMeal.isPending ? safeT(common?.loading, 'Laden...') : safeT(common?.save, 'Speichern')}
           </button>
         </form>
       </div>
