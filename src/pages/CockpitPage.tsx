@@ -46,6 +46,7 @@ import {
 } from '../lib/constants';
 import { WaterWidget } from '../features/water/components/WaterWidget';
 import { useWaterIntake } from '../features/water/hooks/useWaterIntake';
+import { MotivationBanner } from '../features/motivation/components/MotivationBanner';
 
 // Report data hooks & chart components
 import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
@@ -256,6 +257,9 @@ export function CockpitPage() {
   return (
     <PageShell title={t.cockpit.title}>
       <div className="space-y-4">
+        {/* Motivation Banner — shown when inactive 3+ days */}
+        <MotivationBanner />
+
         {/* Share Button — top right float */}
         {shareCardData && shareCardData.avgCalories > 0 && (
           <div className="flex justify-end -mt-2 -mb-2">

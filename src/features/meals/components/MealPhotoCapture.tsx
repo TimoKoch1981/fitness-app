@@ -12,6 +12,7 @@ import { Camera, Image, Loader2, RefreshCw, Check, AlertCircle, X } from 'lucide
 import { useTranslation } from '../../../i18n';
 import { useAnalyzeMealPhoto } from '../hooks/useAnalyzeMealPhoto';
 import type { MealPhotoAnalysisResult } from '../../../lib/ai/mealVision';
+import { OptimizedImage } from '../../../shared/components/OptimizedImage';
 
 type CaptureStep = 'idle' | 'analyzing' | 'result' | 'error';
 
@@ -159,10 +160,11 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
         <div className="space-y-3">
           <div className="relative rounded-xl overflow-hidden bg-gray-100">
             {previewUrl && (
-              <img
+              <OptimizedImage
                 src={previewUrl}
                 alt="Meal preview"
                 className="w-full h-48 object-cover opacity-50"
+                priority
               />
             )}
             <div className="absolute inset-0 flex items-center justify-center">
@@ -183,10 +185,11 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
           {/* Preview image (small) */}
           {previewUrl && (
             <div className="rounded-xl overflow-hidden bg-gray-100">
-              <img
+              <OptimizedImage
                 src={previewUrl}
                 alt="Meal"
                 className="w-full h-32 object-cover"
+                priority
               />
             </div>
           )}
@@ -262,10 +265,11 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
           {/* Preview image */}
           {previewUrl && (
             <div className="rounded-xl overflow-hidden bg-gray-100">
-              <img
+              <OptimizedImage
                 src={previewUrl}
                 alt="Meal"
                 className="w-full h-32 object-cover opacity-50"
+                priority
               />
             </div>
           )}

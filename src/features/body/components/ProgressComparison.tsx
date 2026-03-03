@@ -20,6 +20,7 @@ import { analyzeBodyPhoto, type BodyScanResult } from '../../../lib/ai/bodyVisio
 import { compressImage } from '../../../lib/ai/vision';
 import type { ProgressPhoto } from './ProgressPhotosTimeline';
 import { POSE_LABELS, POSES, type Pose } from './ProgressPhotosTimeline';
+import { OptimizedImage } from '../../../shared/components/OptimizedImage';
 
 interface Props {
   photos: ProgressPhoto[];
@@ -211,20 +212,22 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
               // Side-by-Side
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-lg overflow-hidden bg-gray-100">
-                  <img
+                  <OptimizedImage
                     src={beforePhoto.url}
                     alt={`${labels[beforePhoto.pose]} ${beforePhoto.date}`}
                     className="w-full h-48 object-cover"
+                    priority
                   />
                   <div className="px-2 py-1 bg-gray-50 text-center">
                     <p className="text-[10px] text-gray-500">{beforePhoto.date}</p>
                   </div>
                 </div>
                 <div className="rounded-lg overflow-hidden bg-gray-100">
-                  <img
+                  <OptimizedImage
                     src={afterPhoto.url}
                     alt={`${labels[afterPhoto.pose]} ${afterPhoto.date}`}
                     className="w-full h-48 object-cover"
+                    priority
                   />
                   <div className="px-2 py-1 bg-gray-50 text-center">
                     <p className="text-[10px] text-gray-500">{afterPhoto.date}</p>

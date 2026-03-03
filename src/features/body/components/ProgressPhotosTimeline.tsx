@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { analyzeBodyPhoto, type BodyScanResult } from '../../../lib/ai/bodyVision';
 import { compressImage } from '../../../lib/ai/vision';
+import { OptimizedImage } from '../../../shared/components/OptimizedImage';
 
 const POSES = ['front', 'back', 'side_left', 'side_right', 'front_lat', 'back_lat', 'most_muscular'] as const;
 type Pose = (typeof POSES)[number];
@@ -197,7 +198,7 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
           <div className="grid grid-cols-3 gap-2">
             {filteredPhotos.map(photo => (
               <div key={photo.name} className="relative group rounded-lg overflow-hidden bg-gray-100">
-                <img
+                <OptimizedImage
                   src={photo.url}
                   alt={`${labels[photo.pose]} ${photo.date}`}
                   className="w-full h-28 object-cover cursor-pointer"
@@ -246,7 +247,7 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
                         <div key={photo.name} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                           <div className="flex">
                             {/* Thumbnail */}
-                            <img
+                            <OptimizedImage
                               src={photo.url}
                               alt={`${labels[photo.pose]} ${photo.date}`}
                               className="w-20 h-20 object-cover cursor-pointer flex-shrink-0"
@@ -360,10 +361,12 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
 
           {/* Image */}
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-            <img
+            <OptimizedImage
               src={fullscreenPhoto.url}
               alt={`${labels[fullscreenPhoto.pose]} ${fullscreenPhoto.date}`}
               className="max-w-full max-h-full object-contain"
+              objectFit="contain"
+              priority
               onClick={e => e.stopPropagation()}
             />
           </div>

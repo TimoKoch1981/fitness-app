@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3 } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise } from '../i18n';
@@ -21,6 +21,7 @@ import { PrivacySettings } from '../features/auth/components/PrivacySettings';
 import { MFASettings } from '../features/auth/components/MFASettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
+import { WeeklyReportPreview } from '../features/reports/components/WeeklyReportPreview';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -60,6 +61,8 @@ export function ProfilePage() {
   const [showDataExport, setShowDataExport] = useState(false);
   // Feedback dialog
   const [showFeedback, setShowFeedback] = useState(false);
+  // Weekly report dialog
+  const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   // Goal recommendation
   const [recommendedGoals, setRecommendedGoals] = useState<RecommendedGoals | null>(null);
   const { data: latestBody } = useLatestBodyMeasurement();
@@ -861,6 +864,25 @@ export function ProfilePage() {
           <p className="text-xs text-gray-500 mb-3">{t.equipment.subtitle}</p>
           <EquipmentSelector />
         </div>
+
+        {/* Weekly Report */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-teal-600" />
+              <h3 className="font-semibold text-gray-900">{t.report.weeklyReport}</h3>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 mb-3">{t.report.weeklyReportDesc}</p>
+          <button
+            onClick={() => setShowWeeklyReport(true)}
+            className="w-full py-2.5 bg-teal-50 text-teal-600 text-sm font-medium rounded-lg hover:bg-teal-100 transition-colors"
+          >
+            {t.report.showReport}
+          </button>
+        </div>
+
+        <WeeklyReportPreview open={showWeeklyReport} onClose={() => setShowWeeklyReport(false)} />
 
         {/* Feedback & Feature Requests */}
         <div className="flex gap-3">

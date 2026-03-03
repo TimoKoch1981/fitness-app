@@ -11,6 +11,7 @@ import { useTranslation } from '../../../../i18n';
 import { useProfile } from '../../../auth/hooks/useProfile';
 import { supabase } from '../../../../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { OptimizedImage } from '../../../../shared/components/OptimizedImage';
 
 const POSES = ['front', 'back', 'side_left', 'side_right', 'front_lat', 'back_lat', 'most_muscular'] as const;
 type Pose = (typeof POSES)[number];
@@ -232,7 +233,7 @@ export function PosingPhotos() {
           <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
             {posePhotos.map(photo => (
               <div key={photo.name} className="relative group rounded-lg overflow-hidden">
-                <img
+                <OptimizedImage
                   src={photo.url}
                   alt={`${labels[photo.pose]} ${photo.date}`}
                   className="w-full h-32 object-cover cursor-pointer"
@@ -293,10 +294,12 @@ export function PosingPhotos() {
           >
             <X className="h-6 w-6" />
           </button>
-          <img
+          <OptimizedImage
             src={fullscreenUrl}
             alt="Fullscreen"
             className="max-w-full max-h-full object-contain"
+            objectFit="contain"
+            priority
             onClick={e => e.stopPropagation()}
           />
         </div>
