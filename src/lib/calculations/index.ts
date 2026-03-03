@@ -46,3 +46,17 @@ export {
 } from './bodyMetrics';
 
 export type { BMIClassification, FFMIResult, FFMIClassification } from './bodyMetrics';
+
+export {
+  estimate1RM,
+  calculateVolumeLoad,
+  calculateWeeklyVolume,
+  getStrengthProgression,
+  getBest1RMFromSets,
+} from './progressiveOverload';
+
+export type {
+  CompletedSet,
+  StrengthProgressionPoint,
+  WeeklyVolumePoint,
+} from './progressiveOverload';

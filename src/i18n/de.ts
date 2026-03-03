@@ -225,6 +225,13 @@ export const de = {
     barcodeRescan: 'Erneut scannen',
     barcodeFromDB: 'Aus deiner DB',
     barcodeSource: 'Barcode',
+    // Copy & Favorites (P1)
+    copyYesterday: 'Mahlzeiten von gestern kopieren',
+    copiedMeals: 'Mahlzeiten kopiert',
+    favorites: 'Favoriten',
+    noFavorites: 'Noch keine haeufigen Mahlzeiten',
+    selectFavorite: 'Favorit waehlen',
+    frequentMeals: 'Haeufige Mahlzeiten',
   },
   workouts: {
     title: 'Training',
@@ -1276,6 +1283,26 @@ export const de = {
     energyLevel: 'Energie',
     noData: 'Noch kein Zyklus eingetragen',
     logCycle: 'Zyklus eintragen',
+  },
+  bodyScan: {
+    analyze: 'AI Analyse',
+    analyzing: 'Analysiere...',
+    result: 'AI Body Scan Ergebnis',
+    bodyFat: 'KFA',
+    muscleDev: 'Muskelentwicklung',
+    symmetry: 'Symmetrie',
+    assessment: 'Einschaetzung',
+    compare: 'Vergleichen',
+    before: 'Vorher',
+    after: 'Nachher',
+    delta: 'Veraenderung',
+    noPhotos: 'Noch keine Fortschrittsfotos',
+    confidence: 'Konfidenz',
+  },
+  progress: {
+    timeline: 'Fortschritt',
+    compare: 'Vergleich',
+    noPhotos: 'Noch keine Fotos vorhanden',
   },
 } as const;
 

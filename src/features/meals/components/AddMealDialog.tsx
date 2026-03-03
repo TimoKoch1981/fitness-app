@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
-import { X, Sparkles, Loader2, Camera, ScanBarcode } from 'lucide-react';
+import { X, Sparkles, Loader2, Camera, ScanBarcode, Star } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddMeal } from '../hooks/useMeals';
 import { useEstimateMealNutrition } from '../hooks/useEstimateMealNutrition';
 import { useUserProducts, useAddUserProduct } from '../hooks/useProducts';
+import { useMealFavorites, type MealFavorite } from '../hooks/useMealFavorites';
 import { MealPhotoCapture } from './MealPhotoCapture';
 import { BarcodeScanner, type BarcodeScanResult } from './BarcodeScanner';
 import { today } from '../../../lib/utils';
@@ -36,8 +37,23 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const [showPhotoCapture, setShowPhotoCapture] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [barcodeSource, setBarcodeSource] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+
+  const { data: favorites } = useMealFavorites();
 
   if (!open) return null;
+
+  const handleSelectFavorite = (fav: MealFavorite) => {
+    setName(fav.name);
+    setType(fav.type);
+    setCalories(String(fav.calories));
+    setProtein(String(fav.protein));
+    setCarbs(String(fav.carbs));
+    setFat(String(fav.fat));
+    setIsEstimated(false);
+    setBarcodeSource(false);
+    setShowFavorites(false);
+  };
 
   const handlePhotoResult = (result: MealPhotoAnalysisResult) => {
     setName(result.name);
@@ -193,6 +209,52 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 {mt.label}
               </button>
             ))}
+          </div>
+
+          {/* Favorites Section */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowFavorites(!showFavorites)}
+              className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                showFavorites
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-gray-50 text-gray-600 hover:bg-amber-50 hover:text-amber-600'
+              }`}
+            >
+              <Star className={`h-4 w-4 ${showFavorites ? 'fill-amber-400' : ''}`} />
+              {t.meals.favorites}
+            </button>
+            {showFavorites && (
+              <div className="mt-2 bg-gray-50 rounded-lg p-2 max-h-48 overflow-y-auto">
+                {favorites && favorites.length > 0 ? (
+                  <div className="space-y-1">
+                    {favorites.map((fav, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectFavorite(fav)}
+                        className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-left"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-700 truncate">{fav.name}</p>
+                          <p className="text-[10px] text-gray-400">
+                            {fav.calories} kcal &middot; {fav.protein}g P &middot; {fav.carbs}g C &middot; {fav.fat}g F
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-gray-300 ml-2 flex-shrink-0">
+                          {fav.frequency}x
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 text-center py-3">
+                    {t.meals.noFavorites}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Photo Capture Section */}

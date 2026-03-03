@@ -1,6 +1,6 @@
 /**
  * WorkoutsTabContent — Inner content of the Workouts tab, extracted from WorkoutsPage.
- * Contains sub-tabs: Today | Plan.
+ * Contains sub-tabs: Today | Plan | History | Progress.
  * Used inside TrackingPage as one of 3 tracking tabs.
  */
 
@@ -14,6 +14,7 @@ import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestio
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanView } from './TrainingPlanView';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
+import { ProgressiveOverloadCharts } from './ProgressiveOverloadCharts';
 import { DEFAULT_PLAN } from '../data/defaultPlan';
 import { today, formatDate } from '../../../lib/utils';
 
@@ -25,7 +26,7 @@ interface WorkoutsTabContentProps {
 
 export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
-  const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history'>('today');
+  const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress'>('today');
   const buddySuggestions = usePageBuddySuggestions(
     activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
     language as 'de' | 'en',
@@ -110,6 +111,16 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
           }`}
         >
           {language === 'de' ? 'Historie' : 'History'}
+        </button>
+        <button
+          onClick={() => setActiveSubTab('progress')}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeSubTab === 'progress'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          {language === 'de' ? 'Fortschritt' : 'Progress'}
         </button>
       </div>
 
@@ -205,9 +216,12 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
             isImporting={addTrainingPlan.isPending}
           />
         )
-      ) : (
+      ) : activeSubTab === 'history' ? (
         /* History Sub-Tab */
         <WorkoutHistoryPage embedded />
+      ) : (
+        /* Progress Sub-Tab */
+        <ProgressiveOverloadCharts />
       )}
     </>
   );

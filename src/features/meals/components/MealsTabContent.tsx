@@ -4,10 +4,11 @@
  */
 
 import { useState } from 'react';
-import { UtensilsCrossed, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UtensilsCrossed, ChevronLeft, ChevronRight, Copy, Loader2, Check } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useMealsByDate, useDailyMealTotals, useDeleteMeal } from '../hooks/useMeals';
+import { useCopyYesterdayMeals } from '../hooks/useCopyYesterdayMeals';
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { MealCard } from './MealCard';
 import { AddMealDialog } from './AddMealDialog';
@@ -27,8 +28,23 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
   const { data: meals, isLoading } = useMealsByDate(selectedDate);
   const { totals } = useDailyMealTotals(selectedDate);
   const deleteMeal = useDeleteMeal();
+  const copyMeals = useCopyYesterdayMeals();
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
 
   const isToday = selectedDate === today();
+
+  const handleCopyYesterday = async () => {
+    setCopySuccess(null);
+    try {
+      const result = await copyMeals.mutateAsync(undefined);
+      if (result.copiedCount > 0) {
+        setCopySuccess(`${result.copiedCount} ${t.meals.copiedMeals}`);
+        setTimeout(() => setCopySuccess(null), 3000);
+      }
+    } catch {
+      // Error is handled by mutation state
+    }
+  };
 
   const changeDate = (days: number) => {
     const d = new Date(selectedDate);
@@ -109,6 +125,26 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           </div>
         </div>
       </div>
+
+      {/* Copy Yesterday Button (only on today) */}
+      {isToday && (
+        <div className="mb-4">
+          <button
+            onClick={handleCopyYesterday}
+            disabled={copyMeals.isPending}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-teal-600 transition-colors disabled:opacity-50"
+          >
+            {copyMeals.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : copySuccess ? (
+              <Check className="h-4 w-4 text-teal-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copySuccess ?? t.meals.copyYesterday}
+          </button>
+        </div>
+      )}
 
       {/* Buddy Quick Access */}
       {meals && meals.length > 0 && isToday && (
