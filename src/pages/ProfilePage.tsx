@@ -22,6 +22,8 @@ import { MFASettings } from '../features/auth/components/MFASettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 import { WeeklyReportPreview } from '../features/reports/components/WeeklyReportPreview';
+import { KeyRotationStatus } from '../features/admin/components/KeyRotationStatus';
+import { AuditRetentionCard } from '../features/admin/components/AuditRetentionCard';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -914,6 +916,12 @@ export function ProfilePage() {
             {t.admin.adminLink}
           </Link>
         )}
+
+        {/* Admin: API Key Rotation Status */}
+        {isAdmin && <KeyRotationStatus />}
+
+        {/* Admin: Audit Log Retention (DSGVO) */}
+        {isAdmin && <AuditRetentionCard />}
 
         {/* Privacy Settings (DSGVO Art. 7 Abs. 3 — Widerrufsrecht) */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">

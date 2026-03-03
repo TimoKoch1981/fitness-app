@@ -14,6 +14,8 @@ import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 import { OnboardingGuard } from '../shared/components/OnboardingGuard';
 import { Navigation } from '../shared/components/Navigation';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
+import { PWAUpdatePrompt } from '../shared/components/PWAUpdatePrompt';
+import { OfflineBanner } from '../shared/components/OfflineBanner';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 // Lazy-loaded Pages (code-split per route)
@@ -237,6 +239,9 @@ export default function App() {
               </BrowserRouter>
             </BuddyChatProvider>
           </AuthProvider>
+          {/* PWA: global overlays (outside router, inside I18nProvider for translations) */}
+          <PWAUpdatePrompt />
+          <OfflineBanner />
         </I18nProvider>
       </QueryProvider>
     </ErrorBoundary>
