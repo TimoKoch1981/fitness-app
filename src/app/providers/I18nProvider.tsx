@@ -1,5 +1,5 @@
-import { useState, useCallback, type ReactNode } from 'react';
-import { I18nContext, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise, FONT_SIZE_SCALE, getTranslations } from '../../i18n';
+import { useState, useCallback, useEffect, type ReactNode } from 'react';
+import { I18nContext, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise, FONT_SIZE_SCALE, getTranslations, loadTranslations } from '../../i18n';
 
 interface I18nProviderProps {
   children: ReactNode;
@@ -23,6 +23,9 @@ export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderP
     return defaultLanguage;
   });
 
+  // Counter to force re-render when translations finish loading
+  const [, setLoadGeneration] = useState(0);
+
   const [fontSize, setFontSizeState] = useState<FontSize>(() => {
     const saved = localStorage.getItem('fitbuddy-font-size');
     const size: FontSize = (saved && VALID_FONT_SIZES.includes(saved)) ? saved as FontSize : 'normal';
@@ -39,6 +42,10 @@ export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderP
     setLanguageState(lang);
     localStorage.setItem('fitbuddy-language', lang);
     document.documentElement.lang = lang;
+    // Trigger async load for the new language
+    loadTranslations(lang).then(() => {
+      setLoadGeneration(g => g + 1);
+    });
   }, []);
 
   const setFontSize = useCallback((size: FontSize) => {
@@ -68,6 +75,16 @@ export function I18nProvider({ children, defaultLanguage = 'de' }: I18nProviderP
     localStorage.setItem('fitbuddy-buddy-expertise', e);
   }, []);
 
+  // Load the initial language on mount (for non-de/en languages persisted in localStorage)
+  useEffect(() => {
+    if (language !== 'de' && language !== 'en') {
+      loadTranslations(language).then(() => {
+        setLoadGeneration(g => g + 1);
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // getTranslations returns cached or falls back to 'de'
   const t = getTranslations(language);
 
   return (
