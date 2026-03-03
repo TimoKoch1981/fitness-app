@@ -9,6 +9,12 @@
 
 ### P0 — Blocker (vor Go-Live)
 
+#### ~~Rate-Limiting fuer ai-proxy Edge Function~~ ✅ (2026-03-03, v12.40)
+- [x] ~~**In-Memory Rate Limiting (60 Requests/User/Stunde)**~~ ✅ — JWT `sub` Claim Extraktion, Map<userId, {count, resetAt}>, HTTP 429 + Retry-After Header
+- [x] ~~**Token-Budget Logging**~~ ✅ — console.log pro Request (prompt/completion/total Tokens), X-Token-Count Response Header
+- [x] ~~**Cleanup-Intervall**~~ ✅ — setInterval alle 10 Min, expired Entries entfernen (Memory Leak Prevention)
+- [x] ~~**CORS: Expose-Headers**~~ ✅ — X-Token-Count + Retry-After fuer Frontend lesbar
+
 #### ~~Liability Disclaimer / Haftungsausschluss~~ ✅ (2026-02-24, v8.0)
 - [x] ~~**Disclaimer-Banner oder -Modal beim ersten Start**~~ ✅ — DisclaimerModal mit 5 Sektionen (Medizin, Substanzen, Blutdruck, Daten, Risiko)
   - ~~Muss vor erster Nutzung akzeptiert werden (Checkbox + Bestaetigung)~~ ✅ — Blocking Modal z-[100], Checkbox + Accept
@@ -407,4 +413,4 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-03-01 (v12.18 — TODO bereinigt: 8 erledigte Tasks nachgetragen, konsolidierte offene Liste)*
+*Letzte Aktualisierung: 2026-03-03 (v12.40 — Rate-Limiting fuer ai-proxy Edge Function hinzugefuegt)*

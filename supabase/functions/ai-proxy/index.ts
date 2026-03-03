@@ -9,7 +9,10 @@
  * - Vision (base64 image in messages)
  * - JSON response_format
  *
- * Auth: Validates Supabase anon key via Authorization header.
+ * Security:
+ * - Auth: Validates Supabase JWT via Authorization header
+ * - Rate Limiting: 60 requests per user per hour (in-memory)
+ * - Token Logging: Logs token usage per request (console.log)
  *
  * @see https://supabase.com/docs/guides/functions
  */
@@ -19,9 +22,88 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Expose-Headers': 'X-Token-Count, Retry-After',
 };
 
 const OPENAI_BASE_URL = 'https://api.openai.com/v1';
+
+// ── Rate Limiting ─────────────────────────────────────────────────────
+const RATE_LIMIT_MAX_REQUESTS = 60;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimitMap = new Map<string, RateLimitEntry>();
+
+/**
+ * Decode a JWT payload without verification (auth is already handled by
+ * Supabase Kong gateway — we only need to extract the `sub` claim).
+ */
+function extractUserIdFromJWT(token: string): string | null {
+  try {
+    const parts = token.replace(/^Bearer\s+/i, '').split('.');
+    if (parts.length !== 3) return null;
+    // Base64url → Base64 → decode
+    const payload = parts[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const decoded = atob(payload);
+    const json = JSON.parse(decoded);
+    return json.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check rate limit for a given user ID.
+ * Returns { allowed: true } or { allowed: false, retryAfterSeconds }.
+ */
+function checkRateLimit(userId: string): { allowed: true } | { allowed: false; retryAfterSeconds: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+
+  // Clean up expired entry
+  if (entry && now >= entry.resetAt) {
+    rateLimitMap.delete(userId);
+  }
+
+  const current = rateLimitMap.get(userId);
+
+  if (!current) {
+    // First request in this window
+    rateLimitMap.set(userId, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return { allowed: true };
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfterSeconds = Math.ceil((current.resetAt - now) / 1000);
+    return { allowed: false, retryAfterSeconds };
+  }
+
+  // Increment counter
+  current.count++;
+  return { allowed: true };
+}
+
+/**
+ * Periodically clean up expired rate limit entries to prevent memory leaks.
+ * Runs every 10 minutes.
+ */
+setInterval(() => {
+  const now = Date.now();
+  for (const [userId, entry] of rateLimitMap) {
+    if (now >= entry.resetAt) {
+      rateLimitMap.delete(userId);
+    }
+  }
+}, 10 * 60 * 1000);
 
 Deno.serve(async (req: Request) => {
   // CORS preflight
@@ -43,6 +125,32 @@ Deno.serve(async (req: Request) => {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  }
+
+  // ── Extract user ID from JWT for rate limiting ────────────────────
+  const userId = extractUserIdFromJWT(authHeader);
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Invalid or malformed JWT token' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // ── Rate limit check ──────────────────────────────────────────────
+  const rateLimitResult = checkRateLimit(userId);
+  if (!rateLimitResult.allowed) {
+    console.warn(`[ai-proxy] Rate limit exceeded for user ${userId}`);
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded. Max 60 requests per hour.' }),
+      {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimitResult.retryAfterSeconds),
+        },
+      },
+    );
   }
 
   // ── Get OpenAI key from server secrets ──────────────────────────────
@@ -109,6 +217,9 @@ Deno.serve(async (req: Request) => {
 
     // ── Streaming: pipe SSE through ─────────────────────────────────
     if (stream && openaiResponse.body) {
+      // Note: Token usage for streaming requests is logged client-side
+      // or via stream_options.include_usage when supported.
+      console.log(`[ai-proxy] Streaming request | user=${userId} | model=${model}`);
       return new Response(openaiResponse.body, {
         status: 200,
         headers: {
@@ -120,11 +231,31 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // ── Non-streaming: return JSON ──────────────────────────────────
+    // ── Non-streaming: return JSON + log token usage ────────────────
     const data = await openaiResponse.json();
+
+    // Log token usage from OpenAI response (usage.total_tokens)
+    const usage = (data as { usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } }).usage;
+    if (usage) {
+      console.log(
+        `[ai-proxy] Token usage | user=${userId} | model=${model} | ` +
+        `prompt=${usage.prompt_tokens ?? 0} | completion=${usage.completion_tokens ?? 0} | ` +
+        `total=${usage.total_tokens ?? 0}`
+      );
+    }
+
+    // Include token count as response header for client-side tracking
+    const responseHeaders: Record<string, string> = {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+    };
+    if (usage?.total_tokens) {
+      responseHeaders['X-Token-Count'] = String(usage.total_tokens);
+    }
+
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: responseHeaders,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Internal server error';

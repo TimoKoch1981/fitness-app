@@ -115,6 +115,29 @@
 | 12.38   | 2026-03-02 | Bug #2 DisclaimerModal Validierungs-Feedback + Deploy                    | Erledigt   |
 | 12.36   | 2026-03-02 | Onboarding-Fixes + Audit-Trigger + i18n Diet/Allergy (Live-Test)      | Erledigt   |
 | 12.37   | 2026-03-02 | AI Provider Fix: Supabase-Proxy statt OpenAI-Direct (Volltest)        | Erledigt   |
+| 12.40   | 2026-03-03 | ai-proxy Rate-Limiting (60 Req/User/h) + Token-Budget Logging         | Erledigt   |
+
+---
+
+### 2026-03-03 - v12.40: Rate-Limiting fuer ai-proxy Edge Function
+
+**In-Memory Rate Limiting:**
+- JWT `sub` Claim Extraktion (Base64url-Decode, keine Verifikation — Kong validiert)
+- `Map<userId, { count, resetAt }>` — 60 Requests pro User pro Stunde
+- HTTP 429 bei Ueberschreitung mit `Retry-After` Header (Sekunden bis Reset)
+- Cleanup-Intervall alle 10 Minuten (Memory Leak Prevention)
+- `console.warn` bei Rate-Limit-Verletzung (Monitoring)
+
+**Token-Budget Logging:**
+- Non-Streaming: `console.log` mit user, model, prompt/completion/total Tokens
+- Streaming: Log mit user + model (Token-Counts nicht verfuegbar im SSE-Stream)
+- `X-Token-Count` Response Header fuer Frontend-seitiges Tracking
+- `Access-Control-Expose-Headers` erweitert (X-Token-Count + Retry-After)
+
+**Keine Breaking Changes:**
+- CORS Headers bleiben kompatibel (nur `Expose-Headers` ergaenzt)
+- Bestehende Streaming- und Non-Streaming-Logik unveraendert
+- Neue Auth-Pruefung (JWT sub) schlaegt nur bei ungueltigem Token fehl (Kong filtert vorher)
 
 ---
 

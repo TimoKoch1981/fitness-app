@@ -10,6 +10,7 @@ import { InlineBuddyChat } from '../shared/components/InlineBuddyChat';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 import { OnboardingGuard } from '../shared/components/OnboardingGuard';
 import { Navigation } from '../shared/components/Navigation';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // Pages
 import { LoginPage } from '../pages/LoginPage';
@@ -211,23 +212,25 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <QueryProvider>
-      <I18nProvider>
-        <AuthProvider>
-          <BuddyChatProvider>
-            <BrowserRouter>
-              <NotificationSchedulerProvider>
-                <CelebrationProvider>
-                  <InlineBuddyChatProvider>
-                    <AppRoutes />
-                    <InlineBuddyChat />
-                  </InlineBuddyChatProvider>
-                </CelebrationProvider>
-              </NotificationSchedulerProvider>
-            </BrowserRouter>
-          </BuddyChatProvider>
-        </AuthProvider>
-      </I18nProvider>
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <BuddyChatProvider>
+              <BrowserRouter>
+                <NotificationSchedulerProvider>
+                  <CelebrationProvider>
+                    <InlineBuddyChatProvider>
+                      <AppRoutes />
+                      <InlineBuddyChat />
+                    </InlineBuddyChatProvider>
+                  </CelebrationProvider>
+                </NotificationSchedulerProvider>
+              </BrowserRouter>
+            </BuddyChatProvider>
+          </AuthProvider>
+        </I18nProvider>
+      </QueryProvider>
+    </ErrorBoundary>
   );
 }
