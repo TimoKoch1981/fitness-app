@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { initSentry } from './lib/sentry';
 import App from './app/App';
+import { preloadCriticalAssets } from './shared/utils/assetPreloader';
 import './index.css';
 
 // Initialize Sentry BEFORE React renders (requires VITE_SENTRY_DSN in .env)
@@ -37,3 +38,11 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>
 );
+
+// Preload critical assets (preconnect, dns-prefetch) after initial render.
+// Deferred so it does not block the first paint.
+if (typeof requestIdleCallback === 'function') {
+  requestIdleCallback(preloadCriticalAssets);
+} else {
+  setTimeout(preloadCriticalAssets, 1);
+}

@@ -20,6 +20,8 @@ import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { PWAUpdatePrompt } from '../shared/components/PWAUpdatePrompt';
 import { OfflineBanner } from '../shared/components/OfflineBanner';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { useRoutePreloader } from '../shared/hooks/useRoutePreloader';
+import { useAuth } from './providers/AuthProvider';
 
 // Lazy-loaded Pages (code-split per route)
 const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -37,6 +39,8 @@ const FeatureVotingPage = lazy(() => import('../pages/FeatureVotingPage').then(m
 const ImpressumPage = lazy(() => import('../pages/ImpressumPage').then(m => ({ default: m.ImpressumPage })));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage').then(m => ({ default: m.DatenschutzPage })));
 const AuthCallbackPage = lazy(() => import('../pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
+const LandingPage = lazy(() => import('../pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const JoinPage = lazy(() => import('../features/invite/components/JoinPage').then(m => ({ default: m.JoinPage })));
 
 // Lazy-loaded Workout Session
 const ActiveWorkoutProvider = lazy(() => import('../features/workouts/context/ActiveWorkoutContext').then(m => ({ default: m.ActiveWorkoutProvider })));
@@ -51,7 +55,18 @@ const AdminProductsPage = lazy(() => import('../pages/admin/AdminProductsPage').
 const AdminUsagePage = lazy(() => import('../pages/admin/AdminUsagePage').then(m => ({ default: m.AdminUsagePage })));
 const AdminFeedbackPage = lazy(() => import('../pages/admin/AdminFeedbackPage').then(m => ({ default: m.AdminFeedbackPage })));
 
+/** Home route: shows LandingPage for guests, redirects to /cockpit for authenticated users */
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
+  if (user) return <Navigate to="/cockpit" replace />;
+  return <LandingPage />;
+}
+
 function AppRoutes() {
+  // Predictive route preloading: preloads adjacent page chunks during idle time
+  useRoutePreloader();
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
@@ -63,6 +78,7 @@ function AppRoutes() {
         <Route path="/impressum" element={<ImpressumPage />} />
         <Route path="/datenschutz" element={<DatenschutzPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/join/:code" element={<JoinPage />} />
 
         {/* Protected routes (with onboarding guard) */}
         <Route
@@ -213,9 +229,9 @@ function AppRoutes() {
         <Route path="/body" element={<Navigate to="/nutrition" replace />} />
         <Route path="/reports" element={<Navigate to="/cockpit" replace />} />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/cockpit" replace />} />
-        <Route path="*" element={<Navigate to="/cockpit" replace />} />
+        {/* Default: Landing for guests, Cockpit for authenticated */}
+        <Route path="/" element={<HomeRoute />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );

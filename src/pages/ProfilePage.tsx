@@ -25,6 +25,7 @@ import { WeeklyReportPreview } from '../features/reports/components/WeeklyReport
 import { KeyRotationStatus } from '../features/admin/components/KeyRotationStatus';
 import { AuditRetentionCard } from '../features/admin/components/AuditRetentionCard';
 import { FeatureFlagPanel } from '../features/admin/components/FeatureFlagPanel';
+import { InviteCard } from '../features/invite/components/InviteCard';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -961,6 +962,9 @@ export function ProfilePage() {
             {t.dataRetention?.info || 'Aeltere Gesundheitsdaten werden automatisch geloescht. Dies betrifft: Koerpermasse, Blutdruck, Blutwerte, Schlaf, Symptome, Mahlzeiten, Workouts.'}
           </p>
         </div>
+
+        {/* Invite Friends */}
+        <InviteCard />
 
         {/* Logout */}
         <button

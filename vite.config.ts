@@ -53,6 +53,9 @@ export default defineConfig({
     },
   },
   build: {
+    cssCodeSplit: true,
+    sourcemap: false,
+    assetsInlineLimit: 4096, // Inline small assets < 4KB as base64
     rollupOptions: {
       output: {
         manualChunks(id) {
