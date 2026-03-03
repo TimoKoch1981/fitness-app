@@ -77,12 +77,40 @@ const withingsParser: ScaleFormatParser = {
   },
 };
 
+// ── MyFitnessPal ────────────────────────────────────────────────────
+
+const mfpParser: ScaleFormatParser = {
+  name: 'MyFitnessPal',
+  detect(headers) {
+    const lower = headers.map(h => h.toLowerCase());
+    return lower.some(h => h === 'date') &&
+           lower.some(h => h === 'meal') &&
+           lower.some(h => h === 'calories');
+  },
+  getMappings(headers) {
+    return headers.map(h => {
+      const l = h.toLowerCase();
+      if (l === 'date') return { csvColumn: h, targetField: 'date', autoDetected: true };
+      if (l === 'meal') return { csvColumn: h, targetField: 'name', autoDetected: true };
+      if (l === 'calories') return { csvColumn: h, targetField: 'calories', autoDetected: true };
+      if (l.includes('protein')) return { csvColumn: h, targetField: 'protein', autoDetected: true };
+      if (l.includes('carbohydrate') || l.includes('carbs')) return { csvColumn: h, targetField: 'carbs', autoDetected: true };
+      if (l.includes('fat') && !l.includes('saturated')) return { csvColumn: h, targetField: 'fat', autoDetected: true };
+      if (l.includes('fiber') || l.includes('fibre')) return { csvColumn: h, targetField: 'fiber', autoDetected: true };
+      if (l.includes('sugar')) return { csvColumn: h, targetField: 'sugar', autoDetected: true };
+      if (l.includes('sodium')) return { csvColumn: h, targetField: 'sodium', autoDetected: true };
+      return { csvColumn: h, targetField: '', autoDetected: false };
+    });
+  },
+};
+
 // ── Format Detection ─────────────────────────────────────────────────
 
 export const SCALE_PARSERS: ScaleFormatParser[] = [
   fitdaysParser,
   renphoParser,
   withingsParser,
+  mfpParser,
 ];
 
 export function detectScaleFormat(headers: string[]): ScaleFormatParser | null {

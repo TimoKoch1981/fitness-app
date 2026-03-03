@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3 } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3, Upload } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise } from '../i18n';
@@ -26,6 +26,7 @@ import { KeyRotationStatus } from '../features/admin/components/KeyRotationStatu
 import { AuditRetentionCard } from '../features/admin/components/AuditRetentionCard';
 import { FeatureFlagPanel } from '../features/admin/components/FeatureFlagPanel';
 import { InviteCard } from '../features/invite/components/InviteCard';
+import { MFPImportDialog } from '../features/import/components/MFPImportDialog';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -63,6 +64,8 @@ export function ProfilePage() {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   // Data export dialog
   const [showDataExport, setShowDataExport] = useState(false);
+  // MFP import dialog
+  const [showMFPImport, setShowMFPImport] = useState(false);
   // Feedback dialog
   const [showFeedback, setShowFeedback] = useState(false);
   // Weekly report dialog
@@ -1002,6 +1005,19 @@ export function ProfilePage() {
             {t.legal.privacyPolicy}
           </Link>
         </div>
+
+        {/* MFP Import */}
+        <button
+          onClick={() => setShowMFPImport(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-teal-500 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+        >
+          <Upload className="h-3.5 w-3.5" />
+          {t.dataImport.title}
+        </button>
+
+        {showMFPImport && (
+          <MFPImportDialog open={showMFPImport} onClose={() => setShowMFPImport(false)} />
+        )}
 
         {/* Data Export (DSGVO Art. 20) */}
         <button

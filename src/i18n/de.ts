@@ -1624,6 +1624,30 @@ export const de = {
     joinMessage: 'Ein Freund hat dich zu FitBuddy eingeladen — deinem KI-Fitness-Begleiter.',
     joinCta: 'Jetzt kostenlos registrieren',
   },
+  dataImport: {
+    title: 'MyFitnessPal Import',
+    uploadCSV: 'CSV-Datei hochladen',
+    preview: 'Vorschau',
+    startImport: 'Import starten',
+    importing: 'Importiere...',
+    imported: 'Importiert',
+    skipped: 'Uebersprungen',
+    errors: 'Fehler',
+    noFile: 'Keine Datei ausgewaehlt',
+    invalidFormat: 'Ungueltiges CSV-Format. Bitte eine MyFitnessPal-Exportdatei verwenden.',
+    mapping: 'Mahlzeit',
+    mfpFormat: 'MyFitnessPal CSV-Exportdatei (.csv)',
+    duplicateSkipped: 'Duplikate wurden uebersprungen',
+    importComplete: 'Import abgeschlossen',
+    selectFile: 'CSV-Datei auswaehlen',
+  },
+  api: {
+    deprecationWarning: 'Diese API-Version ist veraltet und wird bald entfernt.',
+    updateRequired: 'Bitte aktualisiere auf die neueste Version.',
+    version: 'API-Version',
+    outdated: 'Deine App-Version ist veraltet.',
+    dismiss: 'Ausblenden',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility
