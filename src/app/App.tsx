@@ -7,6 +7,9 @@ import { BuddyChatProvider } from './providers/BuddyChatProvider';
 import { NotificationSchedulerProvider } from '../features/notifications/components/NotificationSchedulerProvider';
 import { CelebrationProvider } from '../features/celebrations/CelebrationProvider';
 import { InlineBuddyChatProvider } from '../shared/components/InlineBuddyChatContext';
+import { RestTimerProvider } from '../features/timer/context/RestTimerContext';
+import { GlobalTimerOverlay } from '../features/timer/components/GlobalTimerOverlay';
+import { FeatureFlagProvider } from '../lib/featureFlags/FeatureFlagProvider';
 
 // InlineBuddyChat is heavy (pulls in all feature hooks + AI agents) — lazy-load it
 const InlineBuddyChat = lazy(() => import('../shared/components/InlineBuddyChat').then(m => ({ default: m.InlineBuddyChat })));
@@ -223,22 +226,27 @@ export default function App() {
     <ErrorBoundary>
       <QueryProvider>
         <I18nProvider>
-          <AuthProvider>
-            <BuddyChatProvider>
-              <BrowserRouter>
-                <NotificationSchedulerProvider>
-                  <CelebrationProvider>
-                    <InlineBuddyChatProvider>
-                      <AppRoutes />
-                      <Suspense fallback={null}>
-                        <InlineBuddyChat />
-                      </Suspense>
-                    </InlineBuddyChatProvider>
-                  </CelebrationProvider>
-                </NotificationSchedulerProvider>
-              </BrowserRouter>
-            </BuddyChatProvider>
-          </AuthProvider>
+          <FeatureFlagProvider>
+            <AuthProvider>
+              <BuddyChatProvider>
+                <BrowserRouter>
+                  <NotificationSchedulerProvider>
+                    <CelebrationProvider>
+                      <RestTimerProvider>
+                        <InlineBuddyChatProvider>
+                          <AppRoutes />
+                          <Suspense fallback={null}>
+                            <InlineBuddyChat />
+                          </Suspense>
+                          <GlobalTimerOverlay />
+                        </InlineBuddyChatProvider>
+                      </RestTimerProvider>
+                    </CelebrationProvider>
+                  </NotificationSchedulerProvider>
+                </BrowserRouter>
+              </BuddyChatProvider>
+            </AuthProvider>
+          </FeatureFlagProvider>
           {/* PWA: global overlays (outside router, inside I18nProvider for translations) */}
           <PWAUpdatePrompt />
           <OfflineBanner />

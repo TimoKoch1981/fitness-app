@@ -1,6 +1,6 @@
 /**
  * NutritionPage — Standalone page for nutrition tracking.
- * Contains two tabs: Meals (Ernährung) and Body (Körper).
+ * Contains three tabs: Meals (Ernaehrung), Recipes (Rezepte), and Body (Koerper).
  */
 
 import { useState } from 'react';
@@ -11,8 +11,9 @@ import { cn } from '../lib/utils';
 
 import { MealsTabContent } from '../features/meals/components/MealsTabContent';
 import { BodyTabContent } from '../features/body/components/BodyTabContent';
+import { RecipesTabContent } from '../features/recipes/components/RecipesTabContent';
 
-type NutritionTab = 'meals' | 'body';
+type NutritionTab = 'meals' | 'recipes' | 'body';
 
 export function NutritionPage() {
   const { t } = useTranslation();
@@ -20,15 +21,18 @@ export function NutritionPage() {
 
   const [showMealsDialog, setShowMealsDialog] = useState(false);
   const [showBodyDialog, setShowBodyDialog] = useState(false);
+  const [showRecipesDialog, setShowRecipesDialog] = useState(false);
 
   const tabs: { key: NutritionTab; label: string }[] = [
     { key: 'meals', label: t.tracking.nutrition },
+    { key: 'recipes', label: t.recipes.title },
     { key: 'body', label: t.tracking.body },
   ];
 
   const handleAddAction = () => {
     switch (activeTab) {
       case 'meals': setShowMealsDialog(true); break;
+      case 'recipes': setShowRecipesDialog(true); break;
       case 'body': setShowBodyDialog(true); break;
     }
   };
@@ -69,6 +73,13 @@ export function NutritionPage() {
           showAddDialog={showMealsDialog}
           onOpenAddDialog={() => setShowMealsDialog(true)}
           onCloseAddDialog={() => setShowMealsDialog(false)}
+        />
+      )}
+      {activeTab === 'recipes' && (
+        <RecipesTabContent
+          showAddDialog={showRecipesDialog}
+          onOpenAddDialog={() => setShowRecipesDialog(true)}
+          onCloseAddDialog={() => setShowRecipesDialog(false)}
         />
       )}
       {activeTab === 'body' && (

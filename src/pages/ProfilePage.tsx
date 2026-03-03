@@ -24,6 +24,7 @@ import { TrainingModeSelector } from '../shared/components/TrainingModeSelector'
 import { WeeklyReportPreview } from '../features/reports/components/WeeklyReportPreview';
 import { KeyRotationStatus } from '../features/admin/components/KeyRotationStatus';
 import { AuditRetentionCard } from '../features/admin/components/AuditRetentionCard';
+import { FeatureFlagPanel } from '../features/admin/components/FeatureFlagPanel';
 
 export function ProfilePage() {
   const { user, signOut, isAdmin } = useAuth();
@@ -922,6 +923,9 @@ export function ProfilePage() {
 
         {/* Admin: Audit Log Retention (DSGVO) */}
         {isAdmin && <AuditRetentionCard />}
+
+        {/* Admin: Feature Flags */}
+        {isAdmin && <FeatureFlagPanel />}
 
         {/* Privacy Settings (DSGVO Art. 7 Abs. 3 — Widerrufsrecht) */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
