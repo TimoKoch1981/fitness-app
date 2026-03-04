@@ -56,11 +56,16 @@ const AdminProductsPage = lazy(() => import('../pages/admin/AdminProductsPage').
 const AdminUsagePage = lazy(() => import('../pages/admin/AdminUsagePage').then(m => ({ default: m.AdminUsagePage })));
 const AdminFeedbackPage = lazy(() => import('../pages/admin/AdminFeedbackPage').then(m => ({ default: m.AdminFeedbackPage })));
 
-/** Home route: shows LandingPage for guests, redirects to /cockpit for authenticated users */
+/** Home route: shows LandingPage for new guests, redirects to /cockpit for authenticated users,
+ *  redirects to /login for returning visitors (who previously logged in on this browser). */
 function HomeRoute() {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (user) return <Navigate to="/cockpit" replace />;
+  // Returning visitor: skip landing page, go straight to login
+  if (localStorage.getItem('fitbuddy_has_account')) {
+    return <Navigate to="/login" replace />;
+  }
   return <LandingPage />;
 }
 

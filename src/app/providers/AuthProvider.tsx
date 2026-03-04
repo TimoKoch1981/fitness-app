@@ -141,6 +141,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Trigger welcome email on SIGNED_IN (first login after confirmation)
             if (event === 'SIGNED_IN' && session.access_token) {
               triggerWelcomeEmail(session.user.id, session.access_token);
+              // Mark this browser as "has account" — returning visitors skip LandingPage
+              localStorage.setItem('fitbuddy_has_account', '1');
             }
           }
         }

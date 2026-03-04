@@ -18,11 +18,11 @@ export function useDeleteAccount() {
       if (error) throw error;
 
       // 2. Lokalen State aufraumen
-      // localStorage-Keys die mit fitbuddy- beginnen loeschen
+      // localStorage-Keys die mit fitbuddy- oder fitbuddy_ beginnen loeschen
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('fitbuddy-')) {
+        if (key && (key.startsWith('fitbuddy-') || key.startsWith('fitbuddy_'))) {
           keysToRemove.push(key);
         }
       }

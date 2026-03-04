@@ -413,4 +413,15 @@
 
 ---
 
-*Letzte Aktualisierung: 2026-03-03 (v12.40 — Rate-Limiting fuer ai-proxy Edge Function hinzugefuegt)*
+### Landing-Page & Account-Lifecycle
+- [x] ~~**Landing-Page-Skip fuer zurueckkehrende Nutzer**~~ ✅ (2026-03-04, v12.51) — localStorage-Flag `fitbuddy_has_account`, HomeRoute Redirect zu /login
+- [x] ~~**FK Constraints CASCADE**~~ ✅ (2026-03-04, v12.51) — audit_logs + gym_profiles auf ON DELETE CASCADE umgestellt
+- [x] ~~**localStorage-Cleanup bei Account-Loeschung**~~ ✅ (2026-03-04, v12.51) — `fitbuddy_` (Unterstrich) Keys werden jetzt auch geloescht
+
+### v12.49-v12.50 Features
+- [x] ~~**AddMealDialog Crash-Fix + ErrorBoundary**~~ ✅ (2026-03-04, v12.49) — ComponentErrorBoundary, safeT(), Asset-Cleanup Regel
+- [x] ~~**Onboarding-Erweiterung**~~ ✅ (2026-03-04, v12.49) — 9 Allergene, 8 Gesundheitszustaende, Mischkost, KI-Allergie-Awareness
+- [x] ~~**Floating KI-Buddy Avatar (FAB)**~~ ✅ (2026-03-04, v12.50) — Schwebender Button, Pulse-Animation, z-51
+- [x] ~~**Guided Tour / Produkttour**~~ ✅ (2026-03-04, v12.50) — 5 Schritte, SVG-Mask, localStorage, 17 Sprachen
+
+*Letzte Aktualisierung: 2026-03-04 (v12.51 — Landing-Page-Skip + Account-Lifecycle-Fixes)*

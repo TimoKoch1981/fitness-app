@@ -116,6 +116,63 @@
 | 12.36   | 2026-03-02 | Onboarding-Fixes + Audit-Trigger + i18n Diet/Allergy (Live-Test)      | Erledigt   |
 | 12.37   | 2026-03-02 | AI Provider Fix: Supabase-Proxy statt OpenAI-Direct (Volltest)        | Erledigt   |
 | 12.40   | 2026-03-03 | ai-proxy Rate-Limiting (60 Req/User/h) + Token-Budget Logging         | Erledigt   |
+| 12.49   | 2026-03-04 | AddMealDialog Crash-Fix + Onboarding-Erweiterung + KI-Allergie-Awareness | Erledigt   |
+| 12.50   | 2026-03-04 | Floating KI-Buddy Avatar (FAB) + Guided Tour (5 Schritte)               | Erledigt   |
+| 12.51   | 2026-03-04 | Landing-Page-Skip + Account-Loeschung FK CASCADE + localStorage-Cleanup  | Erledigt   |
+
+---
+
+### 2026-03-04 - v12.51: Landing-Page-Skip fuer zurueckkehrende Nutzer
+
+**Landing-Page-Logik:**
+- `fitbuddy_has_account` localStorage-Flag bei SIGNED_IN setzen
+- HomeRoute: Flag gesetzt + nicht eingeloggt → `/login` statt Landing Page
+- Erstbesucher sehen weiterhin die Marketing-Landing-Page
+- Flag wird bei Account-Loeschung mit aufgeraeumt
+
+**Account-Loeschung Fixes:**
+- Alle FK Constraints auf auth.users umgestellt: ON DELETE CASCADE (audit_logs, gym_profiles)
+- `useDeleteAccount`: localStorage-Cleanup erweitert — `fitbuddy_` (Unterstrich) + `fitbuddy-` (Bindestrich)
+- Guided-Tour, Welcome-Email, Has-Account Flags werden jetzt korrekt geloescht
+- Test: timo.koch@rwth-aachen.de komplett geloescht (alle Tabellen + auth.users)
+- Self-Service Account-Loeschung verifiziert (DeleteAccountDialog + delete_user_account() RPC)
+
+---
+
+### 2026-03-04 - v12.50: Floating KI-Buddy Avatar + Guided Tour
+
+**FloatingBuddyAvatar (FAB):**
+- Schwebender Button unten-rechts (z-51, ueber Navigation z-50)
+- Pulse-Animation mit animate-ping Outer-Ring
+- Oeffnet InlineBuddyChat via Context
+- Versteckt auf: /buddy, /login, /register, /landing, /impressum, /datenschutz, /join, /onboarding
+- Versteckt wenn Chat offen oder User nicht authentifiziert
+- `data-tour-buddy` Attribut fuer GuidedTour-Targeting
+
+**GuidedTour (5-Schritt Produkttour):**
+- SVG-Mask Highlights auf Navigation-Items + Buddy FAB
+- Schritte: Cockpit → Ernaehrung → Training → Medizin → KI-Buddy
+- localStorage-basiert (fitbuddy_guided_tour_completed)
+- Trigger: markOnboardingJustCompleted() nach Onboarding-Wizard
+- Welcome-Screen mit "Tour starten" / "Ueberspringen"
+- 17 i18n Keys in allen 17 Sprachen
+
+---
+
+### 2026-03-04 - v12.49: AddMealDialog Crash-Fix + Onboarding-Erweiterung
+
+**Crash-Fix:**
+- Root Cause: Gemischte Asset-Chunks auf Server (alte Mar 2 + neue Mar 3 Dateien)
+- Fix: `rm -rf assets/*` VOR jedem Deploy (in Deploy-Regeln dokumentiert)
+- ComponentErrorBoundary.tsx (wiederverwendbare React Error Boundary mit Retry)
+- AddMealDialog: safeT() Helper fuer defensive i18n-Zugriffe + Null-Guards
+- NutritionPage: Alle 3 Tab-Contents in ComponentErrorBoundary gewrappt
+
+**Onboarding-Erweiterung:**
+- 9 neue Allergene (Histamin, Soja, Fruktose, Sorbit, Sulfite, Sellerie, Senf, Sesam, Lupin)
+- 8 neue Gesundheitszustaende (Diabetes Typ 1/2, Bluthochdruck, Schilddruese, Nierenerkrankung, Gicht, Reizdarm, Rheuma)
+- "Mischkost" als erste Ernaehrungsoption (Omnivore)
+- KI-Allergie-Awareness: Spezifische Lebensmittel-Listen pro Allergen in nutritionAgent + userSkills
 
 ---
 
