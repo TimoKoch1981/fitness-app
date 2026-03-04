@@ -29,6 +29,7 @@ import { useAddBodyMeasurement } from '../features/body/hooks/useBodyMeasurement
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
 import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
+import { markOnboardingJustCompleted } from '../shared/hooks/useGuidedTour';
 import type { Gender, PrimaryGoal, TrainingMode } from '../types/health';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -496,7 +497,10 @@ export function OnboardingWizardPage() {
                 </p>
               </div>
               <button
-                onClick={() => navigate('/cockpit', { replace: true })}
+                onClick={() => {
+                  markOnboardingJustCompleted();
+                  navigate('/cockpit', { replace: true });
+                }}
                 className="w-full py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {label('startApp', `${APP_NAME} starten`)}

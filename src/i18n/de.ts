@@ -424,6 +424,7 @@ export const de = {
     capScreenshot: 'Waage-Screenshot importieren',
     capAnalysis: 'Wochenanalyse & Tipps',
     aiDisclaimer: 'KI-generiert — kann Fehler enthalten. Keine medizinische Beratung.',
+    floatingHint: 'KI-Buddy öffnen',
   },
   reminders: {
     title: 'Erinnerungen',
@@ -1666,6 +1667,25 @@ export const de = {
     version: 'API-Version',
     outdated: 'Deine App-Version ist veraltet.',
     dismiss: 'Ausblenden',
+  },
+  guidedTour: {
+    welcome: 'Willkommen bei FitBuddy!',
+    welcomeMessage: 'Ich bin dein KI-Buddy und begleite dich auf deiner Fitness-Reise. Soll ich dir eine kurze Tour geben?',
+    startTour: 'Tour starten',
+    skip: 'Ueberspringen',
+    next: 'Weiter',
+    finish: 'Los gehts!',
+    stepOf: 'Schritt {current} von {total}',
+    cockpitTitle: 'Dein Cockpit',
+    cockpitDesc: 'Hier siehst du deinen Tagesueberblick: Kalorien, Makros, Aktivitaet und mehr.',
+    nutritionTitle: 'Ernaehrung tracken',
+    nutritionDesc: 'Erfasse deine Mahlzeiten per Text, Foto oder Barcode. Der KI-Buddy hilft dir dabei.',
+    trainingTitle: 'Training planen',
+    trainingDesc: 'Logge deine Workouts, verfolge deinen Fortschritt und nutze den Timer.',
+    medicalTitle: 'Gesundheit im Blick',
+    medicalDesc: 'Blutdruck, Blutwerte, Symptome und mehr — alles an einem Ort.',
+    buddyTitle: 'Dein KI-Buddy',
+    buddyDesc: 'Dein persoenlicher Assistent ist immer ueber den schwebenden Button erreichbar. Frag ihn alles!',
   },
 } as const;
 

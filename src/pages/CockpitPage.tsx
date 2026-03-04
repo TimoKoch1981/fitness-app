@@ -47,6 +47,8 @@ import {
 import { WaterWidget } from '../features/water/components/WaterWidget';
 import { useWaterIntake } from '../features/water/hooks/useWaterIntake';
 import { MotivationBanner } from '../features/motivation/components/MotivationBanner';
+import { GuidedTour } from '../shared/components/GuidedTour';
+import { useGuidedTour } from '../shared/hooks/useGuidedTour';
 
 // Report data hooks & chart components
 import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
@@ -83,6 +85,7 @@ export function CockpitPage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const selectedDate = useToday();
+  const { shouldShowTour, completeTour, skipTour } = useGuidedTour();
   const cockpitSuggestions = usePageBuddySuggestions('cockpit', language as 'de' | 'en');
   const { celebrateCalorieGoal, celebrateProteinGoal } = useCelebrations();
 
@@ -542,6 +545,11 @@ export function CockpitPage() {
           </div>
         )}
       </div>
+
+      {/* Guided Product Tour — shown once after onboarding completion */}
+      {shouldShowTour && (
+        <GuidedTour onComplete={completeTour} onSkip={skipTour} />
+      )}
     </PageShell>
   );
 }

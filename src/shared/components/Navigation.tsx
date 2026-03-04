@@ -31,6 +31,7 @@ export function Navigation() {
               key={path}
               to={path}
               role="menuitem"
+              data-tour-nav={labelKey}
               aria-current={isActive ? 'page' : undefined}
               aria-label={t.nav[labelKey]}
               className={cn(
