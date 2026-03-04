@@ -11,12 +11,17 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt', // User decides when to update
+      registerType: 'autoUpdate', // New SW activates immediately — prevents stale cache issues
       includeAssets: ['favicon.ico', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: false, // Use public/manifest.json directly
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        skipWaiting: true, // New SW takes over immediately (no waiting for tabs to close)
+        clientsClaim: true, // New SW controls all open tabs immediately
+        // CRITICAL: Don't intercept GoTrue auth endpoints (email confirm, password reset)
+        // Without this, the SW serves index.html for /auth/v1/verify → blank page
+        navigateFallbackDenylist: [/^\/auth\/v1/],
         runtimeCaching: [
           {
             // Supabase REST API — network-first with fallback to cache

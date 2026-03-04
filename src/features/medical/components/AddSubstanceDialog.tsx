@@ -32,6 +32,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   const [frequency, setFrequency] = useState('');
   const [ester, setEster] = useState('');
   const [halfLife, setHalfLife] = useState('');
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
@@ -87,6 +88,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     setCategory(cat);
     setSearchQuery('');
     setShowPresets(true);
+    // Clear ester/half-life when switching away from TRT/PED (not relevant for meds/supplements)
+    if (cat !== 'trt' && cat !== 'ped') {
+      setEster('');
+      setHalfLife('');
+    }
     // Show PED disclaimer if selecting PED or TRT for first time
     // NOT for medication, supplement, or other — those are harmless categories
     if ((cat === 'ped' || cat === 'trt') && !pedEnabled) {
@@ -117,7 +123,10 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
 
       // Auto-create linked reminder if frequency is set
       if (frequency && substance?.id) {
-        const reminderConfig = parseFrequencyToReminder(frequency);
+        // Use explicit weekday selection if user picked days, otherwise parse from frequency string
+        const reminderConfig = selectedDays.length > 0
+          ? { repeat_mode: 'weekly' as const, days_of_week: selectedDays }
+          : parseFrequencyToReminder(frequency);
         if (reminderConfig) {
           try {
             const title = language === 'de'
@@ -145,6 +154,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
       setFrequency('');
       setEster('');
       setHalfLife('');
+      setSelectedDays([]);
       setNotes('');
       setSearchQuery('');
       setShowPresets(true);
@@ -170,8 +180,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     other: t.medical.cat_other,
   };
 
-  // Show ester/half-life only for injection-based substances (typically TRT/PED)
-  const showEsterFields = adminType === 'injection' || adminType === 'subcutaneous';
+  // Show ester/half-life only for TRT/PED injectables (not for medications like Wegovy or supplements)
+  const showEsterFields = (category === 'trt' || category === 'ped') && (adminType === 'injection' || adminType === 'subcutaneous');
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -402,6 +412,32 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               placeholder={language === 'de' ? 'Oder eigenen Rhythmus eingeben...' : 'Or enter custom frequency...'}
               className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
             />
+            {/* Weekday selector for weekly frequencies */}
+            {/woche|week/i.test(frequency) && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-gray-500">
+                  {language === 'de' ? 'An welchen Tagen?' : 'On which days?'}
+                </p>
+                <div className="flex gap-1.5 justify-center">
+                  {(language === 'de' ? ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']).map((label, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedDays(prev =>
+                        prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx].sort()
+                      )}
+                      className={`w-8 h-8 rounded-full text-[10px] font-medium transition-all ${
+                        selectedDays.includes(idx)
+                          ? 'bg-teal-500 text-white'
+                          : 'bg-white border border-gray-200 text-gray-400 hover:border-teal-300'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {frequency && (
               <p className="text-[10px] text-teal-600 flex items-center gap-1">
                 <Bell className="h-3 w-3" />

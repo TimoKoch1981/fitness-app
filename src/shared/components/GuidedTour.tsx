@@ -161,12 +161,17 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
   const isLastStep = currentStep === TOTAL_STEPS - 1;
   const step = currentStep >= 0 ? TOUR_STEPS[currentStep] : null;
 
-  // Calculate tooltip position (above the highlighted element)
+  // Calculate tooltip position (above the highlighted element, clamped to viewport)
   const tooltipStyle: React.CSSProperties = {};
-  if (highlightRect) {
-    // Position centered above the highlighted item
+  const hasNavHighlight = highlightRect && step?.navKey !== null;
+  if (hasNavHighlight) {
+    // Position centered above the highlighted nav item, clamped to viewport
     const centerX = highlightRect.left + highlightRect.width / 2;
-    tooltipStyle.left = `${centerX}px`;
+    const vw = window.innerWidth;
+    const tooltipMaxW = Math.min(384, vw - 32); // max-w-sm or calc(100%-2rem)
+    const halfW = tooltipMaxW / 2;
+    const clampedX = Math.max(halfW + 16, Math.min(centerX, vw - halfW - 16));
+    tooltipStyle.left = `${clampedX}px`;
     tooltipStyle.bottom = `${window.innerHeight - highlightRect.top + 16}px`;
     tooltipStyle.transform = 'translateX(-50%)';
   }
@@ -290,12 +295,16 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
               transition={{ duration: 0.3, delay: 0.15 }}
               className="absolute z-10 w-[calc(100%-2rem)] max-w-sm"
               style={
-                highlightRect
+                hasNavHighlight
                   ? tooltipStyle
                   : {
                       left: '50%',
-                      top: '50%',
-                      transform: 'translate(-50%, -50%)',
+                      bottom: highlightRect
+                        ? `${window.innerHeight - highlightRect.top + 16}px`
+                        : '50%',
+                      transform: highlightRect
+                        ? 'translateX(-50%)'
+                        : 'translate(-50%, 50%)',
                     }
               }
             >
@@ -360,8 +369,8 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
                 </div>
               </div>
 
-              {/* Arrow pointing down to the highlighted element */}
-              {highlightRect && (
+              {/* Arrow pointing down to the highlighted nav element */}
+              {hasNavHighlight && (
                 <div className="flex justify-center -mt-px">
                   <div className="w-3 h-3 bg-white rotate-45 transform -translate-y-1.5 shadow-sm" />
                 </div>

@@ -17,7 +17,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
-import { routeAndExecuteStream } from '../../../lib/ai/agents/router';
+import { routeAndExecuteStream, detectIntent } from '../../../lib/ai/agents/router';
 import { getAgent } from '../../../lib/ai/agents';
 import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
@@ -30,6 +30,7 @@ import {
   saveContextNotes,
   cleanupExpiredNotes,
 } from '../../../lib/ai/contextExtractor';
+import { resetTourState } from '../../../shared/hooks/useGuidedTour';
 import { useChatHistory } from './useChatHistory';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import type { AgentContext, AgentType, CommunicationStyle } from '../../../lib/ai/agents/types';
@@ -163,8 +164,22 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         ));
       };
 
-      const result = activeThread !== 'general'
-        ? await getAgent(activeThread).executeStream(fullContext, onChunk)
+      // Smart routing: even on a specific thread, check if the message belongs to a different agent.
+      // If the router detects a different agent with high confidence, use that instead.
+      // This prevents the Substance Agent from answering training questions (and vice versa).
+      let agentToUse = activeThread;
+      if (activeThread !== 'general') {
+        const routerHint = detectIntent(userMessage.trim());
+        if (routerHint.targetAgent !== activeThread
+          && routerHint.targetAgent !== 'general'
+          && routerHint.confidence > 0.3) {
+          console.log(`[BuddyChat] Thread ${activeThread} but router says ${routerHint.targetAgent} (${routerHint.confidence.toFixed(2)}) — switching agent`);
+          agentToUse = routerHint.targetAgent;
+        }
+      }
+
+      const result = agentToUse !== 'general'
+        ? await getAgent(agentToUse).executeStream(fullContext, onChunk)
         : await routeAndExecuteStream(
             userMessage.trim(),
             agentContext,
@@ -208,9 +223,17 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         }
       }
 
-      // Check for search_product actions — auto-execute them and do a follow-up call
+      // Check for auto-execute actions
       const searchActions = parsedActions.filter(a => a.type === 'search_product');
-      const regularActions = parsedActions.filter(a => a.type !== 'search_product');
+      const tourActions = parsedActions.filter(a => a.type === 'restart_tour');
+      const regularActions = parsedActions.filter(a => a.type !== 'search_product' && a.type !== 'restart_tour');
+
+      // Auto-execute restart_tour (no user confirmation needed)
+      if (tourActions.length > 0) {
+        resetTourState();
+        // Navigate to cockpit after a short delay so the user sees the buddy's message
+        setTimeout(() => { window.location.href = '/cockpit'; }, 1500);
+      }
 
       if (parsedActions.length > 0) {
         console.log(`[BuddyChat] Parsed actions: ${parsedActions.map(a => a.type).join(', ')}. search_product: ${searchActions.length}`);

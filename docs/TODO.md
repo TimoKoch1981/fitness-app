@@ -424,4 +424,15 @@
 - [x] ~~**Floating KI-Buddy Avatar (FAB)**~~ ✅ (2026-03-04, v12.50) — Schwebender Button, Pulse-Animation, z-51
 - [x] ~~**Guided Tour / Produkttour**~~ ✅ (2026-03-04, v12.50) — 5 Schritte, SVG-Mask, localStorage, 17 Sprachen
 
-*Letzte Aktualisierung: 2026-03-04 (v12.51 — Landing-Page-Skip + Account-Lifecycle-Fixes)*
+### v12.52 Bugfixes aus Live-Test (2026-03-04)
+- [x] ~~**Substanz-Agent: add_substance VOR log_substance Sequenzierung**~~ ✅ — Explizite Reihenfolge-Regel (DE+EN) mit Beispiel
+- [x] ~~**Standard-Modus: Eingeschraenkte Substanz-Beratung**~~ ✅ — Kein Zyklus/PCT bei Standard, Power+ Verweis
+- [x] ~~**Ester/Halbwertszeit nur bei TRT/PED**~~ ✅ — showEsterFields + Kategorie-Check, Reset bei Wechsel
+- [x] ~~**Wochentag-Auswahl bei Einnahme-Rhythmus**~~ ✅ — Teal Wochentag-Chips (So-Sa), days_of_week Reminder
+- [x] ~~**Buddy-Hinweis im Training-hinzufuegen-Dialog**~~ ✅ — Teal Info-Banner in AddWorkoutDialog
+- [x] ~~**Training-Agent: Profildaten nutzen**~~ ✅ — 3-Schritt-Workflow + globale Regel in baseAgent
+- [x] ~~**Training-Agent: Proaktiv Plan speichern**~~ ✅ — ACTION:save_training_plan sofort erstellen
+- [x] ~~**Agent-Routing: Thread-Override Fix**~~ ✅ — Smart-Routing mit detectIntent() Confidence > 0.3
+- [x] ~~**SKILLS_LEARNINGS: Email-Confirmation + DNS-Anleitung**~~ ✅ — Wiederverwendbare Resend/Hetzner/Strato Doku
+
+*Letzte Aktualisierung: 2026-03-04 (v12.52 — 8 Bugfixes + Agent-Verbesserungen + DNS/Email-Learnings)*

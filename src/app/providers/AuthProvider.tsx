@@ -161,7 +161,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // After email confirmation, GoTrue redirects here with tokens in URL hash.
+        // AuthCallbackPage picks them up and redirects to /cockpit.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
     return {
       error: error ? new Error(error.message) : null,
       autoConfirmed: !!data?.session,

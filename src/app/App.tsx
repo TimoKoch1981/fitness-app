@@ -39,7 +39,9 @@ const OnboardingWizardPage = lazy(() => import('../pages/OnboardingWizardPage').
 const FeatureVotingPage = lazy(() => import('../pages/FeatureVotingPage').then(m => ({ default: m.FeatureVotingPage })));
 const ImpressumPage = lazy(() => import('../pages/ImpressumPage').then(m => ({ default: m.ImpressumPage })));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage').then(m => ({ default: m.DatenschutzPage })));
-const AuthCallbackPage = lazy(() => import('../pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
+// AuthCallbackPage is NOT lazy — must be immediately available for email confirmation redirects
+// (stale service workers might fail to load lazy chunks)
+import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 const LandingPage = lazy(() => import('../pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const JoinPage = lazy(() => import('../features/invite/components/JoinPage').then(m => ({ default: m.JoinPage })));
 

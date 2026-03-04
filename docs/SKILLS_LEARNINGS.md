@@ -248,6 +248,130 @@ Caddy (Reverse Proxy + SSL + Static Files)
 - Resend nutzt AWS SES (eu-west-1 Ireland) als Mail-Infrastruktur
 - Verifizierung erst moeglich wenn DNS-Propagation abgeschlossen
 
+### Email-Confirmation Redirect (Learnings v12.52) ⚠️
+
+**Problem:** Nach Email-Bestätigung → leere Seite statt App.
+
+**Root Cause: Caddy-Routing!**
+- Caddyfile hatte `handle /auth/*` → proxied ALLE `/auth/*` zu Kong (API Gateway)
+- `/auth/callback` ist aber eine SPA-Route (React Router), KEIN GoTrue-Endpoint!
+- Kong gab 404: `{"message":"no Route matched with those values"}`
+- GoTrue-Endpoints liegen unter `/auth/v1/*` (z.B. `/auth/v1/settings`, `/auth/v1/token`)
+
+**Fix:** `handle /auth/*` → `handle /auth/v1/*`
+```
+# RICHTIG:
+handle /auth/v1/* {
+    reverse_proxy kong:8000
+}
+# FALSCH (war vorher):
+# handle /auth/* {
+#     reverse_proxy kong:8000
+# }
+```
+
+**Service Worker Cache-Problem:**
+- Stale Service Worker cached HTML-Seite, laedt alte Chunk-Hashes
+- Fix: `Cache-Control: no-cache, no-store, must-revalidate` fuer `sw.js` und `workbox-*.js`
+```
+@sw path /sw.js /workbox-*.js
+header @sw Cache-Control "no-cache, no-store, must-revalidate"
+```
+
+**AuthCallbackPage MUSS non-lazy sein:**
+- Stale Service Worker koennte lazy-geladene Chunks nicht finden
+- Daher: `import { AuthCallbackPage } from '../pages/AuthCallbackPage';` (direkter Import)
+- NICHT: `const AuthCallbackPage = lazy(() => import(...))`
+
+**Docker bind mount + `sed -i` = Inode-Problem:**
+- `sed -i` erstellt eine NEUE Datei (neuer Inode)
+- Docker bind mount zeigt noch auf den alten Inode → Container sieht alte Config!
+- **Fix:** Nach jedem `sed -i` auf gemounteten Dateien: `docker compose restart <container>`
+- **Alternative:** `sed -i` vermeiden, stattdessen Datei direkt ueberschreiben
+
+**Verification nach Fix:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" https://fudda.de/auth/callback  # → 200 (SPA HTML)
+curl -s -o /dev/null -w "%{http_code}" https://fudda.de/auth/v1/settings  # → 401 (GoTrue)
+```
+
+### Resend + Hetzner DNS + Strato — Komplettanleitung (wiederverwendbar)
+
+**Szenario:** Domain bei Strato registriert, DNS bei Hetzner, Email via Resend.
+
+**Schritt 1: Hetzner DNS-Zone erstellen**
+```bash
+# Zone erstellen (Hetzner Cloud API)
+curl -X POST "https://api.hetzner.cloud/v1/zones" \
+  -H "Authorization: Bearer $HETZNER_CLOUD_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"meinedomain.de","ttl":3600}'
+# → Zone-ID merken!
+```
+
+**Schritt 2: DNS-Records bei Hetzner anlegen**
+```bash
+ZONE_ID=<zone-id>
+TOKEN=<hetzner-cloud-token>
+
+# A-Record (Domain → Server-IP)
+curl -X POST "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"type":"A","name":"@","value":"<server-ip>","ttl":3600}'
+
+# CNAME www
+curl -X POST "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"type":"CNAME","name":"www","value":"meinedomain.de.","ttl":3600}'
+```
+
+**Schritt 3: Strato NS-Delegation**
+- Strato Kundenbereich → Domains → DNS-Verwaltung → Nameserver aendern
+- Formular `ns_form_private` ausfuellen:
+  - NS1: `hydrogen.ns.hetzner.com`
+  - NS2: `oxygen.ns.hetzner.com`
+  - NS3: `helium.ns.hetzner.de`
+  - NS4: (leer lassen)
+- **⚠️ Propagation dauert bis 24h!**
+
+**Schritt 4: Resend Domain hinzufuegen**
+- resend.com → Domains → Add Domain → `meinedomain.de`
+- Region: `eu-west-1` (Frankfurt/Ireland — DSGVO!)
+- Resend zeigt benoetigte DNS-Records
+
+**Schritt 5: Resend DNS-Records bei Hetzner setzen**
+```bash
+# SPF (TXT auf Subdomain 'send')
+curl -X POST "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"type":"TXT","name":"send","value":"v=spf1 include:amazonses.com ~all","ttl":3600}'
+
+# DKIM (3x CNAME — Werte von Resend kopieren!)
+# WICHTIG: CNAME-Werte MUESSEN mit Punkt enden!
+curl -X POST ... -d '{"type":"CNAME","name":"resend._domainkey","value":"<resend-dkim-value>.","ttl":3600}'
+
+# MX fuer Subdomain 'send'
+# WICHTIG: MX-Wert MUSS mit Punkt enden!
+curl -X POST ... -d '{"type":"MX","name":"send","value":"10 feedback-smtp.eu-west-1.amazonses.com.","ttl":3600}'
+
+# DMARC (optional aber empfohlen)
+curl -X POST ... -d '{"type":"TXT","name":"_dmarc","value":"v=DMARC1; p=none; rua=mailto:dmarc@meinedomain.de","ttl":3600}'
+```
+
+**Schritt 6: Verifikation**
+```bash
+# DNS direkt am autoritativen NS pruefen (umgeht lokalen Cache):
+nslookup -type=TXT send.meinedomain.de hydrogen.ns.hetzner.com
+nslookup -type=CNAME resend._domainkey.meinedomain.de hydrogen.ns.hetzner.com
+nslookup -type=MX send.meinedomain.de hydrogen.ns.hetzner.com
+```
+
+**Haeufige Fehler:**
+1. **MX/CNAME ohne Trailing Dot:** `host.example.com` → wird zu `host.example.com.meinedomain.de`!
+2. **Strato-CNAME-Limitation:** Strato kann KEINE CNAME auf Subdomains → daher DNS extern!
+3. **DNS-Propagation:** Resend-Verifizierung fehlschlaegt waehrend Propagation — 1-24h warten
+4. **Hetzner API-Versionen:** Neue API = `api.hetzner.cloud/v1/zones/...`, alte API = `dns.hetzner.com/api/v1/...`
+
 ### Git-Workflow (v10.0+)
 
 **Branching-Strategie:**

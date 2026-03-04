@@ -119,6 +119,27 @@
 | 12.49   | 2026-03-04 | AddMealDialog Crash-Fix + Onboarding-Erweiterung + KI-Allergie-Awareness | Erledigt   |
 | 12.50   | 2026-03-04 | Floating KI-Buddy Avatar (FAB) + Guided Tour (5 Schritte)               | Erledigt   |
 | 12.51   | 2026-03-04 | Landing-Page-Skip + Account-Loeschung FK CASCADE + localStorage-Cleanup  | Erledigt   |
+| 12.52   | 2026-03-04 | 8 Bugfixes aus Live-Test + Agent-Verbesserungen + DNS/Email-Learnings    | Erledigt   |
+
+---
+
+### 2026-03-04 - v12.52: 8 Bugfixes aus Live-Test + KI-Agent-Verbesserungen
+
+**Agent-Fixes (6 Aenderungen):**
+- Substanz-Agent: add_substance ZUERST, dann log_substance (Sequenzierung)
+- Substanz-Agent: Standard-Modus eingeschraenkte Beratung (Power+ Verweis bei PED)
+- Training-Agent: Profildaten nutzen statt redundant zu fragen (Rekomposition-Beispiel)
+- Training-Agent: Proaktiv Trainingsplan als ACTION-Block speichern
+- BaseAgent: Globale "Profildaten nutzen — nicht redundant fragen!" Regel
+- useBuddyChat: Smart-Routing mit detectIntent() Override (Confidence > 0.3)
+
+**UI-Fixes (3 Aenderungen):**
+- AddSubstanceDialog: Ester/Halbwertszeit nur bei TRT/PED Kategorie
+- AddSubstanceDialog: Wochentag-Chips bei woechentlicher Frequenz (analog EditReminderDialog)
+- AddWorkoutDialog: Buddy-Hinweis-Banner ("Sag dem Buddy was du trainiert hast")
+
+**Dokumentation:**
+- SKILLS_LEARNINGS.md: Email-Confirmation Redirect Learnings + Resend/Hetzner DNS Komplettanleitung
 
 ---
 

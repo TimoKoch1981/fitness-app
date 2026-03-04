@@ -35,6 +35,7 @@ const VALID_ACTIONS: ActionType[] = [
   'update_profile',
   'update_equipment',
   'search_product',
+  'restart_tour',
 ];
 
 /**

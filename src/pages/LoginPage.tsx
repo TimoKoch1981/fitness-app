@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import type { OAuthProvider } from '../app/providers/AuthProvider';
+import { supabase } from '../lib/supabase';
 import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
 import { LanguageSelector } from '../components/LanguageSelector';
@@ -19,6 +20,8 @@ export function LoginPage() {
   const [resending, setResending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   if (loading) return null;
   if (user) return <Navigate to="/cockpit" replace />;
@@ -60,6 +63,27 @@ export function LoginPage() {
       setError('Fehler beim Senden');
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim() || !email.trim()) return;
+    setVerifyingOtp(true);
+    setError('');
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: otpCode.trim(),
+        type: 'signup',
+      });
+      if (error) {
+        setError(error.message);
+      }
+      // On success, onAuthStateChange fires SIGNED_IN → auto-redirect to /cockpit
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verifizierung fehlgeschlagen');
+    } finally {
+      setVerifyingOtp(false);
     }
   };
 
@@ -115,6 +139,27 @@ export function LoginPage() {
                   <p className="text-amber-700 mt-0.5">{t.auth.emailNotConfirmedMessage}</p>
                 </div>
               </div>
+              {/* OTP Code Input — enter 6-digit code from email */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder={(t.auth as Record<string, string>).otpPlaceholder || '6-stelliger Code'}
+                  className="flex-1 px-3 py-1.5 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-center tracking-widest font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={verifyingOtp || otpCode.length < 6}
+                  className="px-4 py-1.5 text-sm bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {verifyingOtp ? '...' : ((t.auth as Record<string, string>).verifyCode || 'Bestätigen')}
+                </button>
+              </div>
+
               {resendSuccess ? (
                 <p className="text-emerald-600 font-medium text-center">
                   {t.auth.confirmationResent}

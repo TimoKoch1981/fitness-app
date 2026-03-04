@@ -19,10 +19,11 @@ export type ActionType =
   | 'add_reminder'
   | 'update_profile'
   | 'update_equipment'
-  | 'search_product';
+  | 'search_product'
+  | 'restart_tour';
 
 /** Action types that are auto-executed (no user confirmation needed) */
-export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product'];
+export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product', 'restart_tour'];
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {
@@ -129,6 +130,12 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '🔍',
         title: 'Produkt wird recherchiert...',
         summary: `Suche nach "${d.query ?? 'Produkt'}"`,
+      };
+    case 'restart_tour':
+      return {
+        icon: '🎯',
+        title: 'Produkttour wird gestartet...',
+        summary: 'Tour wird neu gestartet',
       };
   }
 }

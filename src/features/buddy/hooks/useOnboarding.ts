@@ -43,7 +43,7 @@ export function useOnboarding(
       return {
         needsOnboarding: true,
         onboardingComplete: false,
-        missingFields: ['height', 'birth_date', 'gender', 'weight'],
+        missingFields: ['height', 'birth_date', 'gender'],
       };
     }
 
@@ -61,15 +61,17 @@ export function useOnboarding(
       missing.push('gender');
     }
 
-    // Weight is needed for BMR/BMI/goal calculations
+    // Weight is tracked as missing for informational purposes
+    // but does NOT block onboarding (avoids query-cache race condition)
+    const infoMissing = [...missing];
     if (!latestBody?.weight_kg) {
-      missing.push('weight');
+      infoMissing.push('weight');
     }
 
     return {
       needsOnboarding: missing.length > 0,
       onboardingComplete: missing.length === 0,
-      missingFields: missing,
+      missingFields: infoMissing,
     };
   }, [profile, latestBody]);
 }

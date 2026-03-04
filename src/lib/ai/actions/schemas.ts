@@ -237,6 +237,8 @@ const SearchProductSchema = z.object({
   meal_type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).optional(),
 });
 
+const RestartTourSchema = z.object({}).passthrough();
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -252,6 +254,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   update_profile: UpdateProfileSchema,
   update_equipment: UpdateEquipmentSchema,
   search_product: SearchProductSchema,
+  restart_tour: RestartTourSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

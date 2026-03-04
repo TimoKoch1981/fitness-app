@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3, Upload } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
@@ -10,6 +10,7 @@ import { NotificationSettings } from '../features/notifications/components/Notif
 import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
 import { FeedbackDialog } from '../features/feedback/components/FeedbackDialog';
 import { useDebouncedCallback } from '../shared/hooks/useDebounce';
+import { resetTourState } from '../shared/hooks/useGuidedTour';
 import { calculateRecommendedGoals } from '../lib/calculations';
 import type { RecommendedGoals } from '../lib/calculations';
 import { useLatestBodyMeasurement } from '../features/body/hooks/useBodyMeasurements';
@@ -29,6 +30,7 @@ import { InviteCard } from '../features/invite/components/InviteCard';
 import { MFPImportDialog } from '../features/import/components/MFPImportDialog';
 
 export function ProfilePage() {
+  const navigate = useNavigate();
   const { user, signOut, isAdmin } = useAuth();
   const { t, language, setLanguage, fontSize, setFontSize, buddyVerbosity, setBuddyVerbosity, buddyExpertise, setBuddyExpertise } = useTranslation();
   const { data: profile, isLoading } = useProfile();
@@ -317,6 +319,24 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Restart Guided Tour */}
+        <button
+          type="button"
+          onClick={() => {
+            resetTourState();
+            navigate('/cockpit');
+          }}
+          className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 hover:bg-gray-50 active:scale-[0.99] transition-all text-left"
+        >
+          <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-lg">🎯</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">{t.profile.restartTour ?? 'Produkttour starten'}</p>
+            <p className="text-xs text-gray-400">{t.profile.restartTourHint ?? 'Lerne alle Funktionen kennen'}</p>
+          </div>
+        </button>
 
         {/* Notification Settings */}
         <NotificationSettings />

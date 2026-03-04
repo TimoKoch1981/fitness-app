@@ -50,6 +50,16 @@ function markTourCompleted(): void {
   }
 }
 
+/** Reset tour state so it can be restarted (e.g. from Profile page or Buddy chat). */
+export function resetTourState(): void {
+  try {
+    localStorage.removeItem(TOUR_COMPLETED_KEY);
+    localStorage.setItem(ONBOARDING_JUST_COMPLETED_KEY, 'true');
+  } catch {
+    // localStorage not available
+  }
+}
+
 export function useGuidedTour() {
   const [shouldShowTour, setShouldShowTour] = useState(false);
 
@@ -74,5 +84,10 @@ export function useGuidedTour() {
     setShouldShowTour(false);
   }, []);
 
-  return { shouldShowTour, completeTour, skipTour };
+  const restartTour = useCallback(() => {
+    resetTourState();
+    setShouldShowTour(true);
+  }, []);
+
+  return { shouldShowTour, completeTour, skipTour, restartTour };
 }

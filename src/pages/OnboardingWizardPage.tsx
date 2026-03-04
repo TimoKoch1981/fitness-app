@@ -151,9 +151,9 @@ export function OnboardingWizardPage() {
   const [gender, setGender] = useState<Gender | ''>(profile?.gender ?? '');
   const [weightKg, setWeightKg] = useState<number | ''>('');
 
-  // Step 3 — Goal & Mode
-  const [primaryGoal, setPrimaryGoal] = useState<PrimaryGoal>('health');
-  const [activityLevel, setActivityLevel] = useState(1.55);
+  // Step 3 — Goal & Mode (no defaults → user must actively choose)
+  const [primaryGoal, setPrimaryGoal] = useState<PrimaryGoal | ''>('');
+  const [activityLevel, setActivityLevel] = useState<number | ''>('');
   const [trainingMode, setTrainingMode] = useState<TrainingMode>('standard');
   const [powerPlusAccepted, setPowerPlusAccepted] = useState(false);
 
@@ -164,6 +164,7 @@ export function OnboardingWizardPage() {
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const step2Valid = heightCm !== '' && heightCm > 0 && birthDate !== '' && gender !== '';
+  const step3Valid = primaryGoal !== '' && activityLevel !== '';
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   const goNext = async () => {
@@ -181,9 +182,9 @@ export function OnboardingWizardPage() {
           height_cm: typeof heightCm === 'number' ? heightCm : undefined,
           birth_date: birthDate || undefined,
           gender: gender || undefined,
-          activity_level: activityLevel,
+          activity_level: typeof activityLevel === 'number' ? activityLevel : undefined,
           training_mode: trainingMode,
-          personal_goals: { primary_goal: primaryGoal },
+          personal_goals: { primary_goal: primaryGoal || undefined },
           dietary_preferences: dietPrefs,
           allergies,
           health_restrictions: healthRestrictions,
@@ -283,6 +284,9 @@ export function OnboardingWizardPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {label('bodySubtitle', 'Fuer personalisierte Empfehlungen')}
                 </p>
+                <p className="text-xs text-teal-600 mt-1">
+                  {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
+                </p>
               </div>
 
               {/* Name */}
@@ -380,6 +384,9 @@ export function OnboardingWizardPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {label('goalSubtitle', 'Was moechtest du erreichen?')}
                 </p>
+                <p className="text-xs text-teal-600 mt-1">
+                  {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
+                </p>
               </div>
 
               {/* Primary Goal */}
@@ -446,6 +453,9 @@ export function OnboardingWizardPage() {
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
                   {label('dietSubtitle', 'Alles optional — hilft dem Buddy, dich besser zu beraten.')}
+                </p>
+                <p className="text-xs text-teal-600 mt-1">
+                  {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
                 </p>
               </div>
 
@@ -524,7 +534,7 @@ export function OnboardingWizardPage() {
             </button>
             <button
               onClick={goNext}
-              disabled={(step === 2 && !step2Valid) || saving}
+              disabled={(step === 2 && !step2Valid) || (step === 3 && !step3Valid) || saving}
               className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (

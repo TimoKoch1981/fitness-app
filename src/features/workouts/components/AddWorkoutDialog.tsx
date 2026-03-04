@@ -12,7 +12,7 @@ interface AddWorkoutDialogProps {
 }
 
 export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const addWorkout = useAddWorkout();
 
   const [name, setName] = useState('');
@@ -94,6 +94,13 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {/* Buddy Hint */}
+          <p className="text-[11px] text-teal-600 bg-teal-50 rounded-lg px-3 py-2 text-center">
+            💡 {language === 'de'
+              ? 'Tipp: Sag dem Buddy einfach was du trainiert hast — er loggt es automatisch!'
+              : 'Tip: Just tell the Buddy what you trained — it logs automatically!'}
+          </p>
+
           {/* Workout Type Selector */}
           <div className="grid grid-cols-3 gap-2">
             {workoutTypes.map((wt) => (
