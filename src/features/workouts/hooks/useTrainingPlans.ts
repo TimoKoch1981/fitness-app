@@ -97,6 +97,8 @@ export function useAddTrainingPlan() {
         userId = user.id;
       }
 
+      console.log(`[TrainingPlan] Saving plan "${input.name}" with ${input.days.length} days for user ${userId}`);
+
       // Step 1: Deactivate all existing plans
       await supabase
         .from('training_plans')
@@ -118,7 +120,10 @@ export function useAddTrainingPlan() {
         .select()
         .single();
 
-      if (planError) throw planError;
+      if (planError) {
+        console.error('[TrainingPlan] Insert plan failed:', planError);
+        throw planError;
+      }
 
       // Step 3: Insert all days (bulk)
       const dayRows = input.days.map((day) => ({
@@ -134,12 +139,18 @@ export function useAddTrainingPlan() {
         .from('training_plan_days')
         .insert(dayRows);
 
-      if (daysError) throw daysError;
+      if (daysError) {
+        console.error('[TrainingPlan] Insert days failed:', daysError);
+        throw daysError;
+      }
 
+      console.log(`[TrainingPlan] ✅ Plan "${input.name}" saved with ID ${plan.id}`);
       return plan as TrainingPlan;
     },
     onSuccess: () => {
+      // Explicitly invalidate both the list AND the active plan query
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
     },
   });
 }

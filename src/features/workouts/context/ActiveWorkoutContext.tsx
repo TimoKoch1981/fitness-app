@@ -44,6 +44,13 @@ export interface ActiveWorkoutState {
   phase: WorkoutSessionPhase;
   /** Is session active? */
   isActive: boolean;
+  /**
+   * Whether the user has confirmed they're ready for the current set.
+   * Reset to false when navigating to a new exercise or returning from rest.
+   * Set to true when the user presses "Satz starten".
+   * This prevents auto-starting the set timer while the user is still setting up equipment.
+   */
+  setReady: boolean;
 }
 
 const STORAGE_KEY = 'fitbuddy_active_workout';
@@ -69,6 +76,8 @@ type Action =
   | { type: 'SET_PHASE'; phase: WorkoutSessionPhase }
   | { type: 'FINISH_SESSION' }
   | { type: 'RESTORE_SESSION'; state: ActiveWorkoutState }
+  | { type: 'REORDER_EXERCISES'; fromIndex: number; toIndex: number }
+  | { type: 'SET_READY' }
   | { type: 'CLEAR_SESSION' };
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -77,7 +86,9 @@ export function buildExercisesFromPlan(
   planExercises: PlanExercise[],
 ): WorkoutExerciseResult[] {
   return planExercises.map((pe, idx) => {
-    const numSets = pe.sets ?? 3;
+    // Cardio/flexibility exercises default to 1 set (timed), strength defaults to 3
+    const isTimedType = pe.exercise_type === 'cardio' || pe.exercise_type === 'flexibility';
+    const numSets = pe.sets ?? (isTimedType ? 1 : 3);
 
     const sets: SetResult[] = Array.from({ length: numSets }, (_, setIdx) => ({
       set_number: setIdx + 1,
@@ -131,14 +142,15 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         startedAt: new Date().toISOString(),
         phase: 'warmup',
         isActive: true,
+        setReady: false,
       };
     }
 
     case 'LOG_WARMUP':
-      return { ...state, warmup: action.warmup, phase: 'exercise' };
+      return { ...state, warmup: action.warmup, phase: 'exercise', setReady: false };
 
     case 'SKIP_WARMUP':
-      return { ...state, phase: 'exercise' };
+      return { ...state, phase: 'exercise', setReady: false };
 
     case 'LOG_SET': {
       const exercises = [...state.exercises];
@@ -188,16 +200,16 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       if (nextIdx >= state.exercises.length) {
         return { ...state, phase: 'summary' };
       }
-      return { ...state, currentExerciseIndex: nextIdx, currentSetIndex: 0, phase: 'exercise' };
+      return { ...state, currentExerciseIndex: nextIdx, currentSetIndex: 0, phase: 'exercise', setReady: false };
     }
 
     case 'PREV_EXERCISE': {
       const prevIdx = Math.max(0, state.currentExerciseIndex - 1);
-      return { ...state, currentExerciseIndex: prevIdx, currentSetIndex: 0, phase: 'exercise' };
+      return { ...state, currentExerciseIndex: prevIdx, currentSetIndex: 0, phase: 'exercise', setReady: false };
     }
 
     case 'GO_TO_EXERCISE':
-      return { ...state, currentExerciseIndex: action.index, currentSetIndex: 0, phase: 'exercise' };
+      return { ...state, currentExerciseIndex: action.index, currentSetIndex: 0, phase: 'exercise', setReady: false };
 
     case 'SKIP_EXERCISE': {
       const exercises = [...state.exercises];
@@ -229,6 +241,31 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         exercises: [...state.exercises, action.exercise],
       };
 
+    case 'SET_READY':
+      return { ...state, setReady: true };
+
+    case 'REORDER_EXERCISES': {
+      const exercises = [...state.exercises];
+      const [moved] = exercises.splice(action.fromIndex, 1);
+      exercises.splice(action.toIndex, 0, moved);
+      // Adjust currentExerciseIndex to follow the currently active exercise
+      let newCurrentIdx = state.currentExerciseIndex;
+      if (state.currentExerciseIndex === action.fromIndex) {
+        newCurrentIdx = action.toIndex;
+      } else if (
+        action.fromIndex < state.currentExerciseIndex &&
+        action.toIndex >= state.currentExerciseIndex
+      ) {
+        newCurrentIdx = state.currentExerciseIndex - 1;
+      } else if (
+        action.fromIndex > state.currentExerciseIndex &&
+        action.toIndex <= state.currentExerciseIndex
+      ) {
+        newCurrentIdx = state.currentExerciseIndex + 1;
+      }
+      return { ...state, exercises, currentExerciseIndex: newCurrentIdx };
+    }
+
     case 'TOGGLE_MODE':
       return { ...state, mode: state.mode === 'set-by-set' ? 'exercise' : 'set-by-set' };
 
@@ -239,7 +276,12 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       return { ...state, timerSeconds: action.seconds };
 
     case 'SET_PHASE':
-      return { ...state, phase: action.phase };
+      // When returning from rest → exercise, reset setReady so user must press "Start"
+      return {
+        ...state,
+        phase: action.phase,
+        setReady: action.phase === 'exercise' ? false : state.setReady,
+      };
 
     case 'FINISH_SESSION':
       return { ...state, phase: 'summary', isActive: false };
@@ -271,6 +313,7 @@ export const initialState: ActiveWorkoutState = {
   startedAt: '',
   phase: 'warmup',
   isActive: false,
+  setReady: false,
 };
 
 // ── Context ──────────────────────────────────────────────────────────────
@@ -289,6 +332,8 @@ interface ActiveWorkoutContextValue {
   skipExercise: (exerciseIdx: number) => void;
   removeExercise: (exerciseIdx: number, permanent: boolean) => void;
   addExercise: (exercise: WorkoutExerciseResult, permanent: boolean) => void;
+  reorderExercises: (fromIndex: number, toIndex: number) => void;
+  markSetReady: () => void;
   toggleMode: () => void;
   toggleTimer: () => void;
   setTimerSeconds: (seconds: number) => void;
@@ -336,6 +381,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   const skipExercise = useCallback((exerciseIdx: number) => dispatch({ type: 'SKIP_EXERCISE', exerciseIndex: exerciseIdx }), []);
   const removeExercise = useCallback((exerciseIdx: number, permanent: boolean) => dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: exerciseIdx, permanent }), []);
   const addExercise = useCallback((exercise: WorkoutExerciseResult, permanent: boolean) => dispatch({ type: 'ADD_EXERCISE', exercise, permanent }), []);
+  const reorderExercises = useCallback((fromIndex: number, toIndex: number) => dispatch({ type: 'REORDER_EXERCISES', fromIndex, toIndex }), []);
+  const markSetReady = useCallback(() => dispatch({ type: 'SET_READY' }), []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
   const toggleTimer = useCallback(() => dispatch({ type: 'TOGGLE_TIMER' }), []);
   const setTimerSeconds = useCallback((seconds: number) => dispatch({ type: 'SET_TIMER_SECONDS', seconds }), []);
@@ -347,7 +394,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       state, dispatch,
       startSession, logWarmup, skipWarmup, logSet, skipSet,
       nextExercise, prevExercise, goToExercise, skipExercise,
-      removeExercise, addExercise, toggleMode, toggleTimer,
+      removeExercise, addExercise, reorderExercises, markSetReady, toggleMode, toggleTimer,
       setTimerSeconds, finishSession, clearSession,
     }}>
       {children}

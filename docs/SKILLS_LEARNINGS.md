@@ -859,5 +859,44 @@ Persona-basiertes Testing fragt: "Kann Fatima (muslimisch, Ramadan-Fastende, Hal
 
 ---
 
-*Letzte Aktualisierung: 2026-03-02*
-*Version: 5.0 (+ Production Bugfixes, React Anti-Patterns, Recharts, Deploy-Workflow)*
+---
+
+## P. Workout-UX: Timer, Musik & Drag (v12.55-v12.56)
+
+### CSP blockiert YouTube IFrame Player API
+- **Problem:** `script-src 'self'` in Caddyfile blockiert YouTube-Script von `youtube.com/iframe_api`
+- **Symptom:** `window.YT` laedt nie, alle Player-Buttons tun nichts (silent fail)
+- **Root Cause:** CSP Caddyfile-Konfiguration — NICHT der React-Code
+- **Fix:** Komplett auf einfache `<iframe>` Embeds umgeschrieben (kein externes Script noetig)
+- **Learning:** Bei Web-API-Problemen IMMER zuerst CSP-Headers pruefen (`script-src`, `frame-src`)
+- **URL-Format:** `youtube-nocookie.com/embed/videoseries?list=PLAYLIST_ID&autoplay=1&loop=1`
+
+### Satz-Timer UX — Industrie-Standard Recherche
+- **Recherchiert:** Strong, Hevy, JEFIT, FitNotes, GymBook, Fitbod, Setgraph, StrengthLog, StrongLifts
+- **Ergebnis:** KEINE App startet einen Timer automatisch beim Uebungswechsel
+- **Standard-Flow:**
+  1. User navigiert zu Uebung → KEIN Timer startet
+  2. User bereitet sich vor (Geraet, Gewichte, Sicherheit)
+  3. User drueckt "Start" → Set-Timer startet
+  4. User schliesst Satz ab → Rest-Timer startet automatisch
+  5. Rest-Timer laeuft ab → zurueck zu Schritt 1
+- **Implementierung:** `setReady` Boolean in Context, "Satz X starten" Button
+- **Quellen:** Strong Help, Hevy Features, FitNotes Docs, GymBook FAQ, Fitbod Zendesk
+
+### Drag & Drop mit @dnd-kit — Tap vs Drag
+- **Problem:** Separater GripVertical-Handle zu klein/fummelig auf Touch
+- **Loesung:** Gesamtes Chip als Drag-Handle, Unterscheidung via Sensor-Constraints
+- **PointerSensor:** `distance: 8` (8px Bewegung aktiviert Drag)
+- **TouchSensor:** `delay: 250, tolerance: 8` (250ms halten + max 8px Wackeln = Drag)
+- **Tap-Erkennung:** `onPointerUp` auf dem Button — feuert nur wenn Sensor NICHT aktiviert wurde
+- **CSS:** `touch-none select-none cursor-grab active:cursor-grabbing` auf dem Chip
+
+### PDF-Seitenumbruch Best Practice
+- **Statt:** `if (yPos > pageHeight - 35) addPage()` — fuehrt zu halb-leeren Seiten
+- **Besser:** Explizites `if (dayIndex > 0) addPage()` — jeder Tag auf eigener Seite
+- **Anwendung:** Training-Logbuch (Landscape A4) — Nutzer druckt pro Tag eine Seite aus
+
+---
+
+*Letzte Aktualisierung: 2026-03-05*
+*Version: 6.0 (+ CSP, Timer-UX-Recherche, DnD, PDF-Learnings)*

@@ -134,7 +134,7 @@ erklaere ihn verstaendlich mit dem hier hinterlegten Fachwissen.
 
 | Begriff | Erklaerung |
 |---------|-----------|
-| **KFA (Koerperfettanteil)** | Fettmasse / Gesamtmasse x 100. Maenner: 10-20% gesund, Frauen: 18-28%. |
+| **KFA (Koerperfettanteil)** | Fettmasse / Gesamtmasse x 100. Gesunder Bereich ALTERSABHAENGIG (siehe bodyComposition-Skill). Nie pauschal "10-20%" empfehlen. |
 | **FFM (Fat-Free Mass)** | Fettfreie Masse: Muskeln + Knochen + Organe + Wasser. |
 | **FFMI (Fat-Free Mass Index)** | FFM / Groesse² — natuerliche Obergrenze ~25-26 kg/m² (Maenner). |
 | **BMI (Body Mass Index)** | Gewicht / Groesse². Grob: <18.5 Untergewicht, 18.5-24.9 Normal, 25-29.9 Uebergewicht, ≥30 Adipositas. |

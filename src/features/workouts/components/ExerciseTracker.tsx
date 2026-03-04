@@ -7,7 +7,7 @@
 import { useState, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, SkipForward, Video,
-  MoreVertical, Trash2, Plus, Info, Clock,
+  MoreVertical, Trash2, Plus, Info, Clock, Play,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -30,7 +30,7 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const isDE = language === 'de';
   const {
     state, logSet, skipSet, nextExercise, prevExercise,
-    skipExercise, goToExercise,
+    skipExercise, goToExercise, markSetReady,
   } = useActiveWorkout();
 
   const { data: catalog } = useExerciseCatalog();
@@ -68,8 +68,9 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   // Use AI suggestion if no explicit rest_seconds on exercise
   const effectiveRestSeconds = exercise.rest_seconds ?? restSuggestion.restSeconds;
 
-  // Detect timed exercises: flexibility, or exercises with duration but no weight/reps
+  // Detect timed exercises: cardio, flexibility, or exercises with duration but no weight/reps
   const isTimedExercise = (
+    exercise.exercise_type === 'cardio' ||
     exercise.exercise_type === 'flexibility' ||
     (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
   );
@@ -188,6 +189,21 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
           </div>
         )}
       </div>
+
+      {/* "Satz starten" Button — shown when user hasn't started set timer yet */}
+      {/* Industry standard: users need time to set up equipment, adjust weights etc. */}
+      {!isTimedExercise && !state.setReady && !allSetsComplete && (
+        <button
+          onClick={markSetReady}
+          className="w-full flex items-center justify-center gap-3 py-4 bg-teal-500 text-white rounded-xl shadow-md hover:bg-teal-600 active:bg-teal-700 transition-colors font-semibold text-base"
+        >
+          <Play className="h-5 w-5" />
+          {isDE
+            ? `Satz ${state.currentSetIndex + 1} starten`
+            : `Start Set ${state.currentSetIndex + 1}`
+          }
+        </button>
+      )}
 
       {/* Tracker Content (based on mode and exercise type) */}
       <div className="bg-white rounded-xl shadow-sm p-4">

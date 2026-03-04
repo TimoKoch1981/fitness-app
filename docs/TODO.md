@@ -201,14 +201,14 @@
   - ~~Kaloriendefizit eingehalten~~ ✅
   - ~~Konfetti-Animation + Toast~~ ✅
 
-### P1 — UX-Ueberarbeitung Workout-Session ⚠️
+### P1 — UX-Ueberarbeitung Workout-Session ✅
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
-> Analyse: 2026-02-27, Status: Konzept fertig, User-Diskussion ausstehend
 
-#### ~~Musik-Integration komplett ueberarbeiten~~ ✅ (2026-02-28, v11.0)
-- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — WorkoutMusicPlayer komplett neu geschrieben mit echtem `YT.Player()`
-- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — Floating Player, Play/Pause/Stop/Volume als YT API Calls
-- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — Volles SDK (OAuth + Playback), Edge Function spotify-proxy, YouTube/Spotify Tab-Toggle
+#### ~~Musik-Integration komplett ueberarbeiten~~ ✅ (2026-03-04, v12.55)
+- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — v11.0: WorkoutMusicPlayer mit YT.Player()
+- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — v11.0: Floating Player
+- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — v11.0: Volles SDK
+- [x] ~~**M4: CSP-Fix — Komplett-Rewrite auf iframe Embeds**~~ ✅ (2026-03-04, v12.55) — Root Cause: `script-src 'self'` blockierte YouTube IFrame API. Loesung: Einfache `<iframe>` Embeds (youtube-nocookie.com), kein externes Script noetig, funktioniert mit bestehendem CSP `frame-src`
 
 #### ~~Timer komplett ueberarbeiten — Tabellarischer Multi-Timer~~ ✅ (2026-02-28, v11.0)
 - [x] ~~**T1: useWorkoutTimers Hook**~~ ✅ — 5 Sektionen (Gesamt, Uebung, Ueb.-Pause, Satz, Satzpause), je aktivierbar/deaktivierbar
@@ -216,6 +216,13 @@
 - [x] ~~**T3: ActiveWorkoutContext Integration**~~ ✅ — Auto-Timer-Transitionen, Auto-Advance (zuschaltbar)
 - [x] ~~**T4: Timer Alerts**~~ ✅ — Web Audio API Beep + Vibration, 4 Modi (both/vibration/sound/none), Warning-Beep bei 3s
 - [x] ~~**T5: Alte Timer entfernen + 32 Tests**~~ ✅ — ManualTimer entfernt, 21+5+6 Tests (alle gruen)
+- [x] ~~**T6: Satz-Timer manueller Start (Industrie-Standard)**~~ ✅ (2026-03-05, v12.56) — Recherche: Strong/Hevy/JEFIT/FitNotes/GymBook starten Timer NICHT bei Uebungswechsel. Neuer State `setReady`, "Satz X starten" Button, Timer startet nur nach manuellem Klick
+- [x] ~~**T7: Cardio-Aufwaermphase funktionaler Timer**~~ ✅ (2026-03-05, v12.56) — WarmupCard 2-Phasen: Setup → Active Timer (Countdown, Pause/Resume, Reset, Echtzeit-Kalorien, Vibration)
+
+#### ~~Drag & Drop Uebungsreihenfolge~~ ✅ (2026-03-04, v12.55)
+- [x] ~~**@dnd-kit Integration**~~ ✅ — DndContext + SortableContext in ExerciseListBar
+- [x] ~~**REORDER_EXERCISES Action**~~ ✅ — ActiveWorkoutContext Reducer
+- [x] ~~**Ganzes Chip als Drag-Handle**~~ ✅ — Kein separates GripVertical-Icon, Tap vs Drag per Sensor-Constraints
 
 ### P2 — Power/Power+ Modus
 > **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)

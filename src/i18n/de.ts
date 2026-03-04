@@ -482,10 +482,28 @@ export const de = {
     removePhoto: 'Bild entfernen',
     uploadError: 'Bild-Upload fehlgeschlagen',
     // BMR Help
-    bmrHelpToggle: 'Was bedeuten die Formeln?',
+    bmrHelpToggle: 'Was ist BMR und was bedeuten die Formeln?',
+    bmrExplanation: 'BMR (Basal Metabolic Rate) = Grundumsatz. Das ist die Energiemenge (in kcal), die dein Körper in völliger Ruhe benötigt — also nur für lebenswichtige Funktionen wie Atmung, Herzschlag und Zellregeneration. Dein tatsächlicher Kalorienbedarf (TDEE) ergibt sich aus BMR × Aktivitätslevel.',
     bmrHelpAuto: 'Automatisch: Wählt die beste Formel basierend auf deinen Daten. Mit Körperfettanteil → Katch-McArdle (genauer), ohne → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standardformel basierend auf Gewicht, Größe, Alter und Geschlecht. Für die meisten Menschen ausreichend genau.',
     bmrHelpKatch: 'Katch-McArdle: Nutzt die fettfreie Masse (Lean Body Mass). Genauer bei bekanntem Körperfettanteil, besonders für Sportler.',
+    // Activity Level Help
+    activityLevelHelpToggle: 'Wie stufe ich mich ein?',
+    activityLevelExplanation: 'Das Aktivitätslevel (PAL = Physical Activity Level) bestimmt, wie stark dein Grundumsatz (BMR) multipliziert wird, um deinen tatsächlichen Tagesbedarf zu berechnen (TDEE = BMR × PAL).',
+    palSedentary: 'Sitzend (1.4): Bürojob, wenig Bewegung, kein Sport',
+    palLightlyActive: 'Leicht aktiv (1.55): Bürojob + leichter Sport 1–3×/Woche oder regelmäßiges Spazierengehen',
+    palModeratelyActive: 'Moderat aktiv (1.7): Moderater Sport 3–5×/Woche oder körperliche Arbeit (Handwerk, Pflege)',
+    palVeryActive: 'Sehr aktiv (1.9): Intensiver Sport 6–7×/Woche oder schwere körperliche Arbeit',
+    palExtremelyActive: 'Extrem aktiv (2.2): Leistungssportler, doppelt Training/Tag oder sehr schwere körperliche Arbeit',
+    palTip: 'Tipp: Im Zweifel lieber eine Stufe niedriger wählen. Die App passt die Empfehlungen an, wenn du deinen Fortschritt trackst.',
+    // Goals Help
+    goalsHelpToggle: 'Was bedeuten die Ziele?',
+    goalMuscleHelp: 'Muskelaufbau: Kalorienüberschuss (~300–500 kcal), hohe Proteinzufuhr (1,6–2,2 g/kg), progressives Krafttraining.',
+    goalFatLossHelp: 'Fettabbau: Kaloriendefizit (~300–500 kcal), hohe Proteinzufuhr zum Muskelerhalt, Kombination aus Kraft- und Cardiotraining.',
+    goalHealthHelp: 'Gesundheit: Ausgewogene Ernährung nahe Erhaltungskalorien, regelmäßige Bewegung, Stressreduktion.',
+    goalPerformanceHelp: 'Leistung: Optimierte Makroverteilung für deine Sportart, ggf. höherer Kalorienbedarf, periodisiertes Training.',
+    goalRecompHelp: 'Rekomposition: Gleichzeitig Fett abbauen und Muskeln aufbauen. Kalorien knapp unter/am Erhalt, sehr hohe Proteinzufuhr (2,0–2,4 g/kg), intensives Krafttraining. Ergebnisse langsamer, aber nachhaltiger.',
+    goalFieldsHelp: 'Zielgewicht und Ziel-KFA helfen der App, deine Fortschritte zu tracken und dir realistische Empfehlungen zu geben. Das Zieldatum motiviert und ermöglicht eine Berechnung der nötigen wöchentlichen Veränderung.',
     // Buddy Communication Style
     buddyStyle: 'Buddy-Kommunikation',
     verbosity: 'Antwortlänge',
@@ -1691,6 +1709,12 @@ export const de = {
     medicalDesc: 'Blutdruck, Blutwerte, Symptome und mehr — alles an einem Ort.',
     buddyTitle: 'Dein KI-Buddy',
     buddyDesc: 'Dein persoenlicher Assistent ist immer ueber den schwebenden Button erreichbar. Frag ihn alles!',
+  },
+  quickMenu: {
+    profile: 'Profil',
+    settings: 'Einstellungen',
+    logout: 'Abmelden',
+    logoutConfirm: 'Möchtest du dich wirklich abmelden?',
   },
 } as const;
 

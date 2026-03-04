@@ -10,7 +10,7 @@ import { Plus, Camera, TrendingUp, ArrowLeftRight } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useTrainingMode } from '../shared/hooks/useTrainingMode';
-import { RestTimerWidget } from '../features/timer/components/RestTimerWidget';
+// RestTimerWidget removed from main page — full multi-timer is inside ActiveWorkoutPage
 
 import { WorkoutsTabContent } from '../features/workouts/components/WorkoutsTabContent';
 import { CompetitionCountdown } from '../features/workouts/components/power/CompetitionCountdown';
@@ -148,11 +148,6 @@ export function TrainingPage() {
           )}
         </div>
       )}
-
-      {/* Rest Timer Widget */}
-      <div className="mb-4">
-        <RestTimerWidget />
-      </div>
 
       <WorkoutsTabContent
         showAddDialog={showWorkoutDialog}

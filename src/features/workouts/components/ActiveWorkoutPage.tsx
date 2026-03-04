@@ -22,6 +22,7 @@ import { WorkoutTimerPanel } from './WorkoutTimerPanel';
 import { WorkoutSummary } from './WorkoutSummary';
 import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
 import { WorkoutVoiceControl } from './WorkoutVoiceControl';
+import { ExerciseListBar } from './ExerciseListBar';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
 export function ActiveWorkoutPage() {
@@ -78,15 +79,22 @@ export function ActiveWorkoutPage() {
   }, [state.isActive, state.phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-timer transitions on phase / exercise / set changes ───────────
+  // IMPORTANT: Set timer does NOT auto-start. The user must press "Satz starten"
+  // to begin the set timer. This follows gym app industry standard (Strong, Hevy,
+  // JEFIT, FitNotes, GymBook, Fitbod) — users need time to set up equipment,
+  // adjust weights, etc. before starting a set.
   useEffect(() => {
     const prevPhase = prevPhaseRef.current;
     const prevExIdx = prevExerciseIdxRef.current;
-    const prevSetIdx = prevSetIdxRef.current;
 
-    // Exercise changed → reset exercise timer
+    // Exercise changed → reset exercise timer (tracks total time at this exercise)
+    // But do NOT start set timer — user must press "Satz starten"
     if (state.currentExerciseIndex !== prevExIdx && state.phase === 'exercise') {
       const restSec = state.exercises[state.currentExerciseIndex]?.rest_seconds;
       timers.startExerciseTimer(restSec);
+      // Pause the set timer (will be started by user pressing "Satz starten")
+      timers.pauseSection('set');
+      timers.resetSection('set');
     }
 
     // Phase changed to 'rest' → start set rest timer
@@ -96,30 +104,29 @@ export function ActiveWorkoutPage() {
       timers.startSetRest(restSec);
     }
 
-    // Phase changed to 'exercise' from 'rest' → start set timer
+    // Phase changed to 'exercise' from 'rest' → do NOT start set timer
+    // User must press "Satz starten" again
     if (state.phase === 'exercise' && prevPhase === 'rest') {
-      timers.startSetTimer();
+      // Set timer stays paused until user presses "Satz starten"
     }
 
-    // Phase changed to 'exercise' from 'warmup' → start exercise + set timer
+    // Phase changed to 'exercise' from 'warmup' → start exercise timer only
     if (state.phase === 'exercise' && prevPhase === 'warmup') {
       timers.startExerciseTimer();
-      timers.startSetTimer();
-    }
-
-    // Set changed within same exercise → start set timer
-    if (
-      state.currentSetIndex !== prevSetIdx &&
-      state.currentExerciseIndex === prevExIdx &&
-      state.phase === 'exercise'
-    ) {
-      timers.startSetTimer();
+      // Set timer stays paused until user presses "Satz starten"
     }
 
     prevPhaseRef.current = state.phase;
     prevExerciseIdxRef.current = state.currentExerciseIndex;
     prevSetIdxRef.current = state.currentSetIndex;
   }, [state.phase, state.currentExerciseIndex, state.currentSetIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Start set timer when user marks setReady ─────────────────────────
+  useEffect(() => {
+    if (state.setReady && state.phase === 'exercise') {
+      timers.startSetTimer();
+    }
+  }, [state.setReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-advance: when setRest countdown finishes → return to exercise ─
   useEffect(() => {
@@ -352,18 +359,25 @@ export function ActiveWorkoutPage() {
 
       {/* Floating Controls: Voice + Music */}
       {state.phase !== 'summary' && (
-        <div className="fixed bottom-24 right-4 z-20 flex flex-col items-end gap-3">
+        <div className="fixed bottom-[7.5rem] right-4 z-20 flex flex-col items-end gap-3">
           <WorkoutVoiceControl />
           <WorkoutMusicPlayer />
         </div>
       )}
 
+      {/* Exercise List Bar (above finish button) */}
+      {(state.phase === 'exercise' || state.phase === 'rest') && (
+        <div className="fixed bottom-[3.5rem] left-0 right-0 z-10">
+          <ExerciseListBar />
+        </div>
+      )}
+
       {/* Floating Finish Button (during exercise phase) */}
       {(state.phase === 'exercise' || state.phase === 'rest') && (
-        <div className="fixed bottom-6 left-4 right-4 z-20">
+        <div className="fixed bottom-0 left-0 right-0 z-10">
           <button
             onClick={finishSession}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white font-medium rounded-xl shadow-lg hover:bg-green-600 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white font-medium shadow-lg hover:bg-green-600 transition-colors"
           >
             <CheckCircle2 className="h-5 w-5" />
             {isDE ? 'Training beenden' : 'Finish Workout'}

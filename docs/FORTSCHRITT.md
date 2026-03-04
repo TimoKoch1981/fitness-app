@@ -3006,4 +3006,75 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-03-02*
+## v12.53 — Trainingslog PDF Soll/Ist per Set + Last-Workout-Daten (2026-03-04)
+
+**Was:** Training-Logbuch PDF komplett ueberarbeitet mit pro-Satz-Zeilen.
+
+**Aenderungen:**
+- Jede Kraftuebung expandiert in N Zeilen (eine pro Satz: S1, S2, S3...)
+- 10 Spalten: #, Uebung, Satz, Soll Wdh, Soll kg, Letzte Wdh, Letzte kg, Ist Wdh, Ist kg, Notizen
+- `fetchLastWorkoutsForPlan()` — Async-Funktion laedt letzte Workout-Daten aus Supabase
+- Gruene "Letzte"-Spalten, blaue "Ist"-Felder, Trennlinien zwischen Uebungsgruppen
+- Ausdauer-Uebungen: Single-Row mit Dauer/Distanz
+- TrainingPlanView: Async PDF-Handler mit Daten-Fetch vor Generation
+
+**Dateien:** 2 modifiziert (generateTrainingPlanPDF.ts, TrainingPlanView.tsx)
+
+---
+
+## v12.54 — Deployment v12.53 auf fudda.de (2026-03-04)
+
+**Was:** Deploy der PDF-Verbesserungen auf Production.
+
+---
+
+## v12.55 — Workout-Musik Rewrite + Drag&Drop UX (2026-03-04)
+
+**Was:** Zwei grosse Fixes fuer die aktive Workout-Seite.
+
+**1. Workout-Musik komplett neu konzipiert:**
+- **Root Cause:** CSP `script-src 'self'` blockierte YouTube IFrame Player API script
+- **Loesung:** Kompletter Rewrite auf einfache `<iframe>` Embeds (youtube-nocookie.com)
+- Kein externes Script noetig → funktioniert mit bestehendem CSP `frame-src`
+- 4 kuratierte Playlists + Custom YouTube URL
+- Collapsed = Musik laeuft im Hintergrund, Expanded = sichtbarer Player
+
+**2. Drag & Drop UX-Verbesserung:**
+- Gesamtes Chip ist jetzt der Drag-Handle (nicht separates GripVertical-Icon)
+- Tap (kurzer Klick) = zur Uebung springen
+- Halten & Ziehen (250ms Delay) = Reihenfolge aendern
+- @dnd-kit PointerSensor (distance: 8) + TouchSensor (delay: 250ms, tolerance: 8)
+
+**Dateien:** 3 modifiziert (WorkoutMusicPlayer.tsx, ExerciseListBar.tsx, ActiveWorkoutContext.tsx)
+
+---
+
+## v12.56 — PDF-Seitenumbruch + Cardio-Timer + Satz-Timer-UX (2026-03-05)
+
+**Was:** Drei UX-Verbesserungen fuer Trainingsseite basierend auf Live-Test-Feedback.
+
+**1. PDF Trainingslog — Jeder Tag auf eigener Seite:**
+- Automatischer Seitenumbruch zwischen Trainingstagen
+- Jeder Tag beginnt oben auf einer neuen Seite (statt "Platz-Check")
+
+**2. Cardio-Aufwaermphase — Funktionaler Timer:**
+- WarmupCard hat jetzt 2 Phasen: Setup → Active Timer
+- Setup: Geraet/Art, Dauer, Beschreibung auswaehlen → "Starten"
+- Active: Live-Countdown, Pause/Resume, Reset, vorzeitiges Beenden (ab 30s)
+- Echtzeit-Kalorienberechnung basierend auf tatsaechlich absolvierter Zeit
+- Vibration bei Abschluss, gruen/abgeschlossen-Indikator
+
+**3. Satz-Timer — Manueller Start (Industrie-Standard):**
+- **Recherche:** Strong, Hevy, JEFIT, FitNotes, GymBook, Fitbod — KEINE App startet Timer automatisch bei Uebungswechsel
+- **Konzept:** Nutzer braucht Zeit fuer Geraete-Setup, Gewichte auflegen etc.
+- Neuer State `setReady: boolean` im ActiveWorkoutContext
+- "Satz X starten" Button erscheint vor dem SetBySetTracker
+- Satz-Timer startet NUR nach manuellem Klick (nicht automatisch)
+- Rest-Timer startet weiterhin automatisch nach Satz-Abschluss (Standard)
+- setReady wird bei: Uebungswechsel, Rueckkehr aus Rest, Navigation → false
+
+**Dateien:** 5 modifiziert (generateTrainingPlanPDF.ts, WarmupCard.tsx, ActiveWorkoutContext.tsx, ActiveWorkoutPage.tsx, ExerciseTracker.tsx)
+
+---
+
+*Letzte Aktualisierung: 2026-03-05*

@@ -3,12 +3,17 @@
  *
  * Uses jsPDF + jspdf-autotable for clean, formatted tables.
  *
+ * Two PDF types:
+ * 1. generateTrainingPlanPDF — Clean view of the plan (portrait A4)
+ * 2. generateTrainingLogPDF — Soll/Ist logbook with per-set rows + last workout data (landscape A4)
+ *
  * @reference docs/PROJEKTPLAN.md — Teil 3: Trainingsplan-PDF
  */
 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { TrainingPlan, TrainingPlanDay, PlanExercise } from '../../../types/health';
+import type { TrainingPlan, TrainingPlanDay, PlanExercise, WorkoutExerciseResult, Workout } from '../../../types/health';
+import { supabase } from '../../../lib/supabase';
 
 /** Detect if an exercise is endurance-type (has duration but no sets) */
 function isEnduranceExercise(ex: PlanExercise): boolean {
@@ -250,27 +255,74 @@ export function generateTrainingPlanPDF(
   doc.save(fileName);
 }
 
-// ── Training LOG PDF ──────────────────────────────────────────────────────
-// Printable logbook with Soll (plan) values + empty fields for Ist (actual)
-// + optional "last time" values from previous workouts.
+// ── Fetch Last Workouts (async, called before PDF generation) ─────────
 
+/** Per-day last workout data: Map<day_number, WorkoutExerciseResult[]> */
+export type LastWorkoutsByDay = Map<number, WorkoutExerciseResult[]>;
+
+/**
+ * Fetch the most recent workout session for each day in a plan.
+ * Returns a Map<day_number, WorkoutExerciseResult[]> with per-set details.
+ * Called once before generating the log PDF.
+ */
+export async function fetchLastWorkoutsForPlan(planId: string, dayNumbers: number[]): Promise<LastWorkoutsByDay> {
+  const result: LastWorkoutsByDay = new Map();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return result;
+
+  // Fetch all recent workouts for this plan in one query (sorted newest first)
+  const { data: workouts, error } = await supabase
+    .from('workouts')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('plan_id', planId)
+    .not('session_exercises', 'is', null)
+    .order('date', { ascending: false })
+    .limit(dayNumbers.length * 3); // Fetch enough to cover all days
+
+  if (error || !workouts) return result;
+
+  // For each day_number, find the most recent workout
+  for (const dayNum of dayNumbers) {
+    const match = (workouts as Workout[]).find(w => w.plan_day_number === dayNum);
+    if (match && match.session_exercises) {
+      result.set(dayNum, match.session_exercises as WorkoutExerciseResult[]);
+    }
+  }
+
+  return result;
+}
+
+// ── Training LOG PDF ──────────────────────────────────────────────────────
+// Printable logbook with Soll (plan) vs. Ist (actual) — PER SET.
+// Each strength exercise expands into N rows (one per set).
+// Shows per-set "last time" values from the most recent workout.
+
+// Legacy type kept for backwards compatibility
 export interface LastExerciseData {
   reps: string;
   weight_kg: number | null;
 }
 
 /**
- * Generate a printable TRAINING LOG PDF.
- * Shows plan values (target reps/weight), optional last-workout values,
- * and blank fields for the user to fill in actual reps/weight by hand.
+ * Generate a printable TRAINING LOG PDF with per-set rows.
+ *
+ * For each strength exercise: one row per set showing:
+ *   - Set number (S1, S2, ...)
+ *   - Target reps + weight from plan (Soll)
+ *   - Last workout reps + weight per set (Letztes Mal)
+ *   - Blank fields for user to fill in actual values (Ist)
+ *
+ * For endurance exercises: single row with duration/distance info.
  */
 export function generateTrainingLogPDF(
   plan: TrainingPlan,
-  lastWorkouts?: Map<string, LastExerciseData>,
+  lastWorkoutsByDay?: LastWorkoutsByDay,
   language: string = 'de'
 ): void {
   const doc = new jsPDF({
-    orientation: 'landscape', // Landscape for more columns
+    orientation: 'landscape',
     unit: 'mm',
     format: 'a4',
   });
@@ -279,23 +331,27 @@ export function generateTrainingLogPDF(
   const margin = 12;
   let yPos = 15;
 
+  const isDE = language === 'de';
   const t = {
-    title: language === 'de' ? 'Trainingslogbuch' : 'Training Log',
+    title: isDE ? 'Trainingslogbuch' : 'Training Log',
     split: 'Split',
-    frequency: language === 'de' ? 'Frequenz' : 'Frequency',
-    perWeek: language === 'de' ? 'x pro Woche' : 'x per week',
-    date: language === 'de' ? 'Datum' : 'Date',
-    day: language === 'de' ? 'Tag' : 'Day',
-    focus: language === 'de' ? 'Fokus' : 'Focus',
-    exercise: language === 'de' ? 'Übung' : 'Exercise',
-    targetReps: language === 'de' ? 'Soll\nWdh' : 'Target\nReps',
-    targetWeight: language === 'de' ? 'Soll\nGew.' : 'Target\nWeight',
-    lastTime: language === 'de' ? 'Letztes\nMal' : 'Last\nTime',
-    actualReps: language === 'de' ? 'Ist Wdh' : 'Actual Reps',
-    actualWeight: language === 'de' ? 'Ist Gew.' : 'Actual Wt.',
-    notes: language === 'de' ? 'Notizen' : 'Notes',
-    page: language === 'de' ? 'Seite' : 'Page',
-    blankField: '________',
+    frequency: isDE ? 'Frequenz' : 'Frequency',
+    perWeek: isDE ? 'x pro Woche' : 'x per week',
+    date: isDE ? 'Datum' : 'Date',
+    day: isDE ? 'Tag' : 'Day',
+    focus: isDE ? 'Fokus' : 'Focus',
+    exercise: isDE ? 'Übung' : 'Exercise',
+    set: isDE ? 'Satz' : 'Set',
+    targetReps: isDE ? 'Soll\nWdh' : 'Target\nReps',
+    targetWeight: isDE ? 'Soll\nkg' : 'Target\nkg',
+    lastReps: isDE ? 'Letzte\nWdh' : 'Last\nReps',
+    lastWeight: isDE ? 'Letzte\nkg' : 'Last\nkg',
+    actualReps: isDE ? 'Ist\nWdh' : 'Actual\nReps',
+    actualWeight: isDE ? 'Ist\nkg' : 'Actual\nkg',
+    notes: isDE ? 'Notizen' : 'Notes',
+    page: isDE ? 'Seite' : 'Page',
+    blank: '',
+    skipped: isDE ? 'übersprungen' : 'skipped',
   };
 
   // ── Header ──────────────────────────────────────────────────────────
@@ -338,7 +394,8 @@ export function generateTrainingLogPDF(
   const days = (plan.days ?? []).sort((a, b) => a.day_number - b.day_number);
 
   days.forEach((day: TrainingPlanDay, dayIndex: number) => {
-    if (yPos > doc.internal.pageSize.getHeight() - 35) {
+    // Each day starts on a new page (except the first day which follows the header)
+    if (dayIndex > 0) {
       doc.addPage();
       yPos = 15;
     }
@@ -356,40 +413,68 @@ export function generateTrainingLogPDF(
 
     yPos += 2;
 
-    // Table headers: #, Exercise, Target Reps, Target Weight, Last Time, Actual Reps, Actual Weight, Notes
-    const tableHeaders = [['#', t.exercise, t.targetReps, t.targetWeight, t.lastTime, t.actualReps, t.actualWeight, t.notes]];
+    // Get last workout data for this day
+    const lastExercises = lastWorkoutsByDay?.get(day.day_number);
 
-    const tableRows = day.exercises.map((ex, idx) => {
-      const lastData = lastWorkouts?.get(ex.name.toLowerCase());
-      const lastTimeStr = lastData
-        ? `${lastData.reps}${lastData.weight_kg != null ? ` × ${lastData.weight_kg}kg` : ''}`
-        : '—';
+    // Table headers: #, Exercise, Set, Soll Wdh, Soll kg, Letzte Wdh, Letzte kg, Ist Wdh, Ist kg, Notizen
+    const tableHeaders = [[
+      '#', t.exercise, t.set,
+      t.targetReps, t.targetWeight,
+      t.lastReps, t.lastWeight,
+      t.actualReps, t.actualWeight,
+      t.notes,
+    ]];
 
-      // Adaptive format for endurance exercises
+    // Build rows — per set for strength, single row for endurance
+    const tableRows: string[][] = [];
+
+    day.exercises.forEach((ex, exIdx) => {
+      // Find matching exercise from last workout
+      const lastEx = lastExercises?.find(
+        le => le.plan_exercise_index === exIdx || le.name.toLowerCase() === ex.name.toLowerCase()
+      );
+
       if (isEnduranceExercise(ex)) {
+        // Endurance: single row with duration/distance info
         const fmt = formatExerciseForPDF(ex, language);
-        return [
-          String(idx + 1),
+        const lastInfo = lastEx && !lastEx.skipped
+          ? `${lastEx.duration_minutes ?? '—'} min`
+          : '—';
+        tableRows.push([
+          String(exIdx + 1),
           ex.name,
+          '—',
           fmt.detail,
           fmt.info || '—',
-          lastTimeStr,
-          t.blankField,
-          t.blankField,
-          t.blankField,
-        ];
+          lastInfo,
+          '—',
+          t.blank,
+          t.blank,
+          t.blank,
+        ]);
+        return;
       }
 
-      return [
-        String(idx + 1),
-        ex.name,
-        ex.reps ?? '—',
-        ex.weight_kg != null ? `${ex.weight_kg} kg` : '—',
-        lastTimeStr,
-        t.blankField,
-        t.blankField,
-        t.blankField,
-      ];
+      // Strength: one row per set
+      const numSets = ex.sets ?? 3;
+      for (let s = 0; s < numSets; s++) {
+        const lastSet = lastEx?.sets?.[s];
+        const hasLastData = lastSet?.completed && !lastSet?.skipped;
+
+        tableRows.push([
+          s === 0 ? String(exIdx + 1) : '',           // # only on first set row
+          s === 0 ? ex.name : '',                      // Name only on first set row
+          `S${s + 1}`,                                 // Set number
+          ex.reps ?? '—',                              // Soll Wdh (same for all sets from plan)
+          ex.weight_kg != null ? String(ex.weight_kg) : '—',  // Soll kg
+          hasLastData ? String(lastSet.actual_reps ?? '—') : '—',     // Letzte Wdh
+          hasLastData && lastSet.actual_weight_kg != null
+            ? String(lastSet.actual_weight_kg) : '—',                  // Letzte kg
+          t.blank,                                     // Ist Wdh (blank for user)
+          t.blank,                                     // Ist kg (blank for user)
+          s === 0 ? (ex.notes ?? '') : '',             // Notes only on first row
+        ]);
+      }
     });
 
     autoTable(doc, {
@@ -398,30 +483,72 @@ export function generateTrainingLogPDF(
       body: tableRows,
       margin: { left: margin, right: margin },
       styles: {
-        fontSize: 8,
-        cellPadding: 2.5,
+        fontSize: 7.5,
+        cellPadding: 2,
         lineColor: [200, 200, 200],
         lineWidth: 0.15,
+        minCellHeight: 6,
       },
       headStyles: {
         fillColor: [20, 184, 166],
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 7,
+        fontSize: 6.5,
         halign: 'center',
-      },
-      alternateRowStyles: {
-        fillColor: [249, 250, 251],
+        minCellHeight: 10,
       },
       columnStyles: {
-        0: { cellWidth: 7, halign: 'center' },     // #
-        1: { cellWidth: 50 },                        // Exercise
-        2: { cellWidth: 20, halign: 'center' },      // Target Reps
-        3: { cellWidth: 20, halign: 'center' },      // Target Weight
-        4: { cellWidth: 28, halign: 'center', textColor: [107, 114, 128] },  // Last Time (gray)
-        5: { cellWidth: 28, halign: 'center' },      // Actual Reps (blank)
-        6: { cellWidth: 28, halign: 'center' },      // Actual Weight (blank)
-        7: { cellWidth: 'auto' },                    // Notes (blank)
+        0: { cellWidth: 7, halign: 'center', fontStyle: 'bold' },      // #
+        1: { cellWidth: 44, fontStyle: 'bold' },                        // Exercise
+        2: { cellWidth: 10, halign: 'center', textColor: [107, 114, 128] },  // Set (S1, S2...)
+        3: { cellWidth: 16, halign: 'center' },                         // Soll Wdh
+        4: { cellWidth: 16, halign: 'center' },                         // Soll kg
+        5: { cellWidth: 18, halign: 'center', textColor: [34, 197, 94] },    // Letzte Wdh (green)
+        6: { cellWidth: 18, halign: 'center', textColor: [34, 197, 94] },    // Letzte kg (green)
+        7: { cellWidth: 22, halign: 'center' },                         // Ist Wdh (blank)
+        8: { cellWidth: 22, halign: 'center' },                         // Ist kg (blank)
+        9: { cellWidth: 'auto' },                                       // Notes
+      },
+      // Draw horizontal separator between exercises (thicker line before new exercise)
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 0) {
+          const cellText = data.cell.raw as string;
+          // If this is the first set row of a new exercise, draw a top border
+          if (cellText && cellText !== '' && data.row.index > 0) {
+            doc.setDrawColor(150, 150, 150);
+            doc.setLineWidth(0.4);
+            doc.line(
+              margin,
+              data.cell.y,
+              pageWidth - margin,
+              data.cell.y
+            );
+          }
+        }
+      },
+      // Alternate row colors per exercise group (not per row)
+      didParseCell: (data) => {
+        if (data.section !== 'body') return;
+
+        // Determine which exercise group this row belongs to
+        // Count non-empty # cells up to this row to know the exercise index
+        let exGroup = 0;
+        for (let r = 0; r <= data.row.index; r++) {
+          const rowData = tableRows[r];
+          if (rowData && rowData[0] !== '') exGroup++;
+        }
+
+        // Alternate background per exercise group
+        if (exGroup % 2 === 0) {
+          data.cell.styles.fillColor = [249, 250, 251]; // gray-50
+        } else {
+          data.cell.styles.fillColor = [255, 255, 255]; // white
+        }
+
+        // Make blank Ist cells have a subtle underline feel
+        if ((data.column.index === 7 || data.column.index === 8) && data.cell.raw === '') {
+          data.cell.styles.fillColor = [245, 247, 250]; // slightly blue-gray for fill-in fields
+        }
       },
       didDrawPage: () => {
         addFooter(doc, t.page, language, true);
@@ -437,10 +564,6 @@ export function generateTrainingLogPDF(
       doc.setTextColor(156, 163, 175);
       doc.text(day.notes, margin, yPos);
       yPos += 2;
-    }
-
-    if (dayIndex < days.length - 1) {
-      yPos += 6;
     }
   });
 

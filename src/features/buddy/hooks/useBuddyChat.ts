@@ -102,6 +102,14 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
+    // Safety timeout: reset isLoading after 90s max (prevents stuck UI)
+    const safetyTimeout = setTimeout(() => {
+      if (isLoadingRef.current) {
+        console.warn('[BuddyChat] Safety timeout: resetting isLoading after 90s');
+        setIsLoading(false);
+      }
+    }, 90_000);
+
     // Persist user message to DB (fire-and-forget)
     if (user?.id) {
       saveUserMessage(user.id, activeThread, userMsg).catch(() => {});
@@ -220,6 +228,16 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           const extractedQuery = searchPhraseMatch[1].trim().replace(/["""„….]+$/, '');
           console.warn(`[BuddyChat] No ACTION block found, but search phrase detected: "${extractedQuery}"`);
           parsedActions = [{ type: 'search_product', data: { query: extractedQuery }, rawJson: `{"query":"${extractedQuery}"}` }];
+        }
+      }
+
+      // Fallback: detect tour restart from text if no ACTION block was generated
+      if (parsedActions.length === 0 || !parsedActions.some(a => a.type === 'restart_tour')) {
+        const tourTextMatch = /(?:Produkttour|Tour|Guided Tour|starte.*Tour|Tour.*start)/i.test(result.content)
+          && /(?:starte|start|los|weitergeleit|redirect)/i.test(result.content);
+        if (tourTextMatch) {
+          console.warn('[BuddyChat] No ACTION:restart_tour block, but tour-related text detected — injecting action');
+          parsedActions.push({ type: 'restart_tour', data: {}, rawJson: '{}' });
         }
       }
 
@@ -434,6 +452,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       ));
       setIsConnected(false);
     } finally {
+      clearTimeout(safetyTimeout);
       setIsLoading(false);
     }
   }, [context, language, user?.id, activeThread]);

@@ -481,10 +481,28 @@ export const en: TranslationKeys = {
     removePhoto: 'Remove photo',
     uploadError: 'Image upload failed',
     // BMR Help
-    bmrHelpToggle: 'What do the formulas mean?',
+    bmrHelpToggle: 'What is BMR and what do the formulas mean?',
+    bmrExplanation: 'BMR (Basal Metabolic Rate) is the energy (in kcal) your body needs at complete rest — just for vital functions like breathing, heartbeat, and cell regeneration. Your actual daily calorie needs (TDEE) are calculated as BMR × Activity Level.',
     bmrHelpAuto: 'Automatic: Selects the best formula based on your data. With body fat percentage → Katch-McArdle (more accurate), without → Mifflin-St Jeor.',
     bmrHelpMifflin: 'Mifflin-St Jeor: Standard formula based on weight, height, age, and gender. Sufficiently accurate for most people.',
     bmrHelpKatch: 'Katch-McArdle: Uses fat-free mass (Lean Body Mass). More accurate when body fat percentage is known, especially for athletes.',
+    // Activity Level Help
+    activityLevelHelpToggle: 'How do I classify myself?',
+    activityLevelExplanation: 'The Activity Level (PAL = Physical Activity Level) determines how your BMR is multiplied to calculate your actual daily needs (TDEE = BMR × PAL).',
+    palSedentary: 'Sedentary (1.4): Desk job, little movement, no exercise',
+    palLightlyActive: 'Lightly Active (1.55): Desk job + light exercise 1–3×/week or regular walks',
+    palModeratelyActive: 'Moderately Active (1.7): Moderate exercise 3–5×/week or physical work (trades, nursing)',
+    palVeryActive: 'Very Active (1.9): Intense exercise 6–7×/week or heavy physical labor',
+    palExtremelyActive: 'Extremely Active (2.2): Competitive athletes, double training/day or very heavy labor',
+    palTip: 'Tip: When in doubt, choose one level lower. The app adjusts recommendations as you track your progress.',
+    // Goals Help
+    goalsHelpToggle: 'What do the goals mean?',
+    goalMuscleHelp: 'Muscle Gain: Caloric surplus (~300–500 kcal), high protein intake (1.6–2.2 g/kg), progressive strength training.',
+    goalFatLossHelp: 'Fat Loss: Caloric deficit (~300–500 kcal), high protein to preserve muscle, combination of strength and cardio.',
+    goalHealthHelp: 'Health: Balanced diet near maintenance calories, regular exercise, stress reduction.',
+    goalPerformanceHelp: 'Performance: Optimized macro distribution for your sport, possibly higher calorie needs, periodized training.',
+    goalRecompHelp: 'Recomposition: Simultaneously lose fat and build muscle. Calories slightly below/at maintenance, very high protein (2.0–2.4 g/kg), intense strength training. Results slower but more sustainable.',
+    goalFieldsHelp: 'Target weight and target body fat help the app track your progress and give realistic recommendations. The target date motivates and enables calculation of the needed weekly change.',
     // Buddy Communication Style
     buddyStyle: 'Buddy Communication',
     verbosity: 'Response Length',
@@ -1680,5 +1698,11 @@ export const en: TranslationKeys = {
     medicalDesc: 'Blood pressure, blood work, symptoms and more — all in one place.',
     buddyTitle: 'Your AI Buddy',
     buddyDesc: 'Your personal assistant is always available via the floating button. Ask anything!',
+  },
+  quickMenu: {
+    profile: 'Profile',
+    settings: 'Settings',
+    logout: 'Sign Out',
+    logoutConfirm: 'Do you really want to sign out?',
   },
 } as const;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
-import { generateTrainingPlanPDF, generateTrainingLogPDF } from '../utils/generateTrainingPlanPDF';
+import { generateTrainingPlanPDF, generateTrainingLogPDF, fetchLastWorkoutsForPlan } from '../utils/generateTrainingPlanPDF';
 import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseCatalog';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
@@ -162,10 +162,17 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                     {language === 'de' ? 'Plan drucken' : 'Print Plan'}
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setIsExporting(true);
                       setShowPdfMenu(false);
                       try {
+                        // Fetch last workout data per day for Soll/Ist comparison
+                        const dayNumbers = (plan.days ?? []).map(d => d.day_number);
+                        const lastWorkouts = await fetchLastWorkoutsForPlan(plan.id, dayNumbers);
+                        generateTrainingLogPDF(plan, lastWorkouts, language);
+                      } catch (err) {
+                        console.error('PDF generation failed:', err);
+                        // Fallback: generate without last workout data
                         generateTrainingLogPDF(plan, undefined, language);
                       } finally {
                         setIsExporting(false);
@@ -174,7 +181,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <ClipboardList className="h-4 w-4 text-orange-500" />
-                    {language === 'de' ? 'Logbuch drucken' : 'Print Log'}
+                    {language === 'de' ? 'Logbuch drucken (Soll/Ist)' : 'Print Log (Target/Actual)'}
                   </button>
                 </div>
               )}

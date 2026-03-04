@@ -25,6 +25,7 @@ import { COMPETITION_SKILL, COMPETITION_SKILL_META } from './competition';
 import { FEMALE_FITNESS_SKILL, FEMALE_FITNESS_SKILL_META } from './femaleFitness';
 import { NUTRITION_SCIENCE_SKILL, NUTRITION_SCIENCE_SKILL_META } from './nutritionScience';
 import { GLOSSARY_SKILL, GLOSSARY_SKILL_META } from './glossary';
+import { BODY_COMPOSITION_SKILL, BODY_COMPOSITION_SKILL_META } from './bodyComposition';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -35,6 +36,7 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   substances: { meta: SUBSTANCE_SKILL_META, content: SUBSTANCE_SKILL },
   anabolics: { meta: ANABOLICS_SKILL_META, content: ANABOLICS_SKILL },
   analysis: { meta: ANALYSIS_SKILL_META, content: ANALYSIS_SKILL },
+  bodyComposition: { meta: BODY_COMPOSITION_SKILL_META, content: BODY_COMPOSITION_SKILL },
   beauty: { meta: BEAUTY_SKILL_META, content: BEAUTY_SKILL },
   attractiveness: { meta: ATTRACTIVENESS_SKILL_META, content: ATTRACTIVENESS_SKILL },
   medical: { meta: MEDICAL_SKILL_META, content: MEDICAL_SKILL },
@@ -78,7 +80,7 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   analysis: {
-    staticSkills: ['analysis'],
+    staticSkills: ['analysis', 'bodyComposition'],
     userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
   },
   beauty: {
@@ -90,11 +92,11 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience'],
+    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'bodyComposition'],
     userSkills: ['profile', 'substance_protocol', 'body_progress'],
   },
   general: {
-    staticSkills: ['glossary'],  // glossary as lightweight reference for general queries
+    staticSkills: ['glossary', 'bodyComposition'],  // glossary + bodyComposition for common KFA questions
     userSkills: ['daily_summary'],
   },
 };

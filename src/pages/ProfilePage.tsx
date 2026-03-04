@@ -60,6 +60,8 @@ export function ProfilePage() {
   const [isBreastfeeding, setIsBreastfeeding] = useState(false);
   // BMR Help toggle
   const [showBmrHelp, setShowBmrHelp] = useState(false);
+  const [showPalHelp, setShowPalHelp] = useState(false);
+  const [showGoalsHelp, setShowGoalsHelp] = useState(false);
   // Disclaimer viewer
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   // Delete account dialog
@@ -440,9 +442,12 @@ export function ProfilePage() {
               </button>
               {showBmrHelp && (
                 <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-[10px] text-gray-600 leading-relaxed">
-                  <p><span className="font-semibold text-gray-700">{t.profile.auto}:</span> {t.profile.bmrHelpAuto.split(': ').slice(1).join(': ')}</p>
-                  <p><span className="font-semibold text-gray-700">{t.profile.mifflin}:</span> {t.profile.bmrHelpMifflin.split(': ').slice(1).join(': ')}</p>
-                  <p><span className="font-semibold text-gray-700">{t.profile.katch}:</span> {t.profile.bmrHelpKatch.split(': ').slice(1).join(': ')}</p>
+                  <p className="text-gray-700 font-medium">{t.profile.bmrExplanation}</p>
+                  <div className="border-t border-gray-200 pt-2 mt-2 space-y-1.5">
+                    <p><span className="font-semibold text-gray-700">{t.profile.auto}:</span> {t.profile.bmrHelpAuto.split(': ').slice(1).join(': ')}</p>
+                    <p><span className="font-semibold text-gray-700">{t.profile.mifflin}:</span> {t.profile.bmrHelpMifflin.split(': ').slice(1).join(': ')}</p>
+                    <p><span className="font-semibold text-gray-700">{t.profile.katch}:</span> {t.profile.bmrHelpKatch.split(': ').slice(1).join(': ')}</p>
+                  </div>
                 </div>
               )}
 
@@ -462,6 +467,29 @@ export function ProfilePage() {
                   ))}
                 </select>
               </div>
+
+              {/* Activity Level Help */}
+              <button
+                type="button"
+                onClick={() => setShowPalHelp(!showPalHelp)}
+                className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+              >
+                <HelpCircle className="h-3.5 w-3.5" />
+                {t.profile.activityLevelHelpToggle}
+              </button>
+              {showPalHelp && (
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-[10px] text-gray-600 leading-relaxed">
+                  <p className="text-gray-700 font-medium">{t.profile.activityLevelExplanation}</p>
+                  <div className="border-t border-gray-200 pt-2 mt-2 space-y-1.5">
+                    <p>🪑 {t.profile.palSedentary}</p>
+                    <p>🚶 {t.profile.palLightlyActive}</p>
+                    <p>🏃 {t.profile.palModeratelyActive}</p>
+                    <p>💪 {t.profile.palVeryActive}</p>
+                    <p>🏋️ {t.profile.palExtremelyActive}</p>
+                  </div>
+                  <p className="text-teal-600 font-medium mt-2">💡 {t.profile.palTip}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -823,6 +851,28 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
+
+            {/* Goals Help */}
+            <button
+              type="button"
+              onClick={() => setShowGoalsHelp(!showGoalsHelp)}
+              className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              {t.profile.goalsHelpToggle}
+            </button>
+            {showGoalsHelp && (
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-[10px] text-gray-600 leading-relaxed">
+                <p>💪 {t.profile.goalMuscleHelp}</p>
+                <p>🔥 {t.profile.goalFatLossHelp}</p>
+                <p>❤️ {t.profile.goalHealthHelp}</p>
+                <p>⚡ {t.profile.goalPerformanceHelp}</p>
+                <p>🔄 {t.profile.goalRecompHelp}</p>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <p className="text-gray-700 font-medium">📊 {t.profile.goalFieldsHelp}</p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-3 gap-3">
               <div>

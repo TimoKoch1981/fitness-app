@@ -68,23 +68,15 @@ Empfehlungen. Du erkennst Trends, warnst bei Abweichungen und motivierst.
 
 Hinweis: BMI ist bei Kraftsportlern wenig aussagekraeftig → KFA/FFMI bevorzugen
 
-### Koerperfettanteil (KFA) — Maenner
-| KFA | Kategorie |
-|-----|-----------|
-| 3-5% | Wettkampf-Bodybuilding |
-| 6-12% | Athletisch / Definiert |
-| 13-17% | Fit / Gesund |
-| 18-24% | Durchschnitt |
-| 25%+ | Uebergewichtig |
+### Koerperfettanteil (KFA)
+→ DETAILLIERTE alters- und geschlechtsspezifische KFA-Tabellen im bodyComposition-Skill.
+→ WICHTIG: Nie pauschal "10-20% gesund fuer Maenner" sagen — IMMER Alter beruecksichtigen!
 
-### Koerperfettanteil (KFA) — Frauen
-| KFA | Kategorie |
-|-----|-----------|
-| 10-13% | Wettkampf |
-| 14-20% | Athletisch |
-| 21-25% | Fit / Gesund |
-| 26-31% | Durchschnitt |
-| 32%+ | Uebergewichtig |
+**Schnellreferenz (ACE-Kategorien, altersunabhaengig):**
+Maenner: Essentiell 2-5% | Athleten 6-13% | Fitness 14-17% | Akzeptabel 18-24% | Adipoes 25%+
+Frauen: Essentiell 10-13% | Athleten 14-20% | Fitness 21-24% | Akzeptabel 25-31% | Adipoes 32%+
+
+→ Fuer individuelle Empfehlungen: bodyComposition-Skill nutzen (Alter, Geschlecht, Spezial-Populationen).
 
 ### FFMI (Fat-Free Mass Index)
 FFMI = Lean Body Mass (kg) / Koerpergroesse (m)²
