@@ -74,22 +74,22 @@ export function TimerSectionRow({
       )}
     >
       {/* Checkbox */}
-      <td className="py-1.5 px-2 w-8">
+      <td className="py-2 px-2.5 w-10">
         <input
           type="checkbox"
           checked={section.enabled}
           onChange={() => onToggle(section.id)}
-          className="h-3.5 w-3.5 rounded border-gray-600 text-teal-500 focus:ring-teal-500 bg-gray-700"
+          className="h-4 w-4 rounded border-gray-600 text-teal-500 focus:ring-teal-500 bg-gray-700"
         />
       </td>
 
       {/* Label */}
-      <td className="py-1.5 px-1 text-xs text-gray-300 whitespace-nowrap">
+      <td className="py-2 px-1.5 text-sm text-gray-300 whitespace-nowrap font-medium">
         {label}
       </td>
 
       {/* Target (Soll) — clickable for editing */}
-      <td className="py-1.5 px-1 text-center w-16">
+      <td className="py-2 px-1.5 text-center w-20">
         {isEditing ? (
           <input
             type="text"
@@ -97,7 +97,7 @@ export function TimerSectionRow({
             onChange={e => setEditValue(e.target.value)}
             onBlur={handleSaveEdit}
             onKeyDown={e => e.key === 'Enter' && handleSaveEdit()}
-            className="w-14 text-xs text-center bg-gray-600 text-white rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-teal-400"
+            className="w-16 text-sm text-center bg-gray-600 text-white rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-teal-400 font-mono"
             autoFocus
           />
         ) : (
@@ -105,7 +105,7 @@ export function TimerSectionRow({
             onClick={handleStartEdit}
             disabled={!isActive}
             className={cn(
-              'text-xs tabular-nums',
+              'text-sm tabular-nums font-mono',
               isActive ? 'text-gray-400 hover:text-teal-300 cursor-pointer' : 'text-gray-600 cursor-default',
             )}
           >
@@ -115,11 +115,11 @@ export function TimerSectionRow({
       </td>
 
       {/* Current (Ist) — live counter */}
-      <td className="py-1.5 px-2 text-right w-20">
+      <td className="py-2 px-2.5 text-right w-24">
         {section.enabled ? (
           <span
             className={cn(
-              'text-sm font-mono tabular-nums font-semibold',
+              'text-base font-mono tabular-nums font-bold',
               section.isRunning && 'text-teal-400',
               !section.isRunning && !isOvertime && 'text-gray-500',
               isOvertime && 'text-red-400',
@@ -131,11 +131,11 @@ export function TimerSectionRow({
               formatTime(displaySeconds)
             )}
             {section.isRunning && (
-              <span className="ml-0.5 text-[10px] text-teal-500 align-top animate-pulse">&bull;</span>
+              <span className="ml-0.5 text-xs text-teal-500 align-top animate-pulse">&bull;</span>
             )}
           </span>
         ) : (
-          <span className="text-xs text-gray-600">--:--</span>
+          <span className="text-sm text-gray-600">--:--</span>
         )}
       </td>
     </tr>

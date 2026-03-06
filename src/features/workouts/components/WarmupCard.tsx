@@ -300,21 +300,13 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
         </span>
       </div>
 
-      {/* Timer Controls */}
+      {/* Timer Controls — Row 1: Main action */}
       <div className="flex gap-2">
-        {/* Reset */}
-        <button
-          onClick={handleReset}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </button>
-
-        {/* Pause / Resume */}
+        {/* Pause / Resume (primary action) */}
         {!isComplete && (
           <button
             onClick={handlePauseResume}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg transition-colors font-medium ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm rounded-xl transition-colors font-medium ${
               isRunning
                 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                 : 'bg-teal-500 text-white hover:bg-teal-600'
@@ -334,20 +326,36 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
           </button>
         )}
 
-        {/* Finish (always available after at least 30 seconds) */}
-        {(isComplete || elapsedSeconds >= 30) && (
-          <button
-            onClick={handleFinish}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg transition-colors font-medium ${
-              isComplete
-                ? 'bg-green-500 text-white hover:bg-green-600'
-                : 'bg-teal-500/20 text-teal-700 hover:bg-teal-500/30'
-            }`}
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            {isDE ? 'Fertig — weiter' : 'Done — continue'}
-          </button>
-        )}
+        {/* Finish — always available (with calorie data) */}
+        <button
+          onClick={handleFinish}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm rounded-xl transition-colors font-medium ${
+            isComplete
+              ? 'bg-green-500 text-white hover:bg-green-600'
+              : 'bg-teal-500/20 text-teal-700 hover:bg-teal-500/30'
+          }`}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          {isDE ? 'Fertig — weiter' : 'Done — continue'}
+        </button>
+      </div>
+
+      {/* Timer Controls — Row 2: Secondary actions */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleReset}
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          {isDE ? 'Neustart' : 'Reset'}
+        </button>
+        <button
+          onClick={onSkip}
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <SkipForward className="h-3.5 w-3.5" />
+          {isDE ? 'Überspringen' : 'Skip'}
+        </button>
       </div>
     </div>
   );

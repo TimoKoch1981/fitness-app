@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Play, LayoutList, CheckCircle2, SkipForward,
+  Timer as TimerIcon,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -88,13 +89,11 @@ export function ActiveWorkoutPage() {
     const prevExIdx = prevExerciseIdxRef.current;
 
     // Exercise changed → reset exercise timer (tracks total time at this exercise)
-    // But do NOT start set timer — user must press "Satz starten"
+    // Set timer stays paused (reset to 0 by startExerciseTimer reducer).
+    // User must press "Satz starten" to begin set timer.
     if (state.currentExerciseIndex !== prevExIdx && state.phase === 'exercise') {
       const restSec = state.exercises[state.currentExerciseIndex]?.rest_seconds;
       timers.startExerciseTimer(restSec);
-      // Pause the set timer (will be started by user pressing "Satz starten")
-      timers.pauseSection('set');
-      timers.resetSection('set');
     }
 
     // Phase changed to 'rest' → start set rest timer
@@ -121,10 +120,13 @@ export function ActiveWorkoutPage() {
     prevSetIdxRef.current = state.currentSetIndex;
   }, [state.phase, state.currentExerciseIndex, state.currentSetIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Start set timer when user marks setReady ─────────────────────────
+  // ── Start/stop set timer when setReady changes ─────────────────────────
   useEffect(() => {
     if (state.setReady && state.phase === 'exercise') {
       timers.startSetTimer();
+    } else if (!state.setReady) {
+      // setReady went false → stop set timer (e.g. last set completed, or entering rest)
+      timers.pauseSection('set');
     }
   }, [state.setReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -193,6 +195,16 @@ export function ActiveWorkoutPage() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   }, [totalElapsed]);
 
+  // Set timer (stopwatch) for active set display
+  const setSection = timers.state.sections.set;
+  const setTimerElapsed = setSection.elapsedSeconds;
+  const setTimerStr = useMemo(() => {
+    const m = Math.floor(setTimerElapsed / 60);
+    const s = setTimerElapsed % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }, [setTimerElapsed]);
+  const setTimerRunning = setSection.isRunning && setSection.enabled;
+
   // Rest countdown remaining
   const setRestSection = timers.state.sections.setRest;
   const restRemaining = Math.max(0, setRestSection.targetSeconds - setRestSection.elapsedSeconds);
@@ -243,7 +255,7 @@ export function ActiveWorkoutPage() {
               </h1>
               <div className="flex items-center justify-center gap-3 mt-0.5">
                 <span className="text-xs text-gray-400 font-mono tabular-nums">
-                  {elapsedStr}
+                  <span className="font-sans">{isDE ? 'Gesamt' : 'Total'}:</span> {elapsedStr}
                 </span>
                 <span className="text-xs text-gray-400">
                   {completedExercises}/{totalExercises}
@@ -298,6 +310,22 @@ export function ActiveWorkoutPage() {
             onSave={logWarmup}
             onSkip={skipWarmup}
           />
+        )}
+
+        {/* Inline Set Timer — prominent display when set is active */}
+        {state.phase === 'exercise' && state.setReady && setTimerRunning && (
+          <div className="bg-gray-800 rounded-2xl p-4 mb-4 text-center shadow-lg">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <TimerIcon className="h-4 w-4 text-teal-400" />
+              <span className="text-xs uppercase tracking-wider text-gray-400 font-medium">
+                {isDE ? `Satz ${state.currentSetIndex + 1} läuft` : `Set ${state.currentSetIndex + 1} active`}
+              </span>
+              <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
+            </div>
+            <div className="text-4xl font-bold font-mono tabular-nums text-teal-400">
+              {setTimerStr}
+            </div>
+          </div>
         )}
 
         {state.phase === 'exercise' && (

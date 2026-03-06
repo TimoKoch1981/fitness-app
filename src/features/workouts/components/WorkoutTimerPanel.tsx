@@ -217,11 +217,11 @@ export function WorkoutTimerPanel({
       {/* Timer Table */}
       <table className="w-full text-left">
         <thead>
-          <tr className="border-b border-gray-700 text-[10px] uppercase tracking-wider text-gray-500">
-            <th className="py-1 px-2 w-8" />
-            <th className="py-1 px-1">{isDE ? 'Timer' : 'Timer'}</th>
-            <th className="py-1 px-1 text-center w-16">{isDE ? 'Soll' : 'Target'}</th>
-            <th className="py-1 px-2 text-right w-20">{isDE ? 'Ist' : 'Current'}</th>
+          <tr className="border-b border-gray-700 text-xs uppercase tracking-wider text-gray-500">
+            <th className="py-1.5 px-2.5 w-10" />
+            <th className="py-1.5 px-1.5">{isDE ? 'Timer' : 'Timer'}</th>
+            <th className="py-1.5 px-1.5 text-center w-20">{isDE ? 'Soll' : 'Target'}</th>
+            <th className="py-1.5 px-2.5 text-right w-24">{isDE ? 'Ist' : 'Current'}</th>
           </tr>
         </thead>
         <tbody>

@@ -77,8 +77,22 @@ type Action =
   | { type: 'FINISH_SESSION' }
   | { type: 'RESTORE_SESSION'; state: ActiveWorkoutState }
   | { type: 'REORDER_EXERCISES'; fromIndex: number; toIndex: number }
+  | { type: 'EDIT_EXERCISE'; exerciseIndex: number; updates: ExerciseEditPayload }
   | { type: 'SET_READY' }
+  | { type: 'REPLACE_EXERCISES'; exercises: WorkoutExerciseResult[] }
   | { type: 'CLEAR_SESSION' };
+
+/** Payload for editing exercise details mid-session */
+export interface ExerciseEditPayload {
+  /** New number of sets (add/remove sets) */
+  numSets?: number;
+  /** Per-set overrides: target_reps and target_weight_kg */
+  setOverrides?: Array<{ target_reps?: string; target_weight_kg?: number }>;
+  /** Rest seconds between sets */
+  rest_seconds?: number;
+  /** Duration in minutes (for timed exercises) */
+  duration_minutes?: number;
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -136,7 +150,7 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         warmup: undefined,
         currentExerciseIndex: 0,
         currentSetIndex: 0,
-        mode: 'set-by-set',
+        mode: 'exercise',
         timerEnabled: true,
         timerSeconds: 90,
         startedAt: new Date().toISOString(),
@@ -176,6 +190,9 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         exercises,
         currentSetIndex: allSetsComplete ? 0 : nextSetIdx,
         phase: state.timerEnabled && !allSetsComplete ? 'rest' : state.phase,
+        // When all sets complete → reset setReady so set timer stops
+        // When going to rest → reset setReady so user must press "Start" for next set
+        setReady: allSetsComplete ? false : (state.timerEnabled && !allSetsComplete ? false : state.setReady),
       };
     }
 
@@ -244,6 +261,76 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
     case 'SET_READY':
       return { ...state, setReady: true };
 
+    case 'REPLACE_EXERCISES':
+      return { ...state, exercises: action.exercises };
+
+    case 'EDIT_EXERCISE': {
+      const exercises = [...state.exercises];
+      const ex = { ...exercises[action.exerciseIndex] };
+      const { updates } = action;
+
+      // Update duration
+      if (updates.duration_minutes != null) {
+        ex.duration_minutes = updates.duration_minutes;
+      }
+
+      // Update rest seconds
+      if (updates.rest_seconds != null) {
+        ex.rest_seconds = updates.rest_seconds;
+      }
+
+      // Adjust number of sets
+      if (updates.numSets != null && updates.numSets !== ex.sets.length) {
+        const newSets = [...ex.sets];
+        if (updates.numSets > newSets.length) {
+          // Add sets — copy target from last set
+          const template = newSets[newSets.length - 1] || {
+            target_reps: '10', target_weight_kg: undefined,
+            completed: false, skipped: false,
+          };
+          for (let i = newSets.length; i < updates.numSets; i++) {
+            newSets.push({
+              set_number: i + 1,
+              target_reps: template.target_reps,
+              target_weight_kg: template.target_weight_kg,
+              actual_reps: undefined,
+              actual_weight_kg: template.target_weight_kg,
+              completed: false,
+              skipped: false,
+            });
+          }
+        } else {
+          // Remove sets from end (only non-completed)
+          while (newSets.length > updates.numSets) {
+            const last = newSets[newSets.length - 1];
+            if (last.completed) break; // don't remove completed sets
+            newSets.pop();
+          }
+        }
+        ex.sets = newSets;
+      }
+
+      // Apply per-set overrides (target_reps, target_weight_kg)
+      if (updates.setOverrides) {
+        const sets = [...ex.sets];
+        updates.setOverrides.forEach((override, idx) => {
+          if (idx < sets.length && !sets[idx].completed) {
+            sets[idx] = { ...sets[idx] };
+            if (override.target_reps != null) sets[idx].target_reps = override.target_reps;
+            if (override.target_weight_kg != null) {
+              sets[idx].target_weight_kg = override.target_weight_kg;
+              // Also update pre-filled actual weight if not yet logged
+              if (!sets[idx].completed) sets[idx].actual_weight_kg = override.target_weight_kg;
+            }
+          }
+        });
+        ex.sets = sets;
+      }
+
+      exercises[action.exerciseIndex] = ex;
+      return { ...state, exercises, currentSetIndex: 0 };
+    }
+
     case 'REORDER_EXERCISES': {
       const exercises = [...state.exercises];
       const [moved] = exercises.splice(action.fromIndex, 1);
@@ -307,7 +394,7 @@ export const initialState: ActiveWorkoutState = {
   warmup: undefined,
   currentExerciseIndex: 0,
   currentSetIndex: 0,
-  mode: 'set-by-set',
+  mode: 'exercise',
   timerEnabled: true,
   timerSeconds: 90,
   startedAt: '',
@@ -332,6 +419,7 @@ interface ActiveWorkoutContextValue {
   skipExercise: (exerciseIdx: number) => void;
   removeExercise: (exerciseIdx: number, permanent: boolean) => void;
   addExercise: (exercise: WorkoutExerciseResult, permanent: boolean) => void;
+  editExercise: (exerciseIdx: number, updates: ExerciseEditPayload) => void;
   reorderExercises: (fromIndex: number, toIndex: number) => void;
   markSetReady: () => void;
   toggleMode: () => void;
@@ -381,6 +469,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   const skipExercise = useCallback((exerciseIdx: number) => dispatch({ type: 'SKIP_EXERCISE', exerciseIndex: exerciseIdx }), []);
   const removeExercise = useCallback((exerciseIdx: number, permanent: boolean) => dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: exerciseIdx, permanent }), []);
   const addExercise = useCallback((exercise: WorkoutExerciseResult, permanent: boolean) => dispatch({ type: 'ADD_EXERCISE', exercise, permanent }), []);
+  const editExercise = useCallback((exerciseIdx: number, updates: ExerciseEditPayload) => dispatch({ type: 'EDIT_EXERCISE', exerciseIndex: exerciseIdx, updates }), []);
   const reorderExercises = useCallback((fromIndex: number, toIndex: number) => dispatch({ type: 'REORDER_EXERCISES', fromIndex, toIndex }), []);
   const markSetReady = useCallback(() => dispatch({ type: 'SET_READY' }), []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
@@ -394,7 +483,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       state, dispatch,
       startSession, logWarmup, skipWarmup, logSet, skipSet,
       nextExercise, prevExercise, goToExercise, skipExercise,
-      removeExercise, addExercise, reorderExercises, markSetReady, toggleMode, toggleTimer,
+      removeExercise, addExercise, editExercise, reorderExercises, markSetReady, toggleMode, toggleTimer,
       setTimerSeconds, finishSession, clearSession,
     }}>
       {children}

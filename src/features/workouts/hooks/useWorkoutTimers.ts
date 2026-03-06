@@ -216,13 +216,16 @@ function timerReducer(state: WorkoutTimersState, action: TimerAction): WorkoutTi
     case 'START_EXERCISE_TIMER': {
       const s = state.sections.exercise;
       const target = action.seconds ?? s.targetSeconds;
+      // IMPORTANT: Do NOT auto-start the set timer here.
+      // The set timer should only start when the user explicitly presses "Satz starten".
+      // This follows gym app industry standard (Strong, Hevy, JEFIT, etc.)
       return {
         ...state,
         sections: {
           ...state.sections,
           exercise: { ...s, targetSeconds: target, elapsedSeconds: 0, isRunning: s.enabled && state.globalEnabled },
           exerciseRest: { ...state.sections.exerciseRest, isRunning: false, elapsedSeconds: 0 },
-          set: { ...state.sections.set, elapsedSeconds: 0, isRunning: state.sections.set.enabled && state.globalEnabled },
+          set: { ...state.sections.set, elapsedSeconds: 0, isRunning: false },
           setRest: { ...state.sections.setRest, isRunning: false, elapsedSeconds: 0 },
         },
       };

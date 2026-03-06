@@ -2,12 +2,20 @@
  * WorkoutSummary — Shown after finishing a workout session.
  * Displays per-exercise results (target vs actual), duration, calories,
  * weight PRs, and a save button.
+ *
+ * Features:
+ * - Inline editing of reps/weight per set (tap exercise row to expand)
+ * - Visible error feedback on save failure
+ * - "Speichern & Beenden" (Save & Exit) button
+ * - Auto-progression: updates plan weights when user went higher
+ * - Saves session_exercises for "last time" display in next session
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   CheckCircle2, Clock, Flame, Trophy, TrendingUp,
-  Save, Trash2, SkipForward,
+  Save, Trash2, SkipForward, ChevronDown, ChevronUp,
+  AlertCircle, Edit3, X,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -23,10 +31,12 @@ interface WorkoutSummaryProps {
 export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { state, clearSession } = useActiveWorkout();
+  const { state, dispatch, clearSession } = useActiveWorkout();
   const saveSession = useSaveWorkoutSession();
   const { celebrateNewPR, celebrateFirstWorkoutOfWeek } = useCelebrations();
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -76,14 +86,17 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       await saveSession.mutateAsync({ session: state, weightKg });
       // Celebrate first workout of the week
       celebrateFirstWorkoutOfWeek();
       clearSession();
       onClose();
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error('[WorkoutSummary] Save failed:', err);
+      setSaveError(msg);
       setIsSaving(false);
     }
   };
@@ -92,6 +105,26 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     clearSession();
     onClose();
   };
+
+  // Inline editing: update a set's actual values
+  const updateSetValue = useCallback((exIdx: number, setIdx: number, field: 'reps' | 'weight', value: string) => {
+    const exercises = [...state.exercises];
+    const ex = { ...exercises[exIdx] };
+    const sets = [...ex.sets];
+    const set = { ...sets[setIdx] };
+
+    if (field === 'reps') {
+      set.actual_reps = value ? parseInt(value) : undefined;
+    } else {
+      set.actual_weight_kg = value ? parseFloat(value) : undefined;
+    }
+
+    sets[setIdx] = set;
+    ex.sets = sets;
+    exercises[exIdx] = ex;
+
+    dispatch({ type: 'REPLACE_EXERCISES', exercises });
+  }, [state.exercises, dispatch]);
 
   return (
     <div className="space-y-4">
@@ -156,15 +189,20 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         </div>
       )}
 
-      {/* Per-Exercise Results */}
-      <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900">
-          {isDE ? 'Übersicht' : 'Overview'}
-        </h3>
-        {state.exercises.map((ex, i) => {
+      {/* Per-Exercise Results — tap to expand & edit */}
+      <div className="bg-white rounded-xl shadow-sm p-4 space-y-1">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-900">
+            {isDE ? 'Übersicht' : 'Overview'}
+          </h3>
+          <span className="text-[10px] text-gray-400">
+            {isDE ? 'Antippen zum Bearbeiten' : 'Tap to edit'}
+          </span>
+        </div>
+        {state.exercises.map((ex, exIdx) => {
           if (ex.skipped) {
             return (
-              <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
+              <div key={exIdx} className="flex items-center gap-2 text-sm text-gray-300 py-1">
                 <SkipForward className="h-3 w-3" />
                 <span className="line-through">{ex.name}</span>
                 <span className="text-xs">({isDE ? 'übersprungen' : 'skipped'})</span>
@@ -185,25 +223,109 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
             return (s.actual_reps ?? 0) >= targetMin;
           });
 
+          const isExpanded = expandedExercise === exIdx;
+
           return (
-            <div key={i} className="flex items-center justify-between py-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  targetMet ? 'bg-green-500' : 'bg-yellow-500'
-                }`} />
-                <span className="text-sm text-gray-700 truncate">
-                  {ex.is_addition && <span className="text-teal-500 mr-1">+</span>}
-                  {ex.name}
-                </span>
-              </div>
-              <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                {completedSets.length}×{avgReps}
-                {maxWeight > 0 && ` @ ${maxWeight}kg`}
-              </span>
+            <div key={exIdx} className="border border-gray-100 rounded-lg overflow-hidden">
+              {/* Exercise Row — clickable to expand */}
+              <button
+                onClick={() => setExpandedExercise(isExpanded ? null : exIdx)}
+                className="w-full flex items-center justify-between py-2.5 px-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    targetMet ? 'bg-green-500' : 'bg-yellow-500'
+                  }`} />
+                  <span className="text-sm text-gray-700 truncate">
+                    {ex.is_addition && <span className="text-teal-500 mr-1">+</span>}
+                    {ex.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <span className="text-xs text-gray-400">
+                    {completedSets.length}×{avgReps}
+                    {maxWeight > 0 && ` @ ${maxWeight}kg`}
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp className="h-3.5 w-3.5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                  )}
+                </div>
+              </button>
+
+              {/* Expanded: editable set rows */}
+              {isExpanded && (
+                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Edit3 className="h-3 w-3 text-teal-500" />
+                    <span className="text-[10px] text-teal-600 font-medium">
+                      {isDE ? 'Werte korrigieren (Wdh / kg):' : 'Correct values (reps / kg):'}
+                    </span>
+                  </div>
+                  {ex.sets.map((set, setIdx) => (
+                    <div key={setIdx} className="flex items-center gap-2">
+                      <span className={`text-xs font-medium w-14 ${
+                        set.completed ? 'text-teal-600' : set.skipped ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {isDE ? 'Satz' : 'Set'} {setIdx + 1}
+                      </span>
+                      {set.completed ? (
+                        <>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            value={set.actual_reps ?? ''}
+                            onChange={e => updateSetValue(exIdx, setIdx, 'reps', e.target.value)}
+                            className="w-16 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            placeholder={isDE ? 'Wdh' : 'Reps'}
+                          />
+                          <span className="text-xs text-gray-400">×</span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            step="0.5"
+                            value={set.actual_weight_kg ?? ''}
+                            onChange={e => updateSetValue(exIdx, setIdx, 'weight', e.target.value)}
+                            className="w-20 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            placeholder="kg"
+                          />
+                          <span className="text-[10px] text-gray-400">kg</span>
+                        </>
+                      ) : set.skipped ? (
+                        <span className="text-xs text-gray-400 italic">
+                          {isDE ? 'übersprungen' : 'skipped'}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      {/* Error feedback */}
+      {saveError && (
+        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+          <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-red-700">
+              {isDE ? 'Speichern fehlgeschlagen' : 'Save failed'}
+            </p>
+            <p className="text-xs text-red-600 mt-0.5 break-words">{saveError}</p>
+          </div>
+          <button
+            onClick={() => setSaveError(null)}
+            className="text-red-400 hover:text-red-600 flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2 pb-8">
@@ -222,7 +344,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           <Save className="h-4 w-4" />
           {isSaving
             ? (isDE ? 'Speichern...' : 'Saving...')
-            : (isDE ? 'Training speichern' : 'Save Workout')}
+            : (isDE ? 'Speichern & Beenden' : 'Save & Exit')}
         </button>
       </div>
     </div>
