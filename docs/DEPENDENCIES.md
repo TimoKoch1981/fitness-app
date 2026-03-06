@@ -221,7 +221,6 @@ Login/Register funktioniert nicht. Kein Build-Fehler!
 | `VITE_OPENAI_MODEL` | `.env.local` | NIEDRIG | `gpt-4o-mini` | OpenAI Modell |
 | `VITE_OLLAMA_URL` | `.env.local` | NIEDRIG | `http://localhost:11434` | Ollama-URL (nur lokal) |
 | `VITE_OLLAMA_MODEL` | `.env.local` | NIEDRIG | `llama3.1:8b` | Ollama Modell |
-| `VITE_SENTRY_DSN` | `.env.production` / `.env.local` | MITTEL | `''` (leer) → Sentry deaktiviert | Sentry DSN fuer Error-Monitoring |
 
 **WICHTIG:** Vite-Variablen (Praefix `VITE_`) werden zur **Build-Zeit** eingebettet,
 nicht zur Laufzeit gelesen. Ein Neustart des Servers reicht nicht — es muss **neu gebaut**
@@ -396,7 +395,8 @@ auth.users (Supabase-intern, GoTrue)
     │
     ├──→ profiles (1:1, id = auth.users.id)
     │       Felder: display_name, height_cm, birth_date, gender,
-    │               activity_level, daily_*_goal, preferred_*
+    │               activity_level, daily_*_goal, preferred_*,
+    │               ai_trainer_enabled (BOOL)
     │
     ├──→ meals (1:n, user_id)
     │       Felder: date, name, type, calories, protein, carbs, fat,
@@ -415,10 +415,12 @@ auth.users (Supabase-intern, GoTrue)
     │       Felder: goal_type, target_value, deadline
     │
     ├──→ training_plans (1:n, user_id)
-    │       Felder: name, description, exercises (JSONB)
+    │       Felder: name, description, exercises (JSONB),
+    │               ai_supervised (BOOL), review_config (JSONB)
     │
     ├──→ workout_sessions (1:n, user_id)
-    │       Felder: date, plan_id (FK→training_plans), exercises, duration
+    │       Felder: date, plan_id (FK→training_plans), exercises, duration,
+    │               session_feedback (JSONB)
     │
     ├──→ user_products (1:n, user_id)
     │       Felder: barcode, name, brand, nutrition (JSONB)
@@ -536,6 +538,9 @@ Spaetere Migrationen koennen auf Tabellen aus frueheren zugreifen.
 20260301000008_audit_trail.sql            ← audit_logs + 14 Trigger
 20260301000009_buddy_chat_messages.sql    ← buddy_chat_messages
 20260301000010_symptom_logs_mood_energy.sql ← mood/energy Spalten ergaenzt
+20260306000001_ai_trainer_review.sql        ← ai_supervised, review_config (training_plans),
+                                               session_feedback (workouts),
+                                               ai_trainer_enabled (profiles)
 ```
 
 ---
@@ -716,7 +721,7 @@ src/lib/ai/provider.ts (getAIProvider)
     │
     ├──→ lib/ai/contextExtractor.ts (Kontext aus Nutzerdaten extrahieren)
     │
-    ├──→ lib/ai/skills/ (16 statische + 9 dynamische Skills)
+    ├──→ lib/ai/skills/ (17 statische + 9 dynamische Skills, inkl. trainerReview)
     │
     └──→ lib/ai/agents/ (KI-Agenten fuer komplexe Aufgaben)
 ```
@@ -732,79 +737,13 @@ im Frontend! ──→      ai-proxy Edge Function ──→     api.openai.com
                             │ Auth: JWT-Token (Supabase Session)
                             │ → Nur eingeloggte User koennen KI nutzen
                             │
-                            │ Rate Limiting: In-Memory (Map pro User)
-                            │ → 60 Requests / User / Stunde
-                            │ → HTTP 429 + Retry-After Header bei Ueberschreitung
-                            │ → JWT `sub` Claim als User-Identifier
-                            │ → Cleanup-Intervall alle 10 Min (Memory Leak Prevention)
-                            │
-                            │ Token Logging: console.log pro Request
-                            │ → prompt/completion/total Tokens (Non-Streaming)
-                            │ → X-Token-Count Response Header fuer Frontend
+                            │ Rate Limiting: Supabase Edge Functions
+                            │ → Schutz vor Missbrauch
 ```
 
 **Symptom bei KI-Fehler:** Buddy antwortet nicht, "Verbindungsfehler" im Chat.
 **Diagnose:** Edge Function Logs pruefen (`docker logs supabase-functions`),
 OpenAI API Status pruefen, OPENAI_API_KEY in Server-.env pruefen.
-
-**Symptom bei Rate-Limit:** HTTP 429 "Rate limit exceeded. Max 60 requests per hour."
-**Diagnose:** Edge Function Logs pruefen (`[ai-proxy] Rate limit exceeded for user ...`).
-User-Verbrauch wird im In-Memory-Map gehalten (Reset nach 1 Stunde).
-
----
-
-## 6a. Sentry Error-Monitoring [MITTEL]
-
-### 6a.1 Sentry-Kette
-
-```
-.env.production / .env.local
-    │  VITE_SENTRY_DSN (optional — wenn leer, wird Sentry uebersprungen)
-    │
-    │  Vite liest VITE_SENTRY_DSN zur BUILD-Zeit
-    │
-    ▼
-src/lib/sentry.ts
-    │  initSentry(): Prueft DSN, wenn vorhanden → Sentry.init()
-    │  Optionen: environment, release, tracesSampleRate: 0.1, sendDefaultPii: false
-    │
-    │  Wird in main.tsx VOR ReactDOM.createRoot() aufgerufen
-    │
-    ▼
-src/main.tsx
-    │  import { initSentry } from './lib/sentry';
-    │  initSentry();  ← VOR React-Rendering
-    │
-    ▼
-src/components/ErrorBoundary.tsx
-    │  Sentry.ErrorBoundary Wrapper
-    │  Fallback-UI: "Etwas ist schiefgelaufen" + Reload-Button
-    │  onError: console.error als Backup-Log
-    │
-    ▼
-src/app/App.tsx
-    │  <ErrorBoundary> ← aeusserster Wrapper (noch vor QueryProvider)
-    │    <QueryProvider>
-    │      <I18nProvider>
-    │        ... (Provider-Kette)
-    │      </I18nProvider>
-    │    </QueryProvider>
-    │  </ErrorBoundary>
-```
-
-**Verhalten ohne DSN:** Sentry wird nicht initialisiert. ErrorBoundary funktioniert
-trotzdem als React Error Boundary (faengt Fehler, zeigt Fallback-UI).
-Kein Netzwerk-Traffic zu Sentry, kein Fehler, kein Performance-Impact.
-
-**Verhalten mit DSN:** Unbehandelte Fehler werden automatisch an Sentry gemeldet.
-tracesSampleRate: 0.1 (10% der Transaktionen fuer Performance Monitoring).
-sendDefaultPii: false (DSGVO — keine personenbezogenen Daten an Sentry).
-
-**Symptom bei Bruch:** Kein Fehler sichtbar fuer User. Error Monitoring faellt
-still aus. → Sentry-Dashboard pruefen (keine neuen Events).
-
-**Diagnose:** Browser Console: `[FitBuddy] VITE_SENTRY_DSN is not set` bedeutet
-DSN ist nicht konfiguriert. → `.env.production` pruefen, neu bauen.
 
 ---
 
@@ -875,7 +814,6 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | **Resend SMTP** | Email-Verifizierung, Welcome-Email | HOCH | AUTOCONFIRM=true (unsicher, nur Notfall) |
 | **Let's Encrypt** | Caddy SSL-Zertifikate | HOCH | Kein Failover (ohne SSL kein HTTPS) |
 | **Hetzner DNS** | fudda.de DNS-Aufloesung | KRITISCH | DNS-Provider wechseln (Strato als Fallback) |
-| **Sentry** | Error Monitoring (ErrorBoundary, lib/sentry.ts) | MITTEL | Kein Failover (Errors werden nur in Console geloggt) |
 | **Hetzner VPS** | Gesamte Infrastruktur | KRITISCH | Kein Failover (Single-Server) |
 
 ---
@@ -898,7 +836,6 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | `lucide-react` | ^0.564.0 | Icons ueberall | NIEDRIG |
 | `jspdf` + `jspdf-autotable` | ^4.2.0 / ^5.0.7 | PDF-Export (DoctorReport) | MITTEL |
 | `react-markdown` | ^10.1.0 | Buddy-Chat (Markdown-Rendering) | MITTEL |
-| `@sentry/react` | ^9.x | Error Monitoring, ErrorBoundary | MITTEL |
 | `@capacitor/core` | ^8.1.0 | Mobile (Local Notifications) | NIEDRIG |
 | `browser-image-compression` | ^2.0.2 | Avatar-Upload, Meal Vision | NIEDRIG |
 
@@ -973,5 +910,4 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | Datum | Version | Autor | Aenderung |
 |-------|---------|-------|-----------|
 | 2026-03-02 | 1.0 | Claude / Entwickler | Initiale Erstellung nach .env-Production-Bug |
-| 2026-03-03 | 1.1 | Claude / Entwickler | Sentry Error-Monitoring (Abschnitt 6a, Env-Variable, NPM-Paket, Externe Services) |
-| 2026-03-03 | 1.1 | Claude / Entwickler | Abschnitt 6.3 erweitert: Rate-Limiting + Token-Logging Details |
+| 2026-03-06 | 1.1 | Claude / Entwickler | KI-Trainer Review-System: ai_supervised, review_config, session_feedback, ai_trainer_enabled, trainerReview Skill (17 Skills) |

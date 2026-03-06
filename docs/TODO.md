@@ -201,14 +201,14 @@
   - ~~Kaloriendefizit eingehalten~~ ✅
   - ~~Konfetti-Animation + Toast~~ ✅
 
-### P1 — UX-Ueberarbeitung Workout-Session ✅
+### P1 — UX-Ueberarbeitung Workout-Session ⚠️
 > Konzept-Dokument: `docs/MUSIK_TIMER_KONZEPT.md`
+> Analyse: 2026-02-27, Status: Konzept fertig, User-Diskussion ausstehend
 
-#### ~~Musik-Integration komplett ueberarbeiten~~ ✅ (2026-03-04, v12.55)
-- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — v11.0: WorkoutMusicPlayer mit YT.Player()
-- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — v11.0: Floating Player
-- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — v11.0: Volles SDK
-- [x] ~~**M4: CSP-Fix — Komplett-Rewrite auf iframe Embeds**~~ ✅ (2026-03-04, v12.55) — Root Cause: `script-src 'self'` blockierte YouTube IFrame API. Loesung: Einfache `<iframe>` Embeds (youtube-nocookie.com), kein externes Script noetig, funktioniert mit bestehendem CSP `frame-src`
+#### ~~Musik-Integration komplett ueberarbeiten~~ ✅ (2026-02-28, v11.0)
+- [x] ~~**M1: YouTube IFrame API fixen**~~ ✅ — WorkoutMusicPlayer komplett neu geschrieben mit echtem `YT.Player()`
+- [x] ~~**M2: Sichtbarer Mini-Player**~~ ✅ — Floating Player, Play/Pause/Stop/Volume als YT API Calls
+- [x] ~~**M3: Spotify Web Playback SDK**~~ ✅ — Volles SDK (OAuth + Playback), Edge Function spotify-proxy, YouTube/Spotify Tab-Toggle
 
 #### ~~Timer komplett ueberarbeiten — Tabellarischer Multi-Timer~~ ✅ (2026-02-28, v11.0)
 - [x] ~~**T1: useWorkoutTimers Hook**~~ ✅ — 5 Sektionen (Gesamt, Uebung, Ueb.-Pause, Satz, Satzpause), je aktivierbar/deaktivierbar
@@ -216,13 +216,6 @@
 - [x] ~~**T3: ActiveWorkoutContext Integration**~~ ✅ — Auto-Timer-Transitionen, Auto-Advance (zuschaltbar)
 - [x] ~~**T4: Timer Alerts**~~ ✅ — Web Audio API Beep + Vibration, 4 Modi (both/vibration/sound/none), Warning-Beep bei 3s
 - [x] ~~**T5: Alte Timer entfernen + 32 Tests**~~ ✅ — ManualTimer entfernt, 21+5+6 Tests (alle gruen)
-- [x] ~~**T6: Satz-Timer manueller Start (Industrie-Standard)**~~ ✅ (2026-03-05, v12.56) — Recherche: Strong/Hevy/JEFIT/FitNotes/GymBook starten Timer NICHT bei Uebungswechsel. Neuer State `setReady`, "Satz X starten" Button, Timer startet nur nach manuellem Klick
-- [x] ~~**T7: Cardio-Aufwaermphase funktionaler Timer**~~ ✅ (2026-03-05, v12.56) — WarmupCard 2-Phasen: Setup → Active Timer (Countdown, Pause/Resume, Reset, Echtzeit-Kalorien, Vibration)
-
-#### ~~Drag & Drop Uebungsreihenfolge~~ ✅ (2026-03-04, v12.55)
-- [x] ~~**@dnd-kit Integration**~~ ✅ — DndContext + SortableContext in ExerciseListBar
-- [x] ~~**REORDER_EXERCISES Action**~~ ✅ — ActiveWorkoutContext Reducer
-- [x] ~~**Ganzes Chip als Drag-Handle**~~ ✅ — Kein separates GripVertical-Icon, Tap vs Drag per Sensor-Constraints
 
 ### P2 — Power/Power+ Modus
 > **Phase A (Basis) — KOMPLETT** ✅ (2026-02-27, v10.9)
@@ -343,6 +336,40 @@
 
 #### Dependency-Tracking
 - [x] ~~**docs/DEPENDENCIES.md erstellen**~~ ✅ (2026-03-02, v12.35) — Praeambel + Ausfuellanweisung + 10 Sektionen
+
+### P2 — Workout-Session UX-Verbesserungen
+
+#### Uebungs-Reihenfolge in aktiver Workout-Session
+- [ ] **Uebungs-Uebersicht am unteren Rand** — Kompakte Liste aller Uebungen als horizontale oder vertikale Leiste
+- [ ] **Drag & Drop Uebungs-Reihenfolge** — Uebungen per Drag & Drop umordnen waehrend der Session
+- [ ] **Aktuelle Uebung hervorheben** — Aktuell aktive Uebung visuell markiert
+
+### P1 — KI-Trainer Review-System (Konzept freigegeben 2026-03-05)
+> Konzept-Dokument: `docs/KONZEPT_KI_TRAINER.md`
+> 50+ PMIDs, differenziert nach Trainingsart + PED-Zyklen
+
+#### Block A: Skill-File + DB-Schema ✅ (2026-03-06, v12.58)
+- [x] ~~**Skill-File `trainerReview.ts`**~~ ✅ — Volume Landmarks, Double Progression, BW-Multiplier-Tabellen, Deload-Protokoll, Decision Tree (~4500 Tokens, 15 PMIDs)
+- [x] ~~**DB-Migration**~~ ✅ — `ai_supervised` + `review_config` JSONB in training_plans, `session_feedback` JSONB in workouts, `ai_trainer_enabled` in profiles
+- [x] ~~**Training Agent**~~ ✅ — Skill-ID `trainerReview` zu Agent-Mapping (staticSkills) + SKILL_REGISTRY
+
+#### Block B: Startgewicht-Onboarding
+- [ ] **CalibrationWizard Komponente** — 3-Screen Flow (Erfahrung → BW-Multiplier Gewichte-Preview → Review-Settings)
+- [ ] **RIR-Feedback nach erstem Satz** — Nur in allererster Session, "Zu leicht / Passt / Zu schwer"
+- [ ] **Auto-Kalibrierung** — Max-Reps-Pattern Erkennung (Obergrenze 2+ Sessions → Auto: +2.5/5kg)
+
+#### Block C: Review Engine
+- [ ] **Post-Session-Analyse Hook** — Completion Rate, Plateau-Erkennung, RPE-Drift, Volume/Muskelgruppe
+- [x] ~~**Post-Session-Feedback UI**~~ ✅ (2026-03-06, v12.58) — 4 Buttons + optionales Joint Pain (12 Koerperbereiche, Schmerzstaerke 1-5), ein/ausschaltbar via Profil
+- [ ] **Early Triggers** — In Deviations Engine: Plateau, Pain, Sleep, Missed Sessions
+- [ ] **Mesozyklus-Review** — Buddy-initiierte Nachricht am Review-Tag mit Vorschlag-Dialog (Annehmen/Anpassen/Ablehnen)
+- [ ] **PED-Phasen-Synchronisation** — CycleWidget-Status → review_config automatisch anpassen
+
+#### Block D: "Supervised by AI" UI
+- [x] ~~**TrainingPlanView**~~ ✅ (2026-03-06, v12.58) — AI-Trainer Status-Badge (Indigo, Mesozyklus-Woche)
+- [x] ~~**Profil-Toggle**~~ ✅ (2026-03-06, v12.58) — Global "KI-Trainer" Toggle in ProfilePage + useUpdateProfile
+- [ ] **Buddy-Nachfrage** — Bei manuellen Plaenen: "Soll ich mittracken?"
+- [ ] **Review-Dialog** — Vorschlag-Ansicht mit Annehmen/Anpassen/Ablehnen
 
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
