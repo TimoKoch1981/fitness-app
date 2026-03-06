@@ -26,6 +26,7 @@ import { FEMALE_FITNESS_SKILL, FEMALE_FITNESS_SKILL_META } from './femaleFitness
 import { NUTRITION_SCIENCE_SKILL, NUTRITION_SCIENCE_SKILL_META } from './nutritionScience';
 import { GLOSSARY_SKILL, GLOSSARY_SKILL_META } from './glossary';
 import { BODY_COMPOSITION_SKILL, BODY_COMPOSITION_SKILL_META } from './bodyComposition';
+import { TRAINER_REVIEW_SKILL, TRAINER_REVIEW_SKILL_META } from './trainerReview';
 import { USER_SKILLS_META } from './userSkills';
 
 // ── Static Skill Registry ──────────────────────────────────────────────
@@ -48,6 +49,7 @@ const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
   anabolics_powerplus: { meta: ANABOLICS_POWERPLUS_SKILL_META, content: ANABOLICS_POWERPLUS_SKILL },
   nutritionScience: { meta: NUTRITION_SCIENCE_SKILL_META, content: NUTRITION_SCIENCE_SKILL },
   glossary: { meta: GLOSSARY_SKILL_META, content: GLOSSARY_SKILL },
+  trainerReview: { meta: TRAINER_REVIEW_SKILL_META, content: TRAINER_REVIEW_SKILL },
 };
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
@@ -72,7 +74,7 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
   },
   training: {
-    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience'],
+    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'trainerReview'],
     userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
   },
   substance: {

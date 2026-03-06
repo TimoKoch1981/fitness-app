@@ -113,6 +113,16 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                 {plan.days_per_week}x / {t.reminders.weekly.toLowerCase()}
               </span>
             </div>
+            {plan.ai_supervised && (
+              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1 mt-1">
+                🤖 {language === 'de' ? 'KI-Trainer aktiv' : 'AI Trainer active'}
+                {plan.review_config?.current_week && plan.review_config?.mesocycle_weeks && (
+                  <span className="text-indigo-500">
+                    · {language === 'de' ? 'Woche' : 'Week'} {plan.review_config.current_week}/{plan.review_config.mesocycle_weeks}
+                  </span>
+                )}
+              </span>
+            )}
             {plan.notes && (
               <p className="text-xs text-gray-400 mt-1">{plan.notes}</p>
             )}

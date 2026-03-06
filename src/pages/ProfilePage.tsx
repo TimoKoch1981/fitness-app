@@ -958,6 +958,50 @@ export function ProfilePage() {
           }}
         />
 
+        {/* KI-Trainer Review Toggle */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-base">🤖</span>
+                <h3 className="font-semibold text-gray-900">
+                  {language === 'de' ? 'KI-Trainer' : 'AI Trainer'}
+                </h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {language === 'de'
+                  ? 'Automatische Trainingsplan-Reviews, Deload-Empfehlungen und Progressionsanalyse nach jeder Session.'
+                  : 'Automatic training plan reviews, deload recommendations and progression analysis after each session.'}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={!!profile?.ai_trainer_enabled}
+                onChange={async (e) => {
+                  try {
+                    await updateProfile.mutateAsync({ ai_trainer_enabled: e.target.checked });
+                    showSaveStatus('saved');
+                  } catch {
+                    showSaveStatus('error');
+                  }
+                }}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+            </label>
+          </div>
+          {profile?.ai_trainer_enabled && (
+            <div className="mt-3 p-2 bg-indigo-50 rounded-lg">
+              <p className="text-xs text-indigo-600">
+                {language === 'de'
+                  ? '✅ Aktiv — Du erhältst nach jedem Training eine kurze Feedback-Abfrage und der KI-Trainer überwacht deinen Fortschritt.'
+                  : '✅ Active — You\'ll get a quick feedback prompt after each workout and the AI trainer will monitor your progress.'}
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Equipment / Gerätepark */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-3">{t.equipment.title}</h3>

@@ -105,6 +105,7 @@ export interface Workout {
   warmup?: WarmupResult;
   started_at?: string;
   finished_at?: string;
+  session_feedback?: SessionFeedback;
 }
 
 // === BODY MEASUREMENTS ===
@@ -287,6 +288,8 @@ export interface UserProfile {
   is_breastfeeding?: boolean;
   // Data Retention / Loeschkonzept (DSGVO Art. 5(1)(e))
   data_retention_months?: number | null; // NULL = unbegrenzt, 12/36/60 = Monate
+  // KI-Trainer Review System
+  ai_trainer_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -625,6 +628,37 @@ export interface TrainingPlanDay {
   created_at: string;
 }
 
+export interface ReviewConfig {
+  mesocycle_weeks: number;
+  deload_week: number;
+  review_triggers: {
+    plateau_sessions: number;
+    missed_sessions_pct: number;
+    joint_pain_threshold: number;
+    sleep_days_threshold: number;
+    rpe_drift_threshold: number;
+  };
+  current_week: number;
+  mesocycle_start: string | null;
+  last_review: string | null;
+  next_review: string | null;
+  experience_level: 'beginner' | 'intermediate' | 'advanced';
+  calibration_done: boolean;
+}
+
+export interface SessionFeedback {
+  overall_feeling: 'easy' | 'good' | 'hard' | 'exhausted';
+  joint_pain: string[];
+  joint_pain_rating: number;
+  completion_rate: number;
+  exercises_skipped: string[];
+  auto_calculated?: {
+    volume_per_muscle: Record<string, number>;
+    plateau_exercises: string[];
+    rpe_drift_exercises: string[];
+  };
+}
+
 export interface TrainingPlan {
   id: string;
   user_id: string;
@@ -636,4 +670,6 @@ export interface TrainingPlan {
   created_at: string;
   updated_at: string;
   days?: TrainingPlanDay[]; // eagerly loaded via join
+  ai_supervised?: boolean;
+  review_config?: ReviewConfig;
 }

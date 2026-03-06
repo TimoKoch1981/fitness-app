@@ -22,6 +22,8 @@ import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useSaveWorkoutSession } from '../hooks/useSaveWorkoutSession';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
+import { PostSessionFeedback } from './PostSessionFeedback';
+import { useProfile } from '../../auth/hooks/useProfile';
 
 interface WorkoutSummaryProps {
   weightKg: number;
@@ -34,9 +36,12 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const { state, dispatch, clearSession } = useActiveWorkout();
   const saveSession = useSaveWorkoutSession();
   const { celebrateNewPR, celebrateFirstWorkoutOfWeek } = useCelebrations();
+  const { data: profile } = useProfile();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
+  const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -88,9 +93,16 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await saveSession.mutateAsync({ session: state, weightKg });
-      // Celebrate first workout of the week
+      const workout = await saveSession.mutateAsync({ session: state, weightKg });
       celebrateFirstWorkoutOfWeek();
+
+      // Show post-session feedback if ai_trainer_enabled
+      if (profile?.ai_trainer_enabled && workout?.id) {
+        setSavedWorkoutId(workout.id);
+        setShowFeedback(true);
+        return; // Don't close yet — show feedback first
+      }
+
       clearSession();
       onClose();
     } catch (err: unknown) {
@@ -99,6 +111,11 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
       setSaveError(msg);
       setIsSaving(false);
     }
+  };
+
+  const handleFeedbackComplete = () => {
+    clearSession();
+    onClose();
   };
 
   const handleDiscard = () => {
@@ -327,26 +344,43 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-2 pb-8">
-        <button
-          onClick={handleDiscard}
-          className="flex items-center justify-center gap-2 px-4 py-3 text-sm text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-        >
-          <Trash2 className="h-4 w-4" />
-          {isDE ? 'Verwerfen' : 'Discard'}
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex-1 flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
-        >
-          <Save className="h-4 w-4" />
-          {isSaving
-            ? (isDE ? 'Speichern...' : 'Saving...')
-            : (isDE ? 'Speichern & Beenden' : 'Save & Exit')}
-        </button>
-      </div>
+      {/* Post-Session Feedback (shown after save, if KI-Trainer enabled) */}
+      {showFeedback && savedWorkoutId && (
+        <PostSessionFeedback
+          workoutId={savedWorkoutId}
+          completionRate={
+            state.exercises.length > 0
+              ? state.exercises.filter(ex => !ex.skipped).length / state.exercises.length
+              : 1
+          }
+          exercisesSkipped={state.exercises.filter(ex => ex.skipped).map(ex => ex.name)}
+          onComplete={handleFeedbackComplete}
+          onSkip={handleFeedbackComplete}
+        />
+      )}
+
+      {/* Actions (hidden when feedback is showing) */}
+      {!showFeedback && (
+        <div className="flex gap-2 pb-8">
+          <button
+            onClick={handleDiscard}
+            className="flex items-center justify-center gap-2 px-4 py-3 text-sm text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+            {isDE ? 'Verwerfen' : 'Discard'}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            {isSaving
+              ? (isDE ? 'Speichern...' : 'Saving...')
+              : (isDE ? 'Speichern & Beenden' : 'Save & Exit')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

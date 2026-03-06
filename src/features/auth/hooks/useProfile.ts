@@ -61,6 +61,8 @@ interface UpdateProfileInput {
   is_breastfeeding?: boolean;
   // Data Retention / Loeschkonzept
   data_retention_months?: number | null;
+  // KI-Trainer Review System
+  ai_trainer_enabled?: boolean;
 }
 
 export function useUpdateProfile() {
