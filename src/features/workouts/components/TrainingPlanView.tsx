@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF, fetchLastWorkoutsForPlan } from '../utils/generateTrainingPlanPDF';
 import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseCatalog';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
+import { CalibrationWizard } from './CalibrationWizard';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -29,6 +30,18 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const { data: catalog } = useExerciseCatalog();
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showCalibration, setShowCalibration] = useState(false);
+
+  // Auto-trigger CalibrationWizard for uncalibrated plans
+  useEffect(() => {
+    if (
+      plan &&
+      plan.ai_supervised === true &&
+      (!plan.review_config || !plan.review_config.calibration_done)
+    ) {
+      setShowCalibration(true);
+    }
+  }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -122,6 +135,16 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                   </span>
                 )}
               </span>
+            )}
+            {/* Calibration button — show when not yet calibrated */}
+            {!plan.review_config?.calibration_done && (
+              <button
+                onClick={() => setShowCalibration(true)}
+                className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1 mt-1 hover:bg-amber-200 transition-colors"
+              >
+                <Sparkles className="h-3 w-3" />
+                {language === 'de' ? 'Kalibrierung starten' : 'Start calibration'}
+              </button>
             )}
             {plan.notes && (
               <p className="text-xs text-gray-400 mt-1">{plan.notes}</p>
@@ -235,6 +258,15 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
         <ShareTrainingPlanDialog
           plan={plan}
           onClose={() => setShowShareDialog(false)}
+        />
+      )}
+
+      {/* Calibration Wizard */}
+      {showCalibration && plan && (
+        <CalibrationWizard
+          plan={plan}
+          onComplete={() => setShowCalibration(false)}
+          onSkip={() => setShowCalibration(false)}
         />
       )}
     </div>

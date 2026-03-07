@@ -354,7 +354,7 @@
 - [x] ~~**Training Agent**~~ ✅ — Skill-ID `trainerReview` zu Agent-Mapping (staticSkills) + SKILL_REGISTRY
 
 #### Block B: Startgewicht-Onboarding
-- [ ] **CalibrationWizard Komponente** — 3-Screen Flow (Erfahrung → BW-Multiplier Gewichte-Preview → Review-Settings)
+- [x] ~~**CalibrationWizard Komponente**~~ ✅ (2026-03-07) — 3-Screen Flow (Erfahrung → BW-Multiplier Gewichte-Preview → Review-Settings), useCalibration.ts (10 Uebungen × 3 Level × 2 Gender), Fuzzy-Match, Smart Presets, Auto-Trigger bei ai_supervised Plans
 - [ ] **RIR-Feedback nach erstem Satz** — Nur in allererster Session, "Zu leicht / Passt / Zu schwer"
 - [ ] **Auto-Kalibrierung** — Max-Reps-Pattern Erkennung (Obergrenze 2+ Sessions → Auto: +2.5/5kg)
 
@@ -469,4 +469,4 @@
 - [x] ~~**Agent-Routing: Thread-Override Fix**~~ ✅ — Smart-Routing mit detectIntent() Confidence > 0.3
 - [x] ~~**SKILLS_LEARNINGS: Email-Confirmation + DNS-Anleitung**~~ ✅ — Wiederverwendbare Resend/Hetzner/Strato Doku
 
-*Letzte Aktualisierung: 2026-03-04 (v12.52 — 8 Bugfixes + Agent-Verbesserungen + DNS/Email-Learnings)*
+*Letzte Aktualisierung: 2026-03-07 (Block B CalibrationWizard implementiert + deployed)*

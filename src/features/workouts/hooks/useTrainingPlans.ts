@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { TrainingPlan, TrainingPlanDay, SplitType, PlanExercise } from '../../../types/health';
+import type { TrainingPlan, TrainingPlanDay, SplitType, PlanExercise, ReviewConfig } from '../../../types/health';
 
 const PLANS_KEY = 'training_plans';
 
@@ -149,6 +149,65 @@ export function useAddTrainingPlan() {
     },
     onSuccess: () => {
       // Explicitly invalidate both the list AND the active plan query
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+// ── Calibration Mutation ─────────────────────────────────────────────────
+
+export interface CalibrationSaveInput {
+  planId: string;
+  ai_supervised: boolean;
+  review_config: ReviewConfig;
+  dayUpdates: {
+    dayId: string;
+    exercises: PlanExercise[];
+  }[];
+}
+
+/**
+ * Update a training plan with calibration data (ai_supervised, review_config, exercise weights).
+ * Called by CalibrationWizard after the 3-screen flow.
+ */
+export function useUpdateTrainingPlanCalibration() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CalibrationSaveInput) => {
+      console.log(`[CalibrationWizard] Saving calibration for plan ${input.planId}`);
+
+      // Step 1: Update training_plans row (ai_supervised + review_config)
+      const { error: planError } = await supabase
+        .from('training_plans')
+        .update({
+          ai_supervised: input.ai_supervised,
+          review_config: input.review_config,
+        })
+        .eq('id', input.planId);
+
+      if (planError) {
+        console.error('[CalibrationWizard] Update plan failed:', planError);
+        throw planError;
+      }
+
+      // Step 2: Update each day's exercises with calibrated weights
+      for (const day of input.dayUpdates) {
+        const { error: dayError } = await supabase
+          .from('training_plan_days')
+          .update({ exercises: day.exercises })
+          .eq('id', day.dayId);
+
+        if (dayError) {
+          console.error(`[CalibrationWizard] Update day ${day.dayId} failed:`, dayError);
+          throw dayError;
+        }
+      }
+
+      console.log('[CalibrationWizard] ✅ Calibration saved successfully');
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
     },

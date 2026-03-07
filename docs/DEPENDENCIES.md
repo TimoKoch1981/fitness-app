@@ -911,3 +911,4 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 |-------|---------|-------|-----------|
 | 2026-03-02 | 1.0 | Claude / Entwickler | Initiale Erstellung nach .env-Production-Bug |
 | 2026-03-06 | 1.1 | Claude / Entwickler | KI-Trainer Review-System: ai_supervised, review_config, session_feedback, ai_trainer_enabled, trainerReview Skill (17 Skills) |
+| 2026-03-07 | 1.2 | Claude / Entwickler | Block B CalibrationWizard: useCalibration.ts (BW-Multiplier), CalibrationWizard.tsx (3-Screen), useUpdateTrainingPlanCalibration Mutation, TrainingPlanView Auto-Trigger, 31 calibration i18n-Keys (17 Sprachen) |

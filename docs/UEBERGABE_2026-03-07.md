@@ -7,81 +7,65 @@
 
 ## Ziel dieser Session
 
-Deploy von v12.57 + v12.58 (KI-Trainer Review-System) auf Production (fudda.de).
-Danach: Block B CalibrationWizard starten.
+1. Deploy von v12.57 + v12.58 (KI-Trainer Review-System) auf Production (fudda.de) ✅
+2. Block B CalibrationWizard implementieren ✅
 
-## Checkliste Deploy
+## Checkliste Deploy (Phase 1)
 
 | # | Aufgabe | Status | Details |
 |---|---------|--------|---------|
 | 1 | Commit + Push | ✅ ERLEDIGT | Bereits vor Session erledigt (d73392d) |
 | 2 | DB-Migration deployen | ✅ ERLEDIGT | 4 ALTER TABLEs OK, Index-Fix (plan_id→user_id), alle Spalten verifiziert |
-| 3 | Frontend bauen + deployen | ✅ ERLEDIGT | Build OK (94 PWA entries), fudda.de-Check OK, localhost-Check OK, scp deployed |
-| 4 | PostgREST Schema-Reload | ✅ ERLEDIGT | `docker restart fitbuddy-rest-1`, Up + Running, fudda.de HTTP 200 |
+| 3 | Frontend bauen + deployen | ✅ ERLEDIGT | Build OK (94 PWA entries), fudda.de-Check OK, scp deployed |
+| 4 | PostgREST Schema-Reload | ✅ ERLEDIGT | docker restart fitbuddy-rest-1, fudda.de HTTP 200 |
 
-## Migration-Details
+## Block B CalibrationWizard (Phase 2) ✅
 
-Datei: `supabase/migrations/20260306000001_ai_trainer_review.sql`
-- `training_plans.ai_supervised` BOOLEAN
-- `training_plans.review_config` JSONB
-- `workouts.session_feedback` JSONB
-- `profiles.ai_trainer_enabled` BOOLEAN
-- 2 Indexes + NOTIFY pgrst
+| # | Aufgabe | Status | Details |
+|---|---------|--------|---------|
+| 1 | i18n-Keys | ✅ ERLEDIGT | 31 Keys in de.ts + en.ts + 15 weitere Sprachen (calibration namespace) |
+| 2 | useCalibration.ts | ✅ ERLEDIGT | BW-Multiplier (10 Uebungen × 3 Level × 2 Gender), Fuzzy-Match, Smart Presets |
+| 3 | useTrainingPlans.ts | ✅ ERLEDIGT | Neue Mutation useUpdateTrainingPlanCalibration (plan + day updates) |
+| 4 | CalibrationWizard.tsx | ✅ ERLEDIGT | 3-Screen Dialog (Experience → Weights → Settings), Bottom-Sheet |
+| 5 | TrainingPlanView.tsx | ✅ ERLEDIGT | Auto-Trigger (ai_supervised && !calibration_done) + Amber-Button |
+| 6 | Build | ✅ ERLEDIGT | 0 TS-Fehler, 94 PWA entries |
+| 7 | Deploy | ✅ ERLEDIGT | fudda.de HTTP 200 |
 
-## Deploy-Befehle (Referenz)
+## Neue/Geaenderte Dateien
 
-```bash
-# SSH
-ssh -i "C:/Users/test/.ssh/id_ed25519" root@46.225.228.12
+| Datei | Aktion | Inhalt |
+|-------|--------|--------|
+| `src/features/workouts/hooks/useCalibration.ts` | NEU | BW-Multiplier-Tabelle, matchExerciseToReference, calculateSuggestedWeight, calibrateAllExercises, getSmartPreset, getDefaultReviewTriggers |
+| `src/features/workouts/components/CalibrationWizard.tsx` | NEU | 3-Screen Wizard (Experience/Weights/Settings), speichert review_config + ai_supervised + exercise weights |
+| `src/features/workouts/hooks/useTrainingPlans.ts` | ERWEITERT | useUpdateTrainingPlanCalibration Mutation |
+| `src/features/workouts/components/TrainingPlanView.tsx` | ERWEITERT | CalibrationWizard Import, Auto-Trigger, Amber-Badge Button |
+| `src/i18n/de.ts` | ERWEITERT | calibration: { ... } (31 Keys) |
+| `src/i18n/en.ts` | ERWEITERT | calibration: { ... } (31 Keys, EN) |
+| `src/i18n/{ar,es,fa,...,zh}.ts` | ERWEITERT | calibration: { ... } (EN Fallback) |
+| `supabase/migrations/20260306000001_ai_trainer_review.sql` | GEFIXT | Index plan_id → user_id |
 
-# Migration ausfuehren
-psql -U supabase_admin -d postgres -f /path/to/migration.sql
+## Was steht als naechstes an?
 
-# Frontend Deploy
-npm run build
-ssh -i "C:/Users/test/.ssh/id_ed25519" root@46.225.228.12 'rm -rf /opt/fitbuddy/frontend/assets/*'
-scp -i "C:/Users/test/.ssh/id_ed25519" -r dist/* root@46.225.228.12:/opt/fitbuddy/frontend/
+### Block B (Rest):
+- **RIR-Feedback nach erstem Satz** — Nur in allererster Session, "Zu leicht / Passt / Zu schwer"
+- **Auto-Kalibrierung** — Max-Reps-Pattern Erkennung (Obergrenze 2+ Sessions → Auto: +2.5/5kg)
 
-# PostgREST Reload
-docker restart fitbuddy-rest-1
-```
+### Block C (Rest):
+- **Post-Session-Analyse Hook** — Plateau-Erkennung, RPE-Drift, Volume/Muskelgruppe
+- **Early Triggers** — Plateau, Pain, Sleep, Missed Sessions
+- **Mesozyklus-Review** — Buddy-Nachricht am Review-Tag
+- **PED-Phasen-Sync** — CycleWidget → review_config
 
-## Naechster Feature-Block (nach Deploy)
-
-**Block B: CalibrationWizard** — Startgewicht-Onboarding
-- 3-Screen Flow: Erfahrung → BW-Multiplier Preview → Review-Settings
-- Konzept: `docs/KONZEPT_KI_TRAINER.md` Lines 164-184
-- BW-Multiplier in: `src/lib/ai/skills/trainerReview.ts` Lines 47-65
+### Block D (Rest):
+- **Buddy-Nachfrage** — "Soll ich mittracken?" bei manuellen Plaenen
+- **Review-Dialog** — Vorschlag-Ansicht (Annehmen/Anpassen/Ablehnen)
 
 ## Git-Status
 
 - Branch: develop
-- Up to date mit origin/develop
-- Letzter Commit: d73392d
-- Untracked: `nul` (Windows-Artefakt, ignorieren)
+- Letzter Commit: noch zu committen (Block B CalibrationWizard)
+- Uncommitted: useCalibration.ts, CalibrationWizard.tsx, useTrainingPlans.ts, TrainingPlanView.tsx, 17x i18n, Migration-Fix
 
 ---
 
-## Log
-
-- **Schritt 2 erledigt (DB-Migration):**
-  - 4 ALTER TABLEs erfolgreich (ai_supervised, review_config, session_feedback, ai_trainer_enabled)
-  - Index 1 (training_plans) OK
-  - Index 2 FIX: `plan_id` existiert nicht in workouts → `user_id` verwendet
-  - Lokale Migration ebenfalls gefixt (`20260306000001_ai_trainer_review.sql`)
-  - Verifiziert: Alle 4 Spalten auf Production vorhanden
-- **Schritt 3 erledigt (Frontend Deploy):**
-  - `npm run build` — 94 PWA Precache Entries, 26s Build-Zeit
-  - Checks: fudda.de in 13 JS-Dateien ✅, localhost 0 Treffer ✅
-  - Alte Assets geloescht, neue hochgeladen via scp
-- **Schritt 4 erledigt (PostgREST Reload):**
-  - `docker restart fitbuddy-rest-1` — Up + Running
-  - fudda.de HTTP 200 ✅
-  - Alle Docker-Container laufen
-
-## Status: Deploy KOMPLETT ✅
-
-v12.57 + v12.58 sind jetzt LIVE auf fudda.de.
-Naechster Schritt: Block B CalibrationWizard implementieren.
-
-*Erstellt: 2026-03-07, Deploy-Session abgeschlossen*
+*Aktualisiert: 2026-03-07, Block B CalibrationWizard implementiert + deployed*
