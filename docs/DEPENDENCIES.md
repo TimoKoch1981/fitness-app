@@ -324,7 +324,7 @@ Der Fehler zeigt sich erst zur Laufzeit im Browser.
 | buddy | X | X | X | - | X | - | X |
 | meals | X | X | X | X (Kalorien) | - | X | X |
 | medical | X | X | X | X (BP, BMR) | - | X | X |
-| workouts | X | X | X | X (TDEE) | - | - | X |
+| workouts | X | X | X | X (TDEE) | X (Deviations) | - | X |
 | nutrition | X | X | X | X (Protein) | - | - | X |
 | sleep | X | X | X | - | - | - | X |
 | body | X | X | X | X (BMI) | - | X | X |
@@ -912,3 +912,4 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | 2026-03-02 | 1.0 | Claude / Entwickler | Initiale Erstellung nach .env-Production-Bug |
 | 2026-03-06 | 1.1 | Claude / Entwickler | KI-Trainer Review-System: ai_supervised, review_config, session_feedback, ai_trainer_enabled, trainerReview Skill (17 Skills) |
 | 2026-03-07 | 1.2 | Claude / Entwickler | Block B CalibrationWizard: useCalibration.ts (BW-Multiplier), CalibrationWizard.tsx (3-Screen), useUpdateTrainingPlanCalibration Mutation, TrainingPlanView Auto-Trigger, 31 calibration i18n-Keys (17 Sprachen) |
+| 2026-03-07 | 1.3 | Claude / Entwickler | KI-Trainer Blocks B+C+D komplett: Post-Session-Analyse (postSessionAnalysis.ts), Double Progression (doubleProgression.ts), RIR-Feedback (RIRFeedbackDialog.tsx, useIsFirstSessionForPlan.ts, calculateRIRAdjustment), 6 Early Triggers + 6 Suggestion Chips (deviations.ts), PED-Phasen-Sync (usePEDPhaseSync.ts), Mesozyklus-Review (useMesocycleCheck.ts, mesocycleReview.ts), Buddy-Nachfrage (useAISupervisedOffer.ts), Review-Dialog (ReviewDialog.tsx, reviewChanges.ts, useApplyReviewChanges.ts, useRecentWorkoutsForPlan.ts), 8 rirFeedback i18n-Keys (17 Sprachen) |

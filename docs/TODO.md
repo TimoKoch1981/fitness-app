@@ -353,23 +353,23 @@
 - [x] ~~**DB-Migration**~~ ✅ — `ai_supervised` + `review_config` JSONB in training_plans, `session_feedback` JSONB in workouts, `ai_trainer_enabled` in profiles
 - [x] ~~**Training Agent**~~ ✅ — Skill-ID `trainerReview` zu Agent-Mapping (staticSkills) + SKILL_REGISTRY
 
-#### Block B: Startgewicht-Onboarding
+#### Block B: Startgewicht-Onboarding ✅ (2026-03-07)
 - [x] ~~**CalibrationWizard Komponente**~~ ✅ (2026-03-07) — 3-Screen Flow (Erfahrung → BW-Multiplier Gewichte-Preview → Review-Settings), useCalibration.ts (10 Uebungen × 3 Level × 2 Gender), Fuzzy-Match, Smart Presets, Auto-Trigger bei ai_supervised Plans
-- [ ] **RIR-Feedback nach erstem Satz** — Nur in allererster Session, "Zu leicht / Passt / Zu schwer"
-- [ ] **Auto-Kalibrierung** — Max-Reps-Pattern Erkennung (Obergrenze 2+ Sessions → Auto: +2.5/5kg)
+- [x] ~~**RIR-Feedback nach erstem Satz**~~ ✅ (2026-03-07) — RIRFeedbackDialog.tsx (3 Buttons: Zu leicht/Passt/Zu schwer), useIsFirstSessionForPlan, calculateRIRAdjustment (+/-15%), ExerciseTracker Integration, 17 Sprachen
+- [x] ~~**Auto-Kalibrierung (Double Progression)**~~ ✅ (2026-03-07) — doubleProgression.ts (Obergrenze 2x→+2.5/5kg, Untergrenze 2x→-5%), parseRepRange(), Compound-Erkennung via matchExerciseToReference()
 
-#### Block C: Review Engine
-- [ ] **Post-Session-Analyse Hook** — Completion Rate, Plateau-Erkennung, RPE-Drift, Volume/Muskelgruppe
+#### Block C: Review Engine ✅ (2026-03-07)
+- [x] ~~**Post-Session-Analyse**~~ ✅ (2026-03-07) — postSessionAnalysis.ts: analyzeSession() (Completion Rate, Plateau 3+, RPE-Drift, Volumen/Muskel), integriert in useSaveWorkoutSession Step 3
 - [x] ~~**Post-Session-Feedback UI**~~ ✅ (2026-03-06, v12.58) — 4 Buttons + optionales Joint Pain (12 Koerperbereiche, Schmerzstaerke 1-5), ein/ausschaltbar via Profil
-- [ ] **Early Triggers** — In Deviations Engine: Plateau, Pain, Sleep, Missed Sessions
-- [ ] **Mesozyklus-Review** — Buddy-initiierte Nachricht am Review-Tag mit Vorschlag-Dialog (Annehmen/Anpassen/Ablehnen)
-- [ ] **PED-Phasen-Synchronisation** — CycleWidget-Status → review_config automatisch anpassen
+- [x] ~~**Early Triggers**~~ ✅ (2026-03-07) — 6 neue Trigger in deviations.ts: Plateau, Low Completion, Joint Pain, RPE Drift, Sleep Deficit, Missed Sessions + 6 Suggestion Chips
+- [x] ~~**Mesozyklus-Review**~~ ✅ (2026-03-07) — useMesocycleCheck (currentWeek, reviewDue), mesocycleReview.ts (generateReviewSummary, 4 Empfehlungen), ReviewDialog.tsx (Stats + Aenderungen + 3 Buttons), useSaveWorkoutSession Step 4 (updateMesocycleWeek)
+- [x] ~~**PED-Phasen-Synchronisation**~~ ✅ (2026-03-07) — usePEDPhaseSync.ts: Auto-Sync review_config bei cycle_status-Wechsel (blast/cruise/pct), Mesozyklus-Reset
 
-#### Block D: "Supervised by AI" UI
+#### Block D: "Supervised by AI" UI ✅ (2026-03-07)
 - [x] ~~**TrainingPlanView**~~ ✅ (2026-03-06, v12.58) — AI-Trainer Status-Badge (Indigo, Mesozyklus-Woche)
 - [x] ~~**Profil-Toggle**~~ ✅ (2026-03-06, v12.58) — Global "KI-Trainer" Toggle in ProfilePage + useUpdateProfile
-- [ ] **Buddy-Nachfrage** — Bei manuellen Plaenen: "Soll ich mittracken?"
-- [ ] **Review-Dialog** — Vorschlag-Ansicht mit Annehmen/Anpassen/Ablehnen
+- [x] ~~**Buddy-Nachfrage**~~ ✅ (2026-03-07) — useAISupervisedOffer.ts (shouldOffer, acceptOffer, dismissOffer), Teal Banner in TrainingPlanView, localStorage-Flag pro Plan
+- [x] ~~**Review-Dialog**~~ ✅ (2026-03-07) — ReviewDialog.tsx (4 Stats, Empfehlung, Aenderungen-Detail), reviewChanges.ts (Deload -40%, Swap SWAP_SUGGESTIONS, Overhaul -20%), useApplyReviewChanges.ts (Mutation + Mesozyklus-Reset)
 
 ### P3 — Irgendwann (braucht Cloud-Deployment)
 
@@ -469,4 +469,4 @@
 - [x] ~~**Agent-Routing: Thread-Override Fix**~~ ✅ — Smart-Routing mit detectIntent() Confidence > 0.3
 - [x] ~~**SKILLS_LEARNINGS: Email-Confirmation + DNS-Anleitung**~~ ✅ — Wiederverwendbare Resend/Hetzner/Strato Doku
 
-*Letzte Aktualisierung: 2026-03-07 (Block B CalibrationWizard implementiert + deployed)*
+*Letzte Aktualisierung: 2026-03-07 (KI-Trainer Blocks B+C+D KOMPLETT — 12 neue Dateien, 6 geaenderte Dateien, deployed auf fudda.de)*

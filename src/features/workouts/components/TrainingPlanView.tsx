@@ -10,6 +10,10 @@ import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
 import { CalibrationWizard } from './CalibrationWizard';
 import { usePEDPhaseSync } from '../hooks/usePEDPhaseSync';
 import { useMesocycleCheck } from '../hooks/useMesocycleCheck';
+import { useAISupervisedOffer } from '../hooks/useAISupervisedOffer';
+import { useProfile } from '../../auth/hooks/useProfile';
+import { ReviewDialog } from './ReviewDialog';
+import { useRecentWorkoutsForPlan } from '../hooks/useRecentWorkoutsForPlan';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -39,6 +43,17 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
 
   // Mesocycle check — determines if a review is due
   const mesocycleStatus = useMesocycleCheck(plan?.review_config);
+
+  // AI Trainer offer — suggest enabling for non-supervised plans
+  const { data: profile } = useProfile();
+  const aiOffer = useAISupervisedOffer(plan, profile?.ai_trainer_enabled);
+  const [aiOfferDismissed, setAiOfferDismissed] = useState(false);
+
+  // Review Dialog state
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const { data: recentWorkouts } = useRecentWorkoutsForPlan(
+    plan?.ai_supervised ? plan?.id : undefined,
+  );
 
   // Auto-trigger CalibrationWizard for uncalibrated plans
   useEffect(() => {
@@ -255,18 +270,52 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                   : `Week ${mesocycleStatus.currentWeek} of ${mesocycleStatus.totalWeeks} reached. Time for a progress review.`}
               </p>
               <button
-                onClick={() => navigate('/buddy', {
-                  state: {
-                    autoMessage: language === 'de'
-                      ? 'Mein Mesozyklus ist abgeschlossen. Bitte analysiere meinen Fortschritt und empfehle mir die nächsten Schritte.'
-                      : 'My mesocycle is complete. Please analyze my progress and recommend next steps.',
-                  },
-                })}
+                onClick={() => setShowReviewDialog(true)}
                 className="mt-2 text-xs bg-indigo-500 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition-colors inline-flex items-center gap-1"
               >
-                <MessageCircle className="h-3 w-3" />
+                <BarChart3 className="h-3 w-3" />
                 {language === 'de' ? 'Review starten' : 'Start Review'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Trainer Offer Banner (for non-supervised plans) */}
+      {aiOffer.shouldOffer && !aiOfferDismissed && (
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-teal-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-teal-900">
+                {language === 'de' ? 'KI-Trainer aktivieren?' : 'Enable AI Trainer?'}
+              </h4>
+              <p className="text-xs text-teal-600 mt-0.5">
+                {language === 'de'
+                  ? 'Soll ich diesen Plan als KI-Trainer begleiten? Automatische Gewichtsanpassung, Fortschrittsanalyse und Mesozyklus-Reviews.'
+                  : 'Should I coach this plan as AI Trainer? Automatic weight adjustment, progress analysis, and mesocycle reviews.'}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => {
+                    aiOffer.acceptOffer();
+                    setShowCalibration(true);
+                  }}
+                  disabled={aiOffer.isAccepting}
+                  className="text-xs bg-teal-500 text-white px-3 py-1.5 rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                >
+                  {language === 'de' ? 'Ja, aktivieren' : 'Yes, enable'}
+                </button>
+                <button
+                  onClick={() => {
+                    aiOffer.dismissOffer();
+                    setAiOfferDismissed(true);
+                  }}
+                  className="text-xs text-teal-600 px-3 py-1.5 rounded-lg hover:bg-teal-100 transition-colors"
+                >
+                  {language === 'de' ? 'Nein, danke' : 'No, thanks'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -307,6 +356,15 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           plan={plan}
           onComplete={() => setShowCalibration(false)}
           onSkip={() => setShowCalibration(false)}
+        />
+      )}
+
+      {/* Review Dialog */}
+      {showReviewDialog && plan && recentWorkouts && (
+        <ReviewDialog
+          plan={plan}
+          recentWorkouts={recentWorkouts}
+          onClose={() => setShowReviewDialog(false)}
         />
       )}
     </div>
