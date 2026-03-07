@@ -1707,4 +1707,14 @@ export const zh: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: '重量感觉如何？',
+    tooLight: '太轻',
+    tooLightHint: '还能做4+次',
+    justRight: '刚好',
+    justRightHint: '还能做2-3次',
+    tooHeavy: '太重',
+    tooHeavyHint: '勉强完成',
+    skipHint: '仅首次训练 — 之后自动校准',
+  },
 } as const;

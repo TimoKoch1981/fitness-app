@@ -1707,4 +1707,14 @@ export const tr: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Ağırlık nasıldı?',
+    tooLight: 'Çok hafif',
+    tooLightHint: '4+ tekrar kaldı',
+    justRight: 'Tam kararında',
+    justRightHint: '2-3 tekrar kaldı',
+    tooHeavy: 'Çok ağır',
+    tooHeavyHint: 'Zar zor yaptım',
+    skipHint: 'Sadece ilk seans — sonra otomatik',
+  },
 } as const;

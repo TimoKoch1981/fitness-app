@@ -12,8 +12,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
 import type { ActiveWorkoutState } from '../context/ActiveWorkoutContext';
-import type { PlanExercise } from '../../../types/health';
+import type { PlanExercise, SessionFeedback } from '../../../types/health';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
+import { analyzeSession } from '../utils/postSessionAnalysis';
+import { analyzeDoubleProgression } from '../utils/doubleProgression';
 
 interface SaveSessionInput {
   session: ActiveWorkoutState;
@@ -93,6 +95,9 @@ export function useSaveWorkoutSession() {
       // Step 2: Auto-progression — update plan weights where user went higher
       await applyAutoProgression(session);
 
+      // Step 3: Post-session analysis — plateau detection, volume, RPE drift
+      await runPostSessionAnalysis(session, workout.id);
+
       return workout;
     },
     onSuccess: () => {
@@ -147,5 +152,94 @@ async function applyAutoProgression(session: ActiveWorkoutState): Promise<void> 
       .from('training_plan_days')
       .update({ exercises: planExercises })
       .eq('id', session.planDayId);
+  }
+}
+
+/**
+ * Post-session analysis: Runs after auto-progression.
+ * Loads recent workout history, analyzes patterns, and stores results
+ * in session_feedback.auto_calculated JSONB.
+ *
+ * Also runs Double Progression check for weight adjustment suggestions.
+ */
+async function runPostSessionAnalysis(
+  session: ActiveWorkoutState,
+  workoutId: string,
+): Promise<void> {
+  try {
+    if (!session.planId) return;
+
+    // Load last 5 workouts for this plan (excluding the one we just saved)
+    const { data: recentWorkouts } = await supabase
+      .from('workouts')
+      .select('*')
+      .eq('plan_id', session.planId)
+      .neq('id', workoutId)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!recentWorkouts) return;
+
+    // 1. Run post-session analysis
+    const analysis = analyzeSession(
+      session.exercises,
+      recentWorkouts,
+    );
+
+    // 2. Run double progression check
+    let progressionSuggestions: ReturnType<typeof analyzeDoubleProgression> = [];
+    if (session.planDayId) {
+      // Load plan days for double progression
+      const { data: planDays } = await supabase
+        .from('training_plan_days')
+        .select('*')
+        .eq('plan_id', session.planId);
+
+      if (planDays && planDays.length > 0) {
+        // Include current workout in history for DP analysis
+        const allWorkouts = [
+          { session_exercises: session.exercises, session_feedback: null } as unknown as import('../../../types/health').Workout,
+          ...recentWorkouts,
+        ];
+        progressionSuggestions = analyzeDoubleProgression(allWorkouts, planDays);
+      }
+    }
+
+    // 3. Read existing session_feedback (user may have already submitted feelings)
+    const { data: currentWorkout } = await supabase
+      .from('workouts')
+      .select('session_feedback')
+      .eq('id', workoutId)
+      .single();
+
+    const existingFeedback = (currentWorkout?.session_feedback as SessionFeedback | null) ?? {};
+
+    // 4. Merge auto-calculated analysis into session_feedback
+    const updatedFeedback: Partial<SessionFeedback> = {
+      ...existingFeedback,
+      auto_calculated: {
+        volume_per_muscle: analysis.volume_per_muscle,
+        plateau_exercises: analysis.plateau_exercises,
+        rpe_drift_exercises: analysis.rpe_drift_exercises,
+        ...(progressionSuggestions.length > 0 && {
+          progression_suggestions: progressionSuggestions.map(s => ({
+            exercise: s.exerciseName,
+            current: s.currentWeight,
+            suggested: s.suggestedWeight,
+            reason: s.reason,
+            direction: s.direction,
+          })),
+        }),
+      },
+      completion_rate: analysis.completion_rate,
+    };
+
+    await supabase
+      .from('workouts')
+      .update({ session_feedback: updatedFeedback })
+      .eq('id', workoutId);
+  } catch (err) {
+    // Fire-and-forget: Don't block session save on analysis errors
+    console.warn('[PostSessionAnalysis] Error:', err);
   }
 }

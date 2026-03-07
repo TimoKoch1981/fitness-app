@@ -1749,6 +1749,16 @@ export const de = {
     stepOf: 'Schritt {step} von {total}',
     startCalibration: 'Kalibrierung starten',
   },
+  rirFeedback: {
+    title: 'Wie war das Gewicht?',
+    tooLight: 'Zu leicht',
+    tooLightHint: '4+ Wdh Reserve',
+    justRight: 'Passt',
+    justRightHint: '2-3 Wdh Reserve',
+    tooHeavy: 'Zu schwer',
+    tooHeavyHint: 'Kaum geschafft',
+    skipHint: 'Nur in der ersten Session — danach automatisch',
+  },
 } as const;
 
 // Recursively widen string literal types to `string` for i18n compatibility

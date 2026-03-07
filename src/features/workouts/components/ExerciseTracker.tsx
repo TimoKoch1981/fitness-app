@@ -4,7 +4,7 @@
  * Shows exercise name, info button, navigation, and modify options.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   ChevronLeft, ChevronRight, SkipForward, Video,
   MoreVertical, Trash2, Plus, Info, Clock, Play,
@@ -18,7 +18,9 @@ import { ExerciseTimer } from './ExerciseTimer';
 import { ExerciseVideoModal } from './ExerciseVideoModal';
 import { ExerciseModifyDialog } from './ExerciseModifyDialog';
 import { AddExerciseDialog } from './AddExerciseDialog';
+import { RIRFeedbackDialog } from './RIRFeedbackDialog';
 import { suggestRestTime } from '../utils/suggestRestTimes';
+import { useIsFirstSessionForPlan } from '../hooks/useIsFirstSessionForPlan';
 import type { Workout, WorkoutExerciseResult } from '../../../types/health';
 
 interface ExerciseTrackerProps {
@@ -30,7 +32,7 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const isDE = language === 'de';
   const {
     state, logSet, skipSet, nextExercise, prevExercise,
-    skipExercise, goToExercise, markSetReady,
+    skipExercise, goToExercise, markSetReady, editExercise,
   } = useActiveWorkout();
 
   const { data: catalog } = useExerciseCatalog();
@@ -38,6 +40,27 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
   const [showModify, setShowModify] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
+  // RIR Feedback state
+  const [rirDismissed, setRirDismissed] = useState<Set<number>>(() => new Set());
+  const [showRIRDialog, setShowRIRDialog] = useState(false);
+
+  // Check if this is the first session for this plan (RIR only in first session)
+  const { data: firstSessionData } = useIsFirstSessionForPlan(state.planId);
+  const isFirstSession = firstSessionData?.isFirstSession ?? false;
+
+  // RIR dialog should show when: first session + strength exercise with weight + first set just completed + not dismissed
+  const shouldShowRIR = useCallback((exIdx: number) => {
+    if (!isFirstSession) return false;
+    if (rirDismissed.has(exIdx)) return false;
+    const ex = state.exercises[exIdx];
+    if (!ex || ex.skipped) return false;
+    // Only for strength exercises with weight
+    if (!ex.sets[0]?.target_weight_kg) return false;
+    // Show after first set is completed
+    const firstSet = ex.sets[0];
+    return firstSet.completed === true;
+  }, [isFirstSession, rirDismissed, state.exercises]);
 
   const exercise = state.exercises[state.currentExerciseIndex];
 
@@ -77,8 +100,32 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
 
   const handleLogSetAndAdvance = (exIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => {
     logSet(exIdx, setIdx, reps, weightKg, notes);
-    // If timer enabled + not last set → phase goes to 'rest' via reducer
-    // If last set → need to check in parent
+
+    // RIR feedback: After first set (setIdx===0) → show dialog if conditions met
+    if (setIdx === 0 && shouldShowRIR(exIdx)) {
+      setShowRIRDialog(true);
+    }
+  };
+
+  const handleRIRAdjust = (newWeight: number) => {
+    const exIdx = state.currentExerciseIndex;
+    const ex = state.exercises[exIdx];
+    if (!ex) return;
+
+    // Build setOverrides: update target_weight_kg for all non-completed sets
+    const overrides = ex.sets.map((s) => ({
+      target_weight_kg: s.completed ? (s.actual_weight_kg ?? s.target_weight_kg) : newWeight,
+      target_reps: s.target_reps,
+    }));
+    editExercise(exIdx, { setOverrides: overrides });
+
+    setRirDismissed(prev => new Set(prev).add(exIdx));
+    setShowRIRDialog(false);
+  };
+
+  const handleRIRDismiss = () => {
+    setRirDismissed(prev => new Set(prev).add(state.currentExerciseIndex));
+    setShowRIRDialog(false);
   };
 
   const handleTimedComplete = (actualSeconds: number) => {
@@ -298,6 +345,16 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
       {/* Add Exercise Dialog */}
       {showAdd && (
         <AddExerciseDialog onClose={() => setShowAdd(false)} />
+      )}
+
+      {/* RIR Feedback Dialog (first session only, after first set) */}
+      {showRIRDialog && exercise.sets[0]?.target_weight_kg != null && (
+        <RIRFeedbackDialog
+          exerciseName={exercise.name}
+          currentWeight={exercise.sets[0].actual_weight_kg ?? exercise.sets[0].target_weight_kg}
+          onAdjust={handleRIRAdjust}
+          onDismiss={handleRIRDismiss}
+        />
       )}
     </div>
   );

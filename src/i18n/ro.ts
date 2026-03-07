@@ -1707,4 +1707,14 @@ export const ro: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Cum a fost greutatea?',
+    tooLight: 'Prea ușoară',
+    tooLightHint: '4+ repetări în rezervă',
+    justRight: 'Perfectă',
+    justRightHint: '2-3 repetări în rezervă',
+    tooHeavy: 'Prea grea',
+    tooHeavyHint: 'Abia am reușit',
+    skipHint: 'Doar prima sesiune — auto-calibrare după',
+  },
 } as const;

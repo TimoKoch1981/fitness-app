@@ -284,3 +284,27 @@ export function getDefaultReviewTriggers(): ReviewConfig['review_triggers'] {
     rpe_drift_threshold: 2,
   };
 }
+
+// ---------------------------------------------------------------------------
+// RIR (Reps in Reserve) Feedback — Weight Adjustment
+// ---------------------------------------------------------------------------
+
+/**
+ * Calculate weight adjustment based on RIR feedback (first session only).
+ *
+ * - "lighter" (felt too light, 4+ reps in reserve) → +15% (more weight needed)
+ * - "heavier" (barely made it, 0-1 RIR) → −15% (less weight needed)
+ *
+ * Result is rounded to nearest 2.5 kg step, minimum 2.5 kg.
+ * Concept: KONZEPT_KI_TRAINER.md Block B, RIR-Feedback
+ */
+export function calculateRIRAdjustment(
+  currentWeight: number,
+  direction: 'lighter' | 'heavier',
+  _exerciseName?: string,
+): number {
+  const factor = direction === 'lighter' ? 1.15 : 0.85;
+  const raw = currentWeight * factor;
+  const rounded = Math.round(raw / 2.5) * 2.5;
+  return Math.max(rounded, 2.5);
+}

@@ -1707,4 +1707,14 @@ export const fil: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Kumusta ang timbang?',
+    tooLight: 'Masyadong magaan',
+    tooLightHint: '4+ reps na natitira',
+    justRight: 'Tama lang',
+    justRightHint: '2-3 reps na natitira',
+    tooHeavy: 'Masyadong mabigat',
+    tooHeavyHint: 'Halos hindi nagawa',
+    skipHint: 'Unang session lang — auto-calibrate pagkatapos',
+  },
 } as const;

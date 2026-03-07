@@ -1707,4 +1707,14 @@ export const ja: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: '重さはどうでしたか？',
+    tooLight: '軽すぎる',
+    tooLightHint: 'あと4回以上できた',
+    justRight: 'ちょうどいい',
+    justRightHint: 'あと2-3回できた',
+    tooHeavy: '重すぎる',
+    tooHeavyHint: 'ギリギリだった',
+    skipHint: '初回セッションのみ — 以降は自動調整',
+  },
 } as const;

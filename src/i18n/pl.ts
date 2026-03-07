@@ -1707,4 +1707,14 @@ export const pl: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Jak był ciężar?',
+    tooLight: 'Za lekki',
+    tooLightHint: '4+ powtórzeń w zapasie',
+    justRight: 'W sam raz',
+    justRightHint: '2-3 powtórzenia w zapasie',
+    tooHeavy: 'Za ciężki',
+    tooHeavyHint: 'Ledwo dałem radę',
+    skipHint: 'Tylko pierwsza sesja — potem automatycznie',
+  },
 } as const;

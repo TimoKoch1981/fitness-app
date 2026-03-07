@@ -1707,4 +1707,14 @@ export const fr: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Comment était le poids ?',
+    tooLight: 'Trop léger',
+    tooLightHint: '4+ reps en réserve',
+    justRight: 'Parfait',
+    justRightHint: '2-3 reps en réserve',
+    tooHeavy: 'Trop lourd',
+    tooHeavyHint: 'À peine réussi',
+    skipHint: 'Première session uniquement — auto-calibrage ensuite',
+  },
 } as const;

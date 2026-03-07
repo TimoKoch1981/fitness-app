@@ -1707,4 +1707,14 @@ export const uk: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'Як була вага?',
+    tooLight: 'Занадто легка',
+    tooLightHint: '4+ повторень у запасі',
+    justRight: 'Саме те',
+    justRightHint: '2-3 повторення у запасі',
+    tooHeavy: 'Занадто важка',
+    tooHeavyHint: 'Ледве впорався',
+    skipHint: 'Тільки перша тренування — далі автоматично',
+  },
 } as const;

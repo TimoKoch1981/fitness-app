@@ -1707,4 +1707,14 @@ export const fa: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: 'وزن چطور بود؟',
+    tooLight: 'خیلی سبک',
+    tooLightHint: '+۴ تکرار باقی',
+    justRight: 'مناسب',
+    justRightHint: '۲-۳ تکرار باقی',
+    tooHeavy: 'خیلی سنگین',
+    tooHeavyHint: 'به سختی انجام دادم',
+    skipHint: 'فقط جلسه اول — بعد از آن خودکار',
+  },
 } as const;

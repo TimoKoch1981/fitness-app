@@ -1707,4 +1707,14 @@ export const ko: TranslationKeys = {
     stepOf: 'Step {step} of {total}',
     startCalibration: 'Start calibration',
   },
+  rirFeedback: {
+    title: '무게는 어땠나요?',
+    tooLight: '너무 가벼움',
+    tooLightHint: '4회 이상 더 가능',
+    justRight: '적당함',
+    justRightHint: '2-3회 더 가능',
+    tooHeavy: '너무 무거움',
+    tooHeavyHint: '간신히 완료',
+    skipHint: '첫 세션만 — 이후 자동 조정',
+  },
 } as const;
