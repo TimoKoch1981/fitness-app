@@ -50,7 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_training_plans_ai_supervised
   WHERE ai_supervised = true;
 
 CREATE INDEX IF NOT EXISTS idx_workouts_session_feedback
-  ON workouts(plan_id, created_at)
+  ON workouts(user_id, created_at)
   WHERE session_feedback IS NOT NULL;
 
 -- Audit-Trigger fuer review_config Aenderungen (DSGVO)
