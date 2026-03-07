@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddCycleLog, getCyclePhaseEmoji } from '../hooks/useMenstrualCycle';
@@ -15,15 +15,43 @@ const PHASES: CyclePhase[] = ['menstruation', 'follicular', 'ovulation', 'luteal
 const SYMPTOMS: CycleSymptom[] = [
   'cramping', 'bloating', 'mood_changes', 'fatigue',
   'acne', 'headache', 'breast_tenderness', 'water_retention',
+  'sleep_issues', 'hot_flashes', 'irritability', 'back_pain',
+  'joint_pain', 'nausea', 'concentration_issues', 'libido_changes',
+  'appetite_changes', 'skin_changes', 'dizziness', 'urinary_frequency',
 ];
 
 const MOOD_EMOJIS = ['😢', '😕', '😐', '🙂', '😊'];
 const ENERGY_EMOJIS = ['🪫', '😴', '😐', '⚡', '🔥'];
 
+const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const WEEKDAY_SHORT_EN = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+/** Generate array of last N days as ISO strings */
+function getLastNDays(n: number): string[] {
+  const days: string[] = [];
+  const now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+  return days;
+}
+
+function getWeekdayIndex(isoDate: string): number {
+  const d = new Date(isoDate + 'T12:00:00');
+  return (d.getDay() + 6) % 7; // Mo=0 .. So=6
+}
+
+function getDayNum(isoDate: string): number {
+  return parseInt(isoDate.split('-')[2], 10);
+}
+
 export function AddCycleLogDialog({ open, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const addLog = useAddCycleLog();
 
+  const [selectedDate, setSelectedDate] = useState(today());
   const [phase, setPhase] = useState<CyclePhase>('menstruation');
   const [flowIntensity, setFlowIntensity] = useState<FlowIntensity>('normal');
   const [symptoms, setSymptoms] = useState<CycleSymptom[]>([]);
@@ -31,6 +59,10 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
   const [energy, setEnergy] = useState(3);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+
+  // Last 14 days for date picker (Clue-style week slider)
+  const dateDays = useMemo(() => getLastNDays(14), []);
+  const weekdayLabels = language === 'de' ? WEEKDAY_SHORT : WEEKDAY_SHORT_EN;
 
   if (!open) return null;
 
@@ -44,7 +76,7 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
 
     try {
       await addLog.mutateAsync({
-        date: today(),
+        date: selectedDate,
         phase,
         flow_intensity: phase === 'menstruation' ? flowIntensity : undefined,
         symptoms: symptoms.length > 0 ? symptoms : undefined,
@@ -80,6 +112,44 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {/* Date Picker — Clue-style week slider */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium text-gray-500">
+                {language === 'de' ? 'Datum' : 'Date'}
+              </label>
+              <span className="text-xs text-gray-400">
+                {selectedDate === today()
+                  ? (language === 'de' ? 'Heute' : 'Today')
+                  : new Date(selectedDate + 'T12:00:00').toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'short' })}
+              </span>
+            </div>
+            <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
+              {dateDays.map((d) => {
+                const isToday = d === today();
+                const isSelected = d === selectedDate;
+                const wdIdx = getWeekdayIndex(d);
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setSelectedDate(d)}
+                    className={`flex flex-col items-center min-w-[40px] py-1.5 px-1 rounded-lg transition-all text-xs ${
+                      isSelected
+                        ? 'bg-rose-500 text-white ring-2 ring-rose-300'
+                        : isToday
+                          ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-200'
+                          : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-[9px] font-medium opacity-70">{weekdayLabels[wdIdx]}</span>
+                    <span className="text-sm font-semibold">{getDayNum(d)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Phase Selection */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-2">
@@ -145,6 +215,18 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
                   headache: 'headache',
                   breast_tenderness: 'breastTenderness',
                   water_retention: 'waterRetention',
+                  sleep_issues: 'sleepIssues',
+                  hot_flashes: 'hotFlashes',
+                  urinary_frequency: 'urinaryFrequency',
+                  concentration_issues: 'concentrationIssues',
+                  libido_changes: 'libidoChanges',
+                  back_pain: 'backPain',
+                  joint_pain: 'jointPain',
+                  nausea: 'nausea',
+                  dizziness: 'dizziness',
+                  appetite_changes: 'appetiteChanges',
+                  skin_changes: 'skinChanges',
+                  irritability: 'irritability',
                 };
                 return (
                   <button

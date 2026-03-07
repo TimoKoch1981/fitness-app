@@ -70,12 +70,12 @@ interface AgentSkillMap {
  */
 const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   nutrition: {
-    staticSkills: ['nutrition', 'supplements', 'nutritionScience'],
-    userSkills: ['profile', 'nutrition_log', 'substance_protocol'],
+    staticSkills: ['nutrition', 'supplements', 'nutritionScience', 'femaleFitness'],
+    userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'cycle_log'],
   },
   training: {
-    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'trainerReview'],
-    userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment'],
+    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'trainerReview', 'femaleFitness'],
+    userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment', 'cycle_log'],
   },
   substance: {
     staticSkills: ['substances', 'anabolics', 'pct'],
@@ -94,12 +94,12 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'bodyComposition'],
-    userSkills: ['profile', 'substance_protocol', 'body_progress'],
+    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'bodyComposition', 'femaleFitness'],
+    userSkills: ['profile', 'substance_protocol', 'body_progress', 'cycle_log'],
   },
   general: {
     staticSkills: ['glossary', 'bodyComposition'],  // glossary + bodyComposition for common KFA questions
-    userSkills: ['daily_summary'],
+    userSkills: ['daily_summary', 'cycle_log'],
   },
 };
 

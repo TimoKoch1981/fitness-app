@@ -63,6 +63,8 @@ interface UpdateProfileInput {
   data_retention_months?: number | null;
   // KI-Trainer Review System
   ai_trainer_enabled?: boolean;
+  // Cycle Tracking
+  cycle_tracking_enabled?: boolean;
 }
 
 export function useUpdateProfile() {

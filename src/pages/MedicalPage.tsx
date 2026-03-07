@@ -22,6 +22,8 @@ import { useSleepLogs, useDeleteSleepLog, formatSleepDuration } from '../feature
 import { AddSleepDialog } from '../features/sleep/components/AddSleepDialog';
 import { useMenstrualCycleLogs, useDeleteCycleLog, getCyclePhaseEmoji } from '../features/medical/hooks/useMenstrualCycle';
 import { AddCycleLogDialog } from '../features/medical/components/AddCycleLogDialog';
+import { CycleTimeline } from '../features/medical/components/CycleTimeline';
+import { CycleInsightsCard } from '../features/medical/components/CycleInsightsCard';
 import { useProfile } from '../features/auth/hooks/useProfile';
 import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
 import { useSymptomLogs, useDeleteSymptomLog, getSymptomEmoji, getSeverityEmoji } from '../features/medical/hooks/useSymptomLogs';
@@ -284,7 +286,7 @@ export function MedicalPage() {
         </div>
 
         {/* Menstrual Cycle Section — only for female/other */}
-        {showCycleTracker && (
+        {showCycleTracker && (<>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <div className="flex items-center gap-2">
@@ -349,7 +351,13 @@ export function MedicalPage() {
               </div>
             )}
           </div>
-        )}
+
+          {/* Cycle Timeline Visualization */}
+          <CycleTimeline cycleTrackingEnabled />
+
+          {/* Cycle Pattern Insights */}
+          <CycleInsightsCard cycleTrackingEnabled />
+        </>)}
 
         {/* Substances Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

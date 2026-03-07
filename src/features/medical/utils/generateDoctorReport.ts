@@ -19,6 +19,7 @@ import type {
   BloodPressure,
   Substance,
   BodyMeasurement,
+  MenstrualCycleLog,
 } from '../../../types/health';
 
 interface DoctorReportData {
@@ -27,6 +28,7 @@ interface DoctorReportData {
   recentBP: BloodPressure[];
   activeSubstances: Substance[];
   latestBody?: BodyMeasurement | null;
+  recentCycleLogs?: MenstrualCycleLog[];
   language: string;
 }
 
@@ -69,6 +71,21 @@ const LABELS = {
     noBP: 'Keine Blutdruckwerte',
     disclaimer: 'Dieser Bericht wurde automatisch generiert und ersetzt keine aerztliche Dokumentation.',
     generated: 'Erstellt am',
+    cycleTitle: 'Menstruationszyklus (letzte 10)',
+    cycleDate: 'Datum',
+    cyclePhase: 'Phase',
+    cycleFlow: 'Staerke',
+    cycleSymptoms: 'Symptome',
+    cycleEnergy: 'Energie',
+    cycleMood: 'Stimmung',
+    noCycle: 'Keine Zyklusdaten',
+    phaseMenustruation: 'Menstruation',
+    phaseFollicular: 'Follikelphase',
+    phaseOvulation: 'Eisprung',
+    phaseLuteal: 'Lutealphase',
+    flowLight: 'leicht',
+    flowNormal: 'normal',
+    flowHeavy: 'stark',
   },
   en: {
     title: 'Medical Status Report',
@@ -108,6 +125,21 @@ const LABELS = {
     noBP: 'No blood pressure readings',
     disclaimer: 'This report was auto-generated and does not replace medical documentation.',
     generated: 'Generated on',
+    cycleTitle: 'Menstrual Cycle (last 10)',
+    cycleDate: 'Date',
+    cyclePhase: 'Phase',
+    cycleFlow: 'Flow',
+    cycleSymptoms: 'Symptoms',
+    cycleEnergy: 'Energy',
+    cycleMood: 'Mood',
+    noCycle: 'No cycle data',
+    phaseMenustruation: 'Menstruation',
+    phaseFollicular: 'Follicular',
+    phaseOvulation: 'Ovulation',
+    phaseLuteal: 'Luteal',
+    flowLight: 'light',
+    flowNormal: 'normal',
+    flowHeavy: 'heavy',
   },
 };
 
@@ -157,7 +189,7 @@ function calculateAge(birthDate: string): number {
 }
 
 export function generateDoctorReport(data: DoctorReportData): void {
-  const { profile, latestBloodWork, recentBP, activeSubstances, latestBody, language } = data;
+  const { profile, latestBloodWork, recentBP, activeSubstances, latestBody, recentCycleLogs, language } = data;
   const l = LABELS[language as keyof typeof LABELS] ?? LABELS.en;
   const isDE = language === 'de';
 
@@ -337,6 +369,68 @@ export function generateDoctorReport(data: DoctorReportData): void {
       theme: 'striped',
       styles: { fontSize: 9 },
       headStyles: { fillColor: [239, 68, 68], fontStyle: 'bold', textColor: [255, 255, 255] },
+      margin: { left: 14, right: 14 },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // === MENSTRUAL CYCLE ===
+  const showCycle = (profile.gender === 'female' || profile.gender === 'other') && recentCycleLogs && recentCycleLogs.length > 0;
+
+  if (showCycle) {
+    if (y > 220) {
+      doc.addPage();
+      y = 15;
+    }
+
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text(l.cycleTitle, 14, y);
+    y += 6;
+
+    const phaseLabel = (phase: string): string => {
+      const map: Record<string, string> = {
+        menstruation: l.phaseMenustruation,
+        follicular: l.phaseFollicular,
+        ovulation: l.phaseOvulation,
+        luteal: l.phaseLuteal,
+      };
+      return map[phase] ?? phase;
+    };
+
+    const flowLabel = (flow: string | null | undefined): string => {
+      if (!flow) return '—';
+      const map: Record<string, string> = { light: l.flowLight, normal: l.flowNormal, heavy: l.flowHeavy };
+      return map[flow] ?? flow;
+    };
+
+    const energyStr = (e: number | null | undefined): string => {
+      if (!e) return '—';
+      return `${e}/5`;
+    };
+
+    const moodStr = (m: number | null | undefined): string => {
+      if (!m) return '—';
+      return `${m}/5`;
+    };
+
+    const cycleRows = recentCycleLogs!.slice(0, 10).map(cl => [
+      cl.date,
+      phaseLabel(cl.phase),
+      cl.phase === 'menstruation' ? flowLabel(cl.flow_intensity) : '—',
+      (cl.symptoms ?? []).length > 0 ? `${(cl.symptoms ?? []).length}` : '—',
+      energyStr(cl.energy_level),
+      moodStr(cl.mood),
+    ]);
+
+    autoTable(doc, {
+      startY: y,
+      head: [[l.cycleDate, l.cyclePhase, l.cycleFlow, l.cycleSymptoms, l.cycleEnergy, l.cycleMood]],
+      body: cycleRows,
+      theme: 'striped',
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [244, 63, 94], fontStyle: 'bold', textColor: [255, 255, 255] },
       margin: { left: 14, right: 14 },
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

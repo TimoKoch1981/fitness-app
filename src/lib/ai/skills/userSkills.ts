@@ -27,6 +27,7 @@ import type {
   ProductNutrition,
   UserProduct,
   Equipment,
+  MenstrualCycleLog,
 } from '../../../types/health';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
@@ -62,6 +63,7 @@ export interface UserSkillData {
   userProducts?: UserProduct[];
   standardProducts?: ProductNutrition[];
   availableEquipment?: Equipment[];
+  recentCycleLogs?: MenstrualCycleLog[];
 }
 
 export type UserSkillType =
@@ -73,7 +75,8 @@ export type UserSkillType =
   | 'daily_summary'
   | 'active_plan'
   | 'known_products'
-  | 'available_equipment';
+  | 'available_equipment'
+  | 'cycle_log';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -435,6 +438,102 @@ export function generateDailySummarySkill(data: UserSkillData): string {
   return skill;
 }
 
+// ── Cycle Log Skill ──────────────────────────────────────────────────
+
+/**
+ * Generates the user's recent menstrual cycle data.
+ * Helps AI agents give cycle-phase-aware advice for training and nutrition.
+ */
+export function generateCycleLogSkill(data: UserSkillData): string {
+  const { recentCycleLogs, profile } = data;
+  if (!recentCycleLogs || recentCycleLogs.length === 0) return '';
+
+  // Only include for users who have cycle data
+  const phaseLabels: Record<string, string> = {
+    menstruation: 'Menstruation (Tag 1-5)',
+    follicular: 'Follikelphase (Tag 6-13)',
+    ovulation: 'Eisprung (~Tag 14)',
+    luteal: 'Lutealphase (Tag 15-28)',
+  };
+
+  const symptomLabels: Record<string, string> = {
+    cramping: 'Kraempfe', bloating: 'Blaehungen', mood_changes: 'Stimmungsschwankungen',
+    fatigue: 'Muedigkeit', acne: 'Akne', headache: 'Kopfschmerzen',
+    breast_tenderness: 'Brustspannen', water_retention: 'Wassereinlagerung',
+    sleep_issues: 'Schlafprobleme', hot_flashes: 'Hitzewallungen',
+    urinary_frequency: 'Haeufiger Harndrang', concentration_issues: 'Konzentrationsschwaeche',
+    libido_changes: 'Libido-Veraenderungen', back_pain: 'Rueckenschmerzen',
+    joint_pain: 'Gelenkschmerzen', nausea: 'Uebelkeit', dizziness: 'Schwindel',
+    appetite_changes: 'Appetit-Veraenderungen', skin_changes: 'Hautveraenderungen',
+    irritability: 'Reizbarkeit',
+  };
+
+  let skill = `## MENSTRUATIONSZYKLUS\n`;
+
+  // Latest entry = current phase estimate
+  const latest = recentCycleLogs[0];
+  skill += `Aktuelle Phase: **${phaseLabels[latest.phase] ?? latest.phase}** (${latest.date})\n`;
+
+  if (latest.energy_level) skill += `Energie heute: ${latest.energy_level}/5\n`;
+  if (latest.mood) skill += `Stimmung heute: ${latest.mood}/5\n`;
+
+  const symptoms = latest.symptoms ?? [];
+  if (symptoms.length > 0) {
+    skill += `Aktuelle Symptome: ${symptoms.map(s => symptomLabels[s] ?? s).join(', ')}\n`;
+  }
+
+  if (latest.phase === 'menstruation' && latest.flow_intensity) {
+    skill += `Blutungsstaerke: ${latest.flow_intensity === 'light' ? 'leicht' : latest.flow_intensity === 'normal' ? 'normal' : 'stark'}\n`;
+  }
+
+  // Phase-specific context for the agent
+  skill += `\n### Phasen-Kontext fuer Empfehlungen\n`;
+  switch (latest.phase) {
+    case 'menstruation':
+      skill += `- Leichtes bis moderates Training empfehlen (Endorphine lindern Kraempfe)\n`;
+      skill += `- Ernaehrung: Eisenreiche Lebensmittel priorisieren (Blutverlust), Magnesium gegen Kraempfe\n`;
+      skill += `- Kein erzwungener Deload — nach Befinden trainieren\n`;
+      break;
+    case 'follicular':
+      skill += `- Beste Phase fuer intensives Krafttraining, HIIT, PR-Versuche\n`;
+      skill += `- OEstrogen steigt → Muskelproteinsynthese erhoet, Schmerztoleranz hoeher\n`;
+      skill += `- Carbs werden optimal verwertet\n`;
+      break;
+    case 'ovulation':
+      skill += `- Leistungs-Peak, aber VORSICHT: ACL-Verletzungsrisiko erhoeht\n`;
+      skill += `- Technik-Fokus bei Spruengen/Richtungswechseln empfehlen\n`;
+      skill += `- Gutes Aufwaermen besonders wichtig\n`;
+      break;
+    case 'luteal':
+      skill += `- RPE kann subjektiv hoeher ausfallen — das ist NORMAL\n`;
+      skill += `- Moderate Intensitaet empfehlen, letzte Woche = natuerlicher Deload\n`;
+      skill += `- Ernaehrung: +100-300 kcal/Tag normal (erhoehter Grundumsatz durch Progesteron)\n`;
+      skill += `- Heisshunger ist physiologisch — komplexe Carbs empfehlen, nicht als Kontrollverlust framen\n`;
+      skill += `- Protein tendenziell hoeher (Progesteron ist katabol)\n`;
+      break;
+  }
+
+  // Recent history for pattern
+  if (recentCycleLogs.length > 1) {
+    skill += `\n### Letzte Eintraege\n`;
+    for (const log of recentCycleLogs.slice(0, 7)) {
+      const s = (log.symptoms ?? []).length;
+      skill += `- ${log.date}: ${phaseLabels[log.phase] ?? log.phase}`;
+      if (log.energy_level) skill += `, Energie ${log.energy_level}/5`;
+      if (log.mood) skill += `, Stimmung ${log.mood}/5`;
+      if (s > 0) skill += `, ${s} Symptom${s > 1 ? 'e' : ''}`;
+      skill += `\n`;
+    }
+  }
+
+  // Breastfeeding context
+  if (profile?.is_breastfeeding) {
+    skill += `\n> 🤱 Stillzeit: +400 kcal/Tag beruecksichtigt (Dewey 2003)\n`;
+  }
+
+  return skill;
+}
+
 // ── Active Plan Skill ─────────────────────────────────────────────────
 
 /**
@@ -600,6 +699,9 @@ export function generateUserSkills(
         break;
       case 'available_equipment':
         parts.push(generateAvailableEquipmentSkill(data));
+        break;
+      case 'cycle_log':
+        parts.push(generateCycleLogSkill(data));
         break;
     }
   }

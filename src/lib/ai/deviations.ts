@@ -381,6 +381,90 @@ export function analyzeDeviations(
     }
   }
 
+  // ── Menstrual Cycle deviations ──────────────────────────────────────
+
+  if (context.recentCycleLogs && context.recentCycleLogs.length > 0) {
+    const latestCycle = context.recentCycleLogs[0];
+    const currentPhase = latestCycle.phase;
+    const daysSinceLog = Math.floor((Date.now() - new Date(latestCycle.date).getTime()) / (1000 * 60 * 60 * 24));
+
+    // Only use recent data (last 3 days)
+    if (daysSinceLog <= 3) {
+      // Phase-specific training hints
+      if (currentPhase === 'follicular') {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: 'Follikelphase: Gute Phase fuer intensive Einheiten — OEstrogen steigt, Kraft und Schmerztoleranz hoeher.',
+          messageEN: 'Follicular phase: Great phase for intense sessions — estrogen rising, strength and pain tolerance higher.',
+          priority: 5,
+          icon: '🌱',
+        });
+      } else if (currentPhase === 'ovulation') {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: 'Eisprung-Phase: Leistungs-Peak, aber ACL-Verletzungsrisiko erhoeht. Aufwaermen und Technik beachten.',
+          messageEN: 'Ovulation phase: Performance peak, but ACL injury risk elevated. Warm up thoroughly and focus on technique.',
+          priority: 4,
+          icon: '✨',
+        });
+      } else if (currentPhase === 'luteal') {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: 'Lutealphase: RPE kann subjektiv hoeher ausfallen — das ist physiologisch normal. Moderate Intensitaet empfohlen.',
+          messageEN: 'Luteal phase: RPE may feel higher — this is physiologically normal. Moderate intensity recommended.',
+          priority: 4,
+          icon: '🌙',
+        });
+        // Nutrition hint: luteal phase hunger
+        deviations.push({
+          type: 'info',
+          agent: 'nutrition',
+          message: 'Lutealphase: Etwas mehr Hunger ist normal (Grundumsatz +100-300 kcal durch Progesteron). Komplexe Carbs priorisieren.',
+          messageEN: 'Luteal phase: Slightly increased hunger is normal (BMR +100-300 kcal due to progesterone). Prioritize complex carbs.',
+          priority: 4,
+          icon: '🌙',
+        });
+      } else if (currentPhase === 'menstruation') {
+        // Only show if energy is low
+        if (latestCycle.energy_level != null && latestCycle.energy_level <= 2) {
+          deviations.push({
+            type: 'info',
+            agent: 'training',
+            message: `Menstruation + niedrige Energie (${latestCycle.energy_level}/5): Leichtes Training oder aktive Erholung. Kein Zwangs-Deload — nach Befinden entscheiden.`,
+            messageEN: `Menstruation + low energy (${latestCycle.energy_level}/5): Light training or active recovery. No forced deload — go by how you feel.`,
+            priority: 3,
+            icon: '🩸',
+          });
+        }
+        // Nutrition: iron
+        deviations.push({
+          type: 'info',
+          agent: 'nutrition',
+          message: 'Menstruation: Eisenreiche Lebensmittel priorisieren (Blutverlust), Magnesium gegen Kraempfe, Omega-3 entzuendungshemmend.',
+          messageEN: 'Menstruation: Prioritize iron-rich foods (blood loss), magnesium for cramps, omega-3 for inflammation.',
+          priority: 4,
+          icon: '🩸',
+        });
+      }
+
+      // Symptom-based warnings
+      const symptoms = latestCycle.symptoms ?? [];
+      if (symptoms.includes('joint_pain') || symptoms.includes('back_pain')) {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: 'Zyklus-Symptome: Gelenk-/Rueckenschmerzen gemeldet — belastende Uebungen mit Vorsicht oder anpassen.',
+          messageEN: 'Cycle symptoms: Joint/back pain reported — use caution with stressful exercises or modify.',
+          priority: 3,
+          icon: '🦴',
+        });
+      }
+    }
+  }
+
   // ── Blood work deviations (Power+ mode) ─────────────────────────────
 
   if (context.latestBloodWork) {
@@ -610,6 +694,34 @@ export function getDeviationSuggestions(
         label: de ? 'Sessions nachholen' : 'Catch up sessions',
         message: de ? 'Ich verpasse zu viele Sessions. Wie kann ich den Plan anpassen?' : 'I\'m missing too many sessions. How can I adjust the plan?',
         icon: '📅',
+      });
+    } else if (msgLower.includes('follikelphase') || msgLower.includes('follicular')) {
+      suggestions.push({
+        id: 'dev_cycle_follicular',
+        label: de ? 'Zyklus & Training' : 'Cycle & Training',
+        message: de ? 'Ich bin in der Follikelphase. Wie nutze ich das optimal?' : 'I\'m in the follicular phase. How do I make the most of it?',
+        icon: '🌱',
+      });
+    } else if (msgLower.includes('lutealphase') || msgLower.includes('luteal phase')) {
+      suggestions.push({
+        id: 'dev_cycle_luteal',
+        label: de ? 'Lutealphase-Tipps' : 'Luteal phase tips',
+        message: de ? 'Ich bin in der Lutealphase. Was sollte ich bei Training und Ernaehrung beachten?' : 'I\'m in the luteal phase. What should I consider for training and nutrition?',
+        icon: '🌙',
+      });
+    } else if (msgLower.includes('menstruation') && d.agent === 'nutrition') {
+      suggestions.push({
+        id: 'dev_cycle_menstruation',
+        label: de ? 'Ernaehrung Periode' : 'Period nutrition',
+        message: de ? 'Ich habe meine Periode. Was sollte ich essen, um mich besser zu fuehlen?' : 'I\'m on my period. What should I eat to feel better?',
+        icon: '🩸',
+      });
+    } else if (msgLower.includes('eisprung') || msgLower.includes('ovulation')) {
+      suggestions.push({
+        id: 'dev_cycle_ovulation',
+        label: de ? 'Verletzungsschutz' : 'Injury prevention',
+        message: de ? 'Wie kann ich beim Eisprung das Verletzungsrisiko senken?' : 'How can I reduce injury risk during ovulation?',
+        icon: '✨',
       });
     }
   }

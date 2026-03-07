@@ -61,6 +61,7 @@ import { useCelebrations } from '../features/celebrations/CelebrationProvider';
 import { StreakDisplay } from '../features/gamification/components/StreakDisplay';
 import { BadgeGrid } from '../features/gamification/components/BadgeGrid';
 import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyChallengeCard';
+import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidget';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -356,6 +357,9 @@ export function CockpitPage() {
             );
           })}
         </div>
+
+        {/* Cycle Phase Widget — current menstrual phase + tip */}
+        <CyclePhaseWidget cycleTrackingEnabled={profile?.cycle_tracking_enabled} />
 
         {/* Water Widget — Quick Water Tracking */}
         <WaterWidget />

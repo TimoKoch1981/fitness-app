@@ -58,6 +58,8 @@ export function ProfilePage() {
   const [healthRestrictions, setHealthRestrictions] = useState<string[]>([]);
   // Breastfeeding
   const [isBreastfeeding, setIsBreastfeeding] = useState(false);
+  // Cycle Tracking
+  const [cycleTrackingEnabled, setCycleTrackingEnabled] = useState(false);
   // BMR Help toggle
   const [showBmrHelp, setShowBmrHelp] = useState(false);
   const [showPalHelp, setShowPalHelp] = useState(false);
@@ -106,6 +108,7 @@ export function ProfilePage() {
       setAllergies(profile.allergies ?? []);
       setHealthRestrictions(profile.health_restrictions ?? []);
       setIsBreastfeeding(profile.is_breastfeeding ?? false);
+      setCycleTrackingEnabled(profile.cycle_tracking_enabled ?? (profile.gender === 'female' || profile.gender === 'other'));
       // Mark hydrated after a longer delay so all React state batching + renders complete.
       // requestAnimationFrame was too short (single frame) and could race with auto-save.
       setTimeout(() => {
@@ -123,6 +126,7 @@ export function ProfilePage() {
     targetDate: '', goalNotes: '',
     dietaryPreferences: [] as string[], allergies: [] as string[], healthRestrictions: [] as string[],
     isBreastfeeding: false,
+    cycleTrackingEnabled: false,
   });
 
   // Keep formRef in sync
@@ -132,6 +136,7 @@ export function ProfilePage() {
     primaryGoal, targetWeight, targetBodyFat, targetDate, goalNotes,
     dietaryPreferences, allergies, healthRestrictions,
     isBreastfeeding,
+    cycleTrackingEnabled,
   };
 
   const showSaveStatus = useCallback((status: 'saved' | 'error') => {
@@ -166,6 +171,7 @@ export function ProfilePage() {
         allergies: f.allergies,
         health_restrictions: f.healthRestrictions,
         is_breastfeeding: f.isBreastfeeding,
+        cycle_tracking_enabled: f.cycleTrackingEnabled,
       });
       showSaveStatus('saved');
     } catch {
@@ -683,6 +689,42 @@ export function ProfilePage() {
                 )}
               </div>
             )}
+
+            {/* Cycle Tracking Toggle — for all genders (inclusive) */}
+            <div className="pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {language === 'de' ? '🩸 Zyklus-Tracking' : '🩸 Cycle Tracking'}
+                  </label>
+                  <p className="text-[10px] text-gray-400 mt-0.5">
+                    {language === 'de'
+                      ? 'Menstruationszyklus tracken, Training & Ernaehrung anpassen'
+                      : 'Track menstrual cycle, adapt training & nutrition'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleChange(setCycleTrackingEnabled)(!cycleTrackingEnabled)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    cycleTrackingEnabled ? 'bg-rose-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                    cycleTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+              {cycleTrackingEnabled && (
+                <div className="mt-2 p-2 bg-rose-50 rounded-lg">
+                  <p className="text-[10px] text-rose-700">
+                    {language === 'de'
+                      ? '✅ Zyklus-Tracking aktiv. Dein KI-Buddy beruecksichtigt die Zyklusphase bei Training und Ernaehrung. Deine Daten bleiben in Deutschland (DSGVO Art. 9).'
+                      : '✅ Cycle tracking active. Your AI buddy considers your cycle phase for training and nutrition advice. Your data stays in Germany (GDPR Art. 9).'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

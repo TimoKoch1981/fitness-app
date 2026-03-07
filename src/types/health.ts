@@ -286,6 +286,8 @@ export interface UserProfile {
   health_restrictions?: string[];
   // Breastfeeding / Stillzeit (+300-500 kcal/day, Dewey 2003)
   is_breastfeeding?: boolean;
+  // Cycle Tracking Opt-in (independent of gender for inclusivity)
+  cycle_tracking_enabled?: boolean;
   // Data Retention / Loeschkonzept (DSGVO Art. 5(1)(e))
   data_retention_months?: number | null; // NULL = unbegrenzt, 12/36/60 = Monate
   // KI-Trainer Review System
@@ -437,7 +439,13 @@ export interface SleepLog {
 // === MENSTRUAL CYCLE TYPES ===
 export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal';
 export type FlowIntensity = 'light' | 'normal' | 'heavy';
-export type CycleSymptom = 'cramping' | 'bloating' | 'mood_changes' | 'fatigue' | 'acne' | 'headache' | 'breast_tenderness' | 'water_retention';
+export type CycleSymptom =
+  | 'cramping' | 'bloating' | 'mood_changes' | 'fatigue'
+  | 'acne' | 'headache' | 'breast_tenderness' | 'water_retention'
+  | 'sleep_issues' | 'hot_flashes' | 'urinary_frequency'
+  | 'concentration_issues' | 'libido_changes' | 'back_pain'
+  | 'joint_pain' | 'nausea' | 'dizziness'
+  | 'appetite_changes' | 'skin_changes' | 'irritability';
 
 export interface MenstrualCycleLog {
   id: string;

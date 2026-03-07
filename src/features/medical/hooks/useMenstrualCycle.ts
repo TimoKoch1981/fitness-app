@@ -60,6 +60,18 @@ export function getSymptomKey(symptom: CycleSymptom): string {
     headache: 'headache',
     breast_tenderness: 'breastTenderness',
     water_retention: 'waterRetention',
+    sleep_issues: 'sleepIssues',
+    hot_flashes: 'hotFlashes',
+    urinary_frequency: 'urinaryFrequency',
+    concentration_issues: 'concentrationIssues',
+    libido_changes: 'libidoChanges',
+    back_pain: 'backPain',
+    joint_pain: 'jointPain',
+    nausea: 'nausea',
+    dizziness: 'dizziness',
+    appetite_changes: 'appetiteChanges',
+    skin_changes: 'skinChanges',
+    irritability: 'irritability',
   };
   return keys[symptom] ?? symptom;
 }

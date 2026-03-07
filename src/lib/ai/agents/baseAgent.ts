@@ -385,6 +385,7 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
       userProducts: hc.userProducts,
       standardProducts: hc.standardProducts,
       availableEquipment: hc.availableEquipment,
+      recentCycleLogs: hc.recentCycleLogs,
     };
   }
 

@@ -10,6 +10,7 @@ import { useTranslation } from '../../../i18n';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { useLatestBloodWork } from '../hooks/useBloodWork';
 import { useBloodPressureLogs } from '../hooks/useBloodPressure';
+import { useMenstrualCycleLogs } from '../hooks/useMenstrualCycle';
 import { generateDoctorReport } from '../utils/generateDoctorReport';
 import type { Substance, BodyMeasurement } from '../../../types/health';
 import { supabase } from '../../../lib/supabase';
@@ -19,6 +20,7 @@ export function DoctorReportButton() {
   const { data: profile } = useProfile();
   const { data: latestBloodWork } = useLatestBloodWork();
   const { data: recentBP } = useBloodPressureLogs(10);
+  const { data: cycleLogs } = useMenstrualCycleLogs(10);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -51,6 +53,7 @@ export function DoctorReportButton() {
         recentBP: recentBP ?? [],
         activeSubstances: (substances as Substance[]) ?? [],
         latestBody: bodyData?.[0] as BodyMeasurement | undefined ?? null,
+        recentCycleLogs: cycleLogs ?? [],
         language: language as 'de' | 'en',
       });
     } catch (err) {
