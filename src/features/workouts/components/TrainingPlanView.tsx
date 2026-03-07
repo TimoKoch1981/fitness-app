@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles, BarChart3 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF, fetchLastWorkoutsForPlan } from '../utils/generateTrainingPlanPDF';
@@ -8,6 +8,8 @@ import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseC
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
 import { CalibrationWizard } from './CalibrationWizard';
+import { usePEDPhaseSync } from '../hooks/usePEDPhaseSync';
+import { useMesocycleCheck } from '../hooks/useMesocycleCheck';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -31,6 +33,12 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
+
+  // PED phase sync (Power+ mode only — auto-adjusts review_config on cycle change)
+  usePEDPhaseSync();
+
+  // Mesocycle check — determines if a review is due
+  const mesocycleStatus = useMesocycleCheck(plan?.review_config);
 
   // Auto-trigger CalibrationWizard for uncalibrated plans
   useEffect(() => {
@@ -231,6 +239,38 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           </div>
         </div>
       </div>
+
+      {/* Mesocycle Review Banner (when review is due) */}
+      {mesocycleStatus.hasConfig && mesocycleStatus.reviewDue && plan.ai_supervised && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <BarChart3 className="h-5 w-5 text-indigo-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-indigo-900">
+                {language === 'de' ? 'Mesozyklus-Review fällig' : 'Mesocycle Review Due'}
+              </h4>
+              <p className="text-xs text-indigo-600 mt-0.5">
+                {language === 'de'
+                  ? `Woche ${mesocycleStatus.currentWeek} von ${mesocycleStatus.totalWeeks} erreicht. Zeit für eine Fortschrittsanalyse.`
+                  : `Week ${mesocycleStatus.currentWeek} of ${mesocycleStatus.totalWeeks} reached. Time for a progress review.`}
+              </p>
+              <button
+                onClick={() => navigate('/buddy', {
+                  state: {
+                    autoMessage: language === 'de'
+                      ? 'Mein Mesozyklus ist abgeschlossen. Bitte analysiere meinen Fortschritt und empfehle mir die nächsten Schritte.'
+                      : 'My mesocycle is complete. Please analyze my progress and recommend next steps.',
+                  },
+                })}
+                className="mt-2 text-xs bg-indigo-500 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition-colors inline-flex items-center gap-1"
+              >
+                <MessageCircle className="h-3 w-3" />
+                {language === 'de' ? 'Review starten' : 'Start Review'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Day Cards */}
       {plan.days?.map((day) => (

@@ -15,7 +15,7 @@
  * - Protein <60% of goal with calories >70% → nutrition agent warns
  */
 
-import type { HealthContext, DailyCheckin } from '../../types/health';
+import type { HealthContext, DailyCheckin, SessionFeedback } from '../../types/health';
 
 export type DeviationType = 'warning' | 'info' | 'suggestion';
 export type AgentType = 'training' | 'nutrition' | 'medical' | 'general' | 'substance';
@@ -266,6 +266,119 @@ export function analyzeDeviations(
         });
       }
     }
+
+    // ── Training-specific Early Triggers (KI-Trainer Block C) ──────────
+
+    // Access SessionFeedback from recent workouts
+    const recentFeedbacks = workouts
+      .filter(w => w.session_feedback != null)
+      .map(w => w.session_feedback as SessionFeedback);
+
+    const reviewTriggers = context.activePlan?.review_config?.review_triggers;
+
+    // 1. Plateau Detection: plateau_exercises found in latest session
+    if (recentFeedbacks.length > 0) {
+      const latestAuto = recentFeedbacks[0]?.auto_calculated;
+      const plateauExercises = latestAuto?.plateau_exercises ?? [];
+      const plateauThreshold = reviewTriggers?.plateau_sessions ?? 3;
+      if (plateauExercises.length > 0) {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: `Plateau erkannt: ${plateauExercises.slice(0, 3).join(', ')} — gleiches Gewicht seit ${plateauThreshold}+ Sessions. Variante oder Progression empfehlen.`,
+          messageEN: `Plateau detected: ${plateauExercises.slice(0, 3).join(', ')} — same weight for ${plateauThreshold}+ sessions. Suggest variation or progression.`,
+          priority: 3,
+          icon: '📊',
+        });
+      }
+
+      // 2. Low Completion Rate (<70%)
+      const latestCompletion = recentFeedbacks[0]?.completion_rate;
+      if (latestCompletion != null && latestCompletion < 0.7) {
+        deviations.push({
+          type: 'warning',
+          agent: 'training',
+          message: `Niedrige Abschlussrate: ${Math.round(latestCompletion * 100)}% — Plan ueberpruefen, ggf. Volumen reduzieren.`,
+          messageEN: `Low completion rate: ${Math.round(latestCompletion * 100)}% — review plan, consider reducing volume.`,
+          priority: 2,
+          icon: '⚠️',
+        });
+      }
+
+      // 3. Joint Pain (rating >= threshold)
+      const painThreshold = reviewTriggers?.joint_pain_threshold ?? 3;
+      const latestPainRating = recentFeedbacks[0]?.joint_pain_rating;
+      const latestPainAreas = recentFeedbacks[0]?.joint_pain ?? [];
+      if (latestPainRating != null && latestPainRating >= painThreshold && latestPainAreas.length > 0) {
+        deviations.push({
+          type: 'warning',
+          agent: 'training',
+          message: `Gelenkschmerzen gemeldet: ${latestPainAreas.join(', ')} (Stufe ${latestPainRating}/5) — belastende Uebungen anpassen.`,
+          messageEN: `Joint pain reported: ${latestPainAreas.join(', ')} (level ${latestPainRating}/5) — adjust stressful exercises.`,
+          priority: 2,
+          icon: '🦴',
+        });
+      }
+
+      // 4. RPE Drift (feeling harder at same weights)
+      const rpeDriftExercises = latestAuto?.rpe_drift_exercises ?? [];
+      if (rpeDriftExercises.length > 0) {
+        deviations.push({
+          type: 'info',
+          agent: 'training',
+          message: `RPE-Drift erkannt: ${rpeDriftExercises.slice(0, 3).join(', ')} — gleiche Last fuehlt sich schwerer an. Erholung pruefen.`,
+          messageEN: `RPE drift detected: ${rpeDriftExercises.slice(0, 3).join(', ')} — same load feels harder. Check recovery.`,
+          priority: 3,
+          icon: '📈',
+        });
+      }
+    }
+
+    // 5. Sleep Deficit: 5+ days with <6h sleep
+    if (context.recentSleepLogs && context.recentSleepLogs.length >= 5) {
+      const sleepThresholdDays = reviewTriggers?.sleep_days_threshold ?? 5;
+      const shortSleepDays = context.recentSleepLogs
+        .slice(0, 7) // Last 7 days
+        .filter(log => log.duration_minutes != null && log.duration_minutes < 360)
+        .length;
+
+      if (shortSleepDays >= sleepThresholdDays) {
+        deviations.push({
+          type: 'warning',
+          agent: 'training',
+          message: `Schlafdefizit: ${shortSleepDays} von 7 Tagen unter 6 Stunden — Regeneration beeintraechtigt, Volumen anpassen.`,
+          messageEN: `Sleep deficit: ${shortSleepDays} of 7 days under 6 hours — recovery impaired, adjust volume.`,
+          priority: 2,
+          icon: '😴',
+        });
+      }
+    }
+
+    // 6. Missed Sessions: >30% of planned sessions missed
+    if (context.activePlan && workouts.length >= 2) {
+      const missedPctThreshold = reviewTriggers?.missed_sessions_pct ?? 30;
+      const planDays = context.activePlan.days?.length ?? 0;
+      if (planDays > 0) {
+        // Count workouts in last 14 days vs expected
+        const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+        const workoutsLast14 = workouts.filter(
+          w => new Date(w.date).getTime() >= fourteenDaysAgo
+        ).length;
+        const expectedSessions = planDays * 2; // 2 weeks worth
+        const completionPct = expectedSessions > 0 ? (workoutsLast14 / expectedSessions) * 100 : 100;
+
+        if (completionPct < (100 - missedPctThreshold)) {
+          deviations.push({
+            type: 'info',
+            agent: 'training',
+            message: `Trainingsplanung: ${workoutsLast14}/${expectedSessions} Sessions in 14 Tagen (${Math.round(completionPct)}%). Plan anpassen oder Motivation besprechen.`,
+            messageEN: `Training adherence: ${workoutsLast14}/${expectedSessions} sessions in 14 days (${Math.round(completionPct)}%). Adjust plan or discuss motivation.`,
+            priority: 3,
+            icon: '📅',
+          });
+        }
+      }
+    }
   }
 
   // ── Blood work deviations (Power+ mode) ─────────────────────────────
@@ -455,6 +568,48 @@ export function getDeviationSuggestions(
         label: de ? 'Hämatokrit besprechen' : 'Discuss hematocrit',
         message: de ? 'Mein Hämatokrit ist erhöht. Was bedeutet das?' : 'My hematocrit is elevated. What does it mean?',
         icon: '🩸',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('plateau')) {
+      suggestions.push({
+        id: 'dev_plateau',
+        label: de ? 'Plateau durchbrechen' : 'Break plateau',
+        message: de ? 'Ich stagniere bei einigen Übungen. Was kann ich ändern?' : 'I\'m stalling on some exercises. What can I change?',
+        icon: '📊',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('abschlussrate')) {
+      suggestions.push({
+        id: 'dev_completion',
+        label: de ? 'Plan anpassen' : 'Adjust plan',
+        message: de ? 'Ich schaffe nicht alle Übungen. Sollten wir den Plan anpassen?' : 'I can\'t finish all exercises. Should we adjust the plan?',
+        icon: '⚠️',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('gelenkschmerzen')) {
+      suggestions.push({
+        id: 'dev_joint_pain',
+        label: de ? 'Gelenkschmerzen' : 'Joint pain',
+        message: de ? 'Ich habe Gelenkschmerzen. Welche Übungen sollte ich anpassen?' : 'I have joint pain. Which exercises should I adjust?',
+        icon: '🦴',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('rpe-drift')) {
+      suggestions.push({
+        id: 'dev_rpe_drift',
+        label: de ? 'Erholung prüfen' : 'Check recovery',
+        message: de ? 'Die Gewichte fühlen sich schwerer an. Brauche ich einen Deload?' : 'The weights feel heavier. Do I need a deload?',
+        icon: '📈',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('schlafdefizit')) {
+      suggestions.push({
+        id: 'dev_sleep_deficit',
+        label: de ? 'Schlaf verbessern' : 'Improve sleep',
+        message: de ? 'Ich schlafe zu wenig. Wie wirkt sich das auf mein Training aus?' : 'I\'m not sleeping enough. How does this affect my training?',
+        icon: '😴',
+      });
+    } else if (d.agent === 'training' && msgLower.includes('trainingsplanung')) {
+      suggestions.push({
+        id: 'dev_missed_sessions',
+        label: de ? 'Sessions nachholen' : 'Catch up sessions',
+        message: de ? 'Ich verpasse zu viele Sessions. Wie kann ich den Plan anpassen?' : 'I\'m missing too many sessions. How can I adjust the plan?',
+        icon: '📅',
       });
     }
   }

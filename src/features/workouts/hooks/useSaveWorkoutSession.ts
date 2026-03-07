@@ -98,6 +98,9 @@ export function useSaveWorkoutSession() {
       // Step 3: Post-session analysis — plateau detection, volume, RPE drift
       await runPostSessionAnalysis(session, workout.id);
 
+      // Step 4: Update mesocycle current_week in review_config
+      await updateMesocycleWeek(session);
+
       return workout;
     },
     onSuccess: () => {
@@ -241,5 +244,45 @@ async function runPostSessionAnalysis(
   } catch (err) {
     // Fire-and-forget: Don't block session save on analysis errors
     console.warn('[PostSessionAnalysis] Error:', err);
+  }
+}
+
+/**
+ * Step 4: Update mesocycle current_week in review_config.
+ * Calculates the current week based on mesocycle_start date.
+ * Fire-and-forget — doesn't block session save.
+ */
+async function updateMesocycleWeek(session: ActiveWorkoutState): Promise<void> {
+  try {
+    if (!session.planId) return;
+
+    const { data: plan } = await supabase
+      .from('training_plans')
+      .select('review_config')
+      .eq('id', session.planId)
+      .single();
+
+    if (!plan?.review_config) return;
+
+    const config = plan.review_config as import('../../../types/health').ReviewConfig;
+    if (!config.mesocycle_start) return;
+
+    const startDate = new Date(config.mesocycle_start);
+    const now = new Date();
+    const daysSinceStart = Math.floor(
+      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const currentWeek = Math.max(1, Math.floor(daysSinceStart / 7) + 1);
+
+    if (currentWeek !== config.current_week) {
+      await supabase
+        .from('training_plans')
+        .update({
+          review_config: { ...config, current_week: currentWeek },
+        })
+        .eq('id', session.planId);
+    }
+  } catch (err) {
+    console.warn('[MesocycleWeekUpdate] Error:', err);
   }
 }
