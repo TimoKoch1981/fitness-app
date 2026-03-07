@@ -187,6 +187,31 @@ export function ProfilePage() {
       requestAnimationFrame(() => autoSave());
     };
 
+  // Immediate save for toggles — no debounce needed, avoids race condition
+  // with TanStack Query refetch resetting isHydratedRef during debounce window
+  const handleToggleSave = async (
+    field: 'isBreastfeeding' | 'cycleTrackingEnabled',
+    setter: React.Dispatch<React.SetStateAction<boolean>>,
+    currentValue: boolean,
+  ) => {
+    const newValue = !currentValue;
+    setter(newValue);
+    // Update formRef immediately (don't wait for React re-render)
+    formRef.current = { ...formRef.current, [field]: newValue };
+    // Cancel any pending debounced save to avoid overwriting with stale data
+    autoSave.cancel();
+    try {
+      const dbField = field === 'isBreastfeeding' ? 'is_breastfeeding' : 'cycle_tracking_enabled';
+      await updateProfile.mutateAsync({ [dbField]: newValue });
+      showSaveStatus('saved');
+    } catch {
+      // Revert on failure
+      setter(currentValue);
+      formRef.current = { ...formRef.current, [field]: currentValue };
+      showSaveStatus('error');
+    }
+  };
+
   const palOptions = [
     { value: PAL_FACTORS.sedentary.toString(), label: language === 'de' ? 'Sitzend (1.4)' : 'Sedentary (1.4)' },
     { value: PAL_FACTORS.lightly_active.toString(), label: language === 'de' ? 'Leicht aktiv (1.55)' : 'Lightly Active (1.55)' },
@@ -668,7 +693,7 @@ export function ProfilePage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleChange(setIsBreastfeeding)(!isBreastfeeding)}
+                    onClick={() => handleToggleSave('isBreastfeeding', setIsBreastfeeding, isBreastfeeding)}
                     className={`relative w-11 h-6 rounded-full transition-colors ${
                       isBreastfeeding ? 'bg-pink-500' : 'bg-gray-300'
                     }`}
@@ -705,7 +730,7 @@ export function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleChange(setCycleTrackingEnabled)(!cycleTrackingEnabled)}
+                  onClick={() => handleToggleSave('cycleTrackingEnabled', setCycleTrackingEnabled, cycleTrackingEnabled)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
                     cycleTrackingEnabled ? 'bg-rose-500' : 'bg-gray-300'
                   }`}
