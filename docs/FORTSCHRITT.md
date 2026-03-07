@@ -120,8 +120,91 @@
 | 12.50   | 2026-03-04 | Floating KI-Buddy Avatar (FAB) + Guided Tour (5 Schritte)               | Erledigt   |
 | 12.51   | 2026-03-04 | Landing-Page-Skip + Account-Loeschung FK CASCADE + localStorage-Cleanup  | Erledigt   |
 | 12.52   | 2026-03-04 | 8 Bugfixes aus Live-Test + Agent-Verbesserungen + DNS/Email-Learnings    | Erledigt   |
+| 12.53   | 2026-03-04 | Body-Composition-Skill + BMR/PAL/Ziele-Infofelder + Profil-Verbesserungen | Erledigt   |
+| 12.54   | 2026-03-04 | Cardio-Timer-Fix + Workout-Musik-Fix + ExerciseListBar + Logbuch-PDF (Soll/Ist) | Erledigt   |
+| 12.57   | 2026-03-05 | Workout-Session UX: setReady-Sperre, Timer-Stop, Speichern-Button          | Erledigt   |
+| 12.58   | 2026-03-06 | KI-Trainer Review-System Block A-D (Skill, DB, PostSessionFeedback, UI)    | Erledigt   |
 
 ---
+
+### 2026-03-06 - v12.58: KI-Trainer Review-System Block A-D
+
+**Neuer Skill `trainerReview.ts` (~4500 Tokens, 15 PMIDs):**
+- BW-Multiplier-Tabellen (10 Uebungen, 3 Level, m/w) fuer Startgewicht-Kalibrierung
+- Volume Landmarks (MV/MEV/MAV/MRV, 8 Muskelgruppen, PED-Anpassungen)
+- Double Progression Regeln (Rep-Range → Gewicht-Steigerung)
+- Deload-Protokoll (Frequenz, Volume, Intensitaet, RIR)
+- Review-Cadence-Matrix (8 Populationen: Anfaenger bis Senioren inkl. PED Blast/Cruise/PCT)
+- Decision Tree (6 automatische Checks nach jeder Session)
+- PED-Phasen-Synchronisation (Blast/Cruise/PCT differenziert)
+- Autonomie-Modell (Vorschlagen → Absegnen → Durchfuehren)
+
+**DB-Migration (20260306000001):**
+- `training_plans`: ai_supervised BOOLEAN, review_config JSONB
+- `workouts`: session_feedback JSONB
+- `profiles`: ai_trainer_enabled BOOLEAN
+- Indexes fuer Performance (ai_supervised, session_feedback)
+
+**PostSessionFeedback Komponente:**
+- 4 Feeling-Buttons (Zu leicht / Gut / Hart / Kaputt)
+- Optionaler Joint-Pain mit 12 Koerperteil-Chips + Schmerzstufe 1-5
+- Speichert in workouts.session_feedback JSONB
+- Nur angezeigt wenn ai_trainer_enabled im Profil
+
+**UI-Integration:**
+- TrainingPlanView: "KI-Trainer aktiv" Badge mit Mesozyklus-Woche (indigo)
+- ProfilePage: KI-Trainer Toggle mit Erklaerungstext
+- WorkoutSummary: PostSessionFeedback nach Speichern (wenn KI-Trainer aktiv)
+
+**Types:**
+- ReviewConfig Interface (mesocycle_weeks, deload_week, review_triggers, experience_level, etc.)
+- SessionFeedback Interface (overall_feeling, joint_pain, completion_rate, auto_calculated)
+
+---
+
+### 2026-03-05 - v12.57: Workout-Session UX Bugfixes
+
+- setReady-Sperre im ExerciseOverviewTracker (Lock-Icon + disabled Inputs)
+- Satz-Timer stoppt beim letzten Satz (setReady:false in LOG_SET)
+- WorkoutSummary komplett ueberarbeitet: Error-Feedback UI, Inline-Editing, REPLACE_EXERCISES Action
+
+---
+
+### 2026-03-04 - v12.54: Workout-Session Fixes + ExerciseListBar + Trainingslogbuch-PDF
+
+**Workout-Session Fixes (3 Aenderungen):**
+- Cardio-Timer-Bug: `isTimedExercise` erkennt jetzt `exercise_type === 'cardio'` (ExerciseTracker.tsx + ActiveWorkoutContext.tsx)
+- Workout-Musik-Fix: YouTube-Container verwendet jetzt einen stabilen `fixed`-Container statt conditional refs (WorkoutMusicPlayer.tsx)
+- Default-Sets: Cardio/Flexibility-Uebungen defaulten auf 1 Satz statt 3
+
+**ExerciseListBar (neues Feature):**
+- Horizontale scrollbare Uebungsliste am unteren Rand der Workout-Session
+- Status-Icons: ✓ abgeschlossen, ⏩ uebersprungen, ⏱ Cardio, 🏋 Kraft
+- Tap-to-Jump via `goToExercise()` — direkter Sprung zu jeder Uebung
+- Auto-Scroll zur aktuellen Uebung
+- Satz-Fortschritt (z.B. "2/4") bei nicht abgeschlossenen Kraft-Uebungen
+
+**Trainingslogbuch-PDF (grosse Verbesserung):**
+- **Per-Set-Zeilen**: Jeder Satz einer Kraft-Uebung bekommt eine eigene Zeile (S1, S2, S3...)
+- **Echte "Letztes Mal"-Daten**: Pro Satz werden actual_reps + actual_weight_kg aus dem letzten Workout geladen
+- **Supabase-Datenabfrage**: `fetchLastWorkoutsForPlan()` laedt automatisch die letzten Workout-Sessions pro Tag
+- **Visuelle Verbesserungen**: Gruene Letzte-Werte, leicht blaue Ist-Felder, dickere Trennlinien zwischen Uebungen, alternierende Farben pro Uebungsgruppe
+- **10 Spalten**: #, Uebung, Satz, Soll Wdh, Soll kg, Letzte Wdh, Letzte kg, Ist Wdh, Ist kg, Notizen
+
+### 2026-03-04 - v12.53: Body-Composition-Skill + Profil-Infofelder
+
+**Body-Composition-Skill (neu):**
+- Neuer Skill `bodyComposition.ts` (~4.200 Token, 16 PMIDs)
+- Alters- und geschlechtsspezifische KFA-Bereiche (ACSM + ACE, 5 Altersgruppen × 2 Geschlechter)
+- Essential-Fat-Minimum, Red-Flag-Tabelle, Nachhaltigkeitsbewertung
+- Spezial-Populationen: GLP-1 (25% Lean-Mass-Verlust), TRT, Frauen/Zyklus, Schwangerschaft, Senioren
+- Registriert fuer analysis, general, medical Agenten
+
+**Profil-Infofelder (3 neue Hilfe-Sektionen):**
+- BMR-Erklaerung: Was ist der Grundumsatz + Formelerklaerungen
+- Aktivitaetslevel-Hilfe: PAL-Erklaerung mit Klassifizierungsleitfaden (1.2–2.4)
+- Persoenliche-Ziele-Hilfe: Erklaerung aller Zieltypen + Zielfeld-Bedeutung
+- i18n: Alle neuen Keys in 17 Sprachen
 
 ### 2026-03-04 - v12.52: 8 Bugfixes aus Live-Test + KI-Agent-Verbesserungen
 
@@ -3006,75 +3089,27 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-## v12.53 — Trainingslog PDF Soll/Ist per Set + Last-Workout-Daten (2026-03-04)
+---
 
-**Was:** Training-Logbuch PDF komplett ueberarbeitet mit pro-Satz-Zeilen.
+## v12.59 — Zyklus-Integration P1-P3 + Toggle-Bugfix (2026-03-07)
+
+**Was:** Vollstaendige Integration des Menstruationszyklus-Trackings in Training, Ernaehrung und KI-System. 12 Features in 3 Prioritaetsstufen (P1 KI, P2 Training/Ernaehrung, P3 UX/Visualisierung).
+
+**Neue Dateien (7):**
+- CyclePhaseWidget.tsx, CycleTimeline.tsx, CycleInsightsCard.tsx
+- useCyclePatterns.ts, DB Migration cycle_tracking_enabled
+- KONZEPT_ZYKLUS_INTEGRATION.md, Uebergabedatei
 
 **Aenderungen:**
-- Jede Kraftuebung expandiert in N Zeilen (eine pro Satz: S1, S2, S3...)
-- 10 Spalten: #, Uebung, Satz, Soll Wdh, Soll kg, Letzte Wdh, Letzte kg, Ist Wdh, Ist kg, Notizen
-- `fetchLastWorkoutsForPlan()` — Async-Funktion laedt letzte Workout-Daten aus Supabase
-- Gruene "Letzte"-Spalten, blaue "Ist"-Felder, Trennlinien zwischen Uebungsgruppen
-- Ausdauer-Uebungen: Single-Row mit Dauer/Distanz
-- TrainingPlanView: Async PDF-Handler mit Daten-Fetch vor Generation
+- P1: femaleFitness Skill in AGENT_SKILL_MAP, recentCycleLogs im AI-Prompt, Date-Picker (14-Tage), DSGVO-Opt-in Toggle
+- P2: 7 Zyklus-Trigger + 4 Chips in Deviations, CyclePhaseWidget im Cockpit
+- P3: 20 Symptome (8→20) + i18n (17 Sprachen), CycleTimeline (3 Zyklen, Farbbalken), Muster-Erkennung, Arzt-Export PDF
+- Bugfix: Toggle autoSave Race Condition (handleToggleSave statt handleChange fuer Booleans)
 
-**Dateien:** 2 modifiziert (generateTrainingPlanPDF.ts, TrainingPlanView.tsx)
+**Live-Test:** 6/6 Tests bestanden (CyclePhaseWidget, Logs, Timeline, InsightsCard, Dialog, Toggle)
 
----
-
-## v12.54 — Deployment v12.53 auf fudda.de (2026-03-04)
-
-**Was:** Deploy der PDF-Verbesserungen auf Production.
+**Commits:** 27cc31f (12 Features), 63dd89e (Toggle-Bugfix)
 
 ---
 
-## v12.55 — Workout-Musik Rewrite + Drag&Drop UX (2026-03-04)
-
-**Was:** Zwei grosse Fixes fuer die aktive Workout-Seite.
-
-**1. Workout-Musik komplett neu konzipiert:**
-- **Root Cause:** CSP `script-src 'self'` blockierte YouTube IFrame Player API script
-- **Loesung:** Kompletter Rewrite auf einfache `<iframe>` Embeds (youtube-nocookie.com)
-- Kein externes Script noetig → funktioniert mit bestehendem CSP `frame-src`
-- 4 kuratierte Playlists + Custom YouTube URL
-- Collapsed = Musik laeuft im Hintergrund, Expanded = sichtbarer Player
-
-**2. Drag & Drop UX-Verbesserung:**
-- Gesamtes Chip ist jetzt der Drag-Handle (nicht separates GripVertical-Icon)
-- Tap (kurzer Klick) = zur Uebung springen
-- Halten & Ziehen (250ms Delay) = Reihenfolge aendern
-- @dnd-kit PointerSensor (distance: 8) + TouchSensor (delay: 250ms, tolerance: 8)
-
-**Dateien:** 3 modifiziert (WorkoutMusicPlayer.tsx, ExerciseListBar.tsx, ActiveWorkoutContext.tsx)
-
----
-
-## v12.56 — PDF-Seitenumbruch + Cardio-Timer + Satz-Timer-UX (2026-03-05)
-
-**Was:** Drei UX-Verbesserungen fuer Trainingsseite basierend auf Live-Test-Feedback.
-
-**1. PDF Trainingslog — Jeder Tag auf eigener Seite:**
-- Automatischer Seitenumbruch zwischen Trainingstagen
-- Jeder Tag beginnt oben auf einer neuen Seite (statt "Platz-Check")
-
-**2. Cardio-Aufwaermphase — Funktionaler Timer:**
-- WarmupCard hat jetzt 2 Phasen: Setup → Active Timer
-- Setup: Geraet/Art, Dauer, Beschreibung auswaehlen → "Starten"
-- Active: Live-Countdown, Pause/Resume, Reset, vorzeitiges Beenden (ab 30s)
-- Echtzeit-Kalorienberechnung basierend auf tatsaechlich absolvierter Zeit
-- Vibration bei Abschluss, gruen/abgeschlossen-Indikator
-
-**3. Satz-Timer — Manueller Start (Industrie-Standard):**
-- **Recherche:** Strong, Hevy, JEFIT, FitNotes, GymBook, Fitbod — KEINE App startet Timer automatisch bei Uebungswechsel
-- **Konzept:** Nutzer braucht Zeit fuer Geraete-Setup, Gewichte auflegen etc.
-- Neuer State `setReady: boolean` im ActiveWorkoutContext
-- "Satz X starten" Button erscheint vor dem SetBySetTracker
-- Satz-Timer startet NUR nach manuellem Klick (nicht automatisch)
-- Rest-Timer startet weiterhin automatisch nach Satz-Abschluss (Standard)
-- setReady wird bei: Uebungswechsel, Rueckkehr aus Rest, Navigation → false
-
-**Dateien:** 5 modifiziert (generateTrainingPlanPDF.ts, WarmupCard.tsx, ActiveWorkoutContext.tsx, ActiveWorkoutPage.tsx, ExerciseTracker.tsx)
-
----
-
-*Letzte Aktualisierung: 2026-03-05*
+*Letzte Aktualisierung: 2026-03-07*

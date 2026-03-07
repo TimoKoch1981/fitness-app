@@ -469,4 +469,10 @@
 - [x] ~~**Agent-Routing: Thread-Override Fix**~~ ✅ — Smart-Routing mit detectIntent() Confidence > 0.3
 - [x] ~~**SKILLS_LEARNINGS: Email-Confirmation + DNS-Anleitung**~~ ✅ — Wiederverwendbare Resend/Hetzner/Strato Doku
 
-*Letzte Aktualisierung: 2026-03-07 (KI-Trainer Blocks B+C+D KOMPLETT — 12 neue Dateien, 6 geaenderte Dateien, deployed auf fudda.de)*
+### Zyklus-Integration (P1-P3) ✅ (2026-03-07, v12.59)
+- [x] ~~**P1: KI-Integration**~~ ✅ — femaleFitness Skill, recentCycleLogs in AI-Prompt, Date-Picker 14 Tage, DSGVO Opt-in Toggle
+- [x] ~~**P2: Training/Ernaehrung**~~ ✅ — 7 Zyklus-Trigger + 4 Chips, CyclePhaseWidget Cockpit
+- [x] ~~**P3: UX/Visualisierung**~~ ✅ — 20 Symptome + 17 Sprachen, CycleTimeline, CycleInsightsCard, Arzt-Export PDF
+- [x] ~~**Bugfix: Toggle autoSave Race Condition**~~ ✅ — handleToggleSave (sofort, ohne Debounce) fuer Boolean-Toggles
+
+*Letzte Aktualisierung: 2026-03-07 (Zyklus-Integration P1-P3 KOMPLETT + Toggle-Bugfix, deployed + live-getestet auf fudda.de)*
