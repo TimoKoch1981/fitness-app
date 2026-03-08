@@ -12,7 +12,7 @@
 
 import type { AgentConfig, AgentContext, AgentResult, CommunicationStyle } from './types';
 import type { ChatMessage, StreamCallback } from '../types';
-import { getSkillContentWithSources, getSkillVersionMap, getSkillIdsForMode } from '../skills/index';
+import { getSkillContentWithSources, getSkillVersionMap, getSkillIdsForContext } from '../skills/index';
 import type { TrainingMode } from '../../../types/health';
 import { generateUserSkills, type UserSkillData } from '../skills/userSkills';
 import { getAIProvider } from '../provider';
@@ -37,7 +37,8 @@ export abstract class BaseAgent {
    */
   protected buildSystemPrompt(context: AgentContext): string {
     const parts: string[] = [];
-    const trainingMode: TrainingMode = (context.healthContext.profile as unknown as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
+    const profileData = context.healthContext.profile as unknown as Record<string, unknown> | undefined;
+    const trainingMode: TrainingMode = profileData?.training_mode as TrainingMode ?? 'standard';
 
     // 0. Global Facts Codex (applies to ALL agents — facts > estimates)
     parts.push(this.getFactsCodex(context.language));
@@ -52,9 +53,10 @@ export abstract class BaseAgent {
     const stylePrompt = this.getCommunicationStylePrompt(context.communicationStyle, context.language);
     if (stylePrompt) parts.push(stylePrompt);
 
-    // 2. Static knowledge-base skills (versioned, domain-specific, mode-aware)
+    // 2. Static knowledge-base skills (versioned, domain-specific, mode-aware, profile-conditional)
     //    Uses getSkillContentWithSources to inject PMID references for citation
-    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    //    Profile-conditional skills (femaleFitness, trainerReview) only loaded when relevant
+    const skillIds = getSkillIdsForContext(this.config.type, trainingMode, profileData);
     for (const skillId of skillIds) {
       parts.push(getSkillContentWithSources(skillId));
     }
@@ -406,8 +408,9 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
     const provider = getAIProvider();
     const response = await provider.chat(messages);
 
-    // Build version map for transparency (mode-aware skill list)
-    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    // Build version map for transparency (profile-conditional + mode-aware skill list)
+    const profileForVersions = context.healthContext.profile as unknown as Record<string, unknown> | undefined;
+    const skillIds = getSkillIdsForContext(this.config.type, trainingMode, profileForVersions);
     const versions = getSkillVersionMap(skillIds);
 
     return {
@@ -430,7 +433,8 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
     onChunk: StreamCallback,
   ): Promise<AgentResult> {
     const systemPrompt = this.buildSystemPrompt(context);
-    const trainingMode: TrainingMode = (context.healthContext.profile as unknown as Record<string, unknown>)?.training_mode as TrainingMode ?? 'standard';
+    const profileStream = context.healthContext.profile as unknown as Record<string, unknown> | undefined;
+    const trainingMode: TrainingMode = profileStream?.training_mode as TrainingMode ?? 'standard';
 
     console.log(`[Agent:${this.config.type}] Prompt: ${systemPrompt.length} chars (~${Math.round(systemPrompt.length / 4)} tokens), mode: ${trainingMode}`);
 
@@ -442,7 +446,7 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
     const provider = getAIProvider();
     const response = await provider.chatStream(messages, onChunk);
 
-    const skillIds = getSkillIdsForMode(this.config.type, trainingMode);
+    const skillIds = getSkillIdsForContext(this.config.type, trainingMode, profileStream);
     const versions = getSkillVersionMap(skillIds);
 
     return {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3, Upload } from 'lucide-react';
+import { LogOut, Shield, HelpCircle, Check, AlertCircle, Calculator, FileText, MessageSquare, Lightbulb, Download, BarChart3, Upload, Info } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize, type BuddyVerbosity, type BuddyExpertise } from '../i18n';
@@ -445,6 +445,17 @@ export function ProfilePage() {
                       </button>
                     ))}
                   </div>
+                  {/* Cycle features hint for female/other */}
+                  {(gender === 'female' || gender === 'other') && (
+                    <div className="flex items-start gap-1.5 mt-1.5 px-1">
+                      <Info className="h-3 w-3 text-rose-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-rose-500">
+                        {language === 'de'
+                          ? 'Schaltet Zyklus-Tracking & zyklusabhängiges Training frei'
+                          : 'Unlocks cycle tracking & cycle-based training'}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">

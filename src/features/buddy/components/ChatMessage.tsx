@@ -3,11 +3,19 @@ import { AlertCircle, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
 import { useTranslation } from '../../../i18n';
 import type { DisplayMessage } from '../hooks/useBuddyChat';
+import { stripActionBlock } from '../../../lib/ai/actions/actionParser';
 
-/** Hide ACTION blocks from the display during streaming */
+/**
+ * Hide ACTION blocks from display — ALWAYS, not just during streaming.
+ * Uses the canonical stripActionBlock from actionParser (full regex)
+ * PLUS a streaming-safe fallback for partial/incomplete blocks.
+ */
 function stripActionBlockFromDisplay(text: string): string {
-  // Remove everything from ```ACTION: onwards (including partial blocks during streaming)
-  return text.replace(/```(?:ACTION|action)[\s\S]*$/i, '').trim();
+  // 1. Use the full parser regex (handles complete ACTION blocks)
+  let cleaned = stripActionBlock(text);
+  // 2. Streaming fallback: catch partial blocks that aren't closed yet
+  cleaned = cleaned.replace(/```(?:ACTION|action)[\s\S]*$/i, '').trim();
+  return cleaned;
 }
 
 /**
@@ -196,9 +204,9 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
   // Extract PMIDs from completed messages
   const isComplete = !message.isStreaming && !message.isError && !message.isLoading;
   const pmids = isComplete ? extractPMIDs(message.content) : [];
-  const displayContent = message.isStreaming
-    ? stripActionBlockFromDisplay(message.content)
-    : message.content;
+  // ALWAYS strip ACTION blocks — both during streaming AND after completion.
+  // Defensive: even if useBuddyChat already stripped, double-strip is safe.
+  const displayContent = stripActionBlockFromDisplay(message.content);
 
   return (
     <div className="flex gap-3 mb-3">

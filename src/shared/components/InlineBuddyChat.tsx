@@ -273,10 +273,15 @@ function InlineBuddyChatContent() {
           const display = getActionDisplayInfo(r.action);
           return `${display.icon} ${display.summary}`;
         });
+        // Add navigation hint for training plans
+        const hasPlanSave = successes.some(r => r.action.type === 'save_training_plan');
+        const navHint = hasPlanSave
+          ? (language === 'de' ? '\n\n👉 Öffne Training → Plan um deinen Plan zu sehen.' : '\n\n👉 Open Training → Plan to see your plan.')
+          : '';
         addSystemMessage(
           language === 'de'
-            ? `\u2705 ${successes.length === 1 ? 'Gespeichert' : `${successes.length}x gespeichert`}:\n${summaries.join('\n')}`
-            : `\u2705 ${successes.length === 1 ? 'Saved' : `${successes.length}x saved`}:\n${summaries.join('\n')}`,
+            ? `\u2705 ${successes.length === 1 ? 'Gespeichert' : `${successes.length}x gespeichert`}:\n${summaries.join('\n')}${navHint}`
+            : `\u2705 ${successes.length === 1 ? 'Saved' : `${successes.length}x saved`}:\n${summaries.join('\n')}${navHint}`,
           '\u2705',
         );
       }

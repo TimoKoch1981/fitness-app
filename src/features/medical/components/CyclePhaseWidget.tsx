@@ -1,13 +1,22 @@
 /**
- * CyclePhaseWidget — Mini-Widget fuer das Cockpit.
+ * CyclePhaseWidget — Prominent cycle card for the Cockpit.
  *
- * Zeigt aktuelle Zyklusphase + Emoji + kurzen Tagesstipp.
- * Nur sichtbar wenn Zyklus-Tracking aktiviert UND Daten vorhanden.
+ * Shows:
+ *   - Current cycle phase + emoji + training tip
+ *   - Cycle day X of Y (predicted length)
+ *   - Mini progress bar showing position in cycle
+ *   - Next period prediction with days countdown
+ *   - Confidence indicator
+ *
+ * Only visible when cycle_tracking_enabled AND gender is female/other.
+ * Uses the useCyclePrediction hook for forward-looking predictions.
  */
 
-import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useMenstrualCycleLogs, getCyclePhaseEmoji, estimateCyclePhase, daysBetweenDates } from '../hooks/useMenstrualCycle';
+import { getCyclePhaseEmoji } from '../hooks/useMenstrualCycle';
+import { useCyclePrediction } from '../hooks/useCyclePrediction';
 import type { CyclePhase } from '../../../types/health';
 
 interface Props {
@@ -47,62 +56,180 @@ const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
   luteal: 'text-purple-700',
 };
 
+const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
+  menstruation: 'bg-red-400',
+  follicular: 'bg-green-400',
+  ovulation: 'bg-amber-400',
+  luteal: 'bg-purple-400',
+};
+
+const PHASE_NAMES: Record<CyclePhase, { de: string; en: string }> = {
+  menstruation: { de: 'Menstruation', en: 'Menstruation' },
+  follicular: { de: 'Follikelphase', en: 'Follicular Phase' },
+  ovulation: { de: 'Eisprung', en: 'Ovulation' },
+  luteal: { de: 'Lutealphase', en: 'Luteal Phase' },
+};
+
+const CONFIDENCE_DOTS: Record<string, number> = {
+  none: 0,
+  low: 1,
+  medium: 2,
+  high: 3,
+};
+
 export function CyclePhaseWidget({ cycleTrackingEnabled }: Props) {
   const { language } = useTranslation();
-  const { data: cycleLogs } = useMenstrualCycleLogs(7);
+  const navigate = useNavigate();
+  const prediction = useCyclePrediction();
 
-  const currentPhase = useMemo<CyclePhase | null>(() => {
-    if (!cycleLogs || cycleLogs.length === 0) return null;
-
-    const latest = cycleLogs[0];
-    const daysSince = daysBetweenDates(latest.date, new Date().toISOString().split('T')[0]);
-
-    // If entry is from today or yesterday, use logged phase
-    if (daysSince <= 1) return latest.phase;
-
-    // If last entry was menstruation, estimate based on days
-    if (latest.phase === 'menstruation') {
-      return estimateCyclePhase(latest.date, daysSince);
-    }
-
-    // If more than 3 days old, data is stale — don't show
-    if (daysSince > 3) return null;
-
-    return latest.phase;
-  }, [cycleLogs]);
-
-  if (!cycleTrackingEnabled || !currentPhase) return null;
+  if (!cycleTrackingEnabled) return null;
 
   const de = language === 'de';
-  const phaseNames: Record<CyclePhase, { de: string; en: string }> = {
-    menstruation: { de: 'Menstruation', en: 'Menstruation' },
-    follicular: { de: 'Follikelphase', en: 'Follicular Phase' },
-    ovulation: { de: 'Eisprung', en: 'Ovulation' },
-    luteal: { de: 'Lutealphase', en: 'Luteal Phase' },
-  };
+  const phase = prediction.currentPhase;
 
-  const tip = PHASE_TIPS[currentPhase];
-  const colors = PHASE_COLORS[currentPhase];
-  const textColor = PHASE_TEXT_COLORS[currentPhase];
-
-  return (
-    <div className={`rounded-xl p-3 border ${colors}`}>
-      <div className="flex items-start gap-3">
-        <span className="text-2xl">{getCyclePhaseEmoji(currentPhase)}</span>
+  // No data at all — show CTA to start logging
+  if (!phase || prediction.confidence === 'none') {
+    return (
+      <button
+        onClick={() => navigate('/medical')}
+        className="w-full rounded-xl p-4 border border-rose-200 bg-rose-50 shadow-sm text-left flex items-center gap-3 hover:bg-rose-100 transition-colors"
+      >
+        <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+          <Calendar className="h-5 w-5 text-rose-500" />
+        </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className={`text-sm font-semibold ${textColor}`}>
-              {de ? phaseNames[currentPhase].de : phaseNames[currentPhase].en}
-            </h3>
-            <span className="text-[10px] text-gray-400">
-              {de ? 'Zyklus-Tracker' : 'Cycle Tracker'}
-            </span>
-          </div>
-          <p className="text-xs text-gray-600 mt-0.5">
-            {de ? tip.de : tip.en}
+          <p className="text-sm font-semibold text-rose-800">
+            {de ? 'Zyklus-Tracking starten' : 'Start Cycle Tracking'}
+          </p>
+          <p className="text-xs text-rose-600 mt-0.5">
+            {de
+              ? 'Trage deine Periode ein fuer personalisierte Vorhersagen'
+              : 'Log your period for personalized predictions'}
           </p>
         </div>
+        <ChevronRight className="h-5 w-5 text-rose-400 flex-shrink-0" />
+      </button>
+    );
+  }
+
+  const colors = PHASE_COLORS[phase];
+  const textColor = PHASE_TEXT_COLORS[phase];
+  const barColor = PHASE_BAR_COLORS[phase];
+  const tip = PHASE_TIPS[phase];
+  const phaseName = de ? PHASE_NAMES[phase].de : PHASE_NAMES[phase].en;
+
+  // Progress through cycle
+  const cycleProgress = prediction.currentCycleDay && prediction.predictedCycleLength
+    ? Math.min(100, Math.round((prediction.currentCycleDay / prediction.predictedCycleLength) * 100))
+    : 0;
+
+  const confidenceDots = CONFIDENCE_DOTS[prediction.confidence] ?? 0;
+
+  // Format prediction date
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(de ? 'de-DE' : 'en-US', { day: 'numeric', month: 'short' });
+  };
+
+  return (
+    <div className={`rounded-xl border shadow-sm overflow-hidden ${colors}`}>
+      {/* Header */}
+      <div className="p-3">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">{getCyclePhaseEmoji(phase)}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className={`text-sm font-semibold ${textColor}`}>
+                {phaseName}
+              </h3>
+              {prediction.currentCycleDay && (
+                <span className="text-[10px] text-gray-500 bg-white/60 px-1.5 py-0.5 rounded-full">
+                  {de ? `Tag ${prediction.currentCycleDay}` : `Day ${prediction.currentCycleDay}`}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-0.5">
+              {de ? tip.de : tip.en}
+            </p>
+          </div>
+        </div>
+
+        {/* Cycle Progress Bar */}
+        {prediction.currentCycleDay && (
+          <div className="mt-2.5">
+            <div className="flex justify-between text-[9px] text-gray-400 mb-0.5">
+              <span>{de ? `Zyklus ~${prediction.predictedCycleLength} Tage` : `Cycle ~${prediction.predictedCycleLength} days`}</span>
+              <span>{cycleProgress}%</span>
+            </div>
+            <div className="h-1.5 bg-white/50 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                style={{ width: `${cycleProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Prediction Footer */}
+      {prediction.daysUntilPeriod !== null && (
+        <div className="border-t border-inherit bg-white/40 px-3 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Next Period */}
+            <div>
+              <p className="text-[9px] text-gray-400 uppercase tracking-wide">
+                {de ? 'Nächste Periode' : 'Next Period'}
+              </p>
+              <p className="text-xs font-semibold text-gray-700">
+                {prediction.daysUntilPeriod <= 1
+                  ? (de ? 'Heute/Morgen' : 'Today/Tomorrow')
+                  : (de ? `in ${prediction.daysUntilPeriod} Tagen` : `in ${prediction.daysUntilPeriod} days`)}
+              </p>
+              <p className="text-[9px] text-gray-400">
+                {formatDate(prediction.nextPeriodDate)}
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-200" />
+
+            {/* Next Ovulation */}
+            {prediction.daysUntilOvulation !== null && prediction.daysUntilOvulation > 0 && (
+              <div>
+                <p className="text-[9px] text-gray-400 uppercase tracking-wide">
+                  {de ? 'Eisprung' : 'Ovulation'}
+                </p>
+                <p className="text-xs font-semibold text-gray-700">
+                  {prediction.daysUntilOvulation <= 1
+                    ? (de ? 'Heute/Morgen' : 'Today/Tomorrow')
+                    : (de ? `in ${prediction.daysUntilOvulation} T.` : `in ${prediction.daysUntilOvulation} d.`)}
+                </p>
+                <p className="text-[9px] text-gray-400">
+                  {formatDate(prediction.nextOvulationDate)}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Confidence Dots */}
+          <div className="flex flex-col items-end gap-0.5">
+            <div className="flex gap-0.5">
+              {[1, 2, 3].map(i => (
+                <div
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    i <= confidenceDots ? 'bg-rose-400' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-[8px] text-gray-400">
+              {de ? prediction.confidenceLabel.de : prediction.confidenceLabel.en}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

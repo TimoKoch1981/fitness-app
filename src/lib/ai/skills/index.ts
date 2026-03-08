@@ -70,11 +70,13 @@ interface AgentSkillMap {
  */
 const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
   nutrition: {
-    staticSkills: ['nutrition', 'supplements', 'nutritionScience', 'femaleFitness'],
+    // femaleFitness loaded conditionally via PROFILE_CONDITIONAL_SKILLS
+    staticSkills: ['nutrition', 'supplements', 'nutritionScience'],
     userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'cycle_log'],
   },
   training: {
-    staticSkills: ['training', 'sleep', 'competition', 'nutritionScience', 'trainerReview', 'femaleFitness'],
+    // trainerReview + femaleFitness loaded conditionally via PROFILE_CONDITIONAL_SKILLS
+    staticSkills: ['training', 'sleep', 'competition'],
     userSkills: ['profile', 'training_log', 'substance_protocol', 'available_equipment', 'cycle_log'],
   },
   substance: {
@@ -94,7 +96,8 @@ const AGENT_SKILL_MAP: Record<AgentType, AgentSkillMap> = {
     userSkills: ['profile', 'body_progress'],
   },
   medical: {
-    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'bodyComposition', 'femaleFitness'],
+    // femaleFitness loaded conditionally via PROFILE_CONDITIONAL_SKILLS
+    staticSkills: ['medical', 'sleep', 'pct', 'nutritionScience', 'bodyComposition'],
     userSkills: ['profile', 'substance_protocol', 'body_progress', 'cycle_log'],
   },
   general: {
@@ -123,6 +126,33 @@ const MODE_SKILL_EXTENSIONS: Record<string, ModeSkillExtension[]> = {
     { skillId: 'competition', modes: ['power', 'power_plus'] },
   ],
 };
+
+// ── Profile-Conditional Skills ──────────────────────────────────────────
+// Skills that are only loaded when specific profile conditions are met.
+// Keeps prompts lean: e.g. trainerReview only for users who enabled it,
+// femaleFitness only for female/diverse users.
+//
+// IMPORTANT: This was introduced after v12.58 bloated the training agent's
+// system prompt from ~10.400 to ~20.900 tokens, causing training plan
+// ACTION blocks to be truncated at the 2048 max_tokens output limit.
+// See: docs/SKILLS_LEARNINGS.md — "Token-Budget & Conditional Skills"
+
+interface ProfileCondition {
+  skillId: SkillId;
+  /** Returns true if the skill should be loaded for this user profile */
+  condition: (profile: Record<string, unknown>) => boolean;
+}
+
+const PROFILE_CONDITIONAL_SKILLS: ProfileCondition[] = [
+  {
+    skillId: 'trainerReview',
+    condition: (p) => p.ai_trainer_enabled === true,
+  },
+  {
+    skillId: 'femaleFitness',
+    condition: (p) => p.gender === 'female' || p.gender === 'other',
+  },
+];
 
 // ── Public API ──────────────────────────────────────────────────────────
 
@@ -174,11 +204,32 @@ export function getSkillsForAgent(agentType: AgentType): AgentSkillMap {
 /**
  * Get the static skill IDs for an agent, extended with mode-specific skills.
  * E.g. substance agent in power_plus mode also gets 'anabolics_powerplus'.
+ *
+ * @deprecated Use getSkillIdsForContext() which also applies profile-conditional skills.
  */
 export function getSkillIdsForMode(agentType: AgentType, trainingMode: TrainingMode): SkillId[] {
+  return getSkillIdsForContext(agentType, trainingMode);
+}
+
+/**
+ * Get the static skill IDs for an agent, extended with:
+ * 1. Mode-specific skills (e.g. anabolics_powerplus for power_plus mode)
+ * 2. Profile-conditional skills (e.g. femaleFitness only for female/other gender,
+ *    trainerReview only when ai_trainer_enabled)
+ *
+ * This keeps prompts lean — skills are only loaded when actually relevant.
+ * Introduced after v12.58 bloated the training agent's prompt from ~10K to ~21K tokens,
+ * causing training plan ACTION blocks to be truncated at the output limit.
+ */
+export function getSkillIdsForContext(
+  agentType: AgentType,
+  trainingMode: TrainingMode,
+  profile?: Record<string, unknown>,
+): SkillId[] {
   const base = AGENT_SKILL_MAP[agentType].staticSkills;
   const extended = [...base];
 
+  // 1. Mode-specific extensions (Power/Power+ skills)
   for (const baseSkillId of base) {
     const extensions = MODE_SKILL_EXTENSIONS[baseSkillId];
     if (extensions) {
@@ -186,6 +237,15 @@ export function getSkillIdsForMode(agentType: AgentType, trainingMode: TrainingM
         if (ext.modes.includes(trainingMode) && !extended.includes(ext.skillId)) {
           extended.push(ext.skillId);
         }
+      }
+    }
+  }
+
+  // 2. Profile-conditional skills (gender-gated, feature-gated)
+  if (profile) {
+    for (const cond of PROFILE_CONDITIONAL_SKILLS) {
+      if (!extended.includes(cond.skillId) && cond.condition(profile)) {
+        extended.push(cond.skillId);
       }
     }
   }

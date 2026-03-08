@@ -100,11 +100,16 @@ export function useAddTrainingPlan() {
       console.log(`[TrainingPlan] Saving plan "${input.name}" with ${input.days.length} days for user ${userId}`);
 
       // Step 1: Deactivate all existing plans
-      await supabase
+      const { error: deactivateError } = await supabase
         .from('training_plans')
         .update({ is_active: false })
         .eq('user_id', userId)
         .eq('is_active', true);
+
+      if (deactivateError) {
+        console.warn('[TrainingPlan] Deactivate old plans warning:', deactivateError);
+        // Non-fatal: continue even if no old plans exist
+      }
 
       // Step 2: Insert the new plan
       const { data: plan, error: planError } = await supabase
@@ -121,9 +126,16 @@ export function useAddTrainingPlan() {
         .single();
 
       if (planError) {
-        console.error('[TrainingPlan] Insert plan failed:', planError);
+        console.error('[TrainingPlan] ❌ Insert plan failed:', planError);
         throw planError;
       }
+
+      if (!plan || !plan.id) {
+        console.error('[TrainingPlan] ❌ Insert returned no data — possible RLS rejection');
+        throw new Error('Plan wurde nicht gespeichert. Bitte neu einloggen.');
+      }
+
+      console.log(`[TrainingPlan] Plan inserted with ID ${plan.id}, inserting ${input.days.length} days...`);
 
       // Step 3: Insert all days (bulk)
       const dayRows = input.days.map((day) => ({
@@ -135,16 +147,17 @@ export function useAddTrainingPlan() {
         notes: day.notes,
       }));
 
-      const { error: daysError } = await supabase
+      const { data: insertedDays, error: daysError } = await supabase
         .from('training_plan_days')
-        .insert(dayRows);
+        .insert(dayRows)
+        .select();
 
       if (daysError) {
-        console.error('[TrainingPlan] Insert days failed:', daysError);
+        console.error('[TrainingPlan] ❌ Insert days failed:', daysError);
         throw daysError;
       }
 
-      console.log(`[TrainingPlan] ✅ Plan "${input.name}" saved with ID ${plan.id}`);
+      console.log(`[TrainingPlan] ✅ Plan "${input.name}" saved with ID ${plan.id}, ${insertedDays?.length ?? 0} days inserted`);
       return plan as TrainingPlan;
     },
     onSuccess: () => {
