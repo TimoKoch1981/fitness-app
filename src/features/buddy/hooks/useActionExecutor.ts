@@ -22,6 +22,7 @@ import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
+import { ensureFreshSession } from '../../../lib/refreshSession';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
 import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod, Gender } from '../../../types/health';
 
@@ -140,7 +141,15 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     setActionStatus('executing');
     setErrorMessage(null);
 
+    // Ensure fresh auth session before executing any mutation
+    let effectiveUserId = userId;
     try {
+      effectiveUserId = await ensureFreshSession();
+    } catch (err) {
+      console.warn('[ActionExecutor] Session refresh failed, trying with existing userId:', err);
+    }
+
+    const attemptExecution = async (uid: string | undefined): Promise<{ success: boolean; error?: string }> => {
       const d = actionToExecute.data;
 
       switch (actionToExecute.type) {
@@ -155,7 +164,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             fiber: d.fiber as number | undefined,
             date: d.date as string | undefined,
             source: 'ai',
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -170,7 +179,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             exercises: d.exercises as Array<{ name: string; sets?: number; reps?: number; weight_kg?: number }> | undefined,
             notes: d.notes as string | undefined,
             date: d.date as string | undefined,
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -187,7 +196,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             leg_cm: d.leg_cm as number | undefined,
             date: d.date as string | undefined,
             source: 'ai',
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -200,7 +209,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             date: d.date as string,
             time: d.time as string,
             notes: d.notes as string | undefined,
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -225,7 +234,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             date: d.date as string | undefined,
             time: d.time as string | undefined,
             notes: d.notes as string | undefined,
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -243,7 +252,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
               exercises: day.exercises as PlanExercise[],
               notes: day.notes as string | undefined,
             })),
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -262,7 +271,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             fiber_per_serving: d.fiber_per_serving as number | undefined,
             aliases: d.aliases as string[] | undefined,
             notes: d.notes as string | undefined,
-            user_id: userId,
+            user_id: uid,
           });
           break;
         }
@@ -382,8 +391,29 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('executed');
       setPendingAction(null);
       return { success: true };
+    };
+
+    // First attempt
+    try {
+      return await attemptExecution(effectiveUserId);
     } catch (error) {
       const msg = error instanceof Error ? error.message : (typeof error === 'object' && error !== null ? JSON.stringify(error) : 'Unknown error');
+      const isAuthError = /RLS|row-level|Not authenticated|JWT|no data|policy|denied|expired/i.test(msg);
+
+      if (isAuthError) {
+        console.warn('[ActionExecutor] Auth/RLS error, retrying with fresh session:', msg);
+        try {
+          const refreshedId = await ensureFreshSession();
+          return await attemptExecution(refreshedId);
+        } catch (retryError) {
+          const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
+          console.error('[ActionExecutor] Retry also failed:', retryMsg);
+          setErrorMessage(retryMsg);
+          setActionStatus('failed');
+          return { success: false, error: retryMsg };
+        }
+      }
+
       console.error('[ActionExecutor] Failed:', msg, error);
       setErrorMessage(msg);
       setActionStatus('failed');

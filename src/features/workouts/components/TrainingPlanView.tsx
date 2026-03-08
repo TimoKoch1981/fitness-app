@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles, BarChart3 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles, BarChart3, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { generateTrainingPlanPDF, generateTrainingLogPDF, fetchLastWorkoutsForPlan } from '../utils/generateTrainingPlanPDF';
@@ -14,6 +14,7 @@ import { useAISupervisedOffer } from '../hooks/useAISupervisedOffer';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { ReviewDialog } from './ReviewDialog';
 import { useRecentWorkoutsForPlan } from '../hooks/useRecentWorkoutsForPlan';
+import { useInProgressWorkout, useAbortDraft } from '../hooks/useDraftWorkout';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -424,9 +425,34 @@ function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const isDE = language === 'de';
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+
+  // Check for in-progress (resumable) workout for this day
+  const { data: inProgressWorkout } = useInProgressWorkout(day.id);
+  const abortDraft = useAbortDraft();
 
   const handleStartWorkout = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // If there's an in-progress workout, show resume dialog
+    if (inProgressWorkout) {
+      setShowResumeDialog(true);
+      return;
+    }
+    navigate(`/workout/active?planId=${planId}&dayId=${day.id}&dayNumber=${day.day_number}`);
+  };
+
+  const handleResume = () => {
+    setShowResumeDialog(false);
+    navigate(`/workout/active?planId=${planId}&dayId=${day.id}&dayNumber=${day.day_number}&resume=1`);
+  };
+
+  const handleStartFresh = async () => {
+    setShowResumeDialog(false);
+    if (inProgressWorkout) {
+      try {
+        await abortDraft.mutateAsync(inProgressWorkout.id);
+      } catch { /* ignore */ }
+    }
     navigate(`/workout/active?planId=${planId}&dayId=${day.id}&dayNumber=${day.day_number}`);
   };
 
@@ -448,6 +474,12 @@ function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }
               {t.workouts.dayLabel} {day.day_number}
             </span>
             <span className="font-medium text-gray-900 truncate">{day.name}</span>
+            {/* Resume Badge */}
+            {inProgressWorkout && (
+              <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full font-medium animate-pulse">
+                {isDE ? 'Pausiert' : 'Paused'}
+              </span>
+            )}
           </div>
           {day.focus && (
             <div className="flex items-center gap-1 mt-0.5">
@@ -464,15 +496,64 @@ function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }
             <span
               role="button"
               onClick={handleStartWorkout}
-              className="flex items-center gap-1 px-2.5 py-1 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors"
-              title={isDE ? 'Training starten' : 'Start Workout'}
+              className={`flex items-center gap-1 px-2.5 py-1 text-white text-xs font-medium rounded-lg transition-colors ${
+                inProgressWorkout
+                  ? 'bg-orange-500 hover:bg-orange-600'
+                  : 'bg-teal-500 hover:bg-teal-600'
+              }`}
+              title={inProgressWorkout
+                ? (isDE ? 'Training fortsetzen' : 'Resume Workout')
+                : (isDE ? 'Training starten' : 'Start Workout')}
             >
-              <Play className="h-3 w-3" />
-              {isDE ? 'Start' : 'Start'}
+              {inProgressWorkout ? (
+                <><RotateCcw className="h-3 w-3" /> {isDE ? 'Fortsetzen' : 'Resume'}</>
+              ) : (
+                <><Play className="h-3 w-3" /> {isDE ? 'Start' : 'Start'}</>
+              )}
             </span>
           )}
         </div>
       </button>
+
+      {/* Resume Dialog */}
+      {showResumeDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setShowResumeDialog(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-3">
+              <RotateCcw className="h-5 w-5 text-orange-500" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                {isDE ? 'Training fortsetzen?' : 'Resume Workout?'}
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">
+              {isDE
+                ? 'Es gibt ein unterbrochenes Training für diesen Tag. Möchtest du dort weitermachen oder neu starten?'
+                : 'There is a paused workout for this day. Would you like to continue where you left off or start fresh?'}
+            </p>
+            <div className="space-y-2">
+              <button
+                onClick={handleResume}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-medium rounded-xl hover:bg-orange-600 transition-colors"
+              >
+                <RotateCcw className="h-4 w-4" />
+                {isDE ? 'Fortsetzen' : 'Resume'}
+              </button>
+              <button
+                onClick={handleStartFresh}
+                className="w-full py-2.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                {isDE ? 'Neu starten (altes Training verwerfen)' : 'Start fresh (discard old workout)'}
+              </button>
+              <button
+                onClick={() => setShowResumeDialog(false)}
+                className="w-full py-1.5 text-xs text-gray-400 hover:text-gray-500 transition-colors"
+              >
+                {isDE ? 'Abbrechen' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exercises — expandable */}
       {isExpanded && (

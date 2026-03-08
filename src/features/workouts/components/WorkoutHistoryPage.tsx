@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react';
 import {
   Clock, Flame, ChevronDown, ChevronRight,
   TrendingUp, Trophy, Dumbbell, BarChart3,
+  Pencil, Check, X,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import {
@@ -14,6 +15,7 @@ import {
   getExerciseProgress,
   getUniqueExerciseNames,
 } from '../hooks/useWorkoutHistory';
+import { useUpdateWorkout } from '../hooks/useWorkouts';
 import { ExerciseHistoryChart } from './ExerciseHistoryChart';
 import type { Workout, WorkoutExerciseResult } from '../../../types/health';
 
@@ -85,6 +87,10 @@ export function WorkoutHistoryPage(_props: WorkoutHistoryPageProps) {
 
 function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale: string; isDE: boolean }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editedExercises, setEditedExercises] = useState<WorkoutExerciseResult[]>([]);
+  const [saving, setSaving] = useState(false);
+  const updateWorkout = useUpdateWorkout();
 
   const toggle = (id: string) => {
     setExpanded(prev => {
@@ -94,12 +100,51 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
     });
   };
 
+  const startEdit = (w: Workout) => {
+    const exercises = w.session_exercises as WorkoutExerciseResult[] | undefined;
+    if (!exercises) return;
+    setEditingId(w.id);
+    setEditedExercises(JSON.parse(JSON.stringify(exercises)));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditedExercises([]);
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+    setSaving(true);
+    try {
+      await updateWorkout.mutateAsync({ id: editingId, session_exercises: editedExercises });
+      setEditingId(null);
+      setEditedExercises([]);
+    } catch (err) {
+      console.error('[WorkoutHistory] Edit save failed:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateSetValue = (exIdx: number, setIdx: number, field: 'actual_reps' | 'actual_weight_kg', value: number) => {
+    setEditedExercises(prev => {
+      const next = [...prev];
+      const ex = { ...next[exIdx], sets: [...next[exIdx].sets] };
+      ex.sets[setIdx] = { ...ex.sets[setIdx], [field]: value };
+      next[exIdx] = ex;
+      return next;
+    });
+  };
+
   return (
     <div className="space-y-2">
       {workouts.map(w => {
         const isOpen = expanded.has(w.id);
-        const sessionExercises = w.session_exercises as WorkoutExerciseResult[] | undefined;
-        const completedCount = sessionExercises?.filter(e => !e.skipped).length ?? 0;
+        const isEditing = editingId === w.id;
+        const displayExercises = isEditing
+          ? editedExercises
+          : (w.session_exercises as WorkoutExerciseResult[] | undefined);
+        const completedCount = displayExercises?.filter(e => !e.skipped).length ?? 0;
 
         return (
           <div key={w.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -135,34 +180,107 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
               </div>
             </button>
 
-            {isOpen && sessionExercises && (
-              <div className="px-4 pb-4 space-y-1.5 border-t border-gray-50">
-                {sessionExercises.map((ex, i) => {
-                  if (ex.skipped) {
-                    return (
-                      <p key={i} className="text-xs text-gray-300 line-through pl-6">{ex.name}</p>
-                    );
-                  }
-                  const completed = ex.sets.filter(s => s.completed);
-                  const maxW = completed.length > 0
-                    ? Math.max(...completed.map(s => s.actual_weight_kg ?? 0))
-                    : 0;
-                  const avgR = completed.length > 0
-                    ? Math.round(completed.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / completed.length)
-                    : 0;
+            {isOpen && displayExercises && (
+              <div className="px-4 pb-4 border-t border-gray-50">
+                {/* Edit toggle button */}
+                {!isEditing && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startEdit(w); }}
+                    className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 py-2"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    {isDE ? 'Bearbeiten' : 'Edit'}
+                  </button>
+                )}
 
-                  return (
-                    <div key={i} className="flex items-center justify-between py-1 pl-6">
-                      <span className="text-xs text-gray-600 truncate">
-                        {ex.is_addition && <span className="text-teal-500">+ </span>}
-                        {ex.name}
-                      </span>
-                      <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                        {completed.length}×{avgR}{maxW > 0 && ` @ ${maxW}kg`}
-                      </span>
-                    </div>
-                  );
-                })}
+                <div className="space-y-1.5">
+                  {displayExercises.map((ex, exIdx) => {
+                    if (ex.skipped) {
+                      return (
+                        <p key={exIdx} className="text-xs text-gray-300 line-through pl-6">{ex.name}</p>
+                      );
+                    }
+                    const completed = ex.sets.filter(s => s.completed);
+
+                    if (isEditing) {
+                      // Edit mode: show individual sets with editable inputs
+                      return (
+                        <div key={exIdx} className="py-1.5">
+                          <p className="text-xs font-medium text-gray-700 mb-1">
+                            {ex.is_addition && <span className="text-teal-500">+ </span>}
+                            {ex.name}
+                          </p>
+                          <div className="space-y-1 pl-3">
+                            {ex.sets.map((set, setIdx) => {
+                              if (!set.completed) return null;
+                              return (
+                                <div key={setIdx} className="flex items-center gap-2 text-xs">
+                                  <span className="text-gray-400 w-6">S{setIdx + 1}</span>
+                                  <input
+                                    type="number"
+                                    value={set.actual_reps ?? 0}
+                                    onChange={(e) => updateSetValue(exIdx, setIdx, 'actual_reps', parseInt(e.target.value) || 0)}
+                                    className="w-14 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                                  />
+                                  <span className="text-gray-400">Reps</span>
+                                  <input
+                                    type="number"
+                                    step="0.5"
+                                    value={set.actual_weight_kg ?? 0}
+                                    onChange={(e) => updateSetValue(exIdx, setIdx, 'actual_weight_kg', parseFloat(e.target.value) || 0)}
+                                    className="w-16 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                                  />
+                                  <span className="text-gray-400">kg</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Read-only mode: summary line
+                    const maxW = completed.length > 0
+                      ? Math.max(...completed.map(s => s.actual_weight_kg ?? 0))
+                      : 0;
+                    const avgR = completed.length > 0
+                      ? Math.round(completed.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / completed.length)
+                      : 0;
+
+                    return (
+                      <div key={exIdx} className="flex items-center justify-between py-1 pl-6">
+                        <span className="text-xs text-gray-600 truncate">
+                          {ex.is_addition && <span className="text-teal-500">+ </span>}
+                          {ex.name}
+                        </span>
+                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                          {completed.length}×{avgR}{maxW > 0 && ` @ ${maxW}kg`}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Save / Cancel buttons in edit mode */}
+                {isEditing && (
+                  <div className="flex gap-2 mt-3 pt-2 border-t border-gray-100">
+                    <button
+                      onClick={saveEdit}
+                      disabled={saving}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      {saving ? (isDE ? 'Speichert...' : 'Saving...') : (isDE ? 'Speichern' : 'Save')}
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      {isDE ? 'Abbrechen' : 'Cancel'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

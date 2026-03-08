@@ -44,6 +44,7 @@ export function ActiveWorkoutPage() {
   const planId = searchParams.get('planId') ?? '';
   const dayId = searchParams.get('dayId') ?? '';
   const dayNumber = parseInt(searchParams.get('dayNumber') ?? '0');
+  const isResume = searchParams.get('resume') === '1';
 
   const { data: lastWorkout } = useLastWorkoutForDay(planId, dayNumber);
 
@@ -52,14 +53,83 @@ export function ActiveWorkoutPage() {
 
   // Confirm-leave dialog
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  // Confirm-finish dialog (save vs discard)
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
+  // Track if we already attempted resume
+  const resumeAttemptedRef = useRef(false);
 
   // Track previous phase + exercise index for auto-timer transitions
   const prevPhaseRef = useRef(state.phase);
   const prevExerciseIdxRef = useRef(state.currentExerciseIndex);
   const prevSetIdxRef = useRef(state.currentSetIndex);
 
-  // Start session if not already active
+  // Resume from DB draft (when resume=1 in URL)
   useEffect(() => {
+    if (!isResume || resumeAttemptedRef.current) return;
+    if (state.isActive && state.planDayId === dayId) return; // already running
+    if (!activePlan?.days) return;
+    resumeAttemptedRef.current = true;
+
+    const planDay = activePlan.days.find(d => d.id === dayId);
+    if (!planDay) return;
+
+    // Load draft from DB
+    (async () => {
+      try {
+        const { supabase } = await import('../../../lib/supabase');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: draft } = await supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('plan_day_id', dayId)
+          .eq('status', 'in_progress')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (draft?.session_exercises) {
+          // Restore from draft
+          dispatch({
+            type: 'RESTORE_SESSION',
+            state: {
+              planId,
+              planDayId: dayId,
+              planDayNumber: dayNumber,
+              planDayName: planDay.name,
+              exercises: draft.session_exercises as WorkoutExerciseResult[],
+              planExercises: planDay.exercises,
+              warmup: draft.warmup as import('../../../types/health').WarmupResult | undefined,
+              currentExerciseIndex: 0,
+              currentSetIndex: 0,
+              mode: 'exercise',
+              timerEnabled: true,
+              timerSeconds: 90,
+              startedAt: draft.started_at ?? new Date().toISOString(),
+              phase: 'exercise', // Skip warmup on resume
+              isActive: true,
+              setReady: false,
+            },
+          });
+        } else {
+          // No draft found — start fresh
+          const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
+          startSession(planDay, planId, lastResults);
+        }
+      } catch (err) {
+        console.warn('[Resume] Failed to load draft:', err);
+        // Fallback: start fresh
+        const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
+        startSession(planDay, planId, lastResults);
+      }
+    })();
+  }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession]);
+
+  // Start session if not already active (non-resume path)
+  useEffect(() => {
+    if (isResume) return; // handled by resume effect above
     if (state.isActive && state.planDayId === dayId) return; // already running
     if (!activePlan?.days) return;
 
@@ -68,7 +138,7 @@ export function ActiveWorkoutPage() {
 
     const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
     startSession(planDay, planId, lastResults);
-  }, [activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
+  }, [isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
 
   // ── Start total timer when session becomes active ──────────────────────
   useEffect(() => {
@@ -404,7 +474,7 @@ export function ActiveWorkoutPage() {
       {(state.phase === 'exercise' || state.phase === 'rest') && (
         <div className="fixed bottom-0 left-0 right-0 z-10">
           <button
-            onClick={finishSession}
+            onClick={() => setShowFinishDialog(true)}
             className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white font-medium shadow-lg hover:bg-green-600 transition-colors"
           >
             <CheckCircle2 className="h-5 w-5" />
@@ -438,6 +508,54 @@ export function ActiveWorkoutPage() {
                 className="flex-1 py-2.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
                 {isDE ? 'Abbrechen' : 'Leave'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Finish Confirmation Dialog — Save vs Discard */}
+      {showFinishDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowFinishDialog(false)} />
+          <div className="relative bg-white rounded-2xl p-6 mx-4 max-w-sm w-full shadow-xl">
+            <h3 className="font-semibold text-gray-900">
+              {isDE ? 'Training beenden?' : 'Finish Workout?'}
+            </h3>
+            <p className="text-sm text-gray-500 mt-2">
+              {isDE
+                ? 'Wie moechtest du das Training beenden?'
+                : 'How would you like to finish this workout?'}
+            </p>
+            <div className="flex flex-col gap-2 mt-4">
+              {/* Primary: Finish & Save (large, prominent) */}
+              <button
+                onClick={() => {
+                  setShowFinishDialog(false);
+                  finishSession();
+                }}
+                className="w-full py-3 text-sm font-semibold bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors shadow-sm"
+              >
+                <CheckCircle2 className="h-4 w-4 inline mr-2" />
+                {isDE ? 'Mit Speichern beenden' : 'Finish & Save'}
+              </button>
+              {/* Secondary: Discard (small, subtle) */}
+              <button
+                onClick={() => {
+                  setShowFinishDialog(false);
+                  clearSession();
+                  navigate('/training');
+                }}
+                className="w-full py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {isDE ? 'Ohne Speichern verwerfen' : 'Discard without saving'}
+              </button>
+              {/* Cancel: Continue workout */}
+              <button
+                onClick={() => setShowFinishDialog(false)}
+                className="w-full py-2 text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
+              >
+                {isDE ? 'Weitermachen' : 'Continue Workout'}
               </button>
             </div>
           </div>

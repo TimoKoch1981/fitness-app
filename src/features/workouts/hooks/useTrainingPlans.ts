@@ -89,12 +89,11 @@ export function useAddTrainingPlan() {
 
   return useMutation({
     mutationFn: async (input: AddTrainingPlanInput) => {
-      // Use provided user_id (avoids auth race), fallback to getUser()
+      // Use provided user_id, or refresh session to get a fresh one
       let userId = input.user_id;
       if (!userId) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
-        userId = user.id;
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
       }
 
       console.log(`[TrainingPlan] Saving plan "${input.name}" with ${input.days.length} days for user ${userId}`);

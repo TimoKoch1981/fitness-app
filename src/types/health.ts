@@ -106,6 +106,7 @@ export interface Workout {
   started_at?: string;
   finished_at?: string;
   session_feedback?: SessionFeedback;
+  status?: 'in_progress' | 'completed' | 'aborted';
 }
 
 // === BODY MEASUREMENTS ===

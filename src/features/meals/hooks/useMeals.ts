@@ -88,9 +88,8 @@ export function useAddMeal() {
     mutationFn: async (input: AddMealInput) => {
       let userId = input.user_id;
       if (!userId) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
-        userId = user.id;
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
       }
 
       const { data, error } = await supabase

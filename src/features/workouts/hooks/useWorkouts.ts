@@ -111,3 +111,35 @@ export function useDeleteWorkout() {
     },
   });
 }
+
+/**
+ * Update an existing workout's session_exercises (and optionally notes).
+ * Used by the editable workout history feature.
+ */
+interface UpdateWorkoutInput {
+  id: string;
+  session_exercises: import('../../../types/health').WorkoutExerciseResult[];
+}
+
+export function useUpdateWorkout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: UpdateWorkoutInput) => {
+      const { data, error } = await supabase
+        .from('workouts')
+        .update({ session_exercises: input.session_exercises })
+        .eq('id', input.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Workout;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY] });
+      queryClient.invalidateQueries({ queryKey: ['workout_history'] });
+      queryClient.invalidateQueries({ queryKey: ['last_workout_for_day'] });
+    },
+  });
+}

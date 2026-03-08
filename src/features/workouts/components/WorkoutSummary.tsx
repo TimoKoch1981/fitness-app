@@ -98,7 +98,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
 
       // Show post-session feedback if ai_trainer_enabled
       if (profile?.ai_trainer_enabled && workout?.id) {
-        setSavedWorkoutId(workout.id);
+        setSavedWorkoutId(workout.id as string);
         setShowFeedback(true);
         return; // Don't close yet — show feedback first
       }
@@ -330,21 +330,35 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         })}
       </div>
 
-      {/* Error feedback */}
+      {/* Error feedback with Retry */}
       {saveError && (
-        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
-          <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-red-700">
-              {isDE ? 'Speichern fehlgeschlagen' : 'Save failed'}
-            </p>
-            <p className="text-xs text-red-600 mt-0.5 break-words">{saveError}</p>
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-2">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-red-700">
+                {isDE ? 'Speichern fehlgeschlagen' : 'Save failed'}
+              </p>
+              <p className="text-xs text-red-600 mt-0.5 break-words">{saveError}</p>
+              <p className="text-xs text-red-500 mt-1">
+                {isDE
+                  ? 'Dein Training ist noch gespeichert. Versuche es erneut.'
+                  : 'Your workout data is preserved. Try again.'}
+              </p>
+            </div>
+            <button
+              onClick={() => setSaveError(null)}
+              className="text-red-400 hover:text-red-600 flex-shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
           <button
-            onClick={() => setSaveError(null)}
-            className="text-red-400 hover:text-red-600 flex-shrink-0"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full py-2 text-sm font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
           >
-            <X className="h-4 w-4" />
+            {isDE ? 'Erneut versuchen' : 'Try Again'}
           </button>
         </div>
       )}

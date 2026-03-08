@@ -56,6 +56,8 @@ export function TrainingPage() {
   const [compareInitial, setCompareInitial] = useState<{ before?: ProgressPhoto; after?: ProgressPhoto }>({});
   const { data: progressPhotos = [] } = useProgressPhotos();
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
   const showPowerPlusWidgets = showCycleTracker || showPCTCountdown || showHematocritAlert || showBloodWorkDashboard;
@@ -101,7 +103,13 @@ export function TrainingPage() {
   const handleProgressPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset input immediately so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
     setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -114,11 +122,15 @@ export function TrainingPage() {
         .upload(path, blob, { upsert: true, contentType: 'image/webp' });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ['posing-photos'] });
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
     } catch (err) {
       console.error('[TrainingPage] Photo upload failed:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setUploadError(language === 'de' ? `Upload fehlgeschlagen: ${msg}` : `Upload failed: ${msg}`);
+      setTimeout(() => setUploadError(null), 5000);
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -213,6 +225,18 @@ export function TrainingPage() {
               className="hidden"
             />
           </div>
+
+          {/* Upload Feedback */}
+          {uploadError && (
+            <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+              {uploadError}
+            </div>
+          )}
+          {uploadSuccess && (
+            <div className="px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-600">
+              {language === 'de' ? 'Foto erfolgreich hochgeladen!' : 'Photo uploaded successfully!'}
+            </div>
+          )}
 
           {/* Tab Content */}
           {photoTab === 'poses' && showPosingPhotos && <PosingPhotos />}

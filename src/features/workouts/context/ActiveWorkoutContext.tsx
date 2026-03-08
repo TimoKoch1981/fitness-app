@@ -6,7 +6,9 @@
  * Persists to localStorage for crash recovery.
  */
 
-import { createContext, useContext, useReducer, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { supabase } from '../../../lib/supabase';
+import { today } from '../../../lib/utils';
 import type {
   TrainingPlanDay,
   PlanExercise,
@@ -452,6 +454,58 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(STORAGE_KEY);
     }
   }, [state]);
+
+  // Periodic draft save to DB (every 60s while active)
+  const draftSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!state.isActive || state.phase === 'summary' || !state.planDayId) return;
+
+    draftSaveRef.current = setTimeout(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Check for existing draft
+        const { data: existing } = await supabase
+          .from('workouts')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('plan_day_id', state.planDayId!)
+          .eq('status', 'in_progress')
+          .maybeSingle();
+
+        const payload = {
+          session_exercises: state.exercises,
+          warmup: state.warmup,
+        };
+
+        if (existing) {
+          await supabase.from('workouts').update(payload).eq('id', existing.id);
+        } else {
+          await supabase.from('workouts').insert({
+            user_id: user.id,
+            date: today(),
+            name: state.planDayName || 'Workout',
+            type: 'strength',
+            plan_id: state.planId || null,
+            plan_day_id: state.planDayId,
+            plan_day_number: state.planDayNumber ?? 0,
+            session_exercises: state.exercises,
+            warmup: state.warmup,
+            started_at: state.startedAt,
+            status: 'in_progress',
+          });
+        }
+        console.log('[DraftSave] Saved workout draft');
+      } catch (err) {
+        console.warn('[DraftSave] Error (non-fatal):', err);
+      }
+    }, 60_000); // 60 seconds
+
+    return () => {
+      if (draftSaveRef.current) clearTimeout(draftSaveRef.current);
+    };
+  }, [state.exercises, state.currentExerciseIndex, state.isActive, state.phase, state.planDayId, state.planId, state.planDayName, state.planDayNumber, state.warmup, state.startedAt]);
 
   const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[]) => {
     dispatch({ type: 'START_SESSION', planDay, planId, lastResults });

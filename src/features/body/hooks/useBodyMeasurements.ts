@@ -69,9 +69,8 @@ export function useAddBodyMeasurement() {
     mutationFn: async (input: AddBodyMeasurementInput) => {
       let userId = input.user_id;
       if (!userId) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
-        userId = user.id;
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
       }
 
       // Get height from profile for BMI calculation

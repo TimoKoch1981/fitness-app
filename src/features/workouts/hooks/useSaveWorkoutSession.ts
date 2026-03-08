@@ -10,6 +10,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { ensureFreshSession } from '../../../lib/refreshSession';
 import { today } from '../../../lib/utils';
 import type { ActiveWorkoutState } from '../context/ActiveWorkoutContext';
 import type { PlanExercise, SessionFeedback } from '../../../types/health';
@@ -30,11 +31,10 @@ export function useSaveWorkoutSession() {
     mutationFn: async (input: SaveSessionInput) => {
       const { session, weightKg } = input;
 
+      // Ensure fresh session — fixes stale JWT / RLS rejections
       let userId = input.userId;
       if (!userId) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
-        userId = user.id;
+        userId = await ensureFreshSession();
       }
 
       const finishedAt = new Date().toISOString();
@@ -68,29 +68,81 @@ export function useSaveWorkoutSession() {
           };
         });
 
-      // Step 1: Save workout
-      const { data: workout, error } = await supabase
-        .from('workouts')
-        .insert({
-          user_id: userId,
-          date: today(),
-          name: session.planDayName,
-          type: 'strength',
-          duration_minutes: durationMinutes,
-          calories_burned: caloriesBurned,
-          exercises: legacyExercises,
-          plan_id: session.planId,
-          plan_day_id: session.planDayId,
-          plan_day_number: session.planDayNumber,
-          session_exercises: session.exercises,
-          warmup: session.warmup,
-          started_at: startedAt,
-          finished_at: finishedAt,
-        })
-        .select()
-        .single();
+      // Step 1: Check if there's an in-progress draft to upgrade
+      const MAX_RETRIES = 2;
+      let workout: Record<string, unknown> | null = null;
 
-      if (error) throw error;
+      // Check for existing draft
+      let draftId: string | null = null;
+      if (session.planDayId) {
+        try {
+          const { data: draft } = await supabase
+            .from('workouts')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('plan_day_id', session.planDayId)
+            .eq('status', 'in_progress')
+            .maybeSingle();
+          draftId = draft?.id ?? null;
+        } catch { /* ignore — will do fresh insert */ }
+      }
+
+      const workoutPayload = {
+        user_id: userId,
+        date: today(),
+        name: session.planDayName,
+        type: 'strength' as const,
+        duration_minutes: durationMinutes,
+        calories_burned: caloriesBurned,
+        exercises: legacyExercises,
+        plan_id: session.planId,
+        plan_day_id: session.planDayId,
+        plan_day_number: session.planDayNumber,
+        session_exercises: session.exercises,
+        warmup: session.warmup,
+        started_at: startedAt,
+        finished_at: finishedAt,
+        status: 'completed' as const,
+      };
+
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 0) {
+            console.warn(`[SaveWorkout] Retry attempt ${attempt}...`);
+            userId = await ensureFreshSession();
+            workoutPayload.user_id = userId;
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+          }
+
+          if (draftId) {
+            // Upgrade existing draft → completed
+            const { data, error } = await supabase
+              .from('workouts')
+              .update(workoutPayload)
+              .eq('id', draftId)
+              .select()
+              .single();
+            if (error) throw error;
+            workout = data;
+          } else {
+            // Fresh insert
+            const { data, error } = await supabase
+              .from('workouts')
+              .insert(workoutPayload)
+              .select()
+              .single();
+            if (error) throw error;
+            workout = data;
+          }
+
+          break; // Success — exit retry loop
+        } catch (err) {
+          if (attempt >= MAX_RETRIES) throw err;
+          console.warn('[SaveWorkout] Attempt failed:', err);
+        }
+      }
+
+      if (!workout) throw new Error('Failed to save workout after retries');
 
       // Step 2: Auto-progression — update plan weights where user went higher
       // Fire-and-forget: Don't block session save on auto-progression errors
@@ -101,7 +153,7 @@ export function useSaveWorkoutSession() {
       }
 
       // Step 3: Post-session analysis — plateau detection, volume, RPE drift
-      await runPostSessionAnalysis(session, workout.id);
+      await runPostSessionAnalysis(session, workout.id as string);
 
       // Step 4: Update mesocycle current_week in review_config
       await updateMesocycleWeek(session);

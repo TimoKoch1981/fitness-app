@@ -24,6 +24,7 @@ export function useWorkoutHistoryForPlan(planId: string | undefined) {
         .eq('user_id', user.id)
         .eq('plan_id', planId!)
         .not('session_exercises', 'is', null)
+        .neq('status', 'in_progress')
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -45,6 +46,7 @@ export function useAllWorkoutHistory(limit = 50) {
         .select('*')
         .eq('user_id', user.id)
         .not('session_exercises', 'is', null)
+        .neq('status', 'in_progress')
         .order('date', { ascending: false })
         .limit(limit);
 
