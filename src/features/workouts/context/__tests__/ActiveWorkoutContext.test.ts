@@ -121,7 +121,7 @@ describe('START_SESSION', () => {
 
   it('sets defaults: mode, timer, indices', () => {
     const state = startedState();
-    expect(state.mode).toBe('set-by-set');
+    expect(state.mode).toBe('exercise');
     expect(state.timerEnabled).toBe(true);
     expect(state.timerSeconds).toBe(90);
     expect(state.currentExerciseIndex).toBe(0);
@@ -346,11 +346,11 @@ describe('ADD_EXERCISE', () => {
 // ── TOGGLE_MODE / TOGGLE_TIMER / SET_TIMER_SECONDS ────────────────────
 
 describe('TOGGLE_MODE', () => {
-  it('toggles between set-by-set and exercise mode', () => {
+  it('toggles between exercise and set-by-set mode', () => {
     const s1 = reducer(startedState(), { type: 'TOGGLE_MODE' });
-    expect(s1.mode).toBe('exercise');
+    expect(s1.mode).toBe('set-by-set');
     const s2 = reducer(s1, { type: 'TOGGLE_MODE' });
-    expect(s2.mode).toBe('set-by-set');
+    expect(s2.mode).toBe('exercise');
   });
 });
 

@@ -3,10 +3,20 @@
  * Tests: Rendering, title, children, actions slot, CSS classes
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../test/helpers/renderWithProviders';
 import { PageShell } from '../PageShell';
+
+// Mock AuthProvider — UserQuickMenu inside PageShell requires useAuth
+vi.mock('../../../app/providers/AuthProvider', () => ({
+  useAuth: () => ({ user: null, signOut: vi.fn() }),
+}));
+
+// Mock useProfile — UserQuickMenu reads profile data
+vi.mock('../../../features/auth/hooks/useProfile', () => ({
+  useProfile: () => ({ data: null }),
+}));
 
 describe('PageShell', () => {
   it('renders title in header', () => {
