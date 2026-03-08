@@ -82,7 +82,7 @@ function stdDev(values: number[]): number {
 
 /** Compute per-phase statistics */
 function computePhaseAverages(logs: MenstrualCycleLog[]): PhaseAverage[] {
-  const phases: CyclePhase[] = ['menstruation', 'follicular', 'ovulation', 'luteal'];
+  const phases: CyclePhase[] = ['menstruation', 'follicular', 'ovulation', 'luteal', 'spotting'];
   return phases.map(phase => {
     const phaseLogs = logs.filter(l => l.phase === phase);
     const energies = phaseLogs.map(l => l.energy_level).filter((e): e is number => e != null && e > 0);
@@ -117,6 +117,8 @@ function generateInsights(
   cycleLengths: number[],
   sd: number | null,
   phaseAvgs: PhaseAverage[],
+  sorted: MenstrualCycleLog[],
+  menstruationStarts: string[],
 ): CycleInsight[] {
   const insights: CycleInsight[] = [];
 
@@ -137,6 +139,52 @@ function generateInsights(
         en: 'Your cycle varies significantly. Consult a doctor if irregularity persists.',
       });
     }
+  }
+
+  // Cycle deviation warning: too short (< 21d) or too long (> 38d)
+  if (cycleLengths.length > 0) {
+    const lastLength = cycleLengths[cycleLengths.length - 1];
+    if (lastLength < 21) {
+      insights.push({
+        type: 'warning',
+        key: 'cycle_too_short',
+        de: `Letzter Zyklus nur ${lastLength} Tage — bei wiederholtem Auftreten aerztlichen Rat einholen.`,
+        en: `Last cycle only ${lastLength} days — consult a doctor if this recurs.`,
+      });
+    } else if (lastLength > 38) {
+      insights.push({
+        type: 'warning',
+        key: 'cycle_too_long',
+        de: `Letzter Zyklus ${lastLength} Tage — bei wiederholtem Auftreten aerztlichen Rat einholen.`,
+        en: `Last cycle ${lastLength} days — consult a doctor if this recurs.`,
+      });
+    }
+  }
+
+  // Amenorrhea warning: no period for > 60 days
+  if (menstruationStarts.length > 0) {
+    const lastStart = menstruationStarts[menstruationStarts.length - 1];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const daysSince = daysBetweenDates(lastStart, todayStr);
+    if (daysSince > 60) {
+      insights.push({
+        type: 'warning',
+        key: 'amenorrhea',
+        de: `Keine Periode seit ${daysSince} Tagen. Bitte sprich mit deiner Frauenaerztin.`,
+        en: `No period for ${daysSince} days. Please consult your gynecologist.`,
+      });
+    }
+  }
+
+  // Heavy bleeding warning: 3+ days of very_heavy flow → ferritin check hint
+  const veryHeavyDays = sorted.filter(l => l.flow_intensity === 'very_heavy').length;
+  if (veryHeavyDays >= 3) {
+    insights.push({
+      type: 'warning',
+      key: 'heavy_bleeding',
+      de: `${veryHeavyDays} Tage mit sehr starker Blutung — Ferritin/Eisenwerte pruefen lassen.`,
+      en: `${veryHeavyDays} days of very heavy bleeding — consider checking ferritin/iron levels.`,
+    });
   }
 
   // Energy dip in luteal
@@ -219,7 +267,7 @@ export function useCyclePatterns(): CyclePatternData {
       .slice(0, 8)
       .map(([symptom, count]) => ({ symptom, count }));
 
-    const insights = generateInsights(lengths, sd, phaseAverages);
+    const insights = generateInsights(lengths, sd, phaseAverages, sorted, starts);
 
     return {
       avgCycleLength: avg,

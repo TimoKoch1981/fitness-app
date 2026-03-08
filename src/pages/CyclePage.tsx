@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, CalendarPlus } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useMenstrualCycleLogs, useDeleteCycleLog, getCyclePhaseEmoji } from '../features/medical/hooks/useMenstrualCycle';
@@ -40,6 +40,15 @@ export function CyclePage() {
       <div className="space-y-4">
         {/* Current Phase Widget with Prediction */}
         <CyclePhaseWidget cycleTrackingEnabled onStartTracking={() => setShowCycleDialog(true)} />
+
+        {/* Prominent Add Entry Button */}
+        <button
+          onClick={() => setShowCycleDialog(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl shadow-sm transition-colors font-medium text-sm"
+        >
+          <CalendarPlus className="h-4.5 w-4.5" />
+          {t.cycle?.addEntry ?? (language === 'de' ? 'Neuen Eintrag erfassen' : 'Add new entry')}
+        </button>
 
         {/* Cycle Timeline Visualization */}
         <CycleTimeline cycleTrackingEnabled />

@@ -41,6 +41,10 @@ const PHASE_TIPS: Record<CyclePhase, { de: string; en: string }> = {
     de: 'RPE kann hoeher sein — das ist normal. Moderate Intensitaet.',
     en: 'RPE may feel higher — this is normal. Moderate intensity.',
   },
+  spotting: {
+    de: 'Schmierblutung — Training normal moeglich. Bei Schmerzen Intensitaet reduzieren.',
+    en: 'Spotting — training as normal. Reduce intensity if experiencing pain.',
+  },
 };
 
 const PHASE_COLORS: Record<CyclePhase, string> = {
@@ -48,6 +52,7 @@ const PHASE_COLORS: Record<CyclePhase, string> = {
   follicular: 'bg-green-50 border-green-200',
   ovulation: 'bg-amber-50 border-amber-200',
   luteal: 'bg-purple-50 border-purple-200',
+  spotting: 'bg-orange-50 border-orange-200',
 };
 
 const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
@@ -55,6 +60,7 @@ const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
   follicular: 'text-green-700',
   ovulation: 'text-amber-700',
   luteal: 'text-purple-700',
+  spotting: 'text-orange-700',
 };
 
 const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
@@ -62,6 +68,7 @@ const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
   follicular: 'bg-green-400',
   ovulation: 'bg-amber-400',
   luteal: 'bg-purple-400',
+  spotting: 'bg-orange-400',
 };
 
 const PHASE_NAMES: Record<CyclePhase, { de: string; en: string }> = {
@@ -69,6 +76,7 @@ const PHASE_NAMES: Record<CyclePhase, { de: string; en: string }> = {
   follicular: { de: 'Follikelphase', en: 'Follicular Phase' },
   ovulation: { de: 'Eisprung', en: 'Ovulation' },
   luteal: { de: 'Lutealphase', en: 'Luteal Phase' },
+  spotting: { de: 'Schmierblutung', en: 'Spotting' },
 };
 
 const CONFIDENCE_DOTS: Record<string, number> = {
@@ -172,6 +180,33 @@ export function CyclePhaseWidget({ cycleTrackingEnabled, onStartTracking }: Prop
           </div>
         )}
       </div>
+
+      {/* Fertile Window Banner */}
+      {prediction.isFertileToday && (
+        <div className="mx-3 mb-2 px-2.5 py-1.5 bg-amber-100 border border-amber-200 rounded-lg flex items-center gap-2">
+          <span className="text-sm">{'\u{1F95A}'}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold text-amber-800">
+              {de ? 'Fruchtbares Fenster' : 'Fertile Window'}
+            </p>
+            <p className="text-[9px] text-amber-600">
+              {de
+                ? `Bis ${new Date(prediction.fertileWindowEnd!).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}`
+                : `Until ${new Date(prediction.fertileWindowEnd!).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`}
+            </p>
+          </div>
+        </div>
+      )}
+      {!prediction.isFertileToday && prediction.daysUntilFertile !== null && prediction.daysUntilFertile <= 5 && (
+        <div className="mx-3 mb-2 px-2.5 py-1.5 bg-amber-50 border border-amber-100 rounded-lg flex items-center gap-2">
+          <span className="text-xs">{'\u{1F95A}'}</span>
+          <p className="text-[10px] text-amber-700">
+            {de
+              ? `Fruchtbares Fenster in ${prediction.daysUntilFertile} ${prediction.daysUntilFertile === 1 ? 'Tag' : 'Tagen'}`
+              : `Fertile window in ${prediction.daysUntilFertile} day${prediction.daysUntilFertile === 1 ? '' : 's'}`}
+          </p>
+        </div>
+      )}
 
       {/* Prediction Footer */}
       {prediction.daysUntilPeriod !== null && (

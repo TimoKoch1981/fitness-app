@@ -50,6 +50,14 @@ export interface CyclePrediction {
   confidenceLabel: { de: string; en: string };
   /** Last menstruation start date */
   lastPeriodStart: string | null;
+  /** Fertile window start (Ovulation -5 days, ISO string) */
+  fertileWindowStart: string | null;
+  /** Fertile window end (Ovulation +1 day, ISO string) */
+  fertileWindowEnd: string | null;
+  /** Whether today falls within the fertile window */
+  isFertileToday: boolean;
+  /** Days until fertile window starts (null if inside or past) */
+  daysUntilFertile: number | null;
 }
 
 /**
@@ -162,6 +170,10 @@ export function useCyclePrediction(): CyclePrediction {
         cyclesUsed: 0,
         confidenceLabel: CONFIDENCE_LABELS.none,
         lastPeriodStart: null,
+        fertileWindowStart: null,
+        fertileWindowEnd: null,
+        isFertileToday: false,
+        daysUntilFertile: null,
       };
     }
 
@@ -182,6 +194,10 @@ export function useCyclePrediction(): CyclePrediction {
         cyclesUsed: 0,
         confidenceLabel: CONFIDENCE_LABELS.none,
         lastPeriodStart: null,
+        fertileWindowStart: null,
+        fertileWindowEnd: null,
+        isFertileToday: false,
+        daysUntilFertile: null,
       };
     }
 
@@ -238,6 +254,37 @@ export function useCyclePrediction(): CyclePrediction {
       : ((currentCycleDay - 1) % predictedLength) + 1;
     const currentPhase = estimatePhase(effectiveCycleDay, predictedLength);
 
+    // Fertile window: Ovulation -5 days to Ovulation +1 day
+    // Sperm can survive up to 5 days, egg viable ~24h after ovulation
+    const ovulationDateThisCycle = addDays(lastPeriodStart, ovulationDayInCycle);
+    let fertileWindowStart: string | null = null;
+    let fertileWindowEnd: string | null = null;
+    let isFertileToday = false;
+    let daysUntilFertile: number | null = null;
+
+    // Calculate fertile window for current or next cycle
+    const fertileStart = addDays(ovulationDateThisCycle, -5);
+    const fertileEnd = addDays(ovulationDateThisCycle, 1);
+
+    if (fertileEnd >= todayStr) {
+      // Current cycle's fertile window is still relevant
+      fertileWindowStart = fertileStart;
+      fertileWindowEnd = fertileEnd;
+    } else {
+      // Fertile window already passed — calculate for next cycle
+      const nextCycleOvulationDate = addDays(nextPeriodDate, ovulationDayInCycle);
+      fertileWindowStart = addDays(nextCycleOvulationDate, -5);
+      fertileWindowEnd = addDays(nextCycleOvulationDate, 1);
+    }
+
+    // Check if today is within the fertile window
+    if (fertileWindowStart && fertileWindowEnd) {
+      isFertileToday = todayStr >= fertileWindowStart && todayStr <= fertileWindowEnd;
+      if (!isFertileToday && fertileWindowStart > todayStr) {
+        daysUntilFertile = daysBetweenDates(todayStr, fertileWindowStart);
+      }
+    }
+
     return {
       nextPeriodDate,
       daysUntilPeriod,
@@ -250,6 +297,10 @@ export function useCyclePrediction(): CyclePrediction {
       cyclesUsed: cycleLengths.length,
       confidenceLabel: CONFIDENCE_LABELS[confidence],
       lastPeriodStart,
+      fertileWindowStart,
+      fertileWindowEnd,
+      isFertileToday,
+      daysUntilFertile,
     };
   }, [logs]);
 }

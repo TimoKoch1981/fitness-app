@@ -93,7 +93,12 @@ export function useSaveWorkoutSession() {
       if (error) throw error;
 
       // Step 2: Auto-progression — update plan weights where user went higher
-      await applyAutoProgression(session);
+      // Fire-and-forget: Don't block session save on auto-progression errors
+      try {
+        await applyAutoProgression(session);
+      } catch (progErr) {
+        console.warn('[AutoProgression] Error:', progErr);
+      }
 
       // Step 3: Post-session analysis — plateau detection, volume, RPE drift
       await runPostSessionAnalysis(session, workout.id);
@@ -116,6 +121,8 @@ export function useSaveWorkoutSession() {
  * Only increases weights, never touches reps.
  */
 async function applyAutoProgression(session: ActiveWorkoutState): Promise<void> {
+  if (!session.planDayId) return; // No plan day — skip auto-progression
+
   // Load the current plan day
   const { data: planDay, error: loadError } = await supabase
     .from('training_plan_days')

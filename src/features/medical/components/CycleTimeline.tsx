@@ -25,6 +25,7 @@ const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
   follicular: 'bg-green-400',
   ovulation: 'bg-amber-400',
   luteal: 'bg-purple-400',
+  spotting: 'bg-orange-400',
 };
 
 const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
@@ -32,6 +33,7 @@ const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
   follicular: 'text-green-600',
   ovulation: 'text-amber-600',
   luteal: 'text-purple-600',
+  spotting: 'text-orange-600',
 };
 
 /** Group logs into cycles based on menstruation start dates */
@@ -230,12 +232,13 @@ export function CycleTimeline({ cycleTrackingEnabled }: CycleTimelineProps) {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mt-3 pt-2 border-t border-gray-100">
-        {(['menstruation', 'follicular', 'ovulation', 'luteal'] as const).map(phase => {
+        {(['menstruation', 'follicular', 'ovulation', 'luteal', 'spotting'] as const).map(phase => {
           const labels: Record<CyclePhase, { de: string; en: string }> = {
             menstruation: { de: 'Menstruation', en: 'Menstruation' },
             follicular: { de: 'Follikel', en: 'Follicular' },
             ovulation: { de: 'Eisprung', en: 'Ovulation' },
             luteal: { de: 'Luteal', en: 'Luteal' },
+            spotting: { de: 'Schmierblutung', en: 'Spotting' },
           };
           return (
             <div key={phase} className="flex items-center gap-1">

@@ -28,6 +28,7 @@ const PHASE_NAMES: Record<CyclePhase, { de: string; en: string }> = {
   follicular: { de: 'Follikelphase', en: 'Follicular' },
   ovulation: { de: 'Eisprung', en: 'Ovulation' },
   luteal: { de: 'Lutealphase', en: 'Luteal' },
+  spotting: { de: 'Schmierblutung', en: 'Spotting' },
 };
 
 export function CycleInsightsCard({ cycleTrackingEnabled }: CycleInsightsCardProps) {

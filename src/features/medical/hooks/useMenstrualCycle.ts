@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { MenstrualCycleLog, CyclePhase, FlowIntensity, CycleSymptom } from '../../../types/health';
+import type { MenstrualCycleLog, CyclePhase, FlowIntensity, CycleSymptom, CervicalMucus, SexualActivity } from '../../../types/health';
 
 const CYCLE_KEY = 'menstrual_cycle_logs';
 
@@ -13,6 +13,7 @@ export function getCyclePhaseKey(phase: CyclePhase): string {
     follicular: 'follicular',
     ovulation: 'ovulation',
     luteal: 'luteal',
+    spotting: 'spotting',
   };
   return keys[phase] ?? 'follicular';
 }
@@ -24,6 +25,7 @@ export function getCyclePhaseEmoji(phase: CyclePhase): string {
     follicular: '\u{1F331}',    // 🌱
     ovulation: '\u{2728}',      // ✨
     luteal: '\u{1F319}',        // 🌙
+    spotting: '\u{1F538}',      // 🔸
   };
   return emojis[phase] ?? '\u{1F4C5}';
 }
@@ -35,6 +37,7 @@ export function getCyclePhaseColor(phase: CyclePhase): string {
     follicular: 'text-green-500',
     ovulation: 'text-amber-500',
     luteal: 'text-purple-500',
+    spotting: 'text-orange-500',
   };
   return colors[phase] ?? 'text-gray-500';
 }
@@ -45,8 +48,31 @@ export function getFlowIntensityKey(flow: FlowIntensity): string {
     light: 'flowLight',
     normal: 'flowNormal',
     heavy: 'flowHeavy',
+    very_heavy: 'flowVeryHeavy',
   };
   return keys[flow] ?? 'flowNormal';
+}
+
+/** Get cervical mucus emoji */
+export function getCervicalMucusEmoji(mucus: CervicalMucus): string {
+  const emojis: Record<CervicalMucus, string> = {
+    none: '\u{1F6AB}',       // 🚫
+    sticky: '\u{1F4A7}',     // 💧
+    creamy: '\u{2601}\u{FE0F}', // ☁️
+    egg_white: '\u{1F95A}',  // 🥚
+  };
+  return emojis[mucus] ?? '';
+}
+
+/** Get cervical mucus i18n key */
+export function getCervicalMucusKey(mucus: CervicalMucus): string {
+  const keys: Record<CervicalMucus, string> = {
+    none: 'mucusNone',
+    sticky: 'mucusSticky',
+    creamy: 'mucusCreamy',
+    egg_white: 'mucusEggWhite',
+  };
+  return keys[mucus] ?? 'mucusNone';
 }
 
 /** Get symptom i18n key */
@@ -117,7 +143,7 @@ export function useMenstrualCycleLogs(limit = 30) {
   });
 }
 
-interface AddCycleLogInput {
+export interface AddCycleLogInput {
   date: string;
   phase: CyclePhase;
   flow_intensity?: FlowIntensity;
@@ -125,6 +151,10 @@ interface AddCycleLogInput {
   energy_level?: number;
   mood?: number;
   notes?: string;
+  cervical_mucus?: CervicalMucus;
+  pms_flag?: boolean;
+  sexual_activity?: SexualActivity;
+  basal_temp?: number;
 }
 
 /** Add or update a cycle log (upsert by user_id + date). */
@@ -148,6 +178,10 @@ export function useAddCycleLog() {
             energy_level: input.energy_level || null,
             mood: input.mood || null,
             notes: input.notes || null,
+            cervical_mucus: input.cervical_mucus || null,
+            pms_flag: input.pms_flag ?? false,
+            sexual_activity: input.sexual_activity || null,
+            basal_temp: input.basal_temp || null,
           },
           { onConflict: 'user_id,date' }
         )

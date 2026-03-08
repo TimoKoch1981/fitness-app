@@ -437,8 +437,10 @@ export interface SleepLog {
 }
 
 // === MENSTRUAL CYCLE TYPES ===
-export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal';
-export type FlowIntensity = 'light' | 'normal' | 'heavy';
+export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal' | 'spotting';
+export type FlowIntensity = 'light' | 'normal' | 'heavy' | 'very_heavy';
+export type CervicalMucus = 'none' | 'sticky' | 'creamy' | 'egg_white';
+export type SexualActivity = 'none' | 'protected' | 'unprotected';
 export type CycleSymptom =
   | 'cramping' | 'bloating' | 'mood_changes' | 'fatigue'
   | 'acne' | 'headache' | 'breast_tenderness' | 'water_retention'
@@ -452,11 +454,15 @@ export interface MenstrualCycleLog {
   user_id: string;
   date: string;                    // ISO date YYYY-MM-DD
   phase: CyclePhase;
-  flow_intensity?: FlowIntensity;  // relevant during menstruation
+  flow_intensity?: FlowIntensity;  // relevant during menstruation/spotting
   symptoms?: CycleSymptom[];
   energy_level?: number;           // 1-5
   mood?: number;                   // 1-5
   notes?: string;
+  cervical_mucus?: CervicalMucus;  // v2: Billings method (none/sticky/creamy/egg_white)
+  pms_flag?: boolean;              // v2: PMS marker
+  sexual_activity?: SexualActivity; // v2: fertility context
+  basal_temp?: number;             // v2: BBT in °C (35.0-42.0)
   created_at: string;
 }
 
