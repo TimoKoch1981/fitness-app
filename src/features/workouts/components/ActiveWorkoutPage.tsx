@@ -107,7 +107,26 @@ export function ActiveWorkoutPage() {
             }
           } catch { /* ignore parse errors, use defaults */ }
 
-          // Restore from draft at the exact position
+          // Find the first incomplete exercise (smart resume)
+          const draftExercises = draft.session_exercises as WorkoutExerciseResult[];
+          let resumeExIdx = savedPosition.currentExerciseIndex;
+          let resumeSetIdx = savedPosition.currentSetIndex;
+
+          // If saved position points to a completed exercise, find the next incomplete one
+          const savedEx = draftExercises[resumeExIdx];
+          if (savedEx && (savedEx.skipped || savedEx.sets.every(s => s.completed || s.skipped))) {
+            const nextIncomplete = draftExercises.findIndex(
+              (ex, i) => i > resumeExIdx && !ex.skipped && !ex.sets.every(s => s.completed || s.skipped),
+            );
+            if (nextIncomplete !== -1) {
+              resumeExIdx = nextIncomplete;
+              // Find first incomplete set in that exercise
+              const firstIncompleteSet = draftExercises[nextIncomplete].sets.findIndex(s => !s.completed && !s.skipped);
+              resumeSetIdx = firstIncompleteSet >= 0 ? firstIncompleteSet : 0;
+            }
+          }
+
+          // Restore from draft at the correct position
           dispatch({
             type: 'RESTORE_SESSION',
             state: {
@@ -115,11 +134,11 @@ export function ActiveWorkoutPage() {
               planDayId: dayId,
               planDayNumber: dayNumber,
               planDayName: planDay.name,
-              exercises: draft.session_exercises as WorkoutExerciseResult[],
+              exercises: draftExercises,
               planExercises: planDay.exercises,
               warmup: draft.warmup as import('../../../types/health').WarmupResult | undefined,
-              currentExerciseIndex: savedPosition.currentExerciseIndex,
-              currentSetIndex: savedPosition.currentSetIndex,
+              currentExerciseIndex: resumeExIdx,
+              currentSetIndex: resumeSetIdx,
               mode: savedPosition.mode as import('../../../types/health').WorkoutTrackingMode,
               timerEnabled: savedPosition.timerEnabled,
               timerSeconds: savedPosition.timerSeconds,
