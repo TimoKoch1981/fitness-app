@@ -35,6 +35,7 @@ export interface CalibrationExercise {
   suggestedWeight: number | null;
   userWeight: number | null;
   matchedReference: string | null;
+  isBodyweight?: boolean;
 }
 
 export interface ReviewPreset {
@@ -68,13 +69,13 @@ export const BW_MULTIPLIER_TABLE: BwMultiplierEntry[] = [
   },
   {
     name_de: 'Schulterdruecken', name_en: 'Overhead Press',
-    aliases: ['overhead press', 'ohp', 'schulterdruecken', 'schulterdrücken', 'military press', 'shoulder press'],
+    aliases: ['overhead press', 'ohp', 'schulterdruecken', 'schulterdrücken', 'überkopfdrücken', 'ueberkopfdruecken', 'military press', 'shoulder press'],
     beginner_m: 0.20, intermediate_m: 0.45, advanced_m: 0.65,
     beginner_f: 0.10, intermediate_f: 0.25, advanced_f: 0.40,
   },
   {
     name_de: 'Rudern', name_en: 'Row',
-    aliases: ['row', 'rudern', 'barbell row', 'bent over row', 'langhantelrudern', 'pendlay row', 't-bar row'],
+    aliases: ['row', 'rudern', 'barbell row', 'bent over row', 'langhantelrudern', 'pendlay row', 't-bar row', 'kurzhantelrudern', 'dumbbell row', 'einarmiges rudern'],
     beginner_m: 0.25, intermediate_m: 0.55, advanced_m: 0.85,
     beginner_f: 0.15, intermediate_f: 0.35, advanced_f: 0.55,
   },
@@ -107,6 +108,18 @@ export const BW_MULTIPLIER_TABLE: BwMultiplierEntry[] = [
     aliases: ['calf raise', 'wadenheben', 'standing calf raise', 'seated calf raise', 'wadenmaschine'],
     beginner_m: 0.40, intermediate_m: 0.80, advanced_m: 1.2,
     beginner_f: 0.25, intermediate_f: 0.50, advanced_f: 0.80,
+  },
+  {
+    name_de: 'Face Pulls', name_en: 'Face Pull',
+    aliases: ['face pull', 'face pulls', 'facepull', 'facepulls', 'cable face pull'],
+    beginner_m: 0.10, intermediate_m: 0.18, advanced_m: 0.25,
+    beginner_f: 0.05, intermediate_f: 0.10, advanced_f: 0.15,
+  },
+  {
+    name_de: 'Seitheben', name_en: 'Lateral Raise',
+    aliases: ['lateral raise', 'seitheben', 'seitenheben', 'side raise', 'lateral raises', 'kurzhantel seitheben'],
+    beginner_m: 0.05, intermediate_m: 0.10, advanced_m: 0.15,
+    beginner_f: 0.03, intermediate_f: 0.06, advanced_f: 0.10,
   },
 ];
 
@@ -213,8 +226,9 @@ export function calibrateAllExercises(
       // Skip non-strength exercises
       if (isCardioOrFlex(exercise)) continue;
 
+      const isBodyweight = isBodyweightExercise(exercise.name);
       const matched = matchExerciseToReference(exercise.name);
-      const suggestedWeight = matched
+      const suggestedWeight = matched && !isBodyweight
         ? calculateSuggestedWeight(bodyWeight, level, gender, matched)
         : null;
 
@@ -224,12 +238,28 @@ export function calibrateAllExercises(
         name: exercise.name,
         suggestedWeight,
         userWeight: exercise.weight_kg ?? suggestedWeight,
-        matchedReference: matched ? matched.name_de : null,
+        matchedReference: matched && !isBodyweight ? matched.name_de : null,
+        isBodyweight,
       });
     }
   }
 
   return results;
+}
+
+/**
+ * Bodyweight exercises: no weight suggestion applicable (user lifts their own weight).
+ */
+const BODYWEIGHT_KEYWORDS = [
+  'klimmzug', 'klimmzüge', 'pull up', 'pullup', 'chin up', 'chinup',
+  'dip', 'dips', 'push up', 'pushup', 'liegestütz', 'liegestuetz',
+  'plank', 'pike push', 'muscle up', 'muscleup',
+  'hanging', 'dead hang',
+];
+
+function isBodyweightExercise(name: string): boolean {
+  const n = name.toLowerCase().trim();
+  return BODYWEIGHT_KEYWORDS.some((kw) => n.includes(kw));
 }
 
 /**

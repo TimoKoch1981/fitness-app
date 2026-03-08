@@ -9,7 +9,7 @@
  */
 
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Dumbbell, Settings, User } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Dumbbell, Settings, User, CheckCheck, Info } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { useLatestBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
@@ -62,6 +62,8 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
   // Screen 3: Review settings
   const [mesocycleWeeks, setMesocycleWeeks] = useState(4);
   const [deloadWeek, setDeloadWeek] = useState(4);
+  const [deloadEnabled, setDeloadEnabled] = useState(true);
+  const [showMesoInfo, setShowMesoInfo] = useState(false);
   const [aiTrainerEnabled, setAiTrainerEnabled] = useState(true);
 
   // Derived
@@ -104,7 +106,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
       const today = new Date().toISOString().split('T')[0];
       const reviewConfig: ReviewConfig = {
         mesocycle_weeks: mesocycleWeeks,
-        deload_week: deloadWeek,
+        deload_week: deloadEnabled ? deloadWeek : 0,
         review_triggers: getDefaultReviewTriggers(),
         current_week: 1,
         mesocycle_start: today,
@@ -154,6 +156,18 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
     };
     setCalibrationExercises(updated);
   };
+
+  // ── Apply all suggestions ──────────────────────────────────────────────
+
+  const applySuggestions = () => {
+    const updated = calibrationExercises.map((ex) => ({
+      ...ex,
+      userWeight: ex.suggestedWeight != null ? ex.suggestedWeight : ex.userWeight,
+    }));
+    setCalibrationExercises(updated);
+  };
+
+  const hasSuggestions = calibrationExercises.some((ex) => ex.suggestedWeight != null);
 
   // ── Render ──────────────────────────────────────────────────────────────
 
@@ -280,11 +294,22 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
                   {bodyWeight
-                    ? label('weightsSubtitle', 'Basierend auf deinem Koerpergewicht ({bw} kg).')
+                    ? label('weightsSubtitle', 'Basierend auf deinem Koerpergewicht ({bw} kg). Du kannst jedes Gewicht anpassen.')
                         .replace('{bw}', String(bodyWeight))
                     : label('weightsNoBodyWeight', 'Bitte trage dein Koerpergewicht im Profil ein.')}
                 </p>
               </div>
+
+              {/* Apply-Suggestions Button */}
+              {hasSuggestions && (
+                <button
+                  onClick={applySuggestions}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-teal-50 text-teal-700 font-medium text-sm rounded-xl border border-teal-200 hover:bg-teal-100 active:scale-[0.98] transition-all"
+                >
+                  <CheckCheck className="w-4 h-4" />
+                  {label('applySuggestions', 'Vorschlaege uebernehmen')}
+                </button>
+              )}
 
               {/* Column headers */}
               <div className="flex items-center gap-3 text-xs font-medium text-gray-400 border-b border-gray-100 pb-1">
@@ -307,9 +332,13 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                           <p className="text-[10px] text-teal-500">
                             ≈ {ex.matchedReference}
                           </p>
+                        ) : ex.isBodyweight ? (
+                          <p className="text-[10px] text-amber-500">
+                            {label('bodyweightHint', 'Eigengewicht')}
+                          </p>
                         ) : (
                           <p className="text-[10px] text-gray-400">
-                            {label('noMatch', 'Kein Vorschlag')}
+                            {label('tryItOut', 'Einfach ausprobieren')}
                           </p>
                         )}
                       </div>
@@ -379,19 +408,33 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
 
               {/* Mesocycle weeks */}
               <div>
-                <label className="text-xs font-medium text-gray-500 mb-1.5 block">
-                  {label('mesocycleLabel', 'Mesozyklus-Laenge (Wochen)')}
-                </label>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    {label('mesocycleLabel', 'Mesozyklus-Laenge (Wochen)')}
+                  </label>
+                  <button
+                    onClick={() => setShowMesoInfo(!showMesoInfo)}
+                    className="p-0.5 text-gray-400 hover:text-teal-500 transition-colors"
+                    type="button"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {showMesoInfo && (
+                  <div className="mb-2 px-3 py-2 bg-teal-50 border border-teal-100 rounded-lg text-xs text-teal-700 animate-in fade-in">
+                    {label('mesoInfoText', 'Ein Mesozyklus ist ein Trainingsblock von mehreren Wochen mit steigender Belastung. Am Ende steht optional eine Deload-Woche zur Erholung. Typisch: 4-6 Wochen.')}
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
                     min={2}
-                    max={8}
+                    max={12}
                     value={mesocycleWeeks}
                     onChange={(e) => {
                       const v = Number(e.target.value);
                       setMesocycleWeeks(v);
-                      if (deloadWeek > v) setDeloadWeek(v);
+                      if (deloadEnabled && deloadWeek > v) setDeloadWeek(v);
                     }}
                     className="flex-1 accent-teal-500"
                   />
@@ -401,24 +444,41 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 </div>
               </div>
 
-              {/* Deload week */}
+              {/* Deload toggle + week */}
               <div>
-                <label className="text-xs font-medium text-gray-500 mb-1.5 block">
-                  {label('deloadLabel', 'Deload nach Woche')}
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min={1}
-                    max={mesocycleWeeks}
-                    value={deloadWeek}
-                    onChange={(e) => setDeloadWeek(Number(e.target.value))}
-                    className="flex-1 accent-teal-500"
-                  />
-                  <span className="text-sm font-semibold text-gray-700 w-8 text-center">
-                    {deloadWeek}
-                  </span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    {label('deloadLabel', 'Deload-Woche')}
+                  </label>
+                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={deloadEnabled}
+                      onChange={(e) => setDeloadEnabled(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500" />
+                  </label>
                 </div>
+                {deloadEnabled ? (
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={2}
+                      max={Math.max(mesocycleWeeks, 8)}
+                      value={deloadWeek}
+                      onChange={(e) => setDeloadWeek(Number(e.target.value))}
+                      className="flex-1 accent-teal-500"
+                    />
+                    <span className="text-sm font-semibold text-gray-700 w-8 text-center">
+                      {deloadWeek}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">
+                    {label('deloadDisabled', 'Kein Deload geplant — du trainierst durchgehend.')}
+                  </p>
+                )}
               </div>
 
               {/* Smart preset hint */}
@@ -426,7 +486,10 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 <p className="text-xs text-gray-500">
                   📊 {label('presetLabel', 'Empfehlung')}:{' '}
                   <span className="font-medium text-gray-700">
-                    {mesocycleWeeks} {language === 'de' ? 'Wochen' : 'weeks'}, Deload {language === 'de' ? 'Woche' : 'week'} {deloadWeek}
+                    {mesocycleWeeks} {language === 'de' ? 'Wochen' : 'weeks'}
+                    {deloadEnabled
+                      ? `, Deload ${language === 'de' ? 'Woche' : 'week'} ${deloadWeek}`
+                      : `, ${language === 'de' ? 'ohne Deload' : 'no deload'}`}
                   </span>
                 </p>
               </div>

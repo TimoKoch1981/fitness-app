@@ -34,6 +34,7 @@ const CockpitPage = lazy(() => import('../pages/CockpitPage').then(m => ({ defau
 const NutritionPage = lazy(() => import('../pages/NutritionPage').then(m => ({ default: m.NutritionPage })));
 const TrainingPage = lazy(() => import('../pages/TrainingPage').then(m => ({ default: m.TrainingPage })));
 const MedicalPage = lazy(() => import('../pages/MedicalPage').then(m => ({ default: m.MedicalPage })));
+const CyclePage = lazy(() => import('../pages/CyclePage').then(m => ({ default: m.CyclePage })));
 const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const OnboardingWizardPage = lazy(() => import('../pages/OnboardingWizardPage').then(m => ({ default: m.OnboardingWizardPage })));
 const FeatureVotingPage = lazy(() => import('../pages/FeatureVotingPage').then(m => ({ default: m.FeatureVotingPage })));
@@ -132,6 +133,15 @@ function AppRoutes() {
         <Route
           path="/tracking"
           element={<Navigate to="/nutrition" replace />}
+        />
+        <Route
+          path="/cycle"
+          element={
+            <ProtectedRoute>
+              <CyclePage />
+              <Navigation />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/medical"
