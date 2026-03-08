@@ -48,8 +48,10 @@ export interface TrainingModeFlags {
   showRefeedPlanner: boolean;
   /** Show peak week planner */
   showPeakWeek: boolean;
-  /** Show posing photos feature */
+  /** Show posing photos feature (Power/Power+ only) */
   showPosingPhotos: boolean;
+  /** Show progress photos & comparison (all modes) */
+  showProgressPhotos: boolean;
   /** Show natural limit calculator (FFMI) */
   showNaturalLimits: boolean;
   /** Show RED-S warning for aggressive deficits */
@@ -92,6 +94,7 @@ export function useTrainingMode(): TrainingModeFlags {
     showRefeedPlanner: isPower,
     showPeakWeek: isPower,
     showPosingPhotos: isPower,
+    showProgressPhotos: true, // All users can track progress photos
     showNaturalLimits: mode === 'power',
     showREDSWarning: mode === 'power',
     showHematocritAlert: isPowerPlus,
