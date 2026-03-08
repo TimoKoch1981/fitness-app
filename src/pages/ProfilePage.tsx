@@ -434,7 +434,15 @@ export function ProfilePage() {
                       <button
                         key={val}
                         type="button"
-                        onClick={() => handleChange(setGender)(val as Gender)}
+                        onClick={() => {
+                          handleChange(setGender)(val as Gender);
+                          // Auto-disable cycle tracking when switching to male
+                          if (val === 'male' && cycleTrackingEnabled) {
+                            setCycleTrackingEnabled(false);
+                            formRef.current = { ...formRef.current, cycleTrackingEnabled: false };
+                            // The debounced autoSave will pick up both gender + cycle_tracking changes
+                          }
+                        }}
                         className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                           gender === val
                             ? 'bg-teal-500 text-white'
@@ -726,7 +734,8 @@ export function ProfilePage() {
               </div>
             )}
 
-            {/* Cycle Tracking Toggle — for all genders (inclusive) */}
+            {/* Cycle Tracking Toggle — only for female/other */}
+            {(gender === 'female' || gender === 'other') && (
             <div className="pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
@@ -761,6 +770,7 @@ export function ProfilePage() {
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
 

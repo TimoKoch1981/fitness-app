@@ -358,8 +358,10 @@ export function CockpitPage() {
           })}
         </div>
 
-        {/* Cycle Phase Widget — current menstrual phase + tip */}
-        <CyclePhaseWidget cycleTrackingEnabled={profile?.cycle_tracking_enabled} />
+        {/* Cycle Phase Widget — only for female/other with cycle tracking enabled */}
+        {(profile?.gender === 'female' || profile?.gender === 'other') && (
+          <CyclePhaseWidget cycleTrackingEnabled={profile?.cycle_tracking_enabled} />
+        )}
 
         {/* Water Widget — Quick Water Tracking */}
         <WaterWidget />
