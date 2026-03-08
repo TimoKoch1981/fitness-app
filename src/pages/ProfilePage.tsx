@@ -436,11 +436,14 @@ export function ProfilePage() {
                         type="button"
                         onClick={() => {
                           handleChange(setGender)(val as Gender);
-                          // Auto-disable cycle tracking when switching to male
                           if (val === 'male' && cycleTrackingEnabled) {
+                            // Auto-disable cycle tracking when switching to male
                             setCycleTrackingEnabled(false);
                             formRef.current = { ...formRef.current, cycleTrackingEnabled: false };
-                            // The debounced autoSave will pick up both gender + cycle_tracking changes
+                          } else if ((val === 'female' || val === 'other') && !cycleTrackingEnabled) {
+                            // Auto-enable cycle tracking when switching to female/other
+                            setCycleTrackingEnabled(true);
+                            formRef.current = { ...formRef.current, cycleTrackingEnabled: true };
                           }
                         }}
                         className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
