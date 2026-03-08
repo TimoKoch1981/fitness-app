@@ -213,16 +213,16 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
 
               {/* Target */}
               <div className={`col-span-2 text-xs ${isCurrent ? 'text-teal-700 font-semibold' : isDone ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
-                {set.target_reps}
+                {set.target_reps}{set.target_reps != null && <span className="text-[10px] opacity-70"> {isDE ? 'Wdh' : 'reps'}</span>}
                 {set.target_weight_kg != null && (
-                  <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> @{set.target_weight_kg}</span>
+                  <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> @{set.target_weight_kg}<span className="text-[10px] opacity-70"> kg</span></span>
                 )}
               </div>
 
               {/* Last Time */}
               <div className="col-span-2 text-xs text-gray-400">
                 {lastSet?.completed
-                  ? `${lastSet.actual_reps}×${lastSet.actual_weight_kg ?? '-'}`
+                  ? <>{lastSet.actual_reps}×{lastSet.actual_weight_kg ?? '-'}<span className="text-[10px] opacity-70"> kg</span></>
                   : '-'}
               </div>
 

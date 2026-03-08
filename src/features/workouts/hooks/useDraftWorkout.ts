@@ -95,6 +95,14 @@ export function useSaveDraft() {
       const workoutData = {
         session_exercises: session.exercises,
         warmup: session.warmup,
+        // Store current position for resume (JSON in notes field)
+        notes: JSON.stringify({
+          currentExerciseIndex: session.currentExerciseIndex,
+          currentSetIndex: session.currentSetIndex,
+          timerSeconds: session.timerSeconds,
+          timerEnabled: session.timerEnabled,
+          mode: session.mode,
+        }),
       };
 
       if (existing) {

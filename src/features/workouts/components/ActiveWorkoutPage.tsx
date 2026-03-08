@@ -24,6 +24,7 @@ import { WorkoutSummary } from './WorkoutSummary';
 import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
 import { WorkoutVoiceControl } from './WorkoutVoiceControl';
 import { ExerciseListBar } from './ExerciseListBar';
+import { suggestRestTime } from '../utils/suggestRestTimes';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
 export function ActiveWorkoutPage() {
@@ -91,7 +92,22 @@ export function ActiveWorkoutPage() {
           .maybeSingle();
 
         if (draft?.session_exercises) {
-          // Restore from draft
+          // Parse saved position from notes (if available)
+          let savedPosition = { currentExerciseIndex: 0, currentSetIndex: 0, timerSeconds: 90, timerEnabled: true, mode: 'exercise' as const };
+          try {
+            if (draft.notes && draft.notes.startsWith('{')) {
+              const parsed = JSON.parse(draft.notes);
+              savedPosition = {
+                currentExerciseIndex: parsed.currentExerciseIndex ?? 0,
+                currentSetIndex: parsed.currentSetIndex ?? 0,
+                timerSeconds: parsed.timerSeconds ?? 90,
+                timerEnabled: parsed.timerEnabled ?? true,
+                mode: parsed.mode ?? 'exercise',
+              };
+            }
+          } catch { /* ignore parse errors, use defaults */ }
+
+          // Restore from draft at the exact position
           dispatch({
             type: 'RESTORE_SESSION',
             state: {
@@ -102,11 +118,11 @@ export function ActiveWorkoutPage() {
               exercises: draft.session_exercises as WorkoutExerciseResult[],
               planExercises: planDay.exercises,
               warmup: draft.warmup as import('../../../types/health').WarmupResult | undefined,
-              currentExerciseIndex: 0,
-              currentSetIndex: 0,
-              mode: 'exercise',
-              timerEnabled: true,
-              timerSeconds: 90,
+              currentExerciseIndex: savedPosition.currentExerciseIndex,
+              currentSetIndex: savedPosition.currentSetIndex,
+              mode: savedPosition.mode as import('../../../types/health').WorkoutTrackingMode,
+              timerEnabled: savedPosition.timerEnabled,
+              timerSeconds: savedPosition.timerSeconds,
               startedAt: draft.started_at ?? new Date().toISOString(),
               phase: 'exercise', // Skip warmup on resume
               isActive: true,
@@ -167,9 +183,20 @@ export function ActiveWorkoutPage() {
     }
 
     // Phase changed to 'rest' → start set rest timer
+    // Priority: exercise.rest_seconds (user/plan override) → AI suggestion → global timer
     if (state.phase === 'rest' && prevPhase !== 'rest') {
       const ex = state.exercises[state.currentExerciseIndex];
-      const restSec = ex?.rest_seconds ?? state.timerSeconds;
+      let restSec = ex?.rest_seconds;
+      if (restSec == null) {
+        // Use AI-calculated suggestion based on exercise type (same as ExerciseTracker badge)
+        const repsNum = parseInt(String(ex?.sets[0]?.target_reps ?? '10'));
+        const suggestion = suggestRestTime({
+          exerciseName: ex?.name ?? '',
+          repsTarget: isNaN(repsNum) ? 10 : repsNum,
+          weightKg: ex?.sets[0]?.target_weight_kg ?? undefined,
+        });
+        restSec = suggestion.restSeconds;
+      }
       timers.startSetRest(restSec);
     }
 

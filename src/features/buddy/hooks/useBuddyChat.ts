@@ -241,6 +241,23 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         }
       }
 
+      // Fallback: detect log_body from text if LLM claims to have saved weight but no ACTION block
+      if (parsedActions.length === 0) {
+        const bodyTextMatch = /(?:Gewicht|weight|Körpergewicht|body\s*weight).*?(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm)/i.test(result.content)
+          || /(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm).*?(?:eintrag|eingetragen|gespeichert|aktualisier|notier|sav|record|updat|log)/i.test(result.content);
+        if (bodyTextMatch) {
+          // Extract weight value
+          const weightMatch = result.content.match(/(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm)/i);
+          if (weightMatch) {
+            const weightKg = parseFloat(weightMatch[1].replace(',', '.'));
+            if (weightKg >= 30 && weightKg <= 300) {
+              console.warn(`[BuddyChat] No ACTION:log_body block, but weight text detected: ${weightKg} kg — injecting action`);
+              parsedActions = [{ type: 'log_body', data: { weight_kg: weightKg }, rawJson: JSON.stringify({ weight_kg: weightKg }) }];
+            }
+          }
+        }
+      }
+
       // Check for auto-execute actions
       const searchActions = parsedActions.filter(a => a.type === 'search_product');
       const tourActions = parsedActions.filter(a => a.type === 'restart_tour');
