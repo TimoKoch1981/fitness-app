@@ -21,6 +21,7 @@ import type { CyclePhase } from '../../../types/health';
 
 interface Props {
   cycleTrackingEnabled?: boolean;
+  onStartTracking?: () => void;
 }
 
 const PHASE_TIPS: Record<CyclePhase, { de: string; en: string }> = {
@@ -77,7 +78,7 @@ const CONFIDENCE_DOTS: Record<string, number> = {
   high: 3,
 };
 
-export function CyclePhaseWidget({ cycleTrackingEnabled }: Props) {
+export function CyclePhaseWidget({ cycleTrackingEnabled, onStartTracking }: Props) {
   const { language } = useTranslation();
   const navigate = useNavigate();
   const prediction = useCyclePrediction();
@@ -91,7 +92,7 @@ export function CyclePhaseWidget({ cycleTrackingEnabled }: Props) {
   if (!phase || prediction.confidence === 'none') {
     return (
       <button
-        onClick={() => navigate('/medical')}
+        onClick={() => onStartTracking ? onStartTracking() : navigate('/cycle')}
         className="w-full rounded-xl p-4 border border-rose-200 bg-rose-50 shadow-sm text-left flex items-center gap-3 hover:bg-rose-100 transition-colors"
       >
         <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">

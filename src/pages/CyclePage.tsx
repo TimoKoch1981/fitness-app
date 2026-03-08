@@ -39,7 +39,7 @@ export function CyclePage() {
     >
       <div className="space-y-4">
         {/* Current Phase Widget with Prediction */}
-        <CyclePhaseWidget cycleTrackingEnabled />
+        <CyclePhaseWidget cycleTrackingEnabled onStartTracking={() => setShowCycleDialog(true)} />
 
         {/* Cycle Timeline Visualization */}
         <CycleTimeline cycleTrackingEnabled />
