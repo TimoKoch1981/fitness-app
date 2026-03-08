@@ -88,8 +88,8 @@ export function CyclePhaseWidget({ cycleTrackingEnabled, onStartTracking }: Prop
   const de = language === 'de';
   const phase = prediction.currentPhase;
 
-  // No data at all — show CTA to start logging
-  if (!phase || prediction.confidence === 'none') {
+  // No data at all — show CTA to start logging (only when no phase can be estimated)
+  if (!phase) {
     return (
       <button
         onClick={() => onStartTracking ? onStartTracking() : navigate('/cycle')}

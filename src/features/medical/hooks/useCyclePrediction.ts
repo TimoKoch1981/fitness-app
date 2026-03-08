@@ -194,9 +194,9 @@ export function useCyclePrediction(): CyclePrediction {
     let confidence: CyclePrediction['confidence'];
 
     if (cycleLengths.length === 0) {
-      // Only 1 period logged, no complete cycle
+      // Only 1 period logged, no complete cycle — use population prior
       predictedLength = POPULATION_PRIOR;
-      confidence = 'none';
+      confidence = 'low';
     } else if (cycleLengths.length <= 2) {
       // 1-2 complete cycles: simple average
       predictedLength = Math.round(cycleLengths.reduce((s, v) => s + v, 0) / cycleLengths.length);

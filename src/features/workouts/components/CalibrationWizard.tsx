@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Dumbbell, Settings, User, CheckCheck, Info } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useProfile } from '../../auth/hooks/useProfile';
+import { useProfile, useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useLatestBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useUpdateTrainingPlanCalibration } from '../hooks/useTrainingPlans';
 import {
@@ -42,6 +42,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
   const { data: profile } = useProfile();
   const { data: latestBody } = useLatestBodyMeasurement();
   const updateCalibration = useUpdateTrainingPlanCalibration();
+  const updateProfile = useUpdateProfile();
 
   // i18n helper (pattern from OnboardingWizardPage)
   const c = t.calibration as Record<string, unknown> | undefined;
@@ -137,7 +138,10 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
         dayUpdates,
       });
 
-      console.log('[CalibrationWizard] ✅ Calibration complete');
+      // Sync global profile toggle with plan-level setting
+      await updateProfile.mutateAsync({ ai_trainer_enabled: aiTrainerEnabled });
+
+      console.log('[CalibrationWizard] ✅ Calibration complete, profile synced');
       onComplete();
     } catch (err) {
       console.error('[CalibrationWizard] Save failed:', err);
