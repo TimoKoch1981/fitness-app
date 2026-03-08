@@ -896,7 +896,47 @@ Persona-basiertes Testing fragt: "Kann Fatima (muslimisch, Ramadan-Fastende, Hal
 - **Besser:** Explizites `if (dayIndex > 0) addPage()` — jeder Tag auf eigener Seite
 - **Anwendung:** Training-Logbuch (Landscape A4) — Nutzer druckt pro Tag eine Seite aus
 
+### LLM Action-Halluzination — Fallback-Erkennung (2026-03-08)
+- **Problem:** LLM-Antwort sagt "Gewicht wurde eingetragen!" aber erzeugt keinen ACTION-Block
+- **Ursache:** LLM generiert bekraeftigenden Text statt strukturierte Actions
+- **Loesung:** Regex-Fallback nach dem Parsen: Wenn `parsedActions.length === 0` UND Text Gewichts-Pattern matched → ACTION programmatisch erstellen
+- **Pattern:** `/(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm)/i` mit Sanity-Check (30-300 kg)
+- **Datei:** `useBuddyChat.ts` (nach bestehenden search_product + restart_tour Fallbacks)
+- **Learning:** Immer einen Fallback fuer kritische Aktionen haben — LLMs sind unzuverlaessig bei strukturierter Ausgabe
+
+### suggestRestTime() — Regelbasierte Pausen-Empfehlung (2026-03-08)
+- **NSCA/ACSM Richtlinien:** Kraft 180-300s, Hypertrophie 60-120s, Ausdauer 30-60s
+- **Compound Bonus:** +30s fuer Verbunduebungen (Squat, Deadlift, Bench Press, etc.)
+- **Auto-Erkennung:** Regex-Patterns fuer Compound/Isometric/Cardio/Flexibility Uebungen
+- **Goal-Detection:** ≤5 Reps = Kraft, ≤12 Reps = Hypertrophie, >12 = Ausdauer
+- **Isometrisch:** Rest = Hold Time (min 30s) — Plank, Wall Sit, Dead Hang
+- **Fallback-Kette:** exercise.rest_seconds → suggestRestTime() → state.timerSeconds (90s)
+- **Datei:** `suggestRestTimes.ts` (utility), `ActiveWorkoutPage.tsx` (Consumer)
+
+### Draft/Resume Pattern — Workout-Fortschritt speichern (2026-03-08)
+- **Periodischer Save:** Alle 60s in DB als `status: 'in_progress'` (Fire-and-Forget)
+- **Position in notes:** JSON mit currentExerciseIndex, currentSetIndex, timerSeconds, mode
+- **Smart Resume:** Bei Resume pruefen ob gespeicherte Position auf abgeschlossene Uebung zeigt → findIndex auf erste offene Uebung + ersten offenen Satz
+- **Resume-Dialog:** "Fortsetzen" vs "Neu starten" (markiert alten Draft als aborted)
+- **History-Filter:** `.neq('status', 'in_progress')` verhindert Drafts in Trainingshistorie
+- **Dateien:** useDraftWorkout.ts (Hooks), ActiveWorkoutContext.tsx (Timer), ActiveWorkoutPage.tsx (Resume-Logik), TrainingPlanView.tsx (Badge+Dialog)
+
+### Vertikale Exercise-Liste statt DnD-Chips (2026-03-08)
+- **Problem:** Horizontale Chip-Leiste wird auf iPad/Handy am rechten Rand abgeschnitten
+- **Loesung:** Collapsible vertikale Liste mit Compact-Row (immer sichtbar) + expandierte Ansicht
+- **Reorder:** ↑↓ Pfeile statt Drag&Drop (deutlich besser auf Touch-Geraeten)
+- **@dnd-kit entfernt:** Nicht mehr noetig — Buttons sind zuverlaessiger als Touch-DnD
+- **Datei:** ExerciseListBar.tsx (Komplett-Rewrite, ~190 Zeilen)
+
+### ensureFreshSession() — Auth-Robustheit (2026-03-08)
+- **Problem:** AI-Aktionen laufen async nach Response-Streaming → JWT kann stale sein → RLS-Rejection
+- **Loesung:** `ensureFreshSession()` Utility — getSession() + Fallback auf getUser() (erzwingt Refresh)
+- **Retry-Pattern:** Bei Auth/RLS-Fehler → Session refreshen + 1x Retry
+- **Fehler-Erkennung:** 'RLS', 'row-level', 'Not authenticated', 'JWT', 'no data'
+- **Anwendung:** useActionExecutor, useSaveWorkoutSession, alle Mutation-Hooks
+- **Datei:** `src/lib/refreshSession.ts` (neues Utility)
+
 ---
 
-*Letzte Aktualisierung: 2026-03-05*
-*Version: 6.0 (+ CSP, Timer-UX-Recherche, DnD, PDF-Learnings)*
+*Letzte Aktualisierung: 2026-03-08*
+*Version: 7.0 (+ LLM-Fallback, suggestRestTime, Draft/Resume, Exercise-Liste, ensureFreshSession)*

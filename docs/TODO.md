@@ -337,12 +337,27 @@
 #### Dependency-Tracking
 - [x] ~~**docs/DEPENDENCIES.md erstellen**~~ ✅ (2026-03-02, v12.35) — Praeambel + Ausfuellanweisung + 10 Sektionen
 
-### P2 — Workout-Session UX-Verbesserungen
+### ~~P2 — Workout-Session UX-Verbesserungen~~ ✅ (2026-03-08, v12.60)
 
-#### Uebungs-Reihenfolge in aktiver Workout-Session
-- [ ] **Uebungs-Uebersicht am unteren Rand** — Kompakte Liste aller Uebungen als horizontale oder vertikale Leiste
-- [ ] **Drag & Drop Uebungs-Reihenfolge** — Uebungen per Drag & Drop umordnen waehrend der Session
-- [ ] **Aktuelle Uebung hervorheben** — Aktuell aktive Uebung visuell markiert
+#### ~~Uebungs-Reihenfolge in aktiver Workout-Session~~ ✅
+- [x] ~~**Uebungs-Uebersicht am unteren Rand**~~ ✅ — Vertikale collapsible Liste mit Compact-Row + expandierter Ansicht
+- [x] ~~**Reihenfolge aendern (↑↓ Pfeile)**~~ ✅ — ChevronUp/ChevronDown Buttons statt Drag&Drop (mobilfreundlich)
+- [x] ~~**Aktuelle Uebung hervorheben**~~ ✅ — Teal Ring + Hintergrund, Auto-Scroll
+
+#### ~~Robustes Workout-System (6 Phasen)~~ ✅ (2026-03-08, v12.60)
+- [x] ~~**Phase 0: Foto-Upload Fix**~~ ✅ — Storage Bucket posing-photos + RLS + Error-Feedback
+- [x] ~~**Phase 1: Finish-Bestaetigung**~~ ✅ — Dialog mit "Mit Speichern"/"Ohne Speichern"/"Abbrechen"
+- [x] ~~**Phase 2: AI/LLM Save-Robustheit**~~ ✅ — ensureFreshSession() + Retry-Logik in useActionExecutor
+- [x] ~~**Phase 3: Workout-Save-Retry**~~ ✅ — Max 2 Retries + "Erneut versuchen" Button
+- [x] ~~**Phase 4: Editierbare Historie**~~ ✅ — useUpdateWorkout + Inline-Editing in WorkoutHistoryPage
+- [x] ~~**Phase 5: Resume-System**~~ ✅ — status-Spalte, Draft-Save (60s), Resume-Dialog, Smart Resume
+
+#### ~~5 UX-Fixes~~ ✅ (2026-03-08, v12.60)
+- [x] ~~**Einheiten-Anzeige**~~ ✅ — "6-8 Wdh @ 67.5 kg" statt "6-8 @67.5"
+- [x] ~~**Pausen konsistent**~~ ✅ — suggestRestTime() als Fallback statt generischem 90s
+- [x] ~~**Buddy-Gewicht Fallback**~~ ✅ — LLM-Text-Erkennung wenn ACTION-Block fehlt
+- [x] ~~**Resume-Position**~~ ✅ — Draft speichert currentExerciseIndex + currentSetIndex
+- [x] ~~**Smart Resume**~~ ✅ — Springt zur ersten offenen Uebung statt von vorne
 
 ### P1 — KI-Trainer Review-System (Konzept freigegeben 2026-03-05)
 > Konzept-Dokument: `docs/KONZEPT_KI_TRAINER.md`
@@ -475,4 +490,4 @@
 - [x] ~~**P3: UX/Visualisierung**~~ ✅ — 20 Symptome + 17 Sprachen, CycleTimeline, CycleInsightsCard, Arzt-Export PDF
 - [x] ~~**Bugfix: Toggle autoSave Race Condition**~~ ✅ — handleToggleSave (sofort, ohne Debounce) fuer Boolean-Toggles
 
-*Letzte Aktualisierung: 2026-03-07 (Zyklus-Integration P1-P3 KOMPLETT + Toggle-Bugfix, deployed + live-getestet auf fudda.de)*
+*Letzte Aktualisierung: 2026-03-08 (Robustes Workout-System v12.60 — 6 Phasen + 5 UX-Fixes + Smart Resume)*

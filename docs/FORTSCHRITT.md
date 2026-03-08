@@ -3112,4 +3112,55 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-03-07*
+## v12.60 — Robustes Workout-System + 5 UX-Fixes + Smart Resume (2026-03-08)
+
+**Was:** 6-Phasen-Plan fuer robustes Workout-System (Foto-Upload, Auth-Retry, Bestaetigung, Save-Robustheit, History-Edit, Resume) plus 5 UX-Fixes und Smart-Resume-Logik.
+
+**Phase 0: Foto-Upload Fix**
+- Storage Bucket `posing-photos` fehlte → Migration erstellt
+- RLS-Policies (SELECT/INSERT/UPDATE/DELETE)
+- Error-Feedback in TrainingPage (Toast statt console.error)
+
+**Phase 1: Finish-Bestaetigung**
+- "Training beenden" oeffnet Bestaetigungsdialog statt sofort zu beenden
+- 2 Optionen: "Mit Speichern" (Primary) + "Ohne Speichern" (Secondary)
+- "Abbrechen" schliesst Dialog, Training laeuft weiter
+
+**Phase 2: AI/LLM Save-Robustheit**
+- `ensureFreshSession()` Utility — Session-Refresh vor DB-Mutations
+- Retry-Logik in useActionExecutor (Auth/RLS-Fehler → Refresh + 1x Retry)
+- Alle Mutation-Hooks gehaertet (useTrainingPlans, useBodyMeasurements, useMeals)
+
+**Phase 3: Workout-Save-Retry**
+- Max 2 Retries in useSaveWorkoutSession mit ensureFreshSession
+- "Erneut versuchen" Button in WorkoutSummary bei Fehler
+
+**Phase 4: Editierbare Trainings-Historie**
+- useUpdateWorkout Hook (UPDATE session_exercises JSONB)
+- Inline-Editing in WorkoutHistoryPage (Pencil-Icon → Reps/Weight Inputs)
+
+**Phase 5: Resume-System**
+- DB-Migration: `status` Spalte (in_progress/completed/aborted) + Index
+- useDraftWorkout: Periodischer Draft-Save (60s), Position in notes JSON
+- Resume-Erkennung: TrainingPlanView DayCard zeigt "Pausiert" Badge
+- Resume-Dialog: "Fortsetzen oder Neu starten?"
+- ActiveWorkoutPage: Draft laden + Position wiederherstellen
+- Smart Resume: Springt zur ersten offenen Uebung (nicht zurueck zum Anfang)
+- Status-Filter: History-Queries filtern in_progress raus
+
+**5 UX-Fixes (Commit 64e3fde):**
+1. **Einheiten-Anzeige:** "6-8 @67.5" → "6-8 Wdh @ 67.5 kg" in ExerciseOverviewTracker
+2. **Exercise-Liste:** Horizontal → Vertikal + Collapse + ↑↓ Pfeile (mobilfreundlich)
+3. **Pausen konsistent:** Rest-Timer nutzt suggestRestTime() statt generischem 90s-Fallback
+4. **Buddy-Gewicht:** Fallback-Erkennung wenn LLM Gewicht bestätigt aber kein ACTION-Block
+5. **Resume-Position:** Draft speichert currentExerciseIndex + currentSetIndex in notes JSON
+
+**Smart Resume (Commit 8387999):**
+- Bei Resume: Wenn gespeicherte Position auf abgeschlossene Uebung zeigt → automatisch zur naechsten offenen Uebung + erstem offenen Satz springen
+
+**Dateien:** 22+ modifiziert, 3 neue Dateien (Migrationen + refreshSession.ts)
+**Commits:** 4fbf6e1 (Phase 0-5), 64e3fde (5 UX-Fixes), 8387999 (Smart Resume)
+
+---
+
+*Letzte Aktualisierung: 2026-03-08*

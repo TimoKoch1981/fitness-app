@@ -1,6 +1,6 @@
 # DEPENDENCIES.md — FitBuddy Abhaengigkeitskarte
 
-> **Version:** 1.0 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-02
+> **Version:** 1.4 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-08
 >
 > **Konzept:** Entworfen aus der Perspektive eines Software-Architekten, Programmierers
 > und KI-Experten. Zweifach iteriert — erst Struktur, dann Detailtiefe.
@@ -902,6 +902,9 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | SSL-Zertifikat abgelaufen | Caddy-Problem oder DNS | `docker logs caddy` + DNS pruefen |
 | 502 Bad Gateway | Kong/Service down | `docker compose ps` → Status aller Container |
 | Langsame Ladezeiten | Fehlender Cache-Header oder Bundle zu gross | DevTools → Network → Timing |
+| Workout-Save scheitert | JWT stale nach langem Training | ensureFreshSession() Retry-Logik prueft Auth |
+| Resume startet von vorne | notes-JSON fehlt in Draft | `SELECT notes FROM workouts WHERE status='in_progress'` |
+| Foto-Upload scheitert | posing-photos Bucket fehlt | `SELECT id FROM storage.buckets WHERE id='posing-photos'` |
 
 ---
 
@@ -913,3 +916,4 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | 2026-03-06 | 1.1 | Claude / Entwickler | KI-Trainer Review-System: ai_supervised, review_config, session_feedback, ai_trainer_enabled, trainerReview Skill (17 Skills) |
 | 2026-03-07 | 1.2 | Claude / Entwickler | Block B CalibrationWizard: useCalibration.ts (BW-Multiplier), CalibrationWizard.tsx (3-Screen), useUpdateTrainingPlanCalibration Mutation, TrainingPlanView Auto-Trigger, 31 calibration i18n-Keys (17 Sprachen) |
 | 2026-03-07 | 1.3 | Claude / Entwickler | KI-Trainer Blocks B+C+D komplett: Post-Session-Analyse (postSessionAnalysis.ts), Double Progression (doubleProgression.ts), RIR-Feedback (RIRFeedbackDialog.tsx, useIsFirstSessionForPlan.ts, calculateRIRAdjustment), 6 Early Triggers + 6 Suggestion Chips (deviations.ts), PED-Phasen-Sync (usePEDPhaseSync.ts), Mesozyklus-Review (useMesocycleCheck.ts, mesocycleReview.ts), Buddy-Nachfrage (useAISupervisedOffer.ts), Review-Dialog (ReviewDialog.tsx, reviewChanges.ts, useApplyReviewChanges.ts, useRecentWorkoutsForPlan.ts), 8 rirFeedback i18n-Keys (17 Sprachen) |
+| 2026-03-08 | 1.4 | Claude / Entwickler | Robustes Workout-System v12.60: refreshSession.ts (Auth-Retry-Utility), useDraftWorkout.ts (Draft-Save + Resume), DB-Migration workout_status (in_progress/completed/aborted), posing-photos Storage Bucket, ExerciseListBar.tsx Rewrite (vertikal+Pfeile), suggestRestTimes.ts → ActiveWorkoutPage Integration, Buddy-Gewicht-Fallback (useBuddyChat.ts), ensureFreshSession in useActionExecutor/useSaveWorkoutSession |
