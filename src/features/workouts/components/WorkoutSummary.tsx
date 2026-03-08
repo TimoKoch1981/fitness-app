@@ -106,8 +106,13 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
       clearSession();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[WorkoutSummary] Save failed:', err);
+      // Supabase errors are plain objects with .message, not Error instances
+      const msg = err instanceof Error
+        ? err.message
+        : (typeof err === 'object' && err !== null && 'message' in err)
+          ? String((err as { message: string }).message)
+          : String(err);
+      console.error('[WorkoutSummary] Save failed:', JSON.stringify(err));
       setSaveError(msg);
       setIsSaving(false);
     }
