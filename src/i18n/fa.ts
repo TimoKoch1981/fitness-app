@@ -88,6 +88,7 @@ export const fa: TranslationKeys = {
     resendConfirmation: 'ارسال مجدد ایمیل تایید',
     confirmationResent: 'ایمیل تایید مجدداً ارسال شد!',
     signInWithGoogle: 'ورود با Google',
+    signInWithFacebook: 'ورود با Facebook',
     signInWithApple: 'ورود با Apple',
     orWithEmail: 'یا با ایمیل',
   },

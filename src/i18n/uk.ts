@@ -88,6 +88,7 @@ export const uk: TranslationKeys = {
     resendConfirmation: 'Надіслати лист підтвердження повторно',
     confirmationResent: 'Лист підтвердження надіслано повторно!',
     signInWithGoogle: 'Увійти через Google',
+    signInWithFacebook: 'Увiйти через Facebook',
     signInWithApple: 'Увійти через Apple',
     orWithEmail: 'або через електронну пошту',
   },

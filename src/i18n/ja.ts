@@ -88,6 +88,7 @@ export const ja: TranslationKeys = {
     resendConfirmation: '確認メールを再送信',
     confirmationResent: '確認メールを再送信しました！',
     signInWithGoogle: 'Googleでログイン',
+    signInWithFacebook: 'Facebookでログイン',
     signInWithApple: 'Appleでログイン',
     orWithEmail: 'またはメールで',
   },

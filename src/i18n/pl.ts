@@ -88,6 +88,7 @@ export const pl: TranslationKeys = {
     resendConfirmation: 'Wyślij ponownie e-mail potwierdzający',
     confirmationResent: 'E-mail potwierdzający został wysłany ponownie!',
     signInWithGoogle: 'Zaloguj się przez Google',
+    signInWithFacebook: 'Zaloguj sie przez Facebook',
     signInWithApple: 'Zaloguj się przez Apple',
     orWithEmail: 'lub przez e-mail',
   },

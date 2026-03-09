@@ -88,6 +88,7 @@ export const ko: TranslationKeys = {
     resendConfirmation: '확인 이메일 다시 보내기',
     confirmationResent: '확인 이메일이 다시 전송되었습니다!',
     signInWithGoogle: 'Google로 로그인',
+    signInWithFacebook: 'Facebook으로 로그인',
     signInWithApple: 'Apple로 로그인',
     orWithEmail: '또는 이메일로',
   },

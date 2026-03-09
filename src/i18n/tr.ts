@@ -88,6 +88,7 @@ export const tr: TranslationKeys = {
     resendConfirmation: 'Onay e-postasını tekrar gönder',
     confirmationResent: 'Onay e-postası tekrar gönderildi!',
     signInWithGoogle: 'Google ile giriş yap',
+    signInWithFacebook: 'Facebook ile giris yap',
     signInWithApple: 'Apple ile giriş yap',
     orWithEmail: 'veya e-posta ile',
   },

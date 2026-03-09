@@ -88,6 +88,7 @@ export const fr: TranslationKeys = {
     resendConfirmation: 'Renvoyer l\'e-mail de confirmation',
     confirmationResent: 'E-mail de confirmation renvoyé !',
     signInWithGoogle: 'Se connecter avec Google',
+    signInWithFacebook: 'Se connecter avec Facebook',
     signInWithApple: 'Se connecter avec Apple',
     orWithEmail: 'ou par e-mail',
   },

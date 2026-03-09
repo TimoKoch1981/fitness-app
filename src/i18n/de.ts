@@ -87,6 +87,7 @@ export const de = {
     resendConfirmation: 'Bestätigungsmail erneut senden',
     confirmationResent: 'Bestätigungsmail wurde erneut gesendet!',
     signInWithGoogle: 'Mit Google anmelden',
+    signInWithFacebook: 'Mit Facebook anmelden',
     signInWithApple: 'Mit Apple anmelden',
     orWithEmail: 'oder mit E-Mail',
   },

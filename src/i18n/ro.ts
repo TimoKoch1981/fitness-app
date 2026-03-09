@@ -88,6 +88,7 @@ export const ro: TranslationKeys = {
     resendConfirmation: 'Retrimite e-mailul de confirmare',
     confirmationResent: 'E-mailul de confirmare a fost retrimis!',
     signInWithGoogle: 'Conectare cu Google',
+    signInWithFacebook: 'Conecteaza-te cu Facebook',
     signInWithApple: 'Conectare cu Apple',
     orWithEmail: 'sau cu email',
   },

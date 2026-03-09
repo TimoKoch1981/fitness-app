@@ -88,6 +88,7 @@ export const fil: TranslationKeys = {
     resendConfirmation: 'Ipadala muli ang confirmation email',
     confirmationResent: 'Naipadala muli ang confirmation email!',
     signInWithGoogle: 'Mag-sign in gamit ang Google',
+    signInWithFacebook: 'Mag-sign in gamit ang Facebook',
     signInWithApple: 'Mag-sign in gamit ang Apple',
     orWithEmail: 'o gamit ang email',
   },

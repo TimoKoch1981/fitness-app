@@ -88,6 +88,7 @@ export const ar: TranslationKeys = {
     resendConfirmation: 'إعادة إرسال بريد التأكيد',
     confirmationResent: 'تم إعادة إرسال بريد التأكيد!',
     signInWithGoogle: 'تسجيل الدخول بواسطة Google',
+    signInWithFacebook: 'تسجيل الدخول عبر Facebook',
     signInWithApple: 'تسجيل الدخول بواسطة Apple',
     orWithEmail: 'أو بالبريد الإلكتروني',
   },

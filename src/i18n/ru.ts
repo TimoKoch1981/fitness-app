@@ -88,6 +88,7 @@ export const ru: TranslationKeys = {
     resendConfirmation: 'Отправить письмо подтверждения повторно',
     confirmationResent: 'Письмо подтверждения отправлено повторно!',
     signInWithGoogle: 'Войти через Google',
+    signInWithFacebook: 'Войти через Facebook',
     signInWithApple: 'Войти через Apple',
     orWithEmail: 'или по электронной почте',
   },

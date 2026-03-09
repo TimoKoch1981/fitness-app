@@ -89,6 +89,7 @@ export const en: TranslationKeys = {
     resendConfirmation: 'Resend confirmation email',
     confirmationResent: 'Confirmation email has been resent!',
     signInWithGoogle: 'Sign in with Google',
+    signInWithFacebook: 'Sign in with Facebook',
     signInWithApple: 'Sign in with Apple',
     orWithEmail: 'or with email',
   },

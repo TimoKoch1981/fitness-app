@@ -88,6 +88,7 @@ export const zh: TranslationKeys = {
     resendConfirmation: '重新发送确认邮件',
     confirmationResent: '确认邮件已重新发送！',
     signInWithGoogle: '使用Google登录',
+    signInWithFacebook: '使用 Facebook 登录',
     signInWithApple: '使用Apple登录',
     orWithEmail: '或使用邮箱',
   },

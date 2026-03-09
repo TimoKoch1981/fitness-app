@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useMemo, type ReactNode
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
-export type OAuthProvider = 'google' | 'apple';
+export type OAuthProvider = 'google' | 'facebook' | 'apple';
 
 interface AuthContextType {
   user: User | null;
