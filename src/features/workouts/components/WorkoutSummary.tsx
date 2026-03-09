@@ -24,6 +24,8 @@ import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { PostSessionFeedback } from './PostSessionFeedback';
 import { useProfile } from '../../auth/hooks/useProfile';
+import { ShareButton } from '../../../shared/components/ShareButton';
+import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
 
 interface WorkoutSummaryProps {
   weightKg: number;
@@ -388,6 +390,21 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
             <Trash2 className="h-4 w-4" />
             {isDE ? 'Verwerfen' : 'Discard'}
           </button>
+          <ShareButton
+            compact
+            title={state.planDayName || 'Workout'}
+            text={`${state.planDayName || 'Workout'} — ${stats.durationMin} Min, ${stats.totalSets} Sets${stats.prs.length > 0 ? `, ${stats.prs.length} PRs!` : ''} 💪`}
+            getImage={async () => createWorkoutShareCard({
+              planName: state.planDayName || 'Workout',
+              durationMin: stats.durationMin,
+              totalSets: stats.totalSets,
+              exerciseCount: stats.completed.length,
+              prCount: stats.prs.length,
+              prs: stats.prs,
+              calories: stats.calories,
+              date: new Date().toLocaleDateString(isDE ? 'de-DE' : 'en-US'),
+            })}
+          />
           <button
             onClick={handleSave}
             disabled={isSaving}
