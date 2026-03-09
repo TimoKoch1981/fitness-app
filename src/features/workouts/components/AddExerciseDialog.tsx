@@ -204,7 +204,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                   <input
                     type="number"
                     inputMode="decimal"
-                    step="0.5"
+                    step="0.1"
                     value={weight}
                     onChange={e => setWeight(e.target.value)}
                     placeholder="-"

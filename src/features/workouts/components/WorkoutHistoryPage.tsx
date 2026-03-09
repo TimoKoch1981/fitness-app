@@ -225,7 +225,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                                   <span className="text-gray-400">Reps</span>
                                   <input
                                     type="number"
-                                    step="0.5"
+                                    step="0.1"
                                     value={set.actual_weight_kg ?? 0}
                                     onChange={(e) => updateSetValue(exIdx, setIdx, 'actual_weight_kg', parseFloat(e.target.value) || 0)}
                                     className="w-16 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"

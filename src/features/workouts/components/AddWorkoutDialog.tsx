@@ -216,7 +216,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
                         placeholder={t.workouts.kg}
                         className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-xs text-center focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                         min="0"
-                        step="0.5"
+                        step="0.1"
                       />
                       <button
                         type="button"

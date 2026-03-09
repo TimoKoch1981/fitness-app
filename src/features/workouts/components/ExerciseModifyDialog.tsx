@@ -309,7 +309,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                         <input
                           type="number"
                           inputMode="decimal"
-                          step="0.5"
+                          step="0.1"
                           value={s.target_weight_kg}
                           onChange={e => updateSet(idx, 'target_weight_kg', e.target.value)}
                           disabled={s.completed}

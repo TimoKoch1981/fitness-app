@@ -265,7 +265,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                   <input
                     type="number"
                     inputMode="decimal"
-                    step="0.5"
+                    step="0.1"
                     value={input.weight}
                     onChange={e => updateInput(idx, 'weight', e.target.value)}
                     disabled={isInputDisabled}

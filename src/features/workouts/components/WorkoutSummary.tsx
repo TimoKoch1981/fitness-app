@@ -308,7 +308,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                           <input
                             type="number"
                             inputMode="decimal"
-                            step="0.5"
+                            step="0.1"
                             value={set.actual_weight_kg ?? ''}
                             onChange={e => updateSetValue(exIdx, setIdx, 'weight', e.target.value)}
                             className="w-20 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
