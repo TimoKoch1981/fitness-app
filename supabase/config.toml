@@ -319,6 +319,19 @@ url = ""
 skip_nonce_check = true
 email_optional = false
 
+# Facebook OAuth (Social Login)
+# Setup: Meta Developer Console → FitBuddy App → Facebook Login
+# App-ID: 936201995462102
+# Redirect URI: https://fudda.de/auth/v1/callback (production)
+[auth.external.facebook]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_FACEBOOK_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_FACEBOOK_SECRET)"
+redirect_uri = "https://fudda.de/auth/v1/callback"
+url = ""
+skip_nonce_check = false
+email_optional = false
+
 # Apple OAuth (P2: Social Login)
 # Setup: Apple Developer → Certificates, Identifiers & Profiles → Service IDs
 # Redirect URI: https://fudda.de/auth/v1/callback (production)
