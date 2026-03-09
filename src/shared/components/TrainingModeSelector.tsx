@@ -26,20 +26,20 @@ const MODE_CONFIG: Record<TrainingMode, {
   standard: {
     icon: Dumbbell,
     color: 'text-gray-600',
-    bgActive: 'bg-gray-50',
-    borderActive: 'border-gray-400',
+    bgActive: 'bg-teal-50',
+    borderActive: 'border-teal-500',
   },
   power: {
     icon: Zap,
     color: 'text-amber-600',
-    bgActive: 'bg-amber-50',
-    borderActive: 'border-amber-400',
+    bgActive: 'bg-teal-50',
+    borderActive: 'border-teal-500',
   },
   power_plus: {
     icon: Zap,
     color: 'text-red-600',
-    bgActive: 'bg-red-50',
-    borderActive: 'border-red-400',
+    bgActive: 'bg-teal-50',
+    borderActive: 'border-teal-500',
   },
 };
 
