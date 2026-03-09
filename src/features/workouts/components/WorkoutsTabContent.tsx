@@ -208,11 +208,6 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
             </div>
           )}
 
-          <AddWorkoutDialog
-            open={showAddDialog}
-            onClose={onCloseAddDialog}
-            date={selectedDate}
-          />
         </>
       ) : activeSubTab === 'plan' ? (
         /* Plan Sub-Tab */
@@ -242,6 +237,13 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
           <PeriodizationView />
         </Suspense>
       )}
+
+      {/* AddWorkoutDialog — always rendered so Plus button works from any sub-tab */}
+      <AddWorkoutDialog
+        open={showAddDialog}
+        onClose={onCloseAddDialog}
+        date={selectedDate}
+      />
     </>
   );
 }
