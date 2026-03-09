@@ -108,8 +108,14 @@ export function MedicalPage() {
                 // Count non-null biomarkers
                 const markerKeys = [
                   'testosterone_total', 'testosterone_free', 'estradiol', 'lh', 'fsh', 'shbg', 'prolactin',
-                  'hematocrit', 'hemoglobin', 'hdl', 'ldl', 'triglycerides', 'total_cholesterol',
-                  'ast', 'alt', 'ggt', 'creatinine', 'egfr', 'tsh', 'psa', 'hba1c', 'vitamin_d', 'ferritin',
+                  'cortisol', 'free_androgen_index',
+                  'hematocrit', 'hemoglobin', 'erythrocytes', 'leukocytes', 'platelets',
+                  'hdl', 'ldl', 'triglycerides', 'total_cholesterol',
+                  'ast', 'alt', 'ggt', 'bilirubin', 'alkaline_phosphatase',
+                  'creatinine', 'egfr', 'urea',
+                  'fasting_glucose', 'uric_acid', 'iron', 'total_protein', 'hba1c', 'ferritin',
+                  'potassium', 'sodium', 'calcium',
+                  'tsh', 'psa', 'free_psa', 'vitamin_d',
                 ] as const;
                 const filledMarkers = markerKeys.filter(k => (bw as unknown as Record<string, unknown>)[k] != null);
                 // Show a few key values as summary

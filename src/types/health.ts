@@ -301,7 +301,7 @@ export type DietaryPreference = 'vegetarian' | 'vegan' | 'pescatarian' | 'halal'
 export type FoodAllergy = 'nuts' | 'gluten' | 'lactose' | 'shellfish' | 'eggs' | 'soy' | 'wheat';
 export type HealthRestriction = 'back' | 'shoulder' | 'knee' | 'hip' | 'wrist' | 'neck' | 'diastasis_recti';
 
-// === BLOOD WORK (Power+ Modus) ===
+// === BLOOD WORK ===
 export interface BloodWork {
   id: string;
   user_id: string;
@@ -314,9 +314,14 @@ export interface BloodWork {
   fsh?: number;                  // mIU/mL
   shbg?: number;                 // nmol/L
   prolactin?: number;            // ng/mL
+  cortisol?: number;             // µg/dL
+  free_androgen_index?: number;  // %
   // Blutbild
   hematocrit?: number;           // %
   hemoglobin?: number;           // g/dL
+  erythrocytes?: number;         // /pL (Mio/µL)
+  leukocytes?: number;           // /nL (Tsd/µL)
+  platelets?: number;            // /nL (Tsd/µL)
   // Lipide
   hdl?: number;                  // mg/dL
   ldl?: number;                  // mg/dL
@@ -326,13 +331,26 @@ export interface BloodWork {
   ast?: number;                  // U/L (GOT)
   alt?: number;                  // U/L (GPT)
   ggt?: number;                  // U/L
+  bilirubin?: number;            // mg/dL
+  alkaline_phosphatase?: number; // U/L
   // Niere
   creatinine?: number;           // mg/dL
   egfr?: number;                 // mL/min/1.73m2
+  urea?: number;                 // mg/dL (Harnstoff)
+  // Stoffwechsel
+  fasting_glucose?: number;      // mg/dL
+  uric_acid?: number;            // mg/dL
+  iron?: number;                 // µg/dL
+  total_protein?: number;        // g/dL
+  // Elektrolyte
+  potassium?: number;            // mmol/L
+  sodium?: number;               // mmol/L
+  calcium?: number;              // mmol/L
   // Schilddruese
   tsh?: number;                  // mIU/L
   // Sonstige
   psa?: number;                  // ng/mL
+  free_psa?: number;             // ng/mL
   hba1c?: number;                // %
   vitamin_d?: number;            // ng/mL
   ferritin?: number;             // ng/mL

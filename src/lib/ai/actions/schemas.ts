@@ -97,7 +97,7 @@ const LogBloodPressureSchema = z.object({
 
 const LogBloodWorkSchema = z.object({
   date: z.string().default(today),
-  // Hormones
+  // Hormones (9)
   testosterone_total: z.number().positive().optional(),
   testosterone_free: z.number().positive().optional(),
   estradiol: z.number().nonnegative().optional(),
@@ -105,28 +105,45 @@ const LogBloodWorkSchema = z.object({
   fsh: z.number().nonnegative().optional(),
   shbg: z.number().nonnegative().optional(),
   prolactin: z.number().nonnegative().optional(),
-  // Blood count
+  cortisol: z.number().nonnegative().optional(),
+  free_androgen_index: z.number().nonnegative().optional(),
+  // Blood count (5)
   hematocrit: z.number().min(15).max(65).optional(),
   hemoglobin: z.number().positive().optional(),
-  // Lipids
+  erythrocytes: z.number().positive().optional(),
+  leukocytes: z.number().positive().optional(),
+  platelets: z.number().positive().optional(),
+  // Lipids (4)
   hdl: z.number().positive().optional(),
   ldl: z.number().nonnegative().optional(),
   triglycerides: z.number().nonnegative().optional(),
   total_cholesterol: z.number().positive().optional(),
-  // Liver
+  // Liver (5)
   ast: z.number().nonnegative().optional(),
   alt: z.number().nonnegative().optional(),
   ggt: z.number().nonnegative().optional(),
-  // Kidney
+  bilirubin: z.number().nonnegative().optional(),
+  alkaline_phosphatase: z.number().nonnegative().optional(),
+  // Kidney (3)
   creatinine: z.number().positive().optional(),
   egfr: z.number().positive().optional(),
-  // Thyroid
-  tsh: z.number().nonnegative().optional(),
-  // Other
-  psa: z.number().nonnegative().optional(),
+  urea: z.number().nonnegative().optional(),
+  // Metabolism (6)
+  fasting_glucose: z.number().nonnegative().optional(),
+  uric_acid: z.number().nonnegative().optional(),
+  iron: z.number().nonnegative().optional(),
+  total_protein: z.number().positive().optional(),
   hba1c: z.number().positive().optional(),
-  vitamin_d: z.number().nonnegative().optional(),
   ferritin: z.number().nonnegative().optional(),
+  // Electrolytes (3)
+  potassium: z.number().positive().optional(),
+  sodium: z.number().positive().optional(),
+  calcium: z.number().positive().optional(),
+  // Other (4)
+  tsh: z.number().nonnegative().optional(),
+  psa: z.number().nonnegative().optional(),
+  free_psa: z.number().nonnegative().optional(),
+  vitamin_d: z.number().nonnegative().optional(),
   notes: z.string().optional(),
 }).refine(
   (data) => {

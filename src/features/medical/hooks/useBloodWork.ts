@@ -53,9 +53,10 @@ export function useLatestBloodWork() {
   });
 }
 
-/** Input for adding a blood work entry */
+/** Input for adding a blood work entry (38 biomarkers) */
 export interface AddBloodWorkInput {
   date?: string;
+  // Hormones
   testosterone_total?: number;
   testosterone_free?: number;
   estradiol?: number;
@@ -63,19 +64,42 @@ export interface AddBloodWorkInput {
   fsh?: number;
   shbg?: number;
   prolactin?: number;
+  cortisol?: number;
+  free_androgen_index?: number;
+  // Blood count
   hematocrit?: number;
   hemoglobin?: number;
+  erythrocytes?: number;
+  leukocytes?: number;
+  platelets?: number;
+  // Lipids
   hdl?: number;
   ldl?: number;
   triglycerides?: number;
   total_cholesterol?: number;
+  // Liver
   ast?: number;
   alt?: number;
   ggt?: number;
+  bilirubin?: number;
+  alkaline_phosphatase?: number;
+  // Kidney
   creatinine?: number;
   egfr?: number;
+  urea?: number;
+  // Metabolism
+  fasting_glucose?: number;
+  uric_acid?: number;
+  iron?: number;
+  total_protein?: number;
+  // Electrolytes
+  potassium?: number;
+  sodium?: number;
+  calcium?: number;
+  // Other
   tsh?: number;
   psa?: number;
+  free_psa?: number;
   hba1c?: number;
   vitamin_d?: number;
   ferritin?: number;
@@ -94,36 +118,14 @@ export function useAddBloodWork() {
         userId = await ensureFreshSession();
       }
 
-      const { user_id: _uid, ...rest } = input;
+      const { user_id: _uid, date, ...markers } = input;
+      // Spread all marker fields — Supabase ignores unknown columns gracefully
       const { data, error } = await supabase
         .from('blood_work')
         .insert({
           user_id: userId,
-          date: rest.date ?? new Date().toISOString().slice(0, 10),
-          testosterone_total: rest.testosterone_total,
-          testosterone_free: rest.testosterone_free,
-          estradiol: rest.estradiol,
-          lh: rest.lh,
-          fsh: rest.fsh,
-          shbg: rest.shbg,
-          prolactin: rest.prolactin,
-          hematocrit: rest.hematocrit,
-          hemoglobin: rest.hemoglobin,
-          hdl: rest.hdl,
-          ldl: rest.ldl,
-          triglycerides: rest.triglycerides,
-          total_cholesterol: rest.total_cholesterol,
-          ast: rest.ast,
-          alt: rest.alt,
-          ggt: rest.ggt,
-          creatinine: rest.creatinine,
-          egfr: rest.egfr,
-          tsh: rest.tsh,
-          psa: rest.psa,
-          hba1c: rest.hba1c,
-          vitamin_d: rest.vitamin_d,
-          ferritin: rest.ferritin,
-          notes: rest.notes,
+          date: date ?? new Date().toISOString().slice(0, 10),
+          ...markers,
         })
         .select()
         .single();

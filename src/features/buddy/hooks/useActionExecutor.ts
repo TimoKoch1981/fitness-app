@@ -217,34 +217,27 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
         }
 
         case 'log_blood_work': {
-          await addBloodWork.mutateAsync({
+          // All 38 biomarker fields — spread numeric values, explicit date/notes/user_id
+          const bwMarkerKeys = [
+            'testosterone_total', 'testosterone_free', 'estradiol', 'lh', 'fsh', 'shbg', 'prolactin',
+            'cortisol', 'free_androgen_index',
+            'hematocrit', 'hemoglobin', 'erythrocytes', 'leukocytes', 'platelets',
+            'hdl', 'ldl', 'triglycerides', 'total_cholesterol',
+            'ast', 'alt', 'ggt', 'bilirubin', 'alkaline_phosphatase',
+            'creatinine', 'egfr', 'urea',
+            'fasting_glucose', 'uric_acid', 'iron', 'total_protein', 'hba1c', 'ferritin',
+            'potassium', 'sodium', 'calcium',
+            'tsh', 'psa', 'free_psa', 'vitamin_d',
+          ] as const;
+          const bwInput: Record<string, unknown> = {
             date: d.date as string | undefined,
-            testosterone_total: d.testosterone_total as number | undefined,
-            testosterone_free: d.testosterone_free as number | undefined,
-            estradiol: d.estradiol as number | undefined,
-            lh: d.lh as number | undefined,
-            fsh: d.fsh as number | undefined,
-            shbg: d.shbg as number | undefined,
-            prolactin: d.prolactin as number | undefined,
-            hematocrit: d.hematocrit as number | undefined,
-            hemoglobin: d.hemoglobin as number | undefined,
-            hdl: d.hdl as number | undefined,
-            ldl: d.ldl as number | undefined,
-            triglycerides: d.triglycerides as number | undefined,
-            total_cholesterol: d.total_cholesterol as number | undefined,
-            ast: d.ast as number | undefined,
-            alt: d.alt as number | undefined,
-            ggt: d.ggt as number | undefined,
-            creatinine: d.creatinine as number | undefined,
-            egfr: d.egfr as number | undefined,
-            tsh: d.tsh as number | undefined,
-            psa: d.psa as number | undefined,
-            hba1c: d.hba1c as number | undefined,
-            vitamin_d: d.vitamin_d as number | undefined,
-            ferritin: d.ferritin as number | undefined,
             notes: d.notes as string | undefined,
             user_id: uid,
-          });
+          };
+          for (const key of bwMarkerKeys) {
+            if (d[key] != null) bwInput[key] = d[key] as number;
+          }
+          await addBloodWork.mutateAsync(bwInput as Parameters<typeof addBloodWork.mutateAsync>[0]);
           break;
         }
 

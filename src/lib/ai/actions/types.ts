@@ -86,12 +86,18 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         summary: [
           d.testosterone_total ? `Test ${d.testosterone_total} ng/dL` : null,
           d.hematocrit ? `HCT ${d.hematocrit}%` : null,
+          d.hemoglobin ? `Hb ${d.hemoglobin}` : null,
           d.hdl ? `HDL ${d.hdl}` : null,
           d.ldl ? `LDL ${d.ldl}` : null,
           d.alt ? `ALT ${d.alt}` : null,
+          d.creatinine ? `Krea ${d.creatinine}` : null,
+          d.fasting_glucose ? `Gluc ${d.fasting_glucose}` : null,
+          d.iron ? `Fe ${d.iron}` : null,
+          d.cortisol ? `Cort ${d.cortisol}` : null,
           d.tsh ? `TSH ${d.tsh}` : null,
           d.hba1c ? `HbA1c ${d.hba1c}%` : null,
-        ].filter(Boolean).join(', ') || 'Blutwerte',
+          d.vitamin_d ? `VitD ${d.vitamin_d}` : null,
+        ].filter(Boolean).slice(0, 5).join(', ') || 'Blutwerte',
       };
     case 'log_substance':
       return {
