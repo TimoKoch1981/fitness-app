@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Heart, Pill, Trash2, ClipboardList, Bell, Moon, Stethoscope } from 'lucide-react';
+import { Plus, Heart, Pill, Trash2, ClipboardList, Bell, Moon, Stethoscope, FlaskConical } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { BuddyQuickAccess } from '../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../i18n';
@@ -23,6 +23,8 @@ import { AddSleepDialog } from '../features/sleep/components/AddSleepDialog';
 import { REDSWarningBanner } from '../shared/components/REDSWarningBanner';
 import { useSymptomLogs, useDeleteSymptomLog, getSymptomEmoji, getSeverityEmoji } from '../features/medical/hooks/useSymptomLogs';
 import { AddSymptomDialog } from '../features/medical/components/AddSymptomDialog';
+import { useBloodWorkLogs, useDeleteBloodWork } from '../features/medical/hooks/useBloodWork';
+import { AddBloodWorkDialog } from '../features/medical/components/AddBloodWorkDialog';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -34,6 +36,7 @@ export function MedicalPage() {
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [showSleepDialog, setShowSleepDialog] = useState(false);
   const [showSymptomDialog, setShowSymptomDialog] = useState(false);
+  const [showBloodWorkDialog, setShowBloodWorkDialog] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
 
   const { data: bpLogs, isLoading: bpLoading } = useBloodPressureLogs(10);
@@ -41,6 +44,8 @@ export function MedicalPage() {
   const deleteSleep = useDeleteSleepLog();
   const { data: symptomLogs, isLoading: symptomLoading } = useSymptomLogs(10);
   const deleteSymptom = useDeleteSymptomLog();
+  const { data: bloodWorkLogs, isLoading: bwLoading } = useBloodWorkLogs(5);
+  const deleteBloodWork = useDeleteBloodWork();
   const { data: substances } = useSubstances(true);
   const { data: substanceLogs } = useSubstanceLogs(10);
   const deleteBP = useDeleteBloodPressure();
@@ -75,6 +80,88 @@ export function MedicalPage() {
 
         {/* RED-S / Underweight Warning */}
         <REDSWarningBanner />
+
+        {/* Blood Work Section */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="h-4 w-4 text-indigo-500" />
+              <h3 className="font-semibold text-gray-900">
+                {(t as unknown as Record<string, Record<string, string>>).powerPlus?.bloodWork ?? (language === 'de' ? 'Blutwerte' : 'Blood Work')}
+              </h3>
+            </div>
+            <button
+              onClick={() => setShowBloodWorkDialog(true)}
+              className="p-1.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {bwLoading ? (
+            <div className="p-4 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto" />
+            </div>
+          ) : bloodWorkLogs && bloodWorkLogs.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {bloodWorkLogs.slice(0, 5).map((bw) => {
+                // Count non-null biomarkers
+                const markerKeys = [
+                  'testosterone_total', 'testosterone_free', 'estradiol', 'lh', 'fsh', 'shbg', 'prolactin',
+                  'hematocrit', 'hemoglobin', 'hdl', 'ldl', 'triglycerides', 'total_cholesterol',
+                  'ast', 'alt', 'ggt', 'creatinine', 'egfr', 'tsh', 'psa', 'hba1c', 'vitamin_d', 'ferritin',
+                ] as const;
+                const filledMarkers = markerKeys.filter(k => (bw as unknown as Record<string, unknown>)[k] != null);
+                // Show a few key values as summary
+                const summaryParts: string[] = [];
+                if (bw.testosterone_total) summaryParts.push(`T ${bw.testosterone_total}`);
+                if (bw.hematocrit) summaryParts.push(`HCT ${bw.hematocrit}%`);
+                if (bw.hdl) summaryParts.push(`HDL ${bw.hdl}`);
+                if (bw.ldl) summaryParts.push(`LDL ${bw.ldl}`);
+                if (bw.tsh) summaryParts.push(`TSH ${bw.tsh}`);
+                if (bw.hba1c) summaryParts.push(`HbA1c ${bw.hba1c}%`);
+
+                return (
+                  <div key={bw.id} className="px-4 py-2.5 flex items-center gap-3 group">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0 bg-indigo-400" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">
+                        {filledMarkers.length} {language === 'de' ? 'Marker' : 'markers'}
+                        {summaryParts.length > 0 && (
+                          <span className="text-gray-400 font-normal text-xs ml-1.5">
+                            {summaryParts.slice(0, 3).join(' · ')}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        {formatDate(bw.date, locale)}
+                        {bw.notes && ` — ${bw.notes}`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteBloodWork.mutate(bw.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-sm text-gray-400">
+                {(t as unknown as Record<string, Record<string, string>>).powerPlus?.noBloodWork ?? (language === 'de' ? 'Noch kein Blutbild vorhanden' : 'No blood work data yet')}
+              </p>
+              <button
+                onClick={() => setShowBloodWorkDialog(true)}
+                className="mt-2 text-xs text-indigo-600 hover:underline"
+              >
+                {(t as unknown as Record<string, Record<string, string>>).powerPlus?.addBloodWork ?? (language === 'de' ? 'Blutbild eintragen' : 'Add blood work')}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Blood Pressure Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -457,6 +544,10 @@ export function MedicalPage() {
       <AddSymptomDialog
         open={showSymptomDialog}
         onClose={() => setShowSymptomDialog(false)}
+      />
+      <AddBloodWorkDialog
+        open={showBloodWorkDialog}
+        onClose={() => setShowBloodWorkDialog(false)}
       />
       <AddReminderDialog
         open={showReminderDialog}

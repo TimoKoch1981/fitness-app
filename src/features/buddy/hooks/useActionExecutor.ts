@@ -16,6 +16,7 @@ import { useAddMeal } from '../../meals/hooks/useMeals';
 import { useAddWorkout } from '../../workouts/hooks/useWorkouts';
 import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
+import { useAddBloodWork } from '../../medical/hooks/useBloodWork';
 import { useAddSubstance, useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
 import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
 import { useAddUserProduct } from '../../meals/hooks/useProducts';
@@ -117,6 +118,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addWorkout = useAddWorkout();
   const addBodyMeasurement = useAddBodyMeasurement();
   const addBloodPressure = useAddBloodPressure();
+  const addBloodWork = useAddBloodWork();
   const logSubstance = useLogSubstance();
   const addTrainingPlan = useAddTrainingPlan();
   const addUserProduct = useAddUserProduct();
@@ -208,6 +210,38 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             pulse: d.pulse as number | undefined,
             date: d.date as string,
             time: d.time as string,
+            notes: d.notes as string | undefined,
+            user_id: uid,
+          });
+          break;
+        }
+
+        case 'log_blood_work': {
+          await addBloodWork.mutateAsync({
+            date: d.date as string | undefined,
+            testosterone_total: d.testosterone_total as number | undefined,
+            testosterone_free: d.testosterone_free as number | undefined,
+            estradiol: d.estradiol as number | undefined,
+            lh: d.lh as number | undefined,
+            fsh: d.fsh as number | undefined,
+            shbg: d.shbg as number | undefined,
+            prolactin: d.prolactin as number | undefined,
+            hematocrit: d.hematocrit as number | undefined,
+            hemoglobin: d.hemoglobin as number | undefined,
+            hdl: d.hdl as number | undefined,
+            ldl: d.ldl as number | undefined,
+            triglycerides: d.triglycerides as number | undefined,
+            total_cholesterol: d.total_cholesterol as number | undefined,
+            ast: d.ast as number | undefined,
+            alt: d.alt as number | undefined,
+            ggt: d.ggt as number | undefined,
+            creatinine: d.creatinine as number | undefined,
+            egfr: d.egfr as number | undefined,
+            tsh: d.tsh as number | undefined,
+            psa: d.psa as number | undefined,
+            hba1c: d.hba1c as number | undefined,
+            vitamin_d: d.vitamin_d as number | undefined,
+            ferritin: d.ferritin as number | undefined,
             notes: d.notes as string | undefined,
             user_id: uid,
           });
@@ -419,7 +453,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, addBloodWork, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

@@ -12,6 +12,7 @@ export type ActionType =
   | 'log_workout'
   | 'log_body'
   | 'log_blood_pressure'
+  | 'log_blood_work'
   | 'log_substance'
   | 'save_training_plan'
   | 'save_product'
@@ -77,6 +78,20 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '❤️',
         title: 'Blutdruck speichern?',
         summary: `${d.systolic ?? '?'}/${d.diastolic ?? '?'} mmHg${d.pulse ? ` | Puls ${d.pulse}` : ''}`,
+      };
+    case 'log_blood_work':
+      return {
+        icon: '🩸',
+        title: 'Blutwerte speichern?',
+        summary: [
+          d.testosterone_total ? `Test ${d.testosterone_total} ng/dL` : null,
+          d.hematocrit ? `HCT ${d.hematocrit}%` : null,
+          d.hdl ? `HDL ${d.hdl}` : null,
+          d.ldl ? `LDL ${d.ldl}` : null,
+          d.alt ? `ALT ${d.alt}` : null,
+          d.tsh ? `TSH ${d.tsh}` : null,
+          d.hba1c ? `HbA1c ${d.hba1c}%` : null,
+        ].filter(Boolean).join(', ') || 'Blutwerte',
       };
     case 'log_substance':
       return {

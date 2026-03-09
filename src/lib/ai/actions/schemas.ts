@@ -95,6 +95,48 @@ const LogBloodPressureSchema = z.object({
   notes: z.string().optional(),
 });
 
+const LogBloodWorkSchema = z.object({
+  date: z.string().default(today),
+  // Hormones
+  testosterone_total: z.number().positive().optional(),
+  testosterone_free: z.number().positive().optional(),
+  estradiol: z.number().nonnegative().optional(),
+  lh: z.number().nonnegative().optional(),
+  fsh: z.number().nonnegative().optional(),
+  shbg: z.number().nonnegative().optional(),
+  prolactin: z.number().nonnegative().optional(),
+  // Blood count
+  hematocrit: z.number().min(15).max(65).optional(),
+  hemoglobin: z.number().positive().optional(),
+  // Lipids
+  hdl: z.number().positive().optional(),
+  ldl: z.number().nonnegative().optional(),
+  triglycerides: z.number().nonnegative().optional(),
+  total_cholesterol: z.number().positive().optional(),
+  // Liver
+  ast: z.number().nonnegative().optional(),
+  alt: z.number().nonnegative().optional(),
+  ggt: z.number().nonnegative().optional(),
+  // Kidney
+  creatinine: z.number().positive().optional(),
+  egfr: z.number().positive().optional(),
+  // Thyroid
+  tsh: z.number().nonnegative().optional(),
+  // Other
+  psa: z.number().nonnegative().optional(),
+  hba1c: z.number().positive().optional(),
+  vitamin_d: z.number().nonnegative().optional(),
+  ferritin: z.number().nonnegative().optional(),
+  notes: z.string().optional(),
+}).refine(
+  (data) => {
+    return Object.entries(data).some(([key, value]) =>
+      key !== 'date' && key !== 'notes' && value != null
+    );
+  },
+  { message: 'At least one blood work value must be provided' }
+);
+
 const LogSubstanceSchema = z.object({
   substance_name: z.string().min(1),
   date: z.string().default(today),
@@ -246,6 +288,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   log_workout: LogWorkoutSchema,
   log_body: LogBodySchema,
   log_blood_pressure: LogBloodPressureSchema,
+  log_blood_work: LogBloodWorkSchema,
   log_substance: LogSubstanceSchema,
   save_training_plan: SaveTrainingPlanSchema,
   save_product: SaveProductSchema,
