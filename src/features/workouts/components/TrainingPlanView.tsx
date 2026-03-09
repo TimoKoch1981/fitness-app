@@ -16,6 +16,7 @@ import { useProfile } from '../../auth/hooks/useProfile';
 import { ReviewDialog } from './ReviewDialog';
 import { useRecentWorkoutsForPlan } from '../hooks/useRecentWorkoutsForPlan';
 import { useInProgressWorkout, useAbortDraft } from '../hooks/useDraftWorkout';
+import { PlanEditorDialog } from './PlanEditorDialog';
 
 interface TrainingPlanViewProps {
   plan: TrainingPlan | null;
@@ -39,6 +40,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
+  const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
 
   // PED phase sync (Power+ mode only — auto-adjusts review_config on cycle change)
   usePEDPhaseSync();
@@ -176,9 +178,12 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             )}
           </div>
           <div className="flex items-center gap-1">
-            {/* Edit via Buddy */}
+            {/* Edit Plan — opens editor for first day */}
             <button
-              onClick={() => navigate('/buddy', { state: { autoMessage: t.workouts.editViaBuddyAuto } })}
+              onClick={() => {
+                const firstDay = plan.days?.[0];
+                if (firstDay) setEditingDay(firstDay);
+              }}
               className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
               title={t.workouts.editPlan}
             >
@@ -336,8 +341,18 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           onToggle={() => toggleDay(day.day_number)}
           catalog={catalog ?? []}
           onExerciseClick={setSelectedExercise}
+          onEdit={setEditingDay}
         />
       ))}
+
+      {/* Plan Editor Dialog */}
+      {editingDay && (
+        <PlanEditorDialog
+          day={editingDay}
+          onClose={() => setEditingDay(null)}
+          onSaved={() => window.location.reload()}
+        />
+      )}
 
       {/* Exercise Detail Modal */}
       {selectedExercise && (
@@ -423,9 +438,10 @@ interface DayCardProps {
   onToggle: () => void;
   catalog: CatalogExercise[];
   onExerciseClick: (exercise: CatalogExercise) => void;
+  onEdit: (day: TrainingPlanDay) => void;
 }
 
-function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }: DayCardProps) {
+function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick, onEdit }: DayCardProps) {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const isDE = language === 'de';
@@ -495,6 +511,14 @@ function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick }
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-xs text-gray-300">
             {day.exercises.length} {t.workouts.exercises.toLowerCase()}
+          </span>
+          <span
+            role="button"
+            onClick={(e) => { e.stopPropagation(); onEdit(day); }}
+            className="p-1 text-gray-300 hover:text-teal-500 transition-colors"
+            title={isDE ? 'Tag bearbeiten' : 'Edit day'}
+          >
+            <Pencil className="h-3.5 w-3.5" />
           </span>
           {day.exercises.length > 0 && (
             <span

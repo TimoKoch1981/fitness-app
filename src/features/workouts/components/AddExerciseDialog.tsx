@@ -1,14 +1,16 @@
 /**
  * AddExerciseDialog — Add an exercise to the current workout session.
- * Search from exercise catalog or enter custom name.
+ *
+ * Uses the shared ExercisePicker for browsing/searching the catalog,
+ * then a config step for sets/reps/weight.
  * Option: just this session or permanently add to plan.
  */
 
-import { useState, useMemo } from 'react';
-import { X, Search, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { X, Plus, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
-import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
+import { ExercisePicker } from './ExercisePicker';
 import { supabase } from '../../../lib/supabase';
 import type { WorkoutExerciseResult, PlanExercise, CatalogExercise } from '../../../types/health';
 
@@ -20,9 +22,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
   const { state, addExercise } = useActiveWorkout();
-  const { data: catalog } = useExerciseCatalog();
 
-  const [search, setSearch] = useState('');
   const [customName, setCustomName] = useState('');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('10');
@@ -30,18 +30,6 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
   const [permanent, setPermanent] = useState(false);
   const [selected, setSelected] = useState<CatalogExercise | null>(null);
   const [step, setStep] = useState<'search' | 'config'>('search');
-
-  const filtered = useMemo(() => {
-    if (!catalog || !search.trim()) return [];
-    const q = search.toLowerCase();
-    return catalog
-      .filter(e =>
-        e.name.toLowerCase().includes(q) ||
-        (e.name_en ?? '').toLowerCase().includes(q) ||
-        (e.aliases ?? []).some(a => a.toLowerCase().includes(q)),
-      )
-      .slice(0, 15);
-  }, [catalog, search]);
 
   const handleSelect = (ex: CatalogExercise) => {
     setSelected(ex);
@@ -51,7 +39,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
 
   const handleCustom = () => {
     setSelected(null);
-    setCustomName(search.trim() || (isDE ? 'Neue Übung' : 'New Exercise'));
+    setCustomName(isDE ? 'Neue Übung' : 'New Exercise');
     setStep('config');
   };
 
@@ -108,54 +96,38 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 px-4 py-3 flex items-center justify-between z-10">
-          <h3 className="font-semibold text-gray-900 text-sm">
-            {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
+        <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 px-4 py-3 flex items-center justify-between z-10 flex-shrink-0">
+          {step === 'config' && (
+            <button
+              onClick={() => setStep('search')}
+              className="p-1 rounded-full hover:bg-gray-100 mr-1"
+            >
+              <ChevronLeft className="h-4 w-4 text-gray-400" />
+            </button>
+          )}
+          <h3 className="font-semibold text-gray-900 text-sm flex-1">
+            {step === 'search'
+              ? (isDE ? 'Übung auswählen' : 'Select Exercise')
+              : (isDE ? 'Übung konfigurieren' : 'Configure Exercise')
+            }
           </h3>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="h-4 w-4 text-gray-400" />
           </button>
         </div>
 
-        <div className="p-4">
+        <div className="p-4 overflow-y-auto flex-1">
           {step === 'search' ? (
             <div className="space-y-3">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder={isDE ? 'Übung suchen...' : 'Search exercise...'}
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  autoFocus
-                />
-              </div>
+              {/* Exercise Picker with filters */}
+              <ExercisePicker
+                onSelect={handleSelect}
+                maxHeight="50vh"
+              />
 
-              {/* Results */}
-              {filtered.length > 0 && (
-                <div className="space-y-1 max-h-60 overflow-y-auto">
-                  {filtered.map(ex => (
-                    <button
-                      key={ex.id}
-                      onClick={() => handleSelect(ex)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg text-left"
-                    >
-                      <span className="flex-1 truncate">
-                        {isDE ? ex.name : (ex.name_en ?? ex.name)}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {ex.muscle_groups.slice(0, 2).join(', ')}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Custom */}
+              {/* Custom exercise button */}
               <button
                 onClick={handleCustom}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
@@ -176,6 +148,37 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
+
+              {/* Selected exercise info */}
+              {selected && (
+                <div className="bg-gray-50 rounded-lg p-3 space-y-1.5">
+                  {selected.primary_muscles?.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selected.primary_muscles.map((m) => (
+                        <span
+                          key={m}
+                          className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium"
+                        >
+                          {m}
+                        </span>
+                      ))}
+                      {selected.secondary_muscles?.map((m) => (
+                        <span
+                          key={m}
+                          className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-600"
+                        >
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {selected.is_compound && (
+                    <span className="text-[10px] text-teal-600 font-medium">
+                      Compound · {selected.equipment_needed?.join(', ') || (isDE ? 'Körpergewicht' : 'Bodyweight')}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Sets / Reps / Weight */}
               <div className="grid grid-cols-3 gap-3">
@@ -235,18 +238,9 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                 <Plus className="h-4 w-4" />
                 {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
               </button>
-
-              <button
-                onClick={() => setStep('search')}
-                className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                {isDE ? '← Zurück zur Suche' : '← Back to Search'}
-              </button>
             </div>
           )}
         </div>
-
-        <div className="h-4" />
       </div>
     </div>
   );

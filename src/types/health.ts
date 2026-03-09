@@ -572,6 +572,46 @@ export interface Recommendation {
 }
 
 // === EXERCISE CATALOG ===
+
+export type BodyRegion = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'full_body' | 'cardio';
+
+export type MovementPattern =
+  | 'horizontal_push' | 'horizontal_pull'
+  | 'vertical_push' | 'vertical_pull'
+  | 'hip_hinge' | 'squat' | 'lunge'
+  | 'carry' | 'rotation' | 'anti_rotation'
+  | 'isolation' | 'cardio_steady' | 'cardio_interval'
+  | 'flexibility' | 'plyometric' | 'other';
+
+export type ForceType = 'push' | 'pull' | 'static' | 'dynamic';
+
+/** Standardized EN muscle identifiers — frontend translates via muscleNames map */
+export type MuscleIdentifier =
+  | 'chest' | 'upper_chest' | 'lats' | 'rhomboids' | 'traps'
+  | 'erector_spinae' | 'front_delts' | 'lateral_delts' | 'rear_delts'
+  | 'biceps' | 'triceps' | 'forearms'
+  | 'quads' | 'hamstrings' | 'glutes' | 'adductors' | 'abductors'
+  | 'hip_flexors' | 'calves'
+  | 'abs' | 'obliques' | 'deep_core'
+  | 'cardiovascular';
+
+export interface ExerciseVideos {
+  de_male?: string;
+  de_female?: string;
+  en_male?: string;
+  en_female?: string;
+  thumbnail?: string;
+}
+
+export interface JointStress {
+  [joint: string]: 'low' | 'medium' | 'high';
+}
+
+export interface ExerciseTips {
+  de?: string[];
+  en?: string[];
+}
+
 export interface CatalogExercise {
   id: string;
   name: string;
@@ -587,6 +627,22 @@ export interface CatalogExercise {
   equipment_needed: string[];
   is_compound: boolean;
   created_at: string;
+  // v2 fields
+  primary_muscles: MuscleIdentifier[];
+  secondary_muscles: MuscleIdentifier[];
+  body_region: BodyRegion;
+  movement_pattern: MovementPattern;
+  force_type?: ForceType;
+  is_unilateral: boolean;
+  videos: ExerciseVideos;
+  joint_stress: JointStress;
+  contraindications: string[];
+  contraindications_de?: string;
+  contraindications_en?: string;
+  tips?: ExerciseTips;
+  alternatives: string[];
+  sort_order: number;
+  updated_at?: string;
 }
 
 // === EQUIPMENT ===

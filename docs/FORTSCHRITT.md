@@ -124,6 +124,100 @@
 | 12.54   | 2026-03-04 | Cardio-Timer-Fix + Workout-Musik-Fix + ExerciseListBar + Logbuch-PDF (Soll/Ist) | Erledigt   |
 | 12.57   | 2026-03-05 | Workout-Session UX: setReady-Sperre, Timer-Stop, Speichern-Button          | Erledigt   |
 | 12.58   | 2026-03-06 | KI-Trainer Review-System Block A-D (Skill, DB, PostSessionFeedback, UI)    | Erledigt   |
+| 12.60   | 2026-03-08 | Token-Budget-Fixes + Conditional Skills + Cycle Prediction + UI-Verbesserungen | Erledigt   |
+| 12.61   | 2026-03-08 | Blutanalyse-Feature: Manuelle Eingabe + Foto-Upload + KI-Analyse             | Erledigt   |
+| 12.62   | 2026-03-09 | Blutanalyse erweitert: 38 Biomarker, PDF-Upload, Referenzbereiche            | Erledigt   |
+| 12.63   | 2026-03-09 | Workout Drag & Drop: dnd-kit in ExerciseListBar, GripVertical, Touch-Support | Erledigt   |
+| 12.64   | 2026-03-09 | Exercise Catalog v2: 122 Uebungen, ExercisePicker, Plan-Editor, Medizin-Felder | Erledigt   |
+
+---
+
+### 2026-03-09 - v12.62: Blutanalyse erweitert — 38 Biomarker, PDF-Upload, geschlechts-/altersabh. Referenzbereiche
+
+**Neue Dateien:**
+- `bloodWorkReferenceRanges.ts`: 38 Biomarker mit geschlechts- und altersabhaengigen Referenzbereichen (8 Gruppen: Hormone, Blutbild, Lipide, Leber, Niere, Stoffwechsel, Elektrolyte, Sonstige). Gender-Unterschiede bei Testosteron, Haemoglobin, Haematokrit, Ferritin, AST/ALT/GGT, Kreatinin. Altersabhaengig: PSA (4 Dekaden), freies Testosteron (3 Brackets), LH/SHBG/Estradiol/FSH/Ferritin (prae-/postmenopausal)
+- `pdfTextExtractor.ts`: PDF-Text-Extraktion via pdfjs-dist v5.5.207 (dynamischer Import, Code-Splitting). Fallback: PDF-Seite als JPEG rendern (Canvas)
+
+**Geaenderte Dateien (8):**
+- `bloodWorkVision.ts`: Komplett umgeschrieben — PDF-Support (Text-Extraktion + KI-Parsing, Fallback: Bild), callAI()-Helper, Prompt auf 38 Marker erweitert mit Einheiten-Konvertierung
+- `AddBloodWorkDialog.tsx`: PDF-Upload (image/*,application/pdf), dynamische Referenzbereiche aus Profil (Geschlecht, Alter), 8 aufklappbare Marker-Gruppen, Gender-Filter (PSA nur Maenner)
+- `useBloodWork.ts`: AddBloodWorkInput auf 38 Felder erweitert, Insert via Spread statt Einzelfelder
+- `schemas.ts`: LogBloodWorkSchema auf 38 Biomarker erweitert (Cortisol, FAI, Erythrozyten, Leukozyten, Thrombozyten, Bilirubin, AP, Harnstoff, Glucose, Harnsaeure, Eisen, Gesamtprotein, Kalium, Natrium, Calcium, freies PSA)
+- `useActionExecutor.ts`: log_blood_work Case mit dynamischem Spread statt 22 Einzelfelder
+- `types.ts`: getActionDisplayInfo erweitert (13 Key-Marker im Summary, max 5 angezeigt)
+- `MedicalPage.tsx`: markerKeys Array auf 38 Marker erweitert
+- `health.ts`: BloodWork Interface +16 neue Felder
+
+**DB-Migration (lokal + Production):**
+- `20260309000003_blood_work_expanded.sql`: 16 neue REAL-Spalten auf blood_work
+- PostgREST Schema-Reload + Container-Restart
+
+**Neue Dependency:**
+- `pdfjs-dist@5.5.207` — Client-seitige PDF-Text-Extraktion (lazy-loaded, ~406 KB gzipped)
+
+---
+
+### 2026-03-08 - v12.61: Blutanalyse-Feature — Manuelle Eingabe + Foto-Upload mit KI-Analyse
+
+**Neue Dateien:**
+- `AddBloodWorkDialog.tsx`: 22 Biomarker in 6 Gruppen (Hormone, Blutbild, Lipide, Leber, Niere, Sonstige), Collapsible Sections, Referenzbereiche inline (gruen/gelb/rot)
+- `bloodWorkVision.ts`: KI-Analyse von Laborbefund-Fotos via Vision API (gpt-4o-mini), strukturierte JSON-Extraktion, Proxy + Direct Mode
+
+**Geaenderte Dateien (5):**
+- `useBloodWork.ts`: +useAddBloodWork (Mutation-Hook) + useDeleteBloodWork + AddBloodWorkInput Interface
+- `types.ts`: +log_blood_work ActionType + getActionDisplayInfo Case (🩸)
+- `schemas.ts`: +LogBloodWorkSchema (22 Biomarker, .refine min. 1 Wert) + SCHEMA_MAP
+- `useActionExecutor.ts`: +Import + Hook + Switch-Case fuer log_blood_work (22 Felder)
+- `MedicalPage.tsx`: +Blutwerte-Sektion (alle User, nicht nur Power+) mit Verlauf + Dialog
+
+**Features:**
+- Manuelle Eingabe: 22 Biomarker in 6 aufklappbaren Gruppen
+- Foto-Upload: Kamera-Button, Bild komprimieren (max 1200px, JPEG 0.85), KI-Autofill
+- Referenzbereiche: Farbcodierung (gruen=normal, gelb=grenzwertig, rot=auffaellig)
+- MedicalPage: Letzte 5 Eintraege mit Marker-Anzahl + Key-Value-Summary (T, HCT, HDL, LDL, TSH, HbA1c)
+- AI-Buddy: "Mein Testosteron ist 850" → ACTION:log_blood_work → Bestaetigung → DB
+
+---
+
+### 2026-03-08 - v12.60: Token-Budget-Fixes + Conditional Skills + Cycle Prediction + UI-Verbesserungen
+
+**Token-Budget & Conditional Skill Loading:**
+- max_tokens von 2048 auf 4096 erhoeht (openai.ts, supabaseProxy.ts) — verhindert Truncation von ACTION:save_training_plan
+- PROFILE_CONDITIONAL_SKILLS: femaleFitness nur bei female/other, trainerReview nur bei ai_trainer_enabled
+- Neue Funktion getSkillIdsForContext() ersetzt getSkillIdsForMode() (abwaertskompatibel)
+- Training Agent Prompt reduziert von ~20.900 auf ~10.400 Tokens (bei Standard-Modus)
+- Dokumentation in SKILLS_LEARNINGS.md Section L
+
+**ACTION Block Display-Fix:**
+- ChatMessage.tsx: stripActionBlock() aus actionParser importiert, IMMER angewendet (nicht nur beim Streaming)
+- Benutzer sieht keine rohen ACTION:save_training_plan JSON-Bloecke mehr
+
+**Training Plan Save Verbesserungen:**
+- Null-Check nach INSERT (RLS-Rejection erkennen)
+- Days-Count Verifikation via .select()
+- Navigationshinweis nach erfolgreichem Speichern ("Training → Plan")
+
+**KI-Trainer + Zyklus-Toggles auf Trainingsseite:**
+- KI-Trainer Toggle (Indigo, Bot-Icon) prominent auf TrainingPage
+- Zyklusabhaengiges Training Toggle (Rose, Heart-Icon) nur bei female/other
+- Beide weiterhin auch in ProfilePage/Settings verfuegbar
+
+**Zyklus-Vorhersage-Algorithmus (useCyclePrediction.ts):**
+- Gewichteter gleitender Durchschnitt ueber letzte Zyklen (neuere = hoeher gewichtet)
+- 4 Konfidenz-Stufen: none (0 Zyklen, Prior 29 Tage), low (1-2), medium (3-5), high (6+)
+- Vorhersage: Naechste Periode, Eisprung, aktueller Zyklustag, geschaetzte Phase
+- Referenzen: Bull et al. 2019 (PMID: 31523756), Fehring et al. 2006 (PMID: 16865627)
+
+**CyclePhaseWidget Cockpit-Karte erweitert:**
+- Zyklusfortschritts-Balken (Tag X von Y)
+- Naechste Periode + Eisprung Countdown mit Datum
+- Konfidenz-Anzeige (3 Dots + Label)
+- CTA-Karte wenn noch keine Daten vorhanden ("Zyklus-Tracking starten")
+
+**Gender Info-Icon in ProfilePage:**
+- Info-Hinweis (i) bei Geschlecht female/other: "Schaltet Zyklus-Tracking & zyklusabhaengiges Training frei"
+
+**Deployed auf fudda.de** — Build 94 PWA Precache Entries, 0 TS-Fehler
 
 ---
 
@@ -3112,55 +3206,97 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-## v12.60 — Robustes Workout-System + 5 UX-Fixes + Smart Resume (2026-03-08)
+## v12.63 — Workout Drag & Drop mit dnd-kit (2026-03-09)
 
-**Was:** 6-Phasen-Plan fuer robustes Workout-System (Foto-Upload, Auth-Retry, Bestaetigung, Save-Robustheit, History-Edit, Resume) plus 5 UX-Fixes und Smart-Resume-Logik.
+**Was:** ExerciseListBar komplett ueberarbeitet — von ChevronUp/Down Pfeil-Buttons zu nativem Drag & Drop mit @dnd-kit/core + @dnd-kit/sortable. Mobile-freundlich mit Touch-Support.
 
-**Phase 0: Foto-Upload Fix**
-- Storage Bucket `posing-photos` fehlte → Migration erstellt
-- RLS-Policies (SELECT/INSERT/UPDATE/DELETE)
-- Error-Feedback in TrainingPage (Toast statt console.error)
+**Geaenderte Datei:**
+- `src/features/workouts/components/ExerciseListBar.tsx` — Komplettes Rewrite (190 Insertions, 102 Deletions)
 
-**Phase 1: Finish-Bestaetigung**
-- "Training beenden" oeffnet Bestaetigungsdialog statt sofort zu beenden
-- 2 Optionen: "Mit Speichern" (Primary) + "Ohne Speichern" (Secondary)
-- "Abbrechen" schliesst Dialog, Training laeuft weiter
+**Aenderungen:**
+- Neuer `SortableExerciseItem` Wrapper mit `useSortable()` Hook
+- `DndContext` + `SortableContext` mit `verticalListSortingStrategy`
+- `GripVertical` Drag-Handle (ersetzt ChevronUp/Down Buttons)
+- `PointerSensor` (distance: 5px) + `TouchSensor` (delay: 150ms, tolerance: 5px) fuer Desktop + Mobile
+- Visuelles Drag-Feedback: Shadow + Opacity + Ring
+- Kompakte Horizontal-Leiste (collapsed) unveraendert
+- Expanded-Liste jetzt mit vollwertigem Drag & Drop
+- Hint-Text geaendert: "tippen zum Wechseln, ziehen zum Sortieren"
+- Nutzt existierendes `REORDER_EXERCISES` aus ActiveWorkoutContext
 
-**Phase 2: AI/LLM Save-Robustheit**
-- `ensureFreshSession()` Utility — Session-Refresh vor DB-Mutations
-- Retry-Logik in useActionExecutor (Auth/RLS-Fehler → Refresh + 1x Retry)
-- Alle Mutation-Hooks gehaertet (useTrainingPlans, useBodyMeasurements, useMeals)
-
-**Phase 3: Workout-Save-Retry**
-- Max 2 Retries in useSaveWorkoutSession mit ensureFreshSession
-- "Erneut versuchen" Button in WorkoutSummary bei Fehler
-
-**Phase 4: Editierbare Trainings-Historie**
-- useUpdateWorkout Hook (UPDATE session_exercises JSONB)
-- Inline-Editing in WorkoutHistoryPage (Pencil-Icon → Reps/Weight Inputs)
-
-**Phase 5: Resume-System**
-- DB-Migration: `status` Spalte (in_progress/completed/aborted) + Index
-- useDraftWorkout: Periodischer Draft-Save (60s), Position in notes JSON
-- Resume-Erkennung: TrainingPlanView DayCard zeigt "Pausiert" Badge
-- Resume-Dialog: "Fortsetzen oder Neu starten?"
-- ActiveWorkoutPage: Draft laden + Position wiederherstellen
-- Smart Resume: Springt zur ersten offenen Uebung (nicht zurueck zum Anfang)
-- Status-Filter: History-Queries filtern in_progress raus
-
-**5 UX-Fixes (Commit 64e3fde):**
-1. **Einheiten-Anzeige:** "6-8 @67.5" → "6-8 Wdh @ 67.5 kg" in ExerciseOverviewTracker
-2. **Exercise-Liste:** Horizontal → Vertikal + Collapse + ↑↓ Pfeile (mobilfreundlich)
-3. **Pausen konsistent:** Rest-Timer nutzt suggestRestTime() statt generischem 90s-Fallback
-4. **Buddy-Gewicht:** Fallback-Erkennung wenn LLM Gewicht bestätigt aber kein ACTION-Block
-5. **Resume-Position:** Draft speichert currentExerciseIndex + currentSetIndex in notes JSON
-
-**Smart Resume (Commit 8387999):**
-- Bei Resume: Wenn gespeicherte Position auf abgeschlossene Uebung zeigt → automatisch zur naechsten offenen Uebung + erstem offenen Satz springen
-
-**Dateien:** 22+ modifiziert, 3 neue Dateien (Migrationen + refreshSession.ts)
-**Commits:** 4fbf6e1 (Phase 0-5), 64e3fde (5 UX-Fixes), 8387999 (Smart Resume)
+**Build:** 0 TS-Fehler, 100 PWA Precache Entries
+**Deploy:** fudda.de aktualisiert
 
 ---
 
-*Letzte Aktualisierung: 2026-03-08*
+## v12.64 — Exercise Catalog v2: 122 Uebungen, ExercisePicker, Plan-Editor (2026-03-09)
+
+**Was:** Komplette Ueberarbeitung der Uebungsdatenbank basierend auf 5-Experten-Review (Kraftsportler, Sportmediziner, Systemarchitekt, Data Analyst, UX-Trainer). 5 Implementierungsphasen in einer Session.
+
+**Neue Dateien:**
+- `supabase/migrations/20260309000004_exercise_catalog_schema_v2.sql` — 12 neue Spalten + 6 Indexes + Favoriten-Tabelle
+- `supabase/migrations/20260309000005_exercise_catalog_data_fixes.sql` — 6 is_compound Fixes + Backfill 70 Uebungen
+- `supabase/migrations/20260309000006_exercise_catalog_new_exercises.sql` — **52 neue Uebungen** (70→122 gesamt)
+- `src/features/workouts/components/ExercisePicker.tsx` — Shared Exercise-Suche mit Body-Region-Chips, Favoriten, Kategorie-Tabs
+- `src/features/workouts/components/PlanEditorDialog.tsx` — Inline Plan-Editor mit @dnd-kit D&D, Uebung hinzufuegen/entfernen/bearbeiten
+- `src/features/workouts/hooks/useExerciseFavorites.ts` — Favoriten-System mit Optimistic Updates
+- `src/features/workouts/utils/muscleNames.ts` — i18n-Map fuer 23 Muskeln, 8 Body Regions, 16 Movement Patterns
+
+**Geaenderte Dateien:**
+- `src/types/health.ts` — CatalogExercise Interface um 15 Felder erweitert, neue Types: BodyRegion, MovementPattern, ForceType, MuscleIdentifier, ExerciseVideos, JointStress, ExerciseTips
+- `src/features/workouts/hooks/useExerciseCatalog.ts` — staleTime: Infinity, sort_order, useFilteredExercises Hook (8 Filter)
+- `src/features/workouts/components/AddExerciseDialog.tsx` — Refactored mit ExercisePicker statt manuellem Search
+- `src/features/workouts/components/ExerciseDetailModal.tsx` — Primary/Secondary Muscles (farbkodiert), Body Region, Movement Pattern, Kontraindikationen-Warning, Video-Gender-Toggle (M/F), Unilateral-Badge
+- `src/features/workouts/components/TrainingPlanView.tsx` — PlanEditorDialog Integration, Pencil-Icon oeffnet Editor statt Buddy, Edit-Button pro DayCard
+- `src/features/workouts/components/SetBySetTracker.tsx` — Unilateral L/R Hinweis fuer unilaterale Uebungen
+- `docs/TODO.md` — Alle 5 Phasen als abgeschlossen markiert
+- `docs/KONZEPT_EXERCISE_CATALOG.md` — Konsolidiertes Konzept-Dokument
+
+**Phase 1 — DB-Migration:**
+- 12 neue Spalten: primary_muscles, secondary_muscles, body_region, movement_pattern, force_type, is_unilateral, videos (JSONB), joint_stress (JSONB), contraindications, tips, alternatives, sort_order, updated_at
+- 6 GIN/btree Indexes
+- user_exercise_favorites Tabelle mit RLS
+- 6 is_compound Korrekturen
+- Backfill aller 70 Uebungen mit neuen Feldern
+- 52 neue Uebungen: 79 Strength + 15 Cardio + 15 Functional + 13 Flexibility
+
+**Phase 2 — TypeScript + i18n:**
+- CatalogExercise um 15 Felder erweitert (abwaertskompatibel)
+- 6 neue Types (BodyRegion, MovementPattern, ForceType, MuscleIdentifier, ExerciseVideos, JointStress)
+- useFilteredExercises Hook (8 Filter-Dimensionen)
+- muscleNames.ts: 23 Muskeln, 8 Regionen, 16 Patterns mit DE/EN
+
+**Phase 3 — ExercisePicker:**
+- Body-Region-Chips (8 Regionen)
+- Freitext-Suche (Name, Aliases, EN)
+- Kategorie-Tabs (Kraft, Cardio, Functional, Flex)
+- Favoriten-System (Star-Toggle, optimistisches Update, favoriten-zuerst Sortierung)
+- Compact Cards mit Primary-Muscles, Difficulty-Dots, Compound-Badge
+
+**Phase 4 — Plan-Editor:**
+- PlanEditorDialog mit @dnd-kit Drag & Drop
+- Inline-Edit: Name, Sets, Reps, Weight, Duration, Intensity
+- ExercisePicker-Integration zum Hinzufuegen
+- Delete-Button pro Uebung
+- Day Name + Focus editierbar
+- Save to DB (training_plan_days)
+- Pencil-Icon in TrainingPlanView oeffnet Editor
+- Edit-Button pro DayCard
+
+**Phase 5 — Medizin + Video + Polish:**
+- ExerciseDetailModal: Primary (teal) + Secondary (gray) Muscles farbkodiert
+- Body Region + Movement Pattern Badges
+- Kontraindikationen-Warning (amber Box mit AlertTriangle)
+- Video-Gender-Toggle (Maennlich/Weiblich) wenn JSONB female-Variante vorhanden
+- Unilateral-Badge (ArrowLeftRight)
+- SetBySetTracker: L/R Hinweis bei is_unilateral=true
+
+**Uebungs-Verteilung (122 gesamt):**
+- Beine: 34 | Ruecken: 15 | Cardio: 15 | Full Body: 13
+- Core: 13 | Arme: 12 | Brust: 10 | Schultern: 10
+
+**Build:** 0 TS-Fehler, 113 PWA Precache Entries, ~5.5 MB
+
+---
+
+*Letzte Aktualisierung: 2026-03-09*

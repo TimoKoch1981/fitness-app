@@ -1,6 +1,6 @@
 # DEPENDENCIES.md — FitBuddy Abhaengigkeitskarte
 
-> **Version:** 1.4 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-08
+> **Version:** 1.6 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-09
 >
 > **Konzept:** Entworfen aus der Perspektive eines Software-Architekten, Programmierers
 > und KI-Experten. Zweifach iteriert — erst Struktur, dann Detailtiefe.
@@ -460,7 +460,8 @@ auth.users (Supabase-intern, GoTrue)
 
 Standalone-Tabellen (kein user_id FK):
     ├── brand_products (Produkt-Datenbank, Seed-Daten)
-    ├── exercise_catalog (Uebungskatalog, Seed-Daten)
+    ├── exercise_catalog (Uebungskatalog, 122 Uebungen, v2 mit 12+ Spalten)
+    ├── user_exercise_favorites (User-Favoriten, RLS)
     ├── equipment_catalog (Geraetekatalog)
     └── admin_settings (Admin-Konfiguration)
 ```
@@ -517,7 +518,10 @@ Spaetere Migrationen koennen auf Tabellen aus frueheren zugreifen.
 20260221000002_equipment.sql              ← equipment_catalog, user_equipment
 20260221000003_daily_checkin.sql          ← daily_checkin
 20260222000001_exercise_catalog.sql       ← exercise_catalog
-20260222000002_exercise_catalog_seed.sql  ← Seed: 200+ Uebungen
+20260222000002_exercise_catalog_seed.sql  ← Seed: 70 Uebungen
+20260309000004_exercise_catalog_schema_v2.sql  ← 12 neue Spalten + Indexes + user_exercise_favorites
+20260309000005_exercise_catalog_data_fixes.sql ← is_compound Fixes + Backfill 70 Uebungen
+20260309000006_exercise_catalog_new_exercises.sql ← 52 neue Uebungen (→122 gesamt)
 20260222000003_avatar.sql                 ← Avatar-Storage-Bucket + Policies
 20260222000004_personal_goals.sql         ← personal_goals
 20260224000001_disclaimer_accepted.sql    ← Disclaimer-Feld in profiles
@@ -541,6 +545,11 @@ Spaetere Migrationen koennen auf Tabellen aus frueheren zugreifen.
 20260306000001_ai_trainer_review.sql        ← ai_supervised, review_config (training_plans),
                                                session_feedback (workouts),
                                                ai_trainer_enabled (profiles)
+20260307000001_cycle_tracking_enabled.sql   ← cycle_tracking_enabled (profiles)
+20260308000001_cycle_tracker_v2.sql         ← menstrual_cycle_logs erweitert
+20260309000001_posing_photos_bucket.sql     ← posing-photos Storage Bucket
+20260309000002_workout_status.sql           ← status Spalte (workouts)
+20260309000003_blood_work_expanded.sql      ← 16 neue Biomarker-Spalten (blood_work)
 ```
 
 ---
@@ -714,6 +723,10 @@ src/lib/ai/provider.ts (getAIProvider)
     ├──→ usePageBuddySuggestions.ts (seitenspezifische Buddy-Tipps)
     │
     ├──→ lib/ai/mealVision.ts (Foto → Mahlzeit-Erkennung)
+    │
+    ├──→ features/medical/utils/bloodWorkVision.ts (Laborbefund-Foto/PDF → Blutwerte)
+    │       ├──→ bloodWorkReferenceRanges.ts (38 Marker, Gender/Age Ranges)
+    │       └──→ pdfTextExtractor.ts (pdfjs-dist, Text + Bild-Fallback)
     │
     ├──→ lib/ai/vision.ts (allgemeine Bilderkennung)
     │
@@ -889,6 +902,9 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 - [ ] ai-proxy Edge Function aendern? → `deploy/sync-functions.sh` ausfuehren
 - [ ] OpenAI-Modell wechseln? → VITE_OPENAI_MODEL und Server-seitig pruefen
 - [ ] Neue Skills hinzufuegen? → `lib/ai/skills/` + System-Prompt aktualisieren
+- [ ] Neuen Skill zu Agent hinzufuegen? → Token-Budget pruefen (`estimateTokenBudget()`), MAX 12.000 Tokens/Agent!
+- [ ] Skill nur fuer bestimmte User? → `PROFILE_CONDITIONAL_SKILLS` in `skills/index.ts` nutzen (statt AGENT_SKILL_MAP)
+- [ ] max_tokens aendern? → `openai.ts` (2 Stellen) + `supabaseProxy.ts` (3 Stellen), Vision-Provider separat
 
 ### 10.5 Schnell-Diagnose bei Production-Problemen
 
@@ -897,14 +913,12 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | Auth funktioniert nicht | .env.production fehlt/falsch | `grep localhost dist/assets/*.js` |
 | Daten laden nicht (leere Listen) | RLS-Policy oder fehlender JWT | Browser DevTools → Network → Response |
 | Buddy antwortet nicht | ai-proxy oder OpenAI Key | `docker logs supabase-functions` |
+| Buddy sagt "Ich speichere" aber nichts passiert | max_tokens zu klein oder Skill-Bloat → ACTION-Block abgeschnitten | Console: `[ActionParser]` Logs pruefen, Agent Prompt-Laenge checken |
 | Seite laedt nicht (weisser Bildschirm) | JS-Build-Fehler oder CSP | Browser Console → Fehlermeldungen |
 | Email kommt nicht an | SMTP-Config oder Resend-Limit | `docker logs supabase-auth` |
 | SSL-Zertifikat abgelaufen | Caddy-Problem oder DNS | `docker logs caddy` + DNS pruefen |
 | 502 Bad Gateway | Kong/Service down | `docker compose ps` → Status aller Container |
 | Langsame Ladezeiten | Fehlender Cache-Header oder Bundle zu gross | DevTools → Network → Timing |
-| Workout-Save scheitert | JWT stale nach langem Training | ensureFreshSession() Retry-Logik prueft Auth |
-| Resume startet von vorne | notes-JSON fehlt in Draft | `SELECT notes FROM workouts WHERE status='in_progress'` |
-| Foto-Upload scheitert | posing-photos Bucket fehlt | `SELECT id FROM storage.buckets WHERE id='posing-photos'` |
 
 ---
 
@@ -916,4 +930,6 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | 2026-03-06 | 1.1 | Claude / Entwickler | KI-Trainer Review-System: ai_supervised, review_config, session_feedback, ai_trainer_enabled, trainerReview Skill (17 Skills) |
 | 2026-03-07 | 1.2 | Claude / Entwickler | Block B CalibrationWizard: useCalibration.ts (BW-Multiplier), CalibrationWizard.tsx (3-Screen), useUpdateTrainingPlanCalibration Mutation, TrainingPlanView Auto-Trigger, 31 calibration i18n-Keys (17 Sprachen) |
 | 2026-03-07 | 1.3 | Claude / Entwickler | KI-Trainer Blocks B+C+D komplett: Post-Session-Analyse (postSessionAnalysis.ts), Double Progression (doubleProgression.ts), RIR-Feedback (RIRFeedbackDialog.tsx, useIsFirstSessionForPlan.ts, calculateRIRAdjustment), 6 Early Triggers + 6 Suggestion Chips (deviations.ts), PED-Phasen-Sync (usePEDPhaseSync.ts), Mesozyklus-Review (useMesocycleCheck.ts, mesocycleReview.ts), Buddy-Nachfrage (useAISupervisedOffer.ts), Review-Dialog (ReviewDialog.tsx, reviewChanges.ts, useApplyReviewChanges.ts, useRecentWorkoutsForPlan.ts), 8 rirFeedback i18n-Keys (17 Sprachen) |
-| 2026-03-08 | 1.4 | Claude / Entwickler | Robustes Workout-System v12.60: refreshSession.ts (Auth-Retry-Utility), useDraftWorkout.ts (Draft-Save + Resume), DB-Migration workout_status (in_progress/completed/aborted), posing-photos Storage Bucket, ExerciseListBar.tsx Rewrite (vertikal+Pfeile), suggestRestTimes.ts → ActiveWorkoutPage Integration, Buddy-Gewicht-Fallback (useBuddyChat.ts), ensureFreshSession in useActionExecutor/useSaveWorkoutSession |
+| 2026-03-08 | 1.4 | Claude / Entwickler | Token-Budget-Fix: max_tokens 2048→4096 (openai.ts, supabaseProxy.ts), Profile-Conditional Skills (PROFILE_CONDITIONAL_SKILLS), getSkillIdsForContext(), femaleFitness+trainerReview bedingt laden statt statisch, Diagnose-Zeile fuer ACTION-Block-Truncation |
+| 2026-03-09 | 1.6 | Claude / Entwickler | Blutanalyse v12.62: bloodWorkReferenceRanges.ts (38 Marker, Gender/Age), pdfTextExtractor.ts (pdfjs-dist v5), DB-Migration +16 Spalten, Executor/Schema/Types dynamischer Spread |
+| 2026-03-09 | 1.7 | Claude / Entwickler | Workout DnD v12.63: ExerciseListBar.tsx Rewrite mit @dnd-kit/core+sortable, SortableExerciseItem, GripVertical Handle, PointerSensor+TouchSensor, nutzt REORDER_EXERCISES aus ActiveWorkoutContext |

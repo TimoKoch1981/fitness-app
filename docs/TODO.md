@@ -327,7 +327,9 @@
 - [x] ~~**Passwort-Sichtbarkeit Toggle**~~ ✅ (2026-03-02, v12.34) — Eye/EyeOff auf Login + Register
 - [x] ~~**Sprachauswahl auf Login/Register**~~ ✅ (2026-03-02, v12.34) — LanguageSelector Komponente (17 Sprachen, Flaggen)
 - [x] ~~**OAuth Buttons immer sichtbar**~~ ✅ (2026-03-02, v12.34) — Google/Apple Buttons ohne Feature-Gate
-- [ ] OAuth Provider konfigurieren (Google, Apple) — Credentials in config.toml + GoTrue eintragen
+- [x] ~~**OAuth Provider: Google**~~ ✅ (2026-03-09) — Google Cloud Projekt fitbuddy-489710, Client-ID + Secret, GoTrue konfiguriert, /auth/v1/settings → google: true
+- [x] ~~**OAuth Provider: Facebook**~~ ✅ (2026-03-09) — Meta App "FitBuddy" (App-ID: 936201995462102), GoTrue konfiguriert, Login-Button (17 Sprachen), Testmodus (Admin/Tester)
+- [ ] **OAuth Provider: Apple** — Apple Developer Account ($99/Jahr) → Service ID → GoTrue konfigurieren (braucht macOS fuer Key-Erstellung)
 - [ ] MFA (TOTP, WebAuthn) — aktuell alles disabled
 
 #### Foto-basiertes Mahlzeit-Logging
@@ -337,27 +339,12 @@
 #### Dependency-Tracking
 - [x] ~~**docs/DEPENDENCIES.md erstellen**~~ ✅ (2026-03-02, v12.35) — Praeambel + Ausfuellanweisung + 10 Sektionen
 
-### ~~P2 — Workout-Session UX-Verbesserungen~~ ✅ (2026-03-08, v12.60)
+### P2 — Workout-Session UX-Verbesserungen
 
-#### ~~Uebungs-Reihenfolge in aktiver Workout-Session~~ ✅
-- [x] ~~**Uebungs-Uebersicht am unteren Rand**~~ ✅ — Vertikale collapsible Liste mit Compact-Row + expandierter Ansicht
-- [x] ~~**Reihenfolge aendern (↑↓ Pfeile)**~~ ✅ — ChevronUp/ChevronDown Buttons statt Drag&Drop (mobilfreundlich)
-- [x] ~~**Aktuelle Uebung hervorheben**~~ ✅ — Teal Ring + Hintergrund, Auto-Scroll
-
-#### ~~Robustes Workout-System (6 Phasen)~~ ✅ (2026-03-08, v12.60)
-- [x] ~~**Phase 0: Foto-Upload Fix**~~ ✅ — Storage Bucket posing-photos + RLS + Error-Feedback
-- [x] ~~**Phase 1: Finish-Bestaetigung**~~ ✅ — Dialog mit "Mit Speichern"/"Ohne Speichern"/"Abbrechen"
-- [x] ~~**Phase 2: AI/LLM Save-Robustheit**~~ ✅ — ensureFreshSession() + Retry-Logik in useActionExecutor
-- [x] ~~**Phase 3: Workout-Save-Retry**~~ ✅ — Max 2 Retries + "Erneut versuchen" Button
-- [x] ~~**Phase 4: Editierbare Historie**~~ ✅ — useUpdateWorkout + Inline-Editing in WorkoutHistoryPage
-- [x] ~~**Phase 5: Resume-System**~~ ✅ — status-Spalte, Draft-Save (60s), Resume-Dialog, Smart Resume
-
-#### ~~5 UX-Fixes~~ ✅ (2026-03-08, v12.60)
-- [x] ~~**Einheiten-Anzeige**~~ ✅ — "6-8 Wdh @ 67.5 kg" statt "6-8 @67.5"
-- [x] ~~**Pausen konsistent**~~ ✅ — suggestRestTime() als Fallback statt generischem 90s
-- [x] ~~**Buddy-Gewicht Fallback**~~ ✅ — LLM-Text-Erkennung wenn ACTION-Block fehlt
-- [x] ~~**Resume-Position**~~ ✅ — Draft speichert currentExerciseIndex + currentSetIndex
-- [x] ~~**Smart Resume**~~ ✅ — Springt zur ersten offenen Uebung statt von vorne
+#### ~~Uebungs-Reihenfolge in aktiver Workout-Session~~ ✅ (2026-03-09, v12.63)
+- [x] ~~**Uebungs-Uebersicht am unteren Rand**~~ ✅ — Kompakte Liste aller Uebungen als horizontale Leiste (collapsed) + vertikale Liste (expanded)
+- [x] ~~**Drag & Drop Uebungs-Reihenfolge**~~ ✅ — @dnd-kit/core + @dnd-kit/sortable, GripVertical Handle, PointerSensor + TouchSensor (mobile-freundlich), SortableExerciseItem, visuelles Feedback (Shadow + Opacity)
+- [x] ~~**Aktuelle Uebung hervorheben**~~ ✅ — Teal Ring + Background, Auto-Scroll zu aktuellem Exercise
 
 ### P1 — KI-Trainer Review-System (Konzept freigegeben 2026-03-05)
 > Konzept-Dokument: `docs/KONZEPT_KI_TRAINER.md`
@@ -408,9 +395,12 @@
 - [ ] **Challenges** — 30-Tage-Challenges, Gruppen-Ziele, Fortschrittsbalken
   - DB: `challenges` Tabelle (group_id, name, type, target_value, start/end_date)
 
-**Stufe 3 — Externe Integration**
-- [ ] **Instagram/TikTok** — Progress-Fotos mit FitBuddy-Branding teilen
+**Stufe 3 — Externe Integration / Social Media Posting**
+- [ ] **Facebook Posting** — Workout-Ergebnisse, Fortschritts-Fotos auf Facebook teilen (Meta Graph API, publish_pages Scope, App Review noetig)
+- [ ] **Instagram Posting** — Progress-Fotos mit FitBuddy-Branding auf Instagram teilen (Instagram Graph API, instagram_content_publish Scope, Business/Creator Account noetig)
+- [ ] **TikTok Posting** — Workout-Videos/Clips teilen (TikTok Content Posting API)
 - [ ] **Strava/Garmin/Apple Health** — Lauf/Rad-Daten importieren
+> **Hinweis:** Social Media Posting braucht erweiterte OAuth-Scopes + Meta App Review (strenger als Login). Konzept-Dokument empfohlen.
 
 ---
 
@@ -430,7 +420,9 @@
 | SMTP-Provider (Prod) | ✅ Aktiv | Resend SMTP, API Key konfiguriert, Domain-Validierung noetig |
 | Email-Templates | ✅ Deutsch | confirmation.html + recovery.html |
 | site_url | ✅ Korrekt | Port 5173 |
-| OAuth | DEAKTIVIERT | Alle Provider disabled (P2) |
+| OAuth Google | ✅ AKTIV | fitbuddy-489710, Testmodus (max 100 User), 2026-03-09 |
+| OAuth Facebook | ✅ AKTIV | Meta App 936201995462102, Testmodus (Admin/Tester), 2026-03-09 |
+| OAuth Apple | OFFEN | Braucht Apple Developer Account ($99/Jahr) |
 | MFA | DEAKTIVIERT | TOTP/Phone/WebAuthn alle disabled (P2) |
 
 ---
@@ -490,4 +482,37 @@
 - [x] ~~**P3: UX/Visualisierung**~~ ✅ — 20 Symptome + 17 Sprachen, CycleTimeline, CycleInsightsCard, Arzt-Export PDF
 - [x] ~~**Bugfix: Toggle autoSave Race Condition**~~ ✅ — handleToggleSave (sofort, ohne Debounce) fuer Boolean-Toggles
 
-*Letzte Aktualisierung: 2026-03-08 (Robustes Workout-System v12.60 — 6 Phasen + 5 UX-Fixes + Smart Resume)*
+### v12.60 Token-Budget + Cycle Prediction + UI (2026-03-08)
+- [x] ~~**max_tokens 2048→4096**~~ ✅ — Verhindert ACTION-Block-Truncation bei Trainingsplaenen
+- [x] ~~**Conditional Skill Loading**~~ ✅ — PROFILE_CONDITIONAL_SKILLS (femaleFitness + trainerReview), getSkillIdsForContext()
+- [x] ~~**ACTION Block Display-Fix**~~ ✅ — stripActionBlock immer angewendet, nicht nur beim Streaming
+- [x] ~~**Training Plan Save Verbesserungen**~~ ✅ — Null-Check, Days-Verifikation, Navigationshinweis
+- [x] ~~**KI-Trainer Toggle auf TrainingPage**~~ ✅ — Prominent, Indigo, Bot-Icon
+- [x] ~~**Zyklus-Training Toggle auf TrainingPage**~~ ✅ — Rose, Heart-Icon, nur female/other
+- [x] ~~**Gender Info-Icon**~~ ✅ — (i) bei female/other in ProfilePage Geschlechtswahl
+- [x] ~~**Zyklus-Vorhersage-Algorithmus**~~ ✅ — useCyclePrediction.ts, gewichteter Durchschnitt, 4 Konfidenz-Stufen
+- [x] ~~**CyclePhaseWidget erweitert**~~ ✅ — Fortschrittsbalken, Periode/Eisprung-Countdown, Konfidenz-Dots, CTA
+
+### v12.61-12.62 Blutanalyse-Feature (2026-03-08/09)
+- [x] ~~**v12.61: Manuelle Eingabe + Foto-Upload**~~ ✅ — AddBloodWorkDialog (22 Biomarker, 6 Gruppen), bloodWorkVision.ts, useAddBloodWork/useDeleteBloodWork Hooks, log_blood_work AI Action, MedicalPage Blutwerte-Sektion
+- [x] ~~**v12.62: 38 Biomarker + PDF + Referenzbereiche**~~ ✅ — Erweiterung auf 38 Biomarker (8 Gruppen), pdfjs-dist (PDF-Text-Extraktion + Fallback), bloodWorkReferenceRanges.ts (geschlechts-/altersabhaengig), DB-Migration +16 Spalten, Executor/Schema/Types erweitert
+
+### Exercise Catalog Experten-Review + Implementierung (2026-03-09)
+- [x] **5 Experten-Reviews durchgefuehrt** ✅ — Kraftsportler, Sportmediziner, Systemarchitekt, Data Analyst, UX/Fitnesstrainer
+- [x] **Konsolidiertes Konzeptdokument** ✅ — `docs/KONZEPT_EXERCISE_CATALOG.md` (Schema, Korrekturen, Erweiterung, UX, Video-System, Roadmap)
+- [x] **Phase 1: DB-Migration** ✅ — 12 neue Spalten, 6 Indexes, Favoriten-Tabelle, 6 is_compound Fixes, Backfill 70 Uebungen, **52 neue Uebungen** (70→122 gesamt)
+- [x] **Phase 2: TypeScript-Typen + Hook** ✅ — CatalogExercise erweitert (15 neue Felder), BodyRegion/MovementPattern/ForceType/MuscleIdentifier Types, staleTime: Infinity, useFilteredExercises, muscleNames.ts (i18n-Map)
+- [x] **Phase 3: ExercisePicker + AddWorkoutDialog** ✅ — ExercisePicker (Body-Region-Chips, Suche, Favoriten, Kategorie-Tabs), useExerciseFavorites (Optimistic Update), AddExerciseDialog refactored
+- [x] **Phase 4: Plan-Editor** ✅ — PlanEditorDialog.tsx (@dnd-kit D&D, Inline-Edit Name/Sets/Reps/Weight, ExercisePicker-Integration, Save to DB), Pencil-Icon öffnet Editor statt Buddy, Edit-Button pro DayCard
+- [x] **Phase 5: Medizin + Video + Polish** ✅ — ExerciseDetailModal erweitert (primary/secondary Muscles, body_region, movement_pattern, Kontraindikationen-Warning, Video-Gender-Toggle M/F, Unilateral-Badge), SetBySetTracker L/R-Hinweis
+
+### Bugs aus Live-Test (2026-03-09)
+- [x] **Plus-Button funktioniert nicht auf Plan/History/Progress Tabs** ✅ — AddWorkoutDialog aus Sub-Tab-Conditional verschoben (30a4ba9)
+- [x] **Trainingsmodus-Auswahl: Uneinheitliche Rahmenfarben** ✅ — Alle Modi auf teal-500 border (ee7747c)
+- [x] **Gewicht-Input: 37.5kg abgelehnt (step=0.5)** ✅ — Alle 8 Dateien step=0.1 (87c09df)
+- [x] ~~**"Neuen Plan" Button oeffnet nur Buddy-Chat**~~ ✅ — PlanEditorDialog implementiert (Phase 4)
+- [x] ~~**AddWorkoutDialog: Kein Autocomplete aus exercise_catalog**~~ ✅ — ExercisePicker mit 122 Uebungen, Suche, Favoriten (Phase 3)
+- [x] ~~**Unilaterale Uebungen: Kein L/R Input**~~ ✅ — is_unilateral Feld, ArrowLeftRight Hinweis im SetBySetTracker (Phase 5)
+- [ ] **Plus-Button erzeugt nur Einzelworkout, kein Plan** — Klare Trennung Workout-Logging vs Plan-Management noetig (zukuenftig)
+
+*Letzte Aktualisierung: 2026-03-09 (Exercise Catalog komplett implementiert: 5 Phasen, 122 Uebungen, ExercisePicker, Plan-Editor, Medizin-Felder)*

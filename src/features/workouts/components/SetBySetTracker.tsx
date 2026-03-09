@@ -11,8 +11,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Check, SkipForward, Info, ArrowRight } from 'lucide-react';
+import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
+import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
 interface SetBySetTrackerProps {
@@ -34,6 +35,11 @@ export function SetBySetTracker({
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
+
+  // Check if exercise is unilateral (needs L/R)
+  const { data: catalog } = useExerciseCatalog();
+  const catalogEntry = catalog?.find((c) => c.id === exercise.exercise_id);
+  const isUnilateral = catalogEntry?.is_unilateral ?? false;
 
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
@@ -116,6 +122,18 @@ export function SetBySetTracker({
           </p>
         )}
       </div>
+
+      {/* Unilateral Hint */}
+      {isUnilateral && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
+          <ArrowLeftRight className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+          <p className="text-xs text-indigo-600 font-medium">
+            {isDE
+              ? 'Unilaterale Übung — beide Seiten (L/R) trainieren!'
+              : 'Unilateral exercise — train both sides (L/R)!'}
+          </p>
+        </div>
+      )}
 
       {/* Last Time */}
       {lastSet && lastSet.completed && (
