@@ -83,14 +83,16 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="bp-systolic" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.medical.systolic} ({t.medical.mmHg})
               </label>
               <input
+                id="bp-systolic"
                 type="number"
                 value={systolic}
                 onChange={(e) => setSystolic(e.target.value)}
                 placeholder="120"
+                aria-label={`${t.medical.systolic} ${t.medical.mmHg}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
                 required
                 min="50"
@@ -99,14 +101,16 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="bp-diastolic" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.medical.diastolic} ({t.medical.mmHg})
               </label>
               <input
+                id="bp-diastolic"
                 type="number"
                 value={diastolic}
                 onChange={(e) => setDiastolic(e.target.value)}
                 placeholder="80"
+                aria-label={`${t.medical.diastolic} ${t.medical.mmHg}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
                 required
                 min="30"
@@ -114,14 +118,16 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="bp-pulse" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.medical.pulse} ({t.medical.bpm})
               </label>
               <input
+                id="bp-pulse"
                 type="number"
                 value={pulse}
                 onChange={(e) => setPulse(e.target.value)}
                 placeholder="72"
+                aria-label={`${t.medical.pulse} ${t.medical.bpm}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
                 min="30"
                 max="250"
@@ -147,10 +153,11 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="bp-notes" className="block text-xs font-medium text-gray-500 mb-1">
               {t.common.notes}
             </label>
             <input
+              id="bp-notes"
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -160,7 +167,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
+            <p className="text-xs text-red-500 text-center" role="alert">{error}</p>
           )}
 
           <button

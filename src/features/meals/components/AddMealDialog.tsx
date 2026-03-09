@@ -290,11 +290,12 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
           {/* Name + AI Estimate + Photo + Barcode */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="meal-name" className="block text-sm font-medium text-gray-700 mb-1">
               {safeT(meals?.name, 'Name')}
             </label>
             <div className="flex gap-2">
               <input
+                id="meal-name"
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value); setIsEstimated(false); }}
@@ -360,10 +361,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
           {/* Macros Grid */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="meal-calories" className="block text-xs font-medium text-gray-500 mb-1">
                 {safeT(meals?.calories, 'Kalorien')} (kcal)
               </label>
               <input
+                id="meal-calories"
                 type="number"
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
@@ -376,10 +378,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="meal-protein" className="block text-xs font-medium text-gray-500 mb-1">
                 {safeT(meals?.protein, 'Protein')} (g)
               </label>
               <input
+                id="meal-protein"
                 type="number"
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
@@ -392,10 +395,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="meal-carbs" className="block text-xs font-medium text-gray-500 mb-1">
                 {safeT(meals?.carbs, 'Kohlenhydrate')} (g)
               </label>
               <input
+                id="meal-carbs"
                 type="number"
                 value={carbs}
                 onChange={(e) => setCarbs(e.target.value)}
@@ -408,10 +412,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="meal-fat" className="block text-xs font-medium text-gray-500 mb-1">
                 {safeT(meals?.fat, 'Fett')} (g)
               </label>
               <input
+                id="meal-fat"
                 type="number"
                 value={fat}
                 onChange={(e) => setFat(e.target.value)}
@@ -427,7 +432,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
           {/* Error */}
           {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
+            <p className="text-xs text-red-500 text-center" role="alert">{error}</p>
           )}
 
           {/* Submit */}

@@ -341,10 +341,11 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
 
           {/* Basal Temperature */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="cycle-basal-temp" className="block text-xs font-medium text-gray-500 mb-1">
               {label('basalTemp', de ? 'Basaltemperatur (°C)' : 'Basal temperature (°C)')}
             </label>
             <input
+              id="cycle-basal-temp"
               type="number"
               step="0.01"
               min="35.0"
@@ -352,14 +353,16 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
               value={basalTemp}
               onChange={(e) => setBasalTemp(e.target.value)}
               placeholder={de ? 'z.B. 36.50' : 'e.g. 36.50'}
+              aria-label={label('basalTemp', de ? 'Basaltemperatur' : 'Basal temperature')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-sm"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">{t.common.notes}</label>
+            <label htmlFor="cycle-notes" className="block text-xs font-medium text-gray-500 mb-1">{t.common.notes}</label>
             <input
+              id="cycle-notes"
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -368,7 +371,7 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
             />
           </div>
 
-          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          {error && <p className="text-xs text-red-500 text-center" role="alert">{error}</p>}
 
           <button type="submit" disabled={addLog.isPending}
             className="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-medium rounded-lg hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all">

@@ -11,7 +11,8 @@ import { useProfile } from '../../auth/hooks/useProfile';
 import { useLatestBloodWork } from '../hooks/useBloodWork';
 import { useBloodPressureLogs } from '../hooks/useBloodPressure';
 import { useMenstrualCycleLogs } from '../hooks/useMenstrualCycle';
-import { generateDoctorReport } from '../utils/generateDoctorReport';
+// Dynamic import: jsPDF (~800KB) only loaded when user clicks Generate
+const loadDoctorReport = () => import('../utils/generateDoctorReport');
 import type { Substance, BodyMeasurement } from '../../../types/health';
 import { supabase } from '../../../lib/supabase';
 
@@ -47,6 +48,7 @@ export function DoctorReportButton() {
         .order('date', { ascending: false })
         .limit(1);
 
+      const { generateDoctorReport } = await loadDoctorReport();
       generateDoctorReport({
         profile,
         latestBloodWork: latestBloodWork ?? null,

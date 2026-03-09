@@ -77,25 +77,29 @@ export function AddSleepDialog({ open, onClose }: Props) {
           {/* Bedtime + Wake time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="sleep-bedtime" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.sleep.bedtime}
               </label>
               <input
+                id="sleep-bedtime"
                 type="time"
                 value={bedtime}
                 onChange={(e) => setBedtime(e.target.value)}
+                aria-label={t.sleep.bedtime}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm text-center"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="sleep-waketime" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.sleep.wakeTime}
               </label>
               <input
+                id="sleep-waketime"
                 type="time"
                 value={wakeTime}
                 onChange={(e) => setWakeTime(e.target.value)}
+                aria-label={t.sleep.wakeTime}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm text-center"
                 required
               />
@@ -146,10 +150,11 @@ export function AddSleepDialog({ open, onClose }: Props) {
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="sleep-notes" className="block text-xs font-medium text-gray-500 mb-1">
               {t.common.notes}
             </label>
             <input
+              id="sleep-notes"
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -159,7 +164,7 @@ export function AddSleepDialog({ open, onClose }: Props) {
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
+            <p className="text-xs text-red-500 text-center" role="alert">{error}</p>
           )}
 
           <button

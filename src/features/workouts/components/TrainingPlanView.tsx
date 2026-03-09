@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles, BarChart3, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
-import { generateTrainingPlanPDF, generateTrainingLogPDF, fetchLastWorkoutsForPlan } from '../utils/generateTrainingPlanPDF';
+// Dynamic import: jsPDF (~800KB) only loaded when user clicks PDF export
+const loadTrainingPlanPDF = () => import('../utils/generateTrainingPlanPDF');
 import { useExerciseCatalog, findExerciseInCatalog } from '../hooks/useExerciseCatalog';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ShareTrainingPlanDialog } from './ShareTrainingPlanDialog';
@@ -204,10 +205,11 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
               {showPdfMenu && (
                 <div className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20 min-w-[180px]">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setIsExporting(true);
                       setShowPdfMenu(false);
                       try {
+                        const { generateTrainingPlanPDF } = await loadTrainingPlanPDF();
                         generateTrainingPlanPDF(plan, language);
                       } finally {
                         setIsExporting(false);
@@ -223,6 +225,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                       setIsExporting(true);
                       setShowPdfMenu(false);
                       try {
+                        const { generateTrainingLogPDF, fetchLastWorkoutsForPlan } = await loadTrainingPlanPDF();
                         // Fetch last workout data per day for Soll/Ist comparison
                         const dayNumbers = (plan.days ?? []).map(d => d.day_number);
                         const lastWorkouts = await fetchLastWorkoutsForPlan(plan.id, dayNumbers);
@@ -230,6 +233,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                       } catch (err) {
                         console.error('PDF generation failed:', err);
                         // Fallback: generate without last workout data
+                        const { generateTrainingLogPDF } = await loadTrainingPlanPDF();
                         generateTrainingLogPDF(plan, undefined, language);
                       } finally {
                         setIsExporting(false);

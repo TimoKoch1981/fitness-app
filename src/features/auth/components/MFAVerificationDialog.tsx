@@ -53,7 +53,9 @@ export function MFAVerificationDialog({ factorId, onSuccess, onCancel }: MFAVeri
           <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">{error}</div>
         )}
 
+        <label htmlFor="mfa-verify-code" className="sr-only">{mfa.enterCode || 'MFA Code'}</label>
         <input
+          id="mfa-verify-code"
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
@@ -62,6 +64,7 @@ export function MFAVerificationDialog({ factorId, onSuccess, onCancel }: MFAVeri
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
           onKeyDown={handleKeyDown}
           placeholder="000000"
+          aria-label={mfa.enterCode || '6-digit MFA code'}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-mono tracking-[0.5em] focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
           autoFocus
         />

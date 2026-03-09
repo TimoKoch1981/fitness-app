@@ -4,7 +4,7 @@
  * Used inside TrackingPage as one of 3 tracking tabs.
  */
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
@@ -14,8 +14,9 @@ import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestio
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanView } from './TrainingPlanView';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
-import { ProgressiveOverloadCharts } from './ProgressiveOverloadCharts';
-import { PeriodizationView } from './PeriodizationView';
+// Lazy-load heavy chart components (~350KB Recharts)
+const ProgressiveOverloadCharts = lazy(() => import('./ProgressiveOverloadCharts').then(m => ({ default: m.ProgressiveOverloadCharts })));
+const PeriodizationView = lazy(() => import('./PeriodizationView').then(m => ({ default: m.PeriodizationView })));
 import { DEFAULT_PLAN } from '../data/defaultPlan';
 import { today, formatDate } from '../../../lib/utils';
 
@@ -232,10 +233,14 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
         <WorkoutHistoryPage embedded />
       ) : activeSubTab === 'progress' ? (
         /* Progress Sub-Tab */
-        <ProgressiveOverloadCharts />
+        <Suspense fallback={<div className="h-64 bg-gray-50 rounded-xl animate-pulse" />}>
+          <ProgressiveOverloadCharts />
+        </Suspense>
       ) : (
         /* Periodization Sub-Tab */
-        <PeriodizationView />
+        <Suspense fallback={<div className="h-64 bg-gray-50 rounded-xl animate-pulse" />}>
+          <PeriodizationView />
+        </Suspense>
       )}
     </>
   );

@@ -93,14 +93,16 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
           {/* Primary: Weight + Body Fat */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="body-weight" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.body.weight} ({t.body.kg})
               </label>
               <input
+                id="body-weight"
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="85.0"
+                aria-label={`${t.body.weight} ${t.body.kg}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 min="30"
                 max="300"
@@ -109,14 +111,16 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="body-fat" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.body.bodyFat} ({t.body.percent})
               </label>
               <input
+                id="body-fat"
                 type="number"
                 value={bodyFat}
                 onChange={(e) => setBodyFat(e.target.value)}
                 placeholder="15.0"
+                aria-label={`${t.body.bodyFat} ${t.body.percent}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 min="3"
                 max="60"
@@ -128,14 +132,16 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
           {/* Secondary: Muscle Mass + Water */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="body-muscle" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.body.muscleMass} ({t.body.kg})
               </label>
               <input
+                id="body-muscle"
                 type="number"
                 value={muscleMass}
                 onChange={(e) => setMuscleMass(e.target.value)}
                 placeholder="40.0"
+                aria-label={`${t.body.muscleMass} ${t.body.kg}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 min="10"
                 max="100"
@@ -143,14 +149,16 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label htmlFor="body-water" className="block text-xs font-medium text-gray-500 mb-1">
                 {t.body.waterPct} ({t.body.percent})
               </label>
               <input
+                id="body-water"
                 type="number"
                 value={waterPct}
                 onChange={(e) => setWaterPct(e.target.value)}
                 placeholder="55.0"
+                aria-label={`${t.body.waterPct} ${t.body.percent}`}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
                 min="30"
                 max="80"
@@ -167,10 +175,12 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
             <div className="grid grid-cols-4 gap-2">
               <div>
                 <input
+                  id="body-waist"
                   type="number"
                   value={waist}
                   onChange={(e) => setWaist(e.target.value)}
                   placeholder={t.body.waist}
+                  aria-label={`${t.body.waist} ${t.body.cm}`}
                   className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
                   min="40"
                   max="200"
@@ -180,10 +190,12 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               </div>
               <div>
                 <input
+                  id="body-chest"
                   type="number"
                   value={chest}
                   onChange={(e) => setChest(e.target.value)}
                   placeholder={t.body.chest}
+                  aria-label={`${t.body.chest} ${t.body.cm}`}
                   className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
                   min="50"
                   max="200"
@@ -193,10 +205,12 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               </div>
               <div>
                 <input
+                  id="body-arm"
                   type="number"
                   value={arm}
                   onChange={(e) => setArm(e.target.value)}
                   placeholder={t.body.arm}
+                  aria-label={`${t.body.arm} ${t.body.cm}`}
                   className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
                   min="15"
                   max="60"
@@ -206,10 +220,12 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
               </div>
               <div>
                 <input
+                  id="body-leg"
                   type="number"
                   value={leg}
                   onChange={(e) => setLeg(e.target.value)}
                   placeholder={t.body.leg}
+                  aria-label={`${t.body.leg} ${t.body.cm}`}
                   className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
                   min="30"
                   max="100"
@@ -222,7 +238,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
 
           {/* Error */}
           {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
+            <p className="text-xs text-red-500 text-center" role="alert">{error}</p>
           )}
 
           {/* Submit */}

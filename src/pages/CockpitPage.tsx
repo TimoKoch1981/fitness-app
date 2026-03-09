@@ -5,7 +5,7 @@
  * from Reports, removes Quick Info Cards (no longer needed with 5-item nav).
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Flame,
@@ -52,10 +52,12 @@ import { useGuidedTour } from '../shared/hooks/useGuidedTour';
 
 // Report data hooks & chart components
 import { useMealsForRange, useWorkoutsForRange, useBodyTrend, getLastNDays } from '../features/reports/hooks/useReportData';
-import { CalorieChart } from '../features/reports/components/CalorieChart';
-import { WeightChart } from '../features/reports/components/WeightChart';
 import { ShareCardDialog } from '../features/share/components/ShareCardDialog';
-import { ProgressionCard } from '../features/reports/components/ProgressionCard';
+
+// Lazy-load heavy chart components (~350KB Recharts bundle)
+const CalorieChart = lazy(() => import('../features/reports/components/CalorieChart').then(m => ({ default: m.CalorieChart })));
+const WeightChart = lazy(() => import('../features/reports/components/WeightChart').then(m => ({ default: m.WeightChart })));
+const ProgressionCard = lazy(() => import('../features/reports/components/ProgressionCard').then(m => ({ default: m.ProgressionCard })));
 import type { ShareCardData } from '../features/share/components/ShareProgressCard';
 import { useCelebrations } from '../features/celebrations/CelebrationProvider';
 import { StreakDisplay } from '../features/gamification/components/StreakDisplay';
@@ -390,7 +392,9 @@ export function CockpitPage() {
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
               {t.cockpit.weeklyCalories}
             </p>
-            <CalorieChart data={weekMeals.data} calorieGoal={profileComplete ? caloriesGoal : 0} language={language} />
+            <Suspense fallback={<div className="h-48 bg-gray-50 rounded-xl animate-pulse" />}>
+              <CalorieChart data={weekMeals.data} calorieGoal={profileComplete ? caloriesGoal : 0} language={language} />
+            </Suspense>
           </div>
         )}
 
@@ -424,12 +428,16 @@ export function CockpitPage() {
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
               {t.cockpit.weightTrend}
             </p>
-            <WeightChart data={bodyTrendData.data} language={language} />
+            <Suspense fallback={<div className="h-48 bg-gray-50 rounded-xl animate-pulse" />}>
+              <WeightChart data={bodyTrendData.data} language={language} />
+            </Suspense>
           </div>
         )}
 
         {/* Progression / Forecast */}
-        <ProgressionCard language={language} />
+        <Suspense fallback={<div className="h-32 bg-gray-50 rounded-xl animate-pulse" />}>
+          <ProgressionCard language={language} />
+        </Suspense>
 
         {/* Key Metrics Card (BMI + FFMI) */}
         {latestBody?.bmi && (
