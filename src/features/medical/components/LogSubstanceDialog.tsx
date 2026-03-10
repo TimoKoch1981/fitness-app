@@ -115,9 +115,9 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                     </button>
                   );
                 })}
-                {/* PED disclaimer when PED substances exist */}
-                {substances.some(s => s.category === 'ped' || s.category === 'trt') && (
-                  <p className="text-[9px] text-amber-400 select-none mt-1">
+                {/* PED disclaimer — only when selected substance is PED/TRT */}
+                {selectedSubstance && (selectedSubstance.category === 'ped' || selectedSubstance.category === 'trt') && (
+                  <p className="text-[10px] text-amber-500 select-none mt-2">
                     ⚠ {t.medical.pedDisclaimer}
                   </p>
                 )}

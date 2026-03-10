@@ -148,7 +148,7 @@ export function ExerciseListBar() {
   const isDE = language === 'de';
   const { state, goToExercise, reorderExercises } = useActiveWorkout();
   const activeRef = useRef<HTMLDivElement>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const completedCount = useMemo(
     () => state.exercises.filter(e => e.sets.every(s => s.completed || s.skipped)).length,
@@ -194,14 +194,14 @@ export function ExerciseListBar() {
         onClick={() => setExpanded(!expanded)}
         className="w-full px-3 py-2 flex items-center justify-between"
       >
-        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider flex items-center gap-1">
-          <ChevronRight className={cn('h-3 w-3 transition-transform', expanded && 'rotate-90')} />
+        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
+          <ChevronRight className={cn('h-4 w-4 text-teal-500 transition-transform', expanded && 'rotate-90')} />
           {isDE ? 'Übungen' : 'Exercises'}
-          <span className="ml-1 text-gray-300 normal-case tracking-normal">
+          <span className="ml-1 text-[11px] text-gray-400 normal-case tracking-normal font-normal">
             — {isDE ? 'tippen zum Wechseln, ziehen zum Sortieren' : 'tap to switch, drag to reorder'}
           </span>
         </span>
-        <span className="text-[10px] text-gray-400">
+        <span className="text-xs font-semibold text-teal-600">
           {completedCount}/{state.exercises.length}
         </span>
       </button>

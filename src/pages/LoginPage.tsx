@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { useFeatureFlag } from '../lib/featureFlags/useFeatureFlag';
+import { MFAVerificationDialog } from '../features/auth/components/MFAVerificationDialog';
 
 export function LoginPage() {
   const { signIn, signInWithOAuth, resendConfirmation, user, loading } = useAuth();
@@ -22,9 +24,32 @@ export function LoginPage() {
   const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
   const [otpCode, setOtpCode] = useState('');
   const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [mfaPending, setMfaPending] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState('');
+  const appleOAuthEnabled = useFeatureFlag('apple_oauth');
 
   if (loading) return null;
-  if (user) return <Navigate to="/cockpit" replace />;
+  if (user && !mfaPending) return <Navigate to="/cockpit" replace />;
+
+  // MFA challenge dialog — shown after successful password login when TOTP is enrolled
+  if (mfaPending && mfaFactorId) {
+    return (
+      <MFAVerificationDialog
+        factorId={mfaFactorId}
+        onSuccess={() => {
+          // Session upgraded to aal2 → clear MFA state, let redirect happen
+          setMfaPending(false);
+          setMfaFactorId('');
+        }}
+        onCancel={async () => {
+          // User cancelled MFA → sign out to prevent aal1-only session
+          setMfaPending(false);
+          setMfaFactorId('');
+          await supabase.auth.signOut();
+        }}
+      />
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +66,22 @@ export function LoginPage() {
         } else {
           setError(error.message);
         }
+        return;
       }
+
+      // Check if user has MFA enrolled → require TOTP challenge
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData && aalData.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
+        // User needs MFA verification — find the TOTP factor
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const totpFactor = factorsData?.totp?.find(f => f.status === 'verified');
+        if (totpFactor) {
+          setMfaFactorId(totpFactor.id);
+          setMfaPending(true);
+          return;
+        }
+      }
+      // No MFA → normal redirect via AuthProvider
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login fehlgeschlagen');
     } finally {
@@ -206,17 +246,20 @@ export function LoginPage() {
               {oauthLoading === 'facebook' ? t.common.loading : (t.auth as Record<string, string>).signInWithFacebook || 'Mit Facebook anmelden'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleOAuthSignIn('apple')}
-              disabled={!!oauthLoading || submitting}
-              className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors disabled:opacity-50"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.12 4.45-3.74 4.25z"/>
-              </svg>
-              {oauthLoading === 'apple' ? t.common.loading : (t.auth as Record<string, string>).signInWithApple || 'Mit Apple anmelden'}
-            </button>
+            {/* Apple OAuth — hidden until Apple Developer Account is configured */}
+            {appleOAuthEnabled && (
+              <button
+                type="button"
+                onClick={() => handleOAuthSignIn('apple')}
+                disabled={!!oauthLoading || submitting}
+                className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.12 4.45-3.74 4.25z"/>
+                </svg>
+                {oauthLoading === 'apple' ? t.common.loading : (t.auth as Record<string, string>).signInWithApple || 'Mit Apple anmelden'}
+              </button>
+            )}
           </div>
 
           {/* Divider */}

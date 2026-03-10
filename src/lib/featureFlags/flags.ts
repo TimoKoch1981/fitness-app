@@ -54,6 +54,12 @@ export const DEFAULT_FLAGS: FeatureFlagConfig = {
     description: 'Offline mode for Progressive Web App',
     enabled: true,
   },
+  apple_oauth: {
+    id: 'apple_oauth',
+    name: 'Apple OAuth',
+    description: 'Sign in with Apple (requires Apple Developer Account)',
+    enabled: false,
+  },
   social_features: {
     id: 'social_features',
     name: 'Social Features',
