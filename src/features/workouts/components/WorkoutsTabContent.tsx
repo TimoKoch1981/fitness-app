@@ -4,7 +4,7 @@
  * Used inside TrackingPage as one of 3 tracking tabs.
  */
 
-import { useState, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
@@ -35,10 +35,12 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
   const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress' | 'periodization'>('today');
 
   // Apply forceTab from parent (U2: "Plan erstellen" → switch to plan tab)
-  if (forceTab && forceTab !== activeSubTab) {
-    setActiveSubTab(forceTab);
-    onForceTabApplied?.();
-  }
+  useEffect(() => {
+    if (forceTab && forceTab !== activeSubTab) {
+      setActiveSubTab(forceTab);
+      onForceTabApplied?.();
+    }
+  }, [forceTab]); // eslint-disable-line react-hooks/exhaustive-deps
   const buddySuggestions = usePageBuddySuggestions(
     activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
     language as 'de' | 'en',

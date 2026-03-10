@@ -31,7 +31,7 @@ export function WorkoutStartDialog({ open, onClose, onQuickLog, onCreatePlan }: 
 
   const handleFreeWorkout = () => {
     onClose();
-    navigate('/active-workout?mode=free');
+    navigate('/workout/active?mode=free');
   };
 
   const handleQuickLog = () => {

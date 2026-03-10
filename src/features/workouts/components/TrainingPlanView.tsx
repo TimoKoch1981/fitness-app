@@ -58,14 +58,18 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
     plan?.ai_supervised ? plan?.id : undefined,
   );
 
-  // Auto-trigger CalibrationWizard for uncalibrated plans
+  // Auto-trigger CalibrationWizard for uncalibrated plans (once per session per plan)
   useEffect(() => {
     if (
       plan &&
       plan.ai_supervised === true &&
       (!plan.review_config || !plan.review_config.calibration_done)
     ) {
-      setShowCalibration(true);
+      const key = `calibration_shown_${plan.id}`;
+      if (!sessionStorage.getItem(key)) {
+        setShowCalibration(true);
+        sessionStorage.setItem(key, '1');
+      }
     }
   }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
