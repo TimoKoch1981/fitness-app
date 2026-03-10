@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, Trash2, Dumbbell, Target, Download, FileText, ClipboardList, MessageCircle, Pencil, Share2, Play, Sparkles, BarChart3, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
@@ -57,6 +58,16 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
   const { data: recentWorkouts } = useRecentWorkoutsForPlan(
     plan?.ai_supervised ? plan?.id : undefined,
   );
+
+  // Invalidate plan data after PlanEditorDialog save (instead of full page reload)
+  const queryClient = useQueryClient();
+  const onPlanEditorSaved = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['training_plans'] });
+    queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
+    if (plan?.id) {
+      queryClient.invalidateQueries({ queryKey: ['training_plans', 'detail', plan.id] });
+    }
+  }, [queryClient, plan?.id]);
 
   // Auto-trigger CalibrationWizard for uncalibrated plans (once per session per plan)
   useEffect(() => {
@@ -353,7 +364,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
         <PlanEditorDialog
           day={editingDay}
           onClose={() => setEditingDay(null)}
-          onSaved={() => window.location.reload()}
+          onSaved={onPlanEditorSaved}
         />
       )}
 

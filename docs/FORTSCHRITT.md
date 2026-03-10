@@ -136,8 +136,28 @@
 | 12.69   | 2026-03-10 | F4+F5+U2: Adaptive Live-Tracker (Cardio), Volume Comparison, Plan-Button       | Erledigt   |
 | 12.70   | 2026-03-10 | Multi-Plan Management: Plan-Liste, Aktivierung, Duplizierung, Create-Dialog    | Erledigt   |
 | 12.71   | 2026-03-10 | Bugfixes B5+B7: CreatePlanDialog State-Reset + Error-Feedback, negative Zeitanzeige | Erledigt   |
+| 12.72   | 2026-03-10 | PlanEditor UX: Tab-Switch-Fix, DnD ganzer Block, Hoch/Runter-Pfeile               | Erledigt   |
 
 ---
+
+### 2026-03-10 - v12.72: PlanEditor UX — Tab-Switch-Fix, DnD-Verbesserung, Hoch/Runter-Pfeile
+
+**Fix 1: Tab-Switch nach Speichern** (TrainingPlanView.tsx)
+- `onSaved` Callback: `window.location.reload()` → `queryClient.invalidateQueries()` (training_plans, active, detail)
+- Dialog schliesst jetzt ohne Seitenwechsel — bleibt auf "Mein Plan" Tab statt auf "Heute" zu springen
+- React-State (activeSubTab) bleibt erhalten statt durch Reload auf Default zurueckgesetzt zu werden
+
+**Fix 2: Drag & Drop ganzer Uebungsblock** (PlanEditorDialog.tsx)
+- `{...attributes}` + `{...listeners}` vom Griff-Button auf die gesamte Zeile verschoben
+- `cursor-grab active:cursor-grabbing touch-none` auf der Zeile
+- `onClick + onPointerDown stopPropagation` auf ALLEN Inputs, Buttons und interaktiven Elementen — verhindert versehentliches Drag beim Editieren
+
+**Feature: Hoch/Runter-Pfeile** (PlanEditorDialog.tsx)
+- `ChevronUp` + `ChevronDown` (lucide-react) links neben jeder Uebung
+- Layout: ChevronUp / GripVertical / ChevronDown vertikal gestapelt
+- Erster Eintrag: Up-Pfeil disabled, Letzter: Down-Pfeil disabled
+- `handleMoveUp` / `handleMoveDown` Funktionen mit `arrayMove` + `markChanged()`
+- Pfeile nutzen `stopPropagation` um DnD nicht auszuloesen
 
 ### 2026-03-10 - v12.71: Bugfixes B5+B7 — CreatePlanDialog, TrainingPlanList
 

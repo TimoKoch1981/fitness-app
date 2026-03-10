@@ -26,7 +26,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { X, Plus, GripVertical, Trash2, Save, ChevronLeft } from 'lucide-react';
+import { X, Plus, GripVertical, Trash2, Save, ChevronLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { supabase } from '../../../lib/supabase';
 import { ExercisePicker } from './ExercisePicker';
@@ -106,6 +106,24 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
     setExercises((prev) =>
       prev.map((ex) => (ex._id === id ? { ...ex, [field]: value } : ex)),
     );
+    markChanged();
+  };
+
+  const handleMoveUp = (id: string) => {
+    setExercises((prev) => {
+      const idx = prev.findIndex((e) => e._id === id);
+      if (idx <= 0) return prev;
+      return arrayMove(prev, idx, idx - 1);
+    });
+    markChanged();
+  };
+
+  const handleMoveDown = (id: string) => {
+    setExercises((prev) => {
+      const idx = prev.findIndex((e) => e._id === id);
+      if (idx < 0 || idx >= prev.length - 1) return prev;
+      return arrayMove(prev, idx, idx + 1);
+    });
     markChanged();
   };
 
@@ -226,9 +244,12 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
                     key={ex._id}
                     exercise={ex}
                     index={idx}
+                    total={exercises.length}
                     isDE={isDE}
                     onUpdate={handleUpdate}
                     onRemove={handleRemove}
+                    onMoveUp={handleMoveUp}
+                    onMoveDown={handleMoveDown}
                   />
                 ))}
               </div>
@@ -277,12 +298,15 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
 interface SortableExerciseRowProps {
   exercise: EditablePlanExercise;
   index: number;
+  total: number;
   isDE: boolean;
   onUpdate: (id: string, field: keyof PlanExercise, value: string | number | undefined) => void;
   onRemove: (id: string) => void;
+  onMoveUp: (id: string) => void;
+  onMoveDown: (id: string) => void;
 }
 
-function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: SortableExerciseRowProps) {
+function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove, onMoveUp, onMoveDown }: SortableExerciseRowProps) {
   const {
     attributes,
     listeners,
@@ -305,18 +329,32 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-2 ${
+      {...attributes}
+      {...listeners}
+      className={`flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-2 cursor-grab active:cursor-grabbing touch-none ${
         isDragging ? 'shadow-lg' : ''
       }`}
     >
-      {/* Drag handle */}
-      <button
-        {...attributes}
-        {...listeners}
-        className="p-1 text-gray-300 hover:text-gray-400 cursor-grab active:cursor-grabbing touch-none"
-      >
-        <GripVertical className="h-4 w-4" />
-      </button>
+      {/* Reorder arrows + grip */}
+      <div className="flex flex-col items-center flex-shrink-0 -my-1">
+        <button
+          onClick={(e) => { e.stopPropagation(); onMoveUp(exercise._id); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          disabled={index === 0}
+          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+        >
+          <ChevronUp className="h-3.5 w-3.5" />
+        </button>
+        <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+        <button
+          onClick={(e) => { e.stopPropagation(); onMoveDown(exercise._id); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          disabled={index === total - 1}
+          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {/* Index */}
       <span className="text-xs text-gray-300 w-4 text-right flex-shrink-0">
@@ -327,8 +365,10 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
       <input
         type="text"
         value={exercise.name}
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         onChange={(e) => onUpdate(exercise._id, 'name', e.target.value)}
-        className="flex-1 min-w-0 text-sm font-medium text-gray-800 bg-transparent border-none outline-none focus:ring-0 px-1"
+        className="flex-1 min-w-0 text-sm font-medium text-gray-800 bg-transparent border-none outline-none focus:ring-0 px-1 cursor-text"
         placeholder={isDE ? 'Übungsname' : 'Exercise name'}
       />
 
@@ -339,16 +379,20 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
             type="number"
             inputMode="numeric"
             value={exercise.sets ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'sets', e.target.value ? parseInt(e.target.value) : undefined)}
-            className="w-8 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1"
+            className="w-8 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="3"
           />
           <span className="text-xs text-gray-300">×</span>
           <input
             type="text"
             value={exercise.reps ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'reps', e.target.value || undefined)}
-            className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1"
+            className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="8-10"
           />
           <input
@@ -356,8 +400,10 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
             inputMode="decimal"
             step="0.1"
             value={exercise.weight_kg ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
-            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1"
+            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="kg"
           />
         </div>
@@ -366,15 +412,19 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
           <input
             type="text"
             value={exercise.duration_minutes ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'duration_minutes', e.target.value ? parseInt(e.target.value) : undefined)}
-            className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1"
+            className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="min"
           />
           <input
             type="text"
             value={exercise.intensity ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'intensity', e.target.value || undefined)}
-            className="w-14 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1"
+            className="w-14 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder={isDE ? 'Intensität' : 'Intensity'}
           />
         </div>
@@ -382,7 +432,8 @@ function SortableExerciseRow({ exercise, index, isDE, onUpdate, onRemove }: Sort
 
       {/* Delete */}
       <button
-        onClick={() => onRemove(exercise._id)}
+        onClick={(e) => { e.stopPropagation(); onRemove(exercise._id); }}
+        onPointerDown={(e) => e.stopPropagation()}
         className="p-1 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
       >
         <Trash2 className="h-3.5 w-3.5" />

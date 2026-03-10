@@ -1,7 +1,7 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-10, v12.71
-> **Letzte Konsolidierung:** Bugfixes B5+B7 (v12.71)
+> **Stand:** 2026-03-10, v12.72
+> **Letzte Konsolidierung:** PlanEditor UX (v12.72)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
@@ -55,6 +55,11 @@
 
 <details>
 <summary>Alle abgeschlossenen Items aufklappen</summary>
+
+### PlanEditor UX v12.72 ✅
+- [x] **Tab-Switch-Fix** — PlanEditorDialog `onSaved` nutzt `queryClient.invalidateQueries()` statt `window.location.reload()`. Bleibt auf "Mein Plan" Tab statt auf "Heute" zu springen
+- [x] **DnD ganzer Block** — `{...attributes}` + `{...listeners}` auf gesamte Zeile verschoben. stopPropagation auf allen Inputs/Buttons. Cursor-grab Styling
+- [x] **Hoch/Runter-Pfeile** — ChevronUp/ChevronDown links neben jeder Uebung fuer Klick-Reorder. Erster/Letzter disabled. arrayMove + markChanged
 
 ### Multi-Plan Management v12.70 ✅
 - [x] **TrainingPlanList** — Kompakte Card-Liste aller Plaene mit Aktiv-Badge (teal), Duplizieren/Loeschen-Buttons, Delete-Bestaetigung mit Active-Plan-Warnung
