@@ -53,6 +53,11 @@ export interface SetResult {
   target_weight_kg?: number;  // from plan
   actual_reps?: number;       // what the user actually did
   actual_weight_kg?: number;  // what the user actually used
+  // Adaptive fields for cardio/flexibility exercises (Phase D.2)
+  target_duration_minutes?: number;  // from plan (cardio/flex)
+  target_distance_km?: number;       // from plan (cardio)
+  actual_duration_minutes?: number;  // what the user actually did (cardio/flex)
+  actual_distance_km?: number;       // what the user actually did (cardio)
   completed: boolean;
   skipped?: boolean;
   notes?: string;

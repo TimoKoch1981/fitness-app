@@ -35,7 +35,7 @@ interface SetBySetTrackerProps {
   exerciseIndex: number;
   currentSetIndex: number;
   lastExercise?: WorkoutExerciseResult;
-  onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => void;
+  onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => void;
   onSkipSet: (exerciseIdx: number, setIdx: number) => void;
 }
 
@@ -54,6 +54,9 @@ export function SetBySetTracker({
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
 
+  // Adaptive field detection (Phase D.2)
+  const isCardio = exercise.exercise_type === 'cardio';
+
   /** Cycle the current set's tag */
   const cycleCurrentTag = useCallback(() => {
     const currentTag = currentSet?.set_tag ?? 'normal';
@@ -68,16 +71,31 @@ export function SetBySetTracker({
   const totalSets = exercise.sets.length;
   const completedCount = exercise.sets.filter(s => s.completed).length;
 
+  // Strength fields
   const [reps, setReps] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
+  // Cardio fields (Phase D.2)
+  const [duration, setDuration] = useState<string>('');
+  const [distance, setDistance] = useState<string>('');
 
-  // Auto-fill weight: plan target > PREVIOUS > empty (industry standard)
+  // Auto-fill: plan target > PREVIOUS > empty (industry standard)
   useEffect(() => {
-    setReps('');
-    const targetWeight = currentSet?.target_weight_kg;
-    const prevWeight = lastSet?.actual_weight_kg;
-    setWeight((targetWeight ?? prevWeight)?.toString() ?? '');
-  }, [currentSetIndex, currentSet?.target_weight_kg, lastSet?.actual_weight_kg]);
+    if (isCardio) {
+      setDuration('');
+      setDistance('');
+      const targetDuration = currentSet?.target_duration_minutes;
+      const prevDuration = lastSet?.actual_duration_minutes;
+      setDuration((targetDuration ?? prevDuration)?.toString() ?? '');
+      const targetDistance = currentSet?.target_distance_km;
+      const prevDistance = lastSet?.actual_distance_km;
+      setDistance((targetDistance ?? prevDistance)?.toString() ?? '');
+    } else {
+      setReps('');
+      const targetWeight = currentSet?.target_weight_kg;
+      const prevWeight = lastSet?.actual_weight_kg;
+      setWeight((targetWeight ?? prevWeight)?.toString() ?? '');
+    }
+  }, [currentSetIndex, isCardio, currentSet?.target_weight_kg, currentSet?.target_duration_minutes, currentSet?.target_distance_km, lastSet?.actual_weight_kg, lastSet?.actual_duration_minutes, lastSet?.actual_distance_km]);
 
   if (!currentSet) return null;
 
@@ -88,9 +106,15 @@ export function SetBySetTracker({
   };
 
   const handleDone = () => {
-    const actualReps = reps ? parseInt(reps) : parseTargetReps(currentSet.target_reps);
-    const actualWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? lastSet?.actual_weight_kg);
-    onLogSet(exerciseIndex, currentSetIndex, actualReps, actualWeight);
+    if (isCardio) {
+      const actualDuration = duration ? parseFloat(duration) : (currentSet.target_duration_minutes ?? 0);
+      const actualDistance = distance ? parseFloat(distance) : (currentSet.target_distance_km);
+      onLogSet(exerciseIndex, currentSetIndex, 1, undefined, undefined, actualDuration, actualDistance);
+    } else {
+      const actualReps = reps ? parseInt(reps) : parseTargetReps(currentSet.target_reps);
+      const actualWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? lastSet?.actual_weight_kg);
+      onLogSet(exerciseIndex, currentSetIndex, actualReps, actualWeight);
+    }
   };
 
   const allDone = exercise.sets.every(s => s.completed || s.skipped);
@@ -153,18 +177,38 @@ export function SetBySetTracker({
         })()}
       </div>
 
-      {/* Target */}
+      {/* Target — adaptive for cardio vs strength */}
       <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 text-center">
         <p className="text-xs text-teal-500 uppercase tracking-wider mb-1.5 font-medium">
           {isDE ? 'Ziel' : 'Target'}
         </p>
-        <p className="text-3xl font-bold text-teal-700">
-          {currentSet.target_reps} <span className="text-xl font-semibold">{isDE ? 'Wdh' : 'Reps'}</span>
-        </p>
-        {currentSet.target_weight_kg != null && (
-          <p className="text-xl font-semibold text-teal-600 mt-1">
-            @ {currentSet.target_weight_kg} kg
-          </p>
+        {isCardio ? (
+          <>
+            {currentSet.target_duration_minutes != null && (
+              <p className="text-3xl font-bold text-teal-700">
+                {currentSet.target_duration_minutes} <span className="text-xl font-semibold">Min</span>
+              </p>
+            )}
+            {currentSet.target_distance_km != null && (
+              <p className="text-xl font-semibold text-teal-600 mt-1">
+                {currentSet.target_distance_km} km
+              </p>
+            )}
+            {currentSet.target_duration_minutes == null && currentSet.target_distance_km == null && (
+              <p className="text-lg text-teal-500">{isDE ? 'Freies Cardio' : 'Free Cardio'}</p>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-3xl font-bold text-teal-700">
+              {currentSet.target_reps} <span className="text-xl font-semibold">{isDE ? 'Wdh' : 'Reps'}</span>
+            </p>
+            {currentSet.target_weight_kg != null && (
+              <p className="text-xl font-semibold text-teal-600 mt-1">
+                @ {currentSet.target_weight_kg} kg
+              </p>
+            )}
+          </>
         )}
       </div>
 
@@ -180,55 +224,107 @@ export function SetBySetTracker({
         </div>
       )}
 
-      {/* PREVIOUS — Last session data (Strong/Hevy format) */}
+      {/* PREVIOUS — Last session data (Strong/Hevy format), adaptive for cardio */}
       {lastSet && lastSet.completed && (
         <div className="bg-gray-50 border border-gray-100 rounded-lg px-4 py-2 text-center">
           <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
             {isDE ? 'Vorheriges' : 'Previous'}
           </p>
           <p className="text-sm font-medium text-gray-500 mt-0.5">
-            {lastSet.actual_weight_kg != null ? `${lastSet.actual_weight_kg} kg` : '—'}
-            <span className="mx-1.5 text-gray-300">×</span>
-            {lastSet.actual_reps ?? '—'} {isDE ? 'Wdh' : 'reps'}
+            {isCardio ? (
+              <>
+                {lastSet.actual_duration_minutes != null ? `${lastSet.actual_duration_minutes} Min` : '—'}
+                {lastSet.actual_distance_km != null && (
+                  <><span className="mx-1.5 text-gray-300">·</span>{lastSet.actual_distance_km} km</>
+                )}
+              </>
+            ) : (
+              <>
+                {lastSet.actual_weight_kg != null ? `${lastSet.actual_weight_kg} kg` : '—'}
+                <span className="mx-1.5 text-gray-300">×</span>
+                {lastSet.actual_reps ?? '—'} {isDE ? 'Wdh' : 'reps'}
+              </>
+            )}
           </p>
         </div>
       )}
 
-      {/* Input Fields */}
+      {/* Input Fields — adaptive for cardio (Duration+Distance) vs strength (Reps+Weight) */}
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-gray-500 mb-1.5 block font-medium">
-            {isDE ? 'Wiederholungen' : 'Reps'}
-          </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={reps}
-            onChange={e => setReps(e.target.value)}
-            placeholder={currentSet.target_reps}
-            className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
-          />
-          <p className="text-[10px] text-gray-400 mt-1 text-center">
-            {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
-          </p>
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 mb-1.5 block font-medium">
-            {isDE ? 'Gewicht (kg)' : 'Weight (kg)'}
-          </label>
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            value={weight}
-            onChange={e => setWeight(e.target.value)}
-            placeholder={currentSet.target_weight_kg?.toString() ?? '-'}
-            className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
-          />
-          <p className="text-[10px] text-gray-400 mt-1 text-center">
-            {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
-          </p>
-        </div>
+        {isCardio ? (
+          <>
+            <div>
+              <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                {isDE ? 'Dauer (Min)' : 'Duration (min)'}
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
+                placeholder={currentSet.target_duration_minutes?.toString() ?? '-'}
+                className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 text-center">
+                {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                {isDE ? 'Distanz (km)' : 'Distance (km)'}
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                value={distance}
+                onChange={e => setDistance(e.target.value)}
+                placeholder={currentSet.target_distance_km?.toString() ?? '-'}
+                className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 text-center">
+                {isDE ? 'Optional' : 'Optional'}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                {isDE ? 'Wiederholungen' : 'Reps'}
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={reps}
+                onChange={e => setReps(e.target.value)}
+                placeholder={currentSet.target_reps}
+                className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 text-center">
+                {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                {isDE ? 'Gewicht (kg)' : 'Weight (kg)'}
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                value={weight}
+                onChange={e => setWeight(e.target.value)}
+                placeholder={currentSet.target_weight_kg?.toString() ?? '-'}
+                className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 text-center">
+                {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Info hint (only for first set) */}
@@ -236,9 +332,13 @@ export function SetBySetTracker({
         <div className="flex items-start gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
           <Info className="h-3.5 w-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
           <p className="text-[11px] text-blue-500 leading-relaxed">
-            {isDE
-              ? 'Trage deine Werte ein und drücke „Satz fertig". Leere Felder übernehmen automatisch den Zielwert.'
-              : 'Enter your values and press "Set Done". Empty fields will use the target value automatically.'}
+            {isCardio
+              ? (isDE
+                ? 'Trage Dauer und optional Distanz ein. Leere Felder übernehmen den Zielwert.'
+                : 'Enter duration and optionally distance. Empty fields will use the target value.')
+              : (isDE
+                ? 'Trage deine Werte ein und drücke „Satz fertig". Leere Felder übernehmen automatisch den Zielwert.'
+                : 'Enter your values and press "Set Done". Empty fields will use the target value automatically.')}
           </p>
         </div>
       )}

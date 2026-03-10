@@ -64,7 +64,7 @@ type Action =
   | { type: 'START_FREE_SESSION'; name?: string }
   | { type: 'LOG_WARMUP'; warmup: WarmupResult }
   | { type: 'SKIP_WARMUP' }
-  | { type: 'LOG_SET'; exerciseIndex: number; setIndex: number; actualReps: number; actualWeightKg?: number; notes?: string }
+  | { type: 'LOG_SET'; exerciseIndex: number; setIndex: number; actualReps: number; actualWeightKg?: number; actualDurationMinutes?: number; actualDistanceKm?: number; notes?: string }
   | { type: 'SKIP_SET'; exerciseIndex: number; setIndex: number }
   | { type: 'COMPLETE_EXERCISE'; exerciseIndex: number }
   | { type: 'NEXT_EXERCISE' }
@@ -110,10 +110,13 @@ export function buildExercisesFromPlan(
 
     const sets: SetResult[] = Array.from({ length: numSets }, (_, setIdx) => ({
       set_number: setIdx + 1,
-      target_reps: pe.reps ?? '10',
-      target_weight_kg: pe.weight_kg,
+      target_reps: pe.reps ?? (isTimedType ? '1' : '10'),
+      target_weight_kg: isTimedType ? undefined : pe.weight_kg,
       actual_reps: undefined,
-      actual_weight_kg: pe.weight_kg, // pre-fill with target
+      actual_weight_kg: isTimedType ? undefined : pe.weight_kg, // pre-fill with target (strength only)
+      // Adaptive fields for cardio/flexibility (Phase D.2)
+      target_duration_minutes: isTimedType ? pe.duration_minutes : undefined,
+      target_distance_km: pe.exercise_type === 'cardio' ? pe.distance_km : undefined,
       completed: false,
       skipped: false,
     }));
@@ -199,6 +202,8 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         ...sets[action.setIndex],
         actual_reps: action.actualReps,
         actual_weight_kg: action.actualWeightKg ?? sets[action.setIndex].target_weight_kg,
+        actual_duration_minutes: action.actualDurationMinutes,
+        actual_distance_km: action.actualDistanceKm,
         completed: true,
         skipped: false,
         notes: action.notes,
@@ -447,7 +452,7 @@ interface ActiveWorkoutContextValue {
   startFreeSession: (name?: string) => void;
   logWarmup: (warmup: WarmupResult) => void;
   skipWarmup: () => void;
-  logSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => void;
+  logSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => void;
   skipSet: (exerciseIdx: number, setIdx: number) => void;
   nextExercise: () => void;
   prevExercise: () => void;
@@ -570,8 +575,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
   const logWarmup = useCallback((warmup: WarmupResult) => dispatch({ type: 'LOG_WARMUP', warmup }), []);
   const skipWarmup = useCallback(() => dispatch({ type: 'SKIP_WARMUP' }), []);
-  const logSet = useCallback((exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => {
-    dispatch({ type: 'LOG_SET', exerciseIndex: exerciseIdx, setIndex: setIdx, actualReps: reps, actualWeightKg: weightKg, notes });
+  const logSet = useCallback((exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => {
+    dispatch({ type: 'LOG_SET', exerciseIndex: exerciseIdx, setIndex: setIdx, actualReps: reps, actualWeightKg: weightKg, actualDurationMinutes: durationMinutes, actualDistanceKm: distanceKm, notes });
   }, []);
   const skipSet = useCallback((exerciseIdx: number, setIdx: number) => dispatch({ type: 'SKIP_SET', exerciseIndex: exerciseIdx, setIndex: setIdx }), []);
   const nextExercise = useCallback(() => dispatch({ type: 'NEXT_EXERCISE' }), []);

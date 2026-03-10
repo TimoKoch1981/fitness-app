@@ -24,11 +24,21 @@ interface WorkoutsTabContentProps {
   showAddDialog: boolean;
   onOpenAddDialog: () => void;
   onCloseAddDialog: () => void;
+  /** Switch to a specific sub-tab externally (e.g., "plan" from WorkoutStartDialog U2) */
+  forceTab?: 'today' | 'plan' | 'history' | 'progress' | 'periodization' | null;
+  /** Called after forceTab has been applied so parent can clear it */
+  onForceTabApplied?: () => void;
 }
 
-export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: WorkoutsTabContentProps) {
+export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog, forceTab, onForceTabApplied }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
   const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress' | 'periodization'>('today');
+
+  // Apply forceTab from parent (U2: "Plan erstellen" → switch to plan tab)
+  if (forceTab && forceTab !== activeSubTab) {
+    setActiveSubTab(forceTab);
+    onForceTabApplied?.();
+  }
   const buddySuggestions = usePageBuddySuggestions(
     activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
     language as 'de' | 'en',

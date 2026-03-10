@@ -87,15 +87,16 @@ export function ExerciseTracker() {
   // Use AI suggestion if no explicit rest_seconds on exercise
   const effectiveRestSeconds = exercise.rest_seconds ?? restSuggestion.restSeconds;
 
-  // Detect timed exercises: cardio, flexibility, or exercises with duration but no weight/reps
+  // Detect exercise categories for adaptive UI (Phase D.2)
+  const isCardio = exercise.exercise_type === 'cardio';
+  // Timed exercises use ExerciseTimer (flexibility only; cardio uses set trackers with Duration+Distance)
   const isTimedExercise = (
-    exercise.exercise_type === 'cardio' ||
     exercise.exercise_type === 'flexibility' ||
-    (exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
+    (!isCardio && exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
   );
 
-  const handleLogSetAndAdvance = (exIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => {
-    logSet(exIdx, setIdx, reps, weightKg, notes);
+  const handleLogSetAndAdvance = (exIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => {
+    logSet(exIdx, setIdx, reps, weightKg, notes, durationMinutes, distanceKm);
 
     // RIR feedback: After first set (setIdx===0) → show dialog if conditions met
     if (setIdx === 0 && shouldShowRIR(exIdx)) {
@@ -206,8 +207,19 @@ export function ExerciseTracker() {
           </div>
         </div>
 
-        {/* Rest seconds hint */}
-        {exercise.sets[0]?.target_weight_kg != null && (
+        {/* Exercise info hint — adaptive for cardio vs strength */}
+        {isCardio ? (
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+            <span>{exercise.sets.length} {exercise.sets.length === 1 ? (isDE ? 'Intervall' : 'Interval') : (isDE ? 'Intervalle' : 'Intervals')}</span>
+            {exercise.duration_minutes != null && (
+              <span>{exercise.duration_minutes} Min</span>
+            )}
+            {exercise.distance_km != null && (
+              <span>{exercise.distance_km} km</span>
+            )}
+            {exercise.pace && <span>{exercise.pace}</span>}
+          </div>
+        ) : exercise.sets[0]?.target_weight_kg != null && (
           <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
             <span>{exercise.sets.length} {isDE ? 'Sätze' : 'Sets'}</span>
             <span>{exercise.sets[0].target_reps} {isDE ? 'Wdh' : 'Reps'}</span>

@@ -1,15 +1,16 @@
 /**
- * WorkoutStartDialog — Dual-entry dialog for starting a workout.
+ * WorkoutStartDialog — Triple-entry dialog for starting a workout.
  *
- * Two primary options:
+ * Three options:
  * 1. "Freies Training" → Navigate to ActiveWorkoutPage in free mode
  * 2. "Training loggen" → Open AddWorkoutDialog (quick-log for completed workouts)
+ * 3. "Plan erstellen" → Switch to Plan tab for plan creation (U2)
  *
- * Design follows industry standard (Strong, Hevy): empty-session start vs quick log.
+ * Design follows industry standard (Strong, Hevy): empty-session start vs quick log vs plan.
  */
 
 import { useNavigate } from 'react-router-dom';
-import { X, ClipboardList, Play } from 'lucide-react';
+import { X, ClipboardList, Play, BookmarkPlus } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 
 interface WorkoutStartDialogProps {
@@ -17,9 +18,11 @@ interface WorkoutStartDialogProps {
   onClose: () => void;
   /** Called when user selects "Quick-Log" — parent opens AddWorkoutDialog */
   onQuickLog: () => void;
+  /** Called when user selects "Plan erstellen" — parent switches to Plan tab (U2) */
+  onCreatePlan?: () => void;
 }
 
-export function WorkoutStartDialog({ open, onClose, onQuickLog }: WorkoutStartDialogProps) {
+export function WorkoutStartDialog({ open, onClose, onQuickLog, onCreatePlan }: WorkoutStartDialogProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
   const navigate = useNavigate();
@@ -34,6 +37,11 @@ export function WorkoutStartDialog({ open, onClose, onQuickLog }: WorkoutStartDi
   const handleQuickLog = () => {
     onClose();
     onQuickLog();
+  };
+
+  const handleCreatePlan = () => {
+    onClose();
+    onCreatePlan?.();
   };
 
   return (
@@ -92,12 +100,27 @@ export function WorkoutStartDialog({ open, onClose, onQuickLog }: WorkoutStartDi
             </div>
           </button>
 
-          {/* Hint */}
-          <p className="text-[10px] text-gray-400 text-center pt-1">
-            {isDE
-              ? 'Plan-basierte Trainings starten über den "Plan"-Tab'
-              : 'Plan-based workouts start from the "Plan" tab'}
-          </p>
+          {/* Tertiary: Create Plan (U2) */}
+          {onCreatePlan && (
+            <button
+              onClick={handleCreatePlan}
+              className="w-full flex items-center gap-4 p-4 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 hover:border-indigo-300 transition-colors text-left group"
+            >
+              <div className="w-12 h-12 bg-indigo-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-300 transition-colors">
+                <BookmarkPlus className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900">
+                  {isDE ? 'Trainingsplan erstellen' : 'Create Training Plan'}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {isDE
+                    ? 'Neuen Plan mit Übungen zusammenstellen'
+                    : 'Build a new plan with exercises'}
+                </p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -21,13 +21,14 @@ import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useSaveWorkoutSession } from '../hooks/useSaveWorkoutSession';
 import { useAddTrainingPlan } from '../hooks/useTrainingPlans';
+import { useRecentCompletedWorkouts } from '../hooks/useLastExerciseData';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { PostSessionFeedback } from './PostSessionFeedback';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { ShareButton } from '../../../shared/components/ShareButton';
 import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
-import type { SetTag } from '../../../types/health';
+import type { SetTag, WorkoutExerciseResult } from '../../../types/health';
 
 /** Tag display config (matches SetBySetTracker/ExerciseOverviewTracker) */
 const TAG_CONFIG: Record<SetTag, { letter: string; bg: string; text: string }> = {
@@ -98,8 +99,57 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
       }
     }
 
-    return { durationMin, completed, skipped, additions, totalSets, warmupSets, calories, prs };
+    // F5: Total Volume = Σ (reps × weight) for working sets (exclude warmup, cardio)
+    const totalVolume = completed.reduce((vol, ex) => {
+      if (ex.exercise_type === 'cardio') return vol; // cardio has no volume
+      return vol + ex.sets
+        .filter(s => s.completed && s.set_tag !== 'warmup')
+        .reduce((setVol, s) => setVol + ((s.actual_reps ?? 0) * (s.actual_weight_kg ?? 0)), 0);
+    }, 0);
+
+    return { durationMin, completed, skipped, additions, totalSets, warmupSets, calories, prs, totalVolume };
   }, [state, weightKg]);
+
+  // F5: Volume comparison — find last matching workout
+  const { data: recentWorkouts } = useRecentCompletedWorkouts();
+  const volumeComparison = useMemo(() => {
+    if (!recentWorkouts || stats.totalVolume === 0) return null;
+
+    // Helper: calculate volume for a workout's exercises
+    const calcVolume = (exercises: WorkoutExerciseResult[]) =>
+      exercises.reduce((vol, ex) => {
+        if (ex.exercise_type === 'cardio' || ex.skipped) return vol;
+        return vol + ex.sets
+          .filter(s => s.completed && s.set_tag !== 'warmup')
+          .reduce((sv, s) => sv + ((s.actual_reps ?? 0) * (s.actual_weight_kg ?? 0)), 0);
+      }, 0);
+
+    // Find best match: same plan_day_id, or highest exercise name overlap
+    let bestMatch: { volume: number; date: string } | null = null;
+
+    for (const w of recentWorkouts) {
+      const vol = calcVolume(w.session_exercises);
+      if (vol === 0) continue;
+
+      // Match by exercise name overlap (>50%)
+      const currentNames = new Set(state.exercises.filter(e => !e.skipped).map(e => e.name.toLowerCase()));
+      const prevNames = new Set(w.session_exercises.filter(e => !e.skipped).map(e => e.name.toLowerCase()));
+      const overlap = [...currentNames].filter(n => prevNames.has(n)).length;
+      const overlapRatio = currentNames.size > 0 ? overlap / currentNames.size : 0;
+
+      if (overlapRatio >= 0.5) {
+        bestMatch = { volume: vol, date: w.date };
+        break; // First (most recent) match wins
+      }
+    }
+
+    if (!bestMatch) return null;
+
+    const delta = stats.totalVolume - bestMatch.volume;
+    const deltaPercent = bestMatch.volume > 0 ? Math.round((delta / bestMatch.volume) * 100) : 0;
+
+    return { prevVolume: bestMatch.volume, delta, deltaPercent, prevDate: bestMatch.date };
+  }, [recentWorkouts, stats.totalVolume, state.exercises]);
 
   // Trigger celebrations for PRs when summary is shown
   useEffect(() => {
@@ -198,8 +248,8 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     onClose();
   };
 
-  // Inline editing: update a set's actual values
-  const updateSetValue = useCallback((exIdx: number, setIdx: number, field: 'reps' | 'weight', value: string) => {
+  // Inline editing: update a set's actual values (adaptive for cardio)
+  const updateSetValue = useCallback((exIdx: number, setIdx: number, field: 'reps' | 'weight' | 'duration' | 'distance', value: string) => {
     const exercises = [...state.exercises];
     const ex = { ...exercises[exIdx] };
     const sets = [...ex.sets];
@@ -207,8 +257,12 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
 
     if (field === 'reps') {
       set.actual_reps = value ? parseInt(value) : undefined;
-    } else {
+    } else if (field === 'weight') {
       set.actual_weight_kg = value ? parseFloat(value) : undefined;
+    } else if (field === 'duration') {
+      set.actual_duration_minutes = value ? parseFloat(value) : undefined;
+    } else if (field === 'distance') {
+      set.actual_distance_km = value ? parseFloat(value) : undefined;
     }
 
     sets[setIdx] = set;
@@ -252,6 +306,46 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           </p>
         </div>
       </div>
+
+      {/* F5: Volume Card with comparison */}
+      {stats.totalVolume > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-medium">
+                {isDE ? 'Gesamtvolumen' : 'Total Volume'}
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-0.5">
+                {Math.round(stats.totalVolume).toLocaleString()} kg
+              </p>
+            </div>
+            {volumeComparison && (
+              <div className={`text-right px-3 py-1.5 rounded-lg ${
+                volumeComparison.delta > 0
+                  ? 'bg-green-50'
+                  : volumeComparison.delta < 0
+                    ? 'bg-red-50'
+                    : 'bg-gray-50'
+              }`}>
+                <p className={`text-sm font-bold ${
+                  volumeComparison.delta > 0
+                    ? 'text-green-600'
+                    : volumeComparison.delta < 0
+                      ? 'text-red-500'
+                      : 'text-gray-500'
+                }`}>
+                  {volumeComparison.delta > 0 ? '+' : ''}{Math.round(volumeComparison.delta).toLocaleString()} kg
+                </p>
+                <p className={`text-[10px] ${
+                  volumeComparison.delta > 0 ? 'text-green-500' : volumeComparison.delta < 0 ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                  {volumeComparison.deltaPercent > 0 ? '+' : ''}{volumeComparison.deltaPercent}% {isDE ? 'vs. letztes Mal' : 'vs. last time'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Warmup */}
       {state.warmup && (
@@ -310,17 +404,27 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           const completedSets = ex.sets.filter(s => s.completed);
           // Exclude warmup sets from summary stats (industry standard)
           const workingSets = completedSets.filter(s => s.set_tag !== 'warmup');
-          const avgReps = workingSets.length > 0
+          const exIsCardio = ex.exercise_type === 'cardio';
+          const avgReps = !exIsCardio && workingSets.length > 0
             ? Math.round(workingSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / workingSets.length)
             : 0;
-          const maxWeight = workingSets.length > 0
+          const maxWeight = !exIsCardio && workingSets.length > 0
             ? Math.max(...workingSets.map(s => s.actual_weight_kg ?? 0))
             : 0;
+          // Cardio summary: total duration + total distance
+          const totalDuration = exIsCardio
+            ? workingSets.reduce((s, set) => s + (set.actual_duration_minutes ?? 0), 0)
+            : 0;
+          const totalDistance = exIsCardio
+            ? workingSets.reduce((s, set) => s + (set.actual_distance_km ?? 0), 0)
+            : 0;
 
-          const targetMet = completedSets.every(s => {
-            const targetMin = parseInt(s.target_reps.split('-')[0]) || 0;
-            return (s.actual_reps ?? 0) >= targetMin;
-          });
+          const targetMet = exIsCardio
+            ? completedSets.length > 0
+            : completedSets.every(s => {
+                const targetMin = parseInt(s.target_reps.split('-')[0]) || 0;
+                return (s.actual_reps ?? 0) >= targetMin;
+              });
 
           const isExpanded = expandedExercise === exIdx;
 
@@ -342,10 +446,19 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                   <span className="text-xs text-gray-400">
-                    {workingSets.length}×{avgReps}
-                    {maxWeight > 0 && ` @ ${maxWeight}kg`}
-                    {completedSets.length > workingSets.length && (
-                      <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                    {exIsCardio ? (
+                      <>
+                        {totalDuration > 0 && `${Math.round(totalDuration * 10) / 10} min`}
+                        {totalDistance > 0 && ` · ${Math.round(totalDistance * 100) / 100} km`}
+                      </>
+                    ) : (
+                      <>
+                        {workingSets.length}×{avgReps}
+                        {maxWeight > 0 && ` @ ${maxWeight}kg`}
+                        {completedSets.length > workingSets.length && (
+                          <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                        )}
+                      </>
                     )}
                   </span>
                   {isExpanded ? (
@@ -362,7 +475,9 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                   <div className="flex items-center gap-1 mb-1">
                     <Edit3 className="h-3 w-3 text-teal-500" />
                     <span className="text-[10px] text-teal-600 font-medium">
-                      {isDE ? 'Werte korrigieren (Wdh / kg):' : 'Correct values (reps / kg):'}
+                      {exIsCardio
+                        ? (isDE ? 'Werte korrigieren (Min / km):' : 'Correct values (min / km):')
+                        : (isDE ? 'Werte korrigieren (Wdh / kg):' : 'Correct values (reps / kg):')}
                     </span>
                   </div>
                   {ex.sets.map((set, setIdx) => {
@@ -381,6 +496,30 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                         {setIdx + 1}
                       </span>
                       {set.completed ? (
+                        exIsCardio ? (
+                          <>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              step="0.1"
+                              value={set.actual_duration_minutes ?? ''}
+                              onChange={e => updateSetValue(exIdx, setIdx, 'duration', e.target.value)}
+                              className="w-16 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                              placeholder="Min"
+                            />
+                            <span className="text-xs text-gray-400">·</span>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              step="0.01"
+                              value={set.actual_distance_km ?? ''}
+                              onChange={e => updateSetValue(exIdx, setIdx, 'distance', e.target.value)}
+                              className="w-20 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                              placeholder="km"
+                            />
+                            <span className="text-[10px] text-gray-400">km</span>
+                          </>
+                        ) : (
                         <>
                           <input
                             type="number"
@@ -401,7 +540,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                             placeholder="kg"
                           />
                           <span className="text-[10px] text-gray-400">kg</span>
-                        </>
+                        </>)
                       ) : set.skipped ? (
                         <span className="text-xs text-gray-400 italic">
                           {isDE ? 'übersprungen' : 'skipped'}

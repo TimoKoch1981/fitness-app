@@ -1,6 +1,8 @@
 /**
  * ExerciseOverviewTracker — Shows ALL sets of an exercise at once.
- * Tabular view with inline-editable rows for reps and weight.
+ * Tabular view with inline-editable rows.
+ *
+ * Phase D.2: Adaptive fields — Cardio shows Duration+Distance instead of Reps+Weight.
  *
  * UX:
  * - Current set highlighted with teal border/glow
@@ -29,7 +31,7 @@ interface ExerciseOverviewTrackerProps {
   exercise: WorkoutExerciseResult;
   exerciseIndex: number;
   lastExercise?: WorkoutExerciseResult;
-  onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number) => void;
+  onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => void;
   onSkipSet: (exerciseIdx: number, setIdx: number) => void;
   onAllDone: () => void;
 }
@@ -41,6 +43,9 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const { state: workoutState, setTag } = useActiveWorkout();
   const setReady = workoutState.setReady;
 
+  // Adaptive field detection (Phase D.2)
+  const isCardio = exercise.exercise_type === 'cardio';
+
   /** Cycle set tag: normal → warmup → drop → failure → normal */
   const cycleTag = useCallback((setIdx: number) => {
     const currentTag = exercise.sets[setIdx]?.set_tag ?? 'normal';
@@ -48,18 +53,28 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
     setTag(exerciseIndex, setIdx, TAG_CYCLE[nextIdx]);
   }, [exercise.sets, exerciseIndex, setTag]);
 
-  // Local state for inputs (per-set) — auto-fill: actual > target > PREVIOUS > empty
-  const [inputs, setInputs] = useState<Record<number, { reps: string; weight: string }>>(() => {
-    const init: Record<number, { reps: string; weight: string }> = {};
+  // Local state for inputs (per-set) — adaptive: cardio uses duration+distance, strength uses reps+weight
+  const [inputs, setInputs] = useState<Record<number, { field1: string; field2: string }>>(() => {
+    const init: Record<number, { field1: string; field2: string }> = {};
     exercise.sets.forEach((s, i) => {
       const prevSet = lastExercise?.sets[i];
-      init[i] = {
-        reps: s.actual_reps?.toString() ?? '',
-        weight: s.actual_weight_kg?.toString()
-          ?? s.target_weight_kg?.toString()
-          ?? prevSet?.actual_weight_kg?.toString()
-          ?? '',
-      };
+      if (isCardio) {
+        init[i] = {
+          field1: s.actual_duration_minutes?.toString() ?? '', // duration
+          field2: s.actual_distance_km?.toString()
+            ?? s.target_distance_km?.toString()
+            ?? prevSet?.actual_distance_km?.toString()
+            ?? '', // distance
+        };
+      } else {
+        init[i] = {
+          field1: s.actual_reps?.toString() ?? '', // reps
+          field2: s.actual_weight_kg?.toString()
+            ?? s.target_weight_kg?.toString()
+            ?? prevSet?.actual_weight_kg?.toString()
+            ?? '', // weight
+        };
+      }
     });
     return init;
   });
@@ -73,7 +88,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
     [exercise.sets],
   );
 
-  const updateInput = (setIdx: number, field: 'reps' | 'weight', value: string) => {
+  const updateInput = (setIdx: number, field: 'field1' | 'field2', value: string) => {
     setInputs(prev => ({
       ...prev,
       [setIdx]: { ...prev[setIdx], [field]: value },
@@ -92,15 +107,23 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
     const input = inputs[setIdx];
     const set = exercise.sets[setIdx];
 
-    // Check if reps field is empty — warn the user
-    if (!input?.reps?.trim()) {
-      setEmptyWarnings(prev => new Set(prev).add(setIdx));
-      // Still allow confirmation but with target defaults
+    if (isCardio) {
+      // Cardio: field1 = duration, field2 = distance
+      if (!input?.field1?.trim()) {
+        setEmptyWarnings(prev => new Set(prev).add(setIdx));
+      }
+      const durationMin = input?.field1 ? parseFloat(input.field1) : (set.target_duration_minutes ?? 0);
+      const distanceKm = input?.field2 ? parseFloat(input.field2) : set.target_distance_km;
+      onLogSet(exerciseIndex, setIdx, 1, undefined, undefined, durationMin, distanceKm);
+    } else {
+      // Strength: field1 = reps, field2 = weight
+      if (!input?.field1?.trim()) {
+        setEmptyWarnings(prev => new Set(prev).add(setIdx));
+      }
+      const reps = input?.field1 ? parseInt(input.field1) : parseInt(set.target_reps.split('-').pop() ?? '10');
+      const weight = input?.field2 ? parseFloat(input.field2) : set.target_weight_kg;
+      onLogSet(exerciseIndex, setIdx, reps, weight);
     }
-
-    const reps = input?.reps ? parseInt(input.reps) : parseInt(set.target_reps.split('-').pop() ?? '10');
-    const weight = input?.weight ? parseFloat(input.weight) : set.target_weight_kg;
-    onLogSet(exerciseIndex, setIdx, reps, weight);
 
     // Clear warning after confirming
     setEmptyWarnings(prev => {
@@ -123,6 +146,10 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const completedCount = exercise.sets.filter(s => s.completed).length;
   const skippedCount = exercise.sets.filter(s => s.skipped).length;
 
+  // Column labels (adaptive)
+  const col3Label = isCardio ? (isDE ? 'Min' : 'Min') : (isDE ? 'Wdh' : 'Reps');
+  const col4Label = isCardio ? 'km' : 'kg';
+
   return (
     <div className="space-y-3">
       {/* Info hint */}
@@ -139,9 +166,13 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
           )}
           <p className={`text-xs leading-relaxed ${setReady ? 'text-blue-600' : 'text-amber-600'}`}>
             {setReady
-              ? (isDE
-                  ? `Satz ${nextSetIndex + 1} läuft — trage Wdh und kg ein, dann bestätige mit ✓`
-                  : `Set ${nextSetIndex + 1} active — enter reps and weight, then confirm with ✓`)
+              ? isCardio
+                ? (isDE
+                    ? `Intervall ${nextSetIndex + 1} läuft — trage Dauer und km ein, dann bestätige mit ✓`
+                    : `Interval ${nextSetIndex + 1} active — enter duration and distance, then confirm with ✓`)
+                : (isDE
+                    ? `Satz ${nextSetIndex + 1} läuft — trage Wdh und kg ein, dann bestätige mit ✓`
+                    : `Set ${nextSetIndex + 1} active — enter reps and weight, then confirm with ✓`)
               : (isDE
                   ? `Drücke oben „Satz ${nextSetIndex + 1} starten" um den Satz zu beginnen`
                   : `Press "Start Set ${nextSetIndex + 1}" above to begin the set`)}
@@ -180,20 +211,20 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
         </div>
       </div>
 
-      {/* Table Header */}
+      {/* Table Header — adaptive columns */}
       <div className="grid grid-cols-12 gap-1 px-3 text-xs text-gray-400 font-medium border-b border-gray-100 pb-2">
         <div className="col-span-1">#</div>
         <div className="col-span-2">{isDE ? 'Ziel' : 'Target'}</div>
         <div className="col-span-2">{isDE ? 'Vorh.' : 'Prev'}</div>
-        <div className="col-span-3">{isDE ? 'Wdh' : 'Reps'}</div>
-        <div className="col-span-3">kg</div>
+        <div className="col-span-3">{col3Label}</div>
+        <div className="col-span-3">{col4Label}</div>
         <div className="col-span-1"></div>
       </div>
 
       {/* Set Rows */}
       {exercise.sets.map((set, idx) => {
         const lastSet = lastExercise?.sets[idx];
-        const input = inputs[idx] ?? { reps: '', weight: '' };
+        const input = inputs[idx] ?? { field1: '', field2: '' };
         const isDone = set.completed;
         const isSkipped = set.skipped;
         const isCurrent = idx === nextSetIndex;
@@ -245,35 +276,54 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 })()}
               </div>
 
-              {/* Target */}
+              {/* Target — adaptive */}
               <div className={`col-span-2 text-xs ${isCurrent ? 'text-teal-700 font-semibold' : isDone ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
-                {set.target_reps}{set.target_reps != null && <span className="text-[10px] opacity-70"> {isDE ? 'Wdh' : 'reps'}</span>}
-                {set.target_weight_kg != null && (
-                  <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> @{set.target_weight_kg}<span className="text-[10px] opacity-70"> kg</span></span>
+                {isCardio ? (
+                  <>
+                    {set.target_duration_minutes != null && (
+                      <>{set.target_duration_minutes}<span className="text-[10px] opacity-70"> min</span></>
+                    )}
+                    {set.target_distance_km != null && (
+                      <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> {set.target_distance_km}<span className="text-[10px] opacity-70"> km</span></span>
+                    )}
+                    {set.target_duration_minutes == null && set.target_distance_km == null && '—'}
+                  </>
+                ) : (
+                  <>
+                    {set.target_reps}{set.target_reps != null && <span className="text-[10px] opacity-70"> {isDE ? 'Wdh' : 'reps'}</span>}
+                    {set.target_weight_kg != null && (
+                      <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> @{set.target_weight_kg}<span className="text-[10px] opacity-70"> kg</span></span>
+                    )}
+                  </>
                 )}
               </div>
 
-              {/* Last Time */}
+              {/* Last Time — adaptive */}
               <div className="col-span-2 text-xs text-gray-400">
                 {lastSet?.completed
-                  ? <>{lastSet.actual_reps}×{lastSet.actual_weight_kg ?? '-'}<span className="text-[10px] opacity-70"> kg</span></>
+                  ? isCardio
+                    ? <>{lastSet.actual_duration_minutes ?? '-'}<span className="text-[10px] opacity-70">m</span> {lastSet.actual_distance_km != null && <>{lastSet.actual_distance_km}<span className="text-[10px] opacity-70">km</span></>}</>
+                    : <>{lastSet.actual_reps}×{lastSet.actual_weight_kg ?? '-'}<span className="text-[10px] opacity-70"> kg</span></>
                   : '-'}
               </div>
 
-              {/* Reps Input / Completed Value */}
+              {/* Field 1: Duration (cardio) or Reps (strength) — Input / Completed Value */}
               <div className="col-span-3">
                 {isDone ? (
                   <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
-                    {set.actual_reps}
+                    {isCardio ? (set.actual_duration_minutes ?? '-') : set.actual_reps}
                   </div>
                 ) : (
                   <input
                     type="number"
-                    inputMode="numeric"
-                    value={input.reps}
-                    onChange={e => updateInput(idx, 'reps', e.target.value)}
+                    inputMode={isCardio ? 'decimal' : 'numeric'}
+                    step={isCardio ? '0.1' : undefined}
+                    value={input.field1}
+                    onChange={e => updateInput(idx, 'field1', e.target.value)}
                     disabled={isInputDisabled}
-                    placeholder={set.target_reps.split('-').pop()}
+                    placeholder={isCardio
+                      ? (set.target_duration_minutes?.toString() ?? '-')
+                      : set.target_reps.split('-').pop()}
                     className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
                       isCurrent && setReady
                         ? 'border-2 border-teal-300 bg-white font-semibold text-gray-900'
@@ -289,21 +339,23 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 )}
               </div>
 
-              {/* Weight Input / Completed Value */}
+              {/* Field 2: Distance (cardio) or Weight (strength) — Input / Completed Value */}
               <div className="col-span-3">
                 {isDone ? (
                   <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
-                    {set.actual_weight_kg ?? '-'}
+                    {isCardio ? (set.actual_distance_km ?? '-') : (set.actual_weight_kg ?? '-')}
                   </div>
                 ) : (
                   <input
                     type="number"
                     inputMode="decimal"
-                    step="0.1"
-                    value={input.weight}
-                    onChange={e => updateInput(idx, 'weight', e.target.value)}
+                    step={isCardio ? '0.01' : '0.1'}
+                    value={input.field2}
+                    onChange={e => updateInput(idx, 'field2', e.target.value)}
                     disabled={isInputDisabled}
-                    placeholder={set.target_weight_kg?.toString() ?? '-'}
+                    placeholder={isCardio
+                      ? (set.target_distance_km?.toString() ?? '-')
+                      : (set.target_weight_kg?.toString() ?? '-')}
                     className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
                       isCurrent && setReady
                         ? 'border-2 border-teal-300 bg-white font-semibold text-gray-900'
@@ -322,7 +374,11 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               {/* Action Button */}
               <div className="col-span-1 flex justify-center">
                 {isDone ? (
-                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center" title={`${set.actual_reps} × ${set.actual_weight_kg ?? '-'} kg`}>
+                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center"
+                    title={isCardio
+                      ? `${set.actual_duration_minutes ?? '-'} min · ${set.actual_distance_km ?? '-'} km`
+                      : `${set.actual_reps} × ${set.actual_weight_kg ?? '-'} kg`}
+                  >
                     <Check className="h-4 w-4 text-teal-500" />
                   </div>
                 ) : isSkipped ? (
@@ -359,7 +415,9 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               <div className="flex items-center justify-between px-3 py-1.5 bg-amber-50 border border-t-0 border-amber-200 rounded-b-lg -mt-1">
                 <div className="flex items-center gap-1.5 text-xs text-amber-600">
                   <AlertCircle className="h-3.5 w-3.5" />
-                  {isDE ? 'Wdh-Feld leer — Zielwert wird übernommen' : 'Reps empty — target value will be used'}
+                  {isCardio
+                    ? (isDE ? 'Dauer-Feld leer — Zielwert wird übernommen' : 'Duration empty — target value will be used')
+                    : (isDE ? 'Wdh-Feld leer — Zielwert wird übernommen' : 'Reps empty — target value will be used')}
                 </div>
                 <button
                   onClick={() => handleSkipSet(idx)}
@@ -390,7 +448,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
       {/* Complete / Next button */}
       {allCompleted ? (
         <div className="space-y-2 pt-2">
-          {/* Summary of completed sets */}
+          {/* Summary of completed sets — adaptive */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3">
             <p className="text-xs font-medium text-teal-700 mb-2">
               {isDE ? 'Zusammenfassung:' : 'Summary:'}
@@ -399,12 +457,21 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               {exercise.sets.map((set, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs">
                   <span className={`font-medium ${set.completed ? 'text-teal-600' : 'text-gray-400'}`}>
-                    {isDE ? 'Satz' : 'Set'} {idx + 1}:
+                    {isCardio ? (isDE ? 'Int.' : 'Int.') : (isDE ? 'Satz' : 'Set')} {idx + 1}:
                   </span>
                   {set.completed ? (
                     <span className="text-teal-700 font-semibold">
-                      {set.actual_reps} {isDE ? 'Wdh' : 'Reps'}
-                      {set.actual_weight_kg != null && ` @ ${set.actual_weight_kg} kg`}
+                      {isCardio ? (
+                        <>
+                          {set.actual_duration_minutes != null && `${set.actual_duration_minutes} Min`}
+                          {set.actual_distance_km != null && ` · ${set.actual_distance_km} km`}
+                        </>
+                      ) : (
+                        <>
+                          {set.actual_reps} {isDE ? 'Wdh' : 'Reps'}
+                          {set.actual_weight_kg != null && ` @ ${set.actual_weight_kg} kg`}
+                        </>
+                      )}
                     </span>
                   ) : (
                     <span className="text-gray-400 italic">{isDE ? 'übersprungen' : 'skipped'}</span>
