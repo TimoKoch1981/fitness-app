@@ -137,6 +137,44 @@
 | 12.70   | 2026-03-10 | Multi-Plan Management: Plan-Liste, Aktivierung, Duplizierung, Create-Dialog    | Erledigt   |
 | 12.71   | 2026-03-10 | Bugfixes B5+B7: CreatePlanDialog State-Reset + Error-Feedback, negative Zeitanzeige | Erledigt   |
 | 12.72   | 2026-03-10 | PlanEditor UX: Tab-Switch-Fix, DnD ganzer Block, Hoch/Runter-Pfeile               | Erledigt   |
+| 12.73   | 2026-03-10 | 4 UX-Verbesserungen: ExerciseListBar Pfeile, Post-Creation-Flow, Buddy-Hilfe, Akkordeon | Erledigt   |
+| 12.74   | 2026-03-10 | Plan bearbeiten + bewerten: In-Card Buttons, EditPlanMetaDialog, Buddy-Chip Interception | Erledigt   |
+
+---
+
+### 2026-03-10 - v12.74: Plan bearbeiten + Plan bewerten — In-Card Buttons
+
+**Aenderung 1: useUpdateTrainingPlan Hook** (useTrainingPlans.ts)
+- Neuer Hook fuer Plan-Metadaten Update (Name, Split-Type, Tage/Woche, Notizen)
+- Supabase: `.from('training_plans').update({...}).eq('id', id).eq('user_id', userId)`
+- Invalidiert: training_plans, active, detail Query-Keys
+
+**Aenderung 2: EditPlanMetaDialog** (Neue Datei)
+- Bottom-Sheet Dialog zum Bearbeiten der Plan-Metadaten
+- Felder vorausgefuellt mit aktuellen Werten (Name, Split, Tage, Notizen)
+- "Speichern" Button → useUpdateTrainingPlan
+- "Buddy helfen lassen" Button → oeffnet Buddy-Chat mit Kontext
+
+**Aenderung 3: Buttons im aufgeklappten Plan** (TrainingPlanList.tsx)
+- "Plan bearbeiten" Button (Pencil, teal) → oeffnet EditPlanMetaDialog
+- "Plan bewerten" Button (Star, amber) → oeffnet Buddy mit vollem Plan-Kontext
+- Kontext-String: Name, Split, Tage + alle Tags mit Uebungen
+
+**Aenderung 4: Buddy-Chip Interception** (WorkoutsTabContent.tsx)
+- `plan_edit` Chip → oeffnet EditPlanMetaDialog (statt Buddy-Chat)
+- `plan_evaluate` Chip → oeffnet Buddy mit Review-Kontext (statt generischem Chat)
+- `plan_create` bleibt wie bisher (CreatePlanDialog)
+
+**Deployed auf fudda.de, verifiziert: alle 5 Checks bestanden.**
+
+---
+
+### 2026-03-10 - v12.73: 4 UX-Verbesserungen
+
+**1. ExerciseListBar Pfeile** — Groesser (h-5 w-5), nebeneinander (horizontal), Full-Row-DnD
+**2. Post-Creation-Flow** — Nach Plan-Erstellung: Auswahl "Selbst hinzufuegen" oder "Buddy um Hilfe bitten"
+**3. Buddy-Hilfe** — Automatische Buddy-Nachricht mit Kontext bei neuen Plaenen
+**4. Akkordeon-Migration** — Plan-Tab zeigt nur TrainingPlanList mit aufklappbaren Plan-Karten
 
 ---
 
