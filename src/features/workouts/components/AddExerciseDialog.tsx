@@ -216,18 +216,20 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                 </div>
               </div>
 
-              {/* Permanent toggle */}
-              <label className="flex items-center gap-3 py-2">
-                <input
-                  type="checkbox"
-                  checked={permanent}
-                  onChange={e => setPermanent(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-teal-500 focus:ring-teal-500"
-                />
-                <span className="text-sm text-gray-700">
-                  {isDE ? 'Dauerhaft zum Plan hinzufügen' : 'Add permanently to plan'}
-                </span>
-              </label>
+              {/* Permanent toggle — only when a plan-based session is active */}
+              {state.planDayId && (
+                <label className="flex items-center gap-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={permanent}
+                    onChange={e => setPermanent(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {isDE ? 'Dauerhaft zum Plan hinzufügen' : 'Add permanently to plan'}
+                  </span>
+                </label>
+              )}
 
               {/* Add Button */}
               <button

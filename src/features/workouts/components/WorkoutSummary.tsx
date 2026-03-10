@@ -15,11 +15,12 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   CheckCircle2, Clock, Flame, Trophy, TrendingUp,
   Save, Trash2, SkipForward, ChevronDown, ChevronUp,
-  AlertCircle, Edit3, X,
+  AlertCircle, Edit3, X, BookmarkPlus,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useSaveWorkoutSession } from '../hooks/useSaveWorkoutSession';
+import { useAddTrainingPlan } from '../hooks/useTrainingPlans';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { PostSessionFeedback } from './PostSessionFeedback';
@@ -37,6 +38,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const isDE = language === 'de';
   const { state, dispatch, clearSession } = useActiveWorkout();
   const saveSession = useSaveWorkoutSession();
+  const addPlan = useAddTrainingPlan();
   const { celebrateNewPR, celebrateFirstWorkoutOfWeek } = useCelebrations();
   const { data: profile } = useProfile();
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +46,11 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
   const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  // "Save as plan" for free sessions
+  const [showSaveAsPlan, setShowSaveAsPlan] = useState(false);
+  const [planName, setPlanName] = useState('');
+  const [savingPlan, setSavingPlan] = useState(false);
+  const isFreeSession = !state.planId;
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -105,6 +112,13 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         return; // Don't close yet — show feedback first
       }
 
+      // Free session: offer to save as plan
+      if (isFreeSession && state.exercises.filter(e => !e.skipped).length > 0) {
+        setIsSaving(false);
+        setShowSaveAsPlan(true);
+        return; // Don't close yet — show "save as plan" dialog
+      }
+
       clearSession();
       onClose();
     } catch (err: unknown) {
@@ -120,7 +134,48 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     }
   };
 
+  /** Convert session exercises → plan and save */
+  const handleSaveAsPlan = async () => {
+    if (!planName.trim()) return;
+    setSavingPlan(true);
+    try {
+      const completedExercises = state.exercises.filter(e => !e.skipped);
+      await addPlan.mutateAsync({
+        name: planName.trim(),
+        split_type: 'custom',
+        days_per_week: 1,
+        days: [{
+          day_number: 1,
+          name: planName.trim(),
+          exercises: completedExercises.map(ex => ({
+            name: ex.name,
+            exercise_id: ex.exercise_id,
+            exercise_type: ex.exercise_type ?? 'strength',
+            sets: ex.sets.length,
+            reps: ex.sets[0]?.target_reps || String(ex.sets[0]?.actual_reps ?? 10),
+            weight_kg: ex.sets[0]?.actual_weight_kg ?? ex.sets[0]?.target_weight_kg,
+            rest_seconds: ex.rest_seconds,
+            notes: ex.notes,
+          })),
+        }],
+      });
+      clearSession();
+      onClose();
+    } catch (err) {
+      console.error('[WorkoutSummary] Save as plan failed:', err);
+      // Still close — workout is already saved, plan creation is optional
+      clearSession();
+      onClose();
+    }
+  };
+
   const handleFeedbackComplete = () => {
+    // Free session: offer to save as plan after feedback
+    if (isFreeSession && state.exercises.filter(e => !e.skipped).length > 0) {
+      setShowFeedback(false);
+      setShowSaveAsPlan(true);
+      return;
+    }
     clearSession();
     onClose();
   };
@@ -380,8 +435,54 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         />
       )}
 
-      {/* Actions (hidden when feedback is showing) */}
-      {!showFeedback && (
+      {/* Save as Plan (for free sessions, shown after workout save) */}
+      {showSaveAsPlan && (
+        <div className="bg-indigo-50 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <BookmarkPlus className="h-5 w-5 text-indigo-600" />
+            <span className="text-sm font-semibold text-indigo-700">
+              {isDE ? 'Als Trainingsplan speichern?' : 'Save as Training Plan?'}
+            </span>
+          </div>
+          <p className="text-xs text-indigo-600">
+            {isDE
+              ? 'Erstelle einen wiederverwendbaren Plan aus diesem Training.'
+              : 'Create a reusable plan from this workout.'}
+          </p>
+          <input
+            type="text"
+            value={planName}
+            onChange={e => setPlanName(e.target.value)}
+            placeholder={isDE ? 'Name des Plans...' : 'Plan name...'}
+            className="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                clearSession();
+                onClose();
+              }}
+              className="flex-1 py-2.5 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {isDE ? 'Überspringen' : 'Skip'}
+            </button>
+            <button
+              onClick={handleSaveAsPlan}
+              disabled={!planName.trim() || savingPlan}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors font-medium disabled:opacity-50"
+            >
+              <BookmarkPlus className="h-4 w-4" />
+              {savingPlan
+                ? (isDE ? 'Speichern...' : 'Saving...')
+                : (isDE ? 'Plan erstellen' : 'Create Plan')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Actions (hidden when feedback or save-as-plan is showing) */}
+      {!showFeedback && !showSaveAsPlan && (
         <div className="flex gap-2 pb-8">
           <button
             onClick={handleDiscard}

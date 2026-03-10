@@ -14,6 +14,7 @@ import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile'
 // RestTimerWidget removed from main page — full multi-timer is inside ActiveWorkoutPage
 
 import { WorkoutsTabContent } from '../features/workouts/components/WorkoutsTabContent';
+import { WorkoutStartDialog } from '../features/workouts/components/WorkoutStartDialog';
 import { CompetitionCountdown } from '../features/workouts/components/power/CompetitionCountdown';
 import { PhaseProgressBar } from '../features/workouts/components/power/PhaseProgressBar';
 import { NaturalLimitCalc } from '../features/workouts/components/power/NaturalLimitCalc';
@@ -34,6 +35,7 @@ type PhotoTab = 'poses' | 'progress' | 'compare';
 export function TrainingPage() {
   const { t, language } = useTranslation();
   const [showWorkoutDialog, setShowWorkoutDialog] = useState(false);
+  const [showStartDialog, setShowStartDialog] = useState(false);
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
   const showCycleToggle = profile?.gender === 'female' || profile?.gender === 'other';
@@ -139,7 +141,7 @@ export function TrainingPage() {
       title={t.tracking.training}
       actions={
         <button
-          onClick={() => setShowWorkoutDialog(true)}
+          onClick={() => setShowStartDialog(true)}
           className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
         >
           <Plus className="h-4 w-4" />
@@ -334,6 +336,13 @@ export function TrainingPage() {
         showAddDialog={showWorkoutDialog}
         onOpenAddDialog={() => setShowWorkoutDialog(true)}
         onCloseAddDialog={() => setShowWorkoutDialog(false)}
+      />
+
+      {/* Workout Start Dialog — Freies Training vs Quick-Log */}
+      <WorkoutStartDialog
+        open={showStartDialog}
+        onClose={() => setShowStartDialog(false)}
+        onQuickLog={() => setShowWorkoutDialog(true)}
       />
     </PageShell>
   );

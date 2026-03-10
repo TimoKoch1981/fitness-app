@@ -31,7 +31,6 @@ interface TrainingPlanViewProps {
  */
 export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting }: TrainingPlanViewProps) {
   const { t, language } = useTranslation();
-  const navigate = useNavigate();
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1])); // First day expanded by default
   const [isExporting, setIsExporting] = useState(false);
   const [showPdfMenu, setShowPdfMenu] = useState(false);

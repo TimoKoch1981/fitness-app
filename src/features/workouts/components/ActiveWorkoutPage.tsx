@@ -9,7 +9,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Play, LayoutList, CheckCircle2, SkipForward,
-  Timer as TimerIcon,
+  Timer as TimerIcon, Plus, Dumbbell,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -24,6 +24,7 @@ import { WorkoutSummary } from './WorkoutSummary';
 import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
 import { WorkoutVoiceControl } from './WorkoutVoiceControl';
 import { ExerciseListBar } from './ExerciseListBar';
+import { AddExerciseDialog } from './AddExerciseDialog';
 import { suggestRestTime } from '../utils/suggestRestTimes';
 import type { WorkoutExerciseResult } from '../../../types/health';
 
@@ -34,7 +35,7 @@ export function ActiveWorkoutPage() {
   const [searchParams] = useSearchParams();
   const {
     state, dispatch,
-    startSession, logWarmup, skipWarmup,
+    startSession, startFreeSession, logWarmup, skipWarmup,
     nextExercise, toggleMode,
     finishSession, clearSession,
   } = useActiveWorkout();
@@ -46,6 +47,7 @@ export function ActiveWorkoutPage() {
   const dayId = searchParams.get('dayId') ?? '';
   const dayNumber = parseInt(searchParams.get('dayNumber') ?? '0');
   const isResume = searchParams.get('resume') === '1';
+  const isFreeMode = searchParams.get('mode') === 'free';
 
   const { data: lastWorkout } = useLastWorkoutForDay(planId, dayNumber);
 
@@ -56,6 +58,8 @@ export function ActiveWorkoutPage() {
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   // Confirm-finish dialog (save vs discard)
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  // Add exercise dialog for free sessions
+  const [showAddExercise, setShowAddExercise] = useState(false);
   // Track if we already attempted resume
   const resumeAttemptedRef = useRef(false);
 
@@ -162,8 +166,16 @@ export function ActiveWorkoutPage() {
     })();
   }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession]);
 
-  // Start session if not already active (non-resume path)
+  // Start FREE session (no plan required)
   useEffect(() => {
+    if (!isFreeMode) return;
+    if (state.isActive) return; // already running
+    startFreeSession();
+  }, [isFreeMode, state.isActive, startFreeSession]);
+
+  // Start PLAN-BASED session if not already active (non-resume path)
+  useEffect(() => {
+    if (isFreeMode) return; // handled by free session effect above
     if (isResume) return; // handled by resume effect above
     if (state.isActive && state.planDayId === dayId) return; // already running
     if (!activePlan?.days) return;
@@ -173,7 +185,7 @@ export function ActiveWorkoutPage() {
 
     const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
     startSession(planDay, planId, lastResults);
-  }, [isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
+  }, [isFreeMode, isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
 
   // ── Start total timer when session becomes active ──────────────────────
   useEffect(() => {
@@ -332,7 +344,8 @@ export function ActiveWorkoutPage() {
     : 100;
 
   // No plan/day params or plan loaded without matching day → show message
-  if (!state.isActive && !state.startedAt) {
+  // (skip this check for free mode — free sessions don't need a plan)
+  if (!isFreeMode && !state.isActive && !state.startedAt) {
     if (!dayId || !planId || (activePlan && !activePlan.days?.find(d => d.id === dayId))) {
       return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-6">
@@ -444,7 +457,32 @@ export function ActiveWorkoutPage() {
           </div>
         )}
 
-        {state.phase === 'exercise' && (
+        {state.phase === 'exercise' && state.exercises.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center">
+              <Dumbbell className="h-8 w-8 text-teal-400" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {isDE ? 'Freies Training' : 'Free Workout'}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {isDE
+                  ? 'Füge Übungen hinzu und starte dein Training.'
+                  : 'Add exercises and start your workout.'}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddExercise(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors shadow-md"
+            >
+              <Plus className="h-5 w-5" />
+              {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
+            </button>
+          </div>
+        )}
+
+        {state.phase === 'exercise' && state.exercises.length > 0 && (
           <ExerciseTracker
             lastWorkout={lastWorkout}
           />
@@ -500,6 +538,19 @@ export function ActiveWorkoutPage() {
           />
         )}
       </div>
+
+      {/* Floating "Add Exercise" button for free mode (when exercises already exist) */}
+      {isFreeMode && state.phase === 'exercise' && state.exercises.length > 0 && (
+        <div className="fixed bottom-[10.5rem] left-4 z-20">
+          <button
+            onClick={() => setShowAddExercise(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-teal-500 text-white rounded-full font-medium shadow-lg hover:bg-teal-600 transition-colors text-sm"
+          >
+            <Plus className="h-4 w-4" />
+            {isDE ? 'Übung' : 'Exercise'}
+          </button>
+        </div>
+      )}
 
       {/* Floating Controls: Voice + Music */}
       {state.phase !== 'summary' && (
@@ -558,6 +609,11 @@ export function ActiveWorkoutPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Add Exercise Dialog (for free sessions) */}
+      {showAddExercise && (
+        <AddExerciseDialog onClose={() => setShowAddExercise(false)} />
       )}
 
       {/* Finish Confirmation Dialog — Save vs Discard */}

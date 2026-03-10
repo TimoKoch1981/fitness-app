@@ -61,6 +61,7 @@ const STORAGE_KEY = 'fitbuddy_active_workout';
 
 type Action =
   | { type: 'START_SESSION'; planDay: TrainingPlanDay; planId: string; lastResults?: WorkoutExerciseResult[] }
+  | { type: 'START_FREE_SESSION'; name?: string }
   | { type: 'LOG_WARMUP'; warmup: WarmupResult }
   | { type: 'SKIP_WARMUP' }
   | { type: 'LOG_SET'; exerciseIndex: number; setIndex: number; actualReps: number; actualWeightKg?: number; notes?: string }
@@ -157,6 +158,27 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         timerSeconds: 90,
         startedAt: new Date().toISOString(),
         phase: 'warmup',
+        isActive: true,
+        setReady: false,
+      };
+    }
+
+    case 'START_FREE_SESSION': {
+      return {
+        planId: '',
+        planDayId: '',
+        planDayNumber: 0,
+        planDayName: action.name ?? 'Freies Training',
+        exercises: [],
+        planExercises: [],
+        warmup: undefined,
+        currentExerciseIndex: 0,
+        currentSetIndex: 0,
+        mode: 'exercise',
+        timerEnabled: true,
+        timerSeconds: 90,
+        startedAt: new Date().toISOString(),
+        phase: 'exercise', // Skip warmup for free sessions — go straight to exercise picker
         isActive: true,
         setReady: false,
       };
@@ -411,6 +433,7 @@ interface ActiveWorkoutContextValue {
   state: ActiveWorkoutState;
   dispatch: React.Dispatch<Action>;
   startSession: (planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[]) => void;
+  startFreeSession: (name?: string) => void;
   logWarmup: (warmup: WarmupResult) => void;
   skipWarmup: () => void;
   logSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string) => void;
@@ -458,7 +481,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   // Periodic draft save to DB (every 60s while active)
   const draftSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!state.isActive || state.phase === 'summary' || !state.planDayId) return;
+    if (!state.isActive || state.phase === 'summary') return;
+    if (!state.planDayId && state.exercises.length === 0) return; // free session with no exercises yet
 
     draftSaveRef.current = setTimeout(async () => {
       try {
@@ -466,13 +490,30 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
         if (!user) return;
 
         // Check for existing draft
-        const { data: existing } = await supabase
-          .from('workouts')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('plan_day_id', state.planDayId!)
-          .eq('status', 'in_progress')
-          .maybeSingle();
+        const isFreeSession = !state.planDayId;
+        let existing: { id: string } | null = null;
+
+        if (!isFreeSession) {
+          const { data } = await supabase
+            .from('workouts')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('plan_day_id', state.planDayId!)
+            .eq('status', 'in_progress')
+            .maybeSingle();
+          existing = data;
+        } else {
+          // Free session: find by started_at (unique per session)
+          const { data } = await supabase
+            .from('workouts')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('status', 'in_progress')
+            .is('plan_day_id', null)
+            .eq('started_at', state.startedAt)
+            .maybeSingle();
+          existing = data;
+        }
 
         const payload = {
           session_exercises: state.exercises,
@@ -488,7 +529,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
             name: state.planDayName || 'Workout',
             type: 'strength',
             plan_id: state.planId || null,
-            plan_day_id: state.planDayId,
+            plan_day_id: state.planDayId || null,
             plan_day_number: state.planDayNumber ?? 0,
             session_exercises: state.exercises,
             warmup: state.warmup,
@@ -509,6 +550,10 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
   const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[]) => {
     dispatch({ type: 'START_SESSION', planDay, planId, lastResults });
+  }, []);
+
+  const startFreeSession = useCallback((name?: string) => {
+    dispatch({ type: 'START_FREE_SESSION', name });
   }, []);
 
   const logWarmup = useCallback((warmup: WarmupResult) => dispatch({ type: 'LOG_WARMUP', warmup }), []);
@@ -535,7 +580,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   return (
     <ActiveWorkoutCtx.Provider value={{
       state, dispatch,
-      startSession, logWarmup, skipWarmup, logSet, skipSet,
+      startSession, startFreeSession, logWarmup, skipWarmup, logSet, skipSet,
       nextExercise, prevExercise, goToExercise, skipExercise,
       removeExercise, addExercise, editExercise, reorderExercises, markSetReady, toggleMode, toggleTimer,
       setTimerSeconds, finishSession, clearSession,
