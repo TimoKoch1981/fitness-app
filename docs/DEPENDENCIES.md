@@ -1,6 +1,6 @@
 # DEPENDENCIES.md — FitBuddy Abhaengigkeitskarte
 
-> **Version:** 1.6 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-09
+> **Version:** 1.8 | **Erstellt:** 2026-03-02 | **Letzte Aktualisierung:** 2026-03-10
 >
 > **Konzept:** Entworfen aus der Perspektive eines Software-Architekten, Programmierers
 > und KI-Experten. Zweifach iteriert — erst Struktur, dann Detailtiefe.
@@ -933,3 +933,4 @@ src/i18n/de.ts (Primaersprache, definiert TranslationKeys Typ)
 | 2026-03-08 | 1.4 | Claude / Entwickler | Token-Budget-Fix: max_tokens 2048→4096 (openai.ts, supabaseProxy.ts), Profile-Conditional Skills (PROFILE_CONDITIONAL_SKILLS), getSkillIdsForContext(), femaleFitness+trainerReview bedingt laden statt statisch, Diagnose-Zeile fuer ACTION-Block-Truncation |
 | 2026-03-09 | 1.6 | Claude / Entwickler | Blutanalyse v12.62: bloodWorkReferenceRanges.ts (38 Marker, Gender/Age), pdfTextExtractor.ts (pdfjs-dist v5), DB-Migration +16 Spalten, Executor/Schema/Types dynamischer Spread |
 | 2026-03-09 | 1.7 | Claude / Entwickler | Workout DnD v12.63: ExerciseListBar.tsx Rewrite mit @dnd-kit/core+sortable, SortableExerciseItem, GripVertical Handle, PointerSensor+TouchSensor, nutzt REORDER_EXERCISES aus ActiveWorkoutContext |
+| 2026-03-10 | 1.8 | Claude / Entwickler | Plan bearbeiten/bewerten v12.74: useUpdateTrainingPlan Hook (useTrainingPlans.ts), EditPlanMetaDialog.tsx (neu, Bottom-Sheet, nutzt useUpdateTrainingPlan + useInlineBuddyChat + SPLIT_OPTIONS aus CreatePlanDialog), TrainingPlanList.tsx (+ Pencil/Star Buttons, handleReviewPlan, editingPlanMeta State, useInlineBuddyChat), WorkoutsTabContent.tsx (+ plan_edit/plan_evaluate Buddy-Chip Interception, usePlanById fuer expanded plan data) |
