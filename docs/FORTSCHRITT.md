@@ -3346,6 +3346,30 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 - Draft-Save fuer freie Sessions (Lookup via `started_at` statt `plan_day_id`)
 - Deployed auf fudda.de, Commit `5189702`
 
+### v12.67 — Workout UX Consolidation (2026-03-10)
+
+**NEUES:** Phase C (PREVIOUS-Spalte), D.1 (Set-Tags), D.3 (Multi-Select ExercisePicker), D.4 (WorkoutSummary Set-Tags), E.1 (exercise_id), E.2 (Adaptive Felder).
+
+- `useLastExerciseData.ts` (NEU): Shared Query fuer letzte 30 Workouts, per-exercise Selector via useMemo, Cross-Plan Matching (exercise_id > Name)
+- `SetBySetTracker.tsx`: PREVIOUS-Spalte, Set-Tags (Normal/Warmup/Drop/Failure), cycleTag per Tap
+- `ExerciseOverviewTracker.tsx`: Set-Tags in Batch-Ansicht
+- `ExercisePicker.tsx`: Multi-Select mit Checkboxen, Batch-Add, Confirm-Button
+- `WorkoutSummary.tsx`: Warmup-Sets aus Stats/PRs ausgeschlossen, "+XW" Anzeige, Set-Tag-Badges (W/D/F)
+- `AddWorkoutDialog.tsx`: exercise_id Speicherung, Adaptive Felder (Strength: Sets/Reps/kg, Cardio: Duration/Distance, Flex: Duration)
+- `types/health.ts`: exercise_id + distance_km in ExerciseSet, SetTag Typ
+- Deployed auf fudda.de, Commit `c502279`
+
+### v12.68 — B1-B4 Bugfixes (2026-03-10)
+
+**BUGFIXES:** 4 verifizierte Bugs + MFA Login-Challenge.
+
+- **B1+U1:** `ExerciseListBar.tsx` — Default `expanded=true` (vertikale Liste mit Drag-Handles), Hint-Styling verbessert (text-xs, text-gray-600, teal Chevron)
+- **B3:** `LogSubstanceDialog.tsx` — PED-Disclaimer nur bei ausgewaehlter PED/TRT-Substanz (nicht global)
+- **B4:** `LoginPage.tsx` + `flags.ts` — Apple OAuth Button hinter Feature-Flag `apple_oauth=false`
+- **B2+F2:** `LoginPage.tsx` — MFA Login-Challenge integriert: nach signInWithPassword AAL-Level pruefen, MFAVerificationDialog anzeigen wenn TOTP enrolled, signOut bei Cancel
+- `docs/TODO.md` — Vollstaendige Konsolidierung mit Code-Audit-Ergebnissen
+- Deployed auf fudda.de, Commit `2b2d30c`
+
 ---
 
 *Letzte Aktualisierung: 2026-03-10*
