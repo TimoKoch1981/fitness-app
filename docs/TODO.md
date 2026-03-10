@@ -1,7 +1,7 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-10, v12.68
-> **Letzte Konsolidierung:** Vollstaendiges Code-Audit + B1-B4 Bugfixes
+> **Stand:** 2026-03-10, v12.69
+> **Letzte Konsolidierung:** F4+F5+U2 implementiert (Adaptive Tracker, Volume, Plan-Button)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
@@ -16,7 +16,6 @@ Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
 
 | # | Problem | Prioritaet | Beschreibung | Datei(en) |
 |---|---------|-----------|--------------|-----------|
-| U2 | **Plus-Button: Kein "Plan erstellen"** | MITTEL | Plus-Button oeffnet WorkoutStartDialog mit "Freies Training" + "Schnell loggen". Plan-Erstellung nur ueber: (a) Plan-Tab Default-Import, (b) Freies Training → "Als Plan speichern", (c) Buddy Chat. Kein Bug, aber User erwarten eine "Plan erstellen" Option direkt am Plus-Button. Hint-Text vorhanden: "Plan-basierte Trainings starten ueber den Plan-Tab" | `WorkoutStartDialog.tsx` Z.65-100, `TrainingPage.tsx` Z.143-148 |
 | U3 | **z-index Schichtung suboptimal** | NIEDRIG | ExerciseListBar (`z-10`) und Finish-Button (`z-10`) haben gleichen z-index. Voice/Music Controls (`z-20`) ueberlagern korrekt, aber ExerciseListBar und Finish-Button koennen bei Expansion kollidieren. | `ActiveWorkoutPage.tsx` Z.563, Z.570 |
 
 ---
@@ -34,8 +33,6 @@ Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
 
 | # | Feature | Status | Details |
 |---|---------|--------|---------|
-| F4 | **Phase D.2: Adaptive Felder im Live-Tracker** | TEILWEISE | AddWorkoutDialog hat adaptive Felder (Strength/Cardio/Flex). Live-Tracker (SetBySetTracker) zeigt immer Reps+Weight. Sollte bei Cardio-Uebungen Duration+Distance anzeigen. Catalog-Feld `category` steuern. |
-| F5 | **Volumen-Vergleich im Summary** | OFFEN | WorkoutSummary zeigt PRs, aber keinen Vergleich zum letzten Workout (z.B. "Total Volume: 12.000 kg, +800 kg vs last time") |
 | F6 | **Workout-Musik: eigene YouTube-Links** | UNKLAR | Deep-Test sagt "YouTube-Links einfuegbar" — muss verifiziert werden ob das noch funktioniert |
 | F7 | **MFP-Import** | OFFEN | MyFitnessPal CSV-Import fuer Ernaehrungsdaten. Konzept existiert, nicht implementiert |
 | F8 | **API Versioning** | OFFEN | Versionierte API-Endpunkte fuer zukuenftige Kompatibilitaet |
@@ -56,6 +53,11 @@ Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
 
 <details>
 <summary>Alle abgeschlossenen Items aufklappen</summary>
+
+### Workout UX Phase 2 v12.69 ✅
+- [x] **F4: Adaptive Felder im Live-Tracker (Phase D.2)** — SetResult erweitert (target/actual_duration_minutes, target/actual_distance_km), LOG_SET + logSet erweitert, Cardio via Set-Tracker (nicht Timer), SetBySetTracker + ExerciseOverviewTracker zeigen Duration+Distance fuer Cardio, PREVIOUS-Spalte adaptiv, WorkoutSummary adaptiv inkl. Inline-Editing
+- [x] **F5: Volumen-Vergleich im WorkoutSummary** — Total Volume (Σ reps×weight, excl. warmup+cardio), Matching via >50% Exercise-Overlap, Delta mit Farbkodierung (gruen +, rot -), Prozent-Vergleich vs. letztes Mal
+- [x] **U2: "Plan erstellen" im Plus-Button** — Dritte Option in WorkoutStartDialog (indigo, BookmarkPlus), forceTab-Prop auf WorkoutsTabContent, Switch zum Plan-Tab
 
 ### Bugfixes v12.68 ✅
 - [x] **B1+U1:** ExerciseListBar Default `expanded=true`, Hint-Styling verbessert (text-xs, text-gray-600, teal Chevron)
@@ -129,14 +131,14 @@ Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
 | Kategorie | Anzahl |
 |-----------|--------|
 | ❌ Offene Bugs | 0 (alle gefixt in v12.68) |
-| ⚠️ UX-Probleme | 2 (1 MITTEL, 1 NIEDRIG) |
+| ⚠️ UX-Probleme | 1 (NIEDRIG) |
 | 📋 P1 Features | 2 |
-| 📋 P2 Features | 5 |
+| 📋 P2 Features | 3 |
 | 📋 P3 Features | 5 |
-| ✅ Erledigt | ~65+ Items |
+| ✅ Erledigt | ~70+ Items |
 
 ### Empfohlene Reihenfolge fuer naechste Session:
-1. **F4: Adaptive Felder im Live-Tracker** — SetBySetTracker bei Cardio-Uebungen Duration+Distance statt Reps+Weight (45 min)
-2. **F5: Volumen-Vergleich** — WorkoutSummary total volume vs. last time (30 min)
-3. **U2: "Plan erstellen" im Plus-Button** — WorkoutStartDialog erweitern (30 min)
-4. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
+1. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
+2. **F6: YouTube-Links** — Verifizieren ob Feature noch funktioniert (15 min)
+3. **U3: z-index Schichtung** — ExerciseListBar vs Finish-Button Kollision (15 min)
+4. **F7: MFP-Import** — MyFitnessPal CSV-Import implementieren (2-3h)

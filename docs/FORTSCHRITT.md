@@ -130,6 +130,10 @@
 | 12.63   | 2026-03-09 | Workout Drag & Drop: dnd-kit in ExerciseListBar, GripVertical, Touch-Support | Erledigt   |
 | 12.64   | 2026-03-09 | Exercise Catalog v2: 122 Uebungen, ExercisePicker, Plan-Editor, Medizin-Felder | Erledigt   |
 | 12.65   | 2026-03-10 | Workout UX Consolidation: PREVIOUS, Set-Tags, Multi-Select, Summary, Quick-Log | Erledigt   |
+| 12.66   | 2026-03-10 | Freies Training: WorkoutStartDialog, Free-Mode, Save-as-Plan                   | Erledigt   |
+| 12.67   | 2026-03-10 | Workout UX Consolidation Phase C-E: PREVIOUS, Set-Tags, exercise_id, Adaptive  | Erledigt   |
+| 12.68   | 2026-03-10 | Bugfixes B1-B4: ExerciseListBar, PED-Disclaimer, Apple OAuth, MFA Login        | Erledigt   |
+| 12.69   | 2026-03-10 | F4+F5+U2: Adaptive Live-Tracker (Cardio), Volume Comparison, Plan-Button       | Erledigt   |
 
 ---
 
@@ -3369,6 +3373,29 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 - **B2+F2:** `LoginPage.tsx` — MFA Login-Challenge integriert: nach signInWithPassword AAL-Level pruefen, MFAVerificationDialog anzeigen wenn TOTP enrolled, signOut bei Cancel
 - `docs/TODO.md` — Vollstaendige Konsolidierung mit Code-Audit-Ergebnissen
 - Deployed auf fudda.de, Commit `2b2d30c`
+
+### v12.69 — F4+F5+U2: Adaptive Live-Tracker, Volume Comparison, Plan-Button (2026-03-10)
+
+**3 Features in einer Session implementiert:**
+
+**F4 — Adaptive Fields im Live-Tracker (Cardio: Duration+Distance statt Reps+Weight):**
+- `types/health.ts`: SetResult um 4 Felder erweitert: `target_duration_minutes`, `target_distance_km`, `actual_duration_minutes`, `actual_distance_km`
+- `ActiveWorkoutContext.tsx`: LOG_SET Action + Reducer speichert Duration/Distance; logSet-Signatur erweitert; buildExercisesFromPlan pre-fills Cardio-Targets
+- `ExerciseTracker.tsx`: Routing geaendert — Cardio nutzt jetzt Set-Tracker (nicht mehr ExerciseTimer); Cardio-Metadata (Intervalle, Pace) in Exercise-Info
+- `SetBySetTracker.tsx`: Komplett adaptiv — Target/PREVIOUS/Inputs zeigen Duration(min)+Distance(km) fuer Cardio, Reps+Weight(kg) fuer Strength
+- `ExerciseOverviewTracker.tsx`: Tabellen-Header, Inputs, Summary adaptiv mit field1/field2 Pattern
+- `WorkoutSummary.tsx`: Cardio-Uebungen zeigen "X min · Y km" statt "NxM @ Wkg"; Inline-Editing mit 'duration'+'distance' Feldern
+
+**F5 — Volume Comparison in WorkoutSummary:**
+- `WorkoutSummary.tsx`: totalVolume Berechnung (Summe reps*weight, exkl. Warmup+Cardio); volumeComparison findet letztes Workout mit >50% Uebungs-Overlap; Volume-Card mit Delta (gruen/rot/grau) und Prozent-Anzeige
+
+**U2 — "Plan erstellen" Option im Plus-Button:**
+- `WorkoutStartDialog.tsx`: Dritte Option "Trainingsplan erstellen" (Indigo-Styling, BookmarkPlus Icon), optional via `onCreatePlan` Callback
+- `WorkoutsTabContent.tsx`: forceTab + onForceTabApplied Props fuer externen Tab-Wechsel
+- `TrainingPage.tsx`: forceTab State, Verdrahtung WorkoutStartDialog → WorkoutsTabContent Plan-Tab
+
+**Build:** 0 TS-Fehler, 114 PWA Precache Entries
+**Deployed auf fudda.de, Commit `15859fb`**
 
 ---
 
