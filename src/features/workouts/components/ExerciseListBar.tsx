@@ -6,7 +6,7 @@
  */
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import { Check, SkipForward, Timer, Dumbbell, GripVertical, ChevronRight } from 'lucide-react';
+import { Check, SkipForward, Timer, Dumbbell, GripVertical, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -40,6 +40,9 @@ interface SortableExerciseItemProps {
   totalSets: number;
   onJump: (idx: number) => void;
   isDE: boolean;
+  totalExercises: number;
+  onMoveUp: (idx: number) => void;
+  onMoveDown: (idx: number) => void;
 }
 
 function SortableExerciseItem({
@@ -53,6 +56,9 @@ function SortableExerciseItem({
   completedSets,
   totalSets,
   onJump,
+  totalExercises,
+  onMoveUp,
+  onMoveDown,
 }: SortableExerciseItemProps) {
   const {
     attributes,
@@ -74,28 +80,42 @@ function SortableExerciseItem({
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       className={cn(
-        'flex items-center gap-1.5 rounded-lg transition-colors',
+        'flex items-center gap-1.5 rounded-lg transition-colors cursor-grab active:cursor-grabbing touch-none',
         isCurrent && 'bg-teal-50 ring-2 ring-teal-400',
         !isCurrent && allDone && 'bg-green-50/50',
         !isCurrent && isSkipped && 'opacity-50',
         isDragging && 'shadow-lg bg-white ring-2 ring-teal-300',
       )}
     >
-      {/* Drag handle */}
-      <button
-        {...attributes}
-        {...listeners}
-        className="p-1.5 text-gray-300 hover:text-teal-500 touch-none cursor-grab active:cursor-grabbing flex-shrink-0"
-        tabIndex={-1}
-      >
-        <GripVertical className="h-4 w-4" />
-      </button>
+      {/* Reorder arrows + grip visual */}
+      <div className="flex flex-col items-center flex-shrink-0 -my-1">
+        <button
+          onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          disabled={idx === 0}
+          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+        >
+          <ChevronUp className="h-3.5 w-3.5" />
+        </button>
+        <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+        <button
+          onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          disabled={idx === totalExercises - 1}
+          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {/* Exercise row — tap to jump */}
       <button
-        onClick={() => onJump(idx)}
-        className="flex-1 flex items-center gap-2 py-2 pr-2 text-left min-w-0"
+        onClick={(e) => { e.stopPropagation(); onJump(idx); }}
+        onPointerDown={(e) => e.stopPropagation()}
+        className="flex-1 flex items-center gap-2 py-2 pr-2 text-left min-w-0 cursor-pointer"
       >
         {/* Status icon */}
         <div className={cn(
@@ -166,6 +186,14 @@ export function ExerciseListBar() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
   );
+
+  const handleMoveUp = useCallback((idx: number) => {
+    if (idx > 0) reorderExercises(idx, idx - 1);
+  }, [reorderExercises]);
+
+  const handleMoveDown = useCallback((idx: number) => {
+    if (idx < state.exercises.length - 1) reorderExercises(idx, idx + 1);
+  }, [reorderExercises, state.exercises.length]);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
@@ -265,6 +293,9 @@ export function ExerciseListBar() {
                       totalSets={totalSets}
                       onJump={goToExercise}
                       isDE={isDE}
+                      totalExercises={state.exercises.length}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
                     />
                   </div>
                 );

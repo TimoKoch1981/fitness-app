@@ -15,8 +15,8 @@ import type { SplitType } from '../../../types/health';
 interface CreatePlanDialogProps {
   open: boolean;
   onClose: () => void;
-  /** Called after plan is successfully created */
-  onCreated?: () => void;
+  /** Called after plan is successfully created, with the new plan's ID */
+  onCreated?: (planId: string) => void;
 }
 
 const SPLIT_OPTIONS: { value: SplitType; labelDE: string; labelEN: string }[] = [
@@ -111,7 +111,7 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
   const handleCreate = async () => {
     setError(null);
     try {
-      await addPlan.mutateAsync({
+      const newPlan = await addPlan.mutateAsync({
         name: name.trim() || (isDE ? 'Neuer Plan' : 'New Plan'),
         split_type: splitType,
         days_per_week: daysPerWeek,
@@ -123,7 +123,7 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
           exercises: [],
         })),
       });
-      onCreated?.();
+      onCreated?.(newPlan.id);
       onClose();
     } catch (err) {
       console.error('[CreatePlanDialog] Create failed:', err);

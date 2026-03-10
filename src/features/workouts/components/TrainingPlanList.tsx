@@ -14,16 +14,22 @@
 import { useState } from 'react';
 import {
   CheckCircle2, Copy, Trash2, Dumbbell,
-  Plus, ChevronRight, Calendar, Layers,
+  Plus, ChevronRight, ChevronDown, Calendar, Layers, Sparkles,
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '../../../i18n';
 import {
   useTrainingPlans,
   useActivatePlan,
   useDuplicatePlan,
   useDeleteTrainingPlan,
+  usePlanById,
 } from '../hooks/useTrainingPlans';
-import type { TrainingPlan, SplitType } from '../../../types/health';
+import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
+import { DayCard } from './DayCard';
+import { PlanEditorDialog } from './PlanEditorDialog';
+import { ExerciseDetailModal } from './ExerciseDetailModal';
+import type { TrainingPlan, TrainingPlanDay, CatalogExercise, SplitType } from '../../../types/health';
 
 interface TrainingPlanListProps {
   /** Currently selected plan ID (for highlighting in the detail view) */
@@ -32,6 +38,10 @@ interface TrainingPlanListProps {
   onSelectPlan: (plan: TrainingPlan) => void;
   /** Called when user clicks "Create new plan" */
   onCreatePlan: () => void;
+  /** Currently expanded plan ID (accordion) */
+  expandedPlanId?: string | null;
+  /** Called when user clicks to expand/collapse a plan */
+  onToggleExpand?: (planId: string) => void;
 }
 
 const SPLIT_TYPE_LABELS: Record<SplitType, { de: string; en: string }> = {
@@ -47,17 +57,33 @@ const SPLIT_TYPE_LABELS: Record<SplitType, { de: string; en: string }> = {
   mixed: { de: 'Gemischt', en: 'Mixed' },
 };
 
-export function TrainingPlanList({ selectedPlanId, onSelectPlan, onCreatePlan }: TrainingPlanListProps) {
+export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan: _onSelectPlan, onCreatePlan, expandedPlanId, onToggleExpand }: TrainingPlanListProps) {
   const { t, language } = useTranslation();
   const isDE = language === 'de';
   const plans = (t as unknown as Record<string, Record<string, string>>).plans;
+  const queryClient = useQueryClient();
 
   const { data: allPlans, isLoading } = useTrainingPlans();
   const activatePlan = useActivatePlan();
   const duplicatePlan = useDuplicatePlan();
   const deletePlan = useDeleteTrainingPlan();
 
+  // Accordion: load days for expanded plan
+  const { data: expandedPlanData } = usePlanById(expandedPlanId ?? undefined);
+  const { data: catalog } = useExerciseCatalog();
+
   const [deleteTarget, setDeleteTarget] = useState<TrainingPlan | null>(null);
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
+
+  const toggleDay = (dayId: string) => {
+    setExpandedDays(prev => {
+      const next = new Set(prev);
+      next.has(dayId) ? next.delete(dayId) : next.add(dayId);
+      return next;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -156,86 +182,149 @@ export function TrainingPlanList({ selectedPlanId, onSelectPlan, onCreatePlan }:
         </button>
       </div>
 
-      {/* Plan Cards */}
+      {/* Plan Cards (Accordion) */}
       {allPlans.map((plan) => {
         const isActive = plan.is_active;
-        const isSelected = plan.id === selectedPlanId;
+        const isExpanded = plan.id === expandedPlanId;
         const splitLabel = SPLIT_TYPE_LABELS[plan.split_type]?.[isDE ? 'de' : 'en'] ?? plan.split_type;
 
         return (
           <div
             key={plan.id}
-            onClick={() => onSelectPlan(plan)}
-            className={`rounded-xl p-3 shadow-sm cursor-pointer transition-all ${
+            className={`rounded-xl shadow-sm overflow-hidden transition-all ${
               isActive
                 ? 'bg-white ring-2 ring-teal-300'
-                : isSelected
+                : isExpanded
                   ? 'bg-white ring-1 ring-gray-300'
                   : 'bg-white hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-start gap-3">
-              {/* Plan Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 truncate">
-                    {plan.name}
-                  </span>
-                  {isActive && (
-                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {plans?.active ?? 'Active'}
+            {/* Plan Header — click to expand/collapse */}
+            <div
+              onClick={() => onToggleExpand?.(plan.id)}
+              className="p-3 cursor-pointer"
+            >
+              <div className="flex items-start gap-3">
+                {/* Plan Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {plan.name}
                     </span>
+                    {isActive && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {plans?.active ?? 'Active'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                      <Layers className="h-3 w-3" />
+                      {splitLabel}
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                      <Calendar className="h-3 w-3" />
+                      {plan.days_per_week}x/{isDE ? 'Wo' : 'wk'}
+                    </span>
+                    <span className="text-[11px] text-gray-300">
+                      {formatDate(plan.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  {!isActive && (
+                    <button
+                      onClick={(e) => handleActivate(plan.id, e)}
+                      disabled={activatePlan.isPending}
+                      className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
+                      title={plans?.activate ?? 'Activate'}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => handleDuplicate(plan.id, e)}
+                    disabled={duplicatePlan.isPending}
+                    className="p-1.5 text-gray-300 hover:text-indigo-500 transition-colors disabled:opacity-50"
+                    title={plans?.duplicate ?? 'Duplicate'}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteClick(plan, e)}
+                    className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                    title={plans?.delete ?? 'Delete'}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-teal-400 ml-0.5" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-gray-200 ml-0.5" />
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                    <Layers className="h-3 w-3" />
-                    {splitLabel}
-                  </span>
-                  <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                    <Calendar className="h-3 w-3" />
-                    {plan.days_per_week}x/{isDE ? 'Wo' : 'wk'}
-                  </span>
-                  <span className="text-[11px] text-gray-300">
-                    {formatDate(plan.created_at)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-0.5 flex-shrink-0">
-                {!isActive && (
-                  <button
-                    onClick={(e) => handleActivate(plan.id, e)}
-                    disabled={activatePlan.isPending}
-                    className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
-                    title={plans?.activate ?? 'Activate'}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                  </button>
-                )}
-                <button
-                  onClick={(e) => handleDuplicate(plan.id, e)}
-                  disabled={duplicatePlan.isPending}
-                  className="p-1.5 text-gray-300 hover:text-indigo-500 transition-colors disabled:opacity-50"
-                  title={plans?.duplicate ?? 'Duplicate'}
-                >
-                  <Copy className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={(e) => handleDeleteClick(plan, e)}
-                  className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
-                  title={plans?.delete ?? 'Delete'}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-                <ChevronRight className="h-4 w-4 text-gray-200 ml-0.5" />
               </div>
             </div>
+
+            {/* Expanded: Day Cards */}
+            {isExpanded && expandedPlanData?.days && (
+              <div className="px-3 pb-3 space-y-2 border-t border-gray-100 pt-2">
+                {/* Calibration button if needed */}
+                {!expandedPlanData.review_config?.calibration_done && (
+                  <button
+                    className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1 hover:bg-amber-200 transition-colors"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {isDE ? 'Kalibrierung starten' : 'Start calibration'}
+                  </button>
+                )}
+                {expandedPlanData.notes && (
+                  <p className="text-xs text-gray-400 italic px-1">{expandedPlanData.notes}</p>
+                )}
+                {expandedPlanData.days.map((day) => (
+                  <DayCard
+                    key={day.id}
+                    day={day}
+                    planId={plan.id}
+                    isExpanded={expandedDays.has(day.id)}
+                    onToggle={() => toggleDay(day.id)}
+                    catalog={catalog ?? []}
+                    onExerciseClick={setSelectedExercise}
+                    onEdit={setEditingDay}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
+
+      {/* Plan Editor Dialog (opened from DayCard pencil icon) */}
+      {editingDay && (
+        <PlanEditorDialog
+          day={editingDay}
+          onClose={() => setEditingDay(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
+            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
+            if (expandedPlanId) {
+              queryClient.invalidateQueries({ queryKey: ['training_plans', 'detail', expandedPlanId] });
+            }
+            setEditingDay(null);
+          }}
+        />
+      )}
+
+      {/* Exercise Detail Modal */}
+      {selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          onClose={() => setSelectedExercise(null)}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       {deleteTarget && (

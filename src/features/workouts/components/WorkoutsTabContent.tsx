@@ -4,29 +4,30 @@
  * Used inside TrackingPage as one of 3 tracking tabs.
  *
  * Plan tab now shows:
- * - TrainingPlanList (compact card list of all plans with CRUD actions)
- * - TrainingPlanView (details of the active/selected plan)
+ * - TrainingPlanList (accordion: expandable plan cards with inline DayCards)
  * - CreatePlanDialog (2-step dialog for new plans)
+ * - Post-creation choice: manual edit or Buddy help
  */
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
+import { Dumbbell, Clock, Flame, Trash2, Pencil, MessageCircle as MessageCircleIcon } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../hooks/useWorkouts';
-import { useActivePlan, useAddTrainingPlan, usePlanById } from '../hooks/useTrainingPlans';
+import { useActivePlan } from '../hooks/useTrainingPlans';
 import { usePageBuddySuggestions, type BuddySuggestion } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
-import { TrainingPlanView } from './TrainingPlanView';
 import { TrainingPlanList } from './TrainingPlanList';
 import { CreatePlanDialog } from './CreatePlanDialog';
+import { PlanEditorDialog } from './PlanEditorDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
+import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
+import type { TrainingPlanDay } from '../../../types/health';
 // Lazy-load heavy chart components (~350KB Recharts)
 const ProgressiveOverloadCharts = lazy(() => import('./ProgressiveOverloadCharts').then(m => ({ default: m.ProgressiveOverloadCharts })));
 const PeriodizationView = lazy(() => import('./PeriodizationView').then(m => ({ default: m.PeriodizationView })));
-import { DEFAULT_PLAN } from '../data/defaultPlan';
 import { today, formatDate } from '../../../lib/utils';
-import type { TrainingPlan } from '../../../types/health';
 
 interface WorkoutsTabContentProps {
   showAddDialog: boolean;
@@ -47,6 +48,9 @@ export function WorkoutsTabContent({
   forceTab, onForceTabApplied, openCreatePlan, onCreatePlanOpened,
 }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
+  const isDE = language === 'de';
+  const queryClient = useQueryClient();
+  const { openBuddyChat } = useInlineBuddyChat();
   const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress' | 'periodization'>('today');
 
   // Apply forceTab from parent (U2: "Plan erstellen" → switch to plan tab)
@@ -69,15 +73,59 @@ export function WorkoutsTabContent({
 
   // Training plan
   const { data: activePlan, isLoading: isPlanLoading } = useActivePlan();
-  const addTrainingPlan = useAddTrainingPlan();
 
   // Multi-plan state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
-  // Load selected non-active plan with days
-  const isSelectedNonActive = selectedPlanId && selectedPlanId !== activePlan?.id;
-  const { data: selectedPlanData } = usePlanById(isSelectedNonActive ? selectedPlanId : undefined);
+  // Post-creation flow: choice popup + auto-edit
+  const [showPostCreateChoice, setShowPostCreateChoice] = useState(false);
+  const [newlyCreatedPlanId, setNewlyCreatedPlanId] = useState<string | null>(null);
+  const [autoEditDay, setAutoEditDay] = useState<TrainingPlanDay | null>(null);
+
+  // When the new plan becomes the active plan, auto-open editor for day 1
+  useEffect(() => {
+    if (newlyCreatedPlanId && activePlan?.id === newlyCreatedPlanId && activePlan?.days?.[0]) {
+      // Plan is loaded with days — ready for auto-edit if user chose "manually"
+      if (!showPostCreateChoice) {
+        setAutoEditDay(activePlan.days[0]);
+        setNewlyCreatedPlanId(null);
+      }
+    }
+  }, [activePlan, newlyCreatedPlanId, showPostCreateChoice]);
+
+  const handlePostCreateManual = useCallback(() => {
+    setShowPostCreateChoice(false);
+    // If plan is already loaded, open editor immediately
+    if (activePlan?.id === newlyCreatedPlanId && activePlan?.days?.[0]) {
+      setAutoEditDay(activePlan.days[0]);
+      setNewlyCreatedPlanId(null);
+    }
+    // Otherwise the useEffect above will catch it when the plan loads
+  }, [activePlan, newlyCreatedPlanId]);
+
+  const handlePostCreateBuddy = useCallback(() => {
+    setShowPostCreateChoice(false);
+    setNewlyCreatedPlanId(null);
+    const msg = isDE
+      ? 'Ich habe gerade einen neuen Trainingsplan erstellt. Kannst du mir helfen, die Übungen für jeden Tag auszuwählen?'
+      : 'I just created a new training plan. Can you help me choose exercises for each day?';
+    openBuddyChat(msg, 'training');
+  }, [isDE, openBuddyChat]);
+
+  // Accordion: which plan is expanded (auto-expand active plan)
+  const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
+
+  // Auto-expand active plan on first load
+  useEffect(() => {
+    if (activePlan?.id && expandedPlanId === null) {
+      setExpandedPlanId(activePlan.id);
+    }
+  }, [activePlan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleToggleExpand = useCallback((planId: string) => {
+    setExpandedPlanId(prev => prev === planId ? null : planId);
+  }, []);
 
   // Open CreatePlanDialog when requested by parent (e.g., WorkoutStartDialog)
   useEffect(() => {
@@ -107,19 +155,6 @@ export function WorkoutsTabContent({
     other: '\u{1F525}',
   };
 
-  const handleImportDefault = async () => {
-    try {
-      await addTrainingPlan.mutateAsync(DEFAULT_PLAN);
-    } catch (error) {
-      console.error('[WorkoutsTabContent] Failed to import default plan:', error);
-    }
-  };
-
-  // When user selects a plan from the list, show it in TrainingPlanView
-  const handleSelectPlan = (plan: TrainingPlan) => {
-    setSelectedPlanId(plan.id);
-  };
-
   // Intercept "Neuen Plan" buddy chip → open CreatePlanDialog instead of buddy chat
   const handleBuddySuggestionClick = useCallback((suggestion: BuddySuggestion): boolean => {
     if (suggestion.id === 'plan_create') {
@@ -130,16 +165,6 @@ export function WorkoutsTabContent({
     }
     return false; // let all other suggestions go to buddy as normal
   }, [activeSubTab]);
-
-  // The plan to display in TrainingPlanView:
-  // - If user selected the active plan (or no selection), use activePlan (has days loaded)
-  // - If user selected a different plan, use the separately loaded data with days
-  const displayPlan = (() => {
-    if (!selectedPlanId || selectedPlanId === activePlan?.id) {
-      return activePlan ?? null;
-    }
-    return selectedPlanData ?? null;
-  })();
 
   return (
     <>
@@ -278,24 +303,13 @@ export function WorkoutsTabContent({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Plan List (always visible) */}
+            {/* Plan List — Accordion: click plan to expand/collapse inline day cards */}
             <TrainingPlanList
               selectedPlanId={selectedPlanId ?? activePlan?.id}
-              onSelectPlan={handleSelectPlan}
+              onSelectPlan={() => {/* accordion handles selection now */}}
               onCreatePlan={() => setShowCreateDialog(true)}
-            />
-
-            {/* Separator */}
-            {displayPlan && (
-              <div className="border-t border-gray-100" />
-            )}
-
-            {/* Active/Selected Plan Detail View */}
-            <TrainingPlanView
-              plan={displayPlan ?? null}
-              onDelete={undefined /* delete is handled by TrainingPlanList now */}
-              onImportDefault={handleImportDefault}
-              isImporting={addTrainingPlan.isPending}
+              expandedPlanId={expandedPlanId}
+              onToggleExpand={handleToggleExpand}
             />
           </div>
         )
@@ -325,11 +339,61 @@ export function WorkoutsTabContent({
       <CreatePlanDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
-        onCreated={() => {
-          // After creating a new plan, reset selected plan so it shows the new active plan
-          setSelectedPlanId(null);
+        onCreated={(planId) => {
+          setSelectedPlanId(planId);
+          setNewlyCreatedPlanId(planId);
+          setShowPostCreateChoice(true);
         }}
       />
+
+      {/* Post-Creation Choice: Manual edit or Buddy help */}
+      {showPostCreateChoice && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={handlePostCreateManual}
+        >
+          <div className="bg-white rounded-2xl p-5 w-full max-w-xs shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-3">
+              <Dumbbell className="h-5 w-5 text-teal-500" />
+              <h3 className="text-base font-semibold text-gray-900">
+                {isDE ? 'Plan erstellt!' : 'Plan created!'}
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              {isDE ? 'Wie möchtest du die Übungen hinzufügen?' : 'How would you like to add exercises?'}
+            </p>
+            <div className="space-y-2">
+              <button
+                onClick={handlePostCreateManual}
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors"
+              >
+                <Pencil className="h-4 w-4" />
+                {isDE ? 'Selbst hinzufügen' : 'Add manually'}
+              </button>
+              <button
+                onClick={handlePostCreateBuddy}
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors"
+              >
+                <MessageCircleIcon className="h-4 w-4" />
+                {isDE ? 'Buddy um Hilfe bitten' : 'Ask Buddy for help'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-opened PlanEditorDialog after plan creation */}
+      {autoEditDay && (
+        <PlanEditorDialog
+          day={autoEditDay}
+          onClose={() => setAutoEditDay(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
+            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
+            setAutoEditDay(null);
+          }}
+        />
+      )}
     </>
   );
 }
