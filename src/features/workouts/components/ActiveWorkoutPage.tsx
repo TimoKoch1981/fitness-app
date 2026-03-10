@@ -167,17 +167,22 @@ export function ActiveWorkoutPage() {
   }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession]);
 
   // Start FREE session (no plan required)
+  // If there's a restored plan-based session (from localStorage), override it
+  // since the user explicitly chose "Freies Training starten"
   useEffect(() => {
     if (!isFreeMode) return;
-    if (state.isActive) return; // already running
+    // Already running as a free session → don't restart
+    if (state.isActive && !state.planDayId) return;
+    // Start fresh free session (overrides any stale plan session from localStorage)
     startFreeSession();
-  }, [isFreeMode, state.isActive, startFreeSession]);
+  }, [isFreeMode, state.isActive, state.planDayId, startFreeSession]);
 
   // Start PLAN-BASED session if not already active (non-resume path)
+  // Also handles case where a stale free session was restored from localStorage
   useEffect(() => {
     if (isFreeMode) return; // handled by free session effect above
     if (isResume) return; // handled by resume effect above
-    if (state.isActive && state.planDayId === dayId) return; // already running
+    if (state.isActive && state.planDayId === dayId && dayId !== '') return; // already running for this day
     if (!activePlan?.days) return;
 
     const planDay = activePlan.days.find(d => d.id === dayId);
