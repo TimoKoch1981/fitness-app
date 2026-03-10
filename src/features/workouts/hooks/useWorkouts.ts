@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { convertLegacyExercises } from './useWorkoutHistory';
 import type { Workout, WorkoutType, ExerciseSet } from '../../../types/health';
 
 const WORKOUTS_KEY = 'workouts';
@@ -70,6 +71,13 @@ export function useAddWorkout() {
         userId = user.id;
       }
 
+      // Convert legacy exercises[] to session_exercises[] so quick-logs
+      // appear in history, charts, and progress views.
+      const legacyExercises = input.exercises ?? [];
+      const sessionExercises = legacyExercises.length > 0
+        ? convertLegacyExercises(legacyExercises)
+        : [];
+
       const { data, error } = await supabase
         .from('workouts')
         .insert({
@@ -80,8 +88,10 @@ export function useAddWorkout() {
           duration_minutes: input.duration_minutes,
           calories_burned: input.calories_burned,
           met_value: input.met_value,
-          exercises: input.exercises ?? [],
+          exercises: legacyExercises,
+          session_exercises: sessionExercises.length > 0 ? sessionExercises : undefined,
           notes: input.notes,
+          status: 'completed',
         })
         .select()
         .single();

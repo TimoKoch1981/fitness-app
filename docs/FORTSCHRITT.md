@@ -3297,6 +3297,12 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 **Build:** 0 TS-Fehler, 113 PWA Precache Entries, ~5.5 MB
 
+**Deployment (2026-03-10):**
+- 3 DB-Migrationen auf Production (fitbuddy-db-1) angewandt: 122 Uebungen verifiziert
+- PostgREST Schema-Cache neu geladen + Restart
+- Frontend Build deployed auf fudda.de (alte Assets geloescht, neue hochgeladen)
+- HTTP 200 verifiziert
+
 ---
 
-*Letzte Aktualisierung: 2026-03-09*
+*Letzte Aktualisierung: 2026-03-10*

@@ -180,10 +180,10 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
               </div>
             </button>
 
-            {isOpen && displayExercises && (
+            {isOpen && (
               <div className="px-4 pb-4 border-t border-gray-50">
-                {/* Edit toggle button */}
-                {!isEditing && (
+                {/* Edit toggle button — only for workouts with exercise detail */}
+                {!isEditing && displayExercises && displayExercises.length > 0 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); startEdit(w); }}
                     className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 py-2"
@@ -194,7 +194,12 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                 )}
 
                 <div className="space-y-1.5">
-                  {displayExercises.map((ex, exIdx) => {
+                  {(!displayExercises || displayExercises.length === 0) && (
+                    <p className="text-xs text-gray-400 italic py-1">
+                      {w.notes || (isDE ? 'Keine Übungen dokumentiert' : 'No exercises documented')}
+                    </p>
+                  )}
+                  {displayExercises?.map((ex, exIdx) => {
                     if (ex.skipped) {
                       return (
                         <p key={exIdx} className="text-xs text-gray-300 line-through pl-6">{ex.name}</p>

@@ -1,13 +1,62 @@
 /**
- * useWorkoutHistory — Loads workout session history for a plan.
+ * useWorkoutHistory — Loads workout history for a plan or globally.
  * Provides per-exercise trends (weight progression, volume).
+ *
+ * v2 (2026-03-10): Removed session_exercises IS NOT NULL filter.
+ * Quick-logs (from AddWorkoutDialog + Buddy) now appear in history
+ * alongside plan-based sessions. Legacy exercises[] is auto-converted
+ * to session_exercises format for unified rendering.
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { Workout, WorkoutExerciseResult } from '../../../types/health';
+import type { Workout, WorkoutExerciseResult, ExerciseSet } from '../../../types/health';
 
 const HISTORY_KEY = 'workout_history';
+
+/**
+ * Convert legacy exercises[] to WorkoutExerciseResult[] format.
+ * Enables quick-log workouts to appear in history & charts.
+ */
+export function convertLegacyExercises(exercises: ExerciseSet[]): WorkoutExerciseResult[] {
+  return exercises
+    .filter(ex => ex.name && ex.name.trim() !== '')
+    .map((ex, idx) => ({
+      name: ex.name,
+      plan_exercise_index: idx,
+      duration_minutes: ex.duration_minutes,
+      notes: ex.notes,
+      sets: Array.from({ length: ex.sets ?? 1 }, (_, i) => ({
+        set_number: i + 1,
+        target_reps: ex.reps ? String(ex.reps) : '',
+        target_weight_kg: ex.weight_kg,
+        actual_reps: ex.reps,
+        actual_weight_kg: ex.weight_kg,
+        completed: true,
+        skipped: false,
+      })),
+    }));
+}
+
+/**
+ * Ensure every workout has session_exercises populated.
+ * If only legacy exercises[] exist, auto-convert them.
+ */
+function normalizeWorkouts(workouts: Workout[]): Workout[] {
+  return workouts.map(w => {
+    if (w.session_exercises && (w.session_exercises as WorkoutExerciseResult[]).length > 0) {
+      return w;
+    }
+    // Fallback: convert legacy exercises[] → session_exercises[]
+    if (w.exercises && w.exercises.length > 0) {
+      return {
+        ...w,
+        session_exercises: convertLegacyExercises(w.exercises),
+      };
+    }
+    return w;
+  });
+}
 
 /** All session workouts for a plan (newest first) */
 export function useWorkoutHistoryForPlan(planId: string | undefined) {
@@ -23,17 +72,16 @@ export function useWorkoutHistoryForPlan(planId: string | undefined) {
         .select('*')
         .eq('user_id', user.id)
         .eq('plan_id', planId!)
-        .not('session_exercises', 'is', null)
         .neq('status', 'in_progress')
         .order('date', { ascending: false });
 
       if (error) throw error;
-      return data ?? [];
+      return normalizeWorkouts(data ?? []);
     },
   });
 }
 
-/** All session workouts (newest first, limited) */
+/** All workouts (newest first, limited) — includes quick-logs + plan sessions */
 export function useAllWorkoutHistory(limit = 50) {
   return useQuery({
     queryKey: [HISTORY_KEY, 'all', limit],
@@ -45,13 +93,12 @@ export function useAllWorkoutHistory(limit = 50) {
         .from('workouts')
         .select('*')
         .eq('user_id', user.id)
-        .not('session_exercises', 'is', null)
         .neq('status', 'in_progress')
         .order('date', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return data ?? [];
+      return normalizeWorkouts(data ?? []);
     },
   });
 }
