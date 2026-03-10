@@ -2,6 +2,11 @@
  * WorkoutsTabContent — Inner content of the Workouts tab, extracted from WorkoutsPage.
  * Contains sub-tabs: Today | Plan | History | Progress | Periodization.
  * Used inside TrackingPage as one of 3 tracking tabs.
+ *
+ * Plan tab now shows:
+ * - TrainingPlanList (compact card list of all plans with CRUD actions)
+ * - TrainingPlanView (details of the active/selected plan)
+ * - CreatePlanDialog (2-step dialog for new plans)
  */
 
 import { useState, useEffect, lazy, Suspense } from 'react';
@@ -9,16 +14,19 @@ import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../hooks/useWorkouts';
-import { useActivePlan, useAddTrainingPlan, useDeleteTrainingPlan } from '../hooks/useTrainingPlans';
+import { useActivePlan, useAddTrainingPlan, usePlanById } from '../hooks/useTrainingPlans';
 import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanView } from './TrainingPlanView';
+import { TrainingPlanList } from './TrainingPlanList';
+import { CreatePlanDialog } from './CreatePlanDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
 // Lazy-load heavy chart components (~350KB Recharts)
 const ProgressiveOverloadCharts = lazy(() => import('./ProgressiveOverloadCharts').then(m => ({ default: m.ProgressiveOverloadCharts })));
 const PeriodizationView = lazy(() => import('./PeriodizationView').then(m => ({ default: m.PeriodizationView })));
 import { DEFAULT_PLAN } from '../data/defaultPlan';
 import { today, formatDate } from '../../../lib/utils';
+import type { TrainingPlan } from '../../../types/health';
 
 interface WorkoutsTabContentProps {
   showAddDialog: boolean;
@@ -28,9 +36,16 @@ interface WorkoutsTabContentProps {
   forceTab?: 'today' | 'plan' | 'history' | 'progress' | 'periodization' | null;
   /** Called after forceTab has been applied so parent can clear it */
   onForceTabApplied?: () => void;
+  /** If true, open CreatePlanDialog immediately when switching to plan tab */
+  openCreatePlan?: boolean;
+  /** Called after openCreatePlan has been consumed */
+  onCreatePlanOpened?: () => void;
 }
 
-export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog, forceTab, onForceTabApplied }: WorkoutsTabContentProps) {
+export function WorkoutsTabContent({
+  showAddDialog, onOpenAddDialog, onCloseAddDialog,
+  forceTab, onForceTabApplied, openCreatePlan, onCreatePlanOpened,
+}: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
   const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress' | 'periodization'>('today');
 
@@ -41,6 +56,7 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
       onForceTabApplied?.();
     }
   }, [forceTab]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const buddySuggestions = usePageBuddySuggestions(
     activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
     language as 'de' | 'en',
@@ -54,7 +70,22 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
   // Training plan
   const { data: activePlan, isLoading: isPlanLoading } = useActivePlan();
   const addTrainingPlan = useAddTrainingPlan();
-  const deleteTrainingPlan = useDeleteTrainingPlan();
+
+  // Multi-plan state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+
+  // Load selected non-active plan with days
+  const isSelectedNonActive = selectedPlanId && selectedPlanId !== activePlan?.id;
+  const { data: selectedPlanData } = usePlanById(isSelectedNonActive ? selectedPlanId : undefined);
+
+  // Open CreatePlanDialog when requested by parent (e.g., WorkoutStartDialog)
+  useEffect(() => {
+    if (openCreatePlan && activeSubTab === 'plan') {
+      setShowCreateDialog(true);
+      onCreatePlanOpened?.();
+    }
+  }, [openCreatePlan, activeSubTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const locale = language === 'de' ? 'de-DE' : 'en-US';
 
@@ -84,13 +115,20 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
     }
   };
 
-  const handleDeletePlan = async (planId: string) => {
-    try {
-      await deleteTrainingPlan.mutateAsync(planId);
-    } catch (error) {
-      console.error('[WorkoutsTabContent] Failed to delete plan:', error);
-    }
+  // When user selects a plan from the list, show it in TrainingPlanView
+  const handleSelectPlan = (plan: TrainingPlan) => {
+    setSelectedPlanId(plan.id);
   };
+
+  // The plan to display in TrainingPlanView:
+  // - If user selected the active plan (or no selection), use activePlan (has days loaded)
+  // - If user selected a different plan, use the separately loaded data with days
+  const displayPlan = (() => {
+    if (!selectedPlanId || selectedPlanId === activePlan?.id) {
+      return activePlan ?? null;
+    }
+    return selectedPlanData ?? null;
+  })();
 
   return (
     <>
@@ -222,18 +260,33 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
 
         </>
       ) : activeSubTab === 'plan' ? (
-        /* Plan Sub-Tab */
+        /* Plan Sub-Tab — Now with Multi-Plan List + Detail View */
         isPlanLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
           </div>
         ) : (
-          <TrainingPlanView
-            plan={activePlan ?? null}
-            onDelete={handleDeletePlan}
-            onImportDefault={handleImportDefault}
-            isImporting={addTrainingPlan.isPending}
-          />
+          <div className="space-y-4">
+            {/* Plan List (always visible) */}
+            <TrainingPlanList
+              selectedPlanId={selectedPlanId ?? activePlan?.id}
+              onSelectPlan={handleSelectPlan}
+              onCreatePlan={() => setShowCreateDialog(true)}
+            />
+
+            {/* Separator */}
+            {displayPlan && (
+              <div className="border-t border-gray-100" />
+            )}
+
+            {/* Active/Selected Plan Detail View */}
+            <TrainingPlanView
+              plan={displayPlan ?? null}
+              onDelete={undefined /* delete is handled by TrainingPlanList now */}
+              onImportDefault={handleImportDefault}
+              isImporting={addTrainingPlan.isPending}
+            />
+          </div>
         )
       ) : activeSubTab === 'history' ? (
         /* History Sub-Tab */
@@ -255,6 +308,16 @@ export function WorkoutsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddD
         open={showAddDialog}
         onClose={onCloseAddDialog}
         date={selectedDate}
+      />
+
+      {/* Create Plan Dialog — triggered by TrainingPlanList or WorkoutStartDialog */}
+      <CreatePlanDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={() => {
+          // After creating a new plan, reset selected plan so it shows the new active plan
+          setSelectedPlanId(null);
+        }}
       />
     </>
   );

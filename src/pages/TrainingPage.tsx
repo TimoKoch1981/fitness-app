@@ -38,6 +38,8 @@ export function TrainingPage() {
   const [showStartDialog, setShowStartDialog] = useState(false);
   // U2: Force switch to Plan tab when "Plan erstellen" is clicked
   const [forceTab, setForceTab] = useState<'plan' | null>(null);
+  // Open CreatePlanDialog directly from WorkoutStartDialog
+  const [openCreatePlan, setOpenCreatePlan] = useState(false);
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
   const showCycleToggle = profile?.gender === 'female' || profile?.gender === 'other';
@@ -340,6 +342,8 @@ export function TrainingPage() {
         onCloseAddDialog={() => setShowWorkoutDialog(false)}
         forceTab={forceTab}
         onForceTabApplied={() => setForceTab(null)}
+        openCreatePlan={openCreatePlan}
+        onCreatePlanOpened={() => setOpenCreatePlan(false)}
       />
 
       {/* Workout Start Dialog — Freies Training, Quick-Log, Plan erstellen (U2) */}
@@ -347,7 +351,10 @@ export function TrainingPage() {
         open={showStartDialog}
         onClose={() => setShowStartDialog(false)}
         onQuickLog={() => setShowWorkoutDialog(true)}
-        onCreatePlan={() => setForceTab('plan')}
+        onCreatePlan={() => {
+          setForceTab('plan');
+          setOpenCreatePlan(true);
+        }}
       />
     </PageShell>
   );

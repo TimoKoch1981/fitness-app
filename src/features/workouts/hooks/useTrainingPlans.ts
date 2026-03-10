@@ -42,7 +42,39 @@ export function useActivePlan() {
 }
 
 /**
+ * Load a specific training plan by ID with all days (JOIN).
+ * Used when viewing a non-active plan from the plan list.
+ */
+export function usePlanById(planId: string | undefined) {
+  return useQuery({
+    queryKey: [PLANS_KEY, 'detail', planId],
+    queryFn: async (): Promise<TrainingPlan | null> => {
+      if (!planId) return null;
+
+      const { data, error } = await supabase
+        .from('training_plans')
+        .select('*, training_plan_days(*)')
+        .eq('id', planId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return null;
+
+      const { training_plan_days, ...rest } = data as Record<string, unknown>;
+      const plan: TrainingPlan = {
+        ...(rest as Omit<TrainingPlan, 'days'>),
+        days: (training_plan_days as TrainingPlanDay[] ?? [])
+          .sort((a, b) => a.day_number - b.day_number),
+      };
+      return plan;
+    },
+    enabled: !!planId,
+  });
+}
+
+/**
  * Load all training plans (without days) for listing.
+ * Sorted: active plan first, then by creation date (newest first).
  */
 export function useTrainingPlans() {
   return useQuery({
@@ -55,6 +87,7 @@ export function useTrainingPlans() {
         .from('training_plans')
         .select('*')
         .eq('user_id', user.id)
+        .order('is_active', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -239,6 +272,132 @@ export function useDeleteTrainingPlan() {
         .delete()
         .eq('id', id);
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+// ── Activate Plan Mutation ──────────────────────────────────────────────
+
+/**
+ * Activate a training plan (deactivate all others → activate the chosen one).
+ */
+export function useActivatePlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Step 1: Deactivate all plans
+      const { error: deactivateError } = await supabase
+        .from('training_plans')
+        .update({ is_active: false })
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (deactivateError) {
+        console.warn('[TrainingPlan] Deactivate warning:', deactivateError);
+      }
+
+      // Step 2: Activate the chosen plan
+      const { error: activateError } = await supabase
+        .from('training_plans')
+        .update({ is_active: true })
+        .eq('id', planId);
+
+      if (activateError) {
+        console.error('[TrainingPlan] Activate failed:', activateError);
+        throw activateError;
+      }
+
+      console.log(`[TrainingPlan] ✅ Plan ${planId} activated`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+// ── Duplicate Plan Mutation ─────────────────────────────────────────────
+
+/**
+ * Duplicate a training plan (plan + all days). Does NOT activate the copy.
+ */
+export function useDuplicatePlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Step 1: Load the source plan
+      const { data: sourcePlan, error: planError } = await supabase
+        .from('training_plans')
+        .select('*')
+        .eq('id', planId)
+        .single();
+
+      if (planError || !sourcePlan) {
+        throw planError ?? new Error('Plan not found');
+      }
+
+      // Step 2: Load the source days
+      const { data: sourceDays, error: daysError } = await supabase
+        .from('training_plan_days')
+        .select('*')
+        .eq('plan_id', planId)
+        .order('day_number', { ascending: true });
+
+      if (daysError) throw daysError;
+
+      // Step 3: Insert the copy (not active)
+      const { data: newPlan, error: insertError } = await supabase
+        .from('training_plans')
+        .insert({
+          user_id: user.id,
+          name: `Kopie von ${sourcePlan.name}`,
+          split_type: sourcePlan.split_type,
+          days_per_week: sourcePlan.days_per_week,
+          is_active: false,
+          notes: sourcePlan.notes,
+        })
+        .select()
+        .single();
+
+      if (insertError || !newPlan) {
+        throw insertError ?? new Error('Failed to create plan copy');
+      }
+
+      // Step 4: Duplicate all days
+      if (sourceDays && sourceDays.length > 0) {
+        const dayRows = sourceDays.map((day) => ({
+          plan_id: newPlan.id,
+          day_number: day.day_number,
+          name: day.name,
+          focus: day.focus,
+          exercises: day.exercises,
+          notes: day.notes,
+        }));
+
+        const { error: dayInsertError } = await supabase
+          .from('training_plan_days')
+          .insert(dayRows);
+
+        if (dayInsertError) {
+          console.error('[TrainingPlan] Duplicate days failed:', dayInsertError);
+          throw dayInsertError;
+        }
+      }
+
+      console.log(`[TrainingPlan] ✅ Plan duplicated: "${newPlan.name}" (${newPlan.id})`);
+      return newPlan as TrainingPlan;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
