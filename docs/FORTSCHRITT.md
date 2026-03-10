@@ -135,8 +135,21 @@
 | 12.68   | 2026-03-10 | Bugfixes B1-B4: ExerciseListBar, PED-Disclaimer, Apple OAuth, MFA Login        | Erledigt   |
 | 12.69   | 2026-03-10 | F4+F5+U2: Adaptive Live-Tracker (Cardio), Volume Comparison, Plan-Button       | Erledigt   |
 | 12.70   | 2026-03-10 | Multi-Plan Management: Plan-Liste, Aktivierung, Duplizierung, Create-Dialog    | Erledigt   |
+| 12.71   | 2026-03-10 | Bugfixes B5+B7: CreatePlanDialog State-Reset + Error-Feedback, negative Zeitanzeige | Erledigt   |
 
 ---
+
+### 2026-03-10 - v12.71: Bugfixes B5+B7 — CreatePlanDialog, TrainingPlanList
+
+**B7: "vor -1 Tagen" in TrainingPlanList** (TrainingPlanList.tsx)
+- `formatDate()`: `diffDays <= 0` statt `=== 0` — Server-Uhr minimal voraus → negativer Diff → zeigte "vor -1 Tagen"
+
+**B5: CreatePlanDialog State-Reset** (CreatePlanDialog.tsx)
+- `useEffect([open])`: Reset aller State-Variablen (step, name, splitType, daysPerWeek, notes, dayNames, dayFocuses, error) wenn Dialog oeffnet
+- Component bleibt gemounted (open-Prop statt conditional render), daher State persistent zwischen Oeffnungen
+- Error-Feedback: `AlertCircle` + rote Banner bei fehlgeschlagenem Speichern
+
+**B6: Plan-Erstellungs-Bugs** — Konnte nach ausfuehrlichem Test nicht reproduziert werden. Save-Flow (deactivate → insert plan → insert days) funktioniert korrekt.
 
 ### 2026-03-10 - v12.70: Multi-Plan Management — Plan-Liste, Aktivierung, Duplizierung, Create-Dialog
 
