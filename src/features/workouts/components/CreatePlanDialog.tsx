@@ -19,7 +19,7 @@ interface CreatePlanDialogProps {
   onCreated?: (planId: string) => void;
 }
 
-const SPLIT_OPTIONS: { value: SplitType; labelDE: string; labelEN: string }[] = [
+export const SPLIT_OPTIONS: { value: SplitType; labelDE: string; labelEN: string }[] = [
   { value: 'ppl', labelDE: 'Push/Pull/Legs', labelEN: 'Push/Pull/Legs' },
   { value: 'upper_lower', labelDE: 'Upper/Lower', labelEN: 'Upper/Lower' },
   { value: 'full_body', labelDE: 'Ganzkörper', labelEN: 'Full Body' },

@@ -15,11 +15,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../hooks/useWorkouts';
-import { useActivePlan } from '../hooks/useTrainingPlans';
+import { useActivePlan, usePlanById } from '../hooks/useTrainingPlans';
 import { usePageBuddySuggestions, type BuddySuggestion } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanList } from './TrainingPlanList';
 import { CreatePlanDialog } from './CreatePlanDialog';
+import { EditPlanMetaDialog } from './EditPlanMetaDialog';
 import { PlanEditorDialog } from './PlanEditorDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
 import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
@@ -78,6 +79,9 @@ export function WorkoutsTabContent({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
+  // EditPlanMeta state (for buddy chip interception)
+  const [showEditPlanMeta, setShowEditPlanMeta] = useState(false);
+
   // Post-creation flow: choice popup + auto-edit
   const [showPostCreateChoice, setShowPostCreateChoice] = useState(false);
   const [newlyCreatedPlanId, setNewlyCreatedPlanId] = useState<string | null>(null);
@@ -115,6 +119,9 @@ export function WorkoutsTabContent({
 
   // Accordion: which plan is expanded (auto-expand active plan)
   const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
+
+  // Load expanded plan data (with days) for review context
+  const { data: expandedPlanData } = usePlanById(expandedPlanId ?? undefined);
 
   // Auto-expand active plan on first load
   useEffect(() => {
@@ -155,16 +162,41 @@ export function WorkoutsTabContent({
     other: '\u{1F525}',
   };
 
-  // Intercept "Neuen Plan" buddy chip → open CreatePlanDialog instead of buddy chat
+  // Intercept buddy chips → handle plan_create, plan_edit, plan_evaluate
   const handleBuddySuggestionClick = useCallback((suggestion: BuddySuggestion): boolean => {
     if (suggestion.id === 'plan_create') {
-      // Switch to Plan tab if not already there, then open the dialog
       if (activeSubTab !== 'plan') setActiveSubTab('plan');
       setShowCreateDialog(true);
-      return true; // prevent default buddy navigation
+      return true;
     }
-    return false; // let all other suggestions go to buddy as normal
-  }, [activeSubTab]);
+    if (suggestion.id === 'plan_edit') {
+      // Open EditPlanMetaDialog for the active/expanded plan
+      if (activeSubTab !== 'plan') setActiveSubTab('plan');
+      if (activePlan) {
+        setShowEditPlanMeta(true);
+      }
+      return true;
+    }
+    if (suggestion.id === 'plan_evaluate') {
+      // Open buddy with plan review context
+      const plan = expandedPlanData ?? activePlan;
+      if (plan) {
+        const daysSummary = plan.days
+          ? plan.days.map(d => {
+              const exNames = (d.exercises ?? []).map((ex: { name?: string; exercise_id?: string }) => ex.name ?? ex.exercise_id).filter(Boolean).join(', ');
+              return `${d.name}: ${exNames || (isDE ? 'keine Übungen' : 'no exercises')}`;
+            }).join('; ')
+          : '';
+        const context = `${plan.name} (${plan.split_type}, ${plan.days_per_week}x/${isDE ? 'Woche' : 'week'})${daysSummary ? ` — ${daysSummary}` : ''}`;
+        const msg = isDE
+          ? `Bewerte meinen Trainingsplan: ${context}`
+          : `Evaluate my training plan: ${context}`;
+        openBuddyChat(msg, 'training');
+      }
+      return true;
+    }
+    return false;
+  }, [activeSubTab, activePlan, expandedPlanData, isDE, openBuddyChat]);
 
   return (
     <>
@@ -391,6 +423,20 @@ export function WorkoutsTabContent({
             queryClient.invalidateQueries({ queryKey: ['training_plans'] });
             queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
             setAutoEditDay(null);
+          }}
+        />
+      )}
+
+      {/* Edit Plan Meta Dialog — triggered by buddy chip or in-card button */}
+      {showEditPlanMeta && activePlan && (
+        <EditPlanMetaDialog
+          plan={activePlan}
+          open={showEditPlanMeta}
+          onClose={() => setShowEditPlanMeta(false)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
+            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
+            setShowEditPlanMeta(false);
           }}
         />
       )}

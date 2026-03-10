@@ -15,6 +15,7 @@ import { useState } from 'react';
 import {
   CheckCircle2, Copy, Trash2, Dumbbell,
   Plus, ChevronRight, ChevronDown, Calendar, Layers, Sparkles,
+  Pencil, Star,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '../../../i18n';
@@ -28,7 +29,9 @@ import {
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { DayCard } from './DayCard';
 import { PlanEditorDialog } from './PlanEditorDialog';
+import { EditPlanMetaDialog } from './EditPlanMetaDialog';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
+import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
 import type { TrainingPlan, TrainingPlanDay, CatalogExercise, SplitType } from '../../../types/health';
 
 interface TrainingPlanListProps {
@@ -72,10 +75,13 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
   const { data: expandedPlanData } = usePlanById(expandedPlanId ?? undefined);
   const { data: catalog } = useExerciseCatalog();
 
+  const { openBuddyChat } = useInlineBuddyChat();
+
   const [deleteTarget, setDeleteTarget] = useState<TrainingPlan | null>(null);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
+  const [editingPlanMeta, setEditingPlanMeta] = useState<TrainingPlan | null>(null);
 
   const toggleDay = (dayId: string) => {
     setExpandedDays(prev => {
@@ -149,6 +155,22 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
     } catch (err) {
       console.error('[TrainingPlanList] Duplicate failed:', err);
     }
+  };
+
+  const handleReviewPlan = (plan: TrainingPlan, planData: TrainingPlan | null | undefined) => {
+    const splitLabel = SPLIT_TYPE_LABELS[plan.split_type]?.[isDE ? 'de' : 'en'] ?? plan.split_type;
+    let context = `${plan.name} (${splitLabel}, ${plan.days_per_week}x/${isDE ? 'Woche' : 'week'})`;
+    if (planData?.days) {
+      const daysSummary = planData.days.map(d => {
+        const exNames = (d.exercises ?? []).map(ex => ex.name ?? ex.exercise_id).filter(Boolean).join(', ');
+        return `${d.name}: ${exNames || (isDE ? 'keine Übungen' : 'no exercises')}`;
+      }).join('; ');
+      context += ` — ${daysSummary}`;
+    }
+    const msg = isDE
+      ? `Bewerte meinen Trainingsplan: ${context}`
+      : `Evaluate my training plan: ${context}`;
+    openBuddyChat(msg, 'training');
   };
 
   const handleDeleteClick = (plan: TrainingPlan, e: React.MouseEvent) => {
@@ -272,15 +294,31 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
             {/* Expanded: Day Cards */}
             {isExpanded && expandedPlanData?.days && (
               <div className="px-3 pb-3 space-y-2 border-t border-gray-100 pt-2">
-                {/* Calibration button if needed */}
-                {!expandedPlanData.review_config?.calibration_done && (
+                {/* Action buttons row: Edit, Review, Calibration */}
+                <div className="flex flex-wrap gap-1.5">
                   <button
-                    className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1 hover:bg-amber-200 transition-colors"
+                    onClick={() => setEditingPlanMeta(expandedPlanData)}
+                    className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-teal-100 transition-colors"
                   >
-                    <Sparkles className="h-3 w-3" />
-                    {isDE ? 'Kalibrierung starten' : 'Start calibration'}
+                    <Pencil className="h-3 w-3" />
+                    {isDE ? 'Plan bearbeiten' : 'Edit plan'}
                   </button>
-                )}
+                  <button
+                    onClick={() => handleReviewPlan(plan, expandedPlanData)}
+                    className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-amber-100 transition-colors"
+                  >
+                    <Star className="h-3 w-3" />
+                    {isDE ? 'Plan bewerten' : 'Rate plan'}
+                  </button>
+                  {!expandedPlanData.review_config?.calibration_done && (
+                    <button
+                      className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-amber-200 transition-colors"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      {isDE ? 'Kalibrierung starten' : 'Start calibration'}
+                    </button>
+                  )}
+                </div>
                 {expandedPlanData.notes && (
                   <p className="text-xs text-gray-400 italic px-1">{expandedPlanData.notes}</p>
                 )}
@@ -323,6 +361,23 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
         <ExerciseDetailModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
+        />
+      )}
+
+      {/* Edit Plan Metadata Dialog */}
+      {editingPlanMeta && (
+        <EditPlanMetaDialog
+          plan={editingPlanMeta}
+          open={!!editingPlanMeta}
+          onClose={() => setEditingPlanMeta(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
+            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
+            if (expandedPlanId) {
+              queryClient.invalidateQueries({ queryKey: ['training_plans', 'detail', expandedPlanId] });
+            }
+            setEditingPlanMeta(null);
+          }}
         />
       )}
 

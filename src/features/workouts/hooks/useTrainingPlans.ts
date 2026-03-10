@@ -259,6 +259,50 @@ export function useUpdateTrainingPlanCalibration() {
   });
 }
 
+// ── Update Plan Metadata ──────────────────────────────────────────────
+
+export interface UpdateTrainingPlanInput {
+  id: string;
+  name?: string;
+  split_type?: SplitType;
+  days_per_week?: number;
+  notes?: string;
+}
+
+/**
+ * Update a training plan's metadata (name, split_type, days_per_week, notes).
+ * Used by EditPlanMetaDialog.
+ */
+export function useUpdateTrainingPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: UpdateTrainingPlanInput) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { id, ...fields } = input;
+      const { error } = await supabase
+        .from('training_plans')
+        .update(fields)
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('[TrainingPlan] Update metadata failed:', error);
+        throw error;
+      }
+
+      console.log(`[TrainingPlan] ✅ Plan ${id} metadata updated`);
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'detail', variables.id] });
+    },
+  });
+}
+
 /**
  * Delete a training plan (cascade deletes days via FK).
  */
