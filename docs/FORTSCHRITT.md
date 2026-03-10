@@ -3303,6 +3303,29 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 - Frontend Build deployed auf fudda.de (alte Assets geloescht, neue hochgeladen)
 - HTTP 200 verifiziert
 
+### v12.65 — Phase A: Kritische Daten-Fixes (2026-03-10)
+
+**KRITISCHER BUG GEFIXT:** Quick-Log Workouts (+ Button, Buddy) waren in Historie, Fortschritt und 1RM-Charts unsichtbar.
+
+- `useWorkoutHistory.ts`: `.not('session_exercises','is',null)` Filter ENTFERNT, `convertLegacyExercises()` + `normalizeWorkouts()` hinzugefuegt
+- `useWorkouts.ts`: `useAddWorkout()` befuellt jetzt IMMER `session_exercises` + `status: 'completed'`
+- `WorkoutHistoryPage.tsx`: Rendert auch Workouts ohne Uebungs-Detail (Fallback-Text)
+- `AddWorkoutDialog.tsx`: ExercisePicker-Integration (Katalog statt Freitext)
+- Deployed auf fudda.de, Commit `cbdd8bb`
+
+### v12.66 — Phase B: Freies Training (2026-03-10)
+
+**NEUES FEATURE:** "Freies Training" — Workout ohne Trainingsplan starten.
+
+- `WorkoutStartDialog.tsx` (NEU): Dual-Entry-Dialog — "Freies Training starten" / "Training schnell loggen"
+- `ActiveWorkoutContext.tsx`: `START_FREE_SESSION` Action, leere Uebungsliste, Warmup uebersprungen
+- `ActiveWorkoutPage.tsx`: Free-Mode (`mode=free`), Empty-State UI mit "Uebung hinzufuegen" Button
+- `WorkoutSummary.tsx`: "Als Plan speichern?" nach freiem Training (konvertiert Session → Plan)
+- `AddExerciseDialog.tsx`: "Dauerhaft zum Plan" nur bei Plan-Sessions sichtbar
+- `TrainingPage.tsx`: "+" Button oeffnet WorkoutStartDialog statt direkt AddWorkoutDialog
+- Draft-Save fuer freie Sessions (Lookup via `started_at` statt `plan_day_id`)
+- Deployed auf fudda.de, Commit `5189702`
+
 ---
 
 *Letzte Aktualisierung: 2026-03-10*

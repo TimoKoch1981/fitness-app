@@ -1,8 +1,8 @@
 # Uebergabe 2026-03-10 — Workout-System Konsolidierung
 
-> **Session-Stand:** Phase A abgeschlossen, deployed auf fudda.de
-> **Git:** Commit `cbdd8bb` auf develop, gepusht
-> **Version:** v12.65
+> **Session-Stand:** Phase A+B abgeschlossen, deployed auf fudda.de
+> **Git:** Commit `5189702` auf develop, gepusht
+> **Version:** v12.66
 
 ---
 
@@ -38,6 +38,21 @@ Quick-Log Workouts (+ Button, Buddy) waren in Historie, Fortschritt und 1RM-Char
 
 **Buddy-Action `log_workout`:** Automatisch mit gefixt — nutzt `useAddWorkout()` intern.
 
+### 4. Phase B: Freies Training (v12.66)
+
+**NEUES FEATURE:** "Freies Training" — Workout ohne Trainingsplan starten.
+
+**Geaenderte/Neue Dateien:**
+
+| Datei | Aenderung |
+|-------|-----------
+| `components/WorkoutStartDialog.tsx` | NEU: Dual-Entry-Dialog — "Freies Training starten" / "Training schnell loggen" |
+| `context/ActiveWorkoutContext.tsx` | `START_FREE_SESSION` Action + Reducer. Draft-Save fuer freie Sessions (Lookup via `started_at` statt `plan_day_id`). `startFreeSession()` im Context |
+| `components/ActiveWorkoutPage.tsx` | `mode=free` URL-Param. Free-Session-Start-Effect. Empty-State UI (Dumbbell + "Uebung hinzufuegen"). Floating "+" Button fuer weitere Uebungen |
+| `components/WorkoutSummary.tsx` | "Als Plan speichern?" Dialog nach freiem Training. Konvertiert Session-Uebungen → `training_plan` + `training_plan_days` |
+| `components/AddExerciseDialog.tsx` | "Dauerhaft zum Plan" Toggle nur bei Plan-Sessions sichtbar |
+| `pages/TrainingPage.tsx` | "+" Button oeffnet WorkoutStartDialog statt direkt AddWorkoutDialog |
+
 ---
 
 ## Was NICHT gemacht wurde (naechste Schritte)
@@ -47,8 +62,8 @@ Quick-Log Workouts (+ Button, Buddy) waren in Historie, Fortschritt und 1RM-Char
 | Phase | Beschreibung | Status |
 |-------|-------------|--------|
 | **A** | Daten-Fixes (History-Query, session_exercises) | ✅ ERLEDIGT |
-| **B** | "Freies Training" (ActiveWorkoutPage ohne Plan) | OFFEN |
-| **B.3** | **Plan aus einzelnem Training erstellen** (User-Wunsch!) | OFFEN |
+| **B** | "Freies Training" (ActiveWorkoutPage ohne Plan) | ✅ ERLEDIGT |
+| **B.3** | **Plan aus einzelnem Training erstellen** (User-Wunsch!) | ✅ ERLEDIGT |
 | **C** | PREVIOUS-Spalte + Auto-Fill (letzte Werte inline) | OFFEN |
 | **D** | Set-Tags, Adaptive Felder, Multi-Select, Summary | OFFEN |
 | **E** | AddWorkoutDialog weitere Verbesserungen | OFFEN |
@@ -66,7 +81,7 @@ Quick-Log Workouts (+ Button, Buddy) waren in Historie, Fortschritt und 1RM-Char
 - **EINE einzige `workouts`-Tabelle** — kein separates `workout_sessions`
 - **Status-Lifecycle:** `null` → `completed` (Quick-Log), `in_progress` → `completed` (Plan-Session)
 - **Zwei Datenformate:** `exercises[]` (Legacy) + `session_exercises[]` (Detail) — BEIDE werden jetzt normalisiert
-- **4 Erstellungswege:** Manual (+), Plan-Session, Buddy/KI, Resume
+- **5 Erstellungswege:** Manual (+), Plan-Session, Freies Training, Buddy/KI, Resume
 
 ### Wichtige Funktionen (neu)
 ```typescript
