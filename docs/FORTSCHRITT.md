@@ -3450,6 +3450,41 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 **Build:** 0 TS-Fehler, 114 PWA Precache Entries
 **Deployed auf fudda.de, Commit `15859fb`**
 
+### v12.73 — 4 UX-Verbesserungen: ExerciseListBar, Post-Creation-Flow, Buddy-Hilfe, Akkordeon (2026-03-10)
+
+**4 UX-Probleme aus User-Feedback geloest:**
+
+**Aenderung 1 — ExerciseListBar (aktives Workout): Pfeile + Full-Row-DnD:**
+- `ExerciseListBar.tsx`: `{...attributes}` + `{...listeners}` von GripVertical-Button auf gesamte Zeile verschoben
+- `cursor-grab active:cursor-grabbing touch-none` auf der Zeile
+- ChevronUp/ChevronDown-Pfeile als vertikaler Stack links neben jeder Uebung
+- `onMoveUp`/`onMoveDown` Callbacks mit `reorderExercises(idx, idx-1/+1)`
+- `stopPropagation` auf Jump-to-Exercise-Button (onClick + onPointerDown)
+- Erster/Letzter Button disabled (disabled Prop basierend auf Index)
+
+**Aenderung 2 — CreatePlanDialog: Post-Creation-Flow:**
+- `CreatePlanDialog.tsx`: `onCreated` Callback gibt jetzt `planId` zurueck (statt void)
+- `WorkoutsTabContent.tsx`: Nach Plan-Erstellung erscheint Auswahl-Popup
+  - "Selbst hinzufuegen" → PlanEditorDialog fuer Tag 1 oeffnen
+  - "Buddy um Hilfe bitten" → Buddy-Chat mit Kontext oeffnen
+
+**Aenderung 3 — Buddy-Integration nach Plan-Erstellung:**
+- `openBuddyChat()` mit Kontext-Nachricht und 'training' Agent
+- Buddy generiert automatisch Uebungsvorschlaege fuer den neuen Plan
+
+**Aenderung 4 — Plan-Liste als Akkordeon/Baum:**
+- `DayCard.tsx`: Neue Datei — DayCard + formatExerciseDetails aus TrainingPlanView extrahiert
+- `TrainingPlanList.tsx`: Jede Plan-Karte auf/zuklappbar mit inline DayCards
+  - ChevronRight (geschlossen) / ChevronDown (offen)
+  - `usePlanById(expandedPlanId)` laedt Tage nur fuer offenen Plan
+  - PlanEditorDialog + ExerciseDetailModal inline integriert
+- `WorkoutsTabContent.tsx`: TrainingPlanView entfernt, nur noch Akkordeon-TrainingPlanList
+  - `expandedPlanId` State mit Auto-Expand fuer aktiven Plan
+- `TrainingPlanView.tsx`: DayCard-Import statt Inline-Komponente (weiterhin verfuegbar)
+
+**Build:** 0 TS-Fehler, 111 PWA Precache Entries
+**Deployed auf fudda.de, Commit `7ec6f17`**
+
 ---
 
 *Letzte Aktualisierung: 2026-03-10*

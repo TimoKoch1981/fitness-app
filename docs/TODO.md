@@ -1,7 +1,7 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-10, v12.72
-> **Letzte Konsolidierung:** PlanEditor UX (v12.72)
+> **Stand:** 2026-03-10, v12.73
+> **Letzte Konsolidierung:** 4 UX-Verbesserungen (v12.73)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
