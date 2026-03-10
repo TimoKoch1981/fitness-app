@@ -93,7 +93,8 @@ export function TrainingPlanList({ selectedPlanId, onSelectPlan, onCreatePlan }:
       const diffMs = now.getTime() - d.getTime();
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffDays === 0) return isDE ? 'Heute' : 'Today';
+      // Guard against negative diff (server clock slightly ahead)
+      if (diffDays <= 0) return isDE ? 'Heute' : 'Today';
       if (diffDays === 1) return isDE ? 'Gestern' : 'Yesterday';
       if (diffDays < 7) return isDE ? `vor ${diffDays} Tagen` : `${diffDays} days ago`;
       if (diffDays < 30) {

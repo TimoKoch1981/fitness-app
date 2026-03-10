@@ -6,8 +6,8 @@
  * then opens PlanEditorDialog for the first day.
  */
 
-import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Dumbbell, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddTrainingPlan } from '../hooks/useTrainingPlans';
 import type { SplitType } from '../../../types/health';
@@ -82,6 +82,23 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
   const [dayNames, setDayNames] = useState<string[]>([]);
   const [dayFocuses, setDayFocuses] = useState<string[]>([]);
 
+  // Error feedback
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset ALL state when dialog opens (component stays mounted via open prop)
+  useEffect(() => {
+    if (open) {
+      setStep(1);
+      setName('');
+      setSplitType('upper_lower');
+      setDaysPerWeek(4);
+      setNotes('');
+      setDayNames([]);
+      setDayFocuses([]);
+      setError(null);
+    }
+  }, [open]);
+
   if (!open) return null;
 
   const handleNextStep = () => {
@@ -92,6 +109,7 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
   };
 
   const handleCreate = async () => {
+    setError(null);
     try {
       await addPlan.mutateAsync({
         name: name.trim() || (isDE ? 'Neuer Plan' : 'New Plan'),
@@ -109,6 +127,9 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
       onClose();
     } catch (err) {
       console.error('[CreatePlanDialog] Create failed:', err);
+      setError(isDE
+        ? 'Plan konnte nicht gespeichert werden. Bitte erneut versuchen.'
+        : 'Failed to save plan. Please try again.');
     }
   };
 
@@ -272,6 +293,16 @@ export function CreatePlanDialog({ open, onClose, onCreated }: CreatePlanDialogP
             </div>
           )}
         </div>
+
+        {/* Error feedback */}
+        {error && (
+          <div className="px-5 pb-2 flex-shrink-0">
+            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+              {error}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 flex-shrink-0">
