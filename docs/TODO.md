@@ -54,6 +54,13 @@ Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
 <details>
 <summary>Alle abgeschlossenen Items aufklappen</summary>
 
+### Multi-Plan Management v12.70 ✅
+- [x] **TrainingPlanList** — Kompakte Card-Liste aller Plaene mit Aktiv-Badge (teal), Duplizieren/Loeschen-Buttons, Delete-Bestaetigung mit Active-Plan-Warnung
+- [x] **CreatePlanDialog** — 2-Schritt-Dialog (Name/Split/Tage → Day-Konfiguration), Auto-generierte Default-Day-Names basierend auf Split-Type
+- [x] **Hooks** — useActivatePlan (Deaktiviert alle → aktiviert gewaehlten), useDuplicatePlan ("Kopie von" Prefix, nicht aktiv), usePlanById (Days-JOIN fuer non-active Plans)
+- [x] **Integration** — WorkoutsTabContent Plan-Tab zeigt Plan-Liste + Detail-View, WorkoutStartDialog oeffnet CreatePlanDialog direkt
+- [x] **i18n** — 24 neue plans-Keys in allen 17 Sprachen
+
 ### Workout UX Phase 2 v12.69 ✅
 - [x] **F4: Adaptive Felder im Live-Tracker (Phase D.2)** — SetResult erweitert (target/actual_duration_minutes, target/actual_distance_km), LOG_SET + logSet erweitert, Cardio via Set-Tracker (nicht Timer), SetBySetTracker + ExerciseOverviewTracker zeigen Duration+Distance fuer Cardio, PREVIOUS-Spalte adaptiv, WorkoutSummary adaptiv inkl. Inline-Editing
 - [x] **F5: Volumen-Vergleich im WorkoutSummary** — Total Volume (Σ reps×weight, excl. warmup+cardio), Matching via >50% Exercise-Overlap, Delta mit Farbkodierung (gruen +, rot -), Prozent-Vergleich vs. letztes Mal

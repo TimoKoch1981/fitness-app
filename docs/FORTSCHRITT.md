@@ -134,6 +134,26 @@
 | 12.67   | 2026-03-10 | Workout UX Consolidation Phase C-E: PREVIOUS, Set-Tags, exercise_id, Adaptive  | Erledigt   |
 | 12.68   | 2026-03-10 | Bugfixes B1-B4: ExerciseListBar, PED-Disclaimer, Apple OAuth, MFA Login        | Erledigt   |
 | 12.69   | 2026-03-10 | F4+F5+U2: Adaptive Live-Tracker (Cardio), Volume Comparison, Plan-Button       | Erledigt   |
+| 12.70   | 2026-03-10 | Multi-Plan Management: Plan-Liste, Aktivierung, Duplizierung, Create-Dialog    | Erledigt   |
+
+---
+
+### 2026-03-10 - v12.70: Multi-Plan Management — Plan-Liste, Aktivierung, Duplizierung, Create-Dialog
+
+**Neue Dateien (2):**
+- `TrainingPlanList.tsx`: Kompakte Card-Liste aller Trainingsplaene mit Aktiv-Badge (teal), Duplizieren/Loeschen-Buttons, Delete-Bestaetigung mit Active-Plan-Warnung, Empty-State
+- `CreatePlanDialog.tsx`: 2-Schritt-Dialog — Schritt 1: Name, Split-Type (10 Optionen), Tage/Woche, Notizen; Schritt 2: Tag-Namen + Fokus konfigurieren. Auto-generierte Default-Day-Names basierend auf Split-Type (PPL-Cycle, Upper/Lower A/B, etc.)
+
+**Neue Hooks (3) in `useTrainingPlans.ts`:**
+- `usePlanById(planId)`: Laedt spezifischen Plan mit Days-JOIN (fuer non-active Plan-Ansicht)
+- `useActivatePlan()`: Deaktiviert alle Plaene → aktiviert gewaehlten Plan, invalidiert Queries
+- `useDuplicatePlan()`: Klont Plan + Days mit "Kopie von"-Prefix, NICHT automatisch aktiv
+
+**Geaenderte Dateien (4):**
+- `useTrainingPlans.ts`: +159 Zeilen (3 neue Hooks), Sortierung is_active DESC, useDeleteTrainingPlan invalidiert active-Query
+- `WorkoutsTabContent.tsx`: Plan-Tab zeigt TrainingPlanList + TrainingPlanView. Props: openCreatePlan, onCreatePlanOpened. usePlanById fuer non-active Plan-Viewing
+- `TrainingPage.tsx`: openCreatePlan State, WorkoutStartDialog oeffnet CreatePlanDialog direkt
+- `i18n/*.ts`: 24 neue plans-Keys in allen 17 Sprachen
 
 ---
 
