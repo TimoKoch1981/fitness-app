@@ -83,38 +83,39 @@ function SortableExerciseItem({
       {...attributes}
       {...listeners}
       className={cn(
-        'flex items-center gap-1.5 rounded-lg transition-colors cursor-grab active:cursor-grabbing touch-none',
+        'flex items-center gap-1 pl-1 rounded-lg transition-colors cursor-grab active:cursor-grabbing touch-none',
         isCurrent && 'bg-teal-50 ring-2 ring-teal-400',
         !isCurrent && allDone && 'bg-green-50/50',
         !isCurrent && isSkipped && 'opacity-50',
         isDragging && 'shadow-lg bg-white ring-2 ring-teal-300',
       )}
     >
-      {/* Reorder arrows + grip visual */}
-      <div className="flex flex-col items-center flex-shrink-0 -my-1">
+      {/* Reorder arrows — horizontal, large tap targets */}
+      <div className="flex items-center flex-shrink-0">
         <button
           onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={idx === 0}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+          className="p-1.5 text-gray-400 hover:text-teal-500 active:bg-teal-50 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
         >
-          <ChevronUp className="h-3.5 w-3.5" />
+          <ChevronUp className="h-5 w-5" />
         </button>
-        <GripVertical className="h-3.5 w-3.5 text-gray-300" />
         <button
           onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={idx === totalExercises - 1}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+          className="p-1.5 text-gray-400 hover:text-teal-500 active:bg-teal-50 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
         >
-          <ChevronDown className="h-3.5 w-3.5" />
+          <ChevronDown className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Exercise row — tap to jump */}
+      {/* Grip icon — visual drag cue */}
+      <GripVertical className="h-4 w-4 text-gray-300 flex-shrink-0" />
+
+      {/* Exercise row — tap to jump (no onPointerDown stopPropagation so DnD works on text area) */}
       <button
         onClick={(e) => { e.stopPropagation(); onJump(idx); }}
-        onPointerDown={(e) => e.stopPropagation()}
         className="flex-1 flex items-center gap-2 py-2 pr-2 text-left min-w-0 cursor-pointer"
       >
         {/* Status icon */}
