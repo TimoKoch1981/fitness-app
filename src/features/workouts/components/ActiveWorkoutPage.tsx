@@ -483,9 +483,7 @@ export function ActiveWorkoutPage() {
         )}
 
         {state.phase === 'exercise' && state.exercises.length > 0 && (
-          <ExerciseTracker
-            lastWorkout={lastWorkout}
-          />
+          <ExerciseTracker />
         )}
 
         {state.phase === 'rest' && (

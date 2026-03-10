@@ -10,11 +10,25 @@
  * - Info hint explaining the workflow
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
-import type { WorkoutExerciseResult } from '../../../types/health';
+import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
+
+/** Tag display config */
+const TAG_CONFIG: Record<SetTag, { letter: string; bg: string; text: string }> = {
+  normal: { letter: '', bg: '', text: '' },
+  warmup: { letter: 'W', bg: 'bg-amber-100', text: 'text-amber-700' },
+  drop: { letter: 'D', bg: 'bg-purple-100', text: 'text-purple-700' },
+  failure: { letter: 'F', bg: 'bg-red-100', text: 'text-red-700' },
+};
+const TAG_CYCLE: SetTag[] = ['normal', 'warmup', 'drop', 'failure'];
+const TAG_LABELS: Record<string, Record<SetTag, string>> = {
+  de: { normal: 'Normal', warmup: 'Aufwärm', drop: 'Drop', failure: 'Failure' },
+  en: { normal: 'Normal', warmup: 'Warm-up', drop: 'Drop', failure: 'Failure' },
+};
 
 interface SetBySetTrackerProps {
   exercise: WorkoutExerciseResult;
@@ -35,25 +49,35 @@ export function SetBySetTracker({
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
+  const { setTag } = useActiveWorkout();
+
+  const currentSet = exercise.sets[currentSetIndex];
+  const lastSet = lastExercise?.sets[currentSetIndex];
+
+  /** Cycle the current set's tag */
+  const cycleCurrentTag = useCallback(() => {
+    const currentTag = currentSet?.set_tag ?? 'normal';
+    const nextIdx = (TAG_CYCLE.indexOf(currentTag) + 1) % TAG_CYCLE.length;
+    setTag(exerciseIndex, currentSetIndex, TAG_CYCLE[nextIdx]);
+  }, [currentSet?.set_tag, exerciseIndex, currentSetIndex, setTag]);
 
   // Check if exercise is unilateral (needs L/R)
   const { data: catalog } = useExerciseCatalog();
   const catalogEntry = catalog?.find((c) => c.id === exercise.exercise_id);
   const isUnilateral = catalogEntry?.is_unilateral ?? false;
-
-  const currentSet = exercise.sets[currentSetIndex];
-  const lastSet = lastExercise?.sets[currentSetIndex];
   const totalSets = exercise.sets.length;
   const completedCount = exercise.sets.filter(s => s.completed).length;
 
   const [reps, setReps] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
 
-  // Pre-fill weight with target
+  // Auto-fill weight: plan target > PREVIOUS > empty (industry standard)
   useEffect(() => {
     setReps('');
-    setWeight(currentSet?.target_weight_kg?.toString() ?? '');
-  }, [currentSetIndex, currentSet?.target_weight_kg]);
+    const targetWeight = currentSet?.target_weight_kg;
+    const prevWeight = lastSet?.actual_weight_kg;
+    setWeight((targetWeight ?? prevWeight)?.toString() ?? '');
+  }, [currentSetIndex, currentSet?.target_weight_kg, lastSet?.actual_weight_kg]);
 
   if (!currentSet) return null;
 
@@ -65,7 +89,7 @@ export function SetBySetTracker({
 
   const handleDone = () => {
     const actualReps = reps ? parseInt(reps) : parseTargetReps(currentSet.target_reps);
-    const actualWeight = weight ? parseFloat(weight) : currentSet.target_weight_kg;
+    const actualWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? lastSet?.actual_weight_kg);
     onLogSet(exerciseIndex, currentSetIndex, actualReps, actualWeight);
   };
 
@@ -89,16 +113,18 @@ export function SetBySetTracker({
               }`}
             />
             <span className={`text-[10px] font-medium ${
-              i === currentSetIndex ? 'text-teal-600' : s.completed ? 'text-teal-400' : 'text-gray-300'
+              s.set_tag && s.set_tag !== 'normal'
+                ? TAG_CONFIG[s.set_tag].text
+                : i === currentSetIndex ? 'text-teal-600' : s.completed ? 'text-teal-400' : 'text-gray-300'
             }`}>
-              {i + 1}
+              {s.set_tag && s.set_tag !== 'normal' ? TAG_CONFIG[s.set_tag].letter : i + 1}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Current Set Label */}
-      <div className="text-center">
+      {/* Current Set Label + Tag Toggle */}
+      <div className="flex items-center justify-center gap-2">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-semibold">
           <ArrowRight className="h-3.5 w-3.5" />
           {isDE ? 'Satz' : 'Set'} {currentSetIndex + 1} / {totalSets}
@@ -106,6 +132,25 @@ export function SetBySetTracker({
             ({completedCount} {isDE ? 'fertig' : 'done'})
           </span>
         </span>
+        {/* Set Tag Toggle — tap to cycle W/D/F */}
+        {(() => {
+          const tag = currentSet.set_tag ?? 'normal';
+          const config = TAG_CONFIG[tag];
+          const label = TAG_LABELS[isDE ? 'de' : 'en'][tag];
+          return (
+            <button
+              onClick={cycleCurrentTag}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors border ${
+                tag !== 'normal'
+                  ? `${config.bg} ${config.text} border-current`
+                  : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
+              }`}
+              title={isDE ? 'Satz-Typ: Normal → Aufwärm → Drop → Failure' : 'Set type: Normal → Warm-up → Drop → Failure'}
+            >
+              {tag !== 'normal' ? `${config.letter} ${label}` : (isDE ? 'Typ' : 'Type')}
+            </button>
+          );
+        })()}
       </div>
 
       {/* Target */}
@@ -135,13 +180,16 @@ export function SetBySetTracker({
         </div>
       )}
 
-      {/* Last Time */}
+      {/* PREVIOUS — Last session data (Strong/Hevy format) */}
       {lastSet && lastSet.completed && (
-        <div className="bg-gray-50 border border-gray-100 rounded-lg px-4 py-2.5 text-center">
-          <p className="text-xs text-gray-400 mb-0.5 font-medium">{isDE ? 'Letztes Mal' : 'Last Time'}</p>
-          <p className="text-sm font-semibold text-gray-600">
-            {lastSet.actual_reps} {isDE ? 'Wdh' : 'Reps'}
-            {lastSet.actual_weight_kg != null && ` @ ${lastSet.actual_weight_kg} kg`}
+        <div className="bg-gray-50 border border-gray-100 rounded-lg px-4 py-2 text-center">
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
+            {isDE ? 'Vorheriges' : 'Previous'}
+          </p>
+          <p className="text-sm font-medium text-gray-500 mt-0.5">
+            {lastSet.actual_weight_kg != null ? `${lastSet.actual_weight_kg} kg` : '—'}
+            <span className="mx-1.5 text-gray-300">×</span>
+            {lastSet.actual_reps ?? '—'} {isDE ? 'Wdh' : 'reps'}
           </p>
         </div>
       )}

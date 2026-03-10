@@ -27,6 +27,15 @@ import { PostSessionFeedback } from './PostSessionFeedback';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { ShareButton } from '../../../shared/components/ShareButton';
 import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
+import type { SetTag } from '../../../types/health';
+
+/** Tag display config (matches SetBySetTracker/ExerciseOverviewTracker) */
+const TAG_CONFIG: Record<SetTag, { letter: string; bg: string; text: string }> = {
+  normal: { letter: '', bg: '', text: '' },
+  warmup: { letter: 'W', bg: 'bg-amber-100', text: 'text-amber-700' },
+  drop: { letter: 'D', bg: 'bg-purple-100', text: 'text-purple-700' },
+  failure: { letter: 'F', bg: 'bg-red-100', text: 'text-red-700' },
+};
 
 interface WorkoutSummaryProps {
   weightKg: number;
@@ -62,17 +71,21 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     const skipped = state.exercises.filter(ex => ex.skipped);
     const additions = state.exercises.filter(ex => ex.is_addition);
 
+    // Exclude warmup sets from working-set count (industry standard: Strong/Hevy)
     const totalSets = completed.reduce(
-      (sum, ex) => sum + ex.sets.filter(s => s.completed).length, 0,
+      (sum, ex) => sum + ex.sets.filter(s => s.completed && s.set_tag !== 'warmup').length, 0,
+    );
+    const warmupSets = completed.reduce(
+      (sum, ex) => sum + ex.sets.filter(s => s.completed && s.set_tag === 'warmup').length, 0,
     );
 
     const calories = calculateSessionCalories(state.exercises, state.warmup, weightKg, durationMin);
 
-    // Find PRs (weight increases vs target)
+    // Find PRs (weight increases vs target) — exclude warmup sets
     const prs: { name: string; weight: number; targetWeight: number }[] = [];
     for (const ex of completed) {
       for (const set of ex.sets) {
-        if (set.completed && set.actual_weight_kg != null && set.target_weight_kg != null) {
+        if (set.completed && set.set_tag !== 'warmup' && set.actual_weight_kg != null && set.target_weight_kg != null) {
           if (set.actual_weight_kg > set.target_weight_kg) {
             const existing = prs.find(p => p.name === ex.name);
             if (!existing || set.actual_weight_kg > existing.weight) {
@@ -85,7 +98,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
       }
     }
 
-    return { durationMin, completed, skipped, additions, totalSets, calories, prs };
+    return { durationMin, completed, skipped, additions, totalSets, warmupSets, calories, prs };
   }, [state, weightKg]);
 
   // Trigger celebrations for PRs when summary is shown
@@ -231,7 +244,12 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         <div className="bg-white rounded-xl shadow-sm p-3 text-center">
           <TrendingUp className="h-5 w-5 text-blue-500 mx-auto mb-1" />
           <p className="text-lg font-bold text-gray-900">{stats.totalSets}</p>
-          <p className="text-xs text-gray-400">{isDE ? 'Sätze' : 'Sets'}</p>
+          <p className="text-xs text-gray-400">
+            {isDE ? 'Sätze' : 'Sets'}
+            {stats.warmupSets > 0 && (
+              <span className="text-amber-500"> +{stats.warmupSets}W</span>
+            )}
+          </p>
         </div>
       </div>
 
@@ -290,11 +308,13 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           }
 
           const completedSets = ex.sets.filter(s => s.completed);
-          const avgReps = completedSets.length > 0
-            ? Math.round(completedSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / completedSets.length)
+          // Exclude warmup sets from summary stats (industry standard)
+          const workingSets = completedSets.filter(s => s.set_tag !== 'warmup');
+          const avgReps = workingSets.length > 0
+            ? Math.round(workingSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / workingSets.length)
             : 0;
-          const maxWeight = completedSets.length > 0
-            ? Math.max(...completedSets.map(s => s.actual_weight_kg ?? 0))
+          const maxWeight = workingSets.length > 0
+            ? Math.max(...workingSets.map(s => s.actual_weight_kg ?? 0))
             : 0;
 
           const targetMet = completedSets.every(s => {
@@ -322,8 +342,11 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                   <span className="text-xs text-gray-400">
-                    {completedSets.length}×{avgReps}
+                    {workingSets.length}×{avgReps}
                     {maxWeight > 0 && ` @ ${maxWeight}kg`}
+                    {completedSets.length > workingSets.length && (
+                      <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                    )}
                   </span>
                   {isExpanded ? (
                     <ChevronUp className="h-3.5 w-3.5 text-gray-400" />
@@ -342,12 +365,20 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                       {isDE ? 'Werte korrigieren (Wdh / kg):' : 'Correct values (reps / kg):'}
                     </span>
                   </div>
-                  {ex.sets.map((set, setIdx) => (
+                  {ex.sets.map((set, setIdx) => {
+                    const tag = set.set_tag ?? 'normal';
+                    const tagCfg = TAG_CONFIG[tag];
+                    return (
                     <div key={setIdx} className="flex items-center gap-2">
-                      <span className={`text-xs font-medium w-14 ${
+                      <span className={`text-xs font-medium w-14 flex items-center gap-1 ${
                         set.completed ? 'text-teal-600' : set.skipped ? 'text-gray-400' : 'text-gray-500'
                       }`}>
-                        {isDE ? 'Satz' : 'Set'} {setIdx + 1}
+                        {tag !== 'normal' && (
+                          <span className={`inline-flex items-center justify-center w-4 h-4 rounded text-[9px] font-bold ${tagCfg.bg} ${tagCfg.text}`}>
+                            {tagCfg.letter}
+                          </span>
+                        )}
+                        {setIdx + 1}
                       </span>
                       {set.completed ? (
                         <>
@@ -379,7 +410,8 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                         <span className="text-xs text-gray-400">—</span>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

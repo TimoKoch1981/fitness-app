@@ -21,13 +21,9 @@ import { AddExerciseDialog } from './AddExerciseDialog';
 import { RIRFeedbackDialog } from './RIRFeedbackDialog';
 import { suggestRestTime } from '../utils/suggestRestTimes';
 import { useIsFirstSessionForPlan } from '../hooks/useIsFirstSessionForPlan';
-import type { Workout, WorkoutExerciseResult } from '../../../types/health';
+import { useLastExerciseData } from '../hooks/useLastExerciseData';
 
-interface ExerciseTrackerProps {
-  lastWorkout?: Workout | null;
-}
-
-export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
+export function ExerciseTracker() {
   const { language } = useTranslation();
   const isDE = language === 'de';
   const {
@@ -76,12 +72,12 @@ export function ExerciseTracker({ lastWorkout }: ExerciseTrackerProps) {
     });
   }, [exercise]);
 
+  // Cross-plan PREVIOUS data (matches by exercise_id or name, not plan_exercise_index)
+  const { data: lastExData } = useLastExerciseData(exercise?.name, exercise?.exercise_id);
+
   if (!exercise) return null;
 
-  const lastExercises = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-  const lastExercise = lastExercises?.find(
-    ex => ex.plan_exercise_index === exercise.plan_exercise_index,
-  );
+  const lastExercise = lastExData?.exercise;
 
   const catalogEntry = catalog ? findExerciseInCatalog(exercise.name, catalog) : null;
   const hasVideo = catalogEntry && (catalogEntry.video_url_de || catalogEntry.video_url_en);

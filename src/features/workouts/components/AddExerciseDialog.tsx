@@ -6,8 +6,8 @@
  * Option: just this session or permanently add to plan.
  */
 
-import { useState } from 'react';
-import { X, Plus, ChevronLeft } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { X, Plus, ChevronLeft, ListChecks } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { ExercisePicker } from './ExercisePicker';
@@ -30,6 +30,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
   const [permanent, setPermanent] = useState(false);
   const [selected, setSelected] = useState<CatalogExercise | null>(null);
   const [step, setStep] = useState<'search' | 'config'>('search');
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
 
   const handleSelect = (ex: CatalogExercise) => {
     setSelected(ex);
@@ -42,6 +43,26 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
     setCustomName(isDE ? 'Neue Übung' : 'New Exercise');
     setStep('config');
   };
+
+  /** Multi-select: add all selected exercises with default configs (3 sets, 10 reps) */
+  const handleMultiAdd = useCallback((exercises: CatalogExercise[]) => {
+    exercises.forEach((ex, offset) => {
+      const exercise: WorkoutExerciseResult = {
+        name: isDE ? ex.name : (ex.name_en ?? ex.name),
+        exercise_id: ex.id,
+        exercise_type: ex.category as any ?? 'strength',
+        plan_exercise_index: state.exercises.length + offset,
+        sets: Array.from({ length: 3 }, (_, i) => ({
+          set_number: i + 1,
+          target_reps: '10',
+          completed: false,
+        })),
+        is_addition: true,
+      };
+      addExercise(exercise, false);
+    });
+    onClose();
+  }, [isDE, state.exercises.length, addExercise, onClose]);
 
   const handleAdd = async () => {
     const numSets = Math.max(1, parseInt(sets) || 3);
@@ -109,10 +130,23 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
           )}
           <h3 className="font-semibold text-gray-900 text-sm flex-1">
             {step === 'search'
-              ? (isDE ? 'Übung auswählen' : 'Select Exercise')
+              ? (multiSelectMode
+                  ? (isDE ? 'Mehrere auswählen' : 'Select Multiple')
+                  : (isDE ? 'Übung auswählen' : 'Select Exercise'))
               : (isDE ? 'Übung konfigurieren' : 'Configure Exercise')
             }
           </h3>
+          {step === 'search' && (
+            <button
+              onClick={() => setMultiSelectMode(!multiSelectMode)}
+              className={`p-1.5 rounded-lg transition-colors mr-1 ${
+                multiSelectMode ? 'bg-teal-100 text-teal-600' : 'text-gray-400 hover:bg-gray-100'
+              }`}
+              title={isDE ? 'Mehrfachauswahl' : 'Multi-select'}
+            >
+              <ListChecks className="h-4 w-4" />
+            </button>
+          )}
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="h-4 w-4 text-gray-400" />
           </button>
@@ -121,9 +155,11 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
         <div className="p-4 overflow-y-auto flex-1">
           {step === 'search' ? (
             <div className="space-y-3">
-              {/* Exercise Picker with filters */}
+              {/* Exercise Picker with filters (supports multi-select) */}
               <ExercisePicker
                 onSelect={handleSelect}
+                multiSelect={multiSelectMode}
+                onMultiSelectConfirm={handleMultiAdd}
                 maxHeight="50vh"
               />
 

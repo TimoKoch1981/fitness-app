@@ -82,6 +82,7 @@ type Action =
   | { type: 'REORDER_EXERCISES'; fromIndex: number; toIndex: number }
   | { type: 'EDIT_EXERCISE'; exerciseIndex: number; updates: ExerciseEditPayload }
   | { type: 'SET_READY' }
+  | { type: 'SET_TAG'; exerciseIndex: number; setIndex: number; tag: import('../../../types/health').SetTag }
   | { type: 'REPLACE_EXERCISES'; exercises: WorkoutExerciseResult[] }
   | { type: 'CLEAR_SESSION' };
 
@@ -285,6 +286,16 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
     case 'SET_READY':
       return { ...state, setReady: true };
 
+    case 'SET_TAG': {
+      const exercises = [...state.exercises];
+      const ex = { ...exercises[action.exerciseIndex] };
+      const sets = [...ex.sets];
+      sets[action.setIndex] = { ...sets[action.setIndex], set_tag: action.tag };
+      ex.sets = sets;
+      exercises[action.exerciseIndex] = ex;
+      return { ...state, exercises };
+    }
+
     case 'REPLACE_EXERCISES':
       return { ...state, exercises: action.exercises };
 
@@ -447,6 +458,7 @@ interface ActiveWorkoutContextValue {
   editExercise: (exerciseIdx: number, updates: ExerciseEditPayload) => void;
   reorderExercises: (fromIndex: number, toIndex: number) => void;
   markSetReady: () => void;
+  setTag: (exerciseIdx: number, setIdx: number, tag: import('../../../types/health').SetTag) => void;
   toggleMode: () => void;
   toggleTimer: () => void;
   setTimerSeconds: (seconds: number) => void;
@@ -571,6 +583,9 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   const editExercise = useCallback((exerciseIdx: number, updates: ExerciseEditPayload) => dispatch({ type: 'EDIT_EXERCISE', exerciseIndex: exerciseIdx, updates }), []);
   const reorderExercises = useCallback((fromIndex: number, toIndex: number) => dispatch({ type: 'REORDER_EXERCISES', fromIndex, toIndex }), []);
   const markSetReady = useCallback(() => dispatch({ type: 'SET_READY' }), []);
+  const setTag = useCallback((exerciseIdx: number, setIdx: number, tag: import('../../../types/health').SetTag) => {
+    dispatch({ type: 'SET_TAG', exerciseIndex: exerciseIdx, setIndex: setIdx, tag });
+  }, []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
   const toggleTimer = useCallback(() => dispatch({ type: 'TOGGLE_TIMER' }), []);
   const setTimerSeconds = useCallback((seconds: number) => dispatch({ type: 'SET_TIMER_SECONDS', seconds }), []);
@@ -582,7 +597,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       state, dispatch,
       startSession, startFreeSession, logWarmup, skipWarmup, logSet, skipSet,
       nextExercise, prevExercise, goToExercise, skipExercise,
-      removeExercise, addExercise, editExercise, reorderExercises, markSetReady, toggleMode, toggleTimer,
+      removeExercise, addExercise, editExercise, reorderExercises, markSetReady, setTag, toggleMode, toggleTimer,
       setTimerSeconds, finishSession, clearSession,
     }}>
       {children}

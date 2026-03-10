@@ -12,7 +12,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Search, Star, Dumbbell, Heart, Zap, StretchHorizontal, X } from 'lucide-react';
+import { Search, Star, Dumbbell, Heart, Zap, StretchHorizontal, X, Check, Plus } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog, useFilteredExercises, type ExerciseFilters } from '../hooks/useExerciseCatalog';
 import { useExerciseFavorites } from '../hooks/useExerciseFavorites';
@@ -23,6 +23,10 @@ import type { CatalogExercise, BodyRegion, ExerciseCategory } from '../../../typ
 
 interface ExercisePickerProps {
   onSelect: (exercise: CatalogExercise) => void;
+  /** Multi-select mode: enables batch selection with confirm button (Hevy/JEFIT pattern) */
+  multiSelect?: boolean;
+  /** Called when multi-select confirm is pressed */
+  onMultiSelectConfirm?: (exercises: CatalogExercise[]) => void;
   /** Optional: pre-filter to a single category */
   filterCategory?: ExerciseCategory;
   /** Optional: hide category tabs */
@@ -49,6 +53,8 @@ const CATEGORY_CONFIG: { key: ExerciseCategory | 'all'; icon: typeof Dumbbell; d
 
 export function ExercisePicker({
   onSelect,
+  multiSelect = false,
+  onMultiSelectConfirm,
   filterCategory,
   hideCategoryTabs = false,
   maxHeight = '60vh',
@@ -57,6 +63,28 @@ export function ExercisePicker({
   const isDE = language === 'de';
   const { data: catalog, isLoading } = useExerciseCatalog();
   const { isFavorite, toggleFavorite } = useExerciseFavorites();
+
+  // Multi-select state
+  const [selected, setSelected] = useState<Map<string, CatalogExercise>>(new Map());
+
+  const toggleSelected = useCallback((ex: CatalogExercise) => {
+    setSelected(prev => {
+      const next = new Map(prev);
+      if (next.has(ex.id)) {
+        next.delete(ex.id);
+      } else {
+        next.set(ex.id, ex);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleConfirmMulti = useCallback(() => {
+    if (onMultiSelectConfirm && selected.size > 0) {
+      onMultiSelectConfirm(Array.from(selected.values()));
+      setSelected(new Map());
+    }
+  }, [onMultiSelectConfirm, selected]);
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -199,7 +227,7 @@ export function ExercisePicker({
       )}
 
       {/* Exercise List */}
-      <div className="overflow-y-auto -mx-1 px-1" style={{ maxHeight }}>
+      <div className="overflow-y-auto -mx-1 px-1" style={{ maxHeight: multiSelect && selected.size > 0 ? `calc(${maxHeight} - 3rem)` : maxHeight }}>
         {isLoading ? (
           <div className="text-center py-8 text-sm text-gray-400">
             {isDE ? 'Lade Übungen...' : 'Loading exercises...'}
@@ -229,13 +257,26 @@ export function ExercisePicker({
                 exercise={ex}
                 isDE={isDE}
                 isFav={isFavorite(ex.id)}
-                onSelect={onSelect}
+                isSelected={multiSelect ? selected.has(ex.id) : false}
+                multiSelect={multiSelect}
+                onSelect={multiSelect ? () => toggleSelected(ex) : () => onSelect(ex)}
                 onFavClick={handleFavClick}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Multi-select confirm button (sticky) */}
+      {multiSelect && selected.size > 0 && (
+        <button
+          onClick={handleConfirmMulti}
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-semibold shadow-md"
+        >
+          <Plus className="h-4 w-4" />
+          {selected.size} {isDE ? 'Übungen hinzufügen' : selected.size === 1 ? 'exercise' : 'exercises'}
+        </button>
+      )}
     </div>
   );
 }
@@ -246,11 +287,13 @@ interface ExerciseCardProps {
   exercise: CatalogExercise;
   isDE: boolean;
   isFav: boolean;
+  isSelected?: boolean;
+  multiSelect?: boolean;
   onSelect: (ex: CatalogExercise) => void;
   onFavClick: (e: React.MouseEvent, id: string) => void;
 }
 
-function ExerciseCard({ exercise, isDE, isFav, onSelect, onFavClick }: ExerciseCardProps) {
+function ExerciseCard({ exercise, isDE, isFav, isSelected, multiSelect, onSelect, onFavClick }: ExerciseCardProps) {
   const displayName = isDE ? exercise.name : (exercise.name_en ?? exercise.name);
   const muscles = (exercise.primary_muscles ?? [])
     .slice(0, 2)
@@ -261,19 +304,33 @@ function ExerciseCard({ exercise, isDE, isFav, onSelect, onFavClick }: ExerciseC
   return (
     <button
       onClick={() => onSelect(exercise)}
-      className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-gray-50 rounded-lg transition-colors group"
+      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left rounded-lg transition-colors group ${
+        isSelected
+          ? 'bg-teal-50 border border-teal-200'
+          : 'hover:bg-gray-50'
+      }`}
     >
-      {/* Favorite star */}
-      <button
-        onClick={(e) => onFavClick(e, exercise.id)}
-        className="p-0.5 rounded hover:bg-gray-100 flex-shrink-0"
-      >
-        <Star
-          className={`h-3.5 w-3.5 transition-colors ${
-            isFav ? 'text-amber-400 fill-amber-400' : 'text-gray-200 group-hover:text-gray-300'
-          }`}
-        />
-      </button>
+      {/* Multi-select checkbox OR Favorite star */}
+      {multiSelect ? (
+        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+          isSelected
+            ? 'bg-teal-500 border-teal-500'
+            : 'border-gray-300 group-hover:border-gray-400'
+        }`}>
+          {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+        </div>
+      ) : (
+        <button
+          onClick={(e) => onFavClick(e, exercise.id)}
+          className="p-0.5 rounded hover:bg-gray-100 flex-shrink-0"
+        >
+          <Star
+            className={`h-3.5 w-3.5 transition-colors ${
+              isFav ? 'text-amber-400 fill-amber-400' : 'text-gray-200 group-hover:text-gray-300'
+            }`}
+          />
+        </button>
+      )}
 
       {/* Name + muscles */}
       <div className="flex-1 min-w-0">

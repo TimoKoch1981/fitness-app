@@ -48,10 +48,13 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
     setError('');
 
     try {
-      // Strip internal fields before saving
+      // Strip internal fields before saving (keep exercise_id for PREVIOUS matching)
       const cleanExercises: ExerciseSet[] = exercises
         .filter((ex) => ex.name.trim() !== '')
-        .map(({ _id, catalog, ...rest }) => rest);
+        .map(({ _id, catalog, ...rest }) => ({
+          ...rest,
+          exercise_id: rest.exercise_id || catalog?.id,
+        }));
 
       await addWorkout.mutateAsync({
         date: date ?? today(),
@@ -91,13 +94,15 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
     const displayName = isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name);
     const isStrengthType = catalogEx.category === 'strength' || catalogEx.category === 'functional';
 
+    const isCardioType = catalogEx.category === 'cardio';
     const newEx: SelectedExercise = {
       _id: `ex-${Date.now()}`,
       name: displayName,
+      exercise_id: catalogEx.id,
       catalog: catalogEx,
       sets: isStrengthType ? 3 : undefined,
       reps: isStrengthType ? (catalogEx.is_compound ? 8 : 12) : undefined,
-      duration_minutes: !isStrengthType ? 10 : undefined,
+      duration_minutes: !isStrengthType ? (isCardioType ? 30 : 10) : undefined,
     };
 
     setExercises((prev) => [...prev, newEx]);
@@ -346,10 +351,9 @@ interface ExerciseRowProps {
 function ExerciseRow({ exercise, isDE, onUpdate, onRemove }: ExerciseRowProps) {
   const lang = isDE ? 'de' : 'en';
   const hasCatalog = !!exercise.catalog;
-  const isStrength =
-    !exercise.catalog?.category ||
-    exercise.catalog?.category === 'strength' ||
-    exercise.catalog?.category === 'functional';
+  const category = exercise.catalog?.category;
+  const isStrength = !category || category === 'strength' || category === 'functional';
+  const isCardio = category === 'cardio';
 
   return (
     <div className="bg-gray-50 rounded-lg p-2.5 space-y-1.5">
@@ -396,8 +400,9 @@ function ExerciseRow({ exercise, isDE, onUpdate, onRemove }: ExerciseRowProps) {
         </div>
       )}
 
-      {/* Sets / Reps / Weight OR Duration fields */}
+      {/* Adaptive fields based on exercise category */}
       {isStrength || !hasCatalog ? (
+        /* Strength / Functional / Custom: Sets × Reps @ Weight */
         <div className="flex items-center gap-1.5">
           <div className="flex-1">
             <label className="text-[10px] text-gray-400">{isDE ? 'Sätze' : 'Sets'}</label>
@@ -434,7 +439,35 @@ function ExerciseRow({ exercise, isDE, onUpdate, onRemove }: ExerciseRowProps) {
             />
           </div>
         </div>
+      ) : isCardio ? (
+        /* Cardio: Duration + Distance */
+        <div className="flex items-center gap-1.5">
+          <div className="flex-1">
+            <label className="text-[10px] text-gray-400">{isDE ? 'Dauer (min)' : 'Duration (min)'}</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={exercise.duration_minutes ?? ''}
+              onChange={(e) => onUpdate(exercise._id, 'duration_minutes', e.target.value)}
+              className="w-full text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-1 py-1"
+              placeholder="30"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-[10px] text-gray-400">{isDE ? 'Distanz (km)' : 'Distance (km)'}</label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={exercise.distance_km ?? ''}
+              onChange={(e) => onUpdate(exercise._id, 'distance_km', e.target.value)}
+              className="w-full text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-1 py-1"
+              placeholder="—"
+            />
+          </div>
+        </div>
       ) : (
+        /* Flexibility / Other: Duration only */
         <div className="flex items-center gap-1.5">
           <div className="flex-1">
             <label className="text-[10px] text-gray-400">{isDE ? 'Dauer (min)' : 'Duration (min)'}</label>

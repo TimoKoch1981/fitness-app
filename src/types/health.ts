@@ -30,14 +30,21 @@ export type WorkoutType = 'strength' | 'cardio' | 'flexibility' | 'hiit' | 'spor
 
 export interface ExerciseSet {
   name: string;
+  /** Catalog exercise UUID — enables PREVIOUS matching across workouts */
+  exercise_id?: string;
   sets?: number;
   reps?: number;
   weight_kg?: number;
   duration_minutes?: number;
+  /** Distance for cardio exercises (km) */
+  distance_km?: number;
   notes?: string;
 }
 
 // === LIVE WORKOUT SESSION TYPES ===
+
+/** Set tag for categorizing sets (industry standard: Strong, Hevy) */
+export type SetTag = 'normal' | 'warmup' | 'drop' | 'failure';
 
 /** Per-set result tracked during a live workout session */
 export interface SetResult {
@@ -49,6 +56,8 @@ export interface SetResult {
   completed: boolean;
   skipped?: boolean;
   notes?: string;
+  /** Set tag: warmup(W) excluded from stats, drop(D), failure(F) */
+  set_tag?: SetTag;
 }
 
 /** Detailed per-exercise result from a live session */

@@ -10,11 +10,20 @@
  * - "Alle Sätze fertig" validates that all inputs are filled
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
-import type { WorkoutExerciseResult } from '../../../types/health';
+import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
+
+/** Tag display: letter + color */
+const TAG_CONFIG: Record<SetTag, { letter: string; bg: string; text: string }> = {
+  normal: { letter: '', bg: '', text: '' },
+  warmup: { letter: 'W', bg: 'bg-amber-100', text: 'text-amber-700' },
+  drop: { letter: 'D', bg: 'bg-purple-100', text: 'text-purple-700' },
+  failure: { letter: 'F', bg: 'bg-red-100', text: 'text-red-700' },
+};
+const TAG_CYCLE: SetTag[] = ['normal', 'warmup', 'drop', 'failure'];
 
 interface ExerciseOverviewTrackerProps {
   exercise: WorkoutExerciseResult;
@@ -29,16 +38,27 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const { exercise, exerciseIndex, lastExercise, onLogSet, onSkipSet, onAllDone } = props;
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { state: workoutState } = useActiveWorkout();
+  const { state: workoutState, setTag } = useActiveWorkout();
   const setReady = workoutState.setReady;
 
-  // Local state for inputs (per-set)
+  /** Cycle set tag: normal → warmup → drop → failure → normal */
+  const cycleTag = useCallback((setIdx: number) => {
+    const currentTag = exercise.sets[setIdx]?.set_tag ?? 'normal';
+    const nextIdx = (TAG_CYCLE.indexOf(currentTag) + 1) % TAG_CYCLE.length;
+    setTag(exerciseIndex, setIdx, TAG_CYCLE[nextIdx]);
+  }, [exercise.sets, exerciseIndex, setTag]);
+
+  // Local state for inputs (per-set) — auto-fill: actual > target > PREVIOUS > empty
   const [inputs, setInputs] = useState<Record<number, { reps: string; weight: string }>>(() => {
     const init: Record<number, { reps: string; weight: string }> = {};
     exercise.sets.forEach((s, i) => {
+      const prevSet = lastExercise?.sets[i];
       init[i] = {
         reps: s.actual_reps?.toString() ?? '',
-        weight: s.actual_weight_kg?.toString() ?? s.target_weight_kg?.toString() ?? '',
+        weight: s.actual_weight_kg?.toString()
+          ?? s.target_weight_kg?.toString()
+          ?? prevSet?.actual_weight_kg?.toString()
+          ?? '',
       };
     });
     return init;
@@ -164,7 +184,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
       <div className="grid grid-cols-12 gap-1 px-3 text-xs text-gray-400 font-medium border-b border-gray-100 pb-2">
         <div className="col-span-1">#</div>
         <div className="col-span-2">{isDE ? 'Ziel' : 'Target'}</div>
-        <div className="col-span-2">{isDE ? 'Letzte' : 'Last'}</div>
+        <div className="col-span-2">{isDE ? 'Vorh.' : 'Prev'}</div>
         <div className="col-span-3">{isDE ? 'Wdh' : 'Reps'}</div>
         <div className="col-span-3">kg</div>
         <div className="col-span-1"></div>
@@ -198,17 +218,31 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                         : 'bg-gray-50/50'
               }`}
             >
-              {/* Set Number */}
-              <div className={`col-span-1 text-sm font-bold ${
-                isCurrent ? 'text-teal-600' : isDone ? 'text-teal-500' : 'text-gray-400'
-              }`}>
+              {/* Set Number / Tag (tap to cycle: normal → W → D → F) */}
+              <div className="col-span-1">
                 {isDone ? (
                   <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
                     <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
                   </div>
-                ) : (
-                  idx + 1
-                )}
+                ) : (() => {
+                  const tag = set.set_tag ?? 'normal';
+                  const config = TAG_CONFIG[tag];
+                  return (
+                    <button
+                      onClick={() => cycleTag(idx)}
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                        tag !== 'normal'
+                          ? `${config.bg} ${config.text}`
+                          : isCurrent
+                            ? 'text-teal-600 bg-teal-50'
+                            : 'text-gray-400 hover:bg-gray-100'
+                      }`}
+                      title={isDE ? 'Tippen: Satz-Typ ändern (W/D/F)' : 'Tap: change set type (W/D/F)'}
+                    >
+                      {tag !== 'normal' ? config.letter : idx + 1}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Target */}

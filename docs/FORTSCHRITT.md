@@ -129,6 +129,26 @@
 | 12.62   | 2026-03-09 | Blutanalyse erweitert: 38 Biomarker, PDF-Upload, Referenzbereiche            | Erledigt   |
 | 12.63   | 2026-03-09 | Workout Drag & Drop: dnd-kit in ExerciseListBar, GripVertical, Touch-Support | Erledigt   |
 | 12.64   | 2026-03-09 | Exercise Catalog v2: 122 Uebungen, ExercisePicker, Plan-Editor, Medizin-Felder | Erledigt   |
+| 12.65   | 2026-03-10 | Workout UX Consolidation: PREVIOUS, Set-Tags, Multi-Select, Summary, Quick-Log | Erledigt   |
+
+---
+
+### 2026-03-10 - v12.65: Workout System Consolidation — PREVIOUS, Set-Tags, Multi-Select, Summary, Quick-Log
+
+**Neue Dateien:**
+- `useLastExerciseData.ts`: Shared TanStack Query Hook fuer Cross-Plan PREVIOUS-Daten (letzte 30 Workouts, 5min Cache, exercise_id > Name Matching)
+
+**Geaenderte Dateien (11):**
+- `types/health.ts`: SetTag Typ, set_tag in SetResult, exercise_id + distance_km in ExerciseSet
+- `ActiveWorkoutContext.tsx`: SET_TAG Action + setTag Callback
+- `ExerciseTracker.tsx`: Cross-Plan PREVIOUS via useLastExerciseData (statt lastWorkout Prop)
+- `ActiveWorkoutPage.tsx`: lastWorkout Prop entfernt
+- `SetBySetTracker.tsx`: PREVIOUS-Anzeige, Auto-Fill, Set-Tag-Cycling (W/D/F)
+- `ExerciseOverviewTracker.tsx`: Auto-Fill aus PREVIOUS, "Prev" Spalte, Set-Tags
+- `ExercisePicker.tsx`: Multi-Select-Modus (Checkboxen, Confirm-Button)
+- `AddExerciseDialog.tsx`: Multi-Select Toggle, Batch-Add
+- `WorkoutSummary.tsx`: Set-Tag-Badges, Warmup aus Stats, "+XW" Anzeige
+- `AddWorkoutDialog.tsx`: exercise_id, Cardio Distance, adaptive Felder
 
 ---
 
