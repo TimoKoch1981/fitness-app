@@ -9,13 +9,13 @@
  * - CreatePlanDialog (2-step dialog for new plans)
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../hooks/useWorkouts';
 import { useActivePlan, useAddTrainingPlan, usePlanById } from '../hooks/useTrainingPlans';
-import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
+import { usePageBuddySuggestions, type BuddySuggestion } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanView } from './TrainingPlanView';
 import { TrainingPlanList } from './TrainingPlanList';
@@ -120,6 +120,17 @@ export function WorkoutsTabContent({
     setSelectedPlanId(plan.id);
   };
 
+  // Intercept "Neuen Plan" buddy chip → open CreatePlanDialog instead of buddy chat
+  const handleBuddySuggestionClick = useCallback((suggestion: BuddySuggestion): boolean => {
+    if (suggestion.id === 'plan_create') {
+      // Switch to Plan tab if not already there, then open the dialog
+      if (activeSubTab !== 'plan') setActiveSubTab('plan');
+      setShowCreateDialog(true);
+      return true; // prevent default buddy navigation
+    }
+    return false; // let all other suggestions go to buddy as normal
+  }, [activeSubTab]);
+
   // The plan to display in TrainingPlanView:
   // - If user selected the active plan (or no selection), use activePlan (has days loaded)
   // - If user selected a different plan, use the separately loaded data with days
@@ -187,7 +198,7 @@ export function WorkoutsTabContent({
       </div>
 
       {/* Buddy Quick Access */}
-      <BuddyQuickAccess suggestions={buddySuggestions} />
+      <BuddyQuickAccess suggestions={buddySuggestions} onSuggestionClick={handleBuddySuggestionClick} />
 
       {/* Sub-Tab Content */}
       {activeSubTab === 'today' ? (

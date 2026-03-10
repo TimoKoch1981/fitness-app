@@ -1,14 +1,19 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-10, v12.69
-> **Letzte Konsolidierung:** F4+F5+U2 implementiert (Adaptive Tracker, Volume, Plan-Button)
+> **Stand:** 2026-03-10, v12.70
+> **Letzte Konsolidierung:** Multi-Plan Management (v12.70)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
 
 ## ❌ Offene Bugs
 
-Keine offenen Bugs. Alle 4 verifizierten Bugs (B1-B4) wurden in v12.68 gefixt.
+### Multi-Plan v12.70 Bugs
+
+| # | Problem | Prioritaet | Beschreibung | Datei(en) |
+|---|---------|-----------|--------------|-----------|
+| B5 | **CreatePlanDialog UX-Probleme** | MITTEL | Dialog-Menue hat UX-Probleme (Details nach Test ermitteln). Muss nach Fix von B6 geprueft werden. | `CreatePlanDialog.tsx` |
+| B6 | **Plan-Erstellungs-Bugs** | MITTEL | Plaene werden nicht korrekt angelegt (Details nach Test ermitteln). Betrifft den Save-Flow im CreatePlanDialog + useAddTrainingPlan. | `CreatePlanDialog.tsx`, `useTrainingPlans.ts` |
 
 ---
 

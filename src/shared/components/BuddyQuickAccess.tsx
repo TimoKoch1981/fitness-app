@@ -15,15 +15,19 @@ import type { BuddySuggestion } from '../../features/buddy/hooks/usePageBuddySug
 
 interface BuddyQuickAccessProps {
   suggestions: BuddySuggestion[];
+  /** Optional: intercept a suggestion click. Return true to prevent default buddy navigation. */
+  onSuggestionClick?: (suggestion: BuddySuggestion) => boolean;
 }
 
-export function BuddyQuickAccess({ suggestions }: BuddyQuickAccessProps) {
+export function BuddyQuickAccess({ suggestions, onSuggestionClick }: BuddyQuickAccessProps) {
   const { openBuddyChat } = useInlineBuddyChat();
   const { t } = useTranslation();
 
   if (suggestions.length === 0) return null;
 
   const goToBuddy = (suggestion?: BuddySuggestion) => {
+    // If a custom handler is provided AND it returns true, skip buddy navigation
+    if (suggestion && onSuggestionClick?.(suggestion)) return;
     openBuddyChat(suggestion?.message, suggestion?.targetAgent);
   };
 
