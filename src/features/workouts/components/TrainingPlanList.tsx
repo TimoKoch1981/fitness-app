@@ -29,7 +29,7 @@ import {
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { DayCard } from './DayCard';
 import { PlanEditorDialog } from './PlanEditorDialog';
-import { EditPlanMetaDialog } from './EditPlanMetaDialog';
+import { usePlanWizard } from '../context/PlanWizardContext';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
 import type { TrainingPlan, TrainingPlanDay, CatalogExercise, SplitType } from '../../../types/health';
@@ -76,12 +76,12 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
   const { data: catalog } = useExerciseCatalog();
 
   const { openBuddyChat } = useInlineBuddyChat();
+  const { openWizard } = usePlanWizard();
 
   const [deleteTarget, setDeleteTarget] = useState<TrainingPlan | null>(null);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
-  const [editingPlanMeta, setEditingPlanMeta] = useState<TrainingPlan | null>(null);
 
   const toggleDay = (dayId: string) => {
     setExpandedDays(prev => {
@@ -108,7 +108,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
         <Dumbbell className="h-10 w-10 mx-auto text-gray-200 mb-2" />
         <p className="text-gray-400 text-sm">{plans?.noPlan ?? 'No plans yet'}</p>
         <button
-          onClick={onCreatePlan}
+          onClick={() => openWizard('create')}
           className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
         >
           <Plus className="h-4 w-4" />
@@ -196,7 +196,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
           {plans?.title ?? 'My Plans'}
         </h3>
         <button
-          onClick={onCreatePlan}
+          onClick={() => openWizard('create')}
           className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -297,7 +297,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                 {/* Action buttons row: Edit, Review, Calibration */}
                 <div className="flex flex-wrap gap-1.5">
                   <button
-                    onClick={() => setEditingPlanMeta(expandedPlanData)}
+                    onClick={() => openWizard('edit', expandedPlanData)}
                     className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-teal-100 transition-colors"
                   >
                     <Pencil className="h-3 w-3" />
@@ -361,23 +361,6 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
         <ExerciseDetailModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
-        />
-      )}
-
-      {/* Edit Plan Metadata Dialog */}
-      {editingPlanMeta && (
-        <EditPlanMetaDialog
-          plan={editingPlanMeta}
-          open={!!editingPlanMeta}
-          onClose={() => setEditingPlanMeta(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
-            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
-            if (expandedPlanId) {
-              queryClient.invalidateQueries({ queryKey: ['training_plans', 'detail', expandedPlanId] });
-            }
-            setEditingPlanMeta(null);
-          }}
         />
       )}
 

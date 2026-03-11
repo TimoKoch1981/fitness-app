@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Dumbbell, Clock, Flame, Trash2, Pencil, MessageCircle as MessageCircleIcon } from 'lucide-react';
+import { Dumbbell, Clock, Flame, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
@@ -19,12 +19,12 @@ import { useActivePlan, usePlanById } from '../hooks/useTrainingPlans';
 import { usePageBuddySuggestions, type BuddySuggestion } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanList } from './TrainingPlanList';
-import { CreatePlanDialog } from './CreatePlanDialog';
-import { EditPlanMetaDialog } from './EditPlanMetaDialog';
+import { PlanWizardProvider, usePlanWizard } from '../context/PlanWizardContext';
+import { PlanWizardDialog } from './PlanWizardDialog';
 import { PlanEditorDialog } from './PlanEditorDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
 import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
-import type { TrainingPlanDay } from '../../../types/health';
+import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
 // Lazy-load heavy chart components (~350KB Recharts)
 const ProgressiveOverloadCharts = lazy(() => import('./ProgressiveOverloadCharts').then(m => ({ default: m.ProgressiveOverloadCharts })));
 const PeriodizationView = lazy(() => import('./PeriodizationView').then(m => ({ default: m.PeriodizationView })));
@@ -76,46 +76,10 @@ export function WorkoutsTabContent({
   const { data: activePlan, isLoading: isPlanLoading } = useActivePlan();
 
   // Multi-plan state
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
-  // EditPlanMeta state (for buddy chip interception)
-  const [showEditPlanMeta, setShowEditPlanMeta] = useState(false);
-
-  // Post-creation flow: choice popup + auto-edit
-  const [showPostCreateChoice, setShowPostCreateChoice] = useState(false);
-  const [newlyCreatedPlanId, setNewlyCreatedPlanId] = useState<string | null>(null);
-  const [autoEditDay, setAutoEditDay] = useState<TrainingPlanDay | null>(null);
-
-  // When the new plan becomes the active plan, auto-open editor for day 1
-  useEffect(() => {
-    if (newlyCreatedPlanId && activePlan?.id === newlyCreatedPlanId && activePlan?.days?.[0]) {
-      // Plan is loaded with days — ready for auto-edit if user chose "manually"
-      if (!showPostCreateChoice) {
-        setAutoEditDay(activePlan.days[0]);
-        setNewlyCreatedPlanId(null);
-      }
-    }
-  }, [activePlan, newlyCreatedPlanId, showPostCreateChoice]);
-
-  const handlePostCreateManual = useCallback(() => {
-    setShowPostCreateChoice(false);
-    // If plan is already loaded, open editor immediately
-    if (activePlan?.id === newlyCreatedPlanId && activePlan?.days?.[0]) {
-      setAutoEditDay(activePlan.days[0]);
-      setNewlyCreatedPlanId(null);
-    }
-    // Otherwise the useEffect above will catch it when the plan loads
-  }, [activePlan, newlyCreatedPlanId]);
-
-  const handlePostCreateBuddy = useCallback(() => {
-    setShowPostCreateChoice(false);
-    setNewlyCreatedPlanId(null);
-    const msg = isDE
-      ? 'Ich habe gerade einen neuen Trainingsplan erstellt. Kannst du mir helfen, die Übungen für jeden Tag auszuwählen?'
-      : 'I just created a new training plan. Can you help me choose exercises for each day?';
-    openBuddyChat(msg, 'training');
-  }, [isDE, openBuddyChat]);
+  // PlanWizard: pending action from buddy chips (consumed inside PlanWizardProvider)
+  const [pendingWizardAction, setPendingWizardAction] = useState<'create' | 'edit' | null>(null);
 
   // Accordion: which plan is expanded (auto-expand active plan)
   const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
@@ -134,10 +98,10 @@ export function WorkoutsTabContent({
     setExpandedPlanId(prev => prev === planId ? null : planId);
   }, []);
 
-  // Open CreatePlanDialog when requested by parent (e.g., WorkoutStartDialog)
+  // Open PlanWizard when requested by parent (e.g., WorkoutStartDialog)
   useEffect(() => {
     if (openCreatePlan && activeSubTab === 'plan') {
-      setShowCreateDialog(true);
+      setPendingWizardAction('create');
       onCreatePlanOpened?.();
     }
   }, [openCreatePlan, activeSubTab]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -166,14 +130,13 @@ export function WorkoutsTabContent({
   const handleBuddySuggestionClick = useCallback((suggestion: BuddySuggestion): boolean => {
     if (suggestion.id === 'plan_create') {
       if (activeSubTab !== 'plan') setActiveSubTab('plan');
-      setShowCreateDialog(true);
+      setPendingWizardAction('create');
       return true;
     }
     if (suggestion.id === 'plan_edit') {
-      // Open EditPlanMetaDialog for the active/expanded plan
       if (activeSubTab !== 'plan') setActiveSubTab('plan');
       if (activePlan) {
-        setShowEditPlanMeta(true);
+        setPendingWizardAction('edit');
       }
       return true;
     }
@@ -199,7 +162,14 @@ export function WorkoutsTabContent({
   }, [activeSubTab, activePlan, expandedPlanData, isDE, openBuddyChat]);
 
   return (
-    <>
+    <PlanWizardProvider>
+      <WizardActionBridge
+        pendingAction={pendingWizardAction}
+        onConsumed={() => setPendingWizardAction(null)}
+        plan={activePlan ?? undefined}
+      />
+      <PlanWizardDialog />
+      <>
       {/* Sub-Tab Bar (Today | Plan | History) */}
       <div className="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1">
         <button
@@ -339,7 +309,7 @@ export function WorkoutsTabContent({
             <TrainingPlanList
               selectedPlanId={selectedPlanId ?? activePlan?.id}
               onSelectPlan={() => {/* accordion handles selection now */}}
-              onCreatePlan={() => setShowCreateDialog(true)}
+              onCreatePlan={() => setPendingWizardAction('create')}
               expandedPlanId={expandedPlanId}
               onToggleExpand={handleToggleExpand}
             />
@@ -367,79 +337,28 @@ export function WorkoutsTabContent({
         date={selectedDate}
       />
 
-      {/* Create Plan Dialog — triggered by TrainingPlanList or WorkoutStartDialog */}
-      <CreatePlanDialog
-        open={showCreateDialog}
-        onClose={() => setShowCreateDialog(false)}
-        onCreated={(planId) => {
-          setSelectedPlanId(planId);
-          setNewlyCreatedPlanId(planId);
-          setShowPostCreateChoice(true);
-        }}
-      />
-
-      {/* Post-Creation Choice: Manual edit or Buddy help */}
-      {showPostCreateChoice && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-          onClick={handlePostCreateManual}
-        >
-          <div className="bg-white rounded-2xl p-5 w-full max-w-xs shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-2 mb-3">
-              <Dumbbell className="h-5 w-5 text-teal-500" />
-              <h3 className="text-base font-semibold text-gray-900">
-                {isDE ? 'Plan erstellt!' : 'Plan created!'}
-              </h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              {isDE ? 'Wie möchtest du die Übungen hinzufügen?' : 'How would you like to add exercises?'}
-            </p>
-            <div className="space-y-2">
-              <button
-                onClick={handlePostCreateManual}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors"
-              >
-                <Pencil className="h-4 w-4" />
-                {isDE ? 'Selbst hinzufügen' : 'Add manually'}
-              </button>
-              <button
-                onClick={handlePostCreateBuddy}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors"
-              >
-                <MessageCircleIcon className="h-4 w-4" />
-                {isDE ? 'Buddy um Hilfe bitten' : 'Ask Buddy for help'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Auto-opened PlanEditorDialog after plan creation */}
-      {autoEditDay && (
-        <PlanEditorDialog
-          day={autoEditDay}
-          onClose={() => setAutoEditDay(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
-            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
-            setAutoEditDay(null);
-          }}
-        />
-      )}
-
-      {/* Edit Plan Meta Dialog — triggered by buddy chip or in-card button */}
-      {showEditPlanMeta && activePlan && (
-        <EditPlanMetaDialog
-          plan={activePlan}
-          open={showEditPlanMeta}
-          onClose={() => setShowEditPlanMeta(false)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['training_plans'] });
-            queryClient.invalidateQueries({ queryKey: ['training_plans', 'active'] });
-            setShowEditPlanMeta(false);
-          }}
-        />
-      )}
     </>
+    </PlanWizardProvider>
   );
+}
+
+/** Bridges parent state (buddy chips / forceTab) with PlanWizardContext. */
+function WizardActionBridge({ pendingAction, onConsumed, plan }: {
+  pendingAction: 'create' | 'edit' | null;
+  onConsumed: () => void;
+  plan?: TrainingPlan;
+}) {
+  const { openWizard } = usePlanWizard();
+
+  useEffect(() => {
+    if (!pendingAction) return;
+    if (pendingAction === 'create') {
+      openWizard('create');
+    } else if (pendingAction === 'edit' && plan) {
+      openWizard('edit', plan);
+    }
+    onConsumed();
+  }, [pendingAction]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return null;
 }

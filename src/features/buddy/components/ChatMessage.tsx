@@ -8,13 +8,18 @@ import { stripActionBlock } from '../../../lib/ai/actions/actionParser';
 /**
  * Hide ACTION blocks from display — ALWAYS, not just during streaming.
  * Uses the canonical stripActionBlock from actionParser (full regex)
- * PLUS a streaming-safe fallback for partial/incomplete blocks.
+ * PLUS streaming-safe fallbacks for partial/incomplete blocks.
+ * Also strips [ACTION_REQUEST]...[/ACTION_REQUEST] blocks (used by agents).
  */
 function stripActionBlockFromDisplay(text: string): string {
-  // 1. Use the full parser regex (handles complete ACTION blocks)
+  // 1. Use the full parser regex (handles complete ```ACTION blocks)
   let cleaned = stripActionBlock(text);
-  // 2. Streaming fallback: catch partial blocks that aren't closed yet
+  // 2. Strip complete [ACTION_REQUEST]...[/ACTION_REQUEST] blocks
+  cleaned = cleaned.replace(/\[ACTION_REQUEST\][\s\S]*?\[\/?ACTION_REQUEST\]/gi, '').trim();
+  // 3. Streaming fallback: catch partial ```ACTION blocks that aren't closed yet
   cleaned = cleaned.replace(/```(?:ACTION|action)[\s\S]*$/i, '').trim();
+  // 4. Streaming fallback: catch partial [ACTION_REQUEST] blocks not yet closed
+  cleaned = cleaned.replace(/\[ACTION_REQUEST\][\s\S]*$/i, '').trim();
   return cleaned;
 }
 

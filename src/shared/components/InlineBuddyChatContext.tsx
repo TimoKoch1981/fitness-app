@@ -23,12 +23,20 @@ interface InlineBuddyChatContextType {
   autoMessage: string | null;
   /** Target agent to switch to when the sheet opens */
   targetAgent: AgentType | null;
+  /** Whether the buddy is docked next to the PlanWizard (side-by-side) */
+  isDocked: boolean;
   /** Open the inline chat sheet. On /buddy this is a no-op. */
   openBuddyChat: (autoMessage?: string, targetAgent?: AgentType) => void;
   /** Close the inline chat sheet */
   closeBuddyChat: () => void;
   /** Clear the autoMessage after it has been consumed */
   clearAutoMessage: () => void;
+  /** Toggle docked mode (side-by-side with PlanWizard) */
+  setDocked: (docked: boolean) => void;
+  /** Optional interceptor for save_training_plan actions (set by PlanWizard) */
+  wizardActionInterceptor: ((actionData: unknown) => boolean) | null;
+  /** Register/unregister the wizard action interceptor */
+  setWizardActionInterceptor: (interceptor: ((actionData: unknown) => boolean) | null) => void;
 }
 
 const InlineBuddyChatContext = createContext<InlineBuddyChatContextType | null>(null);
@@ -41,6 +49,8 @@ export function InlineBuddyChatProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [autoMessage, setAutoMessage] = useState<string | null>(null);
   const [targetAgent, setTargetAgent] = useState<AgentType | null>(null);
+  const [isDocked, setIsDocked] = useState(false);
+  const [wizardActionInterceptor, setWizardInterceptorState] = useState<((actionData: unknown) => boolean) | null>(null);
   const location = useLocation();
 
   const openBuddyChat = useCallback((msg?: string, agent?: AgentType) => {
@@ -55,10 +65,20 @@ export function InlineBuddyChatProvider({ children }: { children: ReactNode }) {
     setIsOpen(false);
     setAutoMessage(null);
     setTargetAgent(null);
+    setIsDocked(false);
+    setWizardInterceptorState(null);
   }, []);
 
   const clearAutoMessage = useCallback(() => {
     setAutoMessage(null);
+  }, []);
+
+  const setDocked = useCallback((docked: boolean) => {
+    setIsDocked(docked);
+  }, []);
+
+  const setWizardActionInterceptor = useCallback((interceptor: ((actionData: unknown) => boolean) | null) => {
+    setWizardInterceptorState(() => interceptor);
   }, []);
 
   // Auto-close when navigating to /buddy
@@ -67,12 +87,13 @@ export function InlineBuddyChatProvider({ children }: { children: ReactNode }) {
       setIsOpen(false);
       setAutoMessage(null);
       setTargetAgent(null);
+      setIsDocked(false);
     }
   }, [location.pathname, isOpen]);
 
   return (
     <InlineBuddyChatContext.Provider
-      value={{ isOpen, autoMessage, targetAgent, openBuddyChat, closeBuddyChat, clearAutoMessage }}
+      value={{ isOpen, autoMessage, targetAgent, isDocked, openBuddyChat, closeBuddyChat, clearAutoMessage, setDocked, wizardActionInterceptor, setWizardActionInterceptor }}
     >
       {children}
     </InlineBuddyChatContext.Provider>

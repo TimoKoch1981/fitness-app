@@ -45,13 +45,13 @@ import type { HealthContext } from '../../types/health';
 // ---------------------------------------------------------------------------
 
 export function InlineBuddyChat() {
-  const { isOpen, closeBuddyChat } = useInlineBuddyChat();
+  const { isOpen, isDocked, closeBuddyChat } = useInlineBuddyChat();
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && !isDocked && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop (normal bottom-sheet mode) */}
           <motion.div
             key="inline-chat-backdrop"
             initial={{ opacity: 0 }}
@@ -80,6 +80,21 @@ export function InlineBuddyChat() {
           </motion.div>
         </>
       )}
+      {isOpen && isDocked && (
+        <motion.div
+          key="inline-chat-docked"
+          role="dialog"
+          aria-label="Buddy Chat (docked)"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.2 }}
+          className="fixed right-0 top-0 bg-white shadow-xl flex flex-col md:w-[45%] w-full md:h-full border-l border-gray-200"
+          style={{ zIndex: 51, bottom: 56, maxHeight: 'calc(100vh - 56px)' }}
+        >
+          <InlineBuddyChatContent />
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
@@ -91,7 +106,7 @@ export function InlineBuddyChat() {
 function InlineBuddyChatContent() {
   const { t, language, buddyVerbosity, buddyExpertise } = useTranslation();
   const { user } = useAuth();
-  const { autoMessage, targetAgent, closeBuddyChat, clearAutoMessage } = useInlineBuddyChat();
+  const { autoMessage, targetAgent, closeBuddyChat, clearAutoMessage, wizardActionInterceptor } = useInlineBuddyChat();
 
   const [input, setInput] = useState('');
   const [voiceHint, setVoiceHint] = useState('');
@@ -256,9 +271,37 @@ function InlineBuddyChatContent() {
     const actions = lastActionMsg.pendingActions!;
 
     setTimeout(async () => {
+      // Intercept save_training_plan when PlanWizard is active
+      if (wizardActionInterceptor) {
+        const interceptedActions = actions.filter(a => a.type === 'save_training_plan');
+        const remainingActions = actions.filter(a => a.type !== 'save_training_plan');
+
+        for (const action of interceptedActions) {
+          try {
+            wizardActionInterceptor(action.data);
+          } catch (err) {
+            console.warn('[InlineBuddyChat] Wizard interceptor error:', err);
+          }
+        }
+
+        if (interceptedActions.length > 0) {
+          clearAction(lastActionMsg.id);
+          addSystemMessage(
+            language === 'de'
+              ? '✅ Vorschlag in den Wizard übernommen! Prüfe die Einträge und passe sie an.'
+              : '✅ Suggestion applied to wizard! Review and adjust the entries.',
+            '✅',
+          );
+          // If no remaining actions, we're done
+          if (remainingActions.length === 0) return;
+        }
+      }
+
       const results: Array<{ action: typeof actions[0]; success: boolean; error?: string }> = [];
 
       for (const action of actions) {
+        // Skip already-intercepted actions
+        if (wizardActionInterceptor && action.type === 'save_training_plan') continue;
         const result = await executeAction(action);
         results.push({ action, ...result });
       }
@@ -309,7 +352,7 @@ function InlineBuddyChatContent() {
         );
       }
     }, 0);
-  }, [messages, executeAction, clearAction, addSystemMessage, language]);
+  }, [messages, executeAction, clearAction, addSystemMessage, language, wizardActionInterceptor]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
 
