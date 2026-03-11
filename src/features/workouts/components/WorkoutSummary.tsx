@@ -493,7 +493,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                             {tagCfg.letter}
                           </span>
                         )}
-                        {setIdx + 1}
+                        {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : setIdx + 1}
                       </span>
                       {set.completed ? (
                         exIsCardio ? (

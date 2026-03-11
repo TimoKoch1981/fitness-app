@@ -128,9 +128,9 @@ export function SetBySetTracker({
             <div
               className={`w-full h-2 rounded-full transition-all ${
                 i === currentSetIndex
-                  ? 'bg-teal-500 ring-2 ring-teal-200'
+                  ? (s.side === 'left' ? 'bg-indigo-500 ring-2 ring-indigo-200' : s.side === 'right' ? 'bg-purple-500 ring-2 ring-purple-200' : 'bg-teal-500 ring-2 ring-teal-200')
                   : s.completed
-                    ? 'bg-teal-400'
+                    ? (s.side === 'left' ? 'bg-indigo-400' : s.side === 'right' ? 'bg-purple-400' : 'bg-teal-400')
                     : s.skipped
                       ? 'bg-gray-300'
                       : 'bg-gray-200'
@@ -141,7 +141,11 @@ export function SetBySetTracker({
                 ? TAG_CONFIG[s.set_tag].text
                 : i === currentSetIndex ? 'text-teal-600' : s.completed ? 'text-teal-400' : 'text-gray-300'
             }`}>
-              {s.set_tag && s.set_tag !== 'normal' ? TAG_CONFIG[s.set_tag].letter : i + 1}
+              {s.set_tag && s.set_tag !== 'normal'
+                ? TAG_CONFIG[s.set_tag].letter
+                : s.side
+                  ? `${s.set_number}${s.side === 'left' ? 'L' : 'R'}`
+                  : i + 1}
             </span>
           </div>
         ))}
@@ -151,9 +155,14 @@ export function SetBySetTracker({
       <div className="flex items-center justify-center gap-2">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-semibold">
           <ArrowRight className="h-3.5 w-3.5" />
-          {isDE ? 'Satz' : 'Set'} {currentSetIndex + 1} / {totalSets}
-          <span className="text-teal-500 font-normal">
-            ({completedCount} {isDE ? 'fertig' : 'done'})
+          {isDE ? 'Satz' : 'Set'} {currentSet.set_number}
+          {currentSet.side && (
+            <span className={currentSet.side === 'left' ? 'text-indigo-600' : 'text-purple-600'}>
+              ({currentSet.side === 'left' ? 'L' : 'R'})
+            </span>
+          )}
+          <span className="text-xs text-teal-500 font-normal">
+            {completedCount}/{totalSets}
           </span>
         </span>
         {/* Set Tag Toggle — tap to cycle W/D/F */}
@@ -212,8 +221,8 @@ export function SetBySetTracker({
         )}
       </div>
 
-      {/* Unilateral Hint */}
-      {isUnilateral && (
+      {/* Unilateral L/R hint — only show if old bilateral data (no side field) */}
+      {isUnilateral && !currentSet.side && (
         <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
           <ArrowLeftRight className="h-4 w-4 text-indigo-500 flex-shrink-0" />
           <p className="text-xs text-indigo-600 font-medium">

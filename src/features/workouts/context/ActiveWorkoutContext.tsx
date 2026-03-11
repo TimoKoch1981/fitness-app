@@ -18,6 +18,7 @@ import type {
   WorkoutTrackingMode,
   WorkoutSessionPhase,
 } from '../../../types/health';
+import { suggestExerciseDefaults } from '../utils/suggestExerciseDefaults';
 
 // ── State ────────────────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ const STORAGE_KEY = 'fitbuddy_active_workout';
 // ── Actions ──────────────────────────────────────────────────────────────
 
 type Action =
-  | { type: 'START_SESSION'; planDay: TrainingPlanDay; planId: string; lastResults?: WorkoutExerciseResult[] }
+  | { type: 'START_SESSION'; planDay: TrainingPlanDay; planId: string; lastResults?: WorkoutExerciseResult[]; catalog?: CatalogExercise[]; crossPlanData?: Map<string, WorkoutExerciseResult> }
   | { type: 'START_FREE_SESSION'; name?: string }
   | { type: 'LOG_WARMUP'; warmup: WarmupResult }
   | { type: 'SKIP_WARMUP' }
@@ -102,32 +103,88 @@ export interface ExerciseEditPayload {
 
 export function buildExercisesFromPlan(
   planExercises: PlanExercise[],
+  catalog?: CatalogExercise[],
+  crossPlanData?: Map<string, WorkoutExerciseResult>,
 ): WorkoutExerciseResult[] {
   return planExercises.map((pe, idx) => {
-    // Cardio/flexibility exercises default to 1 set (timed), strength defaults to 3
-    const isTimedType = pe.exercise_type === 'cardio' || pe.exercise_type === 'flexibility';
-    const numSets = pe.sets ?? (isTimedType ? 1 : 3);
+    // Look up catalog entry for smart defaults
+    const catEntry = catalog?.find(c => c.id === pe.exercise_id)
+      ?? catalog?.find(c => c.name.toLowerCase() === pe.name.toLowerCase());
+    const defaults = suggestExerciseDefaults(pe.name, catEntry);
 
-    const sets: SetResult[] = Array.from({ length: numSets }, (_, setIdx) => ({
-      set_number: setIdx + 1,
-      target_reps: pe.reps ?? (isTimedType ? '1' : '10'),
-      target_weight_kg: isTimedType ? undefined : pe.weight_kg,
-      actual_reps: undefined,
-      actual_weight_kg: isTimedType ? undefined : pe.weight_kg, // pre-fill with target (strength only)
-      // Adaptive fields for cardio/flexibility (Phase D.2)
-      target_duration_minutes: isTimedType ? pe.duration_minutes : undefined,
-      target_distance_km: pe.exercise_type === 'cardio' ? pe.distance_km : undefined,
-      completed: false,
-      skipped: false,
-    }));
+    // Cross-plan previous data (best completed non-warmup set)
+    const crossKey = pe.exercise_id ?? pe.name.toLowerCase();
+    const prevEx = crossPlanData?.get(crossKey);
+    const prevSet = prevEx?.sets.find(s => s.completed && s.set_tag !== 'warmup');
+
+    // Detect exercise type
+    const isCardioOrFlex = pe.exercise_type === 'cardio' || pe.exercise_type === 'flexibility';
+    const isIsometric = defaults.isIsometric;
+    const isTimedType = isCardioOrFlex || isIsometric;
+
+    const numSets = pe.sets ?? (isCardioOrFlex ? 1 : 3);
+    // Check if exercise is unilateral (L/R tracking) — not for timed types
+    const isUnilateral = !isTimedType && (catEntry?.is_unilateral ?? false);
+
+    // ── Priority chain for target values ────────────────────────────
+    let targetReps: string;
+    let targetWeightKg: number | undefined;
+    let targetDurationMinutes: number | undefined;
+    let targetDistanceKm: number | undefined;
+
+    if (isIsometric) {
+      // Isometric: duration-based, no weight
+      targetReps = pe.reps ?? '1';
+      targetWeightKg = undefined;
+      targetDurationMinutes = pe.duration_minutes
+        ?? (prevSet?.actual_duration_minutes)
+        ?? (defaults.holdSeconds != null ? defaults.holdSeconds / 60 : 0.5);
+      targetDistanceKm = undefined;
+    } else if (isCardioOrFlex) {
+      // Cardio/flexibility: existing behavior
+      targetReps = pe.reps ?? '1';
+      targetWeightKg = undefined;
+      targetDurationMinutes = pe.duration_minutes;
+      targetDistanceKm = pe.exercise_type === 'cardio' ? pe.distance_km : undefined;
+    } else {
+      // Strength: 4-level priority chain
+      // a. Plan value → b. Cross-plan previous → c. Smart defaults → d. Fallback
+      targetReps = pe.reps ?? prevSet?.target_reps ?? defaults.reps;
+      targetWeightKg = pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg;
+      targetDurationMinutes = undefined;
+      targetDistanceKm = undefined;
+    }
+
+    const sets: SetResult[] = [];
+    for (let setIdx = 0; setIdx < numSets; setIdx++) {
+      const baseSet = {
+        set_number: setIdx + 1,
+        target_reps: targetReps,
+        target_weight_kg: targetWeightKg,
+        actual_reps: undefined as number | undefined,
+        actual_weight_kg: isTimedType ? undefined : targetWeightKg,
+        target_duration_minutes: targetDurationMinutes,
+        target_distance_km: targetDistanceKm,
+        actual_duration_minutes: undefined as number | undefined,
+        actual_distance_km: undefined as number | undefined,
+        completed: false,
+        skipped: false,
+      };
+      if (isUnilateral) {
+        sets.push({ ...baseSet, side: 'left' as const });
+        sets.push({ ...baseSet, side: 'right' as const });
+      } else {
+        sets.push(baseSet);
+      }
+    }
 
     return {
       name: pe.name,
       exercise_id: pe.exercise_id,
-      exercise_type: pe.exercise_type,
+      exercise_type: isIsometric ? ('strength' as const) : pe.exercise_type,
       plan_exercise_index: idx,
       sets,
-      duration_minutes: pe.duration_minutes,
+      duration_minutes: isIsometric ? targetDurationMinutes : pe.duration_minutes,
       distance_km: pe.distance_km,
       pace: pe.pace,
       intensity: pe.intensity,
@@ -146,6 +203,8 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
     case 'START_SESSION': {
       const exercises = buildExercisesFromPlan(
         action.planDay.exercises,
+        action.catalog,
+        action.crossPlanData,
       );
       return {
         planId: action.planId,
@@ -448,7 +507,7 @@ export const initialState: ActiveWorkoutState = {
 interface ActiveWorkoutContextValue {
   state: ActiveWorkoutState;
   dispatch: React.Dispatch<Action>;
-  startSession: (planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[]) => void;
+  startSession: (planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>) => void;
   startFreeSession: (name?: string) => void;
   logWarmup: (warmup: WarmupResult) => void;
   skipWarmup: () => void;
@@ -565,8 +624,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     };
   }, [state.exercises, state.currentExerciseIndex, state.isActive, state.phase, state.planDayId, state.planId, state.planDayName, state.planDayNumber, state.warmup, state.startedAt]);
 
-  const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[]) => {
-    dispatch({ type: 'START_SESSION', planDay, planId, lastResults });
+  const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>) => {
+    dispatch({ type: 'START_SESSION', planDay, planId, lastResults, catalog, crossPlanData });
   }, []);
 
   const startFreeSession = useCallback((name?: string) => {

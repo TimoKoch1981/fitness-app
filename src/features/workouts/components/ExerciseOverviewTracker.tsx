@@ -192,11 +192,11 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 key={i}
                 className={`w-2.5 h-2.5 rounded-full transition-colors ${
                   s.completed
-                    ? 'bg-teal-500'
+                    ? (s.side === 'left' ? 'bg-indigo-500' : s.side === 'right' ? 'bg-purple-500' : 'bg-teal-500')
                     : s.skipped
                       ? 'bg-gray-300'
                       : i === nextSetIndex
-                        ? 'bg-teal-300 ring-2 ring-teal-200 animate-pulse'
+                        ? (s.side === 'left' ? 'bg-indigo-300 ring-2 ring-indigo-200 animate-pulse' : s.side === 'right' ? 'bg-purple-300 ring-2 ring-purple-200 animate-pulse' : 'bg-teal-300 ring-2 ring-teal-200 animate-pulse')
                         : 'bg-gray-200'
                 }`}
               />
@@ -270,7 +270,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                       }`}
                       title={isDE ? 'Tippen: Satz-Typ ändern (W/D/F)' : 'Tap: change set type (W/D/F)'}
                     >
-                      {tag !== 'normal' ? config.letter : idx + 1}
+                      {tag !== 'normal' ? config.letter : set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : idx + 1}
                     </button>
                   );
                 })()}
@@ -457,7 +457,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               {exercise.sets.map((set, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs">
                   <span className={`font-medium ${set.completed ? 'text-teal-600' : 'text-gray-400'}`}>
-                    {isCardio ? (isDE ? 'Int.' : 'Int.') : (isDE ? 'Satz' : 'Set')} {idx + 1}:
+                    {isCardio ? (isDE ? 'Int.' : 'Int.') : (isDE ? 'Satz' : 'Set')} {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : idx + 1}:
                   </span>
                   {set.completed ? (
                     <span className="text-teal-700 font-semibold">

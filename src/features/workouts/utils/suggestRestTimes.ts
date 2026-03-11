@@ -37,7 +37,7 @@ interface SuggestParams {
 }
 
 // Compound exercise detection (common exercises)
-const COMPOUND_PATTERNS = [
+export const COMPOUND_PATTERNS = [
   /squat|kniebeuge/i,
   /deadlift|kreuzheben/i,
   /bench\s*press|bankdr/i,
@@ -50,7 +50,7 @@ const COMPOUND_PATTERNS = [
   /hip\s*thrust/i,
 ];
 
-const ISOMETRIC_PATTERNS = [
+export const ISOMETRIC_PATTERNS = [
   /plank/i,
   /hold|halten/i,
   /wall\s*sit/i,
@@ -59,7 +59,7 @@ const ISOMETRIC_PATTERNS = [
   /isometr/i,
 ];
 
-function detectCategory(name: string): ExerciseCategory {
+export function detectCategory(name: string): ExerciseCategory {
   if (ISOMETRIC_PATTERNS.some(p => p.test(name))) return 'isometric';
   if (COMPOUND_PATTERNS.some(p => p.test(name))) return 'compound';
   if (/lauf|run|jog|sprint|schwimm|swim|rad|bike|cycling|cardio/i.test(name)) return 'cardio';

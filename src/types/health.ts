@@ -46,6 +46,9 @@ export interface ExerciseSet {
 /** Set tag for categorizing sets (industry standard: Strong, Hevy) */
 export type SetTag = 'normal' | 'warmup' | 'drop' | 'failure';
 
+/** Side for unilateral exercises (L/R tracking) */
+export type SetSide = 'left' | 'right';
+
 /** Per-set result tracked during a live workout session */
 export interface SetResult {
   set_number: number;
@@ -63,6 +66,8 @@ export interface SetResult {
   notes?: string;
   /** Set tag: warmup(W) excluded from stats, drop(D), failure(F) */
   set_tag?: SetTag;
+  /** Side for unilateral exercises — undefined = bilateral */
+  side?: SetSide;
 }
 
 /** Detailed per-exercise result from a live session */

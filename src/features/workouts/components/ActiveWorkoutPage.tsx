@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActivePlan } from '../hooks/useTrainingPlans';
 import { useLastWorkoutForDay } from '../hooks/useLastWorkoutForDay';
+import { useRecentCompletedWorkouts } from '../hooks/useLastExerciseData';
 import { useLatestBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useWorkoutTimers } from '../hooks/useWorkoutTimers';
 import { WarmupCard } from './WarmupCard';
@@ -41,6 +43,7 @@ export function ActiveWorkoutPage() {
   } = useActiveWorkout();
 
   const { data: latestBody } = useLatestBodyMeasurement();
+  const { data: catalog } = useExerciseCatalog();
   const { data: activePlan } = useActivePlan();
 
   const planId = searchParams.get('planId') ?? '';
@@ -50,6 +53,23 @@ export function ActiveWorkoutPage() {
   const isFreeMode = searchParams.get('mode') === 'free';
 
   const { data: lastWorkout } = useLastWorkoutForDay(planId, dayNumber);
+
+  // Cross-plan lookup: user's most recent values for each exercise (any plan)
+  const { data: recentWorkouts } = useRecentCompletedWorkouts();
+  const crossPlanLookup = useMemo(() => {
+    const map = new Map<string, import('../../../types/health').WorkoutExerciseResult>();
+    if (!recentWorkouts) return map;
+    for (const w of recentWorkouts) {
+      for (const ex of w.session_exercises) {
+        if (ex.skipped || !ex.sets.some(s => s.completed)) continue;
+        const idKey = ex.exercise_id;
+        const nameKey = ex.name.toLowerCase();
+        if (idKey && !map.has(idKey)) map.set(idKey, ex);
+        if (!map.has(nameKey)) map.set(nameKey, ex);
+      }
+    }
+    return map;
+  }, [recentWorkouts]);
 
   // ── Multi-Timer Hook ────────────────────────────────────────────────────
   const timers = useWorkoutTimers();
@@ -155,13 +175,13 @@ export function ActiveWorkoutPage() {
         } else {
           // No draft found — start fresh
           const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-          startSession(planDay, planId, lastResults);
+          startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
         }
       } catch (err) {
         console.warn('[Resume] Failed to load draft:', err);
         // Fallback: start fresh
         const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-        startSession(planDay, planId, lastResults);
+        startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
       }
     })();
   }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession]);
@@ -189,7 +209,7 @@ export function ActiveWorkoutPage() {
     if (!planDay) return;
 
     const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-    startSession(planDay, planId, lastResults);
+    startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
   }, [isFreeMode, isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
 
   // ── Start total timer when session becomes active ──────────────────────

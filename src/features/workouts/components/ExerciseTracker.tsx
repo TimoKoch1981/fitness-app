@@ -19,7 +19,7 @@ import { ExerciseVideoModal } from './ExerciseVideoModal';
 import { ExerciseModifyDialog } from './ExerciseModifyDialog';
 import { AddExerciseDialog } from './AddExerciseDialog';
 import { RIRFeedbackDialog } from './RIRFeedbackDialog';
-import { suggestRestTime } from '../utils/suggestRestTimes';
+import { suggestRestTime, ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
 import { useIsFirstSessionForPlan } from '../hooks/useIsFirstSessionForPlan';
 import { useLastExerciseData } from '../hooks/useLastExerciseData';
 
@@ -89,9 +89,12 @@ export function ExerciseTracker() {
 
   // Detect exercise categories for adaptive UI (Phase D.2)
   const isCardio = exercise.exercise_type === 'cardio';
-  // Timed exercises use ExerciseTimer (flexibility only; cardio uses set trackers with Duration+Distance)
+  // Isometric detection (Plank, Dead Hang, Wall Sit, L-Sit)
+  const isIsometric = ISOMETRIC_PATTERNS.some(p => p.test(exercise.name));
+  // Timed exercises use ExerciseTimer (flexibility, isometric holds; cardio uses set trackers with Duration+Distance)
   const isTimedExercise = (
     exercise.exercise_type === 'flexibility' ||
+    isIsometric ||
     (!isCardio && exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
   );
 
