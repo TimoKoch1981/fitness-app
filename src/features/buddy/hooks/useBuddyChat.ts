@@ -35,6 +35,9 @@ import { useChatHistory } from './useChatHistory';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import type { AgentContext, AgentType, CommunicationStyle } from '../../../lib/ai/agents/types';
 import type { ParsedAction } from '../../../lib/ai/actions/types';
+import { extractActionRequest, stripActionRequest, executeSystemAgent, providerSupportsTools } from '../../../lib/ai/agents/systemAgent';
+import type { ActionType } from '../../../lib/ai/actions/types';
+import { validateAction } from '../../../lib/ai/actions/schemas';
 import type { HealthContext } from '../../../types/health';
 
 export interface DisplayMessage {
@@ -204,8 +207,51 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         durationMs,
       });
 
-      // Stream finished — parse ALL ACTION blocks from final content
-      let parsedActions = parseAllActionsFromResponse(result.content);
+      // Stream finished — parse actions from final content
+      let parsedActions: ParsedAction[] = [];
+      let fcErrorMessage: string | undefined;
+
+      // Path 1: Function Calling via System Agent (OpenAI/Supabase only)
+      const provider = getAIProvider();
+      if (providerSupportsTools(provider)) {
+        const actionRequests = extractActionRequest(result.content);
+        if (actionRequests) {
+          console.log(`[BuddyChat] FC path: ${actionRequests.length} action_request(s) found, calling System Agent...`);
+          const fcResult = await executeSystemAgent(actionRequests, provider, language);
+          if (fcResult.success && fcResult.actions) {
+            parsedActions = fcResult.actions;
+            console.log(`[BuddyChat] FC path: ${parsedActions.length} validated action(s)`);
+          } else if (fcResult.error) {
+            console.warn(`[BuddyChat] FC path failed: ${fcResult.error}`, fcResult.details);
+            fcErrorMessage = fcResult.userMessage;
+            // Fall through to legacy regex path
+          }
+        }
+      }
+
+      // Path 2a: Non-FC provider with ACTION_REQUEST blocks (Ollama direct JSON parse)
+      if (parsedActions.length === 0 && !providerSupportsTools(getAIProvider())) {
+        const actionRequests = extractActionRequest(result.content);
+        if (actionRequests) {
+          for (const req of actionRequests) {
+            try {
+              const data = JSON.parse(req.description);
+              const validation = validateAction(req.type as ActionType, data);
+              if (validation.success) {
+                parsedActions.push({ type: req.type as ActionType, data: validation.data, rawJson: req.description });
+              }
+            } catch { /* JSON parse failed — fallback to regex */ }
+          }
+          if (parsedActions.length > 0) {
+            console.log(`[BuddyChat] Non-FC path: ${parsedActions.length} actions from ACTION_REQUEST blocks`);
+          }
+        }
+      }
+
+      // Path 2: Legacy regex fallback (Ollama, transition period, FC failure)
+      if (parsedActions.length === 0) {
+        parsedActions = parseAllActionsFromResponse(result.content);
+      }
 
       // Fallback: If the LLM said "Ich suche die Nährwerte für..." but the ACTION block
       // wasn't parsed (e.g. formatting issues), try to extract the query from the text
@@ -252,7 +298,8 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
             const weightKg = parseFloat(weightMatch[1].replace(',', '.'));
             if (weightKg >= 30 && weightKg <= 300) {
               console.warn(`[BuddyChat] No ACTION:log_body block, but weight text detected: ${weightKg} kg — injecting action`);
-              parsedActions = [{ type: 'log_body', data: { weight_kg: weightKg }, rawJson: JSON.stringify({ weight_kg: weightKg }) }];
+              const today = new Date().toISOString().split('T')[0];
+              parsedActions = [{ type: 'log_body', data: { weight_kg: weightKg, date: today }, rawJson: JSON.stringify({ weight_kg: weightKg, date: today }) }];
             }
           }
         }
@@ -348,10 +395,22 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           durationMs: followUpDuration,
         });
 
-        // Parse actions from follow-up
-        const followUpActions = parseAllActionsFromResponse(followUpResult.content);
+        // Parse actions from follow-up (FC → Non-FC → Legacy regex)
+        let followUpActions: ParsedAction[] = [];
+        if (providerSupportsTools(getAIProvider())) {
+          const followUpRequests = extractActionRequest(followUpResult.content);
+          if (followUpRequests) {
+            const fcFollowUp = await executeSystemAgent(followUpRequests, getAIProvider(), language);
+            if (fcFollowUp.success && fcFollowUp.actions) {
+              followUpActions = fcFollowUp.actions;
+            }
+          }
+        }
+        if (followUpActions.length === 0) {
+          followUpActions = parseAllActionsFromResponse(followUpResult.content);
+        }
         const followUpClean = followUpActions.length > 0
-          ? stripActionBlock(followUpResult.content)
+          ? stripActionRequest(stripActionBlock(followUpResult.content))
           : followUpResult.content;
 
         setMessages(prev => prev.map(m =>
@@ -388,7 +447,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       } else {
         // Normal flow — no search_product, just show the response
         const cleanContent = regularActions.length > 0
-          ? stripActionBlock(result.content)
+          ? stripActionRequest(stripActionBlock(result.content))
           : result.content;
 
         // Finalize the message: remove streaming flag, add agent attribution
@@ -410,6 +469,17 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
             : m
         ));
 
+        // Show FC error to user (no silent failure!)
+        if (fcErrorMessage) {
+          setMessages(prev => [...prev, {
+            id: crypto.randomUUID(),
+            role: 'assistant' as const,
+            content: `\u26A0\uFE0F ${fcErrorMessage}`,
+            timestamp: new Date(),
+            agentIcon: '\u26A0\uFE0F',
+            isError: true,
+          }]);
+        }
         // Persist assistant message to DB (fire-and-forget)
         if (user?.id) {
           saveAssistantMessage(user.id, (result.agentType as AgentType) ?? activeThread, {

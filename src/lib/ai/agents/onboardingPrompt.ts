@@ -38,10 +38,11 @@ Sammle die wichtigsten Daten in einem natürlichen Gespräch — KEINE Formulare
   - 5-6x/Woche intensiv → 1.725
   - Täglich + körperliche Arbeit → 1.9
 
-### ACTION FORMAT:
-\`\`\`ACTION:update_profile
-{"height_cm": 183, "birth_year": 1981, "gender": "male", "activity_level": 1.55}
-\`\`\`
+### ACTION_REQUEST FORMAT:
+[ACTION_REQUEST]
+type: update_profile
+data: {"height_cm": 183, "birth_year": 1981, "gender": "male", "activity_level": 1.55}
+[/ACTION_REQUEST]
 
 Felder sind alle optional — sende nur was du gerade gelernt hast.
 Mögliche Felder: height_cm, birth_year, gender ("male"/"female"/"other"), activity_level (1.2-1.9),
@@ -76,10 +77,11 @@ Collect key data through natural conversation — NO forms, NO lists.
   - Heavy 5-6x/week → 1.725
   - Daily + physical job → 1.9
 
-### ACTION FORMAT:
-\`\`\`ACTION:update_profile
-{"height_cm": 183, "birth_year": 1981, "gender": "male", "activity_level": 1.55}
-\`\`\`
+### ACTION_REQUEST FORMAT:
+[ACTION_REQUEST]
+type: update_profile
+data: {"height_cm": 183, "birth_year": 1981, "gender": "male", "activity_level": 1.55}
+[/ACTION_REQUEST]
 
 All fields are optional — only send what you just learned.
 Possible fields: height_cm, birth_year, gender ("male"/"female"/"other"), activity_level (1.2-1.9),

@@ -11,7 +11,7 @@
  * @see https://github.com/ollama/ollama/blob/main/docs/api.md
  */
 
-import type { AIProvider } from './provider';
+import type { AIProvider, ChatOptions } from './provider';
 import type { ChatMessage, AIResponse, StreamCallback } from './types';
 import type { HealthContext } from '../../types/health';
 
@@ -49,7 +49,7 @@ export class OllamaProvider implements AIProvider {
    * Blocking chat — waits for the entire response before returning.
    * Use chatStream() instead for better UX.
    */
-  async chat(messages: ChatMessage[], _context?: HealthContext): Promise<AIResponse> {
+  async chat(messages: ChatMessage[], _context?: HealthContext, _options?: ChatOptions): Promise<AIResponse> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);
 
@@ -103,6 +103,7 @@ export class OllamaProvider implements AIProvider {
     messages: ChatMessage[],
     onChunk: StreamCallback,
     _context?: HealthContext,
+    _options?: ChatOptions,
   ): Promise<AIResponse> {
     const controller = new AbortController();
     const totalTimeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);

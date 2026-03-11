@@ -46,10 +46,12 @@ function extractUserIdFromJWT(token: string): string | null {
   try {
     const parts = token.replace(/^Bearer\s+/i, '').split('.');
     if (parts.length !== 3) return null;
-    // Base64url → Base64 → decode
-    const payload = parts[1]
+    // Base64url → Base64 → decode (add padding for atob compatibility)
+    let payload = parts[1]
       .replace(/-/g, '+')
       .replace(/_/g, '/');
+    // Add padding if needed
+    while (payload.length % 4 !== 0) payload += '=';
     const decoded = atob(payload);
     const json = JSON.parse(decoded);
     return json.sub ?? null;
@@ -128,13 +130,8 @@ Deno.serve(async (req: Request) => {
   }
 
   // ── Extract user ID from JWT for rate limiting ────────────────────
-  const userId = extractUserIdFromJWT(authHeader);
-  if (!userId) {
-    return new Response(JSON.stringify({ error: 'Invalid or malformed JWT token' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Note: Supabase anon key JWT has no 'sub' claim, so we fallback to 'anon'
+  const userId = extractUserIdFromJWT(authHeader) ?? 'anon';
 
   // ── Rate limit check ──────────────────────────────────────────────
   const rateLimitResult = checkRateLimit(userId);
@@ -168,11 +165,13 @@ Deno.serve(async (req: Request) => {
       messages,
       model = 'gpt-4o-mini',
       stream = false,
-      max_tokens = 2048,
+      max_tokens = 8192,
       temperature = 0.7,
       top_p,
       response_format,
       stream_options,
+      tools,
+      tool_choice,
     } = body;
 
     if (!messages || !Array.isArray(messages)) {
@@ -194,6 +193,10 @@ Deno.serve(async (req: Request) => {
     if (top_p !== undefined) openaiBody.top_p = top_p;
     if (response_format) openaiBody.response_format = response_format;
     if (stream && stream_options) openaiBody.stream_options = stream_options;
+    if (tools && Array.isArray(tools) && tools.length > 0) {
+      openaiBody.tools = tools;
+      if (tool_choice !== undefined) openaiBody.tool_choice = tool_choice;
+    }
 
     const openaiResponse = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
       method: 'POST',

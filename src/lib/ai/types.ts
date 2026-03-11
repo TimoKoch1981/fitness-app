@@ -3,15 +3,31 @@
  * Supports multiple providers: Ollama (local), OpenAI, Supabase Proxy, Claude.
  */
 
+/** OpenAI Function Calling tool_call from a response */
+export interface ToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string; // JSON string
+  };
+}
+
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
+  /** Tool calls requested by the assistant (Function Calling) */
+  tool_calls?: ToolCall[];
+  /** For role='tool' — the ID of the tool call this response belongs to */
+  tool_call_id?: string;
 }
 
 export interface AIResponse {
   content: string;
   model?: string;
   tokensUsed?: number;
+  /** Tool calls from OpenAI Function Calling (present when tools were requested) */
+  tool_calls?: ToolCall[];
 }
 
 /** Callback for streaming responses — called with accumulated text on each chunk */

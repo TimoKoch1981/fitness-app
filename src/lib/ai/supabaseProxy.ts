@@ -10,7 +10,7 @@
  * Auth: Passes VITE_SUPABASE_ANON_KEY as Bearer token.
  */
 
-import type { AIProvider } from './provider';
+import type { AIProvider, ChatOptions } from './provider';
 import type { ChatMessage, AIResponse, StreamCallback } from './types';
 import type { HealthContext } from '../../types/health';
 import { parseSSEStream, parseCompletionResponse } from './sseParser';
@@ -44,12 +44,28 @@ export class SupabaseAIProvider implements AIProvider {
 
   /**
    * Blocking chat — sends request through Edge Function, waits for full response.
+   * Supports Function Calling via options.tools — forwarded to ai-proxy.
    */
-  async chat(messages: ChatMessage[], _context?: HealthContext): Promise<AIResponse> {
+  async chat(messages: ChatMessage[], _context?: HealthContext, options?: ChatOptions): Promise<AIResponse> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);
 
     try {
+      const body: Record<string, unknown> = {
+        model: this.model,
+        messages,
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 8192,
+        stream: false,
+      };
+
+      // Forward Function Calling parameters to ai-proxy
+      if (options?.tools?.length) {
+        body.tools = options.tools;
+        body.tool_choice = options.tool_choice ?? 'auto';
+      }
+
       const response = await fetch(this.functionsUrl, {
         method: 'POST',
         headers: {
@@ -58,14 +74,7 @@ export class SupabaseAIProvider implements AIProvider {
           'Authorization': `Bearer ${this.anonKey}`,
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 4096,
-          stream: false,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -94,12 +103,29 @@ export class SupabaseAIProvider implements AIProvider {
     messages: ChatMessage[],
     onChunk: StreamCallback,
     _context?: HealthContext,
+    options?: ChatOptions,
   ): Promise<AIResponse> {
     const controller = new AbortController();
     const totalTimeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);
 
     try {
       const connectTimeout = setTimeout(() => controller.abort(), CONNECT_TIMEOUT_MS);
+
+      const body: Record<string, unknown> = {
+        model: this.model,
+        messages,
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 8192,
+        stream: true,
+        stream_options: { include_usage: true },
+      };
+
+      // Forward Function Calling parameters to ai-proxy
+      if (options?.tools?.length) {
+        body.tools = options.tools;
+        body.tool_choice = options.tool_choice ?? 'auto';
+      }
 
       const response = await fetch(this.functionsUrl, {
         method: 'POST',
@@ -109,15 +135,7 @@ export class SupabaseAIProvider implements AIProvider {
           'Authorization': `Bearer ${this.anonKey}`,
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 4096,
-          stream: true,
-          stream_options: { include_usage: true },
-        }),
+        body: JSON.stringify(body),
       });
 
       clearTimeout(connectTimeout);
@@ -138,6 +156,7 @@ export class SupabaseAIProvider implements AIProvider {
         content: result.content,
         model: result.model,
         tokensUsed: result.tokensUsed,
+        tool_calls: result.tool_calls?.length ? result.tool_calls : undefined,
       };
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -184,7 +203,7 @@ export async function proxyCompletionRequest(
       model: options.model ?? 'gpt-4o-mini',
       messages,
       temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 4096,
+      max_tokens: options.max_tokens ?? 8192,
       stream: false,
       ...(options.response_format ? { response_format: options.response_format } : {}),
     }),

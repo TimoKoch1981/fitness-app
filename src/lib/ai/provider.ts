@@ -15,15 +15,24 @@
 
 import type { ChatMessage, AIResponse, AIProviderConfig, StreamCallback } from './types';
 import type { HealthContext } from '../../types/health';
+import type { ToolDefinition } from './tools/actionTools';
 import { OllamaProvider } from './ollama';
 import { OpenAIProvider } from './openai';
 import { SupabaseAIProvider } from './supabaseProxy';
 
+/** Options for chat/chatStream calls — enables Function Calling */
+export interface ChatOptions {
+  /** OpenAI Function Calling tool definitions */
+  tools?: ToolDefinition[];
+  /** Control tool usage: 'auto' (default), 'none', or force a specific function */
+  tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
+}
+
 export interface AIProvider {
   /** Send a chat message and get a response (blocking — waits for full response) */
-  chat(messages: ChatMessage[], context?: HealthContext): Promise<AIResponse>;
+  chat(messages: ChatMessage[], context?: HealthContext, options?: ChatOptions): Promise<AIResponse>;
   /** Send a chat message and stream the response token by token */
-  chatStream(messages: ChatMessage[], onChunk: StreamCallback, context?: HealthContext): Promise<AIResponse>;
+  chatStream(messages: ChatMessage[], onChunk: StreamCallback, context?: HealthContext, options?: ChatOptions): Promise<AIResponse>;
   /** Check if the provider is available/connected */
   isAvailable(): Promise<boolean>;
   /** Get the provider name for display */

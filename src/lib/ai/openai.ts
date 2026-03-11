@@ -12,7 +12,7 @@
  * @see https://platform.openai.com/docs/api-reference/chat/create
  */
 
-import type { AIProvider } from './provider';
+import type { AIProvider, ChatOptions } from './provider';
 import type { ChatMessage, AIResponse, StreamCallback } from './types';
 import type { HealthContext } from '../../types/health';
 import { parseSSEStream, parseCompletionResponse } from './sseParser';
@@ -53,13 +53,27 @@ export class OpenAIProvider implements AIProvider {
 
   /**
    * Blocking chat — waits for the entire response before returning.
-   * Use chatStream() instead for better UX.
+   * Supports OpenAI Function Calling via options.tools.
    */
-  async chat(messages: ChatMessage[], _context?: HealthContext): Promise<AIResponse> {
+  async chat(messages: ChatMessage[], _context?: HealthContext, options?: ChatOptions): Promise<AIResponse> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);
 
     try {
+      const body: Record<string, unknown> = {
+        model: this.model,
+        messages,
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 8192,
+      };
+
+      // Add Function Calling parameters if provided
+      if (options?.tools?.length) {
+        body.tools = options.tools;
+        body.tool_choice = options.tool_choice ?? 'auto';
+      }
+
       const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -67,13 +81,7 @@ export class OpenAIProvider implements AIProvider {
           Authorization: `Bearer ${this.apiKey}`,
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 4096,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -98,6 +106,9 @@ export class OpenAIProvider implements AIProvider {
    * Streaming chat — calls onChunk with accumulated text as tokens arrive.
    * Returns the final AIResponse when done.
    *
+   * Note: When tools are provided, streaming still works but tool_calls
+   * will only be available in the final aggregated response.
+   *
    * OpenAI streams SSE (Server-Sent Events):
    *   data: {"choices":[{"delta":{"content":"token"}}]}
    *   data: [DONE]
@@ -106,12 +117,29 @@ export class OpenAIProvider implements AIProvider {
     messages: ChatMessage[],
     onChunk: StreamCallback,
     _context?: HealthContext,
+    options?: ChatOptions,
   ): Promise<AIResponse> {
     const controller = new AbortController();
     const totalTimeout = setTimeout(() => controller.abort(), TOTAL_TIMEOUT_MS);
 
     try {
       const connectTimeout = setTimeout(() => controller.abort(), CONNECT_TIMEOUT_MS);
+
+      const body: Record<string, unknown> = {
+        model: this.model,
+        messages,
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 8192,
+        stream: true,
+        stream_options: { include_usage: true },
+      };
+
+      // Add Function Calling parameters if provided
+      if (options?.tools?.length) {
+        body.tools = options.tools;
+        body.tool_choice = options.tool_choice ?? 'auto';
+      }
 
       const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
         method: 'POST',
@@ -120,15 +148,7 @@ export class OpenAIProvider implements AIProvider {
           Authorization: `Bearer ${this.apiKey}`,
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 4096,
-          stream: true,
-          stream_options: { include_usage: true },
-        }),
+        body: JSON.stringify(body),
       });
 
       clearTimeout(connectTimeout);
@@ -150,6 +170,7 @@ export class OpenAIProvider implements AIProvider {
         content: result.content,
         model: result.model,
         tokensUsed: result.tokensUsed,
+        tool_calls: result.tool_calls?.length ? result.tool_calls : undefined,
       };
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
