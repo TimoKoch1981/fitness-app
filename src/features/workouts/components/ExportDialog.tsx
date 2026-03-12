@@ -15,8 +15,8 @@ import type { TimeRange } from './progress/TimeRangeSelector';
 type ExportFormat = 'excel' | 'pdf';
 
 const METRICS = [
-  { key: 'volume', labelDE: 'Trainingsvolumen', labelEN: 'Training Volume' },
-  { key: 'e1rm', labelDE: 'e1RM Progression', labelEN: 'e1RM Progression' },
+  { key: 'volume', labelDE: 'Trainingsvolumen (kg)', labelEN: 'Training Volume (kg)' },
+  { key: 'e1rm', labelDE: 'e1RM Progression (kg)', labelEN: 'e1RM Progression (kg)' },
   { key: 'prs', labelDE: 'Bestleistungen (PRs)', labelEN: 'Personal Records' },
   { key: 'frequency', labelDE: 'Trainingsh\u00e4ufigkeit', labelEN: 'Training Frequency' },
   { key: 'bodycomp', labelDE: 'Gewicht & K\u00f6rperfett', labelEN: 'Weight & Body Fat' },

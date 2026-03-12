@@ -53,8 +53,8 @@ export function ProgressDashboard() {
       {/* Time Range Selector */}
       <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
 
-      {/* Category Chips */}
-      <div className="flex gap-1.5">
+      {/* Category Chips + Export Button */}
+      <div className="flex items-center gap-1.5">
         {categories.map(c => (
           <button
             key={c.key}
@@ -68,6 +68,14 @@ export function ProgressDashboard() {
             {c.label}
           </button>
         ))}
+        <div className="flex-1" />
+        <button
+          onClick={() => setShowExport(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-600 bg-teal-50 rounded-full hover:bg-teal-100 transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </button>
       </div>
 
       {isLoading ? (
@@ -115,15 +123,6 @@ export function ProgressDashboard() {
           )}
         </>
       )}
-
-      {/* Export Button */}
-      <button
-        onClick={() => setShowExport(true)}
-        className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-teal-600 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors"
-      >
-        <Download className="h-4 w-4" />
-        {isDE ? 'Daten exportieren' : 'Export Data'}
-      </button>
 
       {/* Export Dialog */}
       {showExport && (
