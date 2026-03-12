@@ -58,8 +58,13 @@ export function WorkoutsTabContent({
     }
   }, [forceTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const buddyPageId = activeSubTab === 'plan'
+    ? 'tracking_training_plan'
+    : activeSubTab === 'history'
+      ? 'tracking_training_history'
+      : 'tracking_training_progress';
   const buddySuggestions = usePageBuddySuggestions(
-    activeSubTab === 'plan' ? 'tracking_training_plan' : 'tracking_training',
+    buddyPageId,
     language as 'de' | 'en',
   );
   const [selectedDate] = useState(today());

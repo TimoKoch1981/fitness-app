@@ -27,6 +27,8 @@ export type PageId =
   | 'tracking_nutrition'
   | 'tracking_training'
   | 'tracking_training_plan'
+  | 'tracking_training_history'
+  | 'tracking_training_progress'
   | 'tracking_body'
   | 'medical'
   | 'cockpit';
@@ -75,17 +77,8 @@ export function usePageBuddySuggestions(
       case 'tracking_training':
         return [
           {
-            id: 'workout_log',
-            label: de ? 'Workout loggen' : 'Log Workout',
-            message: de
-              ? 'Ich habe gerade trainiert.'
-              : 'I just worked out.',
-            icon: '\ud83c\udfcb\ufe0f',
-            targetAgent: 'training' as AgentType,
-          },
-          {
             id: 'workout_advice',
-            label: de ? 'Training-Tipps' : 'Training Tips',
+            label: de ? 'Was trainieren?' : 'What to train?',
             message: de
               ? 'Welche \u00dcbungen sind heute dran?'
               : 'Which exercises should I do today?',
@@ -94,9 +87,17 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Tracking: Training — Plan ──
       case 'tracking_training_plan':
         return [
+          {
+            id: 'workout_log',
+            label: de ? 'Workout loggen' : 'Log Workout',
+            message: de
+              ? 'Ich m\u00f6chte ein Training loggen. Frag mich bitte was ich trainiert habe, bevor du etwas eintr\u00e4gst.'
+              : 'I want to log a workout. Please ask me what I trained before logging anything.',
+            icon: '\ud83c\udfcb\ufe0f',
+            targetAgent: 'training' as AgentType,
+          },
           {
             id: 'plan_create',
             label: de ? 'Neuen Plan' : 'New Plan',
@@ -117,90 +118,57 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      // ── Tracking: Body ──
-      case 'tracking_body':
+      case 'tracking_training_history':
         return [
           {
-            id: 'body_analyze',
-            label: de ? 'K\u00f6rper analysieren' : 'Analyze Body',
-            message: de
-              ? 'Analysiere meine K\u00f6rperkomposition.'
-              : 'Analyze my body composition.',
-            icon: '\ud83d\udcca',
-            targetAgent: 'analysis' as AgentType,
-          },
-          {
-            id: 'body_recomp',
-            label: de ? 'Recomp-Tipps' : 'Recomp Tips',
-            message: de
-              ? 'Gib mir Tipps f\u00fcr Body Recomposition.'
-              : 'Give me body recomposition tips.',
-            icon: '\ud83d\udd04',
-            targetAgent: 'analysis' as AgentType,
-          },
-        ];
-
-      // ── Medical ──
-      case 'medical':
-        return [
-          {
-            id: 'medical_bp',
-            label: de ? 'Blutdruck analysieren' : 'Analyze BP',
-            message: de
-              ? 'Analysiere meinen Blutdruck-Verlauf.'
-              : 'Analyze my blood pressure trend.',
-            icon: '\u2764\ufe0f',
-            targetAgent: 'medical' as AgentType,
-          },
-          {
-            id: 'medical_substances',
-            label: de ? 'Substanzen-Check' : 'Substance Check',
-            message: de
-              ? '\u00dcberpr\u00fcfe meine Substanzen und deren Wechselwirkungen.'
-              : 'Check my substances and their interactions.',
-            icon: '\ud83d\udc8a',
-            targetAgent: 'substance' as AgentType,
-          },
-          {
-            id: 'medical_health',
-            label: de ? 'Gesundheits-\u00dcbersicht' : 'Health Overview',
-            message: de
-              ? 'Gib mir einen Gesundheits-\u00dcberblick.'
-              : 'Give me a health overview.',
-            icon: '\ud83c\udfe5',
-            targetAgent: 'medical' as AgentType,
-          },
-        ];
-
-      // ── Cockpit (Dashboard + Reports combined) ──
-      case 'cockpit':
-        return [
-          {
-            id: 'cockpit_status',
-            label: de ? 'Tagesbilanz' : 'Daily Summary',
-            message: de
-              ? 'Wie steht mein Tag heute?'
-              : 'How is my day going?',
-            icon: '\ud83d\udcca',
-            targetAgent: 'analysis' as AgentType,
-          },
-          {
-            id: 'cockpit_week',
+            id: 'history_analyze',
             label: de ? 'Woche analysieren' : 'Analyze Week',
             message: de
-              ? 'Analysiere meine letzte Woche.'
-              : 'Analyze my last week.',
-            icon: '\ud83d\udcc8',
+              ? 'Analysiere meine Trainingshistorie der letzten Woche.'
+              : 'Analyze my training history from last week.',
+            icon: '📅',
+            targetAgent: 'training' as AgentType,
+          },
+          {
+            id: 'history_compare',
+            label: de ? 'Fortschritte zeigen' : 'Show Progress',
+            message: de
+              ? 'Wie hat sich mein Training in den letzten Wochen entwickelt?'
+              : 'How has my training progressed over the last weeks?',
+            icon: '📈',
+            targetAgent: 'analysis' as AgentType,
+          },
+        ];
+
+      // ── Tracking: Training — Progress/Analytics ──
+      case 'tracking_training_progress':
+        return [
+          {
+            id: 'progress_strength',
+            label: de ? 'Kraft analysieren' : 'Analyze Strength',
+            message: de
+              ? 'Analysiere meine Kraftentwicklung und e1RM-Trends.'
+              : 'Analyze my strength development and e1RM trends.',
+            icon: '📊',
             targetAgent: 'analysis' as AgentType,
           },
           {
-            id: 'cockpit_recommend',
+            id: 'progress_weak',
+            label: de ? 'Schwachstellen' : 'Weak Points',
+            message: de
+              ? 'Wo sind meine Schwachstellen im Training? Was sollte ich verbessern?'
+              : 'Where are my weak points in training? What should I improve?',
+            icon: '🔍',
+            targetAgent: 'training' as AgentType,
+          },
+          {
+            id: 'progress_recommendation',
             label: de ? 'Empfehlungen' : 'Recommendations',
             message: de
-              ? 'Welche Empfehlungen hast du basierend auf meinen Trends?'
-              : 'What recommendations do you have based on my trends?',
-            icon: '\ud83d\udca1',
-            targetAgent: 'analysis' as AgentType,
+              ? 'Welche Anpassungen empfiehlst du basierend auf meinen Fortschrittsdaten?'
+              : 'What adjustments do you recommend based on my progress data?',
+            icon: '💡',
+            targetAgent: 'training' as AgentType,
           },
         ];
 
