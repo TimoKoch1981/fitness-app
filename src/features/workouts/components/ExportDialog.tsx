@@ -2,17 +2,17 @@
  * ExportDialog — Matrix-style export menu with format, metric, and exercise selection.
  */
 import { useState, useMemo, useCallback } from 'react';
-import { X, Download, FileSpreadsheet, FileCode } from 'lucide-react';
+import { X, Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useBodyMeasurements } from '../../body/hooks/useBodyMeasurements';
 import { useBloodPressureLogs } from '../../medical/hooks/useBloodPressure';
 import { useBloodWorkLogs } from '../../medical/hooks/useBloodWork';
 import { useSleepLogs } from '../../sleep/hooks/useSleep';
-import { exportToCSV } from '../utils/exportCSV';
-import { exportToJSON } from '../utils/exportJSON';
+import { exportToExcel } from '../utils/exportExcel';
+import { exportToPDF } from '../utils/exportPDF';
 import type { TimeRange } from './progress/TimeRangeSelector';
 
-type ExportFormat = 'csv' | 'json';
+type ExportFormat = 'excel' | 'pdf';
 
 const METRICS = [
   { key: 'volume', labelDE: 'Trainingsvolumen', labelEN: 'Training Volume' },
@@ -35,7 +35,8 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
   const { language } = useTranslation();
   const isDE = language === 'de';
 
-  const [format, setFormat] = useState<ExportFormat>('csv');
+  const [format, setFormat] = useState<ExportFormat>('excel');
+  const [exporting, setExporting] = useState(false);
   const [selectedMetrics, setSelectedMetrics] = useState<Set<string>>(
     new Set(['volume', 'e1rm', 'prs', 'frequency'])
   );
@@ -72,7 +73,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
     setSelectedExercises(next);
   };
 
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback(async () => {
     const exportData = {
       timeRange,
       workouts: workouts?.filter(w => w.date >= timeRange.from && w.date <= timeRange.to) || [],
@@ -84,13 +85,19 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
       sleepData: selectedMetrics.has('sleep') ? sleepData?.filter(l => l.date >= timeRange.from && l.date <= timeRange.to) : undefined,
     };
 
-    if (format === 'csv') {
-      exportToCSV(exportData, isDE);
+    if (format === 'excel') {
+      exportToExcel(exportData, isDE);
+      onClose();
     } else {
-      exportToJSON(exportData);
+      // PDF needs async (html2canvas)
+      setExporting(true);
+      try {
+        await exportToPDF(exportData, isDE);
+      } finally {
+        setExporting(false);
+      }
+      onClose();
     }
-
-    onClose();
   }, [format, selectedMetrics, allExercises, selectedExercises, timeRange, workouts, bodyData, bpData, bloodWork, sleepData, exerciseNames, isDE, onClose]);
 
   return (
@@ -118,22 +125,22 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
           <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Format</p>
           <div className="flex gap-2">
             <button
-              onClick={() => setFormat('csv')}
+              onClick={() => setFormat('excel')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm rounded-lg border transition-colors ${
-                format === 'csv' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                format === 'excel' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <FileSpreadsheet className="h-4 w-4" />
-              CSV
+              Excel
             </button>
             <button
-              onClick={() => setFormat('json')}
+              onClick={() => setFormat('pdf')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm rounded-lg border transition-colors ${
-                format === 'json' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                format === 'pdf' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <FileCode className="h-4 w-4" />
-              JSON
+              <FileText className="h-4 w-4" />
+              PDF
             </button>
           </div>
         </div>
@@ -192,11 +199,11 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
         {/* Export Button */}
         <button
           onClick={handleExport}
-          disabled={selectedMetrics.size === 0}
+          disabled={selectedMetrics.size === 0 || exporting}
           className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
         >
-          <Download className="h-4 w-4" />
-          {isDE ? 'Exportieren' : 'Export'}
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {exporting ? (isDE ? 'Wird erstellt...' : 'Generating...') : (isDE ? 'Exportieren' : 'Export')}
         </button>
       </div>
     </div>
