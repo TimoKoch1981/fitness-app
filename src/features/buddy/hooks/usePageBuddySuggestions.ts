@@ -172,7 +172,94 @@ export function usePageBuddySuggestions(
           },
         ];
 
-      default:
+      // ── Tracking: Body ──
+      case 'tracking_body':
+        return [
+          {
+            id: 'body_analyze',
+            label: de ? 'Körper analysieren' : 'Analyze Body',
+            message: de
+              ? 'Wie hat sich mein Gewicht und Körperfett entwickelt?'
+              : 'How has my weight and body fat developed?',
+            icon: '📊',
+            targetAgent: 'analysis' as AgentType,
+          },
+          {
+            id: 'body_recomp',
+            label: de ? 'Recomp-Tipps' : 'Recomp Tips',
+            message: de
+              ? 'Gib mir Tipps für Body Recomposition basierend auf meinen Daten.'
+              : 'Give me body recomposition tips based on my data.',
+            icon: '💪',
+            targetAgent: 'nutrition' as AgentType,
+          },
+        ];
+
+      // ── Medical ──
+      case 'medical':
+        return [
+          {
+            id: 'medical_bp',
+            label: de ? 'Blutdruck bewerten' : 'Evaluate BP',
+            message: de
+              ? 'Bewerte meine Blutdruckwerte der letzten Wochen.'
+              : 'Evaluate my blood pressure values from the last weeks.',
+            icon: '❤️',
+            targetAgent: 'analysis' as AgentType,
+          },
+          {
+            id: 'medical_substances',
+            label: de ? 'Substanzen-Check' : 'Substance Check',
+            message: de
+              ? 'Überprüfe meine aktuellen Substanzen und mögliche Wechselwirkungen.'
+              : 'Check my current substances and possible interactions.',
+            icon: '💊',
+            targetAgent: 'substance' as AgentType,
+          },
+          {
+            id: 'medical_health',
+            label: de ? 'Gesundheits-Check' : 'Health Check',
+            message: de
+              ? 'Wie ist mein allgemeiner Gesundheitsstatus basierend auf meinen Daten?'
+              : 'How is my overall health status based on my data?',
+            icon: '🩺',
+            targetAgent: 'analysis' as AgentType,
+          },
+        ];
+
+      // ── Cockpit ──
+      case 'cockpit':
+        return [
+          {
+            id: 'cockpit_status',
+            label: de ? 'Tagesstatus' : 'Daily Status',
+            message: de
+              ? 'Wie sieht mein heutiger Tag aus? Gib mir einen Überblick.'
+              : 'How does my day look? Give me an overview.',
+            icon: '📋',
+            targetAgent: 'analysis' as AgentType,
+          },
+          {
+            id: 'cockpit_week',
+            label: de ? 'Wochenreport' : 'Weekly Report',
+            message: de
+              ? 'Erstelle mir einen Wochenreport über Training und Ernährung.'
+              : 'Create a weekly report on training and nutrition.',
+            icon: '📈',
+            targetAgent: 'analysis' as AgentType,
+          },
+          {
+            id: 'cockpit_recommend',
+            label: de ? 'Empfehlung' : 'Recommendation',
+            message: de
+              ? 'Was empfiehlst du mir heute zu tun?'
+              : 'What do you recommend I do today?',
+            icon: '💡',
+            targetAgent: 'analysis' as AgentType,
+          },
+        ];
+
+            default:
         return [];
     }
   }, [pageId, language]);

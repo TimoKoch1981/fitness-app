@@ -44,40 +44,11 @@ export function TrainingPage() {
     showPCTCountdown,
     showHematocritAlert,
     showBloodWorkDashboard,
-    showPosingPhotos,
   } = useTrainingMode();
 
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
   const showPowerPlusWidgets = showCycleTracker || showPCTCountdown || showHematocritAlert || showBloodWorkDashboard;
 
-  /** Compress image to WebP Blob (canvas-based, max 800px) */
-  const compressToWebP = (file: File, maxSize = 800, quality = 0.8): Promise<Blob> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > maxSize || height > maxSize) {
-          const ratio = Math.min(maxSize / width, maxSize / height);
-          width *= ratio;
-          height *= ratio;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas not supported'));
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(
-          blob => (blob ? resolve(blob) : reject(new Error('Compression failed'))),
-          'image/webp',
-          quality,
-        );
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = url;
-    });
 
   return (
     <PageShell
