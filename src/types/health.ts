@@ -258,6 +258,7 @@ export interface ReminderLog {
 export type Gender = 'male' | 'female' | 'other';
 export type BMRFormula = 'mifflin' | 'katch' | 'auto';
 export type TrainingMode = 'standard' | 'power' | 'power_plus';
+export type BuddyAvatarStyle = 'coach' | 'trainer' | 'sensei';
 export type TrainingPhase = 'bulk' | 'cut' | 'maintenance' | 'peak_week' | 'reverse_diet' | 'off_season';
 export type CycleStatus = 'natural' | 'blast' | 'cruise' | 'pct' | 'off';
 
@@ -312,6 +313,8 @@ export interface UserProfile {
   data_retention_months?: number | null; // NULL = unbegrenzt, 12/36/60 = Monate
   // KI-Trainer Review System
   ai_trainer_enabled?: boolean;
+  // Buddy Avatar Style
+  buddy_avatar_style?: BuddyAvatarStyle;
   created_at: string;
   updated_at: string;
 }

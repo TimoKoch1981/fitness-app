@@ -15,6 +15,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useInlineBuddyChat } from './InlineBuddyChatContext';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useTranslation } from '../../i18n';
+import { BuddyAvatar, BUDDY_VARIANTS } from './BuddyAvatar';
+import { useProfile } from '../../features/auth/hooks/useProfile';
 
 // Routes where the FAB should NOT appear
 const HIDDEN_ROUTES = new Set([
@@ -43,6 +45,9 @@ export function FloatingBuddyAvatar() {
   const { isOpen, openBuddyChat } = useInlineBuddyChat();
   const location = useLocation();
   const { t } = useTranslation();
+  const { data: profile } = useProfile();
+  const buddyStyle = profile?.buddy_avatar_style ?? 'coach';
+  const variantConfig = BUDDY_VARIANTS[buddyStyle];
 
   // Don't render for unauthenticated users or while loading
   if (loading || !user) return null;
@@ -64,19 +69,15 @@ export function FloatingBuddyAvatar() {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="fixed bottom-20 right-4 z-[51] w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 active:scale-95 transition-transform"
+        className={`fixed bottom-20 right-4 z-[51] w-14 h-14 rounded-full shadow-lg flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:${variantConfig.ring} focus-visible:ring-offset-2 active:scale-95 transition-transform`}
         aria-label={t.buddy.floatingHint}
         title={t.buddy.floatingHint}
       >
         {/* Pulse ring — draws attention */}
-        <span className="absolute inset-0 rounded-full bg-teal-400 opacity-75 animate-ping" />
+        <span className={`absolute inset-0 rounded-full ${variantConfig.pingColor} opacity-75 animate-ping`} />
 
-        {/* Inner circle with icon */}
-        <span className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600">
-          <span className="text-2xl leading-none" role="img" aria-hidden="true">
-            🤖
-          </span>
-        </span>
+        {/* Inner circle with avatar */}
+        <BuddyAvatar size="fab" variant={buddyStyle} />
       </motion.button>
     </AnimatePresence>
   );

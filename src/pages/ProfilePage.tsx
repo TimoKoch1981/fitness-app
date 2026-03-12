@@ -22,6 +22,8 @@ import { PrivacySettings } from '../features/auth/components/PrivacySettings';
 import { MFASettings } from '../features/auth/components/MFASettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
+import { BuddyAvatar, BUDDY_VARIANTS } from '../shared/components/BuddyAvatar';
+import type { BuddyAvatarStyle } from '../types/health';
 import { WeeklyReportPreview } from '../features/reports/components/WeeklyReportPreview';
 import { KeyRotationStatus } from '../features/admin/components/KeyRotationStatus';
 import { AuditRetentionCard } from '../features/admin/components/AuditRetentionCard';
@@ -35,6 +37,7 @@ export function ProfilePage() {
   const { t, language, setLanguage, fontSize, setFontSize, buddyVerbosity, setBuddyVerbosity, buddyExpertise, setBuddyExpertise } = useTranslation();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
+  const isDE = language === 'de';
 
   // Local form state
   const [displayName, setDisplayName] = useState('');
@@ -350,6 +353,40 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Buddy Avatar Style */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <p className="text-sm font-medium text-gray-700 mb-3">{isDE ? '🎭 Buddy-Stil' : '🎭 Buddy Style'}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(['coach', 'trainer', 'sensei'] as BuddyAvatarStyle[]).map((v) => {
+              const cfg = BUDDY_VARIANTS[v];
+              const isSelected = (profile?.buddy_avatar_style ?? 'coach') === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => updateProfile.mutate({ buddy_avatar_style: v })}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                    isSelected
+                      ? 'border-teal-500 bg-teal-50 shadow-sm'
+                      : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <BuddyAvatar size="preview" variant={v} />
+                  <div className="text-center">
+                    <p className={`text-xs font-semibold ${isSelected ? 'text-teal-700' : 'text-gray-700'}`}>{cfg.label[isDE ? 'de' : 'en']}</p>
+                    <p className="text-[10px] text-gray-400 leading-tight mt-0.5">{cfg.description[isDE ? 'de' : 'en']}</p>
+                  </div>
+                  {isSelected && (
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

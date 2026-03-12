@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { AlertCircle, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
+import { BuddyAvatar } from '../../../shared/components/BuddyAvatar';
+import { useProfile } from '../../auth/hooks/useProfile';
 import { useTranslation } from '../../../i18n';
 import type { DisplayMessage } from '../hooks/useBuddyChat';
 import { stripActionBlock } from '../../../lib/ai/actions/actionParser';
@@ -170,15 +172,15 @@ interface ChatMessageProps {
 
 export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
   const { t, language } = useTranslation();
+  const { data: profile } = useProfile();
+  const buddyStyle = profile?.buddy_avatar_style ?? 'coach';
   const isUser = message.role === 'user';
 
   // Loading state: show bouncing dots while waiting for first token
   if (message.isLoading && !message.content) {
     return (
       <div className="flex gap-3 mb-3">
-        <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
-          <span className="text-xs text-white font-bold">FB</span>
-        </div>
+        <BuddyAvatar size="sm" variant={buddyStyle} state="thinking" className="mt-1" />
         <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%]">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
@@ -215,11 +217,12 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
 
   return (
     <div className="flex gap-3 mb-3">
-      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
-        <span className="text-xs text-white font-bold">
-          {message.agentIcon && message.agentType !== 'general' ? message.agentIcon : 'FB'}
-        </span>
-      </div>
+      <BuddyAvatar
+        size="sm"
+        variant={buddyStyle}
+        className="mt-1"
+        agentIcon={message.agentIcon && message.agentType !== 'general' ? message.agentIcon : undefined}
+      />
       <div className={`rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%] ${
         message.isError ? 'bg-red-50' : 'bg-white'
       }`}>

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
-import type { UserProfile, Gender, BMRFormula, PersonalGoals, TrainingMode, TrainingPhase, CycleStatus } from '../../../types/health';
+import type { UserProfile, Gender, BMRFormula, PersonalGoals, TrainingMode, TrainingPhase, CycleStatus, BuddyAvatarStyle } from '../../../types/health';
 
 export const PROFILE_KEY = 'profile';
 
@@ -65,6 +65,8 @@ interface UpdateProfileInput {
   ai_trainer_enabled?: boolean;
   // Cycle Tracking
   cycle_tracking_enabled?: boolean;
+  // Buddy Avatar Style
+  buddy_avatar_style?: BuddyAvatarStyle;
 }
 
 export function useUpdateProfile() {
