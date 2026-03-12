@@ -72,9 +72,9 @@ GRANT supabase_admin TO postgres;
 GRANT supabase_auth_admin TO postgres;
 GRANT supabase_storage_admin TO postgres;
 
--- Storage admin needs these to switch roles for RLS enforcement
-GRANT authenticated TO supabase_storage_admin;
-GRANT anon TO supabase_storage_admin;
+-- Storage admin needs authenticator to switch roles for RLS enforcement
+-- See: https://github.com/supabase/storage/issues/369
+GRANT authenticator TO supabase_storage_admin;
 
 -- Set passwords (same as POSTGRES_PASSWORD for simplicity in self-hosted)
 ALTER ROLE authenticator WITH PASSWORD :'PGPASSWORD';
