@@ -79,6 +79,9 @@ export function ProgressDashboard() {
         </button>
       </div>
 
+      {/* Fototracking — always visible, self-contained accordion */}
+      <PhotoTrackingSection />
+
       {isLoading ? (
         <div className="space-y-4">
           <div className="h-48 bg-gray-50 rounded-xl animate-pulse" />
@@ -102,15 +105,6 @@ export function ProgressDashboard() {
             <>
               <SectionHeader title={isDE ? 'K\u00f6rper' : 'Body'} />
               <BodyCompChart timeRange={timeRange} />
-            </>
-          )}
-
-
-          {/* FOTOTRACKING */}
-          {showBody && (
-            <>
-              <SectionHeader title={isDE ? 'Fototracking' : 'Photo Tracking'} />
-              <PhotoTrackingSection />
             </>
           )}
 
