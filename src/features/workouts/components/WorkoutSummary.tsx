@@ -15,7 +15,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   CheckCircle2, Clock, Flame, Trophy, TrendingUp,
   Save, Trash2, SkipForward, ChevronDown, ChevronUp,
-  AlertCircle, Edit3, X, BookmarkPlus,
+  AlertCircle, X, BookmarkPlus, Plus,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -24,8 +24,6 @@ import { useAddTrainingPlan } from '../hooks/useTrainingPlans';
 import { useRecentCompletedWorkouts } from '../hooks/useLastExerciseData';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
-import { PostSessionFeedback } from './PostSessionFeedback';
-import { useProfile } from '../../auth/hooks/useProfile';
 import { ShareButton } from '../../../shared/components/ShareButton';
 import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
 import type { SetTag, WorkoutExerciseResult } from '../../../types/health';
@@ -50,12 +48,10 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
   const saveSession = useSaveWorkoutSession();
   const addPlan = useAddTrainingPlan();
   const { celebrateNewPR, celebrateFirstWorkoutOfWeek } = useCelebrations();
-  const { data: profile } = useProfile();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
-  const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+
   // "Save as plan" for free sessions
   const [showSaveAsPlan, setShowSaveAsPlan] = useState(false);
   const [planName, setPlanName] = useState('');
@@ -165,15 +161,8 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     setIsSaving(true);
     setSaveError(null);
     try {
-      const workout = await saveSession.mutateAsync({ session: state, weightKg });
+      await saveSession.mutateAsync({ session: state, weightKg });
       celebrateFirstWorkoutOfWeek();
-
-      // Show post-session feedback if ai_trainer_enabled
-      if (profile?.ai_trainer_enabled && workout?.id) {
-        setSavedWorkoutId(workout.id as string);
-        setShowFeedback(true);
-        return; // Don't close yet — show feedback first
-      }
 
       // Free session: offer to save as plan
       if (isFreeSession && state.exercises.filter(e => !e.skipped).length > 0) {
@@ -232,17 +221,6 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     }
   };
 
-  const handleFeedbackComplete = () => {
-    // Free session: offer to save as plan after feedback
-    if (isFreeSession && state.exercises.filter(e => !e.skipped).length > 0) {
-      setShowFeedback(false);
-      setShowSaveAsPlan(true);
-      return;
-    }
-    clearSession();
-    onClose();
-  };
-
   const handleDiscard = () => {
     clearSession();
     onClose();
@@ -269,6 +247,42 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
     ex.sets = sets;
     exercises[exIdx] = ex;
 
+    dispatch({ type: 'REPLACE_EXERCISES', exercises });
+  }, [state.exercises, dispatch]);
+
+  // Remove a set from an exercise
+  const removeSet = useCallback((exIdx: number, setIdx: number) => {
+    const exercises = [...state.exercises];
+    const ex = { ...exercises[exIdx] };
+    const sets = [...ex.sets];
+    if (sets.length <= 1) return; // Keep at least 1 set
+    sets.splice(setIdx, 1);
+    ex.sets = sets;
+    exercises[exIdx] = ex;
+    dispatch({ type: 'REPLACE_EXERCISES', exercises });
+  }, [state.exercises, dispatch]);
+
+  // Add a new empty set to an exercise (copies last set's targets)
+  const addSet = useCallback((exIdx: number) => {
+    const exercises = [...state.exercises];
+    const ex = { ...exercises[exIdx] };
+    const sets = [...ex.sets];
+    const lastSet = sets[sets.length - 1];
+    const newSet = {
+      set_number: sets.length + 1,
+      target_reps: lastSet?.target_reps || '10',
+      target_weight_kg: lastSet?.target_weight_kg,
+      actual_reps: undefined as number | undefined,
+      actual_weight_kg: undefined as number | undefined,
+      actual_duration_minutes: undefined as number | undefined,
+      actual_distance_km: undefined as number | undefined,
+      completed: true,
+      skipped: false,
+      set_tag: 'normal' as const,
+    };
+    sets.push(newSet);
+    ex.sets = sets;
+    exercises[exIdx] = ex;
     dispatch({ type: 'REPLACE_EXERCISES', exercises });
   }, [state.exercises, dispatch]);
 
@@ -469,88 +483,70 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                 </div>
               </button>
 
-              {/* Expanded: editable set rows */}
+              {/* Expanded: editable table with add/delete */}
               {isExpanded && (
-                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Edit3 className="h-3 w-3 text-teal-500" />
-                    <span className="text-[10px] text-teal-600 font-medium">
-                      {exIsCardio
-                        ? (isDE ? 'Werte korrigieren (Min / km):' : 'Correct values (min / km):')
-                        : (isDE ? 'Werte korrigieren (Wdh / kg):' : 'Correct values (reps / kg):')}
-                    </span>
+                <div className="border-t border-gray-100 bg-gray-50/50">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-[2rem_1fr_1fr_1.5rem] items-center gap-1 px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                    <span>#</span>
+                    <span>{exIsCardio ? 'Min' : (isDE ? 'Wdh' : 'Reps')}</span>
+                    <span>{exIsCardio ? 'km' : 'kg'}</span>
+                    <span />
                   </div>
+                  {/* Set Rows */}
                   {ex.sets.map((set, setIdx) => {
                     const tag = set.set_tag ?? 'normal';
                     const tagCfg = TAG_CONFIG[tag];
                     return (
-                    <div key={setIdx} className="flex items-center gap-2">
-                      <span className={`text-xs font-medium w-14 flex items-center gap-1 ${
-                        set.completed ? 'text-teal-600' : set.skipped ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                        {tag !== 'normal' && (
-                          <span className={`inline-flex items-center justify-center w-4 h-4 rounded text-[9px] font-bold ${tagCfg.bg} ${tagCfg.text}`}>
-                            {tagCfg.letter}
-                          </span>
-                        )}
-                        {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : setIdx + 1}
-                      </span>
-                      {set.completed ? (
-                        exIsCardio ? (
-                          <>
-                            <input
-                              type="number"
-                              inputMode="decimal"
-                              step="0.1"
-                              value={set.actual_duration_minutes ?? ''}
-                              onChange={e => updateSetValue(exIdx, setIdx, 'duration', e.target.value)}
-                              className="w-16 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                              placeholder="Min"
-                            />
-                            <span className="text-xs text-gray-400">·</span>
-                            <input
-                              type="number"
-                              inputMode="decimal"
-                              step="0.01"
-                              value={set.actual_distance_km ?? ''}
-                              onChange={e => updateSetValue(exIdx, setIdx, 'distance', e.target.value)}
-                              className="w-20 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                              placeholder="km"
-                            />
-                            <span className="text-[10px] text-gray-400">km</span>
-                          </>
-                        ) : (
-                        <>
-                          <input
-                            type="number"
-                            inputMode="numeric"
-                            value={set.actual_reps ?? ''}
-                            onChange={e => updateSetValue(exIdx, setIdx, 'reps', e.target.value)}
-                            className="w-16 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            placeholder={isDE ? 'Wdh' : 'Reps'}
-                          />
-                          <span className="text-xs text-gray-400">×</span>
-                          <input
-                            type="number"
-                            inputMode="decimal"
-                            step="0.1"
-                            value={set.actual_weight_kg ?? ''}
-                            onChange={e => updateSetValue(exIdx, setIdx, 'weight', e.target.value)}
-                            className="w-20 px-2 py-1.5 text-sm text-center rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            placeholder="kg"
-                          />
-                          <span className="text-[10px] text-gray-400">kg</span>
-                        </>)
-                      ) : set.skipped ? (
-                        <span className="text-xs text-gray-400 italic">
-                          {isDE ? 'übersprungen' : 'skipped'}
+                      <div key={setIdx} className="grid grid-cols-[2rem_1fr_1fr_1.5rem] items-center gap-1 px-3 py-1 border-b border-gray-50">
+                        {/* Set number + tag badge */}
+                        <span className="text-xs font-medium text-gray-500 flex items-center gap-0.5">
+                          {tag !== 'normal' && (
+                            <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded text-[8px] font-bold ${tagCfg.bg} ${tagCfg.text}`}>
+                              {tagCfg.letter}
+                            </span>
+                          )}
+                          {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : setIdx + 1}
                         </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
-                    </div>
+                        {/* Value 1: Reps or Duration */}
+                        <input
+                          type="number"
+                          inputMode={exIsCardio ? 'decimal' : 'numeric'}
+                          step={exIsCardio ? '0.1' : '1'}
+                          value={exIsCardio ? (set.actual_duration_minutes ?? '') : (set.actual_reps ?? '')}
+                          onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'duration' : 'reps', e.target.value)}
+                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                          placeholder={exIsCardio ? 'Min' : (isDE ? 'Wdh' : 'Reps')}
+                        />
+                        {/* Value 2: Weight or Distance */}
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={exIsCardio ? '0.01' : '0.5'}
+                          value={exIsCardio ? (set.actual_distance_km ?? '') : (set.actual_weight_kg ?? '')}
+                          onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'distance' : 'weight', e.target.value)}
+                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                          placeholder={exIsCardio ? 'km' : 'kg'}
+                        />
+                        {/* Delete set button */}
+                        <button
+                          onClick={() => removeSet(exIdx, setIdx)}
+                          className="p-0.5 text-gray-300 hover:text-red-400 transition-colors"
+                          title={isDE ? 'Satz entfernen' : 'Remove set'}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     );
                   })}
+                  {/* Add Set Button */}
+                  <button
+                    onClick={() => addSet(exIdx)}
+                    className="w-full flex items-center justify-center gap-1 py-2 text-xs text-teal-600 hover:text-teal-700 hover:bg-teal-50/50 transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                    {isDE ? 'Satz hinzufügen' : 'Add set'}
+                  </button>
                 </div>
               )}
             </div>
@@ -589,21 +585,6 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
             {isDE ? 'Erneut versuchen' : 'Try Again'}
           </button>
         </div>
-      )}
-
-      {/* Post-Session Feedback (shown after save, if KI-Trainer enabled) */}
-      {showFeedback && savedWorkoutId && (
-        <PostSessionFeedback
-          workoutId={savedWorkoutId}
-          completionRate={
-            state.exercises.length > 0
-              ? state.exercises.filter(ex => !ex.skipped).length / state.exercises.length
-              : 1
-          }
-          exercisesSkipped={state.exercises.filter(ex => ex.skipped).map(ex => ex.name)}
-          onComplete={handleFeedbackComplete}
-          onSkip={handleFeedbackComplete}
-        />
       )}
 
       {/* Save as Plan (for free sessions, shown after workout save) */}
@@ -652,8 +633,8 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
         </div>
       )}
 
-      {/* Actions (hidden when feedback or save-as-plan is showing) */}
-      {!showFeedback && !showSaveAsPlan && (
+      {/* Actions (hidden when save-as-plan is showing) */}
+      {!showSaveAsPlan && (
         <div className="flex gap-2 pb-8">
           <button
             onClick={handleDiscard}

@@ -470,7 +470,11 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       };
 
     case 'FINISH_SESSION':
-      return { ...state, phase: 'summary', isActive: false };
+      // Keep isActive: true so localStorage persists the summary state.
+      // Without this, a Suspense/ProtectedRoute remount would lose the state
+      // and redirect to /training. isActive becomes false via CLEAR_SESSION
+      // (after save or discard in WorkoutSummary).
+      return { ...state, phase: 'summary' };
 
     case 'RESTORE_SESSION':
       return action.state;
