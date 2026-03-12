@@ -17,6 +17,7 @@ import { SleepChart } from './progress/SleepChart';
 import { BloodWorkChart } from './progress/BloodWorkChart';
 import { PeriodizationSection } from './progress/PeriodizationSection';
 import { ExportDialog } from './ExportDialog';
+import { PhotoTrackingSection } from './progress/PhotoTrackingSection';
 
 type Category = 'all' | 'strength' | 'body' | 'health';
 
@@ -101,6 +102,15 @@ export function ProgressDashboard() {
             <>
               <SectionHeader title={isDE ? 'K\u00f6rper' : 'Body'} />
               <BodyCompChart timeRange={timeRange} />
+            </>
+          )}
+
+
+          {/* FOTOTRACKING */}
+          {showBody && (
+            <>
+              <SectionHeader title={isDE ? 'Fototracking' : 'Photo Tracking'} />
+              <PhotoTrackingSection />
             </>
           )}
 
