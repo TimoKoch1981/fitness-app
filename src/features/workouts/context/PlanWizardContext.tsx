@@ -301,20 +301,67 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
     return undefined;
   }, [mode, planId, name, splitType, daysPerWeek, notes, days, isDE, addPlan, updatePlan, queryClient, closeWizard]);
 
+  /** Add a single day to the wizard from buddy */
+  const addDayFromBuddy = useCallback((data: unknown) => {
+    const d = data as { day_number: number; name: string; focus?: string; exercises?: PlanExercise[]; notes?: string };
+    setDays(prev => {
+      // Check if day_number already exists — if so, replace it
+      const exists = prev.some(day => day.day_number === d.day_number);
+      if (exists) {
+        return prev.map(day => day.day_number === d.day_number
+          ? { day_number: d.day_number, name: d.name, focus: d.focus ?? '', exercises: d.exercises ?? [], notes: d.notes ?? '' }
+          : day
+        );
+      }
+      return [...prev, { day_number: d.day_number, name: d.name, focus: d.focus ?? '', exercises: d.exercises ?? [], notes: d.notes ?? '' }];
+    });
+    setStepState(2);
+  }, []);
+
+  /** Modify exercises of an existing day in the wizard */
+  const modifyDayFromBuddy = useCallback((data: unknown) => {
+    const d = data as { day_number: number; name?: string; focus?: string; exercises: PlanExercise[] };
+    setDays(prev => prev.map(day =>
+      day.day_number === d.day_number
+        ? { ...day, exercises: d.exercises, ...(d.name && { name: d.name }), ...(d.focus !== undefined && { focus: d.focus }) }
+        : day
+    ));
+  }, []);
+
+  /** Remove a day from the wizard */
+  const removeDayFromBuddy = useCallback((data: unknown) => {
+    const d = data as { day_number: number };
+    setDays(prev => prev.filter(day => day.day_number !== d.day_number));
+  }, []);
+
   // Register/unregister the wizard action interceptor
   const { setWizardActionInterceptor } = useInlineBuddyChat();
 
   useEffect(() => {
     if (isActive) {
-      setWizardActionInterceptor((actionData: unknown) => {
-        populateFromBuddy(actionData as BuddyPlanData);
-        return true;
+      setWizardActionInterceptor((actionType: string, actionData: unknown) => {
+        switch (actionType) {
+          case 'save_training_plan':
+            populateFromBuddy(actionData as BuddyPlanData);
+            return true;
+          case 'add_training_day':
+            addDayFromBuddy(actionData);
+            return true;
+          case 'modify_training_day':
+            modifyDayFromBuddy(actionData);
+            return true;
+          case 'remove_training_day':
+            removeDayFromBuddy(actionData);
+            return true;
+          default:
+            return false;
+        }
       });
     } else {
       setWizardActionInterceptor(null);
     }
     return () => setWizardActionInterceptor(null);
-  }, [isActive, populateFromBuddy, setWizardActionInterceptor]);
+  }, [isActive, populateFromBuddy, addDayFromBuddy, modifyDayFromBuddy, removeDayFromBuddy, setWizardActionInterceptor]);
 
   return (
     <PlanWizardContext.Provider

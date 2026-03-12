@@ -15,6 +15,9 @@ export type ActionType =
   | 'log_blood_work'
   | 'log_substance'
   | 'save_training_plan'
+  | 'add_training_day'
+  | 'modify_training_day'
+  | 'remove_training_day'
   | 'save_product'
   | 'add_substance'
   | 'add_reminder'
@@ -110,6 +113,24 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '📋',
         title: 'Trainingsplan speichern?',
         summary: `${d.name ?? 'Plan'} — ${(d.days as unknown[])?.length ?? '?'} Tage`,
+      };
+    case 'add_training_day':
+      return {
+        icon: '📅',
+        title: 'Trainingstag hinzufügen?',
+        summary: `Tag ${d.day_number ?? '?'}: ${d.name ?? 'Neuer Tag'} — ${(d.exercises as unknown[])?.length ?? '?'} Übungen`,
+      };
+    case 'modify_training_day':
+      return {
+        icon: '✏️',
+        title: 'Trainingstag anpassen?',
+        summary: `Tag ${d.day_number ?? '?'}${d.name ? `: ${d.name}` : ''} — ${(d.exercises as unknown[])?.length ?? '?'} Übungen`,
+      };
+    case 'remove_training_day':
+      return {
+        icon: '🗑️',
+        title: 'Trainingstag entfernen?',
+        summary: `Tag ${d.day_number ?? '?'}${d.day_name ? `: ${d.day_name}` : ''}`,
       };
     case 'save_product':
       return {

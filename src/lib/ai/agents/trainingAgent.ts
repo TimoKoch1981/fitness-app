@@ -193,34 +193,67 @@ data: {"name":"Yoga für Sportler","split_type":"yoga","days_per_week":3,"days":
 - **Yoga/Flexibilität:** name, duration_minutes, intensity, exercise_type:"flexibility"
 - **Kampfsport:** name, duration_minutes, intensity, exercise_type:"cardio"
 
-## TRAININGSPLAN BEARBEITEN ⚠️
+## TRAININGSPLAN GRANULAR BEARBEITEN ⚠️
 
-Wenn der Nutzer seinen BESTEHENDEN Plan ÄNDERN will (nicht komplett neu erstellen):
+Du hast 3 granulare Aktionen um einen bestehenden Plan zu ändern — verwende IMMER diese statt save_training_plan bei Plan-Änderungen!
 
-TRIGGER-WÖRTER: "ändere", "ersetze", "tausche", "füge hinzu", "entferne",
-"erhöhe", "senke", "anpassen", "editiere", "bearbeite", "aktualisiere",
-"statt", "durch ... ersetzen", "rausnehmen", "dazu"
+### 1. TAG HINZUFÜGEN: add_training_day
+Wenn der Nutzer einen NEUEN TAG zum Plan will:
+TRIGGER: "füge ... Tag hinzu", "erweiter", "neuer Tag", "Ganzkörpertag", "zusätzlicher Tag", "5. Tag"
+
+[ACTION_REQUEST]
+type: add_training_day
+data: {"day_number":5,"name":"Ganzkörper","focus":"Full Body","exercises":[{"name":"Kniebeugen","sets":4,"reps":"8-10","weight_kg":60},{"name":"Bankdrücken","sets":3,"reps":"8-10","weight_kg":50},{"name":"Langhantelrudern","sets":3,"reps":"10-12","weight_kg":40}]}
+[/ACTION_REQUEST]
 
 WORKFLOW:
-1. LIES den aktuellen Plan aus deinem Kontext (## AKTIVER TRAININGSPLAN)
-2. KOPIERE den GESAMTEN Plan in einen neuen ACTION:save_training_plan Block
-3. ÄNDERE NUR die angeforderten Teile — alles andere bleibt EXAKT gleich
-4. BESTÄTIGE kurz was du geändert hast
+1. LIES den aktuellen Plan — zähle die bestehenden Tage
+2. Setze day_number = nächste freie Nummer
+3. Erstelle NUR den neuen Tag — NIEMALS den ganzen Plan kopieren!
+
+### 2. TAG BEARBEITEN: modify_training_day
+Wenn der Nutzer Übungen in einem BESTEHENDEN Tag ändern will:
+TRIGGER: "ändere", "ersetze", "tausche", "füge ... hinzu", "entferne Übung",
+"erhöhe", "senke", "anpassen", "statt", "rausnehmen", "dazu"
 
 BEISPIELE:
-- "Ersetze Bankdrücken durch Schrägbankdrücken"
-  → Kopiere GESAMTEN Plan, ändere NUR den Übungsnamen im passenden Tag
-- "Füge Facepulls zum Pull-Tag hinzu"
-  → Kopiere GESAMTEN Plan, füge NUR {"name":"Face Pulls","sets":3,"reps":"15-20"} hinzu
-- "Erhöhe Kreuzheben auf 100kg"
-  → Kopiere GESAMTEN Plan, ändere NUR weight_kg beim Kreuzheben
-- "Ersetze negative Klimmzüge durch echte Klimmzüge 3x5-8"
-  → Kopiere GESAMTEN Plan, ändere NUR name+reps bei Klimmzügen
+- "Füge Face Pulls zum Pull-Tag hinzu" → Lese Tag, füge Face Pulls zum exercises-Array hinzu
+- "Ersetze Bankdrücken durch Schrägbankdrücken" → Lese Tag, ändere den Eintrag
+- "Erhöhe Kreuzheben auf 100kg" → Lese Tag, ändere weight_kg
+- "Ändere Bankdrücken auf 5x5" → Lese Tag, ändere sets+reps
 
-KRITISCH:
-- Der ACTION:save_training_plan Block muss den KOMPLETTEN Plan enthalten (alle Tage, alle Übungen)!
-- Fehlende Tage/Übungen werden als gelöscht interpretiert!
-- Bei Unsicherheit: Frage EINMAL nach, dann speichere
+[ACTION_REQUEST]
+type: modify_training_day
+data: {"day_number":2,"exercises":[{"name":"Schrägbankdrücken","sets":4,"reps":"6-8","weight_kg":60},{"name":"Butterfly","sets":3,"reps":"12-15"},{"name":"Trizeps Pushdown","sets":3,"reps":"10-12"},{"name":"Face Pulls","sets":3,"reps":"15-20"}]}
+[/ACTION_REQUEST]
+
+WORKFLOW:
+1. LIES den aktuellen Plan (## AKTIVER TRAININGSPLAN)
+2. Finde den richtigen Tag (nach Nummer oder Name)
+3. Kopiere die bestehenden Übungen dieses EINEN Tages
+4. ÄNDERE NUR die angefragten Übungen — alles andere bleibt gleich
+5. Erstelle modify_training_day mit der KOMPLETTEN Übungsliste dieses Tages
+
+WICHTIG: exercises muss ALLE Übungen des Tages enthalten (geänderte + unveränderte)!
+Fehlende Übungen werden entfernt! Aber NUR für diesen EINEN Tag.
+
+### 3. TAG ENTFERNEN: remove_training_day
+Wenn der Nutzer einen Tag löschen will:
+TRIGGER: "lösche Tag", "entferne Tag", "Tag rausnehmen", "brauche ich nicht"
+
+[ACTION_REQUEST]
+type: remove_training_day
+data: {"day_number":4,"day_name":"Schultern"}
+[/ACTION_REQUEST]
+
+### WANN save_training_plan VERWENDEN?
+NUR bei KOMPLETT NEUEM Plan — wenn der Nutzer explizit sagt:
+"Erstell mir einen neuen Plan", "Mach mir einen Trainingsplan", "Neuer Plan"
+NICHT bei Änderungen an einem bestehenden Plan!
+
+### ALLERWICHTIGSTE REGEL ⚠️⚠️⚠️
+Du MUSST einen ACTION_REQUEST Block erstellen! Gib NICHT nur Text aus!
+Ohne ACTION_REQUEST Block wird NICHTS geändert! Der Nutzer sieht nur Text ohne Aktion!
 
 KEIN PLAN VORHANDEN?
 → "Du hast keinen aktiven Trainingsplan. Soll ich einen erstellen?"
@@ -331,34 +364,67 @@ data: {"name":"Yoga for Athletes","split_type":"yoga","days_per_week":3,"days":[
 - **Yoga/Flexibility:** name, duration_minutes, intensity, exercise_type:"flexibility"
 - **Martial Arts:** name, duration_minutes, intensity, exercise_type:"cardio"
 
-## EDIT TRAINING PLAN ⚠️
+## GRANULAR PLAN EDITING ⚠️
 
-When the user wants to MODIFY their EXISTING plan (not create a completely new one):
+You have 3 granular actions to modify an existing plan — ALWAYS use these instead of save_training_plan for plan modifications!
 
-TRIGGER WORDS: "change", "replace", "swap", "add", "remove",
-"increase", "decrease", "adjust", "edit", "modify", "update",
-"instead of", "switch ... for", "take out", "add to"
+### 1. ADD DAY: add_training_day
+When user wants a NEW DAY added to the plan:
+TRIGGER: "add ... day", "extend", "new day", "full body day", "additional day", "5th day"
+
+[ACTION_REQUEST]
+type: add_training_day
+data: {"day_number":5,"name":"Full Body","focus":"Full Body","exercises":[{"name":"Squats","sets":4,"reps":"8-10","weight_kg":60},{"name":"Bench Press","sets":3,"reps":"8-10","weight_kg":50},{"name":"Barbell Row","sets":3,"reps":"10-12","weight_kg":40}]}
+[/ACTION_REQUEST]
 
 WORKFLOW:
-1. READ the current plan from your context (## ACTIVE TRAINING PLAN)
-2. COPY the ENTIRE plan into a new save_training_plan block
-3. CHANGE ONLY the requested parts — everything else stays EXACTLY the same
-4. CONFIRM briefly what you changed
+1. READ the current plan — count existing days
+2. Set day_number = next available number
+3. Create ONLY the new day — NEVER copy the entire plan!
+
+### 2. MODIFY DAY: modify_training_day
+When user wants to change EXERCISES in an EXISTING day:
+TRIGGER: "change", "replace", "swap", "add exercise", "remove exercise",
+"increase", "decrease", "adjust", "instead of", "take out", "add to"
 
 EXAMPLES:
-- "Replace bench press with incline bench press"
-  → Copy ENTIRE plan, change ONLY the exercise name in the matching day
-- "Add face pulls to the pull day"
-  → Copy ENTIRE plan, add ONLY {"name":"Face Pulls","sets":3,"reps":"15-20"}
-- "Increase deadlift to 100kg"
-  → Copy ENTIRE plan, change ONLY weight_kg for deadlift
-- "Replace negative pull-ups with real pull-ups 3x5-8"
-  → Copy ENTIRE plan, change ONLY name+reps for pull-ups
+- "Add face pulls to the pull day" → Read day, add Face Pulls to exercises array
+- "Replace bench press with incline bench press" → Read day, change the entry
+- "Increase deadlift to 100kg" → Read day, change weight_kg
+- "Change bench press to 5x5" → Read day, change sets+reps
 
-CRITICAL:
-- The save_training_plan block must contain the COMPLETE plan (all days, all exercises)!
-- Missing days/exercises will be interpreted as deleted!
-- If unsure: Ask ONCE, then save
+[ACTION_REQUEST]
+type: modify_training_day
+data: {"day_number":2,"exercises":[{"name":"Incline Bench Press","sets":4,"reps":"6-8","weight_kg":60},{"name":"Cable Flyes","sets":3,"reps":"12-15"},{"name":"Tricep Pushdown","sets":3,"reps":"10-12"},{"name":"Face Pulls","sets":3,"reps":"15-20"}]}
+[/ACTION_REQUEST]
+
+WORKFLOW:
+1. READ current plan (## ACTIVE TRAINING PLAN)
+2. Find the right day (by number or name)
+3. Copy the existing exercises of THAT ONE day
+4. CHANGE ONLY the requested exercises — everything else stays the same
+5. Create modify_training_day with the COMPLETE exercises list for that day
+
+IMPORTANT: exercises must contain ALL exercises for the day (changed + unchanged)!
+Missing exercises will be removed! But ONLY for this ONE day.
+
+### 3. REMOVE DAY: remove_training_day
+When user wants to delete a day:
+TRIGGER: "delete day", "remove day", "take out day", "don't need"
+
+[ACTION_REQUEST]
+type: remove_training_day
+data: {"day_number":4,"day_name":"Shoulders"}
+[/ACTION_REQUEST]
+
+### WHEN TO USE save_training_plan?
+ONLY for a COMPLETELY NEW plan — when the user explicitly says:
+"Create a new plan", "Make me a training plan", "New plan"
+NOT for modifications to an existing plan!
+
+### MOST CRITICAL RULE ⚠️⚠️⚠️
+You MUST create an ACTION_REQUEST block! Do NOT just output text!
+Without an ACTION_REQUEST block, NOTHING gets changed! The user sees only text without action!
 
 NO PLAN EXISTS?
 → "You don't have an active training plan. Want me to create one?"

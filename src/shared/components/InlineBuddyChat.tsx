@@ -271,14 +271,15 @@ function InlineBuddyChatContent() {
     const actions = lastActionMsg.pendingActions!;
 
     setTimeout(async () => {
-      // Intercept save_training_plan when PlanWizard is active
+      // Intercept plan-related actions when PlanWizard is active
+      const PLAN_ACTIONS = ['save_training_plan', 'add_training_day', 'modify_training_day', 'remove_training_day'];
       if (wizardActionInterceptor) {
-        const interceptedActions = actions.filter(a => a.type === 'save_training_plan');
-        const remainingActions = actions.filter(a => a.type !== 'save_training_plan');
+        const interceptedActions = actions.filter(a => PLAN_ACTIONS.includes(a.type));
+        const remainingActions = actions.filter(a => !PLAN_ACTIONS.includes(a.type));
 
         for (const action of interceptedActions) {
           try {
-            wizardActionInterceptor(action.data);
+            wizardActionInterceptor(action.type, action.data);
           } catch (err) {
             console.warn('[InlineBuddyChat] Wizard interceptor error:', err);
           }
@@ -301,7 +302,7 @@ function InlineBuddyChatContent() {
 
       for (const action of actions) {
         // Skip already-intercepted actions
-        if (wizardActionInterceptor && action.type === 'save_training_plan') continue;
+        if (wizardActionInterceptor && PLAN_ACTIONS.includes(action.type)) continue;
         const result = await executeAction(action);
         results.push({ action, ...result });
       }

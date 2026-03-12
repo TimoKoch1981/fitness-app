@@ -25,6 +25,7 @@ import {
   useDuplicatePlan,
   useDeleteTrainingPlan,
   usePlanById,
+  useDeleteTrainingPlanDay,
 } from '../hooks/useTrainingPlans';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { DayCard } from './DayCard';
@@ -82,6 +83,8 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
+  const [deleteDayTarget, setDeleteDayTarget] = useState<TrainingPlanDay | null>(null);
+  const deleteDay = useDeleteTrainingPlanDay();
 
   const toggleDay = (dayId: string) => {
     setExpandedDays(prev => {
@@ -185,6 +188,19 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
       setDeleteTarget(null);
     } catch (err) {
       console.error('[TrainingPlanList] Delete failed:', err);
+    }
+  };
+
+  const handleDeleteDayConfirm = async () => {
+    if (!deleteDayTarget) return;
+    try {
+      await deleteDay.mutateAsync(deleteDayTarget.id);
+      if (expandedPlanId) {
+        queryClient.invalidateQueries({ queryKey: ['training_plans', 'detail', expandedPlanId] });
+      }
+      setDeleteDayTarget(null);
+    } catch (err) {
+      console.error('[TrainingPlanList] Delete day failed:', err);
     }
   };
 
@@ -332,6 +348,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                     catalog={catalog ?? []}
                     onExerciseClick={setSelectedExercise}
                     onEdit={setEditingDay}
+                    onDelete={setDeleteDayTarget}
                   />
                 ))}
               </div>
@@ -362,6 +379,47 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
         />
+      )}
+
+      {/* Delete Day Confirmation Dialog */}
+      {deleteDayTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setDeleteDayTarget(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-5 w-full max-w-xs shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Trash2 className="h-5 w-5 text-red-500" />
+              <h3 className="text-base font-semibold text-gray-900">
+                {isDE ? 'Tag wirklich l\u00f6schen?' : 'Really delete day?'}
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">
+              Tag {deleteDayTarget.day_number}: &quot;{deleteDayTarget.name}&quot;
+            </p>
+            <p className="text-xs text-gray-400 mb-3">
+              {deleteDayTarget.exercises.length} {isDE ? '\u00dcbungen werden entfernt' : 'exercises will be removed'}
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setDeleteDayTarget(null)}
+                className="flex-1 py-2 text-sm text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {plans?.deleteCancel ?? 'Cancel'}
+              </button>
+              <button
+                onClick={handleDeleteDayConfirm}
+                disabled={deleteDay.isPending}
+                className="flex-1 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {deleteDay.isPending ? '...' : (plans?.delete ?? 'Delete')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}

@@ -18,7 +18,7 @@ import { useAddBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useAddBloodPressure } from '../../medical/hooks/useBloodPressure';
 import { useAddBloodWork } from '../../medical/hooks/useBloodWork';
 import { useAddSubstance, useLogSubstance, useSubstances } from '../../medical/hooks/useSubstances';
-import { useAddTrainingPlan } from '../../workouts/hooks/useTrainingPlans';
+import { useAddTrainingPlan, useAddTrainingPlanDay, useModifyTrainingPlanDay, useRemoveTrainingPlanDay } from '../../workouts/hooks/useTrainingPlans';
 import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
@@ -121,6 +121,9 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addBloodWork = useAddBloodWork();
   const logSubstance = useLogSubstance();
   const addTrainingPlan = useAddTrainingPlan();
+  const addTrainingPlanDay = useAddTrainingPlanDay();
+  const modifyTrainingPlanDay = useModifyTrainingPlanDay();
+  const removeTrainingPlanDay = useRemoveTrainingPlanDay();
   const addUserProduct = useAddUserProduct();
   const addSubstance = useAddSubstance();
   const addReminder = useAddReminder();
@@ -279,6 +282,40 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
               exercises: day.exercises as PlanExercise[],
               notes: day.notes as string | undefined,
             })),
+            user_id: uid,
+          });
+          break;
+        }
+
+
+        case 'add_training_day': {
+          await addTrainingPlanDay.mutateAsync({
+            day_number: d.day_number as number,
+            name: d.name as string,
+            focus: d.focus as string | undefined,
+            exercises: d.exercises as PlanExercise[],
+            notes: d.notes as string | undefined,
+            user_id: uid,
+          });
+          break;
+        }
+
+
+        case 'modify_training_day': {
+          await modifyTrainingPlanDay.mutateAsync({
+            day_number: d.day_number as number,
+            name: d.name as string | undefined,
+            focus: d.focus as string | undefined,
+            exercises: d.exercises as PlanExercise[],
+            notes: d.notes as string | undefined,
+            user_id: uid,
+          });
+          break;
+        }
+
+        case 'remove_training_day': {
+          await removeTrainingPlanDay.mutateAsync({
+            day_number: d.day_number as number,
             user_id: uid,
           });
           break;
@@ -446,7 +483,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, addBloodWork, logSubstance, addTrainingPlan, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
+  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, addBloodWork, logSubstance, addTrainingPlan, addTrainingPlanDay, modifyTrainingPlanDay, removeTrainingPlanDay, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {

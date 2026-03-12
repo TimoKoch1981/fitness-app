@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Play, Target, Pencil, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronRight, Play, Target, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { findExerciseInCatalog } from '../hooks/useExerciseCatalog';
@@ -60,9 +60,10 @@ export interface DayCardProps {
   catalog: CatalogExercise[];
   onExerciseClick: (exercise: CatalogExercise) => void;
   onEdit: (day: TrainingPlanDay) => void;
+  onDelete: (day: TrainingPlanDay) => void;
 }
 
-export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick, onEdit }: DayCardProps) {
+export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExerciseClick, onEdit, onDelete }: DayCardProps) {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const isDE = language === 'de';
@@ -140,6 +141,14 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
             title={isDE ? 'Tag bearbeiten' : 'Edit day'}
           >
             <Pencil className="h-3.5 w-3.5" />
+          </span>
+          <span
+            role="button"
+            onClick={(e) => { e.stopPropagation(); onDelete(day); }}
+            className="p-1 text-gray-300 hover:text-red-500 transition-colors"
+            title={isDE ? 'Tag l\u00f6schen' : 'Delete day'}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
           </span>
           {day.exercises.length > 0 && (
             <span

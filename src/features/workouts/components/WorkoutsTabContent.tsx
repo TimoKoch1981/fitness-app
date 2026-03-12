@@ -15,7 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 import { useWorkoutsByDate, useDeleteWorkout } from '../hooks/useWorkouts';
-import { useActivePlan, usePlanById } from '../hooks/useTrainingPlans';
+import { useActivePlan } from '../hooks/useTrainingPlans';
 import { usePageBuddySuggestions, type BuddySuggestion } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanList } from './TrainingPlanList';
@@ -23,7 +23,6 @@ import { PlanWizardProvider, usePlanWizard } from '../context/PlanWizardContext'
 import { PlanWizardDialog } from './PlanWizardDialog';
 import { PlanEditorDialog } from './PlanEditorDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
-import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
 import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
 // Lazy-load heavy chart components (~350KB Recharts)
 const ProgressiveOverloadCharts = lazy(() => import('./ProgressiveOverloadCharts').then(m => ({ default: m.ProgressiveOverloadCharts })));
@@ -49,9 +48,7 @@ export function WorkoutsTabContent({
   forceTab, onForceTabApplied, openCreatePlan, onCreatePlanOpened,
 }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
-  const isDE = language === 'de';
   const queryClient = useQueryClient();
-  const { openBuddyChat } = useInlineBuddyChat();
   const [activeSubTab, setActiveSubTab] = useState<'today' | 'plan' | 'history' | 'progress' | 'periodization'>('today');
 
   // Apply forceTab from parent (U2: "Plan erstellen" → switch to plan tab)
@@ -85,7 +82,6 @@ export function WorkoutsTabContent({
   const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
 
   // Load expanded plan data (with days) for review context
-  const { data: expandedPlanData } = usePlanById(expandedPlanId ?? undefined);
 
   // Auto-expand active plan on first load
   useEffect(() => {
@@ -126,40 +122,15 @@ export function WorkoutsTabContent({
     other: '\u{1F525}',
   };
 
-  // Intercept buddy chips → handle plan_create, plan_edit, plan_evaluate
+  // Intercept buddy chips → handle plan_create
   const handleBuddySuggestionClick = useCallback((suggestion: BuddySuggestion): boolean => {
     if (suggestion.id === 'plan_create') {
       if (activeSubTab !== 'plan') setActiveSubTab('plan');
       setPendingWizardAction('create');
       return true;
     }
-    if (suggestion.id === 'plan_edit') {
-      if (activeSubTab !== 'plan') setActiveSubTab('plan');
-      if (activePlan) {
-        setPendingWizardAction('edit');
-      }
-      return true;
-    }
-    if (suggestion.id === 'plan_evaluate') {
-      // Open buddy with plan review context
-      const plan = expandedPlanData ?? activePlan;
-      if (plan) {
-        const daysSummary = plan.days
-          ? plan.days.map(d => {
-              const exNames = (d.exercises ?? []).map((ex: { name?: string; exercise_id?: string }) => ex.name ?? ex.exercise_id).filter(Boolean).join(', ');
-              return `${d.name}: ${exNames || (isDE ? 'keine Übungen' : 'no exercises')}`;
-            }).join('; ')
-          : '';
-        const context = `${plan.name} (${plan.split_type}, ${plan.days_per_week}x/${isDE ? 'Woche' : 'week'})${daysSummary ? ` — ${daysSummary}` : ''}`;
-        const msg = isDE
-          ? `Bewerte meinen Trainingsplan: ${context}`
-          : `Evaluate my training plan: ${context}`;
-        openBuddyChat(msg, 'training');
-      }
-      return true;
-    }
     return false;
-  }, [activeSubTab, activePlan, expandedPlanData, isDE, openBuddyChat]);
+  }, [activeSubTab]);
 
   return (
     <PlanWizardProvider>

@@ -169,16 +169,21 @@ const LogSubstanceSchema = z.object({
   notes: z.string().optional(),
 });
 
+/** Coerce to number if truthy, else undefined */
+const toNum = (v: unknown) => (v != null && v !== '' ? Number(v) : undefined);
+/** Coerce to string if truthy, else undefined */
+const toStr = (v: unknown) => (v != null && v !== '' ? String(v) : undefined);
+
 const PlanExerciseSchema = z.object({
   name: z.string().min(1),
-  // Strength fields (optional — backwards compatible, was required)
-  sets: z.number().positive().optional(),
-  reps: z.string().min(1).optional(),
-  weight_kg: z.number().nonnegative().optional(),
-  rest_seconds: z.number().positive().optional(),
+  // Strength fields — preprocess to handle LLM type variations (sets:"3" → 3, reps:10 → "10")
+  sets: z.preprocess(toNum, z.number().positive().optional()),
+  reps: z.preprocess(toStr, z.string().min(1).optional()),
+  weight_kg: z.preprocess(toNum, z.number().nonnegative().optional()),
+  rest_seconds: z.preprocess(toNum, z.number().positive().optional()),
   // Endurance fields
-  duration_minutes: z.number().positive().optional(),
-  distance_km: z.number().positive().optional(),
+  duration_minutes: z.preprocess(toNum, z.number().positive().optional()),
+  distance_km: z.preprocess(toNum, z.number().positive().optional()),
   pace: z.string().optional(),
   intensity: z.string().optional(),
   // Common
@@ -211,6 +216,28 @@ const SaveTrainingPlanSchema = z.object({
   days_per_week: z.number().int().min(1).max(7),
   notes: z.string().optional(),
   days: z.array(PlanDaySchema).min(1),
+});
+
+
+const AddTrainingDaySchema = z.object({
+  day_number: z.number().int().min(1).max(14),
+  name: z.string().min(1),
+  focus: z.string().optional(),
+  exercises: z.array(PlanExerciseSchema).min(1),
+  notes: z.string().optional(),
+});
+
+const ModifyTrainingDaySchema = z.object({
+  day_number: z.number().int().min(1).max(14),
+  name: z.string().optional(),
+  focus: z.string().optional(),
+  exercises: z.array(PlanExerciseSchema).min(1),
+  notes: z.string().optional(),
+});
+
+const RemoveTrainingDaySchema = z.object({
+  day_number: z.number().int().min(1).max(14),
+  day_name: z.string().optional(),
 });
 
 const SaveProductSchema = z.object({
@@ -308,6 +335,9 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   log_blood_work: LogBloodWorkSchema,
   log_substance: LogSubstanceSchema,
   save_training_plan: SaveTrainingPlanSchema,
+  add_training_day: AddTrainingDaySchema,
+  modify_training_day: ModifyTrainingDaySchema,
+  remove_training_day: RemoveTrainingDaySchema,
   save_product: SaveProductSchema,
   add_substance: AddSubstanceSchema,
   add_reminder: AddReminderSchema,

@@ -33,10 +33,10 @@ interface InlineBuddyChatContextType {
   clearAutoMessage: () => void;
   /** Toggle docked mode (side-by-side with PlanWizard) */
   setDocked: (docked: boolean) => void;
-  /** Optional interceptor for save_training_plan actions (set by PlanWizard) */
-  wizardActionInterceptor: ((actionData: unknown) => boolean) | null;
+  /** Optional interceptor for plan-related actions (set by PlanWizard) */
+  wizardActionInterceptor: ((actionType: string, actionData: unknown) => boolean) | null;
   /** Register/unregister the wizard action interceptor */
-  setWizardActionInterceptor: (interceptor: ((actionData: unknown) => boolean) | null) => void;
+  setWizardActionInterceptor: (interceptor: ((actionType: string, actionData: unknown) => boolean) | null) => void;
 }
 
 const InlineBuddyChatContext = createContext<InlineBuddyChatContextType | null>(null);
@@ -50,7 +50,7 @@ export function InlineBuddyChatProvider({ children }: { children: ReactNode }) {
   const [autoMessage, setAutoMessage] = useState<string | null>(null);
   const [targetAgent, setTargetAgent] = useState<AgentType | null>(null);
   const [isDocked, setIsDocked] = useState(false);
-  const [wizardActionInterceptor, setWizardInterceptorState] = useState<((actionData: unknown) => boolean) | null>(null);
+  const [wizardActionInterceptor, setWizardInterceptorState] = useState<((actionType: string, actionData: unknown) => boolean) | null>(null);
   const location = useLocation();
 
   const openBuddyChat = useCallback((msg?: string, agent?: AgentType) => {
@@ -77,7 +77,7 @@ export function InlineBuddyChatProvider({ children }: { children: ReactNode }) {
     setIsDocked(docked);
   }, []);
 
-  const setWizardActionInterceptor = useCallback((interceptor: ((actionData: unknown) => boolean) | null) => {
+  const setWizardActionInterceptor = useCallback((interceptor: ((actionType: string, actionData: unknown) => boolean) | null) => {
     setWizardInterceptorState(() => interceptor);
   }, []);
 

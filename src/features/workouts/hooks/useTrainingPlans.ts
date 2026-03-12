@@ -448,3 +448,251 @@ export function useDuplicatePlan() {
     },
   });
 }
+
+
+// ── Add Training Day to Active Plan ──────────────────────────────────
+
+export interface AddTrainingPlanDayInput {
+  day_number: number;
+  name: string;
+  focus?: string;
+  exercises: PlanExercise[];
+  notes?: string;
+  /** Optional: pass user_id directly to avoid auth race conditions */
+  user_id?: string;
+}
+
+/**
+ * Add a single training day to the currently active plan.
+ * Finds the active plan, inserts the day, and updates days_per_week.
+ */
+export function useAddTrainingPlanDay() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: AddTrainingPlanDayInput) => {
+      // Resolve user
+      let userId = input.user_id;
+      if (!userId) {
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
+      }
+
+      // Step 1: Find the active plan
+      const { data: activePlan, error: planError } = await supabase
+        .from('training_plans')
+        .select('id, days_per_week')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (planError) throw planError;
+      if (!activePlan) throw new Error('Kein aktiver Trainingsplan gefunden / No active training plan found');
+
+      console.log(`[TrainingPlan] Adding day "${input.name}" to plan ${activePlan.id}`);
+
+      // Step 2: Insert the new day
+      const { error: dayError } = await supabase
+        .from('training_plan_days')
+        .insert({
+          plan_id: activePlan.id,
+          day_number: input.day_number,
+          name: input.name,
+          focus: input.focus,
+          exercises: input.exercises,
+          notes: input.notes,
+        });
+
+      if (dayError) {
+        console.error('[TrainingPlan] Insert day failed:', dayError);
+        throw dayError;
+      }
+
+      // Step 3: Update days_per_week on the plan
+      const newDaysPerWeek = Math.max(activePlan.days_per_week ?? 0, input.day_number);
+      const { error: updateError } = await supabase
+        .from('training_plans')
+        .update({ days_per_week: newDaysPerWeek })
+        .eq('id', activePlan.id);
+
+      if (updateError) {
+        console.warn('[TrainingPlan] Update days_per_week warning:', updateError);
+      }
+
+      console.log(`[TrainingPlan] ✅ Day "${input.name}" added to plan ${activePlan.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+
+// ── Modify Training Day Exercises ────────────────────────────────────
+
+export interface ModifyTrainingPlanDayInput {
+  day_number: number;
+  name?: string;
+  focus?: string;
+  exercises: PlanExercise[];
+  notes?: string;
+  user_id?: string;
+}
+
+/**
+ * Modify a specific training day's exercises in the active plan.
+ * Finds the day by day_number, updates its exercises (and optionally name/focus).
+ */
+export function useModifyTrainingPlanDay() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: ModifyTrainingPlanDayInput) => {
+      let userId = input.user_id;
+      if (!userId) {
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
+      }
+
+      // Step 1: Find the active plan
+      const { data: activePlan, error: planError } = await supabase
+        .from('training_plans')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (planError) throw planError;
+      if (!activePlan) throw new Error('Kein aktiver Trainingsplan gefunden / No active training plan found');
+
+      // Step 2: Find the day by day_number
+      const { data: day, error: dayFindError } = await supabase
+        .from('training_plan_days')
+        .select('id')
+        .eq('plan_id', activePlan.id)
+        .eq('day_number', input.day_number)
+        .maybeSingle();
+
+      if (dayFindError) throw dayFindError;
+      if (!day) throw new Error('Trainingstag ' + input.day_number + ' nicht gefunden / Training day ' + input.day_number + ' not found');
+
+      // Step 3: Update the day
+      const updateFields: Record<string, unknown> = { exercises: input.exercises };
+      if (input.name) updateFields.name = input.name;
+      if (input.focus) updateFields.focus = input.focus;
+      if (input.notes !== undefined) updateFields.notes = input.notes;
+
+      const { error: updateError } = await supabase
+        .from('training_plan_days')
+        .update(updateFields)
+        .eq('id', day.id);
+
+      if (updateError) {
+        console.error('[TrainingPlan] Modify day failed:', updateError);
+        throw updateError;
+      }
+
+      console.log('[TrainingPlan] Day ' + input.day_number + ' modified in plan ' + activePlan.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+// ── Remove Training Day from Active Plan ─────────────────────────────
+
+export interface RemoveTrainingPlanDayInput {
+  day_number: number;
+  user_id?: string;
+}
+
+/**
+ * Remove a specific training day from the active plan by day_number.
+ */
+export function useRemoveTrainingPlanDay() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: RemoveTrainingPlanDayInput) => {
+      let userId = input.user_id;
+      if (!userId) {
+        const { ensureFreshSession } = await import('../../../lib/refreshSession');
+        userId = await ensureFreshSession();
+      }
+
+      // Step 1: Find the active plan
+      const { data: activePlan, error: planError } = await supabase
+        .from('training_plans')
+        .select('id, days_per_week')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (planError) throw planError;
+      if (!activePlan) throw new Error('Kein aktiver Trainingsplan gefunden / No active training plan found');
+
+      // Step 2: Find and delete the day
+      const { data: day, error: dayFindError } = await supabase
+        .from('training_plan_days')
+        .select('id')
+        .eq('plan_id', activePlan.id)
+        .eq('day_number', input.day_number)
+        .maybeSingle();
+
+      if (dayFindError) throw dayFindError;
+      if (!day) throw new Error('Trainingstag ' + input.day_number + ' nicht gefunden / Training day ' + input.day_number + ' not found');
+
+      const { error: deleteError } = await supabase
+        .from('training_plan_days')
+        .delete()
+        .eq('id', day.id);
+
+      if (deleteError) {
+        console.error('[TrainingPlan] Remove day failed:', deleteError);
+        throw deleteError;
+      }
+
+      // Step 3: Decrement days_per_week
+      if (activePlan.days_per_week > 1) {
+        await supabase
+          .from('training_plans')
+          .update({ days_per_week: activePlan.days_per_week - 1 })
+          .eq('id', activePlan.id);
+      }
+
+      console.log('[TrainingPlan] Day ' + input.day_number + ' removed from plan ' + activePlan.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
+    },
+  });
+}
+
+/**
+ * useDeleteTrainingPlanDay — Delete a single training day from a plan.
+ */
+export function useDeleteTrainingPlanDay() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (dayId: string) => {
+      const { error } = await supabase
+        .from('training_plan_days')
+        .delete()
+        .eq('id', dayId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+    },
+  });
+}

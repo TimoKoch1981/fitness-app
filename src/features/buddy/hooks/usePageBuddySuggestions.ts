@@ -98,30 +98,21 @@ export function usePageBuddySuggestions(
       case 'tracking_training_plan':
         return [
           {
-            id: 'plan_edit',
-            label: de ? 'Plan anpassen' : 'Edit Plan',
-            message: de
-              ? 'Ich m\u00f6chte meinen Trainingsplan anpassen.'
-              : 'I want to adjust my training plan.',
-            icon: '\u270f\ufe0f',
-            targetAgent: 'training' as AgentType,
-          },
-          {
-            id: 'plan_evaluate',
-            label: de ? 'Plan bewerten' : 'Evaluate Plan',
-            message: de
-              ? 'Wie gut ist mein aktueller Trainingsplan?'
-              : 'How good is my current training plan?',
-            icon: '\ud83d\udccb',
-            targetAgent: 'training' as AgentType,
-          },
-          {
             id: 'plan_create',
             label: de ? 'Neuen Plan' : 'New Plan',
             message: de
               ? 'Erstell mir einen Trainingsplan.'
               : 'Create a training plan for me.',
             icon: '\ud83c\udd95',
+            targetAgent: 'training' as AgentType,
+          },
+          {
+            id: 'training_tip',
+            label: de ? 'Trainingstipp' : 'Training Tip',
+            message: de
+              ? 'Gib mir einen Trainingstipp passend zu meinem Plan.'
+              : 'Give me a training tip based on my plan.',
+            icon: '\ud83d\udca1',
             targetAgent: 'training' as AgentType,
           },
         ];
