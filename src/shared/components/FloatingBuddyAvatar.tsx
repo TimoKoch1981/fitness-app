@@ -77,7 +77,7 @@ export function FloatingBuddyAvatar() {
         <span className={`absolute inset-0 rounded-full ${variantConfig.pingColor} opacity-75 animate-ping`} />
 
         {/* Inner circle with avatar */}
-        <BuddyAvatar size="fab" variant={buddyStyle} />
+        <BuddyAvatar size="fab" variant={buddyStyle} useVideo />
       </motion.button>
     </AnimatePresence>
   );

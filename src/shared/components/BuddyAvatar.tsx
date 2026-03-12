@@ -2,14 +2,17 @@
  * BuddyAvatar — Central avatar component for the KI-Buddy.
  *
  * Renders the buddy's avatar based on the user's chosen variant (coach/trainer/sensei)
- * and the current emotional state. Falls back to styled gradient circle with initials
- * when images are not yet available.
+ * and the current emotional state. Tries multiple image formats (.webp → .png → .jpg).
+ * Falls back to styled gradient circle with initials when no image is available.
+ *
+ * For the FAB idle state, an optional looping video can be displayed instead of
+ * a static image (if a .mp4 file exists for the variant).
  *
  * Usage:
  *   <BuddyAvatar size="fab" />           // reads variant from profile
  *   <BuddyAvatar size="sm" variant="trainer" />  // explicit variant (e.g. settings preview)
  */
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { BuddyAvatarStyle } from '../../types/health';
 
 export type BuddyState = 'idle' | 'thinking' | 'celebrating' | 'encouraging' | 'concerned' | 'explaining' | 'greeting';
@@ -69,6 +72,9 @@ const TEXT_SIZE: Record<BuddySize, string> = {
   preview: 'text-2xl',
 };
 
+/** Image formats to try, in order of preference */
+const IMG_FORMATS = ['webp', 'png', 'jpg'] as const;
+
 interface BuddyAvatarProps {
   size?: BuddySize;
   state?: BuddyState;
@@ -77,6 +83,8 @@ interface BuddyAvatarProps {
   className?: string;
   /** Override content inside (e.g. agent icon emoji) */
   agentIcon?: string;
+  /** Show video loop instead of static image (for FAB idle) */
+  useVideo?: boolean;
 }
 
 export function BuddyAvatar({
@@ -86,15 +94,43 @@ export function BuddyAvatar({
   showRing = false,
   className = '',
   agentIcon,
+  useVideo = false,
 }: BuddyAvatarProps) {
   const config = BUDDY_VARIANTS[variant] ?? BUDDY_VARIANTS.coach;
   const sizeClass = SIZE_CLASSES[size];
   const textClass = TEXT_SIZE[size];
 
-  // Try to load image from /buddy/{variant}-{state}.webp
+  // Image loading with format fallback chain
+  const [formatIdx, setFormatIdx] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const imgSrc = `/buddy/${variant}-${state}.webp`;
+  const imgSrc = `/buddy/${variant}-${state}.${IMG_FORMATS[formatIdx]}`;
+
+  // Video support
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const videoSrc = `/buddy/${variant}-${state}.mp4`;
+  const showVideo = useVideo && state === 'idle' && !videoError;
+
+  // Reset states when variant or state changes
+  useEffect(() => {
+    setFormatIdx(0);
+    setImgLoaded(false);
+    setImgError(false);
+    setVideoLoaded(false);
+    setVideoError(false);
+  }, [variant, state]);
+
+  const handleImgError = () => {
+    // Try next format
+    if (formatIdx < IMG_FORMATS.length - 1) {
+      setFormatIdx(prev => prev + 1);
+    } else {
+      // All formats failed
+      setImgError(true);
+    }
+  };
 
   return (
     <div
@@ -102,8 +138,25 @@ export function BuddyAvatar({
         showRing ? `ring-2 ${config.ring} ring-offset-1` : ''
       } ${className}`}
     >
-      {/* Image layer — shown when loaded, hidden on error */}
-      {!imgError && (
+      {/* Video layer — looping video for FAB idle state */}
+      {showVideo && (
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300 ${
+            videoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoadedData={() => setVideoLoaded(true)}
+          onError={() => setVideoError(true)}
+        />
+      )}
+
+      {/* Image layer — shown when loaded, hidden when video is playing */}
+      {!imgError && !(showVideo && videoLoaded) && (
         <img
           src={imgSrc}
           alt={`Buddy ${variant}`}
@@ -111,15 +164,15 @@ export function BuddyAvatar({
             imgLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImgLoaded(true)}
-          onError={() => setImgError(true)}
+          onError={handleImgError}
           loading={state === 'idle' ? 'eager' : 'lazy'}
         />
       )}
 
-      {/* Fallback gradient with initials — always rendered as base, visible when no image */}
+      {/* Fallback gradient with initials — visible when no image/video loaded */}
       <div
         className={`w-full h-full bg-gradient-to-br ${config.gradient} flex items-center justify-center transition-opacity duration-300 ${
-          imgLoaded && !imgError ? 'opacity-0' : 'opacity-100'
+          (imgLoaded && !imgError) || (showVideo && videoLoaded) ? 'opacity-0' : 'opacity-100'
         }`}
       >
         <span className={`text-white font-bold ${textClass} leading-none`}>
