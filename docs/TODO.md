@@ -1,7 +1,7 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-10, v12.74
-> **Letzte Konsolidierung:** Plan bearbeiten + Plan bewerten (v12.74)
+> **Stand:** 2026-03-12, v12.77
+> **Letzte Konsolidierung:** Training Restructuring + Analytics Dashboard (v12.77)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---

@@ -3525,4 +3525,59 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-03-10*
+
+## v12.77 — Training-Seite Restructuring + Fortschritts-Analytics Dashboard (2026-03-12)
+
+**Tab-Restrukturierung (5→3):**
+- "Heute"-Tab entfernt (redundant mit Historie)
+- "Perioden"-Tab in Fortschritt integriert
+- Neue Tab-Struktur: Plan | Historie | Fortschritt
+- Default-Tab: "Plan" statt "Heute"
+
+**Neues Fortschritts-Analytics-Dashboard (ProgressDashboard.tsx):**
+- Zeitraum-Auswahl: 1W/4W/8W/12W/1J + benutzerdefiniert (Von/Bis Datumsfelder)
+- Kategorie-Chips: Kraft | Koerper | Gesundheit | Alle
+- 9 Chart-Komponenten (alle Recharts):
+  - VolumeChart: Stacked BarChart nach Muskelgruppe (ISO-Wochen)
+  - E1RMChart: Line Chart pro Uebung mit Selector + Stats (Best/Current/Progress%)
+  - PRTimeline: Bestleistungen-Timeline (chronologisch)
+  - FrequencyChart: Sessions/Woche + Streak-Counter + Durchschnitt
+  - BodyCompChart: Gewicht + Koerperfett Dual-Line
+  - BloodPressureChart: Systolisch/Diastolisch mit Referenzlinien (140/90)
+  - SleepChart: Duration Bar + Quality Line (ComposedChart)
+  - BloodWorkChart: 23+ Biomarker mit Gruppen-Dropdown (6 Kategorien)
+  - PeriodizationSection: Wrapper fuer bisherige PeriodizationView
+- Export-System:
+  - ExportDialog: Matrix-Menu (Format: CSV/JSON, Metriken: 8 Checkboxes, Uebungen waehlbar)
+  - exportCSV.ts: Semikolon-separiert, Sektionen pro Metrik-Typ
+  - exportJSON.ts: Strukturierter JSON-Export
+
+**WorkoutSummary Redesign:**
+- Inline-Editierung: Saetze als CSS Grid Tabelle (Wdh/kg editierbar)
+- Saetze hinzufuegen/loeschen (Plus/X Buttons)
+- Feedback-Dialog nach Speichern entfernt (direkt Save & Close)
+
+**FINISH_SESSION Bug-Fix:**
+- ActiveWorkoutContext: isActive bleibt true bei FINISH_SESSION
+- Nur CLEAR_SESSION setzt isActive: false
+- Verhindert State-Verlust durch Suspense/ProtectedRoute-Remount
+
+**Neue Dateien (14):**
+- components/ProgressDashboard.tsx, components/ExportDialog.tsx
+- components/progress/TimeRangeSelector.tsx, VolumeChart.tsx, E1RMChart.tsx
+- components/progress/FrequencyChart.tsx, PRTimeline.tsx, BodyCompChart.tsx
+- components/progress/BloodPressureChart.tsx, SleepChart.tsx, BloodWorkChart.tsx
+- components/progress/PeriodizationSection.tsx
+- utils/exportCSV.ts, utils/exportJSON.ts
+
+**Geaenderte Dateien (3):**
+- WorkoutsTabContent.tsx (5→3 Tabs, lazy import ProgressDashboard)
+- WorkoutSummary.tsx (Inline-Editing, kein Feedback-Dialog)
+- ActiveWorkoutContext.tsx (FINISH_SESSION Fix)
+
+**Build:** 0 TS-Fehler, 112 PWA Precache Entries
+**Deployed auf fudda.de, Commit c638e1a**
+
+---
+
+*Letzte Aktualisierung: 2026-03-12*
