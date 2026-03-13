@@ -1,6 +1,6 @@
 /**
  * RecipeToMealButton — Converts a recipe serving into a meal log entry.
- * Adjusts macros based on the current portion multiplier.
+ * v2.0: Uses new Recipe field names (title, calories_per_serving, etc.)
  */
 
 import { useState } from 'react';
@@ -38,12 +38,12 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
     try {
       await addMeal.mutateAsync({
         date: today(),
-        name: recipe.name,
+        name: recipe.title,
         type: mealType,
-        calories: Math.round(recipe.macrosPerServing.calories * scaleFactor),
-        protein: Math.round(recipe.macrosPerServing.protein * scaleFactor * 10) / 10,
-        carbs: Math.round(recipe.macrosPerServing.carbs * scaleFactor * 10) / 10,
-        fat: Math.round(recipe.macrosPerServing.fat * scaleFactor * 10) / 10,
+        calories: Math.round(recipe.calories_per_serving * scaleFactor),
+        protein: Math.round(recipe.protein_per_serving * scaleFactor * 10) / 10,
+        carbs: Math.round(recipe.carbs_per_serving * scaleFactor * 10) / 10,
+        fat: Math.round(recipe.fat_per_serving * scaleFactor * 10) / 10,
         source: 'manual',
       });
       setSuccess(true);
@@ -103,25 +103,25 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
           <p className="text-sm font-bold text-gray-900">
-            {Math.round(recipe.macrosPerServing.calories * scaleFactor)}
+            {Math.round(recipe.calories_per_serving * scaleFactor)}
           </p>
           <p className="text-[10px] text-gray-400">kcal</p>
         </div>
         <div>
           <p className="text-sm font-bold text-teal-600">
-            {Math.round(recipe.macrosPerServing.protein * scaleFactor)}g
+            {Math.round(recipe.protein_per_serving * scaleFactor)}g
           </p>
           <p className="text-[10px] text-gray-400">{t.recipes.protein}</p>
         </div>
         <div>
           <p className="text-sm font-bold text-blue-600">
-            {Math.round(recipe.macrosPerServing.carbs * scaleFactor)}g
+            {Math.round(recipe.carbs_per_serving * scaleFactor)}g
           </p>
           <p className="text-[10px] text-gray-400">{t.recipes.carbs}</p>
         </div>
         <div>
           <p className="text-sm font-bold text-amber-600">
-            {Math.round(recipe.macrosPerServing.fat * scaleFactor)}g
+            {Math.round(recipe.fat_per_serving * scaleFactor)}g
           </p>
           <p className="text-[10px] text-gray-400">{t.recipes.fat}</p>
         </div>

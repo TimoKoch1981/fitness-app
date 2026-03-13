@@ -184,7 +184,7 @@ export async function executeSystemAgent(
       { role: 'user', content: userContent },
     ];
 
-    // Function Calling options: all 17 action tools, force a call
+    // Function Calling options: all 18 action tools, force a call
     const options: ChatOptions = {
       tools: getActionTools(),
       tool_choice: 'required',

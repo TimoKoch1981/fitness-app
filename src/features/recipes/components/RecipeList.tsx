@@ -1,6 +1,6 @@
 /**
- * RecipeList — Grid/list view of recipes with search, filter and sort.
- * Shows sample recipes when list is empty.
+ * RecipeList — Grid/list view of recipes with search, category chips, and sort.
+ * v2.0: Category chips, auto-tags, recipe images, protein sort.
  */
 
 import { useState } from 'react';
@@ -10,14 +10,17 @@ import {
   Plus,
   Clock,
   Users,
-  ChefHat,
   LayoutGrid,
   LayoutList,
   X,
+  Flame,
+  Heart,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
 import type { Recipe, RecipeFilter, RecipeSortBy } from '../types';
+import { RECIPE_MEAL_TYPES, deriveAutoTags } from '../types';
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -28,7 +31,17 @@ interface RecipeListProps {
   onSelectRecipe: (recipe: Recipe) => void;
   onAddRecipe: () => void;
   onLoadSampleRecipes: () => void;
+  isLoading?: boolean;
 }
+
+const MEAL_TYPE_LABELS: Record<string, { de: string; en: string }> = {
+  breakfast: { de: 'Fruehstueck', en: 'Breakfast' },
+  lunch: { de: 'Mittag', en: 'Lunch' },
+  dinner: { de: 'Abend', en: 'Dinner' },
+  snack: { de: 'Snack', en: 'Snack' },
+  pre_workout: { de: 'Pre-WO', en: 'Pre-WO' },
+  post_workout: { de: 'Post-WO', en: 'Post-WO' },
+};
 
 export function RecipeList({
   recipes,
@@ -39,8 +52,9 @@ export function RecipeList({
   onSelectRecipe,
   onAddRecipe,
   onLoadSampleRecipes,
+  isLoading,
 }: RecipeListProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -59,6 +73,10 @@ export function RecipeList({
     onSetFilters({ ...filters, tags: newTags });
   };
 
+  const handleMealTypeToggle = (type: string) => {
+    onSetFilters({ ...filters, mealType: filters.mealType === type ? null : type });
+  };
+
   const handleMaxPrepTimeChange = (value: string) => {
     onSetFilters({ ...filters, maxPrepTime: value ? parseInt(value, 10) : null });
   };
@@ -67,11 +85,25 @@ export function RecipeList({
     onSetFilters({ ...filters, maxCalories: value ? parseInt(value, 10) : null });
   };
 
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-48 bg-gray-100 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // Empty state
   if (recipes.length === 0) {
     return (
       <div className="text-center py-12">
-        <ChefHat className="h-12 w-12 mx-auto text-gray-200 mb-3" />
+        <ImageIcon className="h-12 w-12 mx-auto text-gray-200 mb-3" />
         <p className="text-gray-400 text-sm mb-1">{t.recipes.noRecipes}</p>
         <p className="text-gray-300 text-xs mb-4">{t.recipes.sampleRecipes}</p>
         <div className="flex flex-col gap-2 items-center">
@@ -94,6 +126,35 @@ export function RecipeList({
 
   return (
     <div className="space-y-3">
+      {/* Meal type chips (horizontal scroll) */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+        <button
+          onClick={() => onSetFilters({ ...filters, mealType: null })}
+          className={cn(
+            'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
+            !filters.mealType
+              ? 'bg-teal-500 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          )}
+        >
+          {language === 'de' ? 'Alle' : 'All'}
+        </button>
+        {RECIPE_MEAL_TYPES.map((type) => (
+          <button
+            key={type}
+            onClick={() => handleMealTypeToggle(type)}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
+              filters.mealType === type
+                ? 'bg-teal-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            )}
+          >
+            {MEAL_TYPE_LABELS[type]?.[language] || type}
+          </button>
+        ))}
+      </div>
+
       {/* Search + Controls */}
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -146,7 +207,7 @@ export function RecipeList({
               {t.recipes.sortBy}
             </label>
             <div className="flex gap-1.5 flex-wrap">
-              {(['name', 'newest', 'prepTime', 'calories'] as RecipeSortBy[]).map((opt) => (
+              {(['name', 'newest', 'prepTime', 'calories', 'protein'] as RecipeSortBy[]).map((opt) => (
                 <button
                   key={opt}
                   onClick={() => handleSortChange(opt)}
@@ -161,6 +222,7 @@ export function RecipeList({
                   {opt === 'newest' && t.recipes.sortByNewest}
                   {opt === 'prepTime' && t.recipes.prepTime}
                   {opt === 'calories' && t.recipes.calories}
+                  {opt === 'protein' && t.recipes.protein}
                 </button>
               ))}
             </div>
@@ -267,29 +329,71 @@ interface RecipeCardProps {
 }
 
 function RecipeCardGrid({ recipe, onClick, t }: RecipeCardProps) {
+  const autoTags = deriveAutoTags(recipe);
+  const displayTags = [...new Set([...autoTags, ...recipe.tags.slice(0, 2)])].slice(0, 2);
+
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-xl shadow-sm p-3 text-left hover:shadow-md transition-shadow w-full"
+      className="bg-white rounded-xl shadow-sm text-left hover:shadow-md transition-shadow w-full overflow-hidden"
     >
-      {/* Color placeholder instead of image */}
-      <div className="w-full h-20 rounded-lg bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center mb-2">
-        <ChefHat className="h-8 w-8 text-teal-400" />
-      </div>
-      <h3 className="text-sm font-semibold text-gray-900 truncate">{recipe.name}</h3>
-      <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
-        <span className="flex items-center gap-0.5">
-          <Clock className="h-3 w-3" />
-          {recipe.prepTime + recipe.cookTime} min
-        </span>
-        <span className="flex items-center gap-0.5">
-          <Users className="h-3 w-3" />
-          {recipe.servings}
-        </span>
-      </div>
-      <div className="mt-1.5 text-[10px] text-gray-500">
-        {recipe.macrosPerServing.calories} kcal &middot;{' '}
-        {recipe.macrosPerServing.protein}g {t.recipes.protein}
+      {/* Image or gradient placeholder */}
+      {recipe.image_url ? (
+        <img
+          src={recipe.image_url}
+          alt={recipe.title}
+          className="w-full h-28 object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-28 bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
+          <ImageIcon className="h-8 w-8 text-teal-300" />
+        </div>
+      )}
+
+      <div className="p-2.5">
+        {/* Favorite indicator */}
+        <div className="flex items-start justify-between gap-1">
+          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight">{recipe.title}</h3>
+          {recipe.is_favorite && <Heart className="h-3.5 w-3.5 text-red-400 fill-red-400 flex-shrink-0 mt-0.5" />}
+        </div>
+
+        {/* Meta */}
+        <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
+          <span className="flex items-center gap-0.5">
+            <Clock className="h-3 w-3" />
+            {recipe.prep_time_min + recipe.cook_time_min} min
+          </span>
+          <span className="flex items-center gap-0.5">
+            <Users className="h-3 w-3" />
+            {recipe.servings}
+          </span>
+        </div>
+
+        {/* Macros row */}
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <span className="flex items-center gap-0.5 text-[10px] text-gray-500">
+            <Flame className="h-3 w-3 text-orange-400" />
+            {recipe.calories_per_serving}
+          </span>
+          <span className="text-[10px] text-teal-600 font-medium">
+            {recipe.protein_per_serving}g P
+          </span>
+        </div>
+
+        {/* Tags */}
+        {displayTags.length > 0 && (
+          <div className="flex gap-1 mt-1.5 flex-wrap">
+            {displayTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-1.5 py-0.5 bg-teal-50 text-teal-600 text-[9px] rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </button>
   );
@@ -299,25 +403,38 @@ function RecipeCardList({ recipe, onClick, t }: RecipeCardProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white rounded-xl shadow-sm p-3 flex gap-3 text-left hover:shadow-md transition-shadow"
+      className="w-full bg-white rounded-xl shadow-sm flex gap-3 text-left hover:shadow-md transition-shadow overflow-hidden"
     >
-      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-teal-100 to-emerald-100 flex-shrink-0 flex items-center justify-center">
-        <ChefHat className="h-6 w-6 text-teal-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-gray-900 truncate">{recipe.name}</h3>
+      {/* Image */}
+      {recipe.image_url ? (
+        <img
+          src={recipe.image_url}
+          alt={recipe.title}
+          className="w-20 h-20 object-cover flex-shrink-0"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-20 h-20 bg-gradient-to-br from-teal-100 to-emerald-100 flex-shrink-0 flex items-center justify-center">
+          <ImageIcon className="h-6 w-6 text-teal-300" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0 py-2.5 pr-3">
+        <div className="flex items-start justify-between gap-1">
+          <h3 className="text-sm font-semibold text-gray-900 truncate">{recipe.title}</h3>
+          {recipe.is_favorite && <Heart className="h-3.5 w-3.5 text-red-400 fill-red-400 flex-shrink-0" />}
+        </div>
         <p className="text-xs text-gray-400 truncate">{recipe.description}</p>
         <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-500">
           <span className="flex items-center gap-0.5">
             <Clock className="h-3 w-3" />
-            {recipe.prepTime + recipe.cookTime} min
+            {recipe.prep_time_min + recipe.cook_time_min} min
           </span>
           <span className="flex items-center gap-0.5">
-            <Users className="h-3 w-3" />
-            {recipe.servings} {t.recipes.servings}
+            <Flame className="h-3 w-3 text-orange-400" />
+            {recipe.calories_per_serving} kcal
           </span>
-          <span>
-            {recipe.macrosPerServing.calories} kcal
+          <span className="text-teal-600 font-medium">
+            {recipe.protein_per_serving}g P
           </span>
         </div>
       </div>

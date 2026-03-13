@@ -118,6 +118,7 @@ function getValidActions(): ActionType[] {
     'add_training_day', 'modify_training_day', 'remove_training_day',
     'save_product', 'add_substance', 'add_reminder',
     'update_profile', 'update_equipment', 'search_product', 'restart_tour',
+    'save_recipe',
   ];
 }
 const VALID_ACTIONS: ActionType[] = getValidActions();

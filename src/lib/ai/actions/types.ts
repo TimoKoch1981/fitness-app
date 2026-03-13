@@ -26,7 +26,8 @@ export type ActionType =
   | 'update_profile'
   | 'update_equipment'
   | 'search_product'
-  | 'restart_tour';
+  | 'restart_tour'
+  | 'save_recipe';
 
 /** Action types that are auto-executed (no user confirmation needed) */
 export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product', 'restart_tour'];

@@ -1,5 +1,5 @@
 /**
- * Default action registrations — registers all 17 actions in the ActionRegistry.
+ * Default action registrations — registers all 18 actions in the ActionRegistry.
  *
  * Called once at app startup (main.tsx) before React renders.
  * Each registration bundles schema, display, execute, and toolDescription
@@ -29,6 +29,7 @@ import {
   UpdateEquipmentSchema,
   SearchProductSchema,
   RestartTourSchema,
+  SaveRecipeSchema,
 } from './schemas';
 import type { ActionType } from './types';
 import type {
@@ -235,6 +236,29 @@ const ToolSchemaMap: Partial<Record<ActionType, z.ZodObject<z.ZodRawShape>>> = {
     meal_type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).describe('Mahlzeittyp').optional(),
   }),
   restart_tour: z.object({}),
+  save_recipe: z.object({
+    title: z.string().describe('Name des Rezepts'),
+    description: z.string().describe('Kurze Beschreibung').optional(),
+    meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack', 'pre_workout', 'post_workout']).describe('Mahlzeittyp').nullable().optional(),
+    servings: z.number().describe('Anzahl Portionen').optional(),
+    prep_time_min: z.number().describe('Vorbereitungszeit in Minuten').optional(),
+    cook_time_min: z.number().describe('Kochzeit in Minuten').optional(),
+    difficulty: z.enum(['easy', 'medium', 'hard']).describe('Schwierigkeitsgrad').optional(),
+    calories_per_serving: z.number().describe('Kalorien pro Portion').optional(),
+    protein_per_serving: z.number().describe('Protein pro Portion in g').optional(),
+    carbs_per_serving: z.number().describe('Kohlenhydrate pro Portion in g').optional(),
+    fat_per_serving: z.number().describe('Fett pro Portion in g').optional(),
+    ingredients: z.array(z.object({
+      name: z.string().describe('Zutatname'),
+      amount: z.number().describe('Menge'),
+      unit: z.string().describe('Einheit (g, ml, EL, TL, Stueck)').optional(),
+    })).describe('Zutaten-Liste').optional(),
+    steps: z.array(z.object({
+      text: z.string().describe('Zubereitungsschritt'),
+      duration_min: z.number().describe('Dauer in Minuten').optional(),
+    })).describe('Zubereitungsschritte').optional(),
+    tags: z.array(z.string()).describe('Tags (High-Protein, Low-Carb, Vegan, etc.)').optional(),
+  }),
 };
 
 // ── Registration ─────────────────────────────────────────────────────────
@@ -766,6 +790,48 @@ export function registerDefaultActions(): void {
     toolDescription: 'Produkttour neu starten. Startet die gefuehrte Tour durch die App.',
     toolSchema: ToolSchemaMap.restart_tour,
     agentHint: 'general',
+  });
+
+  // ── save_recipe ──────────────────────────────────────────────────────
+  actionRegistry.register({
+    type: 'save_recipe',
+    schema: SaveRecipeSchema,
+    display: {
+      icon: '📖',
+      titleDE: 'Rezept wird gespeichert...',
+      titleEN: 'Saving recipe...',
+      summary: (d) => `${d.title} (${d.servings || 2} Portionen)`,
+    },
+    execute: async (data, ctx) => {
+      const d = data as Record<string, unknown>;
+      await ctx.mutations.addRecipe.mutateAsync({
+        title: d.title as string,
+        description: (d.description as string) || '',
+        meal_type: (d.meal_type as string) || null,
+        prep_time_min: (d.prep_time_min as number) || 0,
+        cook_time_min: (d.cook_time_min as number) || 0,
+        servings: (d.servings as number) || 2,
+        difficulty: (d.difficulty as string) || 'easy',
+        calories_per_serving: (d.calories_per_serving as number) || 0,
+        protein_per_serving: (d.protein_per_serving as number) || 0,
+        carbs_per_serving: (d.carbs_per_serving as number) || 0,
+        fat_per_serving: (d.fat_per_serving as number) || 0,
+        fiber_per_serving: null,
+        sugar_per_serving: null,
+        ingredients: (d.ingredients as Array<Record<string, unknown>>) || [],
+        steps: (d.steps as Array<Record<string, unknown>>) || [],
+        tags: (d.tags as string[]) || [],
+        allergens: [],
+        image_url: null,
+        source_url: null,
+        is_favorite: false,
+        is_public: false,
+        fitness_goal: [],
+      });
+    },
+    toolDescription: 'Rezept speichern. Erstellt ein neues Rezept mit Zutaten, Zubereitungsschritten und Naehrwerten.',
+    toolSchema: ToolSchemaMap.save_recipe,
+    agentHint: 'nutrition',
   });
 
   console.log(`[ActionRegistry] ${actionRegistry.size()} actions registered`);

@@ -41,6 +41,7 @@ export interface MutationMap {
   addReminder: MutationHook;
   updateProfile: MutationHook;
   setUserEquipment: MutationHook;
+  addRecipe: MutationHook;
 }
 
 export interface ExecutionContext {

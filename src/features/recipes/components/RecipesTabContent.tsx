@@ -1,6 +1,6 @@
 /**
  * RecipesTabContent — Container component for the Recipes tab.
- * Manages navigation between list, detail, and editor views.
+ * v2.0: Supabase-backed, async operations, image support, favorites.
  */
 
 import { useState, useCallback } from 'react';
@@ -9,7 +9,9 @@ import { SAMPLE_RECIPES } from '../data/sampleRecipes';
 import { RecipeList } from './RecipeList';
 import { RecipeDetail } from './RecipeDetail';
 import { RecipeEditor } from './RecipeEditor';
+import { detectAllergens } from '../types';
 import type { Recipe } from '../types';
+import type { RecipeInput } from '../hooks/useRecipes';
 
 interface RecipesTabContentProps {
   showAddDialog: boolean;
@@ -29,77 +31,100 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    toggleFavorite,
+    isLoading,
   } = useRecipes();
 
   const [view, setView] = useState<View>('list');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | undefined>(undefined);
 
-  // Load sample recipes
-  const handleLoadSampleRecipes = useCallback(() => {
-    SAMPLE_RECIPES.forEach((sample) => {
-      addRecipe({
-        ...sample,
-        userId: 'local',
+  // Load sample recipes (convert legacy format to new DB format)
+  const handleLoadSampleRecipes = useCallback(async () => {
+    for (const sample of SAMPLE_RECIPES) {
+      await addRecipe({
+        title: sample.name,
+        description: sample.description || '',
+        meal_type: null,
+        prep_time_min: sample.prepTime || 0,
+        cook_time_min: sample.cookTime || 0,
+        servings: sample.servings || 1,
+        difficulty: 'easy',
+        calories_per_serving: sample.macrosPerServing?.calories || 0,
+        protein_per_serving: sample.macrosPerServing?.protein || 0,
+        carbs_per_serving: sample.macrosPerServing?.carbs || 0,
+        fat_per_serving: sample.macrosPerServing?.fat || 0,
+        fiber_per_serving: null,
+        sugar_per_serving: null,
+        ingredients: sample.ingredients || [],
+        steps: (sample.instructions || []).map(text => ({ text })),
+        tags: sample.tags || [],
+        allergens: detectAllergens(sample.ingredients || []),
+        image_url: null,
+        source_url: null,
+        is_favorite: false,
+        is_public: false,
+        fitness_goal: [],
       });
-    });
+    }
   }, [addRecipe]);
 
-  // Open detail
   const handleSelectRecipe = useCallback((recipe: Recipe) => {
     setSelectedRecipe(recipe);
     setView('detail');
   }, []);
 
-  // Open editor for new
   const handleAddRecipe = useCallback(() => {
     setEditingRecipe(undefined);
     setView('editor');
     onOpenAddDialog();
   }, [onOpenAddDialog]);
 
-  // Open editor for existing
   const handleEditRecipe = useCallback((recipe: Recipe) => {
     setEditingRecipe(recipe);
     setView('editor');
   }, []);
 
-  // Save recipe (add or update)
   const handleSaveRecipe = useCallback(
-    (input: Omit<Recipe, 'id' | 'createdAt'>) => {
-      if (editingRecipe) {
-        updateRecipe(editingRecipe.id, input);
-        // Update the selected recipe if viewing
-        setSelectedRecipe((prev) =>
-          prev && prev.id === editingRecipe.id
-            ? { ...prev, ...input }
-            : prev
-        );
-      } else {
-        const newRecipe = addRecipe({
-          ...input,
-          userId: 'local',
-        });
-        setSelectedRecipe(newRecipe);
+    async (input: RecipeInput) => {
+      try {
+        if (editingRecipe) {
+          const updated = await updateRecipe(editingRecipe.id, input);
+          setSelectedRecipe(updated || null);
+        } else {
+          const newRecipe = await addRecipe(input);
+          setSelectedRecipe(newRecipe || null);
+        }
+        setView('list');
+        setEditingRecipe(undefined);
+        onCloseAddDialog();
+      } catch (e) {
+        console.error('[RecipesTabContent] Save failed:', e);
       }
-      setView('list');
-      setEditingRecipe(undefined);
-      onCloseAddDialog();
     },
     [editingRecipe, addRecipe, updateRecipe, onCloseAddDialog]
   );
 
-  // Delete recipe
   const handleDeleteRecipe = useCallback(
-    (id: string) => {
-      deleteRecipe(id);
+    async (id: string) => {
+      await deleteRecipe(id);
       setSelectedRecipe(null);
       setView('list');
     },
     [deleteRecipe]
   );
 
-  // Close detail/editor back to list
+  const handleToggleFavorite = useCallback(
+    async (id: string, isFavorite: boolean) => {
+      await toggleFavorite(id, isFavorite);
+      // Update local selected recipe
+      setSelectedRecipe(prev =>
+        prev && prev.id === id ? { ...prev, is_favorite: isFavorite } : prev
+      );
+    },
+    [toggleFavorite]
+  );
+
   const handleClose = useCallback(() => {
     setView('list');
     setSelectedRecipe(null);
@@ -118,19 +143,19 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
         onSelectRecipe={handleSelectRecipe}
         onAddRecipe={handleAddRecipe}
         onLoadSampleRecipes={handleLoadSampleRecipes}
+        isLoading={isLoading}
       />
 
-      {/* Detail overlay */}
       {view === 'detail' && selectedRecipe && (
         <RecipeDetail
           recipe={selectedRecipe}
           onClose={handleClose}
           onEdit={handleEditRecipe}
           onDelete={handleDeleteRecipe}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
 
-      {/* Editor overlay */}
       {(view === 'editor' || showAddDialog) && (
         <RecipeEditor
           recipe={editingRecipe}

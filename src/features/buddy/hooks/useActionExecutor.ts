@@ -24,6 +24,7 @@ import { useAddUserProduct } from '../../meals/hooks/useProducts';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
+import { useAddRecipe } from '../../recipes/hooks/useAddRecipe';
 import { ensureFreshSession } from '../../../lib/refreshSession';
 import { actionRegistry } from '../../../lib/ai/actions/registry';
 import type { MutationMap } from '../../../lib/ai/actions/registry';
@@ -69,6 +70,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const addReminder = useAddReminder();
   const updateProfile = useUpdateProfile();
   const setUserEquipment = useSetUserEquipment();
+  const addRecipe = useAddRecipe();
   const { data: equipmentCatalog } = useEquipmentCatalog();
 
   // Active substances for name → id resolution
@@ -91,6 +93,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     addReminder,
     updateProfile,
     setUserEquipment,
+    addRecipe,
   };
 
   /**

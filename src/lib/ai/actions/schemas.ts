@@ -326,6 +326,30 @@ export const SearchProductSchema = z.object({
 
 export const RestartTourSchema = z.object({}).passthrough();
 
+export const SaveRecipeSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().default(''),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack', 'pre_workout', 'post_workout']).nullable().default(null),
+  servings: z.number().positive().default(2),
+  prep_time_min: z.number().nonnegative().default(0),
+  cook_time_min: z.number().nonnegative().default(0),
+  difficulty: z.enum(['easy', 'medium', 'hard']).default('easy'),
+  calories_per_serving: z.number().nonnegative().default(0),
+  protein_per_serving: z.number().nonnegative().default(0),
+  carbs_per_serving: z.number().nonnegative().default(0),
+  fat_per_serving: z.number().nonnegative().default(0),
+  ingredients: z.array(z.object({
+    name: z.string(),
+    amount: z.number().nonnegative(),
+    unit: z.string().default('g'),
+  })).default([]),
+  steps: z.array(z.object({
+    text: z.string(),
+    duration_min: z.number().nonnegative().optional(),
+  })).default([]),
+  tags: z.array(z.string()).default([]),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -346,6 +370,7 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   update_equipment: UpdateEquipmentSchema,
   search_product: SearchProductSchema,
   restart_tour: RestartTourSchema,
+  save_recipe: SaveRecipeSchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────
