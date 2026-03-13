@@ -30,6 +30,7 @@ import type {
   MenstrualCycleLog,
 } from '../../../types/health';
 import type { Recipe } from '../../../features/recipes/types';
+import type { StoredPreference } from '../nutritionPreferenceEngine';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
 
@@ -66,6 +67,7 @@ export interface UserSkillData {
   availableEquipment?: Equipment[];
   recentCycleLogs?: MenstrualCycleLog[];
   favoriteRecipes?: Recipe[];
+  nutritionPreferences?: StoredPreference[];
 }
 
 export type UserSkillType =
@@ -79,7 +81,8 @@ export type UserSkillType =
   | 'known_products'
   | 'available_equipment'
   | 'cycle_log'
-  | 'recipe_favorites';
+  | 'recipe_favorites'
+  | 'nutrition_preferences';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -691,6 +694,80 @@ export function generateRecipeFavoritesSkill(data: UserSkillData): string {
   ].join('\n');
 }
 
+// ── Nutrition Preferences Skill ────────────────────────────────────────
+
+/**
+ * Generates the user's learned nutrition preferences for the agent.
+ * Only includes preferences with confidence >= 0.4.
+ */
+export function generateNutritionPreferencesSkill(data: UserSkillData): string {
+  const prefs = data.nutritionPreferences;
+  if (!prefs || prefs.length === 0) return '';
+
+  const relevant = prefs.filter(p => p.confidence >= 0.4);
+  if (relevant.length === 0) return '';
+
+  // Group by preference_type
+  const grouped: Record<string, typeof relevant> = {};
+  for (const p of relevant) {
+    if (!grouped[p.preference_type]) grouped[p.preference_type] = [];
+    grouped[p.preference_type].push(p);
+  }
+
+  let skill = `## GELERNTE ERNAEHRUNGS-PRAEFERENZEN\n`;
+  skill += `> Automatisch gelernt aus Gespraechen und Essgewohnheiten. Beruecksichtige bei Vorschlaegen.\n\n`;
+
+  if (grouped.disliked_ingredient?.length) {
+    skill += `### Mag NICHT (meiden!):\n`;
+    for (const p of grouped.disliked_ingredient.slice(0, 10)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  if (grouped.liked_ingredient?.length) {
+    skill += `### Mag gern (bevorzugen):\n`;
+    for (const p of grouped.liked_ingredient.slice(0, 10)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  if (grouped.cuisine_preference?.length) {
+    skill += `### Kueche-Praeferenzen:\n`;
+    for (const p of grouped.cuisine_preference.slice(0, 5)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  if (grouped.cooking_style?.length) {
+    skill += `### Kochstil:\n`;
+    for (const p of grouped.cooking_style.slice(0, 5)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  if (grouped.dietary_pattern?.length) {
+    skill += `### Ernaehrungsmuster:\n`;
+    for (const p of grouped.dietary_pattern.slice(0, 5)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  if (grouped.portion_size?.length) {
+    skill += `### Portionsgroesse:\n`;
+    for (const p of grouped.portion_size.slice(0, 3)) {
+      skill += `- ${p.value} (${confidenceLabel(p.confidence)})\n`;
+    }
+  }
+
+  return skill;
+}
+
+function confidenceLabel(confidence: number): string {
+  if (confidence >= 0.8) return 'sicher';
+  if (confidence >= 0.6) return 'wahrscheinlich';
+  return 'vermutet';
+}
+
 // ── Skill Aggregator ───────────────────────────────────────────────────
 
 /**
@@ -737,6 +814,9 @@ export function generateUserSkills(
         break;
       case 'recipe_favorites':
         parts.push(generateRecipeFavoritesSkill(data));
+        break;
+      case 'nutrition_preferences':
+        parts.push(generateNutritionPreferencesSkill(data));
         break;
     }
   }

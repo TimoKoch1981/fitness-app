@@ -44,6 +44,8 @@ import { getActionDisplayInfo } from '../../lib/ai/actions/types';
 import { supabase } from '../../lib/supabase';
 import type { Recipe } from '../../features/recipes/types';
 import type { HealthContext } from '../../types/health';
+import { useNutritionPreferences } from '../../features/meals/hooks/useNutritionPreferences';
+import { shouldRunDailyInference, runDailyPreferenceInference } from '../../lib/ai/nutritionPreferenceEngine';
 
 // ---------------------------------------------------------------------------
 // Outer Component: Always mounted, handles animation
@@ -139,6 +141,9 @@ function InlineBuddyChatContent() {
   const { data: bloodPressureLogs } = useBloodPressureLogs(10);
   const { data: substanceLogs } = useSubstanceLogs(14);
 
+  // Learned nutrition preferences
+  const { data: nutritionPreferences } = useNutritionPreferences();
+
   // Favorite recipes for nutrition agent context (lightweight query)
   const { data: favoriteRecipes } = useQuery({
     queryKey: ['recipes', 'favorites', user?.id],
@@ -188,6 +193,7 @@ function InlineBuddyChatContent() {
     latestBloodWork: latestBloodWork ?? undefined,
     recentSymptomLogs: symptomLogs ?? [],
     favoriteRecipes: favoriteRecipes ?? [],
+    nutritionPreferences: nutritionPreferences ?? [],
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────
@@ -207,6 +213,13 @@ function InlineBuddyChatContent() {
 
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
+
+  // Daily preference inference — run once per 24h on mount (fire-and-forget)
+  useEffect(() => {
+    if (user?.id && shouldRunDailyInference()) {
+      runDailyPreferenceInference(user.id);
+    }
+  }, [user?.id]);
 
   // Proactive warnings — auto-inject critical health alerts into chat
   const deviations = analyzeDeviations(healthContext, dailyCheckin);

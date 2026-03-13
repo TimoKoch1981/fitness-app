@@ -30,6 +30,7 @@ import {
   extractFromAgentResponse,
   saveContextNotes,
   cleanupExpiredNotes,
+  extractAndSaveNutritionPreferences,
 } from '../../../lib/ai/contextExtractor';
 import { resetTourState } from '../../../shared/hooks/useGuidedTour';
 import { useChatHistory } from './useChatHistory';
@@ -515,6 +516,8 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           if (allNotes.length > 0) {
             saveContextNotes(user.id, allNotes); // fire-and-forget
           }
+          // Extract nutrition preferences from user message (fire-and-forget)
+          extractAndSaveNutritionPreferences(user.id, userMessage.trim(), lang);
           // Cleanup expired notes occasionally (1 in 10 chance)
           if (Math.random() < 0.1) {
             cleanupExpiredNotes(user.id); // fire-and-forget

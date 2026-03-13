@@ -579,6 +579,8 @@ export interface HealthContext {
   latestBloodWork?: BloodWork;
   /** User's favorite recipes (for AI meal suggestions from existing recipes) */
   favoriteRecipes?: import('../features/recipes/types').Recipe[];
+  /** Learned nutrition preferences (liked/disliked ingredients, cooking style, etc.) */
+  nutritionPreferences?: import('../lib/ai/nutritionPreferenceEngine').StoredPreference[];
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }

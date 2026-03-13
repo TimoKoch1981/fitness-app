@@ -16,7 +16,7 @@ const CONFIG: AgentConfig = {
   nameEN: 'Nutrition Agent',
   icon: '🍽️',
   staticSkills: ['nutrition', 'supplements'],
-  userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'known_products', 'recipe_favorites'],
+  userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'known_products', 'recipe_favorites', 'nutrition_preferences'],
   maxContextTokens: 12000,
   description: 'Spezialist für Ernährung, Nährwerte, Mahlzeitenplanung, Supplements und Nahrungsergänzung',
 };

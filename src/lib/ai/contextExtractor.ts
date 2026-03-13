@@ -309,6 +309,27 @@ export async function loadPersistentContext(
 }
 
 /**
+ * Extract nutrition preferences from a chat message and save them.
+ * Bridge function — delegates to nutritionPreferenceEngine.
+ * Fire-and-forget: errors are logged but don't crash the chat.
+ */
+export async function extractAndSaveNutritionPreferences(
+  userId: string,
+  message: string,
+  language: string,
+): Promise<void> {
+  try {
+    const { extractNutritionPreferences, upsertPreferences } = await import('./nutritionPreferenceEngine');
+    const prefs = extractNutritionPreferences(message, language);
+    if (prefs.length > 0) {
+      await upsertPreferences(userId, prefs);
+    }
+  } catch (err) {
+    console.warn('[ContextExtractor] Nutrition preference extraction error:', err);
+  }
+}
+
+/**
  * Delete expired context notes (cleanup utility).
  * Can be called periodically or on app startup.
  */
