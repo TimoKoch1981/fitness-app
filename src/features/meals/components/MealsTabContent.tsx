@@ -20,6 +20,7 @@ import { isUsingProxy } from '../../../lib/ai/provider';
 import { proxyCompletionRequest } from '../../../lib/ai/supabaseProxy';
 import { MealCard } from './MealCard';
 import { AddMealDialog } from './AddMealDialog';
+import { NutritionAICompanion } from './NutritionAICompanion';
 import { today } from '../../../lib/utils';
 
 interface MealsTabContentProps {
@@ -381,6 +382,15 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
             </div>
           )}
         </div>
+      )}
+
+      {/* AI Nutrition Companion (context-aware coaching chips) */}
+      {isToday && energyBalance && totals.calories > 0 && (
+        <NutritionAICompanion
+          language={language as 'de' | 'en'}
+          totals={totals}
+          energyBalance={energyBalance}
+        />
       )}
 
       {/* Copy Yesterday Button (only on today) */}

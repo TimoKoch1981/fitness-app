@@ -9,6 +9,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Send, X, Trash2, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
 import { useTranslation } from '../../i18n';
@@ -34,10 +35,14 @@ import { useTodayCheckin } from '../../features/checkin/hooks/useDailyCheckin';
 import { useSleepLogs } from '../../features/sleep/hooks/useSleep';
 import { useMenstrualCycleLogs } from '../../features/medical/hooks/useMenstrualCycle';
 import { useSymptomLogs } from '../../features/medical/hooks/useSymptomLogs';
+import { useBloodPressureLogs } from '../../features/medical/hooks/useBloodPressure';
+import { useSubstanceLogs } from '../../features/medical/hooks/useSubstances';
 import { analyzeDeviations } from '../../lib/ai/deviations';
 import { useProactiveWarnings } from '../../features/buddy/hooks/useProactiveWarnings';
 import { today } from '../../lib/utils';
 import { getActionDisplayInfo } from '../../lib/ai/actions/types';
+import { supabase } from '../../lib/supabase';
+import type { Recipe } from '../../features/recipes/types';
 import type { HealthContext } from '../../types/health';
 
 // ---------------------------------------------------------------------------
@@ -131,6 +136,26 @@ function InlineBuddyChatContent() {
   const { data: latestBloodWork } = useLatestBloodWork();
   const { data: recentWorkouts } = useRecentWorkouts(14);
   const { data: symptomLogs } = useSymptomLogs(7);
+  const { data: bloodPressureLogs } = useBloodPressureLogs(10);
+  const { data: substanceLogs } = useSubstanceLogs(14);
+
+  // Favorite recipes for nutrition agent context (lightweight query)
+  const { data: favoriteRecipes } = useQuery({
+    queryKey: ['recipes', 'favorites', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('is_favorite', true)
+        .order('updated_at', { ascending: false })
+        .limit(15);
+      if (error) return [];
+      return (data || []) as Recipe[];
+    },
+    enabled: !!user?.id,
+    staleTime: 60_000,
+  });
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -147,8 +172,8 @@ function InlineBuddyChatContent() {
     },
     recentMeals: [],
     recentWorkouts: recentWorkouts ?? [],
-    recentBloodPressure: [],
-    recentSubstanceLogs: [],
+    recentBloodPressure: bloodPressureLogs ?? [],
+    recentSubstanceLogs: substanceLogs ?? [],
     trainingGoals: [],
     latestBodyMeasurement: latestBody ?? undefined,
     bodyHistory: bodyHistory ?? [],
@@ -162,6 +187,7 @@ function InlineBuddyChatContent() {
     recentCycleLogs: cycleLogs ?? [],
     latestBloodWork: latestBloodWork ?? undefined,
     recentSymptomLogs: symptomLogs ?? [],
+    favoriteRecipes: favoriteRecipes ?? [],
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────

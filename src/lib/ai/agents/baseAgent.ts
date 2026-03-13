@@ -402,6 +402,7 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
       standardProducts: hc.standardProducts,
       availableEquipment: hc.availableEquipment,
       recentCycleLogs: hc.recentCycleLogs,
+      favoriteRecipes: hc.favoriteRecipes,
     };
   }
 

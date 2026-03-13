@@ -29,6 +29,7 @@ import type {
   Equipment,
   MenstrualCycleLog,
 } from '../../../types/health';
+import type { Recipe } from '../../../features/recipes/types';
 
 // ── Generator Metadata ─────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export interface UserSkillData {
   standardProducts?: ProductNutrition[];
   availableEquipment?: Equipment[];
   recentCycleLogs?: MenstrualCycleLog[];
+  favoriteRecipes?: Recipe[];
 }
 
 export type UserSkillType =
@@ -76,7 +78,8 @@ export type UserSkillType =
   | 'active_plan'
   | 'known_products'
   | 'available_equipment'
-  | 'cycle_log';
+  | 'cycle_log'
+  | 'recipe_favorites';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -659,6 +662,35 @@ export function generateAvailableEquipmentSkill(data: UserSkillData): string {
   return skill;
 }
 
+// ── Recipe Favorites Skill ─────────────────────────────────────────────
+
+/**
+ * Generates the user's favorite recipes context — titles, macros, prep time, tags.
+ * Allows the nutrition agent to recommend existing user recipes that match macro gaps.
+ */
+export function generateRecipeFavoritesSkill(data: UserSkillData): string {
+  const recipes = data.favoriteRecipes;
+  if (!recipes || recipes.length === 0) return '';
+
+  const lines = recipes.slice(0, 15).map((r) => {
+    const macros = `${r.calories_per_serving} kcal | ${r.protein_per_serving}g P | ${r.carbs_per_serving}g C | ${r.fat_per_serving}g F`;
+    const time = r.prep_time_min + r.cook_time_min;
+    const tags = r.tags.length > 0 ? r.tags.join(', ') : '-';
+    const allergens = r.allergens.length > 0 ? ` ⚠️ ${r.allergens.join(', ')}` : '';
+    return `- **${r.title}** (${r.servings} Portionen, ${time} Min.) — ${macros} | Tags: ${tags}${allergens}`;
+  });
+
+  return [
+    '## 📖 Lieblings-Rezepte des Users',
+    '',
+    `${recipes.length} Favoriten gespeichert:`,
+    '',
+    ...lines,
+    '',
+    'Nutze diese Rezepte bevorzugt bei Empfehlungen — der User kennt und mag sie bereits.',
+  ].join('\n');
+}
+
 // ── Skill Aggregator ───────────────────────────────────────────────────
 
 /**
@@ -702,6 +734,9 @@ export function generateUserSkills(
         break;
       case 'cycle_log':
         parts.push(generateCycleLogSkill(data));
+        break;
+      case 'recipe_favorites':
+        parts.push(generateRecipeFavoritesSkill(data));
         break;
     }
   }

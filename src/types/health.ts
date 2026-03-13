@@ -577,6 +577,8 @@ export interface HealthContext {
   recentSymptomLogs?: SymptomLog[];
   /** Latest blood work entry (for Power+ proactive warnings) */
   latestBloodWork?: BloodWork;
+  /** User's favorite recipes (for AI meal suggestions from existing recipes) */
+  favoriteRecipes?: import('../features/recipes/types').Recipe[];
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }
