@@ -32,6 +32,7 @@ interface RecipeListProps {
   onAddRecipe: () => void;
   onLoadSampleRecipes: () => void;
   isLoading?: boolean;
+  isLoadingSamples?: boolean;
 }
 
 const MEAL_TYPE_LABELS: Record<string, { de: string; en: string }> = {
@@ -53,6 +54,7 @@ export function RecipeList({
   onAddRecipe,
   onLoadSampleRecipes,
   isLoading,
+  isLoadingSamples,
 }: RecipeListProps) {
   const { t, language } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -109,9 +111,12 @@ export function RecipeList({
         <div className="flex flex-col gap-2 items-center">
           <button
             onClick={onLoadSampleRecipes}
-            className="px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+            disabled={isLoadingSamples}
+            className="px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t.recipes.loadSampleRecipes}
+            {isLoadingSamples
+              ? (language === 'de' ? 'Wird geladen...' : 'Loading...')
+              : t.recipes.loadSampleRecipes}
           </button>
           <button
             onClick={onAddRecipe}

@@ -44,6 +44,7 @@ const TOOL_DESCRIPTIONS: Record<ActionType, string> = {
   update_equipment: 'Geraetepark aktualisieren. Setze die Liste der verfuegbaren Trainingsgeraete.',
   search_product: 'Produkt recherchieren. Suche nach Naehrwertinformationen fuer ein Lebensmittel.',
   restart_tour: 'Produkttour neu starten. Startet die gefuehrte Tour durch die App.',
+  save_recipe: 'Rezept speichern. Erstellt ein neues Rezept mit Zutaten, Zubereitungsschritten und Naehrwerten.',
 };
 
 // ── Zod schemas (duplicated from schemas.ts to avoid .refine()/.transform() issues) ──
@@ -245,6 +246,30 @@ const ToolSchemas: Record<ActionType, z.ZodObject<z.ZodRawShape>> = {
   }),
 
   restart_tour: z.object({}),
+
+  save_recipe: z.object({
+    title: z.string().describe('Name des Rezepts'),
+    description: z.string().describe('Kurze Beschreibung').optional(),
+    meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack', 'pre_workout', 'post_workout']).describe('Mahlzeittyp').nullable().optional(),
+    servings: z.number().describe('Anzahl Portionen').optional(),
+    prep_time_min: z.number().describe('Vorbereitungszeit in Minuten').optional(),
+    cook_time_min: z.number().describe('Kochzeit in Minuten').optional(),
+    difficulty: z.enum(['easy', 'medium', 'hard']).describe('Schwierigkeitsgrad').optional(),
+    calories_per_serving: z.number().describe('Kalorien pro Portion').optional(),
+    protein_per_serving: z.number().describe('Protein pro Portion in g').optional(),
+    carbs_per_serving: z.number().describe('Kohlenhydrate pro Portion in g').optional(),
+    fat_per_serving: z.number().describe('Fett pro Portion in g').optional(),
+    ingredients: z.array(z.object({
+      name: z.string().describe('Zutatname'),
+      amount: z.number().describe('Menge'),
+      unit: z.string().describe('Einheit (g, ml, EL, TL, Stueck)').optional(),
+    })).describe('Zutaten-Liste').optional(),
+    steps: z.array(z.object({
+      text: z.string().describe('Zubereitungsschritt'),
+      duration_min: z.number().describe('Dauer in Minuten').optional(),
+    })).describe('Zubereitungsschritte').optional(),
+    tags: z.array(z.string()).describe('Tags wie High-Protein, Low-Carb').optional(),
+  }),
 };
 
 // ── Tool generation ────────────────────────────────────────────────────

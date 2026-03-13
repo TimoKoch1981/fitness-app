@@ -12,6 +12,7 @@ import { RecipeEditor } from './RecipeEditor';
 import { detectAllergens } from '../types';
 import type { Recipe } from '../types';
 import type { RecipeInput } from '../hooks/useRecipes';
+import { useTranslation } from '../../../i18n';
 
 interface RecipesTabContentProps {
   showAddDialog: boolean;
@@ -22,6 +23,7 @@ interface RecipesTabContentProps {
 type View = 'list' | 'detail' | 'editor';
 
 export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: RecipesTabContentProps) {
+  const { language } = useTranslation();
   const {
     recipes,
     filteredRecipes,
@@ -38,36 +40,58 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
   const [view, setView] = useState<View>('list');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | undefined>(undefined);
+  const [loadingSamples, setLoadingSamples] = useState(false);
 
   // Load sample recipes (convert legacy format to new DB format)
   const handleLoadSampleRecipes = useCallback(async () => {
-    for (const sample of SAMPLE_RECIPES) {
-      await addRecipe({
-        title: sample.name,
-        description: sample.description || '',
-        meal_type: null,
-        prep_time_min: sample.prepTime || 0,
-        cook_time_min: sample.cookTime || 0,
-        servings: sample.servings || 1,
-        difficulty: 'easy',
-        calories_per_serving: sample.macrosPerServing?.calories || 0,
-        protein_per_serving: sample.macrosPerServing?.protein || 0,
-        carbs_per_serving: sample.macrosPerServing?.carbs || 0,
-        fat_per_serving: sample.macrosPerServing?.fat || 0,
-        fiber_per_serving: null,
-        sugar_per_serving: null,
-        ingredients: sample.ingredients || [],
-        steps: (sample.instructions || []).map(text => ({ text })),
-        tags: sample.tags || [],
-        allergens: detectAllergens(sample.ingredients || []),
-        image_url: null,
-        source_url: null,
-        is_favorite: false,
-        is_public: false,
-        fitness_goal: [],
-      });
+    setLoadingSamples(true);
+    let successCount = 0;
+    try {
+      for (const sample of SAMPLE_RECIPES) {
+        try {
+          await addRecipe({
+            title: sample.name,
+            description: sample.description || '',
+            meal_type: null,
+            prep_time_min: sample.prepTime || 0,
+            cook_time_min: sample.cookTime || 0,
+            servings: sample.servings || 1,
+            difficulty: 'easy',
+            calories_per_serving: sample.macrosPerServing?.calories || 0,
+            protein_per_serving: sample.macrosPerServing?.protein || 0,
+            carbs_per_serving: sample.macrosPerServing?.carbs || 0,
+            fat_per_serving: sample.macrosPerServing?.fat || 0,
+            fiber_per_serving: null,
+            sugar_per_serving: null,
+            ingredients: sample.ingredients || [],
+            steps: (sample.instructions || []).map(text => ({ text })),
+            tags: sample.tags || [],
+            allergens: detectAllergens(sample.ingredients || []),
+            image_url: null,
+            source_url: null,
+            is_favorite: false,
+            is_public: false,
+            fitness_goal: [],
+          });
+          successCount++;
+        } catch (err) {
+          console.error(`[RecipesTab] Failed to add sample recipe "${sample.name}":`, err);
+        }
+      }
+      if (successCount === 0) {
+        alert(language === 'de'
+          ? 'Fehler: Rezepte konnten nicht geladen werden. Bitte versuche es erneut.'
+          : 'Error: Could not load recipes. Please try again.');
+      }
+    } catch (err) {
+      console.error('[RecipesTab] handleLoadSampleRecipes failed:', err);
+      alert(language === 'de'
+        ? 'Fehler beim Laden der Starter-Rezepte.'
+        : 'Error loading sample recipes.');
+    } finally {
+      setLoadingSamples(false);
     }
-  }, [addRecipe]);
+  }, [addRecipe, language]);
 
   const handleSelectRecipe = useCallback((recipe: Recipe) => {
     setSelectedRecipe(recipe);
@@ -144,6 +168,7 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
         onAddRecipe={handleAddRecipe}
         onLoadSampleRecipes={handleLoadSampleRecipes}
         isLoading={isLoading}
+        isLoadingSamples={loadingSamples}
       />
 
       {view === 'detail' && selectedRecipe && (
