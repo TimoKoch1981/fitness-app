@@ -76,6 +76,39 @@ GRANT supabase_storage_admin TO postgres;
 -- See: https://github.com/supabase/storage/issues/369
 GRANT authenticator TO supabase_storage_admin;
 
+-- ============================================================================
+-- Storage schema grants
+-- Required because our roles.sql creates roles BEFORE the storage-api migration
+-- (0002-storage-schema.sql) runs. That migration's role-creation block fails
+-- silently when roles already exist, causing its GRANT statements to be skipped.
+-- These grants replicate what the migration would have done:
+--   GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
+--   ALTER DEFAULT PRIVILEGES ... GRANT ALL ON TABLES/SEQUENCES ...
+-- Without these, storage uploads fail with aclchk.c:3650 (42501).
+-- ============================================================================
+DO $$
+BEGIN
+  -- Only run if storage schema already exists (after storage-api init)
+  IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'storage') THEN
+    -- Schema usage
+    EXECUTE 'GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role';
+
+    -- Table-level privileges
+    EXECUTE 'GRANT ALL ON ALL TABLES IN SCHEMA storage TO service_role';
+    EXECUTE 'GRANT SELECT ON ALL TABLES IN SCHEMA storage TO anon, authenticated';
+    EXECUTE 'GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA storage TO authenticated';
+
+    -- Sequence privileges
+    EXECUTE 'GRANT ALL ON ALL SEQUENCES IN SCHEMA storage TO service_role';
+    EXECUTE 'GRANT USAGE ON ALL SEQUENCES IN SCHEMA storage TO anon, authenticated';
+
+    -- Default privileges for future tables
+    EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role';
+    EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role';
+  END IF;
+END
+$$;
+
 -- Set passwords (same as POSTGRES_PASSWORD for simplicity in self-hosted)
 ALTER ROLE authenticator WITH PASSWORD :'PGPASSWORD';
 ALTER ROLE supabase_auth_admin WITH PASSWORD :'PGPASSWORD';
