@@ -17,7 +17,8 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { getAIProvider } from '../../../lib/ai/provider';
-import { routeAndExecuteStream, detectIntent } from '../../../lib/ai/agents/router';
+import { routeAndExecuteStream, detectIntent, loadRouterEnrichments } from '../../../lib/ai/agents/router';
+import { supabase } from '../../../lib/supabase';
 import { getAgent } from '../../../lib/ai/agents';
 import { parseAllActionsFromResponse, stripActionBlock } from '../../../lib/ai/actions/actionParser';
 import { useBuddyChatMessages } from '../../../app/providers/BuddyChatProvider';
@@ -130,6 +131,9 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     }]);
 
     try {
+      // Load router enrichments from DB (once per session, fire-and-forget)
+      loadRouterEnrichments(supabase).catch(() => {});
+
       // Load persistent context from previous sessions (fire-and-forget on failure)
       let persistedCtx: string | null = null;
       if (user?.id) {

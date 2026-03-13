@@ -4,10 +4,15 @@ import { registerSW } from 'virtual:pwa-register';
 import { initSentry } from './lib/sentry';
 import App from './app/App';
 import { preloadCriticalAssets } from './shared/utils/assetPreloader';
+import { registerDefaultActions } from './lib/ai/actions/registerDefaults';
 import './index.css';
 
 // Initialize Sentry BEFORE React renders (requires VITE_SENTRY_DSN in .env)
 initSentry();
+
+// Register all 17 action types in the ActionRegistry (Phase 1)
+// Must run before React renders so the registry is available when Buddy chat opens.
+registerDefaultActions();
 
 // Register service worker (PWA offline support).
 // Dispatches custom events so the React useServiceWorker hook can react.

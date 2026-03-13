@@ -1,56 +1,68 @@
 /**
- * Central Skills Registry.
+ * Central Skills Registry — Auto-Discovery via Vite glob import.
  *
- * Maps skill IDs to their versioned content and metadata.
+ * Phase 3 (v12.84): Skills are auto-discovered from *.ts files in this directory.
+ * Each skill file exports a `*_SKILL_META` (SkillMeta) and `*_SKILL` (string).
+ * The registry is built automatically — no manual imports needed.
+ *
+ * Adding a new skill: Create a .ts file with META + SKILL exports → done.
+ *
  * Maps agent types to their required skill sets.
  * Provides token budget estimation for prompt assembly.
+ *
+ * @see docs/KONZEPT_ACTION_REGISTRY.md — Phase 3
  */
 
 import type { SkillId, VersionedSkill, SkillMeta } from './types';
 import type { AgentType } from '../agents/types';
 import type { TrainingMode } from '../../../types/health';
 import type { UserSkillType } from './userSkills';
-import { NUTRITION_SKILL, NUTRITION_SKILL_META } from './nutrition';
-import { TRAINING_SKILL, TRAINING_SKILL_META } from './training';
-import { SUBSTANCE_SKILL, SUBSTANCE_SKILL_META } from './substances';
-import { ANABOLICS_SKILL, ANABOLICS_SKILL_META, ANABOLICS_POWERPLUS_SKILL, ANABOLICS_POWERPLUS_SKILL_META } from './anabolics';
-import { ANALYSIS_SKILL, ANALYSIS_SKILL_META } from './analysis';
-import { BEAUTY_SKILL, BEAUTY_SKILL_META } from './beauty';
-import { ATTRACTIVENESS_SKILL, ATTRACTIVENESS_SKILL_META } from './attractiveness';
-import { MEDICAL_SKILL, MEDICAL_SKILL_META } from './medical';
-import { SLEEP_SKILL, SLEEP_SKILL_META } from './sleep';
-import { SUPPLEMENTS_SKILL, SUPPLEMENTS_SKILL_META } from './supplements';
-import { PCT_SKILL, PCT_SKILL_META } from './pct';
-import { COMPETITION_SKILL, COMPETITION_SKILL_META } from './competition';
-import { FEMALE_FITNESS_SKILL, FEMALE_FITNESS_SKILL_META } from './femaleFitness';
-import { NUTRITION_SCIENCE_SKILL, NUTRITION_SCIENCE_SKILL_META } from './nutritionScience';
-import { GLOSSARY_SKILL, GLOSSARY_SKILL_META } from './glossary';
-import { BODY_COMPOSITION_SKILL, BODY_COMPOSITION_SKILL_META } from './bodyComposition';
-import { TRAINER_REVIEW_SKILL, TRAINER_REVIEW_SKILL_META } from './trainerReview';
 import { USER_SKILLS_META } from './userSkills';
 
-// ── Static Skill Registry ──────────────────────────────────────────────
+// ── Auto-Discovery via Vite glob import ──────────────────────────────────
+// Eagerly imports all .ts files in this directory, excluding non-skill files.
+// Each module is scanned for exports matching *_SKILL_META and *_SKILL patterns.
 
-const SKILL_REGISTRY: Record<SkillId, VersionedSkill> = {
-  nutrition: { meta: NUTRITION_SKILL_META, content: NUTRITION_SKILL },
-  training: { meta: TRAINING_SKILL_META, content: TRAINING_SKILL },
-  substances: { meta: SUBSTANCE_SKILL_META, content: SUBSTANCE_SKILL },
-  anabolics: { meta: ANABOLICS_SKILL_META, content: ANABOLICS_SKILL },
-  analysis: { meta: ANALYSIS_SKILL_META, content: ANALYSIS_SKILL },
-  bodyComposition: { meta: BODY_COMPOSITION_SKILL_META, content: BODY_COMPOSITION_SKILL },
-  beauty: { meta: BEAUTY_SKILL_META, content: BEAUTY_SKILL },
-  attractiveness: { meta: ATTRACTIVENESS_SKILL_META, content: ATTRACTIVENESS_SKILL },
-  medical: { meta: MEDICAL_SKILL_META, content: MEDICAL_SKILL },
-  sleep: { meta: SLEEP_SKILL_META, content: SLEEP_SKILL },
-  supplements: { meta: SUPPLEMENTS_SKILL_META, content: SUPPLEMENTS_SKILL },
-  pct: { meta: PCT_SKILL_META, content: PCT_SKILL },
-  competition: { meta: COMPETITION_SKILL_META, content: COMPETITION_SKILL },
-  femaleFitness: { meta: FEMALE_FITNESS_SKILL_META, content: FEMALE_FITNESS_SKILL },
-  anabolics_powerplus: { meta: ANABOLICS_POWERPLUS_SKILL_META, content: ANABOLICS_POWERPLUS_SKILL },
-  nutritionScience: { meta: NUTRITION_SCIENCE_SKILL_META, content: NUTRITION_SCIENCE_SKILL },
-  glossary: { meta: GLOSSARY_SKILL_META, content: GLOSSARY_SKILL },
-  trainerReview: { meta: TRAINER_REVIEW_SKILL_META, content: TRAINER_REVIEW_SKILL },
-};
+const skillModules = import.meta.glob(
+  ['./*.ts', '!./index.ts', '!./types.ts', '!./userSkills.ts'],
+  { eager: true },
+);
+
+// ── Build Skill Registry automatically ───────────────────────────────────
+
+const SKILL_REGISTRY: Record<string, VersionedSkill> = {};
+
+for (const [_path, module] of Object.entries(skillModules)) {
+  const mod = module as Record<string, unknown>;
+
+  // Find all META exports (e.g. NUTRITION_SKILL_META, ANABOLICS_POWERPLUS_SKILL_META)
+  const metaEntries = Object.entries(mod).filter(
+    ([key, val]) =>
+      key.endsWith('_SKILL_META') &&
+      val !== null &&
+      typeof val === 'object' &&
+      'id' in (val as Record<string, unknown>),
+  );
+
+  for (const [metaKey, metaVal] of metaEntries) {
+    const meta = metaVal as SkillMeta;
+    // Derive content key: NUTRITION_SKILL_META → NUTRITION_SKILL
+    const contentKey = metaKey.replace(/_META$/, '');
+    const content = mod[contentKey];
+
+    if (typeof content === 'string') {
+      SKILL_REGISTRY[meta.id] = { meta, content };
+    } else {
+      console.warn(`[SkillRegistry] Found META for "${meta.id}" but no matching content export "${contentKey}"`);
+    }
+  }
+}
+
+// Verify all expected skills were discovered
+if (import.meta.env.DEV) {
+  console.log(`[SkillRegistry] Auto-discovered ${Object.keys(SKILL_REGISTRY).length} skills:`,
+    Object.keys(SKILL_REGISTRY).sort().join(', '));
+}
 
 // ── Agent → Skill Mapping ──────────────────────────────────────────────
 
@@ -194,6 +206,11 @@ export function getSkillContentWithSources(id: SkillId): string {
 /** Get all registered skills */
 export function getAllSkills(): VersionedSkill[] {
   return Object.values(SKILL_REGISTRY);
+}
+
+/** Get the number of registered skills */
+export function getSkillCount(): number {
+  return Object.keys(SKILL_REGISTRY).length;
 }
 
 /** Get the skill mapping for a specific agent type */

@@ -7,6 +7,12 @@
  *
  * Scoring formula: weight × (matches / √total_keywords)
  * This normalizes across different-sized keyword lists.
+ *
+ * Phase 2 (v12.84): DB-Enrichment support — additional keywords can be
+ * loaded from `agent_routing_enrichments` table and merged at runtime.
+ * New keywords via DB INSERT instead of code edit + deploy.
+ *
+ * @see docs/KONZEPT_ACTION_REGISTRY.md — Phase 2
  */
 
 import type { AgentType, RoutingDecision, MultiRoutingDecision, AgentContext, AgentResult } from './types';
@@ -296,6 +302,95 @@ const GREETING_PATTERNS = [
   /^(tschüss|bye|ciao|bis\s*dann|bis\s*später)[\s!?.]*$/i,
 ];
 
+// ── DB Enrichment Cache (Phase 2) ───────────────────────────────────────
+// Extra keywords loaded from `agent_routing_enrichments` table.
+// Merged with hardcoded ROUTING_RULES at scoring time.
+// Loaded once per session via loadRouterEnrichments().
+
+interface RouterEnrichment {
+  agentType: string;
+  extraKeywords: string[];
+}
+
+/** In-memory cache of DB enrichments. Null = not yet loaded. */
+let enrichmentCache: RouterEnrichment[] | null = null;
+
+/** Whether enrichments have been loaded (prevents repeated fetches on error) */
+let enrichmentLoaded = false;
+
+/**
+ * Load routing enrichments from the DB.
+ * Call once per session (e.g. on first chat message).
+ * Fire-and-forget — routing works fine without enrichments (hardcoded keywords are the base).
+ */
+export async function loadRouterEnrichments(supabaseClient: {
+  from: (table: string) => {
+    select: (columns: string) => Promise<{ data: any[] | null; error: any }>;
+  };
+}): Promise<void> {
+  if (enrichmentLoaded) return;
+  enrichmentLoaded = true;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('agent_routing_enrichments')
+      .select('agent_type, extra_keywords');
+
+    if (error) {
+      console.warn('[Router] Failed to load enrichments:', error.message);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      enrichmentCache = data.map(row => ({
+        agentType: row.agent_type as string,
+        extraKeywords: (row.extra_keywords as string[]) ?? [],
+      }));
+      console.log(`[Router] Loaded ${enrichmentCache.length} enrichment(s) from DB`);
+    }
+  } catch (err) {
+    console.warn('[Router] Enrichment load error:', err);
+  }
+}
+
+/**
+ * Set enrichments directly (for testing or manual override).
+ */
+export function setRouterEnrichments(enrichments: RouterEnrichment[]): void {
+  enrichmentCache = enrichments;
+  enrichmentLoaded = true;
+}
+
+/**
+ * Clear enrichment cache (for testing).
+ */
+export function clearRouterEnrichments(): void {
+  enrichmentCache = null;
+  enrichmentLoaded = false;
+}
+
+/**
+ * Build effective keyword rules by merging hardcoded + DB enrichments.
+ * Called on every detectIntent/detectMultiIntent call (cheap — just array concat).
+ */
+function getEffectiveRules(): KeywordRule[] {
+  if (!enrichmentCache || enrichmentCache.length === 0) {
+    return ROUTING_RULES;
+  }
+
+  // Clone rules with merged keywords
+  return ROUTING_RULES.map(rule => {
+    const enrichment = enrichmentCache!.find(e => e.agentType === rule.agent);
+    if (!enrichment || enrichment.extraKeywords.length === 0) {
+      return rule;
+    }
+    return {
+      ...rule,
+      keywords: [...rule.keywords, ...enrichment.extraKeywords],
+    };
+  });
+}
+
 // ── Router Logic ────────────────────────────────────────────────────────
 
 // Lower threshold to catch short messages like "Skyr und Orangen" or "TRT Spritze"
@@ -307,6 +402,7 @@ const CONFIDENCE_THRESHOLD = 0.12;
 /**
  * Detect intent from a user message using keyword scoring.
  * Returns which agent should handle the message.
+ * Merges hardcoded keywords with DB enrichments (if loaded).
  */
 export function detectIntent(userMessage: string): RoutingDecision {
   const normalized = userMessage.toLowerCase().trim();
@@ -322,10 +418,11 @@ export function detectIntent(userMessage: string): RoutingDecision {
     }
   }
 
-  // 2. Score each agent based on keyword matches
+  // 2. Score each agent based on keyword matches (hardcoded + enrichments)
+  const rules = getEffectiveRules();
   const scores: { agent: AgentType; score: number; matches: string[] }[] = [];
 
-  for (const rule of ROUTING_RULES) {
+  for (const rule of rules) {
     const matches: string[] = [];
     for (const keyword of rule.keywords) {
       if (normalized.includes(keyword)) {
@@ -366,6 +463,7 @@ export function detectIntent(userMessage: string): RoutingDecision {
  * Detect ALL matching intents from a user message.
  * Returns multiple agents when a message spans domains (e.g. "Kekse und TRT Spritze").
  * Primary agent gets streaming, additional agents run blocking.
+ * Merges hardcoded keywords with DB enrichments (if loaded).
  */
 export function detectMultiIntent(userMessage: string): MultiRoutingDecision {
   const normalized = userMessage.toLowerCase().trim();
@@ -380,10 +478,11 @@ export function detectMultiIntent(userMessage: string): MultiRoutingDecision {
     }
   }
 
-  // 2. Score ALL agents
+  // 2. Score ALL agents (hardcoded + enrichments)
+  const rules = getEffectiveRules();
   const scores: RoutingDecision[] = [];
 
-  for (const rule of ROUTING_RULES) {
+  for (const rule of rules) {
     const matches: string[] = [];
     for (const keyword of rule.keywords) {
       if (normalized.includes(keyword)) {

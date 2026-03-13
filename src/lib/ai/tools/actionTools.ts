@@ -10,6 +10,7 @@
 
 import { z } from 'zod';
 import type { ActionType } from '../actions/types';
+import { actionRegistry } from '../actions/registry';
 import type { ToolCall } from '../types';
 export type { ToolCall };
 
@@ -268,18 +269,39 @@ function schemaToTool(name: ActionType, schema: z.ZodObject<z.ZodRawShape>): Too
   };
 }
 
-/** All 14 action tools for OpenAI Function Calling */
+/** All action tools for OpenAI Function Calling */
 let _cachedTools: ToolDefinition[] | null = null;
 
 /**
  * Get all action tool definitions for passing to OpenAI.
+ * Uses ActionRegistry as primary source, falls back to static ToolSchemas.
  * Results are cached since schemas are static.
  */
 export function getActionTools(): ToolDefinition[] {
   if (_cachedTools) return _cachedTools;
 
-  _cachedTools = (Object.entries(ToolSchemas) as [ActionType, z.ZodObject<z.ZodRawShape>][])
-    .map(([name, schema]) => schemaToTool(name, schema));
+  // Try registry first (Phase 1 ActionRegistry)
+  const registrySchemas = actionRegistry.getAllToolSchemas();
+  const registryDescriptions = actionRegistry.getAllToolDescriptions();
+
+  if (Object.keys(registrySchemas).length > 0) {
+    _cachedTools = Object.entries(registrySchemas).map(([name, schema]) => {
+      const jsonSchema = z.toJSONSchema(schema) as Record<string, unknown>;
+      const { $schema, ...params } = jsonSchema;
+      return {
+        type: 'function' as const,
+        function: {
+          name,
+          description: registryDescriptions[name] ?? TOOL_DESCRIPTIONS[name as ActionType] ?? '',
+          parameters: params,
+        },
+      };
+    });
+  } else {
+    // Fallback to static schemas
+    _cachedTools = (Object.entries(ToolSchemas) as [ActionType, z.ZodObject<z.ZodRawShape>][])
+      .map(([name, schema]) => schemaToTool(name, schema));
+  }
 
   return _cachedTools;
 }

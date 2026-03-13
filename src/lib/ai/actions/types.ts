@@ -6,6 +6,8 @@
  * this, validates it, and presents a confirmation banner to the user.
  */
 
+import { actionRegistry } from './registry';
+
 /** Supported action types — map to existing Supabase mutation hooks */
 export type ActionType =
   | 'log_meal'
@@ -53,6 +55,11 @@ export interface ActionDisplayInfo {
 
 /** Map action types to their display info */
 export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
+  // Try registry first (Phase 1 ActionRegistry — populated at app startup)
+  const fromRegistry = actionRegistry.getDisplayInfo(action.type, action.data as Record<string, unknown>);
+  if (fromRegistry) return fromRegistry;
+
+  // Fallback: static switch-case (backward compatibility)
   const d = action.data;
   switch (action.type) {
     case 'log_meal':

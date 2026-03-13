@@ -8,6 +8,7 @@
 
 import { z } from 'zod';
 import type { ActionType } from './types';
+import { actionRegistry } from './registry';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ function inferMealType(): 'breakfast' | 'morning_snack' | 'lunch' | 'afternoon_s
 
 // ── Schemas ─────────────────────────────────────────────────────────────
 
-const LogMealSchema = z.object({
+export const LogMealSchema = z.object({
   date: z.string().default(today),
   name: z.string().min(1),
   type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).default(inferMealType),
@@ -53,7 +54,7 @@ const ExerciseSetSchema = z.object({
   notes: z.string().optional(),
 });
 
-const LogWorkoutSchema = z.object({
+export const LogWorkoutSchema = z.object({
   date: z.string().default(today),
   name: z.string().min(1),
   type: z.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sports', 'other']).default('strength'),
@@ -64,7 +65,7 @@ const LogWorkoutSchema = z.object({
   notes: z.string().optional(),
 });
 
-const LogBodySchema = z.object({
+export const LogBodySchema = z.object({
   date: z.string().default(today),
   weight_kg: z.number().positive().optional(),
   body_fat_pct: z.number().min(1).max(60).optional(),
@@ -86,7 +87,7 @@ const LogBodySchema = z.object({
   { message: 'At least one body measurement must be provided' }
 );
 
-const LogBloodPressureSchema = z.object({
+export const LogBloodPressureSchema = z.object({
   date: z.string().default(today),
   time: z.string().default(nowTime),
   systolic: z.number().int().min(60).max(300),
@@ -95,7 +96,7 @@ const LogBloodPressureSchema = z.object({
   notes: z.string().optional(),
 });
 
-const LogBloodWorkSchema = z.object({
+export const LogBloodWorkSchema = z.object({
   date: z.string().default(today),
   // Hormones (9)
   testosterone_total: z.number().positive().optional(),
@@ -154,7 +155,7 @@ const LogBloodWorkSchema = z.object({
   { message: 'At least one blood work value must be provided' }
 );
 
-const LogSubstanceSchema = z.object({
+export const LogSubstanceSchema = z.object({
   substance_name: z.string().min(1),
   date: z.string().default(today),
   time: z.string().default(nowTime),
@@ -207,7 +208,7 @@ const PlanDaySchema = z.object({
   notes: z.string().optional(),
 });
 
-const SaveTrainingPlanSchema = z.object({
+export const SaveTrainingPlanSchema = z.object({
   name: z.string().min(1),
   split_type: z.enum([
     'ppl', 'upper_lower', 'full_body', 'custom',
@@ -219,7 +220,7 @@ const SaveTrainingPlanSchema = z.object({
 });
 
 
-const AddTrainingDaySchema = z.object({
+export const AddTrainingDaySchema = z.object({
   day_number: z.number().int().min(1).max(14),
   name: z.string().min(1),
   focus: z.string().optional(),
@@ -227,7 +228,7 @@ const AddTrainingDaySchema = z.object({
   notes: z.string().optional(),
 });
 
-const ModifyTrainingDaySchema = z.object({
+export const ModifyTrainingDaySchema = z.object({
   day_number: z.number().int().min(1).max(14),
   name: z.string().optional(),
   focus: z.string().optional(),
@@ -235,12 +236,12 @@ const ModifyTrainingDaySchema = z.object({
   notes: z.string().optional(),
 });
 
-const RemoveTrainingDaySchema = z.object({
+export const RemoveTrainingDaySchema = z.object({
   day_number: z.number().int().min(1).max(14),
   day_name: z.string().optional(),
 });
 
-const SaveProductSchema = z.object({
+export const SaveProductSchema = z.object({
   name: z.string().min(1),
   brand: z.string().optional(),
   category: z.enum([
@@ -258,7 +259,7 @@ const SaveProductSchema = z.object({
   notes: z.string().optional(),
 });
 
-const AddSubstanceSchema = z.object({
+export const AddSubstanceSchema = z.object({
   name: z.string().min(1),
   category: z.enum(['trt', 'ped', 'medication', 'supplement', 'other']).default('other'),
   type: z.enum(['injection', 'oral', 'transdermal', 'subcutaneous', 'other']).default('other'),
@@ -270,7 +271,7 @@ const AddSubstanceSchema = z.object({
   notes: z.string().optional(),
 });
 
-const AddReminderSchema = z.object({
+export const AddReminderSchema = z.object({
   title: z.string().min(1),
   // LLMs sometimes send "supplement", "medication" etc. — coerce to valid ReminderType
   type: z.string().default('custom').transform((val): 'substance' | 'blood_pressure' | 'body_measurement' | 'custom' => {
@@ -296,7 +297,7 @@ const AddReminderSchema = z.object({
   days_of_week: data.days_of_week ?? [0, 1, 2, 3, 4, 5, 6],
 }));
 
-const UpdateProfileSchema = z.object({
+export const UpdateProfileSchema = z.object({
   height_cm: z.number().min(50).max(250).optional(),
   birth_year: z.number().min(1920).max(2020).optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
@@ -312,18 +313,18 @@ const UpdateProfileSchema = z.object({
   { message: 'At least one profile field must be provided' }
 );
 
-const UpdateEquipmentSchema = z.object({
+export const UpdateEquipmentSchema = z.object({
   equipment_names: z.array(z.string().min(1)).min(1),
   gym_profile_name: z.string().optional(),
 });
 
-const SearchProductSchema = z.object({
+export const SearchProductSchema = z.object({
   query: z.string().min(1),
   portion_g: z.number().positive().optional(),
   meal_type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).optional(),
 });
 
-const RestartTourSchema = z.object({}).passthrough();
+export const RestartTourSchema = z.object({}).passthrough();
 
 // ── Schema Registry ─────────────────────────────────────────────────────
 
@@ -360,7 +361,8 @@ export interface ValidationResult {
  * Returns cleaned data with defaults applied, or errors if invalid.
  */
 export function validateAction(type: ActionType, data: unknown): ValidationResult {
-  const schema = SCHEMA_MAP[type];
+  // Registry is primary source, SCHEMA_MAP is fallback
+  const schema = actionRegistry.getSchema(type) ?? SCHEMA_MAP[type];
   if (!schema) {
     return { success: false, data: {}, errors: [`Unknown action type: ${type}`] };
   }

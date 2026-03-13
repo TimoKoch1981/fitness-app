@@ -1,14 +1,15 @@
 /**
  * Action Executor — bridges ParsedActions to Supabase mutation hooks.
  *
- * When an agent includes ACTION blocks in its response, this hook:
- * 1. Holds pending actions in state
- * 2. Executes each action via the appropriate mutation hook
- * 3. Tracks execution status (pending → executing → executed/failed)
+ * Uses the ActionRegistry (Phase 1) to look up and execute actions.
+ * All 17 action types are registered via registerDefaultActions() at app startup.
  *
- * Special handling for `log_substance`: the LLM returns `substance_name`
- * but the DB needs `substance_id` (UUID). We resolve this via fuzzy matching
- * against activeSubstances (case-insensitive, partial match, levenshtein distance).
+ * The hook still initializes mutation hooks (React hook rules) and passes them
+ * as MutationMap in the ExecutionContext to the registry's execute function.
+ *
+ * @see lib/ai/actions/registry.ts — ActionDescriptor, ExecutionContext
+ * @see lib/ai/actions/registerDefaults.ts — 17 action registrations
+ * @see docs/KONZEPT_ACTION_REGISTRY.md — Architecture concept
  */
 
 import { useState, useCallback } from 'react';
@@ -24,74 +25,11 @@ import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
 import { ensureFreshSession } from '../../../lib/refreshSession';
+import { actionRegistry } from '../../../lib/ai/actions/registry';
+import type { MutationMap } from '../../../lib/ai/actions/registry';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
-import type { SplitType, PlanExercise, InjectionSite, ProductCategory, SubstanceCategory, SubstanceAdminType, ReminderType, RepeatMode, TimePeriod, Gender } from '../../../types/health';
 
-// ── Fuzzy Matching Helpers ────────────────────────────────────────────
-
-/**
- * Simple Levenshtein distance between two strings.
- * Used for fuzzy substance name matching.
- */
-function levenshtein(a: string, b: string): number {
-  const m = a.length;
-  const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] = a[i - 1] === b[j - 1]
-        ? dp[i - 1][j - 1]
-        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-    }
-  }
-  return dp[m][n];
-}
-
-/**
- * Fuzzy match a substance name against the active substances list.
- * Matching strategy (in priority order):
- * 1. Exact match (case-insensitive)
- * 2. One name contains the other (partial match)
- * 3. Levenshtein distance ≤ 3 (typo tolerance)
- *
- * Returns the best matching substance or null.
- */
-function fuzzyMatchSubstance(
-  searchName: string,
-  substances: Array<{ id: string; name: string }>,
-): { id: string; name: string } | null {
-  const search = searchName.toLowerCase().trim();
-
-  // 1. Exact match
-  const exact = substances.find(s => s.name.toLowerCase() === search);
-  if (exact) return exact;
-
-  // 2. Partial match (search contains substance name or vice versa)
-  const partial = substances.find(s => {
-    const name = s.name.toLowerCase();
-    return name.includes(search) || search.includes(name);
-  });
-  if (partial) return partial;
-
-  // 3. Levenshtein distance (typo tolerance)
-  let bestMatch: { id: string; name: string } | null = null;
-  let bestDistance = Infinity;
-  for (const s of substances) {
-    const dist = levenshtein(search, s.name.toLowerCase());
-    // Allow distance proportional to name length, but max 3
-    const threshold = Math.min(3, Math.floor(s.name.length * 0.3));
-    if (dist <= threshold && dist < bestDistance) {
-      bestDistance = dist;
-      bestMatch = s;
-    }
-  }
-
-  return bestMatch;
-}
+// ── Types ────────────────────────────────────────────────────────────────
 
 interface UseActionExecutorReturn {
   /** Currently pending action awaiting user confirmation */
@@ -108,12 +46,14 @@ interface UseActionExecutorReturn {
   rejectAction: () => void;
 }
 
+// ── Hook ─────────────────────────────────────────────────────────────────
+
 export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const [pendingAction, setPendingAction] = useState<ParsedAction | null>(null);
   const [actionStatus, setActionStatus] = useState<ActionStatus>('pending');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Initialize all mutation hooks
+  // Initialize all mutation hooks (React hook rules — must be called unconditionally)
   const addMeal = useAddMeal();
   const addWorkout = useAddWorkout();
   const addBodyMeasurement = useAddBodyMeasurement();
@@ -134,8 +74,27 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   // Active substances for name → id resolution
   const { data: activeSubstances } = useSubstances(true);
 
+  // Build MutationMap for ExecutionContext
+  const mutations: MutationMap = {
+    addMeal,
+    addWorkout,
+    addBodyMeasurement,
+    addBloodPressure,
+    addBloodWork,
+    logSubstance,
+    addTrainingPlan,
+    addTrainingPlanDay,
+    modifyTrainingPlanDay,
+    removeTrainingPlanDay,
+    addUserProduct,
+    addSubstance,
+    addReminder,
+    updateProfile,
+    setUserEquipment,
+  };
+
   /**
-   * Execute an action by calling the appropriate mutation.
+   * Execute an action via the ActionRegistry.
    * Accepts an action directly (preferred) or falls back to pendingAction state.
    * Returns { success, error } to avoid stale closure issues.
    */
@@ -155,302 +114,19 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     }
 
     const attemptExecution = async (uid: string | undefined): Promise<{ success: boolean; error?: string }> => {
-      const d = actionToExecute.data;
-
-      switch (actionToExecute.type) {
-        case 'log_meal': {
-          await addMeal.mutateAsync({
-            name: d.name as string,
-            type: d.type as 'breakfast' | 'morning_snack' | 'lunch' | 'afternoon_snack' | 'dinner' | 'snack',
-            calories: d.calories as number,
-            protein: d.protein as number,
-            carbs: d.carbs as number,
-            fat: d.fat as number,
-            fiber: d.fiber as number | undefined,
-            date: d.date as string | undefined,
-            source: 'ai',
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'log_workout': {
-          await addWorkout.mutateAsync({
-            name: d.name as string,
-            type: d.type as 'strength' | 'cardio' | 'flexibility' | 'hiit' | 'sports' | 'other',
-            duration_minutes: d.duration_minutes as number | undefined,
-            calories_burned: d.calories_burned as number | undefined,
-            met_value: d.met_value as number | undefined,
-            exercises: d.exercises as Array<{ name: string; sets?: number; reps?: number; weight_kg?: number }> | undefined,
-            notes: d.notes as string | undefined,
-            date: d.date as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'log_body': {
-          await addBodyMeasurement.mutateAsync({
-            weight_kg: d.weight_kg as number | undefined,
-            body_fat_pct: d.body_fat_pct as number | undefined,
-            muscle_mass_kg: d.muscle_mass_kg as number | undefined,
-            water_pct: d.water_pct as number | undefined,
-            waist_cm: d.waist_cm as number | undefined,
-            chest_cm: d.chest_cm as number | undefined,
-            arm_cm: d.arm_cm as number | undefined,
-            leg_cm: d.leg_cm as number | undefined,
-            date: d.date as string | undefined,
-            source: 'ai',
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'log_blood_pressure': {
-          await addBloodPressure.mutateAsync({
-            systolic: d.systolic as number,
-            diastolic: d.diastolic as number,
-            pulse: d.pulse as number | undefined,
-            date: d.date as string,
-            time: d.time as string,
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'log_blood_work': {
-          // All 38 biomarker fields — spread numeric values, explicit date/notes/user_id
-          const bwMarkerKeys = [
-            'testosterone_total', 'testosterone_free', 'estradiol', 'lh', 'fsh', 'shbg', 'prolactin',
-            'cortisol', 'free_androgen_index',
-            'hematocrit', 'hemoglobin', 'erythrocytes', 'leukocytes', 'platelets',
-            'hdl', 'ldl', 'triglycerides', 'total_cholesterol',
-            'ast', 'alt', 'ggt', 'bilirubin', 'alkaline_phosphatase',
-            'creatinine', 'egfr', 'urea',
-            'fasting_glucose', 'uric_acid', 'iron', 'total_protein', 'hba1c', 'ferritin',
-            'potassium', 'sodium', 'calcium',
-            'tsh', 'psa', 'free_psa', 'vitamin_d',
-          ] as const;
-          const bwInput: Record<string, unknown> = {
-            date: d.date as string | undefined,
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          };
-          for (const key of bwMarkerKeys) {
-            if (d[key] != null) bwInput[key] = d[key] as number;
-          }
-          await addBloodWork.mutateAsync(bwInput as Parameters<typeof addBloodWork.mutateAsync>[0]);
-          break;
-        }
-
-        case 'log_substance': {
-          // Resolve substance_name → substance_id (fuzzy matching)
-          const match = activeSubstances
-            ? fuzzyMatchSubstance(d.substance_name as string, activeSubstances)
-            : null;
-
-          if (!match) {
-            throw new Error(
-              `Substance "${d.substance_name}" not found / Substanz "${d.substance_name}" nicht gefunden. ` +
-              `Add it first under Substances / Zuerst unter Substanzen hinzufügen.`
-            );
-          }
-
-          await logSubstance.mutateAsync({
-            substance_id: match.id,
-            dosage_taken: d.dosage_taken as string | undefined,
-            site: d.site as InjectionSite | undefined,
-            date: d.date as string | undefined,
-            time: d.time as string | undefined,
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'save_training_plan': {
-          await addTrainingPlan.mutateAsync({
-            name: d.name as string,
-            split_type: (d.split_type as SplitType) ?? 'custom',
-            days_per_week: d.days_per_week as number,
-            notes: d.notes as string | undefined,
-            days: (d.days as Array<{ day_number: number; name: string; focus?: string; exercises: PlanExercise[]; notes?: string }>).map((day) => ({
-              day_number: day.day_number as number,
-              name: day.name as string,
-              focus: day.focus as string | undefined,
-              exercises: day.exercises as PlanExercise[],
-              notes: day.notes as string | undefined,
-            })),
-            user_id: uid,
-          });
-          break;
-        }
-
-
-        case 'add_training_day': {
-          await addTrainingPlanDay.mutateAsync({
-            day_number: d.day_number as number,
-            name: d.name as string,
-            focus: d.focus as string | undefined,
-            exercises: d.exercises as PlanExercise[],
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-
-        case 'modify_training_day': {
-          await modifyTrainingPlanDay.mutateAsync({
-            day_number: d.day_number as number,
-            name: d.name as string | undefined,
-            focus: d.focus as string | undefined,
-            exercises: d.exercises as PlanExercise[],
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'remove_training_day': {
-          await removeTrainingPlanDay.mutateAsync({
-            day_number: d.day_number as number,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'save_product': {
-          await addUserProduct.mutateAsync({
-            name: d.name as string,
-            brand: d.brand as string | undefined,
-            category: (d.category as ProductCategory) ?? 'general',
-            serving_size_g: d.serving_size_g as number,
-            serving_label: d.serving_label as string | undefined,
-            calories_per_serving: d.calories_per_serving as number,
-            protein_per_serving: d.protein_per_serving as number,
-            carbs_per_serving: d.carbs_per_serving as number,
-            fat_per_serving: d.fat_per_serving as number,
-            fiber_per_serving: d.fiber_per_serving as number | undefined,
-            aliases: d.aliases as string[] | undefined,
-            notes: d.notes as string | undefined,
-            user_id: uid,
-          });
-          break;
-        }
-
-        case 'add_substance': {
-          await addSubstance.mutateAsync({
-            name: d.name as string,
-            category: (d.category as SubstanceCategory) ?? 'other',
-            type: (d.type as SubstanceAdminType) ?? 'other',
-            dosage: d.dosage as string | undefined,
-            unit: d.unit as string | undefined,
-            frequency: d.frequency as string | undefined,
-            ester: d.ester as string | undefined,
-            half_life_days: d.half_life_days as number | undefined,
-            notes: d.notes as string | undefined,
-          });
-          break;
-        }
-
-        case 'add_reminder': {
-          // If substance_name is provided, resolve to substance_id
-          let substanceId: string | undefined;
-          if (d.substance_name) {
-            const match = activeSubstances
-              ? fuzzyMatchSubstance(d.substance_name as string, activeSubstances)
-              : null;
-            if (match) {
-              substanceId = match.id;
-            }
-          }
-
-          await addReminder.mutateAsync({
-            type: (d.type as ReminderType) ?? 'custom',
-            title: d.title as string,
-            description: d.description as string | undefined,
-            time: d.time as string | undefined,
-            time_period: d.time_period as TimePeriod | undefined,
-            repeat_mode: (d.repeat_mode as RepeatMode) ?? 'weekly',
-            days_of_week: d.days_of_week as number[] | undefined,
-            interval_days: d.interval_days as number | undefined,
-            substance_id: substanceId,
-          });
-          break;
-        }
-
-        case 'update_profile': {
-          // Convert birth_year to birth_date (YYYY-01-01) for the DB
-          const profileUpdate: Record<string, unknown> = {};
-          if (d.height_cm != null) profileUpdate.height_cm = d.height_cm as number;
-          if (d.gender != null) profileUpdate.gender = d.gender as Gender;
-          if (d.activity_level != null) profileUpdate.activity_level = d.activity_level as number;
-          if (d.display_name != null) profileUpdate.display_name = d.display_name as string;
-          if (d.daily_calories_goal != null) profileUpdate.daily_calories_goal = d.daily_calories_goal as number;
-          if (d.daily_protein_goal != null) profileUpdate.daily_protein_goal = d.daily_protein_goal as number;
-          if (d.birth_year != null) {
-            profileUpdate.birth_date = `${d.birth_year}-01-01`;
-          }
-
-          await updateProfile.mutateAsync(profileUpdate as Parameters<typeof updateProfile.mutateAsync>[0]);
-          break;
-        }
-
-        case 'update_equipment': {
-          // Resolve equipment_names → equipment_ids via fuzzy matching against catalog
-          const names = d.equipment_names as string[];
-          if (!equipmentCatalog || equipmentCatalog.length === 0) {
-            throw new Error('Equipment catalog not loaded / Geräte-Katalog nicht geladen.');
-          }
-
-          const resolvedIds: string[] = [];
-          const notFound: string[] = [];
-
-          for (const name of names) {
-            const searchLower = name.toLowerCase().trim();
-            // Try exact match first
-            const exact = equipmentCatalog.find(e =>
-              e.name.toLowerCase() === searchLower ||
-              (e.name_en?.toLowerCase() ?? '') === searchLower
-            );
-            if (exact) {
-              resolvedIds.push(exact.id);
-              continue;
-            }
-            // Partial match
-            const partial = equipmentCatalog.find(e =>
-              e.name.toLowerCase().includes(searchLower) ||
-              searchLower.includes(e.name.toLowerCase()) ||
-              (e.name_en?.toLowerCase() ?? '').includes(searchLower) ||
-              searchLower.includes(e.name_en?.toLowerCase() ?? '')
-            );
-            if (partial) {
-              resolvedIds.push(partial.id);
-              continue;
-            }
-            notFound.push(name);
-          }
-
-          if (resolvedIds.length === 0) {
-            throw new Error(`No matching equipment found for: ${notFound.join(', ')}`);
-          }
-
-          await setUserEquipment.mutateAsync({
-            equipment_ids: resolvedIds,
-          });
-
-          if (notFound.length > 0) {
-            console.warn('[ActionExecutor] Equipment not found:', notFound);
-          }
-          break;
-        }
-
-        default: {
-          throw new Error(`Unknown action type: ${(actionToExecute as { type: string }).type}`);
-        }
+      // Look up action descriptor from registry
+      const descriptor = actionRegistry.get(actionToExecute.type);
+      if (!descriptor) {
+        throw new Error(`Unknown action type: ${actionToExecute.type}`);
       }
+
+      // Execute via registry (schema + display + execute all in one place)
+      await descriptor.execute(actionToExecute.data as Record<string, unknown>, {
+        userId: uid,
+        mutations,
+        activeSubstances: activeSubstances ?? undefined,
+        equipmentCatalog: equipmentCatalog ?? undefined,
+      });
 
       setActionStatus('executed');
       setPendingAction(null);
@@ -483,7 +159,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       setActionStatus('failed');
       return { success: false, error: msg };
     }
-  }, [pendingAction, activeSubstances, userId, addMeal, addWorkout, addBodyMeasurement, addBloodPressure, addBloodWork, logSubstance, addTrainingPlan, addTrainingPlanDay, modifyTrainingPlanDay, removeTrainingPlanDay, addUserProduct, addSubstance, addReminder, updateProfile, setUserEquipment, equipmentCatalog]);
+  }, [pendingAction, activeSubstances, userId, mutations, equipmentCatalog]);
 
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {
