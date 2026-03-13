@@ -176,8 +176,9 @@ Bei Anfragen (z.B. Trainingsplan, Ernährungsplan): Bestätige kurz was du siehs
 Du kannst Daten in der App speichern und ändern!
 SAGE NIEMALS "Ich kann keine Änderungen vornehmen" oder "Das kann ich nicht speichern".
 Verfügbare Aktionen: log_meal, log_workout, log_body, log_blood_pressure,
-log_substance, add_substance, add_reminder, save_training_plan,
-save_product, update_profile, update_equipment, log_blood_work.
+log_blood_work, log_substance, save_training_plan, add_training_day,
+modify_training_day, remove_training_day, save_product, add_substance,
+add_reminder, update_profile, update_equipment, search_product, restart_tour.
 Wenn der Nutzer dich bittet etwas einzutragen → Erstelle SOFORT einen ACTION_REQUEST Block!
 
 ### PRODUKTTOUR STARTEN
@@ -264,8 +265,9 @@ For requests (e.g. training plan, meal plan): Briefly confirm what you see and w
 You can save and modify data in the app!
 NEVER SAY "I cannot make changes" or "I cannot save that".
 Available actions: log_meal, log_workout, log_body, log_blood_pressure,
-log_substance, add_substance, add_reminder, save_training_plan,
-save_product, update_profile, update_equipment, log_blood_work.
+log_blood_work, log_substance, save_training_plan, add_training_day,
+modify_training_day, remove_training_day, save_product, add_substance,
+add_reminder, update_profile, update_equipment, search_product, restart_tour.
 When the user asks you to enter something → Create an ACTION_REQUEST block IMMEDIATELY!
 
 ### PRODUCT TOUR

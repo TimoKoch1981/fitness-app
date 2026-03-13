@@ -20,6 +20,7 @@
 
 import type { ActionType, ParsedAction } from './types';
 import { validateAction } from './schemas';
+import { actionRegistry } from './registry';
 
 // ── JSON Repair for truncated ACTION blocks ──────────────────────────
 
@@ -104,22 +105,22 @@ function attemptJsonRepair(rawJson: string): Record<string, unknown> | null {
   }
 }
 
-/** All valid action types */
-const VALID_ACTIONS: ActionType[] = [
-  'log_meal',
-  'log_workout',
-  'log_body',
-  'log_blood_pressure',
-  'log_substance',
-  'save_training_plan',
-  'save_product',
-  'add_substance',
-  'add_reminder',
-  'update_profile',
-  'update_equipment',
-  'search_product',
-  'restart_tour',
-];
+/** All valid action types — derived from ActionRegistry if available, static fallback otherwise */
+
+function getValidActions(): ActionType[] {
+  // Primary: from registry (all registered types)
+  const fromRegistry = actionRegistry.getAll().map(d => d.type);
+  if (fromRegistry.length > 0) return fromRegistry;
+  // Fallback: static list (should never reach here after registerDefaultActions)
+  return [
+    'log_meal', 'log_workout', 'log_body', 'log_blood_pressure',
+    'log_blood_work', 'log_substance', 'save_training_plan',
+    'add_training_day', 'modify_training_day', 'remove_training_day',
+    'save_product', 'add_substance', 'add_reminder',
+    'update_profile', 'update_equipment', 'search_product', 'restart_tour',
+  ];
+}
+const VALID_ACTIONS: ActionType[] = getValidActions();
 
 /**
  * Regex to match ACTION blocks in LLM output.
