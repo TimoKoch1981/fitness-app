@@ -68,8 +68,9 @@ export function useMealFavorites(limit = 10) {
         }
       }
 
-      // Sort by frequency descending and take top N
+      // Sort by frequency descending, require at least 2 occurrences, take top N
       return Array.from(freqMap.values())
+        .filter((f) => f.frequency >= 2)
         .sort((a, b) => b.frequency - a.frequency)
         .slice(0, limit);
     },

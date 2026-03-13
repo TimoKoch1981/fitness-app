@@ -123,7 +123,7 @@ export function useUpdateMeal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Meal> & { id: string }) => {
+    mutationFn: async ({ id, _previousDate, ...updates }: Partial<Meal> & { id: string; _previousDate?: string }) => {
       const { data, error } = await supabase
         .from('meals')
         .update(updates)
@@ -132,10 +132,14 @@ export function useUpdateMeal() {
         .single();
 
       if (error) throw error;
-      return data as Meal;
+      return { meal: data as Meal, _previousDate };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [MEALS_KEY, data.date] });
+    onSuccess: ({ meal, _previousDate }) => {
+      queryClient.invalidateQueries({ queryKey: [MEALS_KEY, meal.date] });
+      // If date was changed, also refresh the old date's meal list
+      if (_previousDate && _previousDate !== meal.date) {
+        queryClient.invalidateQueries({ queryKey: [MEALS_KEY, _previousDate] });
+      }
     },
   });
 }

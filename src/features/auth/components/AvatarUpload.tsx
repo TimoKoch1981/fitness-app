@@ -28,6 +28,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
   const previewObjectUrlRef = useRef<string | null>(null);
   const prevAvatarUrlRef = useRef(avatarUrl);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
 
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
@@ -51,6 +52,11 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
     }
     prevAvatarUrlRef.current = avatarUrl;
   }, [avatarUrl, previewUrl]);
+
+  // Reset error state when URL changes
+  useEffect(() => {
+    setImgError(false);
+  }, [currentImage]);
 
   // Cleanup object URL on unmount
   useEffect(() => {
@@ -97,11 +103,12 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
       {/* Avatar Circle */}
       <div className="relative">
         <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg">
-          {currentImage ? (
+          {currentImage && !imgError ? (
             <img
               src={currentImage}
               alt={displayName ?? 'Avatar'}
               className="w-full h-full object-cover"
+              onError={() => setImgError(true)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">

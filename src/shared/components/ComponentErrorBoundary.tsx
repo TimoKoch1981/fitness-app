@@ -13,6 +13,7 @@ interface ComponentErrorBoundaryProps {
 interface ComponentErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  componentStack: string | null;
 }
 
 /**
@@ -30,11 +31,11 @@ export class ComponentErrorBoundary extends Component<
 > {
   constructor(props: ComponentErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, componentStack: null };
   }
 
   static getDerivedStateFromError(error: Error): ComponentErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, componentStack: null };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
@@ -43,10 +44,11 @@ export class ComponentErrorBoundary extends Component<
       error,
       info.componentStack,
     );
+    this.setState({ componentStack: info.componentStack ?? null });
   }
 
   handleRetry = (): void => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, componentStack: null });
   };
 
   render(): ReactNode {
@@ -75,6 +77,14 @@ export class ComponentErrorBoundary extends Component<
           <p className="text-[10px] text-red-400 mb-3 max-w-xs break-words">
             {this.state.error.message}
           </p>
+        )}
+        {this.state.componentStack && (
+          <details className="mb-3 max-w-xs">
+            <summary className="text-[10px] text-red-400 cursor-pointer">Stack</summary>
+            <pre className="text-[8px] text-red-300 text-left whitespace-pre-wrap break-words mt-1 max-h-32 overflow-y-auto">
+              {this.state.componentStack}
+            </pre>
+          </details>
         )}
         <button
           onClick={this.handleRetry}

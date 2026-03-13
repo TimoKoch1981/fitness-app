@@ -5,6 +5,7 @@
  * Used in chat messages and other places where avatar is displayed.
  */
 
+import { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
 
 interface UserAvatarProps {
@@ -28,13 +29,19 @@ const ICON_SIZES = {
 export function UserAvatar({ avatarUrl, size = 'md', className = '' }: UserAvatarProps) {
   const sizeClass = SIZES[size];
   const iconSize = ICON_SIZES[size];
+  const [imgError, setImgError] = useState(false);
 
-  if (avatarUrl) {
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
+
+  if (avatarUrl && !imgError) {
     return (
       <img
         src={avatarUrl}
         alt="Avatar"
         className={`${sizeClass} rounded-full object-cover flex-shrink-0 ${className}`}
+        onError={() => setImgError(true)}
       />
     );
   }

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Plus, Bot, Heart } from 'lucide-react';
+import { Plus, Sparkles, Heart } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useTrainingMode } from '../shared/hooks/useTrainingMode';
@@ -89,7 +89,7 @@ export function TrainingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4 text-indigo-600" />
+                <Sparkles className="h-4 w-4 text-indigo-600" />
               </div>
               <div className="min-w-0">
                 <h4 className="text-sm font-medium text-gray-900">

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { X, Sparkles, Loader2, Camera, ScanBarcode, Star } from 'lucide-react';
+import { X, Sparkles, Loader2, Camera, ScanBarcode, Star, Calendar } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddMeal } from '../hooks/useMeals';
 import { useEstimateMealNutrition } from '../hooks/useEstimateMealNutrition';
@@ -19,6 +19,17 @@ function safeT<T>(obj: T | undefined | null, fallback: string): string {
   return fallback;
 }
 
+/** Determine meal type based on current time of day */
+function getMealTypeByTime(): MealType {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 10) return 'breakfast';
+  if (hour >= 10 && hour < 11) return 'morning_snack';
+  if (hour >= 11 && hour < 14) return 'lunch';
+  if (hour >= 14 && hour < 17) return 'afternoon_snack';
+  if (hour >= 17 && hour < 21) return 'dinner';
+  return 'snack'; // late night or early morning
+}
+
 interface AddMealDialogProps {
   open: boolean;
   onClose: () => void;
@@ -26,7 +37,7 @@ interface AddMealDialogProps {
   date?: string;
 }
 
-export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: AddMealDialogProps) {
+export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialogProps) {
   const { t, language } = useTranslation();
   const addMeal = useAddMeal();
   const { estimate, isEstimating, estimateError } = useEstimateMealNutrition();
@@ -38,7 +49,8 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const common = t?.common ?? ({} as Record<string, string>);
 
   const [name, setName] = useState('');
-  const [type, setType] = useState<MealType>(defaultType);
+  const [type, setType] = useState<MealType>(defaultType ?? getMealTypeByTime());
+  const [mealDate, setMealDate] = useState(date ?? today());
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
@@ -49,36 +61,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [barcodeSource, setBarcodeSource] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [nameWasCorrected, setNameWasCorrected] = useState(false);
 
   const { data: favorites } = useMealFavorites();
 
-  if (!open) return null;
-
-  const handleSelectFavorite = (fav: MealFavorite) => {
-    if (!fav) return;
-    setName(fav.name ?? '');
-    setType(fav.type ?? defaultType);
-    setCalories(String(fav.calories ?? 0));
-    setProtein(String(fav.protein ?? 0));
-    setCarbs(String(fav.carbs ?? 0));
-    setFat(String(fav.fat ?? 0));
-    setIsEstimated(false);
-    setBarcodeSource(false);
-    setShowFavorites(false);
-  };
-
-  const handlePhotoResult = (result: MealPhotoAnalysisResult) => {
-    if (!result) return;
-    setName(result.name ?? '');
-    setCalories(String(result.calories ?? 0));
-    setProtein(String(result.protein ?? 0));
-    setCarbs(String(result.carbs ?? 0));
-    setFat(String(result.fat ?? 0));
-    setIsEstimated(true);
-    setShowPhotoCapture(false);
-  };
-
-  // ── Barcode Scanner ──────────────────────────────────────────────
+  // ── Barcode Scanner hooks (MUST be before early return to satisfy Rules of Hooks) ──
 
   /** Look up a barcode in the user's product database */
   const lookupUserProductByBarcode = useCallback((barcode: string): BarcodeProduct | null => {
@@ -135,6 +122,32 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
     }
   }, [addUserProduct]);
 
+  if (!open) return null;
+
+  const handleSelectFavorite = (fav: MealFavorite) => {
+    if (!fav) return;
+    setName(fav.name ?? '');
+    setType(fav.type ?? defaultType);
+    setCalories(String(fav.calories ?? 0));
+    setProtein(String(fav.protein ?? 0));
+    setCarbs(String(fav.carbs ?? 0));
+    setFat(String(fav.fat ?? 0));
+    setIsEstimated(false);
+    setBarcodeSource(false);
+    setShowFavorites(false);
+  };
+
+  const handlePhotoResult = (result: MealPhotoAnalysisResult) => {
+    if (!result) return;
+    setName(result.name ?? '');
+    setCalories(String(result.calories ?? 0));
+    setProtein(String(result.protein ?? 0));
+    setCarbs(String(result.carbs ?? 0));
+    setFat(String(result.fat ?? 0));
+    setIsEstimated(true);
+    setShowPhotoCapture(false);
+  };
+
   const handleEstimate = async () => {
     if (!name.trim()) return;
     const result = await estimate(name, language);
@@ -144,6 +157,13 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
       setCarbs(String(result.carbs));
       setFat(String(result.fat));
       setIsEstimated(true);
+      // Auto-correct typos in name
+      if (result.corrected_name && result.corrected_name.toLowerCase() !== name.trim().toLowerCase()) {
+        setName(result.corrected_name);
+        setNameWasCorrected(true);
+      } else {
+        setNameWasCorrected(false);
+      }
     }
   };
 
@@ -154,7 +174,7 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
     try {
       await addMeal.mutateAsync({
-        date: date ?? today(),
+        date: mealDate,
         name,
         type,
         calories: parseInt(calories) || 0,
@@ -170,12 +190,15 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
 
       // Reset and close
       setName('');
+      setType(defaultType ?? getMealTypeByTime());
+      setMealDate(date ?? today());
       setCalories('');
       setProtein('');
       setCarbs('');
       setFat('');
       setIsEstimated(false);
       setBarcodeSource(false);
+      setNameWasCorrected(false);
       onClose();
     } catch {
       setError(safeT(common?.saveError, 'Speichern fehlgeschlagen'));
@@ -223,6 +246,18 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 {mt.label}
               </button>
             ))}
+          </div>
+
+          {/* Date Picker */}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <input
+              type="date"
+              value={mealDate}
+              onChange={(e) => setMealDate(e.target.value)}
+              max={today()}
+              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-gray-700"
+            />
           </div>
 
           {/* Favorites Section */}
@@ -354,6 +389,11 @@ export function AddMealDialog({ open, onClose, defaultType = 'lunch', date }: Ad
                 {barcodeSource
                   ? (language === 'de' ? 'Barcode-Daten — bitte prüfen & anpassen' : 'Barcode data — please review & adjust')
                   : (language === 'de' ? 'KI-Schätzung — bitte prüfen & anpassen' : 'AI estimate — please review & adjust')}
+              </p>
+            )}
+            {nameWasCorrected && (
+              <p className="text-[10px] mt-0.5 text-emerald-600">
+                {language === 'de' ? '✓ Name wurde automatisch korrigiert' : '✓ Name was auto-corrected'}
               </p>
             )}
           </div>

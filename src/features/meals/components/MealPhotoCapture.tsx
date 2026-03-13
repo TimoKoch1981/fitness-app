@@ -7,14 +7,21 @@
  * Pattern based on ScreenshotImport.tsx (body/components).
  */
 
-import { useState, useRef } from 'react';
-import { Camera, Image, Loader2, RefreshCw, Check, AlertCircle, X } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { Camera, Image, Loader2, RefreshCw, Check, AlertCircle, X, Upload } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAnalyzeMealPhoto } from '../hooks/useAnalyzeMealPhoto';
 import type { MealPhotoAnalysisResult } from '../../../lib/ai/mealVision';
 import { OptimizedImage } from '../../../shared/components/OptimizedImage';
 
 type CaptureStep = 'idle' | 'analyzing' | 'result' | 'error';
+
+/** Detect mobile device (touch + small screen = likely has camera capture) */
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    ('ontouchstart' in window && window.innerWidth < 1024);
+}
 
 interface MealPhotoCaptureProps {
   /** Called when user accepts the analysis result */
@@ -33,6 +40,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
+  const isMobile = useMemo(() => isMobileDevice(), []);
   const meals = t.meals as Record<string, string>;
 
   const handleFileSelect = async (file: File) => {
@@ -132,26 +140,41 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
       {step === 'idle' && (
         <div className="space-y-2">
           <p className="text-xs text-gray-500">
-            {meals.photoHint || 'Fotografiere deine Mahlzeit fuer automatische Naehrwert-Schaetzung'}
+            {isMobile
+              ? (meals.photoHint || 'Fotografiere deine Mahlzeit für automatische Nährwert-Schätzung')
+              : (language === 'de' ? 'Lade ein Foto deiner Mahlzeit hoch für automatische Nährwert-Schätzung' : 'Upload a photo of your meal for automatic nutrition estimation')}
           </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => cameraRef.current?.click()}
-              className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
-            >
-              <Camera className="h-5 w-5" />
-              {meals.photoCamera || 'Kamera'}
-            </button>
+          {isMobile ? (
+            /* Mobile: Show Camera + Gallery buttons */
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => cameraRef.current?.click()}
+                className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+              >
+                <Camera className="h-5 w-5" />
+                {meals.photoCamera || 'Kamera'}
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+              >
+                <Image className="h-5 w-5" />
+                {meals.photoGallery || 'Galerie'}
+              </button>
+            </div>
+          ) : (
+            /* Desktop: Single upload button (camera capture not supported) */
             <button
               type="button"
               onClick={() => galleryRef.current?.click()}
-              className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
             >
-              <Image className="h-5 w-5" />
-              {meals.photoGallery || 'Galerie'}
+              <Upload className="h-5 w-5" />
+              {language === 'de' ? 'Bild auswählen' : 'Choose image'}
             </button>
-          </div>
+          )}
         </div>
       )}
 

@@ -11,30 +11,29 @@ import { useTranslation } from '../i18n';
 import { cn } from '../lib/utils';
 
 import { MealsTabContent } from '../features/meals/components/MealsTabContent';
-import { BodyTabContent } from '../features/body/components/BodyTabContent';
 import { RecipesTabContent } from '../features/recipes/components/RecipesTabContent';
+import { NutritionHistoryTab } from '../features/meals/components/NutritionHistoryTab';
 
-type NutritionTab = 'meals' | 'recipes' | 'body';
+type NutritionTab = 'meals' | 'recipes' | 'history';
 
 export function NutritionPage() {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<NutritionTab>('meals');
 
   const [showMealsDialog, setShowMealsDialog] = useState(false);
-  const [showBodyDialog, setShowBodyDialog] = useState(false);
   const [showRecipesDialog, setShowRecipesDialog] = useState(false);
 
   const tabs: { key: NutritionTab; label: string }[] = [
     { key: 'meals', label: t.tracking.nutrition },
     { key: 'recipes', label: t.recipes.title },
-    { key: 'body', label: t.tracking.body },
+    { key: 'history', label: language === 'de' ? 'Historie' : 'History' },
   ];
 
   const handleAddAction = () => {
     switch (activeTab) {
       case 'meals': setShowMealsDialog(true); break;
       case 'recipes': setShowRecipesDialog(true); break;
-      case 'body': setShowBodyDialog(true); break;
+      // history tab has no add action
     }
   };
 
@@ -42,12 +41,14 @@ export function NutritionPage() {
     <PageShell
       title={t.tracking.nutrition}
       actions={
-        <button
-          onClick={handleAddAction}
-          className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+        activeTab !== 'history' ? (
+          <button
+            onClick={handleAddAction}
+            className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        ) : undefined
       }
     >
       {/* Tab Selector */}
@@ -87,13 +88,9 @@ export function NutritionPage() {
           />
         </ComponentErrorBoundary>
       )}
-      {activeTab === 'body' && (
-        <ComponentErrorBoundary label="BodyTabContent" language={language as 'de' | 'en'}>
-          <BodyTabContent
-            showAddDialog={showBodyDialog}
-            onOpenAddDialog={() => setShowBodyDialog(true)}
-            onCloseAddDialog={() => setShowBodyDialog(false)}
-          />
+      {activeTab === 'history' && (
+        <ComponentErrorBoundary label="NutritionHistoryTab" language={language as 'de' | 'en'}>
+          <NutritionHistoryTab />
         </ComponentErrorBoundary>
       )}
     </PageShell>

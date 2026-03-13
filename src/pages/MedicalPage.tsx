@@ -25,6 +25,8 @@ import { useSymptomLogs, useDeleteSymptomLog, getSymptomEmoji, getSeverityEmoji 
 import { AddSymptomDialog } from '../features/medical/components/AddSymptomDialog';
 import { useBloodWorkLogs, useDeleteBloodWork } from '../features/medical/hooks/useBloodWork';
 import { AddBloodWorkDialog } from '../features/medical/components/AddBloodWorkDialog';
+import { ComponentErrorBoundary } from '../shared/components/ComponentErrorBoundary';
+import { BodyTabContent } from '../features/body/components/BodyTabContent';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -37,6 +39,7 @@ export function MedicalPage() {
   const [showSleepDialog, setShowSleepDialog] = useState(false);
   const [showSymptomDialog, setShowSymptomDialog] = useState(false);
   const [showBloodWorkDialog, setShowBloodWorkDialog] = useState(false);
+  const [showBodyDialog, setShowBodyDialog] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
 
   const { data: bpLogs, isLoading: bpLoading } = useBloodPressureLogs(10);
@@ -80,6 +83,15 @@ export function MedicalPage() {
 
         {/* RED-S / Underweight Warning */}
         <REDSWarningBanner />
+
+        {/* Body Measurements Section */}
+        <ComponentErrorBoundary label="BodyTabContent" language={language as 'de' | 'en'}>
+          <BodyTabContent
+            showAddDialog={showBodyDialog}
+            onOpenAddDialog={() => setShowBodyDialog(true)}
+            onCloseAddDialog={() => setShowBodyDialog(false)}
+          />
+        </ComponentErrorBoundary>
 
         {/* Blood Work Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

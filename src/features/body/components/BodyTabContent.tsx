@@ -1,15 +1,13 @@
 /**
- * BodyTabContent — Inner content of the Body tab, extracted from BodyPage.
- * Used inside TrackingPage as one of 3 tracking tabs.
+ * BodyTabContent — Body measurements section.
+ * Used on MedicalPage as a card section matching other medical sections.
  */
 
 import { useState } from 'react';
-import { Activity, Camera, FileSpreadsheet, Info, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
-import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
+import { Activity, Camera, FileSpreadsheet, Info, Plus, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useBodyMeasurements, useDeleteBodyMeasurement } from '../hooks/useBodyMeasurements';
 import { useProfile } from '../../auth/hooks/useProfile';
-import { usePageBuddySuggestions } from '../../buddy/hooks/usePageBuddySuggestions';
 import { AddBodyMeasurementDialog } from './AddBodyMeasurementDialog';
 import { ScreenshotImport } from './ScreenshotImport';
 import { BodySilhouette } from './BodySilhouette';
@@ -26,7 +24,6 @@ interface BodyTabContentProps {
 export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialog }: BodyTabContentProps) {
   const { t, language } = useTranslation();
   const isDE = language === 'de';
-  const bodySuggestions = usePageBuddySuggestions('tracking_body', language as 'de' | 'en');
   const { data: measurements, isLoading } = useBodyMeasurements(20);
   const { data: profile } = useProfile();
   const deleteMeasurement = useDeleteBodyMeasurement();
@@ -57,29 +54,29 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
 
   if (!latest) {
     return (
-      <div className="text-center py-12">
-        <Activity className="h-12 w-12 mx-auto text-gray-200 mb-3" />
-        <p className="text-gray-400 text-sm">{t.common.noData}</p>
-        <div className="mt-3 flex gap-2 justify-center">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Card Header — matches other MedicalPage sections */}
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-teal-500" />
+            <h3 className="font-semibold text-gray-900">
+              {isDE ? 'Körperdaten' : 'Body Data'}
+            </h3>
+          </div>
           <button
             onClick={onOpenAddDialog}
-            className="px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+            className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="p-4 text-center">
+          <p className="text-sm text-gray-400">{t.common.noData}</p>
+          <button
+            onClick={onOpenAddDialog}
+            className="mt-2 text-xs text-teal-600 hover:underline"
           >
             {t.body.addMeasurement}
-          </button>
-          <button
-            onClick={() => setShowScreenshotImport(true)}
-            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
-          >
-            <Camera className="h-3.5 w-3.5" />
-            {t.screenshot.importButton}
-          </button>
-          <button
-            onClick={() => setShowDataImport(true)}
-            className="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1"
-          >
-            <FileSpreadsheet className="h-3.5 w-3.5" />
-            {isDE ? 'CSV Import' : 'CSV Import'}
           </button>
         </div>
         <AddBodyMeasurementDialog
@@ -100,7 +97,40 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
 
   return (
     <>
-      <div className="space-y-4">
+      {/* Card Header — matches other MedicalPage sections */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-teal-500" />
+            <h3 className="font-semibold text-gray-900">
+              {isDE ? 'Körperdaten' : 'Body Data'}
+            </h3>
+          </div>
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => setShowScreenshotImport(true)}
+              className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+              title={t.screenshot.importButton}
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setShowDataImport(true)}
+              className="p-1.5 text-gray-400 hover:text-indigo-500 transition-colors"
+              title={isDE ? 'CSV Import' : 'CSV Import'}
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={onOpenAddDialog}
+              className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
         {/* Current Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -113,7 +143,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             if (!stat.value) return null;
             const trend = getTrend(stat.value, stat.prev);
             return (
-              <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm">
+              <div key={stat.label} className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
                 <div className="flex items-end gap-1 mt-1">
                   <p className="text-xl font-bold text-gray-900">{stat.value}</p>
@@ -133,7 +163,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             const bmiClass = classifyBMI(latest.bmi);
             const trend = getTrend(latest.bmi, previous?.bmi);
             return (
-              <div className="bg-white rounded-xl p-4 shadow-sm relative">
+              <div className="bg-gray-50 rounded-lg p-3 relative">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-500 font-medium">{t.body.bmi}</p>
                   <button
@@ -164,7 +194,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             const ffmiResult = calculateFFMI(latest.lean_mass_kg!, profile.height_cm);
             const ffmiClass = classifyFFMI(ffmiResult.normalizedFFMI, profile.gender ?? 'male');
             return (
-              <div className="bg-white rounded-xl p-4 shadow-sm relative">
+              <div className="bg-gray-50 rounded-lg p-3 relative">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-500 font-medium">{t.body.ffmi}</p>
                   <button
@@ -358,35 +388,12 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
           />
         )}
 
-        {/* Import Buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowScreenshotImport(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm"
-          >
-            <Camera className="h-4 w-4" />
-            {t.screenshot.importButton}
-          </button>
-          <button
-            onClick={() => setShowDataImport(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all shadow-sm"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            {isDE ? 'CSV / Text' : 'CSV / Text'}
-          </button>
-        </div>
-
-        {/* Buddy Quick Access */}
-        <BuddyQuickAccess suggestions={bodySuggestions} />
-
         {/* History */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b">
-            <h3 className="font-semibold text-gray-900 text-sm">{t.body.history}</h3>
-          </div>
+        <div className="border-t border-gray-100 pt-3">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{t.body.history}</p>
           <div className="divide-y divide-gray-50">
             {measurements?.slice(0, 10).map((m) => (
-              <div key={m.id} className="px-4 py-2.5 flex items-center gap-3 group">
+              <div key={m.id} className="py-2 flex items-center gap-3 group">
                 <div className="flex-1">
                   <p className="text-sm text-gray-900">
                     {m.weight_kg && `${m.weight_kg} kg`}
@@ -400,7 +407,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
                 </div>
                 <button
                   onClick={() => deleteMeasurement.mutate(m.id)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                  className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -408,7 +415,8 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             ))}
           </div>
         </div>
-      </div>
+        </div>{/* end p-4 space-y-4 */}
+      </div>{/* end bg-white card */}
 
       <AddBodyMeasurementDialog
         open={showAddDialog}
