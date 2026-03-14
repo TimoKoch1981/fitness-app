@@ -7,7 +7,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Package, Search, ChevronDown, ChevronUp, AlertTriangle, Trash2, Settings2, XCircle, Activity, Plus, ShieldAlert } from 'lucide-react';
+import { Package, Search, ChevronDown, ChevronUp, AlertTriangle, Trash2, Activity, Plus, ShieldAlert } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
 import { usePantry, useUpdatePantryItem, useRemovePantryItem, useClearPantry } from '../hooks/usePantry';
@@ -21,6 +21,8 @@ import { PantrySetupWizard } from './PantrySetupWizard';
 import { AddCustomIngredientDialog } from './AddCustomIngredientDialog';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { detectAllergens, profileAllergensToRecipeAllergens } from '../../recipes/types';
+import { useIngredientCatalog } from '../hooks/useIngredientCatalog';
+import { useAddPantryItems } from '../hooks/usePantry';
 
 export function PantryTabContent() {
   const { language } = useTranslation();
@@ -34,6 +36,8 @@ export function PantryTabContent() {
   const clearPantry = useClearPantry();
   const { data: activeSubstances } = useSubstances();
   const { data: profile } = useProfile();
+  const { data: catalog } = useIngredientCatalog();
+  const addPantryItems = useAddPantryItems();
 
   // Detect pantry items that conflict with user's allergen profile
   const allergenWarnings = useMemo(() => {
@@ -143,6 +147,26 @@ export function PantryTabContent() {
     }
   }, [confirmClear, handleClearAll, handleClearCategory]);
 
+  // Get catalog items for a category that aren't already in pantry
+  const getCatalogItemsForCategory = useCallback((cat: IngredientCategory) => {
+    if (!catalog) return [];
+    const existingNames = new Set(
+      (pantryItems ?? []).map((i) => i.ingredient_name.toLowerCase())
+    );
+    return catalog
+      .filter((item) => item.category === cat && !existingNames.has(item.name_de.toLowerCase()))
+      .slice(0, 20); // Limit to 20
+  }, [catalog, pantryItems]);
+
+  const handleQuickAdd = useCallback(async (name: string, cat: IngredientCategory, catalogId?: string) => {
+    await addPantryItems.mutateAsync([{
+      ingredient_name: name,
+      category: cat,
+      buy_preference: 'sometimes',
+      ingredient_id: catalogId,
+    }]);
+  }, [addPantryItems]);
+
   // Empty state
   if (!isLoading && (!pantryItems || pantryItems.length === 0)) {
     return (
@@ -167,7 +191,7 @@ export function PantryTabContent() {
 
   return (
     <div className="space-y-4">
-      {/* Header Row */}
+      {/* Search Row */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -179,27 +203,30 @@ export function PantryTabContent() {
             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
         </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
         <button
           onClick={() => setShowAddCustom(true)}
-          className="flex items-center gap-1 px-2.5 py-2 text-white bg-teal-500 rounded-lg hover:bg-teal-600 text-xs font-medium"
-          title={t.addCustom}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-white bg-teal-500 rounded-lg hover:bg-teal-600 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">{language === 'de' ? 'Zutat' : 'Item'}</span>
-        </button>
-        <button
-          onClick={() => setConfirmClear('all')}
-          className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-lg hover:bg-red-50"
-          title={t.clearAll}
-        >
-          <XCircle className="h-4 w-4" />
+          {language === 'de' ? 'Zutat hinzufuegen' : 'Add Ingredient'}
         </button>
         <button
           onClick={() => setShowWizard(true)}
-          className="p-2 text-gray-500 hover:text-teal-600 bg-gray-50 rounded-lg hover:bg-teal-50"
-          title={t.setupButton}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 text-sm font-medium transition-colors"
         >
-          <Settings2 className="h-4 w-4" />
+          <Plus className="h-4 w-4" />
+          {language === 'de' ? 'Vorrat einrichten' : 'Setup Pantry'}
+        </button>
+        <button
+          onClick={() => setConfirmClear('all')}
+          className="flex items-center justify-center gap-1 px-3 py-2.5 text-red-500 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 text-sm font-medium transition-colors"
+          title={t.clearAll}
+        >
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
@@ -234,16 +261,38 @@ export function PantryTabContent() {
         </div>
       )}
 
-      {/* Allergen Warnings */}
+      {/* Allergen Warnings — actionable */}
       {allergenWarnings.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-          <ShieldAlert className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-          <div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <div className="flex items-start gap-2 mb-2">
+            <ShieldAlert className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
             <p className="text-sm font-medium text-red-800">{t.allergenWarning}</p>
-            <p className="text-xs text-red-600">
-              {allergenWarnings.map((w) => w.item.ingredient_name).join(', ')}
-            </p>
           </div>
+          <div className="space-y-1 ml-6">
+            {allergenWarnings.map((w) => (
+              <div key={w.item.id} className="flex items-center justify-between gap-2">
+                <span className="text-xs text-red-600">{w.item.ingredient_name}</span>
+                <button
+                  onClick={() => handleRemove(w.item.id)}
+                  className="text-[10px] text-red-500 hover:text-red-700 px-1.5 py-0.5 rounded hover:bg-red-100 transition-colors flex items-center gap-0.5"
+                >
+                  <Trash2 className="h-2.5 w-2.5" />
+                  {language === 'de' ? 'Entfernen' : 'Remove'}
+                </button>
+              </div>
+            ))}
+          </div>
+          {allergenWarnings.length > 1 && (
+            <button
+              onClick={() => {
+                allergenWarnings.forEach((w) => handleRemove(w.item.id));
+              }}
+              className="mt-2 ml-6 text-[10px] text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
+            >
+              <Trash2 className="h-3 w-3" />
+              {language === 'de' ? 'Alle unvertraeglichen entfernen' : 'Remove all conflicting'}
+            </button>
+          )}
         </div>
       )}
 
@@ -254,15 +303,15 @@ export function PantryTabContent() {
         const isEmpty = items.length === 0;
 
         return (
-          <div key={cat} className={cn('border rounded-lg overflow-hidden', isEmpty ? 'border-gray-50 opacity-60' : 'border-gray-100')}>
+          <div key={cat} className={cn('border rounded-lg overflow-hidden', isEmpty ? 'border-gray-50' : 'border-gray-100')}>
             <button
-              onClick={() => !isEmpty ? toggleExpanded(cat) : setShowAddCustom(true)}
+              onClick={() => toggleExpanded(cat)}
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2.5 text-left',
-                isEmpty ? 'bg-gray-25 hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'
+                isEmpty ? 'bg-gray-50/50 hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'
               )}
             >
-              <span className="text-base">{info.icon}</span>
+              <span className={cn('text-base', isEmpty && 'opacity-40')}>{info.icon}</span>
               <span className={cn('flex-1 text-sm font-medium', isEmpty ? 'text-gray-400' : 'text-gray-800')}>
                 {language === 'de' ? info.labelDe : info.labelEn}
               </span>
@@ -284,15 +333,16 @@ export function PantryTabContent() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               )}
-              {!isEmpty && (expanded ? (
+              {expanded ? (
                 <ChevronUp className="h-4 w-4 text-gray-400" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-gray-400" />
-              ))}
+              )}
             </button>
 
             {expanded && (
               <div className="px-3 py-2 space-y-1.5">
+                {/* Existing pantry items */}
                 {items.map((item) => {
                   const isTracked = (cat === 'supplements' || cat === 'proteine_gainer') &&
                     activeSubstances &&
@@ -344,6 +394,30 @@ export function PantryTabContent() {
                   </div>
                   );
                 })}
+
+                {/* Catalog items available to add */}
+                {(() => {
+                  const available = getCatalogItemsForCategory(cat);
+                  if (available.length === 0) return null;
+                  return (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-[10px] text-gray-400 mb-1.5">
+                        {language === 'de' ? 'Aus Katalog hinzufuegen:' : 'Add from catalog:'}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {available.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => handleQuickAdd(item.name_de, cat, item.id)}
+                            className="px-2 py-0.5 text-[10px] text-teal-600 bg-teal-50 border border-teal-100 rounded-full hover:bg-teal-100 transition-colors"
+                          >
+                            + {item.name_de}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
