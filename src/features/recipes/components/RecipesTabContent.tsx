@@ -269,13 +269,14 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
 
   const handleAddToShoppingList = useCallback(
     async (recipe: Recipe) => {
-      const items = buildShoppingListFromRecipe(recipe, pantryItems ?? []);
-      if (items.length === 0) {
-        alert(language === 'de'
-          ? 'Alle Zutaten sind im Vorrat verfuegbar!'
-          : 'All ingredients are available in your pantry!');
-        return;
+      // Try missing-only first; fall back to ALL ingredients if nothing missing
+      let items = buildShoppingListFromRecipe(recipe, pantryItems ?? []);
+      const allAvailable = items.length === 0;
+      if (allAvailable) {
+        // Build list with ALL ingredients (empty pantry = no subtraction)
+        items = buildShoppingListFromRecipe(recipe, []);
       }
+      if (items.length === 0) return; // No ingredients at all
       try {
         await createShoppingList.mutateAsync({
           name: recipe.title,

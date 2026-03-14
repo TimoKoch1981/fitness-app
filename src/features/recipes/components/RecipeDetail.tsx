@@ -284,11 +284,22 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
 
           {/* All ingredients available badge */}
           {pantryMatch && pantryMatch.missing.length === 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
-              <Package className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-700">
-                {language === 'de' ? 'Alle Zutaten im Vorrat verfuegbar!' : 'All ingredients available in pantry!'}
-              </span>
+            <div className="bg-green-50 rounded-lg">
+              <div className="flex items-center gap-2 px-3 py-2">
+                <Package className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700">
+                  {language === 'de' ? 'Alle Zutaten im Vorrat verfuegbar!' : 'All ingredients available in pantry!'}
+                </span>
+              </div>
+              {onAddToShoppingList && (
+                <button
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[11px] text-green-600 hover:bg-green-100 transition-colors rounded-b-lg"
+                  onClick={() => onAddToShoppingList(recipe)}
+                >
+                  <ShoppingCart className="h-3 w-3" />
+                  {language === 'de' ? 'Trotzdem zur Einkaufsliste' : 'Add to shopping list anyway'}
+                </button>
+              )}
             </div>
           )}
 
