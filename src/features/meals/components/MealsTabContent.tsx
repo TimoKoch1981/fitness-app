@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { UtensilsCrossed, ChevronLeft, ChevronRight, Copy, Loader2, Check, Flame, Sparkles } from 'lucide-react';
+import { UtensilsCrossed, ChevronLeft, ChevronRight, Copy, Loader2, Check, Flame, Sparkles, ShieldAlert, Leaf } from 'lucide-react';
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { ComponentErrorBoundary } from '../../../shared/components/ComponentErrorBoundary';
 import { useTranslation } from '../../../i18n';
@@ -28,6 +28,7 @@ import { MacroCyclingPlanner } from '../../nutrition/components/MacroCyclingPlan
 import { MealTimingPlanner } from '../../nutrition/components/MealTimingPlanner';
 import { PeakWeekPlanner } from '../../nutrition/components/PeakWeekPlanner';
 import { AlternativeScoringCard } from '../../nutrition/components/AlternativeScoringCard';
+import { profileAllergensToRecipeAllergens } from '../../recipes/types';
 
 interface MealsTabContentProps {
   showAddDialog: boolean;
@@ -104,6 +105,41 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
       fatGoal,
     };
   }, [profile, latestBody, workouts, totals.calories]);
+
+  // B15: Active allergen/dietary restrictions from profile
+  const activeAllergens = useMemo(() => {
+    if (!profile?.allergies || profile.allergies.length === 0) return [];
+    return profileAllergensToRecipeAllergens(profile.allergies);
+  }, [profile?.allergies]);
+
+  const activeDietaryPrefs = useMemo(() => {
+    return profile?.dietary_preferences ?? [];
+  }, [profile?.dietary_preferences]);
+
+  // Map allergen keys to display labels
+  const ALLERGEN_LABELS: Record<string, { de: string; en: string }> = {
+    gluten: { de: 'Gluten', en: 'Gluten' },
+    dairy: { de: 'Laktose', en: 'Dairy' },
+    egg: { de: 'Ei', en: 'Egg' },
+    nuts: { de: 'Nuesse', en: 'Nuts' },
+    soy: { de: 'Soja', en: 'Soy' },
+    fish: { de: 'Fisch', en: 'Fish' },
+    shellfish: { de: 'Schalen', en: 'Shellfish' },
+    sesame: { de: 'Sesam', en: 'Sesame' },
+    celery: { de: 'Sellerie', en: 'Celery' },
+    mustard: { de: 'Senf', en: 'Mustard' },
+  };
+
+  const DIETARY_LABELS: Record<string, { de: string; en: string }> = {
+    vegan: { de: 'Vegan', en: 'Vegan' },
+    vegetarian: { de: 'Vegetarisch', en: 'Vegetarian' },
+    pescatarian: { de: 'Pescatarisch', en: 'Pescatarian' },
+    keto: { de: 'Keto', en: 'Keto' },
+    paleo: { de: 'Paleo', en: 'Paleo' },
+    glutenFree: { de: 'Glutenfrei', en: 'Gluten-Free' },
+    lactoseFree: { de: 'Laktosefrei', en: 'Lactose-Free' },
+    mixed: { de: 'Mischkost', en: 'Mixed' },
+  };
 
   // F15: Bodybuilder-Modus
   const trainingMode = useTrainingMode();
@@ -262,6 +298,37 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
       {totals.calories > 0 && (
         <div className="mb-4">
           <AlternativeScoringCard totals={totals} />
+        </div>
+      )}
+
+      {/* B15: Active Allergen/Dietary restrictions from profile */}
+      {(activeAllergens.length > 0 || activeDietaryPrefs.length > 0) && (
+        <div className="bg-white rounded-xl px-3 py-2 shadow-sm mb-4">
+          <div className="flex flex-wrap gap-1.5 items-center">
+            {activeAllergens.length > 0 && (
+              <>
+                <ShieldAlert className="h-3 w-3 text-red-400 flex-shrink-0" />
+                {activeAllergens.map((a) => (
+                  <span key={a} className="px-1.5 py-0.5 text-[10px] font-medium text-red-600 bg-red-50 rounded-full">
+                    {(language === 'de' ? ALLERGEN_LABELS[a]?.de : ALLERGEN_LABELS[a]?.en) ?? a}
+                  </span>
+                ))}
+              </>
+            )}
+            {activeDietaryPrefs.length > 0 && activeDietaryPrefs.filter(p => p !== 'mixed').length > 0 && (
+              <>
+                <Leaf className="h-3 w-3 text-green-500 flex-shrink-0 ml-1" />
+                {activeDietaryPrefs.filter(p => p !== 'mixed').map((d) => (
+                  <span key={d} className="px-1.5 py-0.5 text-[10px] font-medium text-green-700 bg-green-50 rounded-full">
+                    {(language === 'de' ? DIETARY_LABELS[d]?.de : DIETARY_LABELS[d]?.en) ?? d}
+                  </span>
+                ))}
+              </>
+            )}
+            <span className="text-[9px] text-gray-300 ml-auto">
+              {language === 'de' ? 'aus Profil' : 'from profile'}
+            </span>
+          </div>
         </div>
       )}
 
