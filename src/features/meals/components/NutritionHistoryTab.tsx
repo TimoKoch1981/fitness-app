@@ -13,6 +13,15 @@ import { today } from '../../../lib/utils';
 import { TimeRangeSelector, getPresetRange } from '../../workouts/components/progress/TimeRangeSelector';
 import type { TimeRange } from '../../workouts/components/progress/TimeRangeSelector';
 import { NutritionExportDialog } from './NutritionExportDialog';
+import {
+  calculateAllScores,
+  NOOM_COLOR_CONFIG,
+  NUTRI_SCORE_CONFIG,
+  type ScoringSystem,
+  type ScoringResult,
+  type NutritionScoringInput,
+} from '../../nutrition/utils/alternativeScoring';
+import { cn } from '../../../lib/utils';
 
 type QuickPreset = 'yesterday' | 'thisWeek' | null;
 
@@ -30,6 +39,20 @@ function getMonday(): string {
   return d.toISOString().split('T')[0];
 }
 
+const SCORING_STORAGE_KEY = 'fitbuddy_scoring_systems';
+
+/** Calculate scoring for a day's macros */
+function scoreDayTotals(day: { calories: number; protein: number; carbs: number; fat: number }): ScoringResult | null {
+  if (day.calories <= 0) return null;
+  const input: NutritionScoringInput = {
+    calories: day.calories,
+    protein: day.protein,
+    carbs: day.carbs,
+    fat: day.fat,
+  };
+  return calculateAllScores(input);
+}
+
 export function NutritionHistoryTab() {
   const { t, language } = useTranslation();
   const isDE = language === 'de';
@@ -38,6 +61,16 @@ export function NutritionHistoryTab() {
   const [timeRange, setTimeRange] = useState<TimeRange>({ preset: '1w', ...defaultRange });
   const [quickPreset, setQuickPreset] = useState<QuickPreset>(null);
   const [showExport, setShowExport] = useState(false);
+
+  // Load active scoring systems from localStorage (same key as AlternativeScoringCard)
+  const [activeSystems] = useState<ScoringSystem[]>(() => {
+    try {
+      const stored = localStorage.getItem(SCORING_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const effectiveRange = useMemo(() => {
     if (quickPreset === 'yesterday') {
@@ -78,6 +111,23 @@ export function NutritionHistoryTab() {
       protein: prevHistory.averages.protein,
     };
   }, [prevHistory]);
+
+  // Per-day scoring calculations
+  const dayScores = useMemo(() => {
+    if (!history || activeSystems.length === 0) return new Map<string, ScoringResult>();
+    const map = new Map<string, ScoringResult>();
+    for (const day of history.days) {
+      const score = scoreDayTotals(day);
+      if (score) map.set(day.date, score);
+    }
+    return map;
+  }, [history, activeSystems]);
+
+  // Average scores across all days
+  const avgScores = useMemo((): ScoringResult | null => {
+    if (!history || history.daysWithData === 0 || activeSystems.length === 0) return null;
+    return scoreDayTotals(history.averages);
+  }, [history, activeSystems]);
 
   const locale = isDE ? 'de-DE' : 'en-US';
 
@@ -238,6 +288,51 @@ export function NutritionHistoryTab() {
             </div>
           </div>
 
+          {/* Alternative Scoring Averages */}
+          {avgScores && activeSystems.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-500 font-medium mb-2">
+                {isDE ? 'ø Alternative Bewertungen' : 'ø Alternative Scores'}
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {activeSystems.includes('wwSmartPoints') && (
+                  <div className="px-2.5 py-1 bg-blue-50 rounded-lg text-center">
+                    <p className="text-sm font-bold text-blue-700">{avgScores.wwPoints}</p>
+                    <p className="text-[9px] text-blue-500">WW Smart</p>
+                  </div>
+                )}
+                {activeSystems.includes('wwClassic') && (
+                  <div className="px-2.5 py-1 bg-indigo-50 rounded-lg text-center">
+                    <p className="text-sm font-bold text-indigo-700">{avgScores.wwClassicPoints}</p>
+                    <p className="text-[9px] text-indigo-500">WW Classic</p>
+                  </div>
+                )}
+                {activeSystems.includes('noom') && (
+                  <div className={cn('px-2.5 py-1 rounded-lg text-center', NOOM_COLOR_CONFIG[avgScores.noomColor].bg)}>
+                    <p className={cn('text-sm font-bold', NOOM_COLOR_CONFIG[avgScores.noomColor].text)}>
+                      {avgScores.noomCalorieDensity}
+                    </p>
+                    <p className="text-[9px] text-gray-500">
+                      Noom ({isDE ? NOOM_COLOR_CONFIG[avgScores.noomColor].labelDe : NOOM_COLOR_CONFIG[avgScores.noomColor].labelEn})
+                    </p>
+                  </div>
+                )}
+                {activeSystems.includes('nutriScore') && (
+                  <div className="px-2.5 py-1 bg-gray-50 rounded-lg text-center flex items-center gap-1.5">
+                    <div className={cn(
+                      'w-5 h-6 rounded-sm flex items-center justify-center text-[10px] font-bold',
+                      NUTRI_SCORE_CONFIG[avgScores.nutriScoreGrade].bg,
+                      NUTRI_SCORE_CONFIG[avgScores.nutriScoreGrade].text,
+                    )}>
+                      {avgScores.nutriScoreGrade}
+                    </div>
+                    <p className="text-[9px] text-gray-500">Nutri-Score</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {history.averages.mealsPerDay > 0 && (
             <p className="text-[10px] text-gray-300 text-center mt-2">
               ø {history.averages.mealsPerDay} {isDE ? 'Mahlzeiten/Tag' : 'meals/day'}
@@ -283,6 +378,43 @@ export function NutritionHistoryTab() {
                     </span>
                   </div>
                 )}
+                {/* Alternative scoring badges */}
+                {(() => {
+                  const ds = dayScores.get(day.date);
+                  if (!ds || activeSystems.length === 0) return null;
+                  return (
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {activeSystems.includes('wwSmartPoints') && (
+                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded-full font-medium">
+                          {ds.wwPoints} WW
+                        </span>
+                      )}
+                      {activeSystems.includes('wwClassic') && (
+                        <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] rounded-full font-medium">
+                          {ds.wwClassicPoints} P
+                        </span>
+                      )}
+                      {activeSystems.includes('noom') && (
+                        <span className={cn(
+                          'px-1.5 py-0.5 text-[10px] rounded-full font-medium',
+                          NOOM_COLOR_CONFIG[ds.noomColor].bg,
+                          NOOM_COLOR_CONFIG[ds.noomColor].text,
+                        )}>
+                          {isDE ? NOOM_COLOR_CONFIG[ds.noomColor].labelDe : NOOM_COLOR_CONFIG[ds.noomColor].labelEn}
+                        </span>
+                      )}
+                      {activeSystems.includes('nutriScore') && (
+                        <span className={cn(
+                          'w-4 h-4 rounded-sm flex items-center justify-center text-[9px] font-bold',
+                          NUTRI_SCORE_CONFIG[ds.nutriScoreGrade].bg,
+                          NUTRI_SCORE_CONFIG[ds.nutriScoreGrade].text,
+                        )}>
+                          {ds.nutriScoreGrade}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -297,19 +429,58 @@ export function NutritionHistoryTab() {
           </div>
           <div className="divide-y divide-gray-50">
             {history.days.map((day) => (
-              <div key={day.date} className="flex items-center justify-between px-4 py-2.5">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-700">{formatDay(day.date)}</p>
-                  <p className="text-[10px] text-gray-300">{day.mealCount} {isDE ? 'Mahlzeiten' : 'meals'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900">{day.calories} kcal</p>
-                  <div className="flex gap-2 text-[10px] text-gray-400">
-                    <span className="text-teal-500">P: {Math.round(day.protein)}g</span>
-                    <span className="text-blue-500">K: {Math.round(day.carbs)}g</span>
-                    <span className="text-amber-500">F: {Math.round(day.fat)}g</span>
+              <div key={day.date} className="px-4 py-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-700">{formatDay(day.date)}</p>
+                    <p className="text-[10px] text-gray-300">{day.mealCount} {isDE ? 'Mahlzeiten' : 'meals'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900">{day.calories} kcal</p>
+                    <div className="flex gap-2 text-[10px] text-gray-400">
+                      <span className="text-teal-500">P: {Math.round(day.protein)}g</span>
+                      <span className="text-blue-500">K: {Math.round(day.carbs)}g</span>
+                      <span className="text-amber-500">F: {Math.round(day.fat)}g</span>
+                    </div>
                   </div>
                 </div>
+                {/* Alternative scoring badges */}
+                {(() => {
+                  const ds = dayScores.get(day.date);
+                  if (!ds || activeSystems.length === 0) return null;
+                  return (
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {activeSystems.includes('wwSmartPoints') && (
+                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded-full font-medium">
+                          {ds.wwPoints} WW
+                        </span>
+                      )}
+                      {activeSystems.includes('wwClassic') && (
+                        <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] rounded-full font-medium">
+                          {ds.wwClassicPoints} P
+                        </span>
+                      )}
+                      {activeSystems.includes('noom') && (
+                        <span className={cn(
+                          'px-1.5 py-0.5 text-[10px] rounded-full font-medium',
+                          NOOM_COLOR_CONFIG[ds.noomColor].bg,
+                          NOOM_COLOR_CONFIG[ds.noomColor].text,
+                        )}>
+                          {isDE ? NOOM_COLOR_CONFIG[ds.noomColor].labelDe : NOOM_COLOR_CONFIG[ds.noomColor].labelEn}
+                        </span>
+                      )}
+                      {activeSystems.includes('nutriScore') && (
+                        <span className={cn(
+                          'w-4 h-4 rounded-sm flex items-center justify-center text-[9px] font-bold',
+                          NUTRI_SCORE_CONFIG[ds.nutriScoreGrade].bg,
+                          NUTRI_SCORE_CONFIG[ds.nutriScoreGrade].text,
+                        )}>
+                          {ds.nutriScoreGrade}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -329,6 +500,9 @@ export function NutritionHistoryTab() {
           timeRange={effectiveRange}
           history={history ?? null}
           balanceData={balanceData}
+          activeScoingSystems={activeSystems}
+          dayScores={dayScores}
+          avgScores={avgScores}
           onClose={() => setShowExport(false)}
         />
       )}

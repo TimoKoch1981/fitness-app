@@ -9,18 +9,26 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { MealHistoryData } from '../hooks/useMealHistory';
 import type { NutritionBalanceData } from '../hooks/useNutritionBalance';
+import type { ScoringResult } from '../../nutrition/utils/alternativeScoring';
 
 interface NutritionExportData {
   timeRange: { from: string; to: string };
   history: MealHistoryData;
   balanceData?: NutritionBalanceData;
   metrics: string[];
+  dayScores?: Map<string, ScoringResult>;
+  avgScores?: ScoringResult;
 }
 
 export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): void {
-  const { history, balanceData, metrics } = data;
+  const { history, balanceData, metrics, dayScores, avgScores } = data;
   const hasBalance = balanceData?.hasProfile && (metrics.includes('expenditure') || metrics.includes('balance'));
-  const pdf = new jsPDF({ orientation: hasBalance ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+  const hasWWSmart = metrics.includes('wwSmartPoints') && dayScores;
+  const hasWWClassic = metrics.includes('wwClassic') && dayScores;
+  const hasNoom = metrics.includes('noom') && dayScores;
+  const hasNutriScore = metrics.includes('nutriScore') && dayScores;
+  const hasAnyScoring = hasWWSmart || hasWWClassic || hasNoom || hasNutriScore;
+  const pdf = new jsPDF({ orientation: (hasBalance || hasAnyScoring) ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
   const pageW = pdf.internal.pageSize.getWidth();
   const margin = 14;
   let y = margin;
@@ -84,6 +92,28 @@ export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): vo
       summaryHeaders.push(isDE ? 'Fett' : 'Fat');
       summaryRow.push(`${history.averages.fat}g`);
     }
+    // Scoring averages in summary
+    if (hasWWSmart && avgScores) {
+      summaryHeaders.push('WW Smart');
+      summaryRow.push(`${avgScores.wwPoints}`);
+    }
+    if (hasWWClassic && avgScores) {
+      summaryHeaders.push('WW Classic');
+      summaryRow.push(`${avgScores.wwClassicPoints}`);
+    }
+    if (hasNoom && avgScores) {
+      summaryHeaders.push('Noom');
+      const colorLabel = avgScores.noomColor === 'green'
+        ? (isDE ? 'Gruen' : 'Green')
+        : avgScores.noomColor === 'yellow'
+          ? (isDE ? 'Gelb' : 'Yellow')
+          : (isDE ? 'Rot' : 'Red');
+      summaryRow.push(colorLabel);
+    }
+    if (hasNutriScore && avgScores) {
+      summaryHeaders.push('Nutri');
+      summaryRow.push(avgScores.nutriScoreGrade);
+    }
 
     if (summaryHeaders.length > 0) {
       autoTable(pdf, {
@@ -128,6 +158,10 @@ export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): vo
       headers.push('Train.');
     }
     if (hasBalance && metrics.includes('balance')) headers.push(isDE ? 'Bilanz' : 'Bal.');
+    if (hasWWSmart) headers.push('WW');
+    if (hasWWClassic) headers.push('WWC');
+    if (hasNoom) headers.push('Noom');
+    if (hasNutriScore) headers.push('NS');
 
     const days = hasBalance && balanceData ? balanceData.days : history.days;
     const tableRows: (string | number)[][] = [];
@@ -147,6 +181,15 @@ export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): vo
         const bal = (day as any).balance;
         row.push(`${bal > 0 ? '+' : ''}${bal}`);
       }
+      // Scoring
+      const ds = dayScores?.get(day.date);
+      if (hasWWSmart) row.push(ds?.wwPoints ?? '');
+      if (hasWWClassic) row.push(ds?.wwClassicPoints ?? '');
+      if (hasNoom) {
+        const c = ds?.noomColor;
+        row.push(c ? (c === 'green' ? 'G' : c === 'yellow' ? 'Y' : 'R') : '');
+      }
+      if (hasNutriScore) row.push(ds?.nutriScoreGrade ?? '');
       tableRows.push(row);
     }
 
@@ -167,6 +210,15 @@ export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): vo
       const totalBal = balanceData.days.reduce((sum, d) => sum + d.balance, 0);
       totalRow.push(`${totalBal > 0 ? '+' : ''}${totalBal}`);
     }
+    // Scoring totals (sum points, n/a for colors)
+    if (hasWWSmart && dayScores) {
+      totalRow.push(Array.from(dayScores.values()).reduce((s, v) => s + v.wwPoints, 0));
+    }
+    if (hasWWClassic && dayScores) {
+      totalRow.push(Array.from(dayScores.values()).reduce((s, v) => s + v.wwClassicPoints, 0));
+    }
+    if (hasNoom) totalRow.push('');
+    if (hasNutriScore) totalRow.push('');
     tableRows.push(totalRow);
 
     autoTable(pdf, {

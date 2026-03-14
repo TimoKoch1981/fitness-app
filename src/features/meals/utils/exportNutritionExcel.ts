@@ -5,18 +5,27 @@
 import * as XLSX from 'xlsx';
 import type { MealHistoryData } from '../hooks/useMealHistory';
 import type { NutritionBalanceData } from '../hooks/useNutritionBalance';
+import type { ScoringResult } from '../../nutrition/utils/alternativeScoring';
 
 interface NutritionExportData {
   timeRange: { from: string; to: string };
   history: MealHistoryData;
   balanceData?: NutritionBalanceData;
   metrics: string[];
+  dayScores?: Map<string, ScoringResult>;
+  avgScores?: ScoringResult;
 }
 
 export function exportNutritionExcel(data: NutritionExportData, isDE: boolean): void {
   const wb = XLSX.utils.book_new();
-  const { history, balanceData, metrics } = data;
+  const { history, balanceData, metrics, dayScores, avgScores } = data;
   const hasBalance = balanceData?.hasProfile && (metrics.includes('expenditure') || metrics.includes('balance'));
+
+  // Scoring flags
+  const hasWWSmart = metrics.includes('wwSmartPoints') && dayScores;
+  const hasWWClassic = metrics.includes('wwClassic') && dayScores;
+  const hasNoom = metrics.includes('noom') && dayScores;
+  const hasNutriScore = metrics.includes('nutriScore') && dayScores;
 
   // --- Daily Data Sheet ---
   const headers: string[] = [isDE ? 'Datum' : 'Date'];
@@ -32,6 +41,11 @@ export function exportNutritionExcel(data: NutritionExportData, isDE: boolean): 
     headers.push('Training');
   }
   if (hasBalance && metrics.includes('balance')) headers.push(isDE ? 'Bilanz (kcal)' : 'Balance (kcal)');
+  if (hasWWSmart) headers.push('WW SmartPoints');
+  if (hasWWClassic) headers.push(isDE ? 'WW Klassisch' : 'WW Classic');
+  if (hasNoom) headers.push(isDE ? 'Noom Farbe' : 'Noom Color');
+  if (hasNoom) headers.push(isDE ? 'Kaloriendichte' : 'Cal. Density');
+  if (hasNutriScore) headers.push('Nutri-Score');
 
   const rows: (string | number | null)[][] = [headers];
 
@@ -54,6 +68,18 @@ export function exportNutritionExcel(data: NutritionExportData, isDE: boolean): 
     if (hasBalance && metrics.includes('balance') && 'balance' in day) {
       row.push((day as any).balance);
     }
+    // Scoring columns
+    const ds = dayScores?.get(day.date);
+    if (hasWWSmart) row.push(ds?.wwPoints ?? '');
+    if (hasWWClassic) row.push(ds?.wwClassicPoints ?? '');
+    if (hasNoom) {
+      row.push(ds ? (isDE
+        ? (ds.noomColor === 'green' ? 'Gruen' : ds.noomColor === 'yellow' ? 'Gelb' : 'Rot')
+        : (ds.noomColor === 'green' ? 'Green' : ds.noomColor === 'yellow' ? 'Yellow' : 'Red')
+      ) : '');
+      row.push(ds?.noomCalorieDensity ?? '');
+    }
+    if (hasNutriScore) row.push(ds?.nutriScoreGrade ?? '');
     rows.push(row);
   }
 
@@ -75,6 +101,17 @@ export function exportNutritionExcel(data: NutritionExportData, isDE: boolean): 
     if (hasBalance && metrics.includes('balance') && balanceData) {
       avgRow.push(balanceData.averages.balance);
     }
+    // Scoring averages
+    if (hasWWSmart) avgRow.push(avgScores?.wwPoints ?? '');
+    if (hasWWClassic) avgRow.push(avgScores?.wwClassicPoints ?? '');
+    if (hasNoom) {
+      avgRow.push(avgScores ? (isDE
+        ? (avgScores.noomColor === 'green' ? 'Gruen' : avgScores.noomColor === 'yellow' ? 'Gelb' : 'Rot')
+        : (avgScores.noomColor === 'green' ? 'Green' : avgScores.noomColor === 'yellow' ? 'Yellow' : 'Red')
+      ) : '');
+      avgRow.push(avgScores?.noomCalorieDensity ?? '');
+    }
+    if (hasNutriScore) avgRow.push(avgScores?.nutriScoreGrade ?? '');
     rows.push(avgRow);
 
     // Totals row
@@ -97,6 +134,17 @@ export function exportNutritionExcel(data: NutritionExportData, isDE: boolean): 
     if (hasBalance && metrics.includes('balance') && balanceData) {
       totalRow.push(balanceData.days.reduce((sum, d) => sum + d.balance, 0));
     }
+    // Scoring totals — sums for points, n/a for colors/grades
+    if (hasWWSmart) {
+      const totalWW = Array.from(dayScores!.values()).reduce((sum, s) => sum + s.wwPoints, 0);
+      totalRow.push(totalWW);
+    }
+    if (hasWWClassic) {
+      const totalWWC = Array.from(dayScores!.values()).reduce((sum, s) => sum + s.wwClassicPoints, 0);
+      totalRow.push(totalWWC);
+    }
+    if (hasNoom) { totalRow.push(''); totalRow.push(''); }
+    if (hasNutriScore) totalRow.push('');
     rows.push(totalRow);
   }
 

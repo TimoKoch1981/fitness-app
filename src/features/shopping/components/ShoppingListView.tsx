@@ -12,9 +12,10 @@ import {
   Trash2,
   CheckCircle2,
   ShoppingCart,
+  Package,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useToggleShoppingItem, useDeleteShoppingList, useCompleteShoppingList } from '../hooks/useShoppingLists';
+import { useToggleShoppingItem, useDeleteShoppingList, useCompleteShoppingList, useAddShoppingItemToPantry } from '../hooks/useShoppingLists';
 import { shoppingListToClipboardText } from '../utils/shoppingListBuilder';
 import { CATEGORY_INFO, type IngredientCategory } from '../../pantry/types';
 import type { ShoppingList } from '../types';
@@ -30,10 +31,12 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
   const toggleItem = useToggleShoppingItem();
   const deleteList = useDeleteShoppingList();
   const completeList = useCompleteShoppingList();
+  const addToPantry = useAddShoppingItemToPantry();
 
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [addedToPantry, setAddedToPantry] = useState<Set<string>>(new Set());
 
   const items = list.items ?? [];
   const checkedCount = items.filter((i) => i.is_checked).length;
@@ -88,8 +91,20 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
   }, [deleteList, list.id]);
 
   const handleComplete = useCallback(() => {
-    completeList.mutate(list.id);
+    completeList.mutate({ listId: list.id, addToPantry: true });
   }, [completeList, list.id]);
+
+  const handleAddItemToPantry = useCallback(
+    (item: { id: string; ingredient_name: string; ingredient_normalized: string; category: string }) => {
+      addToPantry.mutate({
+        ingredient_name: item.ingredient_name,
+        ingredient_normalized: item.ingredient_normalized,
+        category: item.category,
+      });
+      setAddedToPantry((prev) => new Set(prev).add(item.id));
+    },
+    [addToPantry],
+  );
 
   return (
     <div className="border border-gray-100 rounded-lg overflow-hidden">
@@ -132,33 +147,49 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
                 </p>
                 <div className="space-y-1">
                   {catItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleToggle(item.id, item.is_checked)}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 text-left"
-                    >
-                      <span
-                        className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          item.is_checked
-                            ? 'bg-green-500 border-green-500 text-white'
-                            : 'border-gray-300'
-                        }`}
+                    <div key={item.id} className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleToggle(item.id, item.is_checked)}
+                        className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 text-left"
                       >
-                        {item.is_checked && <Check className="h-3 w-3" />}
-                      </span>
-                      <span
-                        className={`flex-1 text-sm ${
-                          item.is_checked ? 'line-through text-gray-400' : 'text-gray-700'
-                        }`}
-                      >
-                        {item.amount && item.unit
-                          ? `${item.amount} ${item.unit} `
-                          : item.amount
-                          ? `${item.amount} `
-                          : ''}
-                        {item.ingredient_name}
-                      </span>
-                    </button>
+                        <span
+                          className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                            item.is_checked
+                              ? 'bg-green-500 border-green-500 text-white'
+                              : 'border-gray-300'
+                          }`}
+                        >
+                          {item.is_checked && <Check className="h-3 w-3" />}
+                        </span>
+                        <span
+                          className={`flex-1 text-sm ${
+                            item.is_checked ? 'line-through text-gray-400' : 'text-gray-700'
+                          }`}
+                        >
+                          {item.amount && item.unit
+                            ? `${item.amount} ${item.unit} `
+                            : item.amount
+                            ? `${item.amount} `
+                            : ''}
+                          {item.ingredient_name}
+                        </span>
+                      </button>
+                      {/* Add to pantry button — visible for checked items */}
+                      {item.is_checked && !addedToPantry.has(item.id) && (
+                        <button
+                          onClick={() => handleAddItemToPantry(item)}
+                          className="px-1.5 py-1 text-[10px] text-teal-600 bg-teal-50 rounded hover:bg-teal-100 transition-colors flex items-center gap-0.5 flex-shrink-0"
+                          title={language === 'de' ? 'Zum Vorrat' : 'Add to pantry'}
+                        >
+                          <Package className="h-3 w-3" />
+                        </button>
+                      )}
+                      {item.is_checked && addedToPantry.has(item.id) && (
+                        <span className="px-1.5 py-1 text-[10px] text-green-600 flex-shrink-0">
+                          <Check className="h-3 w-3" />
+                        </span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -176,7 +207,7 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
               {copied ? t.copied : t.copyToClipboard}
             </button>
 
-            {/* Mark complete */}
+            {/* Mark complete + add to pantry */}
             {allChecked && (
               <button
                 onClick={handleComplete}
@@ -224,7 +255,7 @@ const DE = {
   untitled: 'Einkaufsliste',
   copyToClipboard: 'Kopieren',
   copied: 'Kopiert!',
-  markComplete: 'Erledigt',
+  markComplete: 'Erledigt + Vorrat',
   confirmDelete: 'Loeschen',
   cancel: 'Abbrechen',
 };
@@ -233,7 +264,7 @@ const EN = {
   untitled: 'Shopping List',
   copyToClipboard: 'Copy',
   copied: 'Copied!',
-  markComplete: 'Complete',
+  markComplete: 'Complete + Pantry',
   confirmDelete: 'Delete',
   cancel: 'Cancel',
 };

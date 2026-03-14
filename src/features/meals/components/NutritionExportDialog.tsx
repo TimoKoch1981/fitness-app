@@ -10,6 +10,7 @@ import { exportNutritionExcel } from '../utils/exportNutritionExcel';
 import { exportNutritionPDF } from '../utils/exportNutritionPDF';
 import type { MealHistoryData } from '../hooks/useMealHistory';
 import type { NutritionBalanceData } from '../hooks/useNutritionBalance';
+import type { ScoringSystem, ScoringResult } from '../../nutrition/utils/alternativeScoring';
 
 type ExportFormat = 'excel' | 'pdf';
 
@@ -23,22 +24,37 @@ const METRICS = [
   { key: 'balance', labelDE: 'Bilanz (kcal)', labelEN: 'Balance (kcal)' },
 ] as const;
 
+const SCORING_METRICS = [
+  { key: 'wwSmartPoints', labelDE: 'WW SmartPoints', labelEN: 'WW SmartPoints' },
+  { key: 'wwClassic', labelDE: 'WW Klassisch (Punkte)', labelEN: 'WW Classic (Points)' },
+  { key: 'noom', labelDE: 'Noom Farbe (Kaloriendichte)', labelEN: 'Noom Color (Cal. Density)' },
+  { key: 'nutriScore', labelDE: 'Nutri-Score (A-E)', labelEN: 'Nutri-Score (A-E)' },
+] as const;
+
 interface NutritionExportDialogProps {
   timeRange: { from: string; to: string };
   history: MealHistoryData | null;
   balanceData?: NutritionBalanceData | null;
+  activeScoingSystems?: ScoringSystem[];
+  dayScores?: Map<string, ScoringResult>;
+  avgScores?: ScoringResult | null;
   onClose: () => void;
 }
 
-export function NutritionExportDialog({ timeRange, history, balanceData, onClose }: NutritionExportDialogProps) {
+export function NutritionExportDialog({ timeRange, history, balanceData, activeScoingSystems, dayScores, avgScores, onClose }: NutritionExportDialogProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
 
   const [format, setFormat] = useState<ExportFormat>('excel');
   const [exporting, setExporting] = useState(false);
-  const [selectedMetrics, setSelectedMetrics] = useState<Set<string>>(
-    new Set(['calories', 'protein', 'carbs', 'fat', 'mealCount', 'expenditure', 'balance'])
-  );
+  const [selectedMetrics, setSelectedMetrics] = useState<Set<string>>(() => {
+    const base = new Set(['calories', 'protein', 'carbs', 'fat', 'mealCount', 'expenditure', 'balance']);
+    // Auto-include active scoring systems
+    if (activeScoingSystems) {
+      for (const s of activeScoingSystems) base.add(s);
+    }
+    return base;
+  });
 
   const toggleMetric = (key: string) => {
     const next = new Set(selectedMetrics);
@@ -52,6 +68,11 @@ export function NutritionExportDialog({ timeRange, history, balanceData, onClose
     return true;
   });
 
+  // Only show scoring metrics that the user has activated
+  const availableScoringMetrics = SCORING_METRICS.filter(m =>
+    activeScoingSystems?.includes(m.key as ScoringSystem)
+  );
+
   const handleExport = useCallback(async () => {
     if (!history || selectedMetrics.size === 0) return;
 
@@ -60,6 +81,8 @@ export function NutritionExportDialog({ timeRange, history, balanceData, onClose
       history,
       balanceData: balanceData ?? undefined,
       metrics: Array.from(selectedMetrics),
+      dayScores,
+      avgScores: avgScores ?? undefined,
     };
 
     if (format === 'excel') {
@@ -74,7 +97,7 @@ export function NutritionExportDialog({ timeRange, history, balanceData, onClose
       }
       onClose();
     }
-  }, [format, selectedMetrics, timeRange, history, balanceData, isDE, onClose]);
+  }, [format, selectedMetrics, timeRange, history, balanceData, dayScores, avgScores, isDE, onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -138,6 +161,26 @@ export function NutritionExportDialog({ timeRange, history, balanceData, onClose
                 <span className="text-sm text-gray-700">{isDE ? m.labelDE : m.labelEN}</span>
               </label>
             ))}
+            {availableScoringMetrics.length > 0 && (
+              <>
+                <div className="border-t border-gray-100 mt-2 pt-2">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1.5">
+                    {isDE ? 'Alternative Bewertungen' : 'Alternative Scores'}
+                  </p>
+                </div>
+                {availableScoringMetrics.map(m => (
+                  <label key={m.key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedMetrics.has(m.key)}
+                      onChange={() => toggleMetric(m.key)}
+                      className="rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                    />
+                    <span className="text-sm text-gray-700">{isDE ? m.labelDE : m.labelEN}</span>
+                  </label>
+                ))}
+              </>
+            )}
           </div>
         </div>
 

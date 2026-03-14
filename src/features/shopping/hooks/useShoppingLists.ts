@@ -185,13 +185,48 @@ export function useDeleteShoppingList() {
   });
 }
 
-// ── Mutation: Mark list as completed ──────────────────────────────────
+// ── Mutation: Mark list as completed + add checked items to pantry ────
 
 export function useCompleteShoppingList() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (listId: string) => {
+    mutationFn: async ({ listId, addToPantry = true }: { listId: string; addToPantry?: boolean }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // 1. Get checked items from this list
+      if (addToPantry) {
+        const { data: checkedItems, error: itemsErr } = await supabase
+          .from('shopping_list_items')
+          .select('ingredient_name, ingredient_normalized, category')
+          .eq('list_id', listId)
+          .eq('is_checked', true);
+
+        if (itemsErr) throw itemsErr;
+
+        // 2. Add checked items to pantry (upsert to avoid duplicates)
+        if (checkedItems && checkedItems.length > 0) {
+          const pantryRows = checkedItems.map((item) => ({
+            user_id: user.id,
+            ingredient_id: null,
+            ingredient_name: item.ingredient_name,
+            ingredient_normalized: item.ingredient_normalized,
+            category: item.category || 'sonstiges',
+            status: 'available' as const,
+            buy_preference: 'sometimes' as const,
+            last_confirmed_at: new Date().toISOString(),
+          }));
+
+          const { error: pantryErr } = await supabase
+            .from('user_pantry')
+            .upsert(pantryRows, { onConflict: 'user_id,ingredient_normalized' });
+
+          if (pantryErr) throw pantryErr;
+        }
+      }
+
+      // 3. Mark list as completed
       const { error } = await supabase
         .from('shopping_lists')
         .update({ is_active: false, completed_at: new Date().toISOString() })
@@ -200,6 +235,44 @@ export function useCompleteShoppingList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+      // Also invalidate pantry cache so new items show up
+      queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+    },
+  });
+}
+
+// ── Mutation: Add single checked item to pantry ─────────────────────
+
+export function useAddShoppingItemToPantry() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (item: { ingredient_name: string; ingredient_normalized: string; category: string }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('user_pantry')
+        .upsert(
+          [{
+            user_id: user.id,
+            ingredient_id: null,
+            ingredient_name: item.ingredient_name,
+            ingredient_normalized: item.ingredient_normalized,
+            category: item.category || 'sonstiges',
+            status: 'available' as const,
+            buy_preference: 'sometimes' as const,
+            last_confirmed_at: new Date().toISOString(),
+          }],
+          { onConflict: 'user_id,ingredient_normalized' }
+        );
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
     },
   });
 }
