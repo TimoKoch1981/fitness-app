@@ -139,6 +139,7 @@
 | 12.72   | 2026-03-10 | PlanEditor UX: Tab-Switch-Fix, DnD ganzer Block, Hoch/Runter-Pfeile               | Erledigt   |
 | 12.73   | 2026-03-10 | 4 UX-Verbesserungen: ExerciseListBar Pfeile, Post-Creation-Flow, Buddy-Hilfe, Akkordeon | Erledigt   |
 | 12.74   | 2026-03-10 | Plan bearbeiten + bewerten: In-Card Buttons, EditPlanMetaDialog, Buddy-Chip Interception | Erledigt   |
+| 12.87   | 2026-03-14 | Rezept-System Bugfixes: GRANT-Berechtigungen, Error-Display, Bedarfsanalyse, save_recipe | Erledigt   |
 
 ---
 
@@ -3580,4 +3581,72 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-03-12*
+### v12.87 — Rezept-System Bugfixes (2026-03-14)
+
+**Root Cause:** `recipes` Tabelle fehlten GRANT-Berechtigungen fuer `authenticated`/`anon`/`service_role` Rollen. RLS-Policies waren vorhanden, aber die Basis-Tabellen-Berechtigungen (PostgreSQL GRANT) fehlten in der Migration. PostgREST gab "permission denied for table recipes" zurueck.
+
+**Fixes:**
+1. **GRANT-Berechtigungen:** `GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE recipes TO authenticated` + `GRANT SELECT TO anon` + `GRANT ALL TO service_role`. Migration-Datei aktualisiert.
+2. **Error-Display:** RecipesTabContent zeigt jetzt die tatsaechliche Supabase-Fehlermeldung im Alert statt generischer Meldung.
+3. **ActionExecutor Error-Handling:** PostgrestError (plain object, kein Error-Instance) wird jetzt korrekt via `.message` Property extrahiert statt `[object Object]`.
+4. **actionTools.ts TS-Fehler:** Fehlende `add_training_day`, `modify_training_day`, `remove_training_day` in TOOL_DESCRIPTIONS und ToolSchemas ergaenzt.
+5. **NutritionAgent Bedarfsanalyse:** PFLICHT-Rueckfragen vor Rezeptvorschlaegen (DE+EN).
+6. **NutritionAgent save_recipe:** Explizite ACTION_REQUEST Format-Anweisungen mit Beispielen.
+
+**Geaenderte Dateien (5):**
+- supabase/migrations/20260313000002_recipes.sql (+ GRANT Block)
+- src/features/recipes/components/RecipesTabContent.tsx (bessere Fehlermeldungen)
+- src/features/buddy/hooks/useActionExecutor.ts (PostgrestError-Handling)
+- src/lib/ai/tools/actionTools.ts (+3 TOOL_DESCRIPTIONS, +3 ToolSchemas)
+- src/lib/ai/agents/nutritionAgent.ts (Bedarfsanalyse + save_recipe Anweisungen)
+
+**Deployed auf fudda.de.**
+
+---
+
+### v12.90 — Rezept-Flow Konsolidierung + Vorrat-System Phase 0+A (2026-03-14)
+
+**Neue Features:**
+
+1. **Rezept-Flow Konsolidierung:** 2 Buttons → 1 Button mit 4-Optionen-Dialog (Manuell, URL-Import, Websuche via DuckDuckGo, Text-Import). AddRecipeMethodDialog, RecipeSearchDialog, TextImportDialog, RecipePreviewCard als neue Komponenten.
+
+2. **Zutatenkatalog (ingredient_catalog):** 223 Zutaten in 15 Kategorien mit BLS 4.0 Naehrwertdaten (Kalorien, Protein, Kohlenhydrate, Fett, Ballaststoffe pro 100g). Suchbegriffe, Allergene, Lagertyp, Haltbarkeit. 35. DB-Tabelle.
+
+3. **Persoenlicher Vorrat (user_pantry):** 36. DB-Tabelle mit RLS, buy_preference (always/sometimes/never), Status-Tracking (available/low/empty), Ablaufdatum. FK zu ingredient_catalog.
+
+4. **PantrySetupWizard:** 3-Schritt-Assistent (Vorlage waehlen → Kategorien pruefen → Zusammenfassung). 4 Templates: Basis-Kueche (~60), Fitness-Kueche (~80), Vegane Kueche (~65), Leere Kueche.
+
+5. **PantryTabContent:** Vorrats-Verwaltung als 4. Tab in NutritionPage. Suche, Kategorien-Akkordeon, Status-Chips (verfuegbar/knapp/leer), Ablauf-Warnungen, Loeschen.
+
+6. **update_pantry ActionType (#20):** Vollstaendige ActionRegistry-Integration (add/remove/set_status/clear_all). Fuzzy-Matching gegen Katalog bei add.
+
+7. **pantry_inventory User-Skill:** Dynamischer Skill fuer Nutrition-Agent. Gruppiert nach Kategorie, zeigt ablaufende Zutaten, buy_preference-Regeln.
+
+**Neue Dateien (7):**
+- supabase/migrations/20260314000003_ingredient_catalog_and_pantry.sql
+- src/features/pantry/types.ts (IngredientCategory, PantryItem, Templates)
+- src/features/pantry/hooks/useIngredientCatalog.ts
+- src/features/pantry/hooks/usePantry.ts (6 Hooks)
+- src/features/pantry/components/PantrySetupWizard.tsx
+- src/features/pantry/components/PantryTabContent.tsx
+- src/features/recipes/components/ (AddRecipeMethodDialog, RecipeSearchDialog, TextImportDialog, RecipePreviewCard)
+
+**Geaenderte Dateien (12):**
+- src/pages/NutritionPage.tsx (+Vorrat Tab, 4 statt 3 Tabs)
+- src/lib/ai/actions/types.ts (+update_pantry ActionType)
+- src/lib/ai/actions/schemas.ts (+UpdatePantrySchema)
+- src/lib/ai/actions/registerDefaults.ts (+update_pantry Registration, 20 Actions)
+- src/lib/ai/actions/registry.ts (+clearPantry, invalidatePantry in MutationMap)
+- src/lib/ai/tools/actionTools.ts (+update_pantry)
+- src/features/buddy/hooks/useActionExecutor.ts (+clearPantry, queryClient)
+- src/lib/ai/skills/userSkills.ts (+pantry_inventory Skill)
+- src/lib/ai/agents/nutritionAgent.ts (+pantry_inventory)
+- src/lib/ai/agents/baseAgent.ts (+pantryItems)
+- src/types/health.ts (+pantryItems)
+- src/shared/components/InlineBuddyChat.tsx (+pantryItems Query)
+
+**Deployed auf fudda.de.**
+
+---
+
+*Letzte Aktualisierung: 2026-03-14*

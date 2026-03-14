@@ -3,9 +3,9 @@
  * German recipes with realistic macros based on common fitness-friendly meals.
  */
 
-import type { Recipe } from '../types';
+import type { LegacyRecipe } from '../types';
 
-export const SAMPLE_RECIPES: Omit<Recipe, 'id' | 'userId' | 'createdAt'>[] = [
+export const SAMPLE_RECIPES: Omit<LegacyRecipe, 'id' | 'userId' | 'createdAt'>[] = [
   {
     name: 'Haehnchen-Reis Bowl',
     description: 'Proteinreiche Bowl mit gegrillter Haehnchenbrust, Basmatireis und frischem Gemuese.',

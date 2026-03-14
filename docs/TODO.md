@@ -1,7 +1,7 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-12, v12.77
-> **Letzte Konsolidierung:** Training Restructuring + Analytics Dashboard (v12.77)
+> **Stand:** 2026-03-14, v12.89
+> **Letzte Konsolidierung:** Rezept-Bugfixes + Favoriten-Filter + Rezept-Import Konzept (v12.89)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
@@ -16,9 +16,7 @@
 
 ## ⚠️ UX-Probleme (kein Crash, aber schlecht)
 
-| # | Problem | Prioritaet | Beschreibung | Datei(en) |
-|---|---------|-----------|--------------|-----------|
-| U3 | **z-index Schichtung suboptimal** | NIEDRIG | ExerciseListBar (`z-10`) und Finish-Button (`z-10`) haben gleichen z-index. Voice/Music Controls (`z-20`) ueberlagern korrekt, aber ExerciseListBar und Finish-Button koennen bei Expansion kollidieren. | `ActiveWorkoutPage.tsx` Z.563, Z.570 |
+*Keine offenen UX-Probleme. U3 (z-index Schichtung) gefixt — Finish-Button jetzt z-20, ExerciseListBar z-10.*
 
 ---
 
@@ -31,6 +29,14 @@
 | F1 | **Apple OAuth** | OFFEN — extern blockiert | Button hinter Feature-Flag (`apple_oauth=false`). Braucht: Apple Developer Account ($99/Jahr), Service ID, Key-Erstellung (macOS noetig), GoTrue-Config auf Server |
 | F3 | **Alte Quick-Logs DB-Migration** | ENTSCHEIDUNG NOETIG | ~100 alte Workouts haben nur `exercises[]` (kein `session_exercises`). Aktuell: Runtime-Konvertierung via `convertLegacyExercises()`. Option: DB-Migration die alle alten Rows nachtraeglich befuellt (einmalig, dann saubere Daten) |
 
+### P1.5 — Wichtig (Konzept noetig)
+
+| # | Feature | Status | Details |
+|---|---------|--------|---------|
+| F15 | **Bodybuilder-Modus** | KONZEPT NOETIG | Spezieller Modus fuer Bodybuilder (zu-/abschaltbar, default ON in Power/Power+ Mode). Umfasst: Phasen-Management (Ladephase/Massephase/Diaet/Wettkampf/Reverse Diet), exakte Essenszeiten-Planung (6-8 Mahlzeiten/Tag), Mahlzeiten-Inhalt-Planung (pre/post-Workout, vor dem Schlafen etc.), Supplement-Scheduling (Kreatin, BCAA, Glutamin, Timing), Makro-Cycling (High/Low/Medium Carb Days), Wasserhaushalt-Management (Wettkampf), Peak-Week-Protokoll. Braucht: Detail-Recherche, Konzeptpapier, Experten-Review (Dr. Nutrition + Coach Pump) |
+| F16 | **Vorrat Phase B: Kochen mit Vorrat** | OFFEN | Rezept-Filter-Chip "Aus meinem Vorrat", Zutaten-Matching, Buddy-Integration, fehlende Zutaten anzeigen |
+| F17 | **Vorrat Phase C: Smarte Einkaufsliste** | OFFEN | Shopping-List UI, Rezept→Liste, Vorrat-Subtraktion, Bring!-Export |
+
 ### P2 — Nice-to-Have
 
 | # | Feature | Status | Details |
@@ -38,6 +44,7 @@
 | F6 | **Workout-Musik: eigene YouTube-Links** | UNKLAR | Deep-Test sagt "YouTube-Links einfuegbar" — muss verifiziert werden ob das noch funktioniert |
 | F7 | **MFP-Import** | OFFEN | MyFitnessPal CSV-Import fuer Ernaehrungsdaten. Konzept existiert, nicht implementiert |
 | F8 | **API Versioning** | OFFEN | Versionierte API-Endpunkte fuer zukuenftige Kompatibilitaet |
+| F14 | **Rezept-Import aus dem Internet** | KONZEPT FERTIG | URL einfuegen → JSON-LD/Microdata Extraktion → KI-Fallback → Vorschau → Speichern. Konzept: `docs/KONZEPT_REZEPT_IMPORT.md` |
 
 ### P3 — Irgendwann
 
@@ -145,14 +152,14 @@
 | Kategorie | Anzahl |
 |-----------|--------|
 | ❌ Offene Bugs | 0 (alle gefixt in v12.68) |
-| ⚠️ UX-Probleme | 1 (NIEDRIG) |
+| ⚠️ UX-Probleme | 0 (U3 gefixt) |
 | 📋 P1 Features | 2 |
-| 📋 P2 Features | 3 |
+| 📋 P2 Features | 4 |
 | 📋 P3 Features | 5 |
 | ✅ Erledigt | ~70+ Items |
 
 ### Empfohlene Reihenfolge fuer naechste Session:
-1. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
-2. **F6: YouTube-Links** — Verifizieren ob Feature noch funktioniert (15 min)
-3. **U3: z-index Schichtung** — ExerciseListBar vs Finish-Button Kollision (15 min)
+1. **F14: Rezept-Import aus dem Internet** — Konzept fertig (KONZEPT_REZEPT_IMPORT.md), Implementierung (~4-6h)
+2. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
+3. **F6: YouTube-Links** — Verifizieren ob Feature noch funktioniert (15 min)
 4. **F7: MFP-Import** — MyFitnessPal CSV-Import implementieren (2-3h)

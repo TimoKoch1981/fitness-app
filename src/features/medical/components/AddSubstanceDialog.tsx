@@ -1,13 +1,18 @@
 import { useState, useMemo } from 'react';
-import { X, Bell, Search, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Bell, Search, AlertTriangle, ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddSubstance } from '../hooks/useSubstances';
 import { useAddReminder } from '../../reminders/hooks/useReminders';
+import { useAddPantryItems } from '../../pantry/hooks/usePantry';
+import { useIngredientCatalog } from '../../pantry/hooks/useIngredientCatalog';
+import { findCatalogItemForPreset } from '../../pantry/utils/supplementLinker';
+import { normalizeIngredient } from '../../pantry/types';
 import { SUBSTANCE_CATEGORIES, SUBSTANCE_TYPES } from '../../../lib/constants';
 import { parseFrequencyToReminder } from '../../reminders/lib/parseFrequency';
 import {
   getFilteredPresets,
   PRESET_GROUP_LABELS,
+  SUPPLEMENT_PRESETS,
   type SubstancePreset,
 } from '../lib/substancePresets';
 import type { SubstanceCategory, SubstanceAdminType } from '../../../types/health';
@@ -23,8 +28,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   const { t, language } = useTranslation();
   const addSubstance = useAddSubstance();
   const addReminder = useAddReminder();
+  const addPantryItems = useAddPantryItems();
+  const { data: ingredientCatalog } = useIngredientCatalog();
 
   const [name, setName] = useState('');
+  const [addToPantry, setAddToPantry] = useState(false);
   const [category, setCategory] = useState<SubstanceCategory>('supplement');
   const [adminType, setAdminType] = useState<SubstanceAdminType>('oral');
   const [dosage, setDosage] = useState('');
@@ -64,6 +72,19 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
 
   if (!open) return null;
 
+  // Check if current name has a matching catalog item (for pantry linking)
+  const hasCatalogMatch = useMemo(() => {
+    if (!ingredientCatalog || category !== 'supplement') return false;
+    const preset = SUPPLEMENT_PRESETS.find(p => p.name === name);
+    if (preset) return !!findCatalogItemForPreset(preset, ingredientCatalog);
+    // Fallback: check by normalized name
+    const norm = normalizeIngredient(name);
+    return ingredientCatalog.some(
+      item => (item.category === 'supplements' || item.category === 'proteine_gainer') &&
+        normalizeIngredient(item.name_de).includes(norm)
+    );
+  }, [ingredientCatalog, name, category]);
+
   // Apply a preset to the form
   const applyPreset = (preset: SubstancePreset) => {
     setName(preset.name);
@@ -76,6 +97,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     setHalfLife(preset.halfLifeDays?.toString() || '');
     setSearchQuery('');
     setShowPresets(false);
+    // Auto-suggest adding to pantry for supplement presets with catalog match
+    if (preset.category === 'supplement' && ingredientCatalog) {
+      const match = findCatalogItemForPreset(preset, ingredientCatalog);
+      setAddToPantry(!!match);
+    }
   };
 
   const enablePed = () => {
@@ -145,6 +171,28 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
         }
       }
 
+      // Add to pantry if requested
+      if (addToPantry && category === 'supplement' && ingredientCatalog) {
+        try {
+          const preset = SUPPLEMENT_PRESETS.find(p => p.name === name);
+          const catalogItem = preset
+            ? findCatalogItemForPreset(preset, ingredientCatalog)
+            : ingredientCatalog.find(
+                item => (item.category === 'supplements' || item.category === 'proteine_gainer') &&
+                  normalizeIngredient(item.name_de) === normalizeIngredient(name)
+              );
+
+          await addPantryItems.mutateAsync([{
+            ingredient_name: catalogItem?.name_de || name,
+            category: catalogItem?.category || 'supplements',
+            buy_preference: 'always' as const,
+            ingredient_id: catalogItem?.id ?? undefined,
+          }]);
+        } catch {
+          // Non-critical: substance was saved, pantry link failed silently
+        }
+      }
+
       // Reset and close
       setName('');
       setCategory('supplement');
@@ -158,6 +206,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
       setNotes('');
       setSearchQuery('');
       setShowPresets(true);
+      setAddToPantry(false);
       onClose();
     } catch {
       setError(t.common.saveError);
@@ -490,6 +539,24 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               rows={2}
             />
           </div>
+
+          {/* Add to Pantry option (supplements only) */}
+          {category === 'supplement' && hasCatalogMatch && (
+            <label className="flex items-center gap-2 p-2.5 bg-teal-50 rounded-lg border border-teal-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={addToPantry}
+                onChange={(e) => setAddToPantry(e.target.checked)}
+                className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+              />
+              <Package className="h-4 w-4 text-teal-500 flex-shrink-0" />
+              <span className="text-xs text-teal-700">
+                {language === 'de'
+                  ? 'Auch zum Vorrat hinzufuegen (Ernaehrung → Vorrat)'
+                  : 'Also add to pantry (Nutrition → Pantry)'}
+              </span>
+            </label>
+          )}
 
           {/* Error */}
           {error && (

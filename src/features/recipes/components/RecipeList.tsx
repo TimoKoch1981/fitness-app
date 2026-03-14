@@ -15,12 +15,17 @@ import {
   X,
   Flame,
   Heart,
+  Package,
   Image as ImageIcon,
+  ShieldAlert,
+  Leaf,
+  RefreshCw,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
 import type { Recipe, RecipeFilter, RecipeSortBy } from '../types';
 import { RECIPE_MEAL_TYPES, deriveAutoTags } from '../types';
+import type { PantryMatchResult } from '../../pantry/utils/pantryMatcher';
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -33,6 +38,14 @@ interface RecipeListProps {
   onLoadSampleRecipes: () => void;
   isLoading?: boolean;
   isLoadingSamples?: boolean;
+  /** Pantry match results per recipe (computed in parent) */
+  pantryMatchMap?: Map<string, PantryMatchResult>;
+  /** Whether pantry data is available */
+  hasPantry?: boolean;
+  /** Profile allergens (mapped to recipe allergen keys) for sync indicator */
+  profileAllergens?: string[];
+  /** Profile dietary preferences for sync indicator */
+  profileDietaryPrefs?: string[];
 }
 
 const MEAL_TYPE_LABELS: Record<string, { de: string; en: string }> = {
@@ -55,6 +68,10 @@ export function RecipeList({
   onLoadSampleRecipes,
   isLoading,
   isLoadingSamples,
+  pantryMatchMap,
+  hasPantry,
+  profileAllergens,
+  profileDietaryPrefs,
 }: RecipeListProps) {
   const { t, language } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -76,7 +93,21 @@ export function RecipeList({
   };
 
   const handleMealTypeToggle = (type: string) => {
-    onSetFilters({ ...filters, mealType: filters.mealType === type ? null : type });
+    onSetFilters({ ...filters, mealType: filters.mealType === type ? null : type, favoritesOnly: false });
+  };
+
+  const handleFavoritesToggle = () => {
+    onSetFilters({ ...filters, favoritesOnly: !filters.favoritesOnly, mealType: null, pantryOnly: false });
+  };
+
+  const handlePantryToggle = () => {
+    const newPantryOnly = !filters.pantryOnly;
+    onSetFilters({
+      ...filters,
+      pantryOnly: newPantryOnly,
+      // Auto-switch to bestMatch sort when enabling, revert when disabling
+      sortBy: newPantryOnly ? 'bestMatch' : filters.sortBy === 'bestMatch' ? 'newest' : filters.sortBy,
+    });
   };
 
   const handleMaxPrepTimeChange = (value: string) => {
@@ -86,6 +117,59 @@ export function RecipeList({
   const handleMaxCaloriesChange = (value: string) => {
     onSetFilters({ ...filters, maxCalories: value ? parseInt(value, 10) : null });
   };
+
+  const handleAllergenToggle = (allergen: string) => {
+    const current = filters.excludeAllergens;
+    const next = current.includes(allergen)
+      ? current.filter((a) => a !== allergen)
+      : [...current, allergen];
+    onSetFilters({ ...filters, excludeAllergens: next });
+  };
+
+  const handleAllergenFilterEnabledToggle = () => {
+    onSetFilters({ ...filters, allergenFilterEnabled: !filters.allergenFilterEnabled });
+  };
+
+  const handleDietaryToggle = (pref: string) => {
+    const current = filters.dietaryFilter;
+    const next = current.includes(pref)
+      ? current.filter((p) => p !== pref)
+      : [...current, pref];
+    onSetFilters({ ...filters, dietaryFilter: next });
+  };
+
+  const handleDietaryFilterEnabledToggle = () => {
+    onSetFilters({ ...filters, dietaryFilterEnabled: !filters.dietaryFilterEnabled });
+  };
+
+  const handleSyncAllergens = () => {
+    if (profileAllergens) {
+      onSetFilters({ ...filters, excludeAllergens: [...profileAllergens], allergenFilterEnabled: true });
+    }
+  };
+
+  const handleSyncDietary = () => {
+    if (profileDietaryPrefs) {
+      onSetFilters({ ...filters, dietaryFilter: [...profileDietaryPrefs], dietaryFilterEnabled: true });
+    }
+  };
+
+  // Count active advanced filters for badge
+  const activeFilterCount =
+    (filters.allergenFilterEnabled && filters.excludeAllergens.length > 0 ? 1 : 0) +
+    (filters.dietaryFilterEnabled && filters.dietaryFilter.length > 0 ? 1 : 0) +
+    (filters.maxPrepTime ? 1 : 0) +
+    (filters.maxCalories ? 1 : 0);
+
+  // Check if filter differs from profile
+  const allergensDifferFromProfile = profileAllergens && (
+    filters.excludeAllergens.length !== profileAllergens.length ||
+    !filters.excludeAllergens.every((a) => profileAllergens.includes(a))
+  );
+  const dietaryDiffersFromProfile = profileDietaryPrefs && (
+    filters.dietaryFilter.length !== profileDietaryPrefs.length ||
+    !filters.dietaryFilter.every((p) => profileDietaryPrefs.includes(p))
+  );
 
   // Loading skeleton
   if (isLoading) {
@@ -134,16 +218,42 @@ export function RecipeList({
       {/* Meal type chips (horizontal scroll) */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         <button
-          onClick={() => onSetFilters({ ...filters, mealType: null })}
+          onClick={() => onSetFilters({ ...filters, mealType: null, favoritesOnly: false, pantryOnly: false })}
           className={cn(
             'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
-            !filters.mealType
+            !filters.mealType && !filters.favoritesOnly && !filters.pantryOnly
               ? 'bg-teal-500 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           )}
         >
           {language === 'de' ? 'Alle' : 'All'}
         </button>
+        <button
+          onClick={handleFavoritesToggle}
+          className={cn(
+            'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1',
+            filters.favoritesOnly
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          )}
+        >
+          <Heart className={cn('h-3 w-3', filters.favoritesOnly ? 'fill-white' : '')} />
+          {language === 'de' ? 'Favoriten' : 'Favorites'}
+        </button>
+        {hasPantry && (
+          <button
+            onClick={handlePantryToggle}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1',
+              filters.pantryOnly
+                ? 'bg-emerald-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            )}
+          >
+            <Package className="h-3 w-3" />
+            {language === 'de' ? 'Aus Vorrat' : 'From Pantry'}
+          </button>
+        )}
         {RECIPE_MEAL_TYPES.map((type) => (
           <button
             key={type}
@@ -155,7 +265,7 @@ export function RecipeList({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
-            {MEAL_TYPE_LABELS[type]?.[language] || type}
+            {MEAL_TYPE_LABELS[type]?.[language as 'de' | 'en'] || MEAL_TYPE_LABELS[type]?.['en'] || type}
           </button>
         ))}
       </div>
@@ -183,13 +293,20 @@ export function RecipeList({
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            'p-2 rounded-lg border transition-colors',
+            'p-2 rounded-lg border transition-colors relative',
             showFilters
               ? 'bg-teal-50 border-teal-300 text-teal-600'
+              : activeFilterCount > 0
+              ? 'bg-teal-50 border-teal-200 text-teal-600'
               : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
           )}
         >
           <SlidersHorizontal className="h-4 w-4" />
+          {activeFilterCount > 0 && !showFilters && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -203,6 +320,40 @@ export function RecipeList({
         </button>
       </div>
 
+      {/* Active Filter Summary — shown when panel is closed but filters are active */}
+      {!showFilters && activeFilterCount > 0 && (
+        <button
+          onClick={() => setShowFilters(true)}
+          className="flex items-center gap-1.5 flex-wrap px-3 py-1.5 bg-teal-50 rounded-lg border border-teal-100"
+        >
+          {filters.allergenFilterEnabled && filters.excludeAllergens.length > 0 && (
+            <span className="flex items-center gap-0.5 text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+              <ShieldAlert className="h-2.5 w-2.5" />
+              {filters.excludeAllergens.length} {language === 'de' ? 'Allergene' : 'Allergens'}
+            </span>
+          )}
+          {filters.dietaryFilterEnabled && filters.dietaryFilter.length > 0 && (
+            <span className="flex items-center gap-0.5 text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+              <Leaf className="h-2.5 w-2.5" />
+              {filters.dietaryFilter.map(p => {
+                const display = DIETARY_DISPLAY.find(d => d.key === p);
+                return display ? (language === 'de' ? display.labelDe : display.labelEn) : p;
+              }).join(', ')}
+            </span>
+          )}
+          {filters.maxPrepTime && (
+            <span className="text-[10px] text-gray-500 bg-white px-1.5 py-0.5 rounded-full">
+              ≤{filters.maxPrepTime} min
+            </span>
+          )}
+          {filters.maxCalories && (
+            <span className="text-[10px] text-gray-500 bg-white px-1.5 py-0.5 rounded-full">
+              ≤{filters.maxCalories} kcal
+            </span>
+          )}
+        </button>
+      )}
+
       {/* Filter Panel */}
       {showFilters && (
         <div className="bg-white rounded-xl p-3 shadow-sm space-y-3">
@@ -212,7 +363,7 @@ export function RecipeList({
               {t.recipes.sortBy}
             </label>
             <div className="flex gap-1.5 flex-wrap">
-              {(['name', 'newest', 'prepTime', 'calories', 'protein'] as RecipeSortBy[]).map((opt) => (
+              {(['name', 'newest', 'prepTime', 'calories', 'protein', ...(hasPantry ? ['bestMatch'] : [])] as RecipeSortBy[]).map((opt) => (
                 <button
                   key={opt}
                   onClick={() => handleSortChange(opt)}
@@ -228,6 +379,7 @@ export function RecipeList({
                   {opt === 'prepTime' && t.recipes.prepTime}
                   {opt === 'calories' && t.recipes.calories}
                   {opt === 'protein' && t.recipes.protein}
+                  {opt === 'bestMatch' && (language === 'de' ? 'Vorrat-Match' : 'Pantry Match')}
                 </button>
               ))}
             </div>
@@ -287,8 +439,115 @@ export function RecipeList({
               />
             </div>
           </div>
+
+          {/* Allergen Filter */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                <ShieldAlert className="h-3 w-3 text-red-400" />
+                {language === 'de' ? 'Allergene ausschliessen' : 'Exclude Allergens'}
+              </label>
+              <div className="flex items-center gap-1.5">
+                {allergensDifferFromProfile && (
+                  <button
+                    onClick={handleSyncAllergens}
+                    className="flex items-center gap-0.5 text-[10px] text-teal-600 hover:text-teal-700"
+                    title={language === 'de' ? 'Mit Profil synchronisieren' : 'Sync with profile'}
+                  >
+                    <RefreshCw className="h-2.5 w-2.5" />
+                    {language === 'de' ? 'Profil' : 'Profile'}
+                  </button>
+                )}
+                <button
+                  onClick={handleAllergenFilterEnabledToggle}
+                  className={cn(
+                    'px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors',
+                    filters.allergenFilterEnabled
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-gray-100 text-gray-400'
+                  )}
+                >
+                  {filters.allergenFilterEnabled ? 'ON' : 'OFF'}
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-1 flex-wrap">
+              {ALLERGEN_DISPLAY.map(({ key, labelDe, labelEn }) => (
+                <button
+                  key={key}
+                  onClick={() => handleAllergenToggle(key)}
+                  className={cn(
+                    'px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors border',
+                    filters.excludeAllergens.includes(key)
+                      ? 'bg-red-50 text-red-700 border-red-200'
+                      : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                  )}
+                >
+                  {language === 'de' ? labelDe : labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Dietary Filter */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                <Leaf className="h-3 w-3 text-green-500" />
+                {language === 'de' ? 'Ernaehrungspraeferenzen' : 'Dietary Preferences'}
+              </label>
+              <div className="flex items-center gap-1.5">
+                {dietaryDiffersFromProfile && (
+                  <button
+                    onClick={handleSyncDietary}
+                    className="flex items-center gap-0.5 text-[10px] text-teal-600 hover:text-teal-700"
+                    title={language === 'de' ? 'Mit Profil synchronisieren' : 'Sync with profile'}
+                  >
+                    <RefreshCw className="h-2.5 w-2.5" />
+                    {language === 'de' ? 'Profil' : 'Profile'}
+                  </button>
+                )}
+                <button
+                  onClick={handleDietaryFilterEnabledToggle}
+                  className={cn(
+                    'px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors',
+                    filters.dietaryFilterEnabled
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-400'
+                  )}
+                >
+                  {filters.dietaryFilterEnabled ? 'ON' : 'OFF'}
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-1 flex-wrap">
+              {DIETARY_DISPLAY.map(({ key, labelDe, labelEn }) => (
+                <button
+                  key={key}
+                  onClick={() => handleDietaryToggle(key)}
+                  className={cn(
+                    'px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors border',
+                    filters.dietaryFilter.includes(key)
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                  )}
+                >
+                  {language === 'de' ? labelDe : labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Action button */}
+      <button
+        onClick={onAddRecipe}
+        className="w-full flex items-center justify-center gap-1.5 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors"
+      >
+        <Plus className="h-4 w-4" />
+        {t.recipes.addRecipe}
+      </button>
 
       {/* Results count */}
       <p className="text-xs text-gray-400 px-1">
@@ -303,24 +562,17 @@ export function RecipeList({
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 gap-3">
           {filteredRecipes.map((recipe) => (
-            <RecipeCardGrid key={recipe.id} recipe={recipe} onClick={() => onSelectRecipe(recipe)} t={t} />
+            <RecipeCardGrid key={recipe.id} recipe={recipe} onClick={() => onSelectRecipe(recipe)} t={t} pantryMatch={pantryMatchMap?.get(recipe.id)} />
           ))}
         </div>
       ) : (
         <div className="space-y-2">
           {filteredRecipes.map((recipe) => (
-            <RecipeCardList key={recipe.id} recipe={recipe} onClick={() => onSelectRecipe(recipe)} t={t} />
+            <RecipeCardList key={recipe.id} recipe={recipe} onClick={() => onSelectRecipe(recipe)} t={t} pantryMatch={pantryMatchMap?.get(recipe.id)} />
           ))}
         </div>
       )}
 
-      {/* FAB */}
-      <button
-        onClick={onAddRecipe}
-        className="fixed bottom-24 right-4 z-30 p-3.5 bg-teal-500 text-white rounded-full shadow-lg hover:bg-teal-600 transition-colors"
-      >
-        <Plus className="h-5 w-5" />
-      </button>
     </div>
   );
 }
@@ -331,9 +583,10 @@ interface RecipeCardProps {
   recipe: Recipe;
   onClick: () => void;
   t: ReturnType<typeof useTranslation>['t'];
+  pantryMatch?: PantryMatchResult;
 }
 
-function RecipeCardGrid({ recipe, onClick, t }: RecipeCardProps) {
+function RecipeCardGrid({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps) {
   const autoTags = deriveAutoTags(recipe);
   const displayTags = [...new Set([...autoTags, ...recipe.tags.slice(0, 2)])].slice(0, 2);
 
@@ -343,18 +596,21 @@ function RecipeCardGrid({ recipe, onClick, t }: RecipeCardProps) {
       className="bg-white rounded-xl shadow-sm text-left hover:shadow-md transition-shadow w-full overflow-hidden"
     >
       {/* Image or gradient placeholder */}
-      {recipe.image_url ? (
-        <img
-          src={recipe.image_url}
-          alt={recipe.title}
-          className="w-full h-28 object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-28 bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
-          <ImageIcon className="h-8 w-8 text-teal-300" />
-        </div>
-      )}
+      <div className="w-full h-28 overflow-hidden">
+        {recipe.image_url ? (
+          <img
+            src={recipe.image_url}
+            alt={recipe.title}
+            className="w-full h-28 object-cover"
+            loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-teal-100', 'to-emerald-100', 'flex', 'items-center', 'justify-center'); }}
+          />
+        ) : (
+          <div className="w-full h-28 bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
+            <ImageIcon className="h-8 w-8 text-teal-300" />
+          </div>
+        )}
+      </div>
 
       <div className="p-2.5">
         {/* Favorite indicator */}
@@ -386,43 +642,90 @@ function RecipeCardGrid({ recipe, onClick, t }: RecipeCardProps) {
           </span>
         </div>
 
-        {/* Tags */}
-        {displayTags.length > 0 && (
-          <div className="flex gap-1 mt-1.5 flex-wrap">
-            {displayTags.map((tag) => (
-              <span
-                key={tag}
-                className="px-1.5 py-0.5 bg-teal-50 text-teal-600 text-[9px] rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Tags + Pantry Badge */}
+        <div className="flex gap-1 mt-1.5 flex-wrap items-center">
+          {pantryMatch && (
+            <span
+              className={cn(
+                'px-1.5 py-0.5 text-[9px] rounded-full font-medium',
+                pantryMatch.matchPercent >= 80
+                  ? 'bg-green-100 text-green-700'
+                  : pantryMatch.matchPercent >= 50
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-red-100 text-red-700'
+              )}
+            >
+              {pantryMatch.matched.length}/{pantryMatch.matched.length + pantryMatch.missing.length}
+            </span>
+          )}
+          {displayTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-1.5 py-0.5 bg-teal-50 text-teal-600 text-[9px] rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
     </button>
   );
 }
 
-function RecipeCardList({ recipe, onClick, t }: RecipeCardProps) {
+// ── Allergen & Dietary display constants ──────────────────────────────
+
+const ALLERGEN_DISPLAY = [
+  { key: 'gluten', labelDe: 'Gluten', labelEn: 'Gluten' },
+  { key: 'laktose', labelDe: 'Laktose', labelEn: 'Lactose' },
+  { key: 'ei', labelDe: 'Ei', labelEn: 'Eggs' },
+  { key: 'nuesse', labelDe: 'Nuesse', labelEn: 'Nuts' },
+  { key: 'soja', labelDe: 'Soja', labelEn: 'Soy' },
+  { key: 'fisch', labelDe: 'Fisch', labelEn: 'Fish' },
+  { key: 'krusten', labelDe: 'Krusten', labelEn: 'Shellfish' },
+  { key: 'sellerie', labelDe: 'Sellerie', labelEn: 'Celery' },
+  { key: 'senf', labelDe: 'Senf', labelEn: 'Mustard' },
+  { key: 'sesam', labelDe: 'Sesam', labelEn: 'Sesame' },
+  { key: 'fruktose', labelDe: 'Fruktose', labelEn: 'Fructose' },
+  { key: 'histamin', labelDe: 'Histamin', labelEn: 'Histamine' },
+  { key: 'sorbitol', labelDe: 'Sorbitol', labelEn: 'Sorbitol' },
+  { key: 'fodmap', labelDe: 'FODMAP', labelEn: 'FODMAP' },
+  { key: 'salicylat', labelDe: 'Salicylate', labelEn: 'Salicylates' },
+  { key: 'nickel', labelDe: 'Nickel', labelEn: 'Nickel' },
+  { key: 'alphagal', labelDe: 'Alpha-Gal', labelEn: 'Alpha-Gal' },
+] as const;
+
+const DIETARY_DISPLAY = [
+  { key: 'vegan', labelDe: 'Vegan', labelEn: 'Vegan' },
+  { key: 'vegetarian', labelDe: 'Vegetarisch', labelEn: 'Vegetarian' },
+  { key: 'pescatarian', labelDe: 'Pescetarisch', labelEn: 'Pescatarian' },
+  { key: 'keto', labelDe: 'Keto', labelEn: 'Keto' },
+  { key: 'paleo', labelDe: 'Paleo', labelEn: 'Paleo' },
+  { key: 'glutenFree', labelDe: 'Glutenfrei', labelEn: 'Gluten-Free' },
+  { key: 'lactoseFree', labelDe: 'Laktosefrei', labelEn: 'Lactose-Free' },
+] as const;
+
+function RecipeCardList({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps) {
   return (
     <button
       onClick={onClick}
       className="w-full bg-white rounded-xl shadow-sm flex gap-3 text-left hover:shadow-md transition-shadow overflow-hidden"
     >
       {/* Image */}
-      {recipe.image_url ? (
-        <img
-          src={recipe.image_url}
-          alt={recipe.title}
-          className="w-20 h-20 object-cover flex-shrink-0"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-20 h-20 bg-gradient-to-br from-teal-100 to-emerald-100 flex-shrink-0 flex items-center justify-center">
-          <ImageIcon className="h-6 w-6 text-teal-300" />
-        </div>
-      )}
+      <div className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-l-xl">
+        {recipe.image_url ? (
+          <img
+            src={recipe.image_url}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-teal-100', 'to-emerald-100', 'flex', 'items-center', 'justify-center'); }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
+            <ImageIcon className="h-6 w-6 text-teal-300" />
+          </div>
+        )}
+      </div>
       <div className="flex-1 min-w-0 py-2.5 pr-3">
         <div className="flex items-start justify-between gap-1">
           <h3 className="text-sm font-semibold text-gray-900 truncate">{recipe.title}</h3>
@@ -441,6 +744,20 @@ function RecipeCardList({ recipe, onClick, t }: RecipeCardProps) {
           <span className="text-teal-600 font-medium">
             {recipe.protein_per_serving}g P
           </span>
+          {pantryMatch && (
+            <span
+              className={cn(
+                'px-1.5 py-0.5 rounded-full text-[10px] font-medium ml-auto',
+                pantryMatch.matchPercent >= 80
+                  ? 'bg-green-100 text-green-700'
+                  : pantryMatch.matchPercent >= 50
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-red-100 text-red-700'
+              )}
+            >
+              {pantryMatch.matched.length}/{pantryMatch.matched.length + pantryMatch.missing.length}
+            </span>
+          )}
         </div>
       </div>
     </button>

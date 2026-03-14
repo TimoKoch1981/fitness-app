@@ -15,13 +15,19 @@ import { useProfile } from '../../auth/hooks/useProfile';
 import { useLatestBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useWorkoutsByDate } from '../../workouts/hooks/useWorkouts';
 import { useMealHistory } from '../hooks/useMealHistory';
-import { calculateBMR, calculateAge, calculateTDEE_PAL } from '../../../lib/calculations';
+import { calculateBMR, calculateAge } from '../../../lib/calculations';
 import { isUsingProxy } from '../../../lib/ai/provider';
 import { proxyCompletionRequest } from '../../../lib/ai/supabaseProxy';
 import { MealCard } from './MealCard';
 import { AddMealDialog } from './AddMealDialog';
 import { NutritionAICompanion } from './NutritionAICompanion';
 import { today } from '../../../lib/utils';
+import { useTrainingMode } from '../../../shared/hooks/useTrainingMode';
+import { calculatePhaseMacros, type PhaseMacros } from '../../nutrition/utils/phaseMacroCalculator';
+import { MacroCyclingPlanner } from '../../nutrition/components/MacroCyclingPlanner';
+import { MealTimingPlanner } from '../../nutrition/components/MealTimingPlanner';
+import { PeakWeekPlanner } from '../../nutrition/components/PeakWeekPlanner';
+import { AlternativeScoringCard } from '../../nutrition/components/AlternativeScoringCard';
 
 interface MealsTabContentProps {
   showAddDialog: boolean;
@@ -98,6 +104,19 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
       fatGoal,
     };
   }, [profile, latestBody, workouts, totals.calories]);
+
+  // F15: Bodybuilder-Modus
+  const trainingMode = useTrainingMode();
+  const phaseMacros: PhaseMacros | null = useMemo(() => {
+    if (!trainingMode.showBodybuilderNutrition || !energyBalance || !latestBody?.weight_kg) return null;
+    return calculatePhaseMacros({
+      tdee: energyBalance.tdee,
+      phase: trainingMode.phase,
+      weeksIntoPhase: 0, // TODO: track weeks in phase via profile
+      bodyWeight: latestBody.weight_kg,
+      bodyFatPct: latestBody.body_fat_pct ?? undefined,
+    });
+  }, [trainingMode.showBodybuilderNutrition, trainingMode.phase, energyBalance, latestBody]);
 
   // AI Nutrition Comment
   const [aiComment, setAiComment] = useState<string | null>(null);
@@ -238,6 +257,13 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           </div>
         </div>
       </div>
+
+      {/* Alternative Scoring Systems (WW Points, Noom, Nutri-Score) */}
+      {totals.calories > 0 && (
+        <div className="mb-4">
+          <AlternativeScoringCard totals={totals} />
+        </div>
+      )}
 
       {/* Energy Balance Card */}
       {energyBalance && (
@@ -391,6 +417,72 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           totals={totals}
           energyBalance={energyBalance}
         />
+      )}
+
+      {/* F15: Bodybuilder Phase Macros */}
+      {phaseMacros && trainingMode.showBodybuilderNutrition && (
+        <div className="mb-4 bg-white rounded-xl p-3 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] text-purple-600 font-medium uppercase tracking-wider">
+              {language === 'de' ? phaseMacros.phaseLabelDe : phaseMacros.phaseLabelEn}
+            </p>
+            <span className="text-[10px] text-gray-400">
+              {language === 'de' ? 'Phase-Ziele' : 'Phase Targets'}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-gray-50 rounded-lg py-1.5">
+              <p className="text-sm font-bold text-gray-900">{phaseMacros.calories}</p>
+              <p className="text-[9px] text-gray-500">kcal</p>
+            </div>
+            <div className="bg-teal-50 rounded-lg py-1.5">
+              <p className="text-sm font-bold text-teal-700">{phaseMacros.protein}g</p>
+              <p className="text-[9px] text-teal-600">Protein</p>
+            </div>
+            <div className="bg-blue-50 rounded-lg py-1.5">
+              <p className="text-sm font-bold text-blue-700">{phaseMacros.carbs}g</p>
+              <p className="text-[9px] text-blue-600">Carbs</p>
+            </div>
+            <div className="bg-amber-50 rounded-lg py-1.5">
+              <p className="text-sm font-bold text-amber-700">{phaseMacros.fat}g</p>
+              <p className="text-[9px] text-amber-600">{language === 'de' ? 'Fett' : 'Fat'}</p>
+            </div>
+          </div>
+          {phaseMacros.notes.length > 0 && (
+            <div className="mt-2 space-y-0.5">
+              {phaseMacros.notes.slice(0, 2).map((note, i) => (
+                <p key={i} className="text-[10px] text-gray-500">
+                  {language === 'de' ? note.de : note.en}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* F15: Macro Cycling Planner */}
+      {phaseMacros && trainingMode.showMacroCycling && (
+        <div className="mb-4">
+          <MacroCyclingPlanner baseMacros={phaseMacros} />
+        </div>
+      )}
+
+      {/* F15: Meal Timing Planner */}
+      {phaseMacros && trainingMode.showMealTiming && latestBody?.weight_kg && (
+        <div className="mb-4">
+          <MealTimingPlanner baseMacros={phaseMacros} bodyWeight={latestBody.weight_kg} />
+        </div>
+      )}
+
+      {/* F15: Peak Week Planner */}
+      {trainingMode.showPeakWeekNutrition && energyBalance && latestBody?.weight_kg && (
+        <div className="mb-4">
+          <PeakWeekPlanner
+            tdee={energyBalance.tdee}
+            bodyWeight={latestBody.weight_kg}
+            bodyFatPct={latestBody.body_fat_pct ?? undefined}
+          />
+        </div>
       )}
 
       {/* Copy Yesterday Button (only on today) */}

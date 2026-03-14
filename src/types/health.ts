@@ -579,8 +579,12 @@ export interface HealthContext {
   latestBloodWork?: BloodWork;
   /** User's favorite recipes (for AI meal suggestions from existing recipes) */
   favoriteRecipes?: import('../features/recipes/types').Recipe[];
+  /** All user recipes (non-favorites, for broader recipe suggestions) */
+  allRecipes?: import('../features/recipes/types').Recipe[];
   /** Learned nutrition preferences (liked/disliked ingredients, cooking style, etc.) */
   nutritionPreferences?: import('../lib/ai/nutritionPreferenceEngine').StoredPreference[];
+  /** User's pantry items (what ingredients they have at home) */
+  pantryItems?: Array<{ ingredient_name: string; category: string; quantity_text: string | null; status: string; buy_preference: string; expires_at: string | null }>;
   /** When true, agents prepend onboarding instructions to their system prompt */
   onboardingMode?: boolean;
 }

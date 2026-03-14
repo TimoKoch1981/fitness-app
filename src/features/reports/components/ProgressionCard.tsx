@@ -145,13 +145,13 @@ export function ProgressionCard({ language }: ProgressionCardProps) {
               domain={['dataMin - 1', 'dataMax + 1']}
             />
             <Tooltip
-              formatter={(value: number | undefined, name: string | undefined) => {
+              formatter={((value: number | undefined, name: string | undefined) => {
                 const v = Number(value ?? 0).toFixed(1);
                 if (name === 'weight_kg') return [`${v} kg`, t.actual];
                 if (name === 'ma7') return [`${v} kg`, t.movingAvg];
                 if (name === 'projection') return [`${v} kg`, t.forecast];
                 return [v, name];
-              }}
+              }) as any}
               contentStyle={{ fontSize: 12, borderRadius: 8 }}
             />
             {/* Target weight line */}

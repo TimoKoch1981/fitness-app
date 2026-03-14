@@ -80,7 +80,7 @@ export function VolumeChart({ workouts, timeRange }: VolumeChartProps) {
           <XAxis dataKey="name" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 10 }} width={45} />
           <Tooltip
-            formatter={(value: number, name: string) => [`${Math.round(value).toLocaleString()} kg`, MUSCLE_LABELS_DE[name] || name]}
+            formatter={((value: number, name: string) => [`${Math.round(value).toLocaleString()} kg`, MUSCLE_LABELS_DE[name] || name]) as any}
             contentStyle={{ fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 10 }} />

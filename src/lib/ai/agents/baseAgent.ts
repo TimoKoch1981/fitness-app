@@ -403,7 +403,9 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
       availableEquipment: hc.availableEquipment,
       recentCycleLogs: hc.recentCycleLogs,
       favoriteRecipes: hc.favoriteRecipes,
+      allRecipes: hc.allRecipes,
       nutritionPreferences: hc.nutritionPreferences,
+      pantryItems: hc.pantryItems,
     };
   }
 

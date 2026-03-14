@@ -9,15 +9,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import type { Recipe, RecipeFilter, RecipeSortBy, LegacyRecipe } from '../types';
-import { DEFAULT_RECIPE_FILTER, convertLegacyRecipe } from '../types';
+import { DEFAULT_RECIPE_FILTER, convertLegacyRecipe, recipeFitsDietaryPrefs } from '../types';
+import type { PantryItem } from '../../pantry/types';
+import { matchRecipeAgainstPantry, sortByPantryMatch } from '../../pantry/utils/pantryMatcher';
 
 const LEGACY_STORAGE_KEY = 'fitbuddy_recipes';
 const MIGRATION_FLAG = 'fitbuddy_recipes_migrated';
 
 // ── Filtering & sorting (pure functions, exported for testing) ──────────
 
-export function filterRecipes(recipes: Recipe[], filters: RecipeFilter): Recipe[] {
+export function filterRecipes(recipes: Recipe[], filters: RecipeFilter, pantryItems?: PantryItem[]): Recipe[] {
   let result = [...recipes];
+
+  // Filter by favorites
+  if (filters.favoritesOnly) {
+    result = result.filter((r) => r.is_favorite);
+  }
+
+  // Filter by pantry availability
+  if (filters.pantryOnly && pantryItems && pantryItems.length > 0) {
+    result = result.filter((r) => {
+      const match = matchRecipeAgainstPantry(r, pantryItems);
+      return match.matchPercent > 0;
+    });
+  }
 
   // Search by title/description
   if (filters.searchQuery.trim()) {
@@ -54,13 +69,29 @@ export function filterRecipes(recipes: Recipe[], filters: RecipeFilter): Recipe[
     );
   }
 
+  // Filter by allergens (exclude recipes containing these allergens)
+  if (filters.allergenFilterEnabled && filters.excludeAllergens.length > 0) {
+    result = result.filter((r) =>
+      !filters.excludeAllergens.some((allergen) => r.allergens.includes(allergen))
+    );
+  }
+
+  // Filter by dietary preferences (exclude recipes that don't fit)
+  if (filters.dietaryFilterEnabled && filters.dietaryFilter.length > 0) {
+    result = result.filter((r) => recipeFitsDietaryPrefs(r, filters.dietaryFilter));
+  }
+
   // Sort
-  result = sortRecipes(result, filters.sortBy);
+  result = sortRecipes(result, filters.sortBy, pantryItems);
 
   return result;
 }
 
-export function sortRecipes(recipes: Recipe[], sortBy: RecipeSortBy): Recipe[] {
+export function sortRecipes(recipes: Recipe[], sortBy: RecipeSortBy, pantryItems?: PantryItem[]): Recipe[] {
+  if (sortBy === 'bestMatch' && pantryItems && pantryItems.length > 0) {
+    return sortByPantryMatch(recipes, pantryItems);
+  }
+
   const sorted = [...recipes];
   switch (sortBy) {
     case 'name':
@@ -161,10 +192,12 @@ export function useRecipes() {
     staleTime: 30_000,
   });
 
-  // Filtered & sorted
+  // Filtered & sorted (pantryItems passed externally via setPantryItems)
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+
   const filteredRecipes = useMemo(
-    () => filterRecipes(recipes, filters),
-    [recipes, filters]
+    () => filterRecipes(recipes, filters, pantryItems),
+    [recipes, filters, pantryItems]
   );
 
   // All unique tags
@@ -275,6 +308,7 @@ export function useRecipes() {
     allTags,
     filters,
     setFilters,
+    setPantryItems,
     addRecipe,
     updateRecipe,
     deleteRecipe,

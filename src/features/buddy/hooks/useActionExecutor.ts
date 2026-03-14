@@ -25,6 +25,8 @@ import { useAddReminder } from '../../reminders/hooks/useReminders';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
 import { useAddRecipe } from '../../recipes/hooks/useAddRecipe';
+import { useClearPantry } from '../../pantry/hooks/usePantry';
+import { useQueryClient } from '@tanstack/react-query';
 import { ensureFreshSession } from '../../../lib/refreshSession';
 import { actionRegistry } from '../../../lib/ai/actions/registry';
 import type { MutationMap } from '../../../lib/ai/actions/registry';
@@ -71,6 +73,8 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const updateProfile = useUpdateProfile();
   const setUserEquipment = useSetUserEquipment();
   const addRecipe = useAddRecipe();
+  const clearPantry = useClearPantry();
+  const queryClient = useQueryClient();
   const { data: equipmentCatalog } = useEquipmentCatalog();
 
   // Active substances for name → id resolution
@@ -94,6 +98,11 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     updateProfile,
     setUserEquipment,
     addRecipe,
+    clearPantry,
+    invalidatePantry: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+    },
   };
 
   /**
@@ -140,7 +149,14 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     try {
       return await attemptExecution(effectiveUserId);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : (typeof error === 'object' && error !== null ? JSON.stringify(error) : 'Unknown error');
+      // Extract readable error message (PostgrestError is a plain object, not Error instance)
+      const msg = error instanceof Error
+        ? error.message
+        : (typeof error === 'object' && error !== null && 'message' in error)
+          ? String((error as Record<string, unknown>).message)
+          : (typeof error === 'object' && error !== null)
+            ? JSON.stringify(error)
+            : 'Unknown error';
       const isAuthError = /RLS|row-level|Not authenticated|JWT|no data|policy|denied|expired/i.test(msg);
 
       if (isAuthError) {
@@ -149,7 +165,11 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           const refreshedId = await ensureFreshSession();
           return await attemptExecution(refreshedId);
         } catch (retryError) {
-          const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
+          const retryMsg = retryError instanceof Error
+            ? retryError.message
+            : (typeof retryError === 'object' && retryError !== null && 'message' in retryError)
+              ? String((retryError as Record<string, unknown>).message)
+              : String(retryError);
           console.error('[ActionExecutor] Retry also failed:', retryMsg);
           setErrorMessage(retryMsg);
           setActionStatus('failed');

@@ -3,19 +3,17 @@
  * v2.0: Image upload, structured steps, difficulty, meal type, allergen detection.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import {
   X,
   Plus,
   Trash2,
-  FileText,
   Calculator,
   Camera,
   Clock,
   GripVertical,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useRecipeImport } from '../hooks/useRecipeImport';
 import { useRecipeImage } from '../hooks/useRecipeImage';
 import { detectAllergens, RECIPE_MEAL_TYPES } from '../types';
 import type { Recipe, Ingredient, RecipeStep } from '../types';
@@ -23,6 +21,7 @@ import type { RecipeInput } from '../hooks/useRecipes';
 
 interface RecipeEditorProps {
   recipe?: Recipe;
+  importedData?: Partial<Recipe>;
   onSave: (recipe: RecipeInput) => void;
   onClose: () => void;
 }
@@ -44,54 +43,38 @@ const MEAL_TYPE_LABELS: Record<string, string> = {
   post_workout: 'Post-Workout',
 };
 
-export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
-  const { t } = useTranslation();
-  const { parseText, parsedRecipe, error: importError, reset: resetImport } = useRecipeImport();
+export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEditorProps) {
+  const { t, language } = useTranslation();
   const { uploadImage, uploading } = useRecipeImage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState(recipe?.title ?? '');
-  const [description, setDescription] = useState(recipe?.description ?? '');
-  const [servings, setServings] = useState(String(recipe?.servings ?? 2));
-  const [prepTime, setPrepTime] = useState(String(recipe?.prep_time_min ?? ''));
-  const [cookTime, setCookTime] = useState(String(recipe?.cook_time_min ?? ''));
-  const [mealType, setMealType] = useState<string | null>(recipe?.meal_type ?? null);
+  // importedData takes priority over recipe (for URL import prefill)
+  const src = importedData || recipe;
+  const [title, setTitle] = useState(src?.title ?? '');
+  const [description, setDescription] = useState(src?.description ?? '');
+  const [servings, setServings] = useState(String(src?.servings ?? 2));
+  const [prepTime, setPrepTime] = useState(String(src?.prep_time_min ?? ''));
+  const [cookTime, setCookTime] = useState(String(src?.cook_time_min ?? ''));
+  const [mealType, setMealType] = useState<string | null>(src?.meal_type ?? null);
   const [difficulty, setDifficulty] = useState(recipe?.difficulty ?? 'easy');
   const [ingredients, setIngredients] = useState<Ingredient[]>(
-    recipe?.ingredients?.length ? recipe.ingredients : [{ ...EMPTY_INGREDIENT }]
+    src?.ingredients?.length ? src.ingredients : [{ ...EMPTY_INGREDIENT }]
   );
   const [steps, setSteps] = useState<RecipeStep[]>(
-    recipe?.steps?.length ? recipe.steps : [{ ...EMPTY_STEP }]
+    src?.steps?.length ? src.steps : [{ ...EMPTY_STEP }]
   );
-  const [tags, setTags] = useState<string[]>(recipe?.tags ?? []);
+  const [tags, setTags] = useState<string[]>(src?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
-  const [calories, setCalories] = useState(String(recipe?.calories_per_serving ?? ''));
-  const [protein, setProtein] = useState(String(recipe?.protein_per_serving ?? ''));
-  const [carbs, setCarbs] = useState(String(recipe?.carbs_per_serving ?? ''));
-  const [fat, setFat] = useState(String(recipe?.fat_per_serving ?? ''));
-  const [imageUrl, setImageUrl] = useState<string | null>(recipe?.image_url ?? null);
+  const [calories, setCalories] = useState(String(src?.calories_per_serving ?? ''));
+  const [protein, setProtein] = useState(String(src?.protein_per_serving ?? ''));
+  const [carbs, setCarbs] = useState(String(src?.carbs_per_serving ?? ''));
+  const [fat, setFat] = useState(String(src?.fat_per_serving ?? ''));
+  const [imageUrl, _setImageUrl] = useState<string | null>(src?.image_url ?? null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(recipe?.image_url ?? null);
-  const [showImport, setShowImport] = useState(false);
-  const [importText, setImportText] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(src?.image_url ?? null);
+  const [sourceUrl] = useState<string | null>(importedData?.source_url ?? recipe?.source_url ?? null);
+  const [importMethod] = useState<string | null>((importedData as Record<string, unknown>)?.import_method as string ?? null);
   const [formError, setFormError] = useState('');
-
-  // Apply imported recipe data
-  useEffect(() => {
-    if (parsedRecipe) {
-      if (parsedRecipe.name) setTitle(parsedRecipe.name);
-      if (parsedRecipe.description) setDescription(parsedRecipe.description);
-      if (parsedRecipe.servings) setServings(String(parsedRecipe.servings));
-      if (parsedRecipe.prepTime) setPrepTime(String(parsedRecipe.prepTime));
-      if (parsedRecipe.cookTime) setCookTime(String(parsedRecipe.cookTime));
-      if (parsedRecipe.ingredients?.length) setIngredients(parsedRecipe.ingredients);
-      if (parsedRecipe.instructions?.length) {
-        setSteps(parsedRecipe.instructions.map(text => ({ text })));
-      }
-      setShowImport(false);
-      resetImport();
-    }
-  }, [parsedRecipe, resetImport]);
 
   // ── Image handling ──────────────────────────────────────────────────────
 
@@ -154,12 +137,21 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
   const calculateMacros = () => {
     const totalServings = parseInt(servings) || 1;
     let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+    let hasAnyMacros = false;
     ingredients.forEach((ing) => {
       totalCal += ing.calories ?? 0;
       totalPro += ing.protein ?? 0;
       totalCarb += ing.carbs ?? 0;
       totalFat += ing.fat ?? 0;
+      if ((ing.calories ?? 0) > 0 || (ing.protein ?? 0) > 0) hasAnyMacros = true;
     });
+    // Don't overwrite existing macros with zeros if ingredients have no macro data
+    if (!hasAnyMacros && (parseFloat(calories) > 0 || parseFloat(protein) > 0)) {
+      setFormError(language === 'de'
+        ? 'Zutaten haben keine Naehrwert-Daten. Makros bleiben unveraendert.'
+        : 'Ingredients have no macro data. Macros unchanged.');
+      return;
+    }
     setCalories(String(Math.round(totalCal / totalServings)));
     setProtein(String(Math.round((totalPro / totalServings) * 10) / 10));
     setCarbs(String(Math.round((totalCarb / totalServings) * 10) / 10));
@@ -208,7 +200,8 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
       tags,
       allergens: detectedAllergens,
       image_url: finalImageUrl,
-      source_url: null,
+      source_url: sourceUrl,
+      import_method: importMethod,
       is_favorite: recipe?.is_favorite ?? false,
       is_public: false,
       fitness_goal: [],
@@ -262,36 +255,6 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
               className="hidden"
             />
           </div>
-
-          {/* Import from text */}
-          <button
-            type="button"
-            onClick={() => setShowImport(!showImport)}
-            className="w-full flex items-center justify-center gap-2 py-2 bg-gray-50 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            <FileText className="h-4 w-4" />
-            {t.recipes.importFromText}
-          </button>
-
-          {showImport && (
-            <div className="space-y-2">
-              <textarea
-                value={importText}
-                onChange={(e) => setImportText(e.target.value)}
-                placeholder={t.recipes.importPlaceholder}
-                rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none resize-none"
-              />
-              {importError && <p className="text-xs text-red-500">{importError}</p>}
-              <button
-                type="button"
-                onClick={() => parseText(importText)}
-                className="w-full py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
-              >
-                {t.recipes.parseImport}
-              </button>
-            </div>
-          )}
 
           {/* Title */}
           <div>
@@ -376,7 +339,7 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
               <label className="block text-[10px] font-medium text-gray-500 mb-1">Schwierigkeit</label>
               <select
                 value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
+                onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
               >
                 <option value="easy">Einfach</option>
@@ -399,7 +362,7 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
                     onChange={(e) => updateIngredient(i, 'amount', parseFloat(e.target.value) || 0)}
                     placeholder="0"
                     min="0"
-                    step="0.1"
+                    step="any"
                     className="w-14 px-1.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                   <select
@@ -566,7 +529,7 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
                   onChange={(e) => setProtein(e.target.value)}
                   placeholder="0"
                   min="0"
-                  step="0.1"
+                  step="any"
                   className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
                 />
               </div>
@@ -578,7 +541,7 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
                   onChange={(e) => setCarbs(e.target.value)}
                   placeholder="0"
                   min="0"
-                  step="0.1"
+                  step="any"
                   className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
                 />
               </div>
@@ -590,7 +553,7 @@ export function RecipeEditor({ recipe, onSave, onClose }: RecipeEditorProps) {
                   onChange={(e) => setFat(e.target.value)}
                   placeholder="0"
                   min="0"
-                  step="0.1"
+                  step="any"
                   className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
                 />
               </div>

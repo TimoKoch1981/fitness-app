@@ -2,7 +2,7 @@
  * E1RMChart — Estimated 1RM progression per exercise (line chart).
  */
 import { useMemo, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from '../../../../i18n';
 import { getStrengthProgression } from '../../../../lib/calculations/progressiveOverload';
 import type { TimeRange } from './TimeRangeSelector';
@@ -85,7 +85,7 @@ export function E1RMChart({ workouts, timeRange }: E1RMChartProps) {
             <XAxis dataKey="date" tick={{ fontSize: 9 }} tickFormatter={d => d.slice(5)} />
             <YAxis tick={{ fontSize: 10 }} width={40} domain={['auto', 'auto']} />
             <Tooltip
-              formatter={(val: number) => [`${Math.round(val)} kg`]}
+              formatter={((val: number) => [`${Math.round(val)} kg`]) as any}
               labelFormatter={d => d}
               contentStyle={{ fontSize: 12 }}
             />

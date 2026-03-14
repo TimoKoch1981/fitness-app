@@ -133,7 +133,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
 
     try {
       // Load router enrichments from DB (once per session, fire-and-forget)
-      loadRouterEnrichments(supabase).catch(() => {});
+      loadRouterEnrichments(supabase as any).catch(() => {});
 
       // Load persistent context from previous sessions (fire-and-forget on failure)
       let persistedCtx: string | null = null;
@@ -234,8 +234,9 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         }
       }
 
-      // Path 2a: Non-FC provider with ACTION_REQUEST blocks (Ollama direct JSON parse)
-      if (parsedActions.length === 0 && !providerSupportsTools(getAIProvider())) {
+      // Path 2a: Direct JSON parse from ACTION_REQUEST blocks
+      // Runs for non-FC providers OR as fallback when FC path failed
+      if (parsedActions.length === 0) {
         const actionRequests = extractActionRequest(result.content);
         if (actionRequests) {
           for (const req of actionRequests) {
@@ -244,11 +245,14 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               const validation = validateAction(req.type as ActionType, data);
               if (validation.success) {
                 parsedActions.push({ type: req.type as ActionType, data: validation.data, rawJson: req.description });
+              } else {
+                console.warn(`[BuddyChat] Direct parse validation failed for ${req.type}:`, validation.errors);
               }
             } catch { /* JSON parse failed — fallback to regex */ }
           }
           if (parsedActions.length > 0) {
-            console.log(`[BuddyChat] Non-FC path: ${parsedActions.length} actions from ACTION_REQUEST blocks`);
+            console.log(`[BuddyChat] Direct parse path: ${parsedActions.length} actions from ACTION_REQUEST blocks`);
+            fcErrorMessage = undefined; // Clear FC error since direct parse succeeded
           }
         }
       }

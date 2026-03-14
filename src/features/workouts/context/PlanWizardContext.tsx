@@ -11,7 +11,7 @@ import { useAddTrainingPlan, useUpdateTrainingPlan } from '../hooks/useTrainingP
 import { getDefaultDayNames } from '../data/planConstants';
 import { useTranslation } from '../../../i18n';
 import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
-import type { TrainingPlan, SplitType, PlanExercise, CatalogExercise } from '../../../types/health';
+import type { TrainingPlan, SplitType, PlanExercise } from '../../../types/health';
 
 // ── Types ───────────────────────────────────────────────────────────────────────
 

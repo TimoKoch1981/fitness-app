@@ -67,7 +67,9 @@ export interface UserSkillData {
   availableEquipment?: Equipment[];
   recentCycleLogs?: MenstrualCycleLog[];
   favoriteRecipes?: Recipe[];
+  allRecipes?: Recipe[];
   nutritionPreferences?: StoredPreference[];
+  pantryItems?: Array<{ ingredient_name: string; category: string; quantity_text: string | null; status: string; buy_preference: string; expires_at: string | null }>;
 }
 
 export type UserSkillType =
@@ -82,7 +84,8 @@ export type UserSkillType =
   | 'available_equipment'
   | 'cycle_log'
   | 'recipe_favorites'
-  | 'nutrition_preferences';
+  | 'nutrition_preferences'
+  | 'pantry_inventory';
 
 // ── Profile Skill ──────────────────────────────────────────────────────
 
@@ -668,30 +671,49 @@ export function generateAvailableEquipmentSkill(data: UserSkillData): string {
 // ── Recipe Favorites Skill ─────────────────────────────────────────────
 
 /**
- * Generates the user's favorite recipes context — titles, macros, prep time, tags.
- * Allows the nutrition agent to recommend existing user recipes that match macro gaps.
+ * Generates the user's recipe collection context — favorites first, then other recipes.
+ * Allows the nutrition agent to recommend existing user recipes with proper prioritization.
  */
 export function generateRecipeFavoritesSkill(data: UserSkillData): string {
-  const recipes = data.favoriteRecipes;
-  if (!recipes || recipes.length === 0) return '';
+  const favorites = data.favoriteRecipes || [];
+  const others = data.allRecipes || [];
+  if (favorites.length === 0 && others.length === 0) return '';
 
-  const lines = recipes.slice(0, 15).map((r) => {
+  const formatRecipe = (r: Recipe): string => {
     const macros = `${r.calories_per_serving} kcal | ${r.protein_per_serving}g P | ${r.carbs_per_serving}g C | ${r.fat_per_serving}g F`;
     const time = r.prep_time_min + r.cook_time_min;
     const tags = r.tags.length > 0 ? r.tags.join(', ') : '-';
+    const mealType = r.meal_type ? ` [${r.meal_type}]` : '';
     const allergens = r.allergens.length > 0 ? ` ⚠️ ${r.allergens.join(', ')}` : '';
-    return `- **${r.title}** (${r.servings} Portionen, ${time} Min.) — ${macros} | Tags: ${tags}${allergens}`;
-  });
+    return `- **${r.title}**${mealType} (${r.servings} Port., ${time} Min.) — ${macros} | Tags: ${tags}${allergens}`;
+  };
 
-  return [
-    '## 📖 Lieblings-Rezepte des Users',
+  const sections: string[] = [
+    '## 📖 REZEPT-SAMMLUNG DES USERS',
     '',
-    `${recipes.length} Favoriten gespeichert:`,
+    '### PRIORISIERUNG BEI EMPFEHLUNGEN:',
+    '1. ⭐ FAVORITEN zuerst (User kennt und mag diese)',
+    '2. 📋 Eigene Rezepte aus der Sammlung',
+    '3. 💡 Neue Vorschlaege nur wenn nichts Passendes in der Sammlung',
+    '⚠️ WICHTIG: Vorschlaege MUESSEN zur Anfrage passen (meal_type, Makros, Zeitbudget). Ein Mittagessen-Favorit NICHT als Snack vorschlagen!',
     '',
-    ...lines,
-    '',
-    'Nutze diese Rezepte bevorzugt bei Empfehlungen — der User kennt und mag sie bereits.',
-  ].join('\n');
+  ];
+
+  if (favorites.length > 0) {
+    sections.push(`### ⭐ Favoriten (${favorites.length}):`);
+    sections.push('');
+    sections.push(...favorites.slice(0, 15).map(formatRecipe));
+    sections.push('');
+  }
+
+  if (others.length > 0) {
+    sections.push(`### 📋 Weitere Rezepte (${others.length}):`);
+    sections.push('');
+    sections.push(...others.slice(0, 20).map(formatRecipe));
+    sections.push('');
+  }
+
+  return sections.join('\n');
 }
 
 // ── Nutrition Preferences Skill ────────────────────────────────────────
@@ -818,10 +840,95 @@ export function generateUserSkills(
       case 'nutrition_preferences':
         parts.push(generateNutritionPreferencesSkill(data));
         break;
+      case 'pantry_inventory':
+        parts.push(generatePantryInventorySkill(data));
+        break;
     }
   }
 
   return parts.filter(Boolean).join('\n\n');
+}
+
+// ── Pantry Inventory Skill ─────────────────────────────────────────────
+
+const CATEGORY_LABELS_DE: Record<string, string> = {
+  gemuese: 'Gemüse',
+  obst: 'Obst',
+  fleisch_fisch: 'Fleisch & Fisch',
+  milchprodukte: 'Milchprodukte & Eier',
+  getreide_nudeln: 'Getreide & Nudeln',
+  huelsenfruechte: 'Hülsenfrüchte & Samen',
+  nuesse: 'Nüsse & Trockenfrüchte',
+  oele_fette: 'Öle & Fette',
+  gewuerze: 'Gewürze & Kräuter',
+  konserven: 'Konserven & Saucen',
+  backzutaten: 'Backzutaten',
+  getraenke: 'Getränke',
+  tiefkuehl: 'Tiefkühl',
+  brot_aufstriche: 'Brot & Aufstriche',
+  supplements: 'Supplements & Proteine',
+  sonstiges: 'Sonstiges',
+};
+
+function generatePantryInventorySkill(data: UserSkillData): string {
+  const { pantryItems } = data;
+  if (!pantryItems || pantryItems.length === 0) {
+    return `## VORRAT\nDer Nutzer hat noch keinen Vorrat angelegt. Schlage ihm vor, seinen Vorrat einzurichten ("Sag mir was du zu Hause hast" oder "Vorrat einrichten").`;
+  }
+
+  const available = pantryItems.filter(i => i.status === 'available');
+  const low = pantryItems.filter(i => i.status === 'low');
+  const neverBuy = pantryItems.filter(i => i.buy_preference === 'never');
+
+  let skill = `## VORRAT (${available.length} verfügbar, ${low.length} wenig)\n`;
+
+  // Group by category
+  const grouped = new Map<string, typeof pantryItems>();
+  for (const item of [...available, ...low]) {
+    const cat = item.category || 'sonstiges';
+    const arr = grouped.get(cat) ?? [];
+    arr.push(item);
+    grouped.set(cat, arr);
+  }
+
+  for (const [cat, items] of grouped) {
+    const label = CATEGORY_LABELS_DE[cat] ?? cat;
+    skill += `\n### ${label}\n`;
+    for (const item of items) {
+      const qty = item.quantity_text ? ` (${item.quantity_text})` : '';
+      const status = item.status === 'low' ? ' ⚠️ wenig' : '';
+      const expiry = item.expires_at ? ` [MHD: ${item.expires_at}]` : '';
+      skill += `- ${item.ingredient_name}${qty}${status}${expiry}\n`;
+    }
+  }
+
+  // Expiring soon (next 3 days)
+  const today = new Date();
+  const threeDays = new Date(today.getTime() + 3 * 86400000);
+  const expiring = pantryItems.filter(i =>
+    i.expires_at && new Date(i.expires_at) <= threeDays && i.status !== 'empty'
+  );
+  if (expiring.length > 0) {
+    skill += `\n### ⚠️ Bald ablaufend\n`;
+    for (const item of expiring) {
+      skill += `- ${item.ingredient_name} (${item.expires_at})\n`;
+    }
+  }
+
+  // Never-buy items (relevant for recipe suggestions)
+  if (neverBuy.length > 0) {
+    skill += `\n### ❌ Kauft/isst der Nutzer NICHT\n`;
+    skill += neverBuy.map(i => i.ingredient_name).join(', ') + '\n';
+  }
+
+  skill += `\n### REGELN FÜR VORRAT-INTERAKTION\n`;
+  skill += `- Wenn der Nutzer sagt "Ich habe eingekauft: ..." → update_pantry action mit action="add"\n`;
+  skill += `- Wenn der Nutzer sagt "X ist alle/leer" → update_pantry action mit action="set_status", status="empty"\n`;
+  skill += `- Wenn der Nutzer sagt "X wird knapp" → update_pantry action mit action="set_status", status="low"\n`;
+  skill += `- Wenn der Nutzer fragt "Was kann ich kochen?" → Rezepte basierend auf verfügbaren Zutaten vorschlagen\n`;
+  skill += `- Priorisiere Rezepte die bald ablaufende Zutaten verwenden\n`;
+
+  return skill;
 }
 
 // ── Helper Functions ───────────────────────────────────────────────────

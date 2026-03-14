@@ -48,6 +48,12 @@ CREATE INDEX IF NOT EXISTS idx_recipes_is_favorite ON recipes(user_id, is_favori
 CREATE INDEX IF NOT EXISTS idx_recipes_tags ON recipes USING GIN(tags);
 CREATE INDEX IF NOT EXISTS idx_recipes_created_at ON recipes(user_id, created_at DESC);
 
+-- ── Grants ────────────────────────────────────────────────────────────────────
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE recipes TO authenticated;
+GRANT SELECT ON TABLE recipes TO anon;
+GRANT ALL ON TABLE recipes TO service_role;
+
 -- ── RLS ─────────────────────────────────────────────────────────────────────
 
 ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;

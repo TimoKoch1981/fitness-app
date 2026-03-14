@@ -2,7 +2,7 @@
  * SleepChart — Sleep duration (bars) + quality (line) chart.
  */
 import { useMemo } from 'react';
-import { BarChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart } from 'recharts';
+import { Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart } from 'recharts';
 import { useTranslation } from '../../../../i18n';
 import { useSleepLogs } from '../../../sleep/hooks/useSleep';
 import type { TimeRange } from './TimeRangeSelector';

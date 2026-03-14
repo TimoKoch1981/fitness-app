@@ -10,8 +10,8 @@
  */
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Dumbbell } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
+
+
 import { BuddyQuickAccess } from '../../../shared/components/BuddyQuickAccess';
 import { useTranslation } from '../../../i18n';
 // useWorkoutsByDate removed (today tab eliminated)
@@ -21,12 +21,11 @@ import { AddWorkoutDialog } from './AddWorkoutDialog';
 import { TrainingPlanList } from './TrainingPlanList';
 import { PlanWizardProvider, usePlanWizard } from '../context/PlanWizardContext';
 import { PlanWizardDialog } from './PlanWizardDialog';
-import { PlanEditorDialog } from './PlanEditorDialog';
 import { WorkoutHistoryPage } from './WorkoutHistoryPage';
-import type { TrainingPlan, TrainingPlanDay } from '../../../types/health';
+import type { TrainingPlan } from '../../../types/health';
 // Lazy-load analytics dashboard
 const ProgressDashboard = lazy(() => import('./ProgressDashboard').then(m => ({ default: m.ProgressDashboard })));
-import { today, formatDate } from '../../../lib/utils';
+import { today } from '../../../lib/utils';
 
 interface WorkoutsTabContentProps {
   showAddDialog: boolean;
@@ -43,11 +42,10 @@ interface WorkoutsTabContentProps {
 }
 
 export function WorkoutsTabContent({
-  showAddDialog, onOpenAddDialog, onCloseAddDialog,
+  showAddDialog, onOpenAddDialog: _onOpenAddDialog, onCloseAddDialog,
   forceTab, onForceTabApplied, openCreatePlan, onCreatePlanOpened,
 }: WorkoutsTabContentProps) {
   const { t, language } = useTranslation();
-  const queryClient = useQueryClient();
   const [activeSubTab, setActiveSubTab] = useState<'plan' | 'history' | 'progress'>('plan');
 
   // Apply forceTab from parent (U2: "Plan erstellen" → switch to plan tab)
@@ -73,7 +71,7 @@ export function WorkoutsTabContent({
   const { data: activePlan, isLoading: isPlanLoading } = useActivePlan();
 
   // Multi-plan state
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [selectedPlanId, _setSelectedPlanId] = useState<string | null>(null);
 
   // PlanWizard: pending action from buddy chips (consumed inside PlanWizardProvider)
   const [pendingWizardAction, setPendingWizardAction] = useState<'create' | 'edit' | null>(null);

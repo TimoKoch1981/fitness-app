@@ -64,6 +64,7 @@ import { StreakDisplay } from '../features/gamification/components/StreakDisplay
 import { BadgeGrid } from '../features/gamification/components/BadgeGrid';
 import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyChallengeCard';
 import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidget';
+import { AlternativeScoringCard } from '../features/nutrition/components/AlternativeScoringCard';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -359,6 +360,9 @@ export function CockpitPage() {
             );
           })}
         </div>
+
+        {/* Alternative Scoring (WW Points, Noom, Nutri-Score) */}
+        <AlternativeScoringCard totals={totals} />
 
         {/* Cycle Phase Widget — only for female/other with cycle tracking enabled */}
         {(profile?.gender === 'female' || profile?.gender === 'other') && (

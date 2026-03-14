@@ -350,6 +350,22 @@ export const SaveRecipeSchema = z.object({
   tags: z.array(z.string()).default([]),
 });
 
+export const ImportRecipeSchema = z.object({
+  url: z.string().url(),
+});
+
+export const UpdatePantrySchema = z.object({
+  action: z.enum(['add', 'remove', 'set_status', 'clear_all']),
+  items: z.array(z.object({
+    name: z.string().min(1),
+    category: z.string().optional(),
+    quantity: z.string().optional(),
+    status: z.enum(['available', 'low', 'empty']).optional(),
+    buy_preference: z.enum(['always', 'sometimes', 'never']).optional(),
+    expires_at: z.string().optional(),
+  })).optional().default([]),
+});
+
 // ── Schema Registry ─────────────────────────────────────────────────────
 
 const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
@@ -371,6 +387,8 @@ const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
   search_product: SearchProductSchema,
   restart_tour: RestartTourSchema,
   save_recipe: SaveRecipeSchema,
+  import_recipe: ImportRecipeSchema,
+  update_pantry: UpdatePantrySchema,
 };
 
 // ── Public API ──────────────────────────────────────────────────────────

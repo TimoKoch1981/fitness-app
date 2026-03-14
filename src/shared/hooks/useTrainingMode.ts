@@ -62,6 +62,18 @@ export interface TrainingModeFlags {
   showDoctorReport: boolean;
   /** Show phase progress bar */
   showPhaseProgress: boolean;
+
+  // === F15: Bodybuilder Nutrition Flags ===
+  /** Show bodybuilder nutrition features (phase macros, macro cycling) */
+  showBodybuilderNutrition: boolean;
+  /** Show macro cycling planner (high/low/moderate carb days) */
+  showMacroCycling: boolean;
+  /** Show meal timing planner */
+  showMealTiming: boolean;
+  /** Show supplement timing recommendations */
+  showSupplementTiming: boolean;
+  /** Show peak week nutrition protocol */
+  showPeakWeekNutrition: boolean;
 }
 
 export function useTrainingMode(): TrainingModeFlags {
@@ -100,5 +112,12 @@ export function useTrainingMode(): TrainingModeFlags {
     showHematocritAlert: isPowerPlus,
     showDoctorReport: isPowerPlus,
     showPhaseProgress: isPower,
+
+    // F15: Bodybuilder nutrition
+    showBodybuilderNutrition: isPower,
+    showMacroCycling: isPower,
+    showMealTiming: isPower,
+    showSupplementTiming: isPower,
+    showPeakWeekNutrition: isPower && phase === 'peak_week',
   };
 }

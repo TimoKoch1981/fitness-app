@@ -356,6 +356,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           catalog={catalog ?? []}
           onExerciseClick={setSelectedExercise}
           onEdit={setEditingDay}
+          onDelete={() => {/* handled elsewhere */}}
         />
       ))}
 

@@ -61,7 +61,7 @@ const SPLIT_TYPE_LABELS: Record<SplitType, { de: string; en: string }> = {
   mixed: { de: 'Gemischt', en: 'Mixed' },
 };
 
-export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan: _onSelectPlan, onCreatePlan, expandedPlanId, onToggleExpand }: TrainingPlanListProps) {
+export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan: _onSelectPlan, onCreatePlan: _onCreatePlan, expandedPlanId, onToggleExpand }: TrainingPlanListProps) {
   const { t, language } = useTranslation();
   const isDE = language === 'de';
   const plans = (t as unknown as Record<string, Record<string, string>>).plans;

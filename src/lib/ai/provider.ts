@@ -25,7 +25,7 @@ export interface ChatOptions {
   /** OpenAI Function Calling tool definitions */
   tools?: ToolDefinition[];
   /** Control tool usage: 'auto' (default), 'none', or force a specific function */
-  tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
+  tool_choice?: 'auto' | 'none' | 'required' | { type: 'function'; function: { name: string } };
 }
 
 export interface AIProvider {

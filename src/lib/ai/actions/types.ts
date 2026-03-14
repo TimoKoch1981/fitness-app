@@ -27,7 +27,9 @@ export type ActionType =
   | 'update_equipment'
   | 'search_product'
   | 'restart_tour'
-  | 'save_recipe';
+  | 'save_recipe'
+  | 'import_recipe'
+  | 'update_pantry';
 
 /** Action types that are auto-executed (no user confirmation needed) */
 export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product', 'restart_tour'];
@@ -186,6 +188,24 @@ export function getActionDisplayInfo(action: ParsedAction): ActionDisplayInfo {
         icon: '🎯',
         title: 'Produkttour wird gestartet...',
         summary: 'Tour wird neu gestartet',
+      };
+    case 'import_recipe':
+      return {
+        icon: '🌐',
+        title: 'Rezept importieren?',
+        summary: `Import von ${d.url ?? 'URL'}`,
+      };
+    case 'update_pantry':
+      return {
+        icon: '🛒',
+        title: d.action === 'remove' ? 'Vorrat aktualisieren?' : 'Zum Vorrat hinzufügen?',
+        summary: `${(d.items as unknown[])?.length ?? '?'} Zutaten — ${d.action ?? 'update'}`,
+      };
+    default:
+      return {
+        icon: '⚡',
+        title: action.type,
+        summary: '',
       };
   }
 }

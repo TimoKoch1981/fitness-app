@@ -2,7 +2,7 @@
  * BloodWorkChart — Blood biomarker trends with reference ranges.
  */
 import { useMemo, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from '../../../../i18n';
 import { useBloodWorkLogs } from '../../../medical/hooks/useBloodWork';
 import type { TimeRange } from './TimeRangeSelector';

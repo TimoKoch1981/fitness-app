@@ -13,8 +13,10 @@ import { cn } from '../lib/utils';
 import { MealsTabContent } from '../features/meals/components/MealsTabContent';
 import { RecipesTabContent } from '../features/recipes/components/RecipesTabContent';
 import { NutritionHistoryTab } from '../features/meals/components/NutritionHistoryTab';
+import { PantryTabContent } from '../features/pantry/components/PantryTabContent';
+import { ShoppingTabContent } from '../features/shopping/components/ShoppingTabContent';
 
-type NutritionTab = 'meals' | 'recipes' | 'history';
+type NutritionTab = 'meals' | 'recipes' | 'pantry' | 'shopping' | 'history';
 
 export function NutritionPage() {
   const { t, language } = useTranslation();
@@ -26,6 +28,8 @@ export function NutritionPage() {
   const tabs: { key: NutritionTab; label: string }[] = [
     { key: 'meals', label: t.tracking.nutrition },
     { key: 'recipes', label: t.recipes.title },
+    { key: 'pantry', label: language === 'de' ? 'Vorrat' : 'Pantry' },
+    { key: 'shopping', label: language === 'de' ? 'Einkauf' : 'Shopping' },
     { key: 'history', label: language === 'de' ? 'Historie' : 'History' },
   ];
 
@@ -41,7 +45,7 @@ export function NutritionPage() {
     <PageShell
       title={t.tracking.nutrition}
       actions={
-        activeTab !== 'history' ? (
+        activeTab !== 'history' && activeTab !== 'pantry' && activeTab !== 'shopping' ? (
           <button
             onClick={handleAddAction}
             className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
@@ -86,6 +90,16 @@ export function NutritionPage() {
             onOpenAddDialog={() => setShowRecipesDialog(true)}
             onCloseAddDialog={() => setShowRecipesDialog(false)}
           />
+        </ComponentErrorBoundary>
+      )}
+      {activeTab === 'pantry' && (
+        <ComponentErrorBoundary label="PantryTabContent" language={language as 'de' | 'en'}>
+          <PantryTabContent />
+        </ComponentErrorBoundary>
+      )}
+      {activeTab === 'shopping' && (
+        <ComponentErrorBoundary label="ShoppingTabContent" language={language as 'de' | 'en'}>
+          <ShoppingTabContent />
         </ComponentErrorBoundary>
       )}
       {activeTab === 'history' && (

@@ -30,8 +30,11 @@ import {
   SearchProductSchema,
   RestartTourSchema,
   SaveRecipeSchema,
+  ImportRecipeSchema,
+  UpdatePantrySchema,
 } from './schemas';
 import type { ActionType } from './types';
+import { supabase } from '../../supabase';
 import type {
   SplitType,
   PlanExercise,
@@ -258,6 +261,19 @@ const ToolSchemaMap: Partial<Record<ActionType, z.ZodObject<z.ZodRawShape>>> = {
       duration_min: z.number().describe('Dauer in Minuten').optional(),
     })).describe('Zubereitungsschritte').optional(),
     tags: z.array(z.string()).describe('Tags (High-Protein, Low-Carb, Vegan, etc.)').optional(),
+  }),
+  import_recipe: z.object({
+    url: z.string().describe('URL der Rezeptseite'),
+  }),
+  update_pantry: z.object({
+    action: z.enum(['add', 'remove', 'set_status', 'clear_all']).describe('Aktion: add=hinzufuegen, remove=entfernen, set_status=Status aendern, clear_all=alles leeren'),
+    items: z.array(z.object({
+      name: z.string().describe('Zutat, z.B. Haehnchenbrust'),
+      category: z.string().describe('Kategorie: gemuese, obst, fleisch_fisch, milchprodukte, getreide_nudeln, huelsenfruechte, nuesse, oele_fette, gewuerze, konserven, backzutaten, getraenke, tiefkuehl, brot_aufstriche, supplements').optional(),
+      quantity: z.string().describe('Menge, z.B. 500g, 2 Stueck, 1 Packung').optional(),
+      status: z.enum(['available', 'low', 'empty']).describe('Status: available=vorhanden, low=wenig, empty=leer').optional(),
+      buy_preference: z.enum(['always', 'sometimes', 'never']).describe('Kaufverhalten: always=immer da, sometimes=bei Bedarf, never=kaufe ich nie').optional(),
+    })).describe('Liste der Zutaten'),
   }),
 };
 
@@ -800,7 +816,14 @@ export function registerDefaultActions(): void {
       icon: '📖',
       titleDE: 'Rezept wird gespeichert...',
       titleEN: 'Saving recipe...',
-      summary: (d) => `${d.title} (${d.servings || 2} Portionen)`,
+      summary: (d) => {
+        const mealLabels: Record<string, string> = {
+          breakfast: 'Fruehstueck', lunch: 'Mittag', dinner: 'Abend',
+          snack: 'Snack', pre_workout: 'Pre-WO', post_workout: 'Post-WO',
+        };
+        const cat = d.meal_type ? ` · ${mealLabels[d.meal_type as string] || d.meal_type}` : '';
+        return `${d.title} (${d.servings || 2} Portionen${cat})`;
+      },
     },
     execute: async (data, ctx) => {
       const d = data as Record<string, unknown>;
@@ -831,6 +854,204 @@ export function registerDefaultActions(): void {
     },
     toolDescription: 'Rezept speichern. Erstellt ein neues Rezept mit Zutaten, Zubereitungsschritten und Naehrwerten.',
     toolSchema: ToolSchemaMap.save_recipe,
+    agentHint: 'nutrition',
+  });
+
+  // ── import_recipe ──────────────────────────────────────────────────────
+  actionRegistry.register({
+    type: 'import_recipe',
+    schema: ImportRecipeSchema,
+    display: {
+      icon: '🌐',
+      titleDE: 'Rezept importieren',
+      titleEN: 'Import recipe',
+      summary: (d) => {
+        const title = d._importedTitle as string | undefined;
+        const method = d._sourceMethod as string | undefined;
+        if (title) return `${title}${method ? ` (${method})` : ''}`;
+        return `Import von ${d.url ?? 'URL'}`;
+      },
+    },
+    execute: async (data, ctx) => {
+      const d = data as Record<string, unknown>;
+      const url = d.url as string;
+
+      // Get session token for Edge Function auth
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error('Nicht eingeloggt / Not authenticated');
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321';
+      const res = await fetch(`${supabaseUrl}/functions/v1/recipe-import`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`Rezept-Import fehlgeschlagen (${res.status}): ${errText}`);
+      }
+
+      const result = await res.json() as { success: boolean; source?: string; recipe?: Record<string, unknown>; message?: string };
+
+      if (!result.success || !result.recipe) {
+        throw new Error(result.message || 'Kein Rezept auf dieser Seite gefunden.');
+      }
+
+      const recipe = result.recipe;
+
+      // Store the imported title and method for display summary
+      d._importedTitle = recipe.title;
+      d._sourceMethod = result.source ?? 'web';
+
+      // Insert recipe into DB using same pattern as save_recipe
+      await ctx.mutations.addRecipe.mutateAsync({
+        title: (recipe.title as string) || 'Importiertes Rezept',
+        description: (recipe.description as string) || '',
+        meal_type: (recipe.meal_type as string) || null,
+        prep_time_min: (recipe.prep_time_min as number) || 0,
+        cook_time_min: (recipe.cook_time_min as number) || 0,
+        servings: (recipe.servings as number) || 2,
+        difficulty: 'easy',
+        calories_per_serving: (recipe.calories_per_serving as number) || 0,
+        protein_per_serving: (recipe.protein_per_serving as number) || 0,
+        carbs_per_serving: (recipe.carbs_per_serving as number) || 0,
+        fat_per_serving: (recipe.fat_per_serving as number) || 0,
+        fiber_per_serving: null,
+        sugar_per_serving: null,
+        ingredients: (recipe.ingredients as Array<Record<string, unknown>>) || [],
+        steps: (recipe.steps as Array<Record<string, unknown>>) || [],
+        tags: (recipe.tags as string[]) || [],
+        allergens: (recipe.allergens as string[]) || [],
+        image_url: (recipe.image_url as string) || null,
+        source_url: (recipe.source_url as string) || url,
+        import_method: (recipe.import_method as string) || null,
+        is_favorite: false,
+        is_public: false,
+        fitness_goal: [],
+      });
+    },
+    toolDescription: 'Rezept von URL importieren. Extrahiert Titel, Zutaten, Schritte und Makros von einer Webseite.',
+    toolSchema: ToolSchemaMap.import_recipe,
+    agentHint: 'nutrition',
+  });
+
+  // ── update_pantry ─────────────────────────────────────────────────────
+  actionRegistry.register({
+    type: 'update_pantry',
+    schema: UpdatePantrySchema,
+    display: {
+      icon: '🛒',
+      titleDE: 'Vorrat aktualisieren',
+      titleEN: 'Update pantry',
+      summary: (d) => {
+        const items = d.items as Array<{ name: string }> | undefined;
+        const action = d.action as string;
+        const count = items?.length ?? 0;
+        const names = items?.slice(0, 3).map((i) => i.name).join(', ') ?? '';
+        const suffix = count > 3 ? ` +${count - 3}` : '';
+        if (action === 'clear_all') return 'Gesamten Vorrat leeren';
+        if (action === 'remove') return `${count} entfernen: ${names}${suffix}`;
+        if (action === 'set_status') return `Status ändern: ${names}${suffix}`;
+        return `${count} hinzufügen: ${names}${suffix}`;
+      },
+    },
+    execute: async (data, ctx) => {
+      const d = data as { action: string; items: Array<{ name: string; category?: string; quantity?: string; status?: string; buy_preference?: string }> };
+
+      if (d.action === 'clear_all') {
+        await ctx.mutations.clearPantry?.mutateAsync(undefined);
+        return;
+      }
+
+      if (d.action === 'remove') {
+        // Find matching pantry items and remove them
+        for (const item of d.items) {
+          const normalized = item.name.toLowerCase().trim()
+            .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe')
+            .replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss');
+
+          const { data: matches } = await supabase
+            .from('user_pantry')
+            .select('id')
+            .eq('user_id', ctx.userId)
+            .ilike('ingredient_normalized', `%${normalized}%`)
+            .limit(1);
+
+          if (matches?.[0]) {
+            await supabase.from('user_pantry').delete().eq('id', matches[0].id);
+          }
+        }
+        ctx.mutations.invalidatePantry?.();
+        return;
+      }
+
+      if (d.action === 'set_status') {
+        for (const item of d.items) {
+          const normalized = item.name.toLowerCase().trim()
+            .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe')
+            .replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss');
+
+          await supabase
+            .from('user_pantry')
+            .update({
+              status: item.status || 'available',
+              last_confirmed_at: new Date().toISOString(),
+            })
+            .eq('user_id', ctx.userId)
+            .ilike('ingredient_normalized', `%${normalized}%`);
+        }
+        ctx.mutations.invalidatePantry?.();
+        return;
+      }
+
+      // action === 'add'
+      // Try to match against catalog for enrichment
+      const rows = [];
+      for (const item of d.items) {
+        const normalized = item.name.toLowerCase().trim()
+          .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe')
+          .replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss');
+
+        // Try catalog match
+        const { data: catalogMatch } = await supabase
+          .from('ingredient_catalog')
+          .select('id, name_de, category, storage_type')
+          .or(`name_de.ilike.%${item.name}%,search_terms.cs.{${item.name}}`)
+          .limit(1);
+
+        const match = catalogMatch?.[0];
+
+        rows.push({
+          user_id: ctx.userId,
+          ingredient_id: match?.id || null,
+          ingredient_name: match?.name_de || item.name,
+          ingredient_normalized: normalized,
+          category: item.category || match?.category || 'sonstiges',
+          quantity_text: item.quantity || null,
+          storage_location: match?.storage_type || null,
+          status: item.status || 'available',
+          buy_preference: item.buy_preference || 'sometimes',
+          last_confirmed_at: new Date().toISOString(),
+        });
+      }
+
+      if (rows.length > 0) {
+        const { error } = await supabase
+          .from('user_pantry')
+          .upsert(rows, { onConflict: 'user_id,ingredient_normalized' });
+
+        if (error) throw error;
+      }
+
+      ctx.mutations.invalidatePantry?.();
+    },
+    toolDescription: 'Vorrat verwalten: Zutaten hinzufuegen, entfernen oder Status aendern. Der Nutzer sagt z.B. "Ich habe eingekauft: Reis, Haehnchen, Brokkoli" oder "Der Reis ist alle" oder "Was habe ich im Vorrat?". Nutze "add" zum Hinzufuegen, "remove" zum Entfernen, "set_status" zum Status-Update (available/low/empty).',
+    toolSchema: ToolSchemaMap.update_pantry,
     agentHint: 'nutrition',
   });
 

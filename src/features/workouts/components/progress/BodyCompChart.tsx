@@ -25,7 +25,7 @@ export function BodyCompChart({ timeRange }: BodyCompChartProps) {
         date: m.date,
         label: m.date.slice(5),
         weight: m.weight_kg,
-        bodyFat: m.body_fat_pct ?? m.body_fat_percentage,
+        bodyFat: m.body_fat_pct,
       }));
   }, [measurements, timeRange]);
 

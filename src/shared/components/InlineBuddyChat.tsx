@@ -144,23 +144,43 @@ function InlineBuddyChatContent() {
   // Learned nutrition preferences
   const { data: nutritionPreferences } = useNutritionPreferences();
 
-  // Favorite recipes for nutrition agent context (lightweight query)
-  const { data: favoriteRecipes } = useQuery({
-    queryKey: ['recipes', 'favorites', user?.id],
+  // User's pantry items for nutrition agent context
+  const { data: pantryItems } = useQuery({
+    queryKey: ['user-pantry', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('user_pantry')
+        .select('ingredient_name, category, quantity_text, status, buy_preference, expires_at')
+        .eq('user_id', user.id)
+        .order('category')
+        .order('ingredient_name');
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !!user?.id,
+    staleTime: 30_000,
+  });
+
+  // All user recipes for nutrition agent context (favorites + non-favorites)
+  const { data: allUserRecipes } = useQuery({
+    queryKey: ['recipes', 'all', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('recipes')
         .select('*')
-        .eq('is_favorite', true)
+        .order('is_favorite', { ascending: false }) // favorites first
         .order('updated_at', { ascending: false })
-        .limit(15);
+        .limit(50);
       if (error) return [];
       return (data || []) as Recipe[];
     },
     enabled: !!user?.id,
     staleTime: 60_000,
   });
+  const favoriteRecipes = allUserRecipes?.filter(r => r.is_favorite) ?? [];
+  const nonFavoriteRecipes = allUserRecipes?.filter(r => !r.is_favorite) ?? [];
 
   const healthContext: Partial<HealthContext> = {
     profile: profile ?? undefined,
@@ -192,8 +212,10 @@ function InlineBuddyChatContent() {
     recentCycleLogs: cycleLogs ?? [],
     latestBloodWork: latestBloodWork ?? undefined,
     recentSymptomLogs: symptomLogs ?? [],
-    favoriteRecipes: favoriteRecipes ?? [],
+    favoriteRecipes: favoriteRecipes,
+    allRecipes: nonFavoriteRecipes,
     nutritionPreferences: nutritionPreferences ?? [],
+    pantryItems: pantryItems ?? [],
   };
 
   // ── Chat Hook ───────────────────────────────────────────────────────────
@@ -356,11 +378,14 @@ function InlineBuddyChatContent() {
           const display = getActionDisplayInfo(r.action);
           return `${display.icon} ${display.summary}`;
         });
-        // Add navigation hint for training plans
+        // Add navigation hints
         const hasPlanSave = successes.some(r => r.action.type === 'save_training_plan');
+        const hasRecipeSave = successes.some(r => r.action.type === 'save_recipe');
         const navHint = hasPlanSave
           ? (language === 'de' ? '\n\n👉 Öffne Training → Plan um deinen Plan zu sehen.' : '\n\n👉 Open Training → Plan to see your plan.')
-          : '';
+          : hasRecipeSave
+            ? (language === 'de' ? '\n\n👉 Öffne Ernährung → Rezepte um dein Rezept zu sehen.' : '\n\n👉 Open Nutrition → Recipes to see your recipe.')
+            : '';
         addSystemMessage(
           language === 'de'
             ? `\u2705 ${successes.length === 1 ? 'Gespeichert' : `${successes.length}x gespeichert`}:\n${summaries.join('\n')}${navHint}`

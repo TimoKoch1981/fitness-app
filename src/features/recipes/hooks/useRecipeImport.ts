@@ -191,13 +191,13 @@ export function parseRecipeText(text: string): Partial<Recipe> {
 
   // Build result, only include non-empty fields
   const result: Partial<Recipe> = {};
-  if (name) result.name = name;
+  if (name) result.title = name;
   if (description) result.description = description;
   if (ingredients.length > 0) result.ingredients = ingredients;
-  if (instructions.length > 0) result.instructions = instructions;
+  if (instructions.length > 0) result.steps = instructions.map(text => ({ text }));
   if (servings > 0) result.servings = servings;
-  if (prepTime > 0) result.prepTime = prepTime;
-  if (cookTime > 0) result.cookTime = cookTime;
+  if (prepTime > 0) result.prep_time_min = prepTime;
+  if (cookTime > 0) result.cook_time_min = cookTime;
 
   return result;
 }
@@ -220,7 +220,7 @@ export function useRecipeImport() {
 
     try {
       const result = parseRecipeText(text);
-      if (!result.name && !result.ingredients?.length) {
+      if (!result.title && !result.ingredients?.length) {
         setError('Konnte kein Rezept erkennen. Bitte formatiere den Text mit Abschnitten: Zutaten, Zubereitung.');
         setParsedRecipe(null);
         return null;

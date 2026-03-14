@@ -16,11 +16,17 @@ import {
   AlertTriangle,
   Flame,
   Image as ImageIcon,
+  ExternalLink,
+  Package,
+  ChevronDown,
+  ChevronUp,
+  ShoppingCart,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { RecipeToMealButton } from './RecipeToMealButton';
 import { deriveAutoTags } from '../types';
 import type { Recipe } from '../types';
+import type { PantryMatchResult } from '../../pantry/utils/pantryMatcher';
 
 interface RecipeDetailProps {
   recipe: Recipe;
@@ -28,6 +34,8 @@ interface RecipeDetailProps {
   onEdit: (recipe: Recipe) => void;
   onDelete: (id: string) => void;
   onToggleFavorite?: (id: string, isFavorite: boolean) => void;
+  pantryMatch?: PantryMatchResult;
+  onAddToShoppingList?: (recipe: Recipe) => void;
 }
 
 const DIFFICULTY_LABELS: Record<string, { de: string; en: string; color: string }> = {
@@ -36,10 +44,11 @@ const DIFFICULTY_LABELS: Record<string, { de: string; en: string; color: string 
   hard: { de: 'Anspruchsvoll', en: 'Advanced', color: 'text-red-600 bg-red-50' },
 };
 
-export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavorite }: RecipeDetailProps) {
+export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavorite, pantryMatch, onAddToShoppingList }: RecipeDetailProps) {
   const { t, language } = useTranslation();
   const [servings, setServings] = useState(recipe.servings);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMissing, setShowMissing] = useState(false);
 
   const scaleFactor = servings / recipe.servings;
   const autoTags = deriveAutoTags(recipe);
@@ -104,7 +113,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
                 {recipe.servings} {t.recipes.servings}
               </span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${diffLabel.color}`}>
-                {diffLabel[language] || diffLabel.de}
+                {diffLabel[language as 'de' | 'en'] || diffLabel.de}
               </span>
             </div>
           </div>
@@ -132,6 +141,19 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
                 <p className="text-xs text-amber-600 capitalize">{recipe.allergens.join(', ')}</p>
               </div>
             </div>
+          )}
+
+          {/* Source URL */}
+          {recipe.source_url && (
+            <a
+              href={recipe.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-teal-600 hover:underline px-1"
+            >
+              <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+              {new URL(recipe.source_url).hostname.replace('www.', '')}
+            </a>
           )}
 
           {/* Macros Card */}
@@ -182,14 +204,34 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
 
           {/* Ingredients */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t.recipes.ingredients}</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900">{t.recipes.ingredients}</h3>
+              {pantryMatch && (
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  pantryMatch.matchPercent >= 80
+                    ? 'bg-green-100 text-green-700'
+                    : pantryMatch.matchPercent >= 50
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  <Package className="h-3 w-3 inline mr-1" />
+                  {pantryMatch.matched.length}/{pantryMatch.matched.length + pantryMatch.missing.length}{' '}
+                  {language === 'de' ? 'verfuegbar' : 'available'}
+                </span>
+              )}
+            </div>
             <ul className="space-y-1.5">
               {recipe.ingredients.map((ing, i) => {
                 const scaledAmount = Math.round(ing.amount * scaleFactor * 10) / 10;
+                const isMissing = pantryMatch?.missing.includes(ing.name);
                 return (
                   <li key={i} className="flex items-center gap-2 text-sm">
-                    <span className="w-2 h-2 rounded-full bg-teal-400 flex-shrink-0" />
-                    <span className="text-gray-900">
+                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      pantryMatch
+                        ? isMissing ? 'bg-red-400' : 'bg-green-400'
+                        : 'bg-teal-400'
+                    }`} />
+                    <span className={isMissing ? 'text-red-600' : 'text-gray-900'}>
                       <span className="font-medium">{scaledAmount} {ing.unit}</span>{' '}
                       {ing.name}
                     </span>
@@ -198,6 +240,57 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
               })}
             </ul>
           </div>
+
+          {/* Missing Ingredients */}
+          {pantryMatch && pantryMatch.missing.length > 0 && (
+            <div className="border border-red-100 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setShowMissing(!showMissing)}
+                className="w-full flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-left"
+              >
+                <Package className="h-4 w-4 text-red-500" />
+                <span className="flex-1 text-sm font-medium text-red-700">
+                  {language === 'de'
+                    ? `${pantryMatch.missing.length} fehlende Zutat${pantryMatch.missing.length > 1 ? 'en' : ''}`
+                    : `${pantryMatch.missing.length} missing ingredient${pantryMatch.missing.length > 1 ? 's' : ''}`}
+                </span>
+                {showMissing ? (
+                  <ChevronUp className="h-4 w-4 text-red-400" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-red-400" />
+                )}
+              </button>
+              {showMissing && (
+                <div className="px-3 py-2 space-y-1">
+                  {pantryMatch.missing.map((name) => (
+                    <div key={name} className="flex items-center gap-2 text-sm text-red-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                      {name}
+                    </div>
+                  ))}
+                  {onAddToShoppingList && (
+                    <button
+                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 bg-teal-50 text-teal-700 text-sm font-medium rounded-lg hover:bg-teal-100 transition-colors"
+                      onClick={() => onAddToShoppingList(recipe)}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      {language === 'de' ? 'Zur Einkaufsliste' : 'Add to Shopping List'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* All ingredients available badge */}
+          {pantryMatch && pantryMatch.missing.length === 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
+              <Package className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-700">
+                {language === 'de' ? 'Alle Zutaten im Vorrat verfuegbar!' : 'All ingredients available in pantry!'}
+              </span>
+            </div>
+          )}
 
           {/* Steps */}
           {recipe.steps.length > 0 && (

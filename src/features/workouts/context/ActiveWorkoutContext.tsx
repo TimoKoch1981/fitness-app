@@ -17,6 +17,7 @@ import type {
   WarmupResult,
   WorkoutTrackingMode,
   WorkoutSessionPhase,
+  CatalogExercise,
 } from '../../../types/health';
 import { suggestExerciseDefaults } from '../utils/suggestExerciseDefaults';
 

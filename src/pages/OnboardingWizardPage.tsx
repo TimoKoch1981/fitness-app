@@ -61,6 +61,7 @@ const DIET_OPTIONS = [
 const ALLERGY_OPTIONS = [
   'nuts', 'peanuts', 'gluten', 'lactose', 'milk_protein', 'shellfish', 'mollusks', 'soy', 'eggs',
   'fructose', 'histamine', 'celery', 'mustard', 'sesame', 'lupins', 'sulfites',
+  'fish', 'sorbitol', 'fodmap', 'cross_allergy', 'salicylate', 'nickel_food', 'alpha_gal',
 ] as const;
 
 const HEALTH_RESTRICTION_OPTIONS = [
@@ -118,6 +119,13 @@ const ALLERGY_I18N: Record<string, string> = {
   sesame: 'allergy_sesame',
   lupins: 'allergy_lupins',
   sulfites: 'allergy_sulfites',
+  fish: 'allergy_fish',
+  sorbitol: 'allergy_sorbitol',
+  fodmap: 'allergy_fodmap',
+  cross_allergy: 'allergy_cross_allergy',
+  salicylate: 'allergy_salicylate',
+  nickel_food: 'allergy_nickel_food',
+  alpha_gal: 'allergy_alpha_gal',
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

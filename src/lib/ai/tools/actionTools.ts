@@ -37,6 +37,9 @@ const TOOL_DESCRIPTIONS: Record<ActionType, string> = {
   log_blood_work: 'Blutwerte loggen. Erfasse Laborergebnisse wie Testosteron, Haematokrit, Haemoglobin, Cholesterin, Leberwerte etc. Mindestens ein Wert muss vorhanden sein.',
   log_substance: 'Substanz-Einnahme loggen. Erfasse welche Substanz eingenommen wurde, Dosierung und optional die Injektionsstelle.',
   save_training_plan: 'Trainingsplan speichern. Erfasse Planname, Split-Typ, Tage pro Woche und die einzelnen Trainingstage mit Uebungen.',
+  add_training_day: 'Trainingstag hinzufuegen. Fuegt einen neuen Tag zum aktiven Trainingsplan hinzu.',
+  modify_training_day: 'Trainingstag bearbeiten. Aendert Uebungen, Saetze oder Wiederholungen eines bestehenden Trainingstags.',
+  remove_training_day: 'Trainingstag entfernen. Entfernt einen Tag aus dem aktiven Trainingsplan.',
   save_product: 'Neues Produkt/Lebensmittel speichern. Erfasse Naehrwerte pro Portion (Kalorien, Protein, Kohlenhydrate, Fett).',
   add_substance: 'Neue Substanz anlegen. Erfasse Name, Kategorie (TRT/PED/Medikament/Supplement), Verabreichungsart, Dosierung.',
   add_reminder: 'Erinnerung anlegen. Erfasse Titel, Typ, Tageszeit oder konkreten Zeitpunkt, Wiederholungsmodus.',
@@ -45,6 +48,8 @@ const TOOL_DESCRIPTIONS: Record<ActionType, string> = {
   search_product: 'Produkt recherchieren. Suche nach Naehrwertinformationen fuer ein Lebensmittel.',
   restart_tour: 'Produkttour neu starten. Startet die gefuehrte Tour durch die App.',
   save_recipe: 'Rezept speichern. Erstellt ein neues Rezept mit Zutaten, Zubereitungsschritten und Naehrwerten.',
+  import_recipe: 'Rezept von URL importieren. Extrahiert Titel, Zutaten, Schritte und Makros von einer Webseite.',
+  update_pantry: 'Vorrat verwalten: Zutaten hinzufuegen, entfernen oder Status aendern. Der Nutzer sagt z.B. "Ich habe eingekauft: Reis, Haehnchen, Brokkoli" oder "Der Reis ist alle". Nutze "add" zum Hinzufuegen, "remove" zum Entfernen, "set_status" zum Status-Update (available/low/empty).',
 };
 
 // ── Zod schemas (duplicated from schemas.ts to avoid .refine()/.transform() issues) ──
@@ -186,6 +191,41 @@ const ToolSchemas: Record<ActionType, z.ZodObject<z.ZodRawShape>> = {
     })),
   }),
 
+  add_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer (1-14)'),
+    name: z.string().describe('Tagesname, z.B. Push Day'),
+    focus: z.string().describe('Trainingsfokus').optional(),
+    exercises: z.array(z.object({
+      name: z.string().describe('Uebungsname'),
+      sets: z.number().describe('Saetze').optional(),
+      reps: z.string().describe('Wiederholungen').optional(),
+      weight_kg: z.number().describe('Gewicht in kg').optional(),
+      rest_seconds: z.number().describe('Pausenzeit in Sekunden').optional(),
+      notes: z.string().describe('Notizen').optional(),
+    })),
+    notes: z.string().describe('Notizen zum Tag').optional(),
+  }),
+
+  modify_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer des zu aendernden Tages (1-14)'),
+    name: z.string().describe('Neuer Tagesname').optional(),
+    focus: z.string().describe('Neuer Trainingsfokus').optional(),
+    exercises: z.array(z.object({
+      name: z.string().describe('Uebungsname'),
+      sets: z.number().describe('Saetze').optional(),
+      reps: z.string().describe('Wiederholungen').optional(),
+      weight_kg: z.number().describe('Gewicht in kg').optional(),
+      rest_seconds: z.number().describe('Pausenzeit in Sekunden').optional(),
+      notes: z.string().describe('Notizen').optional(),
+    })),
+    notes: z.string().describe('Notizen zum Tag').optional(),
+  }),
+
+  remove_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer des zu entfernenden Tages (1-14)'),
+    day_name: z.string().describe('Name des Tages (zur Bestaetigung)').optional(),
+  }),
+
   save_product: z.object({
     name: z.string().describe('Produktname'),
     brand: z.string().describe('Marke').optional(),
@@ -269,6 +309,21 @@ const ToolSchemas: Record<ActionType, z.ZodObject<z.ZodRawShape>> = {
       duration_min: z.number().describe('Dauer in Minuten').optional(),
     })).describe('Zubereitungsschritte').optional(),
     tags: z.array(z.string()).describe('Tags wie High-Protein, Low-Carb').optional(),
+  }),
+
+  import_recipe: z.object({
+    url: z.string().describe('URL der Rezeptseite'),
+  }),
+
+  update_pantry: z.object({
+    action: z.enum(['add', 'remove', 'set_status', 'clear_all']).describe('Aktion: add=hinzufuegen, remove=entfernen, set_status=Status aendern, clear_all=alles leeren'),
+    items: z.array(z.object({
+      name: z.string().describe('Zutat, z.B. Haehnchenbrust'),
+      category: z.string().describe('Kategorie: gemuese, obst, fleisch_fisch, milchprodukte, getreide_nudeln, huelsenfruechte, nuesse, oele_fette, gewuerze, konserven, backzutaten, getraenke, tiefkuehl, brot_aufstriche, supplements').optional(),
+      quantity: z.string().describe('Menge, z.B. 500g, 2 Stueck').optional(),
+      status: z.enum(['available', 'low', 'empty']).describe('Status').optional(),
+      buy_preference: z.enum(['always', 'sometimes', 'never']).describe('Kaufverhalten').optional(),
+    })).describe('Liste der Zutaten'),
   }),
 };
 

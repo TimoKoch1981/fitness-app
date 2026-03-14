@@ -42,6 +42,9 @@ export interface MutationMap {
   updateProfile: MutationHook;
   setUserEquipment: MutationHook;
   addRecipe: MutationHook;
+  // Pantry (optional — execute uses direct supabase calls, only needs invalidation)
+  clearPantry?: MutationHook;
+  invalidatePantry?: () => void;
 }
 
 export interface ExecutionContext {
