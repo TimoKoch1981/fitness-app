@@ -468,31 +468,39 @@ export function PantryTabContent() {
                       )}
                     </span>
 
-                    {/* Status chips */}
-                    <div className="flex gap-1">
-                      {(['available', 'low', 'empty'] as PantryStatus[]).map((st) => (
-                        <button
-                          key={st}
-                          onClick={() => handleStatusChange(item.id, st)}
-                          className={cn(
-                            'px-2 py-0.5 text-[10px] rounded-full border transition-colors',
-                            item.status === st
-                              ? st === 'available'
-                                ? 'bg-green-100 text-green-700 border-green-200'
-                                : st === 'low'
-                                ? 'bg-amber-100 text-amber-700 border-amber-200'
-                                : 'bg-red-100 text-red-700 border-red-200'
-                              : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
-                          )}
-                        >
-                          {st === 'available' ? '✓' : st === 'low' ? '↓' : '✕'}
-                        </button>
-                      ))}
+                    {/* Status chips — text labels to avoid confusion with delete */}
+                    <div className="flex gap-0.5">
+                      {(['available', 'low', 'empty'] as PantryStatus[]).map((st) => {
+                        const label = st === 'available'
+                          ? (language === 'de' ? 'Da' : 'OK')
+                          : st === 'low'
+                          ? (language === 'de' ? 'Wenig' : 'Low')
+                          : (language === 'de' ? 'Leer' : 'Out');
+                        return (
+                          <button
+                            key={st}
+                            onClick={() => handleStatusChange(item.id, st)}
+                            className={cn(
+                              'px-1.5 py-0.5 text-[9px] rounded-full border transition-colors',
+                              item.status === st
+                                ? st === 'available'
+                                  ? 'bg-green-100 text-green-700 border-green-200'
+                                  : st === 'low'
+                                  ? 'bg-amber-100 text-amber-700 border-amber-200'
+                                  : 'bg-red-100 text-red-700 border-red-200'
+                                : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                            )}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
                     </div>
 
                     <button
                       onClick={() => handleRemove(item.id)}
                       className="p-1 text-gray-300 hover:text-red-500"
+                      title={language === 'de' ? 'Entfernen' : 'Remove'}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
