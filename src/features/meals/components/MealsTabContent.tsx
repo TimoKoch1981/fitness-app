@@ -29,6 +29,10 @@ import { MealTimingPlanner } from '../../nutrition/components/MealTimingPlanner'
 import { PeakWeekPlanner } from '../../nutrition/components/PeakWeekPlanner';
 import { AlternativeScoringCard } from '../../nutrition/components/AlternativeScoringCard';
 import { PhaseSetupWizard } from '../../nutrition/components/PhaseSetupWizard';
+import { RefeedCalendar } from '../../nutrition/components/RefeedCalendar';
+import { ReverseDietTracker } from '../../nutrition/components/ReverseDietTracker';
+import { calculateDeloadNutrition } from '../../nutrition/utils/deloadNutritionSync';
+import { analyzePhaseTransition, type PhaseTransitionSignal } from '../../nutrition/utils/phaseTransitionAdvisor';
 import { getTodayTrainingNutrition, type WeekDayNutrition } from '../../nutrition/utils/trainingNutritionSync';
 import { DAY_TYPE_INFO } from '../../nutrition/utils/phaseMacroCalculator';
 import { useActivePlan } from '../../workouts/hooks/useTrainingPlans';
@@ -165,6 +169,28 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
       bodyFatPct: latestBody.body_fat_pct ?? undefined,
     });
   }, [trainingMode.showBodybuilderNutrition, trainingMode.phase, energyBalance, latestBody]);
+
+  // Deload nutrition adjustment
+  const deloadAdjustment = useMemo(() => {
+    if (!trainingMode.showBodybuilderNutrition || !energyBalance || !latestBody?.weight_kg) return null;
+    return calculateDeloadNutrition(activePlan ?? null, energyBalance.caloriesGoal || energyBalance.tdee, energyBalance.proteinGoal, latestBody.weight_kg);
+  }, [trainingMode.showBodybuilderNutrition, activePlan, energyBalance, latestBody?.weight_kg]);
+
+  // Phase transition advisor
+  const phaseTransition: PhaseTransitionSignal | null = useMemo(() => {
+    if (!trainingMode.showBodybuilderNutrition) return null;
+    const weeksInPhase = profile?.phase_started_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(profile.phase_started_at).getTime()) / (7 * 24 * 60 * 60 * 1000)))
+      : 0;
+    if (weeksInPhase < 2) return null;
+    const signal = analyzePhaseTransition({
+      currentPhase: trainingMode.phase,
+      weeksInPhase,
+      targetWeeks: profile?.phase_target_weeks ?? undefined,
+      bodyFatPct: latestBody?.body_fat_pct ?? undefined,
+    });
+    return signal.shouldTransition ? signal : null;
+  }, [trainingMode.showBodybuilderNutrition, trainingMode.phase, profile?.phase_started_at, profile?.phase_target_weeks, latestBody?.body_fat_pct]);
 
   // AI Nutrition Comment
   const [aiComment, setAiComment] = useState<string | null>(null);
@@ -549,6 +575,38 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
         </div>
       )}
 
+      {/* Refeed Calendar — only during cut phase in Power/Power+ */}
+      {trainingMode.showBodybuilderNutrition && energyBalance && latestBody?.weight_kg && (trainingMode.phase === 'cut' || trainingMode.phase === 'peak_week') && (
+        <div className="mb-4">
+          <RefeedCalendar
+            language={language as 'de' | 'en'}
+            weeksIntoCut={profile?.phase_started_at
+              ? Math.max(0, Math.floor((Date.now() - new Date(profile.phase_started_at).getTime()) / (7 * 24 * 60 * 60 * 1000)))
+              : 0
+            }
+            tdee={energyBalance.tdee}
+            bodyWeight={latestBody.weight_kg}
+            phase={trainingMode.phase}
+          />
+        </div>
+      )}
+
+      {/* Reverse Diet Tracker — only during reverse_diet phase */}
+      {trainingMode.showBodybuilderNutrition && phaseMacros && trainingMode.phase === 'reverse_diet' && energyBalance && (
+        <div className="mb-4">
+          <ReverseDietTracker
+            language={language as 'de' | 'en'}
+            weeksIntoPhase={profile?.phase_started_at
+              ? Math.max(0, Math.floor((Date.now() - new Date(profile.phase_started_at).getTime()) / (7 * 24 * 60 * 60 * 1000)))
+              : 0
+            }
+            tdee={energyBalance.tdee}
+            currentCalories={phaseMacros.calories}
+            phaseStartedAt={profile?.phase_started_at ?? null}
+          />
+        </div>
+      )}
+
       {/* F15: Training-Nutrition Sync — Today's Day Type */}
       {trainingMode.showBodybuilderNutrition && todayTrainingNutrition && isToday && (
         <div className="mb-3 flex items-center gap-2 px-1">
@@ -558,6 +616,49 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           <span className="text-xs text-gray-500">
             {language === 'de' ? todayTrainingNutrition.reason.de : todayTrainingNutrition.reason.en}
           </span>
+        </div>
+      )}
+
+      {/* Deload Nutrition Adjustment */}
+      {deloadAdjustment?.isDeload && isToday && (
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+            {language === 'de' ? 'Deload-Woche' : 'Deload Week'}
+          </span>
+          <span className="text-xs text-gray-500">
+            {language === 'de'
+              ? `Kalorien -${deloadAdjustment.calorieReductionPct}% (${deloadAdjustment.adjustedCalories} kcal)`
+              : `Calories -${deloadAdjustment.calorieReductionPct}% (${deloadAdjustment.adjustedCalories} kcal)`
+            }
+          </span>
+        </div>
+      )}
+
+      {/* Phase Transition Suggestion */}
+      {phaseTransition && isToday && (
+        <div className={`mb-3 mx-1 rounded-lg p-2.5 ${
+          phaseTransition.urgency === 'critical' ? 'bg-red-50 border border-red-200' :
+          phaseTransition.urgency === 'warning' ? 'bg-amber-50 border border-amber-200' :
+          'bg-blue-50 border border-blue-200'
+        }`}>
+          <p className={`text-xs font-medium ${
+            phaseTransition.urgency === 'critical' ? 'text-red-700' :
+            phaseTransition.urgency === 'warning' ? 'text-amber-700' :
+            'text-blue-700'
+          }`}>
+            {language === 'de' ? 'Phase-Empfehlung' : 'Phase Recommendation'}
+          </p>
+          {phaseTransition.reasons.slice(0, 2).map((r, i) => (
+            <p key={i} className="text-[10px] text-gray-600 mt-0.5">
+              {language === 'de' ? r.de : r.en}
+            </p>
+          ))}
+          <button
+            onClick={() => setShowPhaseWizard(true)}
+            className="mt-1.5 text-[10px] text-teal-600 hover:text-teal-700 font-medium"
+          >
+            {language === 'de' ? 'Phase aendern →' : 'Change phase →'}
+          </button>
         </div>
       )}
 

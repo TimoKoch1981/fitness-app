@@ -7,7 +7,8 @@ export type NotificationType =
   | 'body_measurement'
   | 'meal_logging'
   | 'custom'
-  | 'daily_summary';
+  | 'daily_summary'
+  | 'refeed_reminder';
 
 export interface NotificationTypeConfig {
   enabled: boolean;
@@ -37,6 +38,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     meal_logging: true,
     custom: true,
     daily_summary: true,
+    refeed_reminder: true,
   },
   dailySummaryTime: '21:00',
   quietHours: {
@@ -64,4 +66,5 @@ export const NOTIFICATION_ROUTES: Record<NotificationType, string> = {
   meal_logging: '/nutrition',
   custom: '/cockpit',
   daily_summary: '/cockpit',
+  refeed_reminder: '/nutrition',
 };

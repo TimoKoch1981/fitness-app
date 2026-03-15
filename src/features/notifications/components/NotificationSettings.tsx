@@ -11,6 +11,7 @@ const TYPE_ICONS: Record<NotificationType, string> = {
   meal_logging: '\uD83C\uDF7D\uFE0F',
   custom: '\uD83D\uDCCC',
   daily_summary: '\uD83D\uDCCA',
+  refeed_reminder: '\uD83C\uDF57',
 };
 
 /**

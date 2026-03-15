@@ -5,8 +5,8 @@
  * F15: Bodybuilder-Modus
  */
 
-import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { AlertTriangle, Droplets } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { calculatePhaseMacros, type PhaseMacroInput } from '../utils/phaseMacroCalculator';
 
@@ -21,6 +21,27 @@ export function PeakWeekPlanner({ tdee, bodyWeight, bodyFatPct }: PeakWeekPlanne
   const t = language === 'de' ? DE : EN;
 
   const [selectedDay, setSelectedDay] = useState(1);
+
+  // Sodium & water tracking (localStorage persistence)
+  const LS_SODIUM_KEY = 'fitbuddy_peak_week_sodium';
+  const [sodiumLog, setSodiumLog] = useState<Record<number, { sodium: number; water: number }>>(() => {
+    try { const s = localStorage.getItem(LS_SODIUM_KEY); return s ? JSON.parse(s) : {}; } catch { return {}; }
+  });
+
+  const updateSodiumLog = useCallback((day: number, field: 'sodium' | 'water', value: number) => {
+    setSodiumLog(prev => {
+      const next = { ...prev, [day]: { ...(prev[day] || { sodium: 0, water: 0 }), [field]: value } };
+      localStorage.setItem(LS_SODIUM_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Sodium & water targets per day
+  const SODIUM_WATER_TARGETS: Record<string, { sodiumMin: number; sodiumMax: number; waterMin: number; waterMax: number }> = {
+    depletion: { sodiumMin: 5000, sodiumMax: 8000, waterMin: 6, waterMax: 8 },
+    loading: { sodiumMin: 500, sodiumMax: 2000, waterMin: 2, waterMax: 4 },
+    show: { sodiumMin: 0, sodiumMax: 500, waterMin: 0, waterMax: 1 },
+  };
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const dayNum = i + 1;
@@ -120,6 +141,81 @@ export function PeakWeekPlanner({ tdee, bodyWeight, bodyFatPct }: PeakWeekPlanne
               </p>
             ))}
           </div>
+
+          {/* Sodium & Water Tracking */}
+          {(() => {
+            const targets = SODIUM_WATER_TARGETS[selected.phase];
+            const logged = sodiumLog[selected.day] || { sodium: 0, water: 0 };
+            return (
+              <div className="bg-cyan-50 rounded-lg p-2.5 space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <Droplets className="h-3.5 w-3.5 text-cyan-600" />
+                  <p className="text-[10px] text-cyan-700 font-medium">
+                    {language === 'de' ? 'Natrium & Wasser' : 'Sodium & Water'}
+                  </p>
+                </div>
+
+                {/* Sodium */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 w-14">Na (mg):</span>
+                  <input
+                    type="number"
+                    step="100"
+                    min="0"
+                    max="10000"
+                    value={logged.sodium || ''}
+                    onChange={(e) => updateSodiumLog(selected.day, 'sodium', Number(e.target.value))}
+                    placeholder={`${targets.sodiumMin}-${targets.sodiumMax}`}
+                    className="flex-1 px-2 py-1 text-xs border border-cyan-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-300 bg-white"
+                  />
+                  <span className={`text-[9px] font-medium ${
+                    logged.sodium >= targets.sodiumMin && logged.sodium <= targets.sodiumMax ? 'text-green-600' :
+                    logged.sodium > 0 ? 'text-red-500' : 'text-gray-400'
+                  }`}>
+                    {logged.sodium > 0
+                      ? (logged.sodium >= targets.sodiumMin && logged.sodium <= targets.sodiumMax ? '✓' : '!')
+                      : `${targets.sodiumMin}-${targets.sodiumMax}`
+                    }
+                  </span>
+                </div>
+
+                {/* Water */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 w-14">H₂O (L):</span>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="12"
+                    value={logged.water || ''}
+                    onChange={(e) => updateSodiumLog(selected.day, 'water', Number(e.target.value))}
+                    placeholder={`${targets.waterMin}-${targets.waterMax}`}
+                    className="flex-1 px-2 py-1 text-xs border border-cyan-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-300 bg-white"
+                  />
+                  <span className={`text-[9px] font-medium ${
+                    logged.water >= targets.waterMin && logged.water <= targets.waterMax ? 'text-green-600' :
+                    logged.water > 0 ? 'text-red-500' : 'text-gray-400'
+                  }`}>
+                    {logged.water > 0
+                      ? (logged.water >= targets.waterMin && logged.water <= targets.waterMax ? '✓' : '!')
+                      : `${targets.waterMin}-${targets.waterMax}L`
+                    }
+                  </span>
+                </div>
+
+                <p className="text-[8px] text-cyan-500">
+                  {language === 'de'
+                    ? selected.phase === 'depletion' ? 'Natrium hoch halten fuer Carb-Load-Effekt'
+                      : selected.phase === 'loading' ? 'Natrium reduzieren fuer subkutane Wasserreduktion'
+                      : 'Minimal — nur Schlucke'
+                    : selected.phase === 'depletion' ? 'Keep sodium high for carb loading effect'
+                      : selected.phase === 'loading' ? 'Reduce sodium for subcutaneous water reduction'
+                      : 'Minimal — sips only'
+                  }
+                </p>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
