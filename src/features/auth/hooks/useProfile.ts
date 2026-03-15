@@ -63,6 +63,10 @@ interface UpdateProfileInput {
   data_retention_months?: number | null;
   // KI-Trainer Review System
   ai_trainer_enabled?: boolean;
+  // Power+ Advanced Nutrition
+  show_advanced_nutrition?: boolean;
+  phase_started_at?: string;
+  phase_target_weeks?: number;
   // Cycle Tracking
   cycle_tracking_enabled?: boolean;
   // Buddy Avatar Style

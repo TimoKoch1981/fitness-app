@@ -28,6 +28,10 @@ import { MacroCyclingPlanner } from '../../nutrition/components/MacroCyclingPlan
 import { MealTimingPlanner } from '../../nutrition/components/MealTimingPlanner';
 import { PeakWeekPlanner } from '../../nutrition/components/PeakWeekPlanner';
 import { AlternativeScoringCard } from '../../nutrition/components/AlternativeScoringCard';
+import { PhaseSetupWizard } from '../../nutrition/components/PhaseSetupWizard';
+import { getTodayTrainingNutrition, type WeekDayNutrition } from '../../nutrition/utils/trainingNutritionSync';
+import { DAY_TYPE_INFO } from '../../nutrition/utils/phaseMacroCalculator';
+import { useActivePlan } from '../../workouts/hooks/useTrainingPlans';
 import { profileAllergensToRecipeAllergens } from '../../recipes/types';
 
 interface MealsTabContentProps {
@@ -47,6 +51,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
   const updateMeal = useUpdateMeal();
   const copyMeals = useCopyYesterdayMeals();
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [showPhaseWizard, setShowPhaseWizard] = useState(false);
 
   // Energy balance data
   const { data: profile } = useProfile();
@@ -55,6 +60,13 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
 
   // Meal history for AI comment (last 7 days)
   const { data: weekHistory } = useMealHistory(7);
+
+  // Training-Nutrition Sync
+  const { data: activePlan } = useActivePlan();
+  const todayTrainingNutrition: WeekDayNutrition | null = useMemo(() => {
+    if (!activePlan) return null;
+    return getTodayTrainingNutrition(activePlan);
+  }, [activePlan]);
 
   const energyBalance = useMemo(() => {
     if (!profile?.height_cm || !profile?.birth_date || !latestBody?.weight_kg) return null;
@@ -492,10 +504,18 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] text-purple-600 font-medium uppercase tracking-wider">
               {language === 'de' ? phaseMacros.phaseLabelDe : phaseMacros.phaseLabelEn}
+              {profile?.phase_started_at && (
+                <span className="ml-1 text-gray-400 font-normal">
+                  ({language === 'de' ? 'Woche' : 'Week'} {Math.max(1, Math.ceil((Date.now() - new Date(profile.phase_started_at).getTime()) / (7 * 24 * 60 * 60 * 1000)))}{profile?.phase_target_weeks ? `/${profile.phase_target_weeks}` : ''})
+                </span>
+              )}
             </p>
-            <span className="text-[10px] text-gray-400">
-              {language === 'de' ? 'Phase-Ziele' : 'Phase Targets'}
-            </span>
+            <button
+              onClick={() => setShowPhaseWizard(true)}
+              className="text-[10px] text-teal-500 hover:text-teal-600 font-medium"
+            >
+              {language === 'de' ? 'Phase ändern' : 'Change Phase'}
+            </button>
           </div>
           <div className="grid grid-cols-4 gap-2 text-center">
             <div className="bg-gray-50 rounded-lg py-1.5">
@@ -524,6 +544,18 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* F15: Training-Nutrition Sync — Today's Day Type */}
+      {trainingMode.showBodybuilderNutrition && todayTrainingNutrition && isToday && (
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${DAY_TYPE_INFO[todayTrainingNutrition.dayType].color}`}>
+            {language === 'de' ? DAY_TYPE_INFO[todayTrainingNutrition.dayType].de : DAY_TYPE_INFO[todayTrainingNutrition.dayType].en}
+          </span>
+          <span className="text-xs text-gray-500">
+            {language === 'de' ? todayTrainingNutrition.reason.de : todayTrainingNutrition.reason.en}
+          </span>
         </div>
       )}
 
@@ -636,6 +668,9 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           date={selectedDate}
         />
       </ComponentErrorBoundary>
+
+      {/* Phase Setup Wizard */}
+      <PhaseSetupWizard open={showPhaseWizard} onClose={() => setShowPhaseWizard(false)} />
     </>
   );
 }

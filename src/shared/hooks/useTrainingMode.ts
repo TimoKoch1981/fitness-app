@@ -113,11 +113,11 @@ export function useTrainingMode(): TrainingModeFlags {
     showDoctorReport: isPowerPlus,
     showPhaseProgress: isPower,
 
-    // F15: Bodybuilder nutrition
-    showBodybuilderNutrition: isPower,
-    showMacroCycling: isPower,
-    showMealTiming: isPower,
-    showSupplementTiming: isPower,
-    showPeakWeekNutrition: isPower && phase === 'peak_week',
+    // F15: Bodybuilder nutrition (toggle-able via profile, default ON for Power/Power+)
+    showBodybuilderNutrition: isPower && (profile?.show_advanced_nutrition !== false),
+    showMacroCycling: isPower && (profile?.show_advanced_nutrition !== false),
+    showMealTiming: isPower && (profile?.show_advanced_nutrition !== false),
+    showSupplementTiming: isPower && (profile?.show_advanced_nutrition !== false),
+    showPeakWeekNutrition: isPower && (profile?.show_advanced_nutrition !== false) && phase === 'peak_week',
   };
 }

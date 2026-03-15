@@ -297,6 +297,8 @@ export interface UserProfile {
   show_date?: string;
   show_federation?: string;
   current_phase?: TrainingPhase;
+  phase_started_at?: string; // ISO date when current phase started
+  phase_target_weeks?: number; // Planned duration of current phase in weeks
   cycle_status?: CycleStatus;
   cycle_start_date?: string;
   cycle_planned_weeks?: number;
@@ -313,6 +315,8 @@ export interface UserProfile {
   data_retention_months?: number | null; // NULL = unbegrenzt, 12/36/60 = Monate
   // KI-Trainer Review System
   ai_trainer_enabled?: boolean;
+  // Power+ Advanced Nutrition Features (phase macros, macro cycling, meal timing)
+  show_advanced_nutrition?: boolean;
   // Buddy Avatar Style
   buddy_avatar_style?: BuddyAvatarStyle;
   created_at: string;

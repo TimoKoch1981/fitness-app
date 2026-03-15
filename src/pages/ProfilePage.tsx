@@ -1086,6 +1086,43 @@ export function ProfilePage() {
           }}
         />
 
+        {/* Advanced Nutrition Toggle (Power/Power+ only) */}
+        {(profile?.training_mode === 'power' || profile?.training_mode === 'power_plus') && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🍽️</span>
+                  <h3 className="font-semibold text-gray-900">
+                    {language === 'de' ? 'Erweiterte Ernährung' : 'Advanced Nutrition'}
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {language === 'de'
+                    ? 'Phasen-Makros, Makro-Cycling, Mahlzeiten-Timing und Peak-Week-Protokoll auf der Ernährungsseite.'
+                    : 'Phase macros, macro cycling, meal timing and peak week protocol on the nutrition page.'}
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+                <input
+                  type="checkbox"
+                  checked={profile?.show_advanced_nutrition !== false}
+                  onChange={async (e) => {
+                    try {
+                      await updateProfile.mutateAsync({ show_advanced_nutrition: e.target.checked });
+                      showSaveStatus('saved');
+                    } catch {
+                      showSaveStatus('error');
+                    }
+                  }}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* KI-Trainer Review Toggle */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between">

@@ -15,7 +15,7 @@ const CONFIG: AgentConfig = {
   name: 'Ernährungs-Agent',
   nameEN: 'Nutrition Agent',
   icon: '🍽️',
-  staticSkills: ['nutrition', 'supplements'],
+  staticSkills: ['nutrition', 'supplements', 'supplementTiming'],
   userSkills: ['profile', 'nutrition_log', 'substance_protocol', 'known_products', 'recipe_favorites', 'nutrition_preferences', 'pantry_inventory'],
   maxContextTokens: 12000,
   description: 'Spezialist für Ernährung, Nährwerte, Mahlzeitenplanung, Supplements und Nahrungsergänzung',
@@ -78,7 +78,36 @@ Shakes sind schnelle, kalorienarme Protein-Booster — perfekt zum Auffüllen.
 
 Wenn du einen Shake vorschlägst und der Nutzer sagt "ja" oder "leg an":
 → Erstelle einen save_recipe ACTION_REQUEST Block mit allen Details (Zutaten, Schritte, Makros)!
-→ meal_type: "snack" oder "post_workout" je nach Kontext`;
+→ meal_type: "snack" oder "post_workout" je nach Kontext
+
+## PHASEN-SPEZIFISCHE ERNÄHRUNGSBERATUNG (Power/Power+ Modus)
+Wenn der Nutzer im Power/Power+ Modus ist, reagiere phasenspezifisch:
+
+### CUT-PHASE:
+- Protein-Priorität: IMMER zuerst Protein prüfen und betonen (2.3-3.1g/kg LBM, Helms 2014)
+- Bei >12 Wochen Defizit: Refeed-Tage vorschlagen (1-2x/Woche, +500-1000 kcal aus Carbs)
+- Hunger-Management: Volumetric Eating empfehlen (Gemüse, Suppe, Skyr, Wassermelone)
+- Defizit-Tracking: "Du bist heute Xg Protein im Plus/Minus — [Empfehlung]"
+- WARNUNG bei <0.5g/kg Fett: "⚠️ Fett zu niedrig — Risiko für hormonelle Dysregulation"
+
+### BULK-PHASE:
+- Surplus-Qualität: "Versuche den Überschuss aus komplexen Carbs zu decken (Reis, Kartoffeln, Haferflocken)"
+- Lean-Mass-Gain-Rate: Bei >0.5% KG/Woche → "Gewichtszunahme etwas hoch — mehr Fett als nötig?"
+- Kalorienreiche Rezepte bevorzugen
+
+### PEAK WEEK:
+- Tagesprotokoll-Wissen: Tag 1-3 Carb Depletion, Tag 4-6 Loading, Tag 7 Show Day
+- Wasser/Natrium-Erinnerungen: "Tag X: Wasseraufnahme bei X Litern halten"
+- ⚠️ IMMER Coach-Absprache empfehlen
+
+### REVERSE DIET:
+- Wochenweise Kalorien-Erhöhung tracken: "+100 kcal/Woche, aktuell Woche X"
+- Gewichtsverlauf interpretieren: "2-3 kg Zunahme ist normal — das meiste ist Wasser und Glykogen"
+- Motivations-Support: Post-Diet-Phase ist psychisch belastend
+
+### MAINTENANCE / OFF-SEASON:
+- Entspannter: Keine strenge Makro-Einhaltung nötig
+- Langfristige Ernährungsqualität betonen`;
 
     }
     return `You are the FitBuddy Nutrition Agent — expert in sports nutrition, nutritional analysis, and meal planning.
@@ -496,6 +525,30 @@ The system automatically extracts title, ingredients, steps, and nutritional val
 [ACTION_REQUEST]
 type: import_recipe
 data: {"url":"https://www.allrecipes.com/recipe/123456/example"}
-[/ACTION_REQUEST]`;
+[/ACTION_REQUEST]
+
+## PHASE-SPECIFIC NUTRITION COACHING (Power/Power+ Mode)
+When the user is in Power/Power+ mode, respond phase-specifically:
+
+### CUT PHASE:
+- Protein priority: ALWAYS check and emphasize protein first (2.3-3.1g/kg LBM, Helms 2014)
+- After >12 weeks deficit: Suggest refeed days (1-2x/week, +500-1000 kcal from carbs)
+- Hunger management: Recommend volumetric eating (vegetables, soup, Greek yogurt, watermelon)
+- WARNING if <0.5g/kg fat: "⚠️ Fat too low — risk of hormonal dysregulation"
+
+### BULK PHASE:
+- Surplus quality: "Try to get the surplus from complex carbs (rice, potatoes, oats)"
+- If >0.5% BW gain/week: "Weight gain slightly high — more fat than necessary?"
+
+### PEAK WEEK:
+- Day 1-3 Carb Depletion, Day 4-6 Loading, Day 7 Show Day
+- ⚠️ ALWAYS recommend coach consultation
+
+### REVERSE DIET:
+- Track weekly calorie increases: "+100 kcal/week"
+- "2-3 kg gain is normal — mostly water and glycogen"
+
+### MAINTENANCE / OFF-SEASON:
+- No strict macro adherence necessary, emphasize nutrition quality`;
   }
 }
