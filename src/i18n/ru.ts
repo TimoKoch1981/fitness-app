@@ -38,6 +38,7 @@ export const ru: TranslationKeys = {
     tracking: 'Трекинг',
     medical: 'Здоровье',
     cycle: 'Цикл',
+    social: 'Community',
     profile: 'Профиль',
     dashboard: 'Главная',
     meals: 'Еда',

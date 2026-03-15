@@ -25,6 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { cn } from '../../../lib/utils';
+import { detectSupersets, getSupersetLabel } from '../utils/supersetDetector';
 
 // ── Sortable Exercise Item ──────────────────────────────────────────
 
@@ -43,6 +44,8 @@ interface SortableExerciseItemProps {
   totalExercises: number;
   onMoveUp: (idx: number) => void;
   onMoveDown: (idx: number) => void;
+  /** Superset label and position, if part of a superset */
+  supersetInfo?: { label: string; position: 'first' | 'middle' | 'last' | 'only' } | null;
 }
 
 function SortableExerciseItem({
@@ -59,6 +62,7 @@ function SortableExerciseItem({
   totalExercises,
   onMoveUp,
   onMoveDown,
+  supersetInfo,
 }: SortableExerciseItemProps) {
   const {
     attributes,
@@ -137,6 +141,18 @@ function SortableExerciseItem({
           )}
         </div>
 
+        {/* Superset badge */}
+        {supersetInfo && (
+          <span className={cn(
+            'text-[9px] font-bold px-1 py-0.5 rounded flex-shrink-0',
+            'bg-purple-100 text-purple-700',
+            supersetInfo.position === 'first' && 'rounded-b-none',
+            supersetInfo.position === 'last' && 'rounded-t-none',
+          )}>
+            {supersetInfo.label}{supersetInfo.position === 'first' ? '1' : supersetInfo.position === 'last' ? '2' : ''}
+          </span>
+        )}
+
         {/* Exercise name */}
         <div className="flex-1 min-w-0">
           <p className={cn(
@@ -173,6 +189,12 @@ export function ExerciseListBar() {
 
   const completedCount = useMemo(
     () => state.exercises.filter(e => e.sets.every(s => s.completed || s.skipped)).length,
+    [state.exercises],
+  );
+
+  // Detect superset groupings from exercise notes
+  const supersetGroups = useMemo(
+    () => detectSupersets(state.exercises),
     [state.exercises],
   );
 
@@ -297,6 +319,7 @@ export function ExerciseListBar() {
                       totalExercises={state.exercises.length}
                       onMoveUp={handleMoveUp}
                       onMoveDown={handleMoveDown}
+                      supersetInfo={getSupersetLabel(supersetGroups, idx)}
                     />
                   </div>
                 );

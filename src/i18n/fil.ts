@@ -36,6 +36,7 @@ export const fil: TranslationKeys = {
     nutrition: 'Nutrisyon',
     training: 'Training',
     cycle: 'Siklo',
+    social: 'Community',
     tracking: 'Tracking',
     medical: 'Medikal',
     profile: 'Profile',

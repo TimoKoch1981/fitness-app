@@ -38,6 +38,7 @@ export const ja: TranslationKeys = {
     tracking: 'トラッキング',
     medical: '医療',
     cycle: 'サイクル',
+    social: 'Community',
     profile: 'プロフィール',
     dashboard: 'ホーム',
     meals: '食事',

@@ -38,6 +38,7 @@ export const zh: TranslationKeys = {
     tracking: '追踪',
     medical: '医疗',
     cycle: '周期',
+    social: 'Community',
     profile: '个人资料',
     dashboard: '首页',
     meals: '饮食',

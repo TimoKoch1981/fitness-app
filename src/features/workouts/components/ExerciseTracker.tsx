@@ -22,6 +22,7 @@ import { RIRFeedbackDialog } from './RIRFeedbackDialog';
 import { suggestRestTime, ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
 import { useIsFirstSessionForPlan } from '../hooks/useIsFirstSessionForPlan';
 import { useLastExerciseData } from '../hooks/useLastExerciseData';
+import { useExercisePR } from '../hooks/useExercisePR';
 
 export function ExerciseTracker() {
   const { language } = useTranslation();
@@ -74,6 +75,9 @@ export function ExerciseTracker() {
 
   // Cross-plan PREVIOUS data (matches by exercise_id or name, not plan_exercise_index)
   const { data: lastExData } = useLastExerciseData(exercise?.name, exercise?.exercise_id);
+
+  // PR detection — zero extra fetches (uses shared query)
+  const prData = useExercisePR(exercise?.name, exercise?.exercise_id);
 
   if (!exercise) return null;
 
@@ -280,6 +284,7 @@ export function ExerciseTracker() {
             lastExercise={lastExercise}
             onLogSet={handleLogSetAndAdvance}
             onSkipSet={skipSet}
+            maxWeight={prData.maxWeight}
           />
         ) : (
           <ExerciseOverviewTracker
@@ -289,6 +294,7 @@ export function ExerciseTracker() {
             onLogSet={logSet}
             onSkipSet={skipSet}
             onAllDone={nextExercise}
+            maxWeight={prData.maxWeight}
           />
         )}
       </div>

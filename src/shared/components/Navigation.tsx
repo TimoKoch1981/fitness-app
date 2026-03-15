@@ -6,6 +6,7 @@ import {
   Dumbbell,
   Heart,
   User,
+  Users,
   CalendarHeart,
 } from 'lucide-react';
 import { useTranslation } from '../../i18n';
@@ -23,6 +24,7 @@ const BASE_NAV_ITEMS: NavItem[] = [
   { path: '/nutrition', icon: UtensilsCrossed, labelKey: 'nutrition' },
   { path: '/training', icon: Dumbbell, labelKey: 'training' },
   { path: '/medical', icon: Heart, labelKey: 'medical' },
+  { path: '/social', icon: Users, labelKey: 'social' },
   { path: '/profile', icon: User, labelKey: 'profile' },
 ];
 
@@ -50,11 +52,13 @@ export function Navigation() {
       BASE_NAV_ITEMS[2], // Training
       CYCLE_NAV_ITEM,     // Zyklus
       BASE_NAV_ITEMS[3], // Medizin
-      BASE_NAV_ITEMS[4], // Profil
+      BASE_NAV_ITEMS[4], // Social
+      BASE_NAV_ITEMS[5], // Profil
     ];
   }, [showCycleNav]);
 
-  const gridCols = navItems.length === 6 ? 'grid-cols-6' : 'grid-cols-5';
+  const gridColsMap: Record<number, string> = { 5: 'grid-cols-5', 6: 'grid-cols-6', 7: 'grid-cols-7' };
+  const gridCols = gridColsMap[navItems.length] ?? `grid-cols-${navItems.length}`;
 
   // Nav label lookup — handle both static t.nav keys and dynamic 'cycle'
   const getLabel = (key: string): string => {

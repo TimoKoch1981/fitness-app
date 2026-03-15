@@ -7,6 +7,7 @@ import { useTranslation, LANGUAGE_OPTIONS, type Language, type FontSize, type Bu
 import { useProfile, useUpdateProfile } from '../features/auth/hooks/useProfile';
 import { AvatarUpload } from '../features/auth/components/AvatarUpload';
 import { NotificationSettings } from '../features/notifications/components/NotificationSettings';
+import { CloudPushSettings } from '../features/notifications/components/CloudPushSettings';
 import { EquipmentSelector } from '../features/equipment/components/EquipmentSelector';
 import { FeedbackDialog } from '../features/feedback/components/FeedbackDialog';
 import { useDebouncedCallback } from '../shared/hooks/useDebounce';
@@ -410,6 +411,9 @@ export function ProfilePage() {
 
         {/* Notification Settings */}
         <NotificationSettings />
+
+        {/* Cloud Push Settings (Web Push, WhatsApp, Telegram) */}
+        <CloudPushSettings />
 
         {/* Personal Data */}
         <div className="bg-white rounded-xl p-4 shadow-sm">

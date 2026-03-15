@@ -38,6 +38,7 @@ export const en: TranslationKeys = {
     tracking: 'Tracking',
     medical: 'Medical',
     cycle: 'Cycle',
+    social: 'Community',
     profile: 'Profile',
     // Legacy keys
     dashboard: 'Home',

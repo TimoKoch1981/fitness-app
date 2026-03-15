@@ -19,6 +19,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         skipWaiting: true, // New SW takes over immediately (no waiting for tabs to close)
         clientsClaim: true, // New SW controls all open tabs immediately
+        // Import push notification handler into the generated SW
+        importScripts: ['push-sw.js'],
         // CRITICAL: Don't intercept GoTrue auth endpoints (email confirm, password reset)
         // Without this, the SW serves index.html for /auth/v1/verify → blank page
         navigateFallbackDenylist: [/^\/auth\/v1/],

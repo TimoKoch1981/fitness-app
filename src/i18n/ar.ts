@@ -38,6 +38,7 @@ export const ar: TranslationKeys = {
     tracking: 'المتابعة',
     medical: 'الطب',
     cycle: 'الدورة',
+    social: 'Community',
     profile: 'الملف الشخصي',
     dashboard: 'الرئيسية',
     meals: 'الوجبات',

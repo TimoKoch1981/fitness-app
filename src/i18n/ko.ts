@@ -38,6 +38,7 @@ export const ko: TranslationKeys = {
     tracking: '트래킹',
     medical: '의료',
     cycle: '주기',
+    social: 'Community',
     profile: '프로필',
     dashboard: '홈',
     meals: '식사',

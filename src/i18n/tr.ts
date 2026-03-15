@@ -38,6 +38,7 @@ export const tr: TranslationKeys = {
     tracking: 'Takip',
     medical: 'Sağlık',
     cycle: 'Döngü',
+    social: 'Community',
     profile: 'Profil',
     dashboard: 'Ana Sayfa',
     meals: 'Öğünler',

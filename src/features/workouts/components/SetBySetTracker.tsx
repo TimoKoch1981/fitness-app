@@ -11,10 +11,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight } from 'lucide-react';
+import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import { PlateCalculatorPopup } from './PlateCalculatorPopup';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
 
 /** Tag display config */
@@ -37,6 +38,8 @@ interface SetBySetTrackerProps {
   lastExercise?: WorkoutExerciseResult;
   onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => void;
   onSkipSet: (exerciseIdx: number, setIdx: number) => void;
+  /** All-time max weight for PR detection */
+  maxWeight?: number | null;
 }
 
 export function SetBySetTracker({
@@ -46,6 +49,7 @@ export function SetBySetTracker({
   lastExercise,
   onLogSet,
   onSkipSet,
+  maxWeight,
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
@@ -328,9 +332,25 @@ export function SetBySetTracker({
                 placeholder={currentSet.target_weight_kg?.toString() ?? '-'}
                 className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
               />
-              <p className="text-[10px] text-gray-400 mt-1 text-center">
-                {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
-              </p>
+              {/* PR indicator */}
+              {(() => {
+                const currentWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? 0);
+                if (maxWeight != null && currentWeight > maxWeight && currentWeight > 0) {
+                  return (
+                    <div className="flex items-center justify-center gap-1 mt-1 text-amber-600 animate-pulse">
+                      <Trophy className="h-3.5 w-3.5" />
+                      <span className="text-[11px] font-bold">{isDE ? 'Neuer Rekord!' : 'New PR!'}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <p className="text-[10px] text-gray-400 mt-1 text-center">
+                    {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+                  </p>
+                );
+              })()}
+              {/* Plate Calculator */}
+              <PlateCalculatorPopup weight={weight ? parseFloat(weight) : currentSet.target_weight_kg} />
             </div>
           </>
         )}

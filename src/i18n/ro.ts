@@ -38,6 +38,7 @@ export const ro: TranslationKeys = {
     tracking: 'Monitorizare',
     medical: 'Sănătate',
     cycle: 'Ciclu',
+    social: 'Community',
     profile: 'Profil',
     dashboard: 'Acasă',
     meals: 'Mese',

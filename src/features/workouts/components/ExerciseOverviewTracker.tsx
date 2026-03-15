@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock } from 'lucide-react';
+import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
@@ -34,10 +34,12 @@ interface ExerciseOverviewTrackerProps {
   onLogSet: (exerciseIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => void;
   onSkipSet: (exerciseIdx: number, setIdx: number) => void;
   onAllDone: () => void;
+  /** All-time max weight for PR detection */
+  maxWeight?: number | null;
 }
 
 export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
-  const { exercise, exerciseIndex, lastExercise, onLogSet, onSkipSet, onAllDone } = props;
+  const { exercise, exerciseIndex, lastExercise, onLogSet, onSkipSet, onAllDone, maxWeight } = props;
   const { language } = useTranslation();
   const isDE = language === 'de';
   const { state: workoutState, setTag } = useActiveWorkout();
@@ -239,9 +241,9 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
             <div
               className={`grid grid-cols-12 gap-1 items-center px-3 py-2.5 rounded-xl transition-all ${
                 isDone
-                  ? 'bg-teal-50 border border-teal-200'
+                  ? 'bg-teal-50/60 border border-teal-200/60 opacity-70'
                   : isSkipped
-                    ? 'bg-gray-50 opacity-40'
+                    ? 'bg-gray-50 opacity-30 line-through'
                     : isCurrent
                       ? 'bg-teal-50 border-2 border-teal-400 shadow-md shadow-teal-100'
                       : hasWarning
@@ -444,6 +446,68 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
           </div>
         );
       })}
+
+      {/* Volume Totals Row (strength only) */}
+      {!isCardio && (() => {
+        // Calculate live volume from inputs + completed sets
+        let totalVolume = 0;
+        let lastVolume = 0;
+        let hasPR = false;
+
+        exercise.sets.forEach((set, idx) => {
+          if (set.set_tag === 'warmup') return;
+          if (set.completed) {
+            totalVolume += (set.actual_reps ?? 0) * (set.actual_weight_kg ?? 0);
+            // Check for PR
+            if (maxWeight != null && (set.actual_weight_kg ?? 0) > maxWeight) hasPR = true;
+          } else if (!set.skipped) {
+            const input = inputs[idx];
+            const r = input?.field1 ? parseInt(input.field1) : 0;
+            const w = input?.field2 ? parseFloat(input.field2) : 0;
+            totalVolume += r * w;
+            // Check if entered weight is PR
+            if (maxWeight != null && w > maxWeight && w > 0) hasPR = true;
+          }
+        });
+
+        if (lastExercise) {
+          lastExercise.sets.forEach(set => {
+            if (set.set_tag === 'warmup') return;
+            if (set.completed) {
+              lastVolume += (set.actual_reps ?? 0) * (set.actual_weight_kg ?? 0);
+            }
+          });
+        }
+
+        if (totalVolume === 0 && !hasPR) return null;
+
+        const volumeDiff = lastVolume > 0 ? totalVolume - lastVolume : 0;
+        const volumePct = lastVolume > 0 ? Math.round((volumeDiff / lastVolume) * 100) : 0;
+
+        return (
+          <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg mt-1">
+            <span className="text-xs text-gray-500 font-medium">
+              {isDE ? 'Volumen' : 'Volume'}
+            </span>
+            <div className="flex items-center gap-2">
+              {hasPR && (
+                <span className="flex items-center gap-1 text-amber-600 animate-pulse">
+                  <Trophy className="h-3 w-3" />
+                  <span className="text-[10px] font-bold">{isDE ? 'PR!' : 'PR!'}</span>
+                </span>
+              )}
+              <span className="text-xs font-bold text-gray-700">
+                {totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()} kg` : '—'}
+              </span>
+              {volumeDiff !== 0 && (
+                <span className={`text-[10px] font-medium ${volumeDiff > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  {volumeDiff > 0 ? '+' : ''}{volumePct}%
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Complete / Next button */}
       {allCompleted ? (

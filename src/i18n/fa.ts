@@ -36,6 +36,7 @@ export const fa: TranslationKeys = {
     nutrition: 'تغذیه',
     training: 'تمرین',
     cycle: 'چرخه',
+    social: 'Community',
     tracking: 'ردیابی',
     medical: 'پزشکی',
     profile: 'پروفایل',

@@ -17,6 +17,7 @@ import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActivePlan } from '../hooks/useTrainingPlans';
 import { useLastWorkoutForDay } from '../hooks/useLastWorkoutForDay';
 import { useRecentCompletedWorkouts } from '../hooks/useLastExerciseData';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { useLatestBodyMeasurement } from '../../body/hooks/useBodyMeasurements';
 import { useWorkoutTimers } from '../hooks/useWorkoutTimers';
 import { WarmupCard } from './WarmupCard';
@@ -43,6 +44,9 @@ export function ActiveWorkoutPage() {
   } = useActiveWorkout();
 
   const { data: latestBody } = useLatestBodyMeasurement();
+
+  // Prevent screen from dimming during active workout
+  useWakeLock(state.isActive && state.phase !== 'summary');
   const { data: catalog } = useExerciseCatalog();
   const { data: activePlan } = useActivePlan();
 

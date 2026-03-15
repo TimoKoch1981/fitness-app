@@ -37,6 +37,7 @@ const MedicalPage = lazy(() => import('../pages/MedicalPage').then(m => ({ defau
 const CyclePage = lazy(() => import('../pages/CyclePage').then(m => ({ default: m.CyclePage })));
 const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const OnboardingWizardPage = lazy(() => import('../pages/OnboardingWizardPage').then(m => ({ default: m.OnboardingWizardPage })));
+const SocialPage = lazy(() => import('../pages/SocialPage').then(m => ({ default: m.SocialPage })));
 const FeatureVotingPage = lazy(() => import('../pages/FeatureVotingPage').then(m => ({ default: m.FeatureVotingPage })));
 const ImpressumPage = lazy(() => import('../pages/ImpressumPage').then(m => ({ default: m.ImpressumPage })));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage').then(m => ({ default: m.DatenschutzPage })));
@@ -149,6 +150,17 @@ function AppRoutes() {
             <ProtectedRoute>
               <MedicalPage />
               <Navigation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/social"
+          element={
+            <ProtectedRoute>
+              <OnboardingGuard>
+                <SocialPage />
+                <Navigation />
+              </OnboardingGuard>
             </ProtectedRoute>
           }
         />

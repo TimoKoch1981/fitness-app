@@ -38,6 +38,7 @@ export const fr: TranslationKeys = {
     tracking: 'Suivi',
     medical: 'Médecine',
     cycle: 'Cycle',
+    social: 'Community',
     profile: 'Profil',
     dashboard: 'Accueil',
     meals: 'Repas',

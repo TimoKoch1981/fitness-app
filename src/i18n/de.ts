@@ -36,6 +36,7 @@ export const de = {
     tracking: 'Tracking',
     medical: 'Medizin',
     cycle: 'Zyklus',
+    social: 'Community',
     profile: 'Profil',
     // Legacy keys (for references in old code during migration)
     dashboard: 'Start',
