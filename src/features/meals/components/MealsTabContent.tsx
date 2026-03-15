@@ -495,6 +495,8 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           language={language as 'de' | 'en'}
           totals={totals}
           energyBalance={energyBalance}
+          allergens={activeAllergens}
+          dietaryPreferences={activeDietaryPrefs}
         />
       )}
 

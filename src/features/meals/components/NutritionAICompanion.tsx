@@ -23,11 +23,15 @@ interface NutritionAICompanionProps {
     tdee: number;
     totalExpenditure: number;
   };
+  /** Active allergens from profile (e.g. ['gluten', 'dairy']) */
+  allergens?: string[];
+  /** Active dietary preferences from profile (e.g. ['vegan', 'keto']) */
+  dietaryPreferences?: string[];
 }
 
 const LS_KEY = 'fitbuddy_nutrition_ai_collapsed';
 
-export function NutritionAICompanion({ language, totals, energyBalance }: NutritionAICompanionProps) {
+export function NutritionAICompanion({ language, totals, energyBalance, allergens = [], dietaryPreferences = [] }: NutritionAICompanionProps) {
   const { openBuddyChat } = useInlineBuddyChat();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(LS_KEY) === 'true');
   const [dismissed, setDismissed] = useState(false);
@@ -67,7 +71,7 @@ export function NutritionAICompanion({ language, totals, energyBalance }: Nutrit
   const de = language === 'de';
 
   // Build context-aware Buddy suggestion chips
-  const chips = buildChips(de, deficits, totals);
+  const chips = buildChips(de, deficits, totals, allergens, dietaryPreferences);
 
   return (
     <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
@@ -165,8 +169,13 @@ function buildChips(
     proGoal: number;
   },
   totals: { calories: number; protein: number; carbs: number; fat: number },
+  allergens: string[],
+  dietaryPreferences: string[],
 ): Chip[] {
   const chips: Chip[] = [];
+
+  // Build allergen/dietary constraint suffix for messages
+  const constraintSuffix = buildConstraintSuffix(de, allergens, dietaryPreferences);
 
   // 1. Protein-focused (if protein gap > 30%)
   if (deficits.proPct < 70 && deficits.proGoal > 0) {
@@ -175,8 +184,8 @@ function buildChips(
       icon: '🍗',
       label: de ? 'Proteinreiche Mahlzeit' : 'High-protein meal',
       message: de
-        ? `Schlage mir eine proteinreiche Mahlzeit vor. Mir fehlen noch ${Math.round(deficits.proRemaining)}g Protein und ${deficits.calRemaining} kcal für heute.`
-        : `Suggest a high-protein meal. I still need ${Math.round(deficits.proRemaining)}g protein and ${deficits.calRemaining} kcal today.`,
+        ? `Schlage mir eine proteinreiche Mahlzeit vor. Mir fehlen noch ${Math.round(deficits.proRemaining)}g Protein und ${deficits.calRemaining} kcal für heute.${constraintSuffix}`
+        : `Suggest a high-protein meal. I still need ${Math.round(deficits.proRemaining)}g protein and ${deficits.calRemaining} kcal today.${constraintSuffix}`,
     });
   }
 
@@ -186,8 +195,8 @@ function buildChips(
     icon: '📖',
     label: de ? 'Aus meinen Rezepten' : 'From my recipes',
     message: de
-      ? `Welches meiner gespeicherten Rezepte passt am besten zu meinen verbleibenden Makros? Ich brauche noch ${deficits.calRemaining} kcal, ${Math.round(deficits.proRemaining)}g Protein, ${Math.round(deficits.carbRemaining)}g Kohlenhydrate und ${Math.round(deficits.fatRemaining)}g Fett.`
-      : `Which of my saved recipes best fits my remaining macros? I still need ${deficits.calRemaining} kcal, ${Math.round(deficits.proRemaining)}g protein, ${Math.round(deficits.carbRemaining)}g carbs, and ${Math.round(deficits.fatRemaining)}g fat.`,
+      ? `Welches meiner gespeicherten Rezepte passt am besten zu meinen verbleibenden Makros? Ich brauche noch ${deficits.calRemaining} kcal, ${Math.round(deficits.proRemaining)}g Protein, ${Math.round(deficits.carbRemaining)}g Kohlenhydrate und ${Math.round(deficits.fatRemaining)}g Fett.${constraintSuffix}`
+      : `Which of my saved recipes best fits my remaining macros? I still need ${deficits.calRemaining} kcal, ${Math.round(deficits.proRemaining)}g protein, ${Math.round(deficits.carbRemaining)}g carbs, and ${Math.round(deficits.fatRemaining)}g fat.${constraintSuffix}`,
   });
 
   // 3. Quick snack (if gap is small — under 500 kcal)
@@ -197,8 +206,8 @@ function buildChips(
       icon: '🥜',
       label: de ? 'Schneller Snack' : 'Quick snack',
       message: de
-        ? `Gib mir einen schnellen Snack-Vorschlag für ca. ${deficits.calRemaining} kcal und ${Math.round(deficits.proRemaining)}g Protein. Am besten etwas Einfaches ohne Kochen.`
-        : `Give me a quick snack suggestion for about ${deficits.calRemaining} kcal and ${Math.round(deficits.proRemaining)}g protein. Preferably something simple, no cooking needed.`,
+        ? `Gib mir einen schnellen Snack-Vorschlag für ca. ${deficits.calRemaining} kcal und ${Math.round(deficits.proRemaining)}g Protein. Am besten etwas Einfaches ohne Kochen.${constraintSuffix}`
+        : `Give me a quick snack suggestion for about ${deficits.calRemaining} kcal and ${Math.round(deficits.proRemaining)}g protein. Preferably something simple, no cooking needed.${constraintSuffix}`,
     });
   }
 
@@ -209,8 +218,8 @@ function buildChips(
       icon: '🍽️',
       label: de ? 'Mahlzeit vorschlagen' : 'Suggest a meal',
       message: de
-        ? `Schlage mir eine vollständige Mahlzeit vor für ca. ${deficits.calRemaining} kcal. Mir fehlen noch ${Math.round(deficits.proRemaining)}g Protein, ${Math.round(deficits.carbRemaining)}g Kohlenhydrate und ${Math.round(deficits.fatRemaining)}g Fett.`
-        : `Suggest a complete meal for about ${deficits.calRemaining} kcal. I still need ${Math.round(deficits.proRemaining)}g protein, ${Math.round(deficits.carbRemaining)}g carbs, and ${Math.round(deficits.fatRemaining)}g fat.`,
+        ? `Schlage mir eine vollständige Mahlzeit vor für ca. ${deficits.calRemaining} kcal. Mir fehlen noch ${Math.round(deficits.proRemaining)}g Protein, ${Math.round(deficits.carbRemaining)}g Kohlenhydrate und ${Math.round(deficits.fatRemaining)}g Fett.${constraintSuffix}`
+        : `Suggest a complete meal for about ${deficits.calRemaining} kcal. I still need ${Math.round(deficits.proRemaining)}g protein, ${Math.round(deficits.carbRemaining)}g carbs, and ${Math.round(deficits.fatRemaining)}g fat.${constraintSuffix}`,
     });
   }
 
@@ -220,9 +229,34 @@ function buildChips(
     icon: '🎯',
     label: de ? 'Tag bewerten' : 'Rate my day',
     message: de
-      ? `Bewerte meinen heutigen Ernährungstag. Ich habe bisher ${totals.calories} kcal, ${Math.round(totals.protein)}g Protein, ${Math.round(totals.carbs)}g Kohlenhydrate und ${Math.round(totals.fat)}g Fett gegessen. Berücksichtige dabei meine Ziele, Allergien und Gesundheitsdaten.`
-      : `Rate my nutrition today. So far I've had ${totals.calories} kcal, ${Math.round(totals.protein)}g protein, ${Math.round(totals.carbs)}g carbs, and ${Math.round(totals.fat)}g fat. Consider my goals, allergies, and health data.`,
+      ? `Bewerte meinen heutigen Ernährungstag. Ich habe bisher ${totals.calories} kcal, ${Math.round(totals.protein)}g Protein, ${Math.round(totals.carbs)}g Kohlenhydrate und ${Math.round(totals.fat)}g Fett gegessen.${constraintSuffix} Berücksichtige dabei meine Ziele und Gesundheitsdaten.`
+      : `Rate my nutrition today. So far I've had ${totals.calories} kcal, ${Math.round(totals.protein)}g protein, ${Math.round(totals.carbs)}g carbs, and ${Math.round(totals.fat)}g fat.${constraintSuffix} Consider my goals and health data.`,
   });
 
   return chips;
+}
+
+/** Build a constraint text suffix from allergens and dietary preferences */
+function buildConstraintSuffix(de: boolean, allergens: string[], dietaryPreferences: string[]): string {
+  const parts: string[] = [];
+  const filteredDiet = dietaryPreferences.filter(p => p !== 'mixed');
+
+  if (allergens.length > 0) {
+    parts.push(de
+      ? `Allergien: ${allergens.join(', ')}`
+      : `Allergies: ${allergens.join(', ')}`
+    );
+  }
+
+  if (filteredDiet.length > 0) {
+    parts.push(de
+      ? `Ernährungsform: ${filteredDiet.join(', ')}`
+      : `Diet: ${filteredDiet.join(', ')}`
+    );
+  }
+
+  if (parts.length === 0) return '';
+  return de
+    ? ` Bitte beachte: ${parts.join('. ')}.`
+    : ` Please note: ${parts.join('. ')}.`;
 }

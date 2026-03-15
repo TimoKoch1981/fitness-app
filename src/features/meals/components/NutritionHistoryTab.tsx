@@ -5,7 +5,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { BarChart3, TrendingUp, TrendingDown, Minus, Download, Flame } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Minus, Download, Flame, LineChart as LineChartIcon } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useMealHistory } from '../hooks/useMealHistory';
 import { useNutritionBalance } from '../hooks/useNutritionBalance';
@@ -22,6 +22,7 @@ import {
   type NutritionScoringInput,
 } from '../../nutrition/utils/alternativeScoring';
 import { cn } from '../../../lib/utils';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 type QuickPreset = 'yesterday' | 'thisWeek' | null;
 
@@ -128,6 +129,24 @@ export function NutritionHistoryTab() {
     if (!history || history.daysWithData === 0 || activeSystems.length === 0) return null;
     return scoreDayTotals(history.averages);
   }, [history, activeSystems]);
+
+  // B14: Scoring trend chart data (WW points over time)
+  const scoringTrendData = useMemo(() => {
+    if (!history || history.daysWithData < 2 || activeSystems.length === 0) return null;
+    const hasWW = activeSystems.includes('wwSmartPoints') || activeSystems.includes('wwClassic');
+    if (!hasWW) return null;
+
+    return history.days
+      .filter(d => d.calories > 0)
+      .map(d => {
+        const score = dayScores.get(d.date);
+        return {
+          date: new Date(d.date).toLocaleDateString(isDE ? 'de-DE' : 'en-US', { day: '2-digit', month: '2-digit' }),
+          wwSmart: score?.wwPoints ?? null,
+          wwClassic: score?.wwClassicPoints ?? null,
+        };
+      });
+  }, [history, dayScores, activeSystems, isDE]);
 
   const locale = isDE ? 'de-DE' : 'en-US';
 
@@ -338,6 +357,65 @@ export function NutritionHistoryTab() {
               ø {history.averages.mealsPerDay} {isDE ? 'Mahlzeiten/Tag' : 'meals/day'}
             </p>
           )}
+        </div>
+      )}
+
+      {/* B14: WW Points Trend Chart */}
+      {scoringTrendData && scoringTrendData.length >= 2 && (
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-1.5 mb-3">
+            <LineChartIcon className="h-4 w-4 text-blue-500" />
+            <p className="text-xs text-gray-500 font-medium">
+              {isDE ? 'WW-Punkte Verlauf' : 'WW Points Trend'}
+            </p>
+          </div>
+          <div className="h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={scoringTrendData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10, fill: '#9ca3af' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e5e7eb' }}
+                />
+                <YAxis
+                  width={35}
+                  tick={{ fontSize: 10, fill: '#9ca3af' }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                  labelStyle={{ fontSize: 11, fontWeight: 600 }}
+                />
+                {activeSystems.includes('wwSmartPoints') && (
+                  <Line
+                    type="monotone"
+                    dataKey="wwSmart"
+                    name="WW Smart"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: '#3b82f6' }}
+                    connectNulls
+                  />
+                )}
+                {activeSystems.includes('wwClassic') && (
+                  <Line
+                    type="monotone"
+                    dataKey="wwClassic"
+                    name="WW Classic"
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: '#6366f1' }}
+                    connectNulls
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[9px] text-gray-300 text-center mt-1">
+            {isDE ? 'Niedrigere Punkte = bessere Lebensmittelqualität' : 'Lower points = better food quality'}
+          </p>
         </div>
       )}
 

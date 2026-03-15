@@ -10,7 +10,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Package, Search, ChevronDown, ChevronUp, AlertTriangle, Trash2, Activity, Plus, ShieldAlert, Pencil, Check, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
-import { usePantry, useUpdatePantryItem, useRemovePantryItem, useClearPantry } from '../hooks/usePantry';
+import { usePantry, useUpdatePantryItem, useRemovePantryItem, useHardDeletePantryItem, useClearPantry } from '../hooks/usePantry';
 import { useSubstances } from '../../medical/hooks/useSubstances';
 import { isSubstanceTracked } from '../utils/supplementLinker';
 import { supabase } from '../../../lib/supabase';
@@ -32,8 +32,9 @@ export function PantryTabContent() {
 
   const { data: pantryItems, isLoading } = usePantry();
   const updateItem = useUpdatePantryItem();
-  const removeItem = useRemovePantryItem();
-  const clearPantry = useClearPantry();
+  const removeItem = useRemovePantryItem(); // Sets status='empty' (soft-remove)
+  const hardDeleteItem = useHardDeletePantryItem(); // Hard delete (allergen conflicts)
+  const clearPantry = useClearPantry(); // Sets all to 'empty' (soft-clear)
   const { data: activeSubstances } = useSubstances();
   const { data: profile } = useProfile();
   const { data: catalog } = useIngredientCatalog();
@@ -119,7 +120,7 @@ export function PantryTabContent() {
     clearPantry.mutate(undefined);
   }, [clearPantry]);
 
-  // Clear all items in a specific category (delete rows, category itself stays)
+  // Clear all items in a specific category (set status='empty', items remain re-activatable)
   const handleClearCategory = useCallback(async (cat: IngredientCategory) => {
     setConfirmClear(null);
     if (!user) return;
@@ -129,7 +130,7 @@ export function PantryTabContent() {
     const ids = items.map((i) => i.id);
     const { error } = await supabase
       .from('user_pantry')
-      .delete()
+      .update({ status: 'empty', last_confirmed_at: new Date().toISOString() })
       .in('id', ids);
 
     if (error) {
@@ -307,7 +308,7 @@ export function PantryTabContent() {
               <div key={w.item.id} className="flex items-center justify-between gap-2">
                 <span className="text-xs text-red-600">{w.item.ingredient_name}</span>
                 <button
-                  onClick={() => handleRemove(w.item.id)}
+                  onClick={() => hardDeleteItem.mutate(w.item.id)}
                   className="text-[10px] text-red-500 hover:text-red-700 px-1.5 py-0.5 rounded hover:bg-red-100 transition-colors flex items-center gap-0.5"
                 >
                   <Trash2 className="h-2.5 w-2.5" />
@@ -319,7 +320,7 @@ export function PantryTabContent() {
           {allergenWarnings.length > 1 && (
             <button
               onClick={() => {
-                allergenWarnings.forEach((w) => handleRemove(w.item.id));
+                allergenWarnings.forEach((w) => hardDeleteItem.mutate(w.item.id));
               }}
               className="mt-2 ml-6 text-[10px] text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
             >
@@ -605,9 +606,9 @@ const DE = {
   clearCategory: 'Kategorie leeren',
   cancel: 'Abbrechen',
   confirmClearAllTitle: 'Gesamten Vorrat leeren?',
-  confirmClearAllDesc: 'Alle Zutaten werden aus deinem Vorrat entfernt. Du kannst den Vorrat danach neu einrichten.',
+  confirmClearAllDesc: 'Alle Zutaten werden deaktiviert. Du kannst sie jederzeit über die Kategorie-Bearbeitung wieder aktivieren.',
   confirmClearCategoryTitle: 'Kategorie leeren?',
-  confirmClearCategoryDesc: 'Alle Zutaten in "{category}" werden entfernt. Die Kategorie selbst bleibt erhalten.',
+  confirmClearCategoryDesc: 'Alle Zutaten in "{category}" werden deaktiviert. Du kannst sie über das Bearbeiten-Icon wieder aktivieren.',
   allergenWarning: 'Diese Zutaten koennten fuer dich unvertraeglich sein (laut Profil):',
 };
 
@@ -625,8 +626,8 @@ const EN = {
   clearCategory: 'Clear Category',
   cancel: 'Cancel',
   confirmClearAllTitle: 'Clear entire pantry?',
-  confirmClearAllDesc: 'All ingredients will be removed from your pantry. You can set it up again afterwards.',
+  confirmClearAllDesc: 'All ingredients will be deactivated. You can re-activate them anytime via category editing.',
   confirmClearCategoryTitle: 'Clear category?',
-  confirmClearCategoryDesc: 'All ingredients in "{category}" will be removed. The category itself will remain.',
+  confirmClearCategoryDesc: 'All ingredients in "{category}" will be deactivated. You can re-activate them via the edit icon.',
   allergenWarning: 'These ingredients may conflict with your allergies (from profile):',
 };

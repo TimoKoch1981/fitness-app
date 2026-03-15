@@ -182,9 +182,30 @@ export function useUpdatePantryItem() {
   });
 }
 
-// ── Mutation: Remove item ─────────────────────────────────────────────
+// ── Mutation: Deactivate item (set status='empty' instead of deleting) ─
 
 export function useRemovePantryItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('user_pantry')
+        .update({ status: 'empty' as PantryStatus, last_confirmed_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+    },
+  });
+}
+
+// ── Mutation: Hard-delete item (only for truly removing, e.g. allergen conflicts) ─
+
+export function useHardDeletePantryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -203,7 +224,7 @@ export function useRemovePantryItem() {
   });
 }
 
-// ── Mutation: Clear entire pantry ─────────────────────────────────────
+// ── Mutation: Clear entire pantry (set all to 'empty') ────────────────
 
 export function useClearPantry() {
   const { user } = useAuth();
@@ -214,7 +235,7 @@ export function useClearPantry() {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
         .from('user_pantry')
-        .delete()
+        .update({ status: 'empty' as PantryStatus, last_confirmed_at: new Date().toISOString() })
         .eq('user_id', user.id);
 
       if (error) throw error;
