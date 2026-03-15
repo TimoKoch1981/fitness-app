@@ -7,7 +7,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Package, Search, ChevronDown, ChevronUp, AlertTriangle, Trash2, Activity, Plus, ShieldAlert } from 'lucide-react';
+import { Package, Search, ChevronDown, ChevronUp, AlertTriangle, Trash2, Activity, Plus, ShieldAlert, Pencil, Check, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
 import { usePantry, useUpdatePantryItem, useRemovePantryItem, useClearPantry } from '../hooks/usePantry';
@@ -61,6 +61,7 @@ export function PantryTabContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<IngredientCategory>>(new Set());
   const [confirmClear, setConfirmClear] = useState<'all' | IngredientCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<IngredientCategory | null>(null);
 
   // Group by category
   const grouped = useMemo(() => {
@@ -166,6 +167,39 @@ export function PantryTabContent() {
       ingredient_id: catalogId,
     }]);
   }, [addPantryItems]);
+
+  // Get ALL catalog items for a category (for edit mode checklist)
+  const getAllCatalogItemsForCategory = useCallback((cat: IngredientCategory) => {
+    if (!catalog) return [];
+    return catalog.filter((item) => item.category === cat);
+  }, [catalog]);
+
+  // Check if a catalog item is in pantry (by normalized name)
+  const pantryNormalizedNames = useMemo(() => {
+    if (!pantryItems) return new Set<string>();
+    return new Set(pantryItems.map((i) => i.ingredient_normalized));
+  }, [pantryItems]);
+
+  // Toggle a catalog item in/out of pantry
+  const handleToggleCatalogItem = useCallback(async (catalogItem: { id: string; name_de: string; category: IngredientCategory; is_staple: boolean; storage_type: string }, isInPantry: boolean) => {
+    if (isInPantry) {
+      // Remove from pantry — find by normalized name
+      const normalized = catalogItem.name_de.toLowerCase().trim()
+        .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss').replace(/\s+/g, ' ');
+      const item = pantryItems?.find((p) => p.ingredient_normalized === normalized);
+      if (item) {
+        removeItem.mutate(item.id);
+      }
+    } else {
+      // Add to pantry
+      await addPantryItems.mutateAsync([{
+        ingredient_name: catalogItem.name_de,
+        category: catalogItem.category,
+        buy_preference: catalogItem.is_staple ? 'always' : 'sometimes',
+        ingredient_id: catalogItem.id,
+      }]);
+    }
+  }, [pantryItems, removeItem, addPantryItems]);
 
   // Empty state
   if (!isLoading && (!pantryItems || pantryItems.length === 0)) {
@@ -320,6 +354,21 @@ export function PantryTabContent() {
               ) : (
                 <span className="text-xs text-gray-500">{items.length}</span>
               )}
+              {/* Edit category button (opens catalog checklist) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingCategory(editingCategory === cat ? null : cat);
+                  if (!expandedCategories.has(cat)) toggleExpanded(cat);
+                }}
+                className={cn(
+                  'p-1 transition-colors',
+                  editingCategory === cat ? 'text-teal-500' : 'text-gray-300 hover:text-teal-500'
+                )}
+                title={language === 'de' ? 'Kategorie bearbeiten' : 'Edit category'}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
               {/* Clear category button */}
               {!isEmpty && (
                 <button
@@ -340,7 +389,63 @@ export function PantryTabContent() {
               )}
             </button>
 
-            {expanded && (
+            {expanded && editingCategory === cat && (
+              /* ── EDIT MODE: Full catalog checklist ── */
+              <div className="px-3 py-2">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-medium text-teal-600 uppercase tracking-wider">
+                    {language === 'de' ? 'Bearbeitungsmodus' : 'Edit Mode'}
+                  </p>
+                  <button
+                    onClick={() => setEditingCategory(null)}
+                    className="text-[10px] text-gray-400 hover:text-gray-600 flex items-center gap-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                    {language === 'de' ? 'Fertig' : 'Done'}
+                  </button>
+                </div>
+                <div className="space-y-0.5 max-h-64 overflow-y-auto">
+                  {getAllCatalogItemsForCategory(cat).map((catalogItem) => {
+                    const normalized = catalogItem.name_de.toLowerCase().trim()
+                      .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss').replace(/\s+/g, ' ');
+                    const isInPantry = pantryNormalizedNames.has(normalized);
+                    return (
+                      <button
+                        key={catalogItem.id}
+                        onClick={() => handleToggleCatalogItem(catalogItem, isInPantry)}
+                        className={cn(
+                          'w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors',
+                          isInPantry ? 'bg-teal-50 hover:bg-teal-100' : 'hover:bg-gray-50'
+                        )}
+                      >
+                        <div className={cn(
+                          'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors',
+                          isInPantry ? 'bg-teal-500 border-teal-500' : 'border-gray-300'
+                        )}>
+                          {isInPantry && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span className={cn(
+                          'flex-1 text-sm',
+                          isInPantry ? 'text-teal-800 font-medium' : 'text-gray-600'
+                        )}>
+                          {catalogItem.name_de}
+                        </span>
+                        {catalogItem.is_staple && (
+                          <span className="text-[9px] text-gray-400">{language === 'de' ? 'Basis' : 'Staple'}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[9px] text-gray-400 mt-2">
+                  {language === 'de'
+                    ? 'Tippe auf eine Zutat um sie hinzuzufuegen oder zu entfernen'
+                    : 'Tap an ingredient to add or remove it'}
+                </p>
+              </div>
+            )}
+
+            {expanded && editingCategory !== cat && (
               <div className="px-3 py-2 space-y-1.5">
                 {/* Existing pantry items */}
                 {items.map((item) => {

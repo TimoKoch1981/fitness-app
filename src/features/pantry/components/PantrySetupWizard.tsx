@@ -313,6 +313,24 @@ function Step1Templates({
         );
       })}
 
+      {/* 5th option: Browse by category */}
+      <button
+        onClick={() => onSelect('empty')}
+        className="w-full flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-left"
+      >
+        <span className="text-2xl">🗂️</span>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-gray-900">
+            {language === 'de' ? 'Nach Kategorien wählen' : 'Browse by Category'}
+          </p>
+          <p className="text-xs text-gray-500">
+            {language === 'de'
+              ? 'Alle Kategorien durchgehen und einzeln auswählen'
+              : 'Browse all categories and pick individually'}
+          </p>
+        </div>
+      </button>
+
       <p className="text-xs text-gray-400 text-center pt-2">
         {t.catalogInfo.replace('{count}', String(catalogCount))}
       </p>
