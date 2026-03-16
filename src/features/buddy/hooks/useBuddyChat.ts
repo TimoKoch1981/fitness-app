@@ -478,8 +478,8 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
             : m
         ));
 
-        // Show FC error to user (no silent failure!)
-        if (fcErrorMessage) {
+        // Show FC error to user — but ONLY if no actions were ultimately parsed via fallback
+        if (fcErrorMessage && regularActions.length === 0) {
           setMessages(prev => [...prev, {
             id: crypto.randomUUID(),
             role: 'assistant' as const,

@@ -16,6 +16,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
 
 /** Tag display: letter + color */
@@ -45,8 +46,12 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const { state: workoutState, setTag } = useActiveWorkout();
   const setReady = workoutState.setReady;
 
-  // Adaptive field detection (Phase D.2)
-  const isCardio = exercise.exercise_type === 'cardio';
+  // Catalog lookup for movement pattern (carry exercises use distance/duration like cardio)
+  const { data: catalog } = useExerciseCatalog();
+  const catalogEntry = catalog?.find((c) => c.id === exercise.exercise_id);
+
+  // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
+  const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
 
   /** Cycle set tag: normal → warmup → drop → failure → normal */
   const cycleTag = useCallback((setIdx: number) => {

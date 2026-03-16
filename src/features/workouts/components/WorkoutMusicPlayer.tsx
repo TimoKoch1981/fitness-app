@@ -24,10 +24,10 @@ import { cn } from '../../../lib/utils';
 
 /** Curated workout playlists (YouTube playlist IDs). */
 const PLAYLISTS = [
-  { id: 'PLgzTt0k8mXzEk586SfGBUBNkgmfGBKAV', label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
-  { id: 'PLDfKAXSi6kzZmB3HroGh9jCIlImz-djir', label: 'cardio', emoji: '\u{1F3C3}' },
-  { id: 'PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5', label: 'focus', emoji: '\u{1F3AF}' },
-  { id: 'PLgzTt0k8mXzEpH3-UrLbmGPSYjJLOFAJm', label: 'chill', emoji: '\u{1F60C}' },
+  { id: 'RDCLAK5uy_n9Fb4e2UPSuzcbxRuakVBkAE85BEY_sjM', label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
+  { id: 'RDCLAK5uy_kgXMHMfuABcnFNOum4kVIhEa97Q1W-S00', label: 'cardio', emoji: '\u{1F3C3}' },
+  { id: 'RDCLAK5uy_mfz4WCU2OEqJieBi8jXB-bSBhLqrnY0e0', label: 'focus', emoji: '\u{1F3AF}' },
+  { id: 'RDCLAK5uy_m1IWBQ2x7HOQAX_2O6CVVxMFINT8RJDM', label: 'chill', emoji: '\u{1F60C}' },
 ] as const;
 
 const PLAYLIST_LABELS: Record<string, Record<string, string>> = {

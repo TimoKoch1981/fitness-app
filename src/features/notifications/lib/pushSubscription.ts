@@ -37,9 +37,9 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
     if (!subscription) {
       // Create new subscription
       subscription = await registration.pushManager.subscribe({
-        userVisuallyPrompt: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      } as PushSubscriptionOptionsInit);
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+      });
     }
 
     // Save to Supabase

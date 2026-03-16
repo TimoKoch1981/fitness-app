@@ -23,6 +23,7 @@ import { PrivacySettings } from '../features/auth/components/PrivacySettings';
 import { MFASettings } from '../features/auth/components/MFASettings';
 import type { Gender, BMRFormula, PrimaryGoal, TrainingMode } from '../types/health';
 import { TrainingModeSelector } from '../shared/components/TrainingModeSelector';
+import { PowerModeSetupWizard } from '../shared/components/PowerModeSetupWizard';
 import { BuddyAvatar, BUDDY_VARIANTS } from '../shared/components/BuddyAvatar';
 import type { BuddyAvatarStyle } from '../types/health';
 import { WeeklyReportPreview } from '../features/reports/components/WeeklyReportPreview';
@@ -78,6 +79,9 @@ export function ProfilePage() {
   const [showMFPImport, setShowMFPImport] = useState(false);
   // Feedback dialog
   const [showFeedback, setShowFeedback] = useState(false);
+  // Power Mode Setup Wizard
+  const [showPowerSetup, setShowPowerSetup] = useState(false);
+  const [powerSetupMode, setPowerSetupMode] = useState<TrainingMode>('power');
   // Weekly report dialog
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   // Goal recommendation
@@ -1076,6 +1080,11 @@ export function ProfilePage() {
             try {
               await updateProfile.mutateAsync({ training_mode: mode });
               showSaveStatus('saved');
+              // Open Power Setup Wizard when switching TO Power/Power+
+              if (mode === 'power' || mode === 'power_plus') {
+                setPowerSetupMode(mode);
+                setShowPowerSetup(true);
+              }
             } catch {
               showSaveStatus('error');
             }
@@ -1088,6 +1097,13 @@ export function ProfilePage() {
               showSaveStatus('error');
             }
           }}
+        />
+
+        {/* Power Mode Setup Wizard */}
+        <PowerModeSetupWizard
+          open={showPowerSetup}
+          onClose={() => setShowPowerSetup(false)}
+          mode={powerSetupMode}
         />
 
         {/* Advanced Nutrition Toggle (Power/Power+ only) */}

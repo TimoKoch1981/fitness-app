@@ -55,7 +55,7 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
   const addLog = useAddCycleLog();
   const de = language === 'de';
 
-  const [selectedDate, setSelectedDate] = useState(today());
+  const [selectedDates, setSelectedDates] = useState<string[]>([today()]);
   const [phase, setPhase] = useState<CyclePhase>('menstruation');
   const [flowIntensity, setFlowIntensity] = useState<FlowIntensity>('normal');
   const [symptoms, setSymptoms] = useState<CycleSymptom[]>([]);
@@ -68,6 +68,7 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
   const [basalTemp, setBasalTemp] = useState('');
   const [showMucusInfo, setShowMucusInfo] = useState(false);
   const [error, setError] = useState('');
+  const [multiMode, setMultiMode] = useState(false);
 
   const dateDays = useMemo(() => getLastNDays(14), []);
   const weekdayLabels = de ? WEEKDAY_SHORT : WEEKDAY_SHORT_EN;
@@ -78,26 +79,46 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
     setSymptoms(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   };
 
+  const toggleDate = (d: string) => {
+    if (multiMode) {
+      setSelectedDates(prev =>
+        prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort()
+      );
+    } else {
+      setSelectedDates([d]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    if (selectedDates.length === 0) {
+      setError(de ? 'Bitte mindestens ein Datum wählen' : 'Please select at least one date');
+      return;
+    }
+
     try {
-      await addLog.mutateAsync({
-        date: selectedDate,
-        phase,
-        flow_intensity: (phase === 'menstruation' || phase === 'spotting') ? flowIntensity : undefined,
-        symptoms: symptoms.length > 0 ? symptoms : undefined,
-        energy_level: energy,
-        mood,
-        notes: notes || undefined,
-        cervical_mucus: cervicalMucus || undefined,
-        pms_flag: pmsFlag || undefined,
-        sexual_activity: sexualActivity || undefined,
-        basal_temp: basalTemp ? parseFloat(basalTemp) : undefined,
-      });
+      // Save entry for each selected date
+      for (const date of selectedDates) {
+        await addLog.mutateAsync({
+          date,
+          phase,
+          flow_intensity: (phase === 'menstruation' || phase === 'spotting') ? flowIntensity : undefined,
+          symptoms: symptoms.length > 0 ? symptoms : undefined,
+          energy_level: energy,
+          mood,
+          notes: notes || undefined,
+          cervical_mucus: cervicalMucus || undefined,
+          pms_flag: pmsFlag || undefined,
+          sexual_activity: sexualActivity || undefined,
+          basal_temp: basalTemp ? parseFloat(basalTemp) : undefined,
+        });
+      }
 
       // Reset
+      setSelectedDates([today()]);
+      setMultiMode(false);
       setPhase('menstruation');
       setFlowIntensity('normal');
       setSymptoms([]);
@@ -147,19 +168,45 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-medium text-gray-500">{de ? 'Datum' : 'Date'}</label>
-              <span className="text-xs text-gray-400">
-                {selectedDate === today()
-                  ? (de ? 'Heute' : 'Today')
-                  : new Date(selectedDate + 'T12:00:00').toLocaleDateString(de ? 'de-DE' : 'en-US', { day: 'numeric', month: 'short' })}
-              </span>
+              <div className="flex items-center gap-2">
+                {selectedDates.length > 1 && (
+                  <span className="text-[10px] text-rose-500 font-medium">
+                    {selectedDates.length} {de ? 'Tage' : 'days'}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMultiMode(!multiMode);
+                    if (!multiMode) {
+                      // Keep current selection when entering multi mode
+                    } else {
+                      // When leaving multi mode, keep only last selected
+                      setSelectedDates(prev => prev.length > 0 ? [prev[prev.length - 1]] : [today()]);
+                    }
+                  }}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all ${
+                    multiMode
+                      ? 'bg-rose-500 text-white'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  {de ? 'Mehrere Tage' : 'Multi-day'}
+                </button>
+              </div>
             </div>
+            {multiMode && (
+              <p className="text-[10px] text-rose-500 mb-1.5">
+                {de ? '💡 Tippe auf mehrere Tage, um sie gleichzeitig nachzutragen' : '💡 Tap multiple days to log them at once'}
+              </p>
+            )}
             <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
               {dateDays.map((d) => {
                 const isToday = d === today();
-                const isSelected = d === selectedDate;
+                const isSelected = selectedDates.includes(d);
                 const wdIdx = getWeekdayIndex(d);
                 return (
-                  <button key={d} type="button" onClick={() => setSelectedDate(d)}
+                  <button key={d} type="button" onClick={() => toggleDate(d)}
                     className={`flex flex-col items-center min-w-[40px] py-1.5 px-1 rounded-lg transition-all text-xs ${
                       isSelected ? 'bg-rose-500 text-white ring-2 ring-rose-300'
                       : isToday ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-200'
@@ -373,9 +420,13 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
 
           {error && <p className="text-xs text-red-500 text-center" role="alert">{error}</p>}
 
-          <button type="submit" disabled={addLog.isPending}
+          <button type="submit" disabled={addLog.isPending || selectedDates.length === 0}
             className="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-medium rounded-lg hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all">
-            {addLog.isPending ? t.common.loading : t.common.save}
+            {addLog.isPending
+              ? t.common.loading
+              : selectedDates.length > 1
+                ? `${t.common.save} (${selectedDates.length} ${de ? 'Tage' : 'days'})`
+                : t.common.save}
           </button>
         </form>
       </div>

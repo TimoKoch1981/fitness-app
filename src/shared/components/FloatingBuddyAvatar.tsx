@@ -17,6 +17,7 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { useTranslation } from '../../i18n';
 import { BuddyAvatar, BUDDY_VARIANTS } from './BuddyAvatar';
 import { useProfile } from '../../features/auth/hooks/useProfile';
+import type { AgentType } from '../../lib/ai/agents/types';
 
 // Routes where the FAB should NOT appear
 const HIDDEN_ROUTES = new Set([
@@ -38,6 +39,17 @@ function shouldHide(pathname: string): boolean {
   // /join/:code — any path starting with /join
   if (pathname.startsWith('/join')) return true;
   return false;
+}
+
+/** Map current page path to the correct default agent */
+function getAgentForPage(pathname: string): AgentType {
+  if (pathname.startsWith('/nutrition') || pathname.startsWith('/ernaehrung')) return 'nutrition';
+  if (pathname.startsWith('/training') || pathname.startsWith('/workout')) return 'training';
+  if (pathname.startsWith('/medical') || pathname.startsWith('/medizin')) return 'medical';
+  if (pathname.startsWith('/cockpit') || pathname === '/') return 'general';
+  if (pathname.startsWith('/profile') || pathname.startsWith('/profil')) return 'general';
+  if (pathname.startsWith('/social')) return 'general';
+  return 'general';
 }
 
 export function FloatingBuddyAvatar() {
@@ -63,7 +75,7 @@ export function FloatingBuddyAvatar() {
       <motion.button
         key="floating-buddy-avatar"
         type="button"
-        onClick={() => openBuddyChat()}
+        onClick={() => openBuddyChat(undefined, getAgentForPage(location.pathname))}
         data-tour-buddy
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

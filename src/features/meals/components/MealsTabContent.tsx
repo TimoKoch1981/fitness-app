@@ -27,6 +27,7 @@ import { calculatePhaseMacros, type PhaseMacros } from '../../nutrition/utils/ph
 import { MacroCyclingPlanner } from '../../nutrition/components/MacroCyclingPlanner';
 import { MealTimingPlanner } from '../../nutrition/components/MealTimingPlanner';
 import { PeakWeekPlanner } from '../../nutrition/components/PeakWeekPlanner';
+import { SupplementTimingWidget } from '../../nutrition/components/SupplementTimingWidget';
 import { AlternativeScoringCard } from '../../nutrition/components/AlternativeScoringCard';
 import { PhaseSetupWizard } from '../../nutrition/components/PhaseSetupWizard';
 import { RefeedCalendar } from '../../nutrition/components/RefeedCalendar';
@@ -684,6 +685,13 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
             bodyWeight={latestBody.weight_kg}
             bodyFatPct={latestBody.body_fat_pct ?? undefined}
           />
+        </div>
+      )}
+
+      {/* F15: Supplement Timing Widget */}
+      {trainingMode.showSupplementTiming && (
+        <div className="mb-4">
+          <SupplementTimingWidget phase={trainingMode.phase} />
         </div>
       )}
 

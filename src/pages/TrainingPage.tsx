@@ -23,6 +23,8 @@ import { CycleWidget } from '../features/workouts/components/powerplus/CycleWidg
 import { PCTCountdown } from '../features/workouts/components/powerplus/PCTCountdown';
 import { HematocritAlert } from '../features/workouts/components/powerplus/HematocritAlert';
 import { BloodWorkDashboard } from '../features/workouts/components/powerplus/BloodWorkDashboard';
+import { PhaseSetupWizard } from '../features/nutrition/components/PhaseSetupWizard';
+import { PhaseCyclePlanner } from '../features/workouts/components/power/PhaseCyclePlanner';
 
 export function TrainingPage() {
   const { t, language } = useTranslation();
@@ -46,6 +48,8 @@ export function TrainingPage() {
     showBloodWorkDashboard,
   } = useTrainingMode();
 
+  const [showPhaseWizard, setShowPhaseWizard] = useState(false);
+  const [showCyclePlanner, setShowCyclePlanner] = useState(false);
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
   const showPowerPlusWidgets = showCycleTracker || showPCTCountdown || showHematocritAlert || showBloodWorkDashboard;
 
@@ -66,7 +70,17 @@ export function TrainingPage() {
       {showPowerWidgets && (
         <div className="space-y-3 mb-4">
           {showCompetitionFeatures && <CompetitionCountdown />}
-          {showPhaseProgress && <PhaseProgressBar />}
+          {showPhaseProgress && (
+            <div className="space-y-2">
+              <PhaseProgressBar onClick={() => setShowPhaseWizard(true)} />
+              <button
+                onClick={() => setShowCyclePlanner(true)}
+                className="w-full py-2 text-xs text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors font-medium"
+              >
+                {language === 'de' ? '🔄 Phasen-Zyklus planen' : '🔄 Plan Phase Cycle'}
+              </button>
+            </div>
+          )}
           {showNaturalLimits && <NaturalLimitCalc />}
           {showRefeedPlanner && <RefeedPlanner />}
         </div>
@@ -164,6 +178,12 @@ export function TrainingPage() {
         openCreatePlan={openCreatePlan}
         onCreatePlanOpened={() => setOpenCreatePlan(false)}
       />
+
+      {/* Phase Setup Wizard — triggered by clicking PhaseProgressBar */}
+      <PhaseSetupWizard open={showPhaseWizard} onClose={() => setShowPhaseWizard(false)} />
+
+      {/* Phase Cycle Planner — automated phase sequencing */}
+      <PhaseCyclePlanner open={showCyclePlanner} onClose={() => setShowCyclePlanner(false)} />
 
       {/* Workout Start Dialog — Freies Training, Quick-Log, Plan erstellen (U2) */}
       <WorkoutStartDialog

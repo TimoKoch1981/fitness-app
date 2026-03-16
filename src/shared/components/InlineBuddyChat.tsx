@@ -249,10 +249,11 @@ function InlineBuddyChatContent() {
   useProactiveWarnings(deviations, addSystemMessage, language as 'de' | 'en', isDataReady);
 
   // Switch to target agent when inline chat opens with a specific agent
-  const targetAgentAppliedRef = useRef(false);
+  // Track which targetAgent value was already applied to avoid re-applying the same one
+  const lastAppliedTargetRef = useRef<string | null>(null);
   useEffect(() => {
-    if (targetAgent && !targetAgentAppliedRef.current) {
-      targetAgentAppliedRef.current = true;
+    if (targetAgent && targetAgent !== lastAppliedTargetRef.current) {
+      lastAppliedTargetRef.current = targetAgent;
       setActiveThread(targetAgent);
     }
   }, [targetAgent, setActiveThread]);

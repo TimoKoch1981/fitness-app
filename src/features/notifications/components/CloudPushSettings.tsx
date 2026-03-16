@@ -20,7 +20,7 @@ import {
   isWebPushSupported,
 } from '../hooks/usePushSubscriptions';
 
-const TELEGRAM_BOT_NAME = 'FitBuddyNotifyBot'; // Change to actual bot username
+const TELEGRAM_BOT_NAME = 'FitBuddyNotify_Bot';
 
 export function CloudPushSettings() {
   const { language } = useTranslation();

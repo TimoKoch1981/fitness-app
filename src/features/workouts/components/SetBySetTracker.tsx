@@ -58,8 +58,12 @@ export function SetBySetTracker({
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
 
-  // Adaptive field detection (Phase D.2)
-  const isCardio = exercise.exercise_type === 'cardio';
+  // Check if exercise is unilateral (needs L/R) + movement pattern
+  const { data: catalog } = useExerciseCatalog();
+  const catalogEntry = catalog?.find((c) => c.id === exercise.exercise_id);
+
+  // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
+  const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
 
   /** Cycle the current set's tag */
   const cycleCurrentTag = useCallback(() => {
@@ -67,10 +71,6 @@ export function SetBySetTracker({
     const nextIdx = (TAG_CYCLE.indexOf(currentTag) + 1) % TAG_CYCLE.length;
     setTag(exerciseIndex, currentSetIndex, TAG_CYCLE[nextIdx]);
   }, [currentSet?.set_tag, exerciseIndex, currentSetIndex, setTag]);
-
-  // Check if exercise is unilateral (needs L/R)
-  const { data: catalog } = useExerciseCatalog();
-  const catalogEntry = catalog?.find((c) => c.id === exercise.exercise_id);
   const isUnilateral = catalogEntry?.is_unilateral ?? false;
   const totalSets = exercise.sets.length;
   const completedCount = exercise.sets.filter(s => s.completed).length;
