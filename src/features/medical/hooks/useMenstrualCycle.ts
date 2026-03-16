@@ -197,6 +197,44 @@ export function useAddCycleLog() {
   });
 }
 
+/** Batch add/update cycle logs — atomic single request for multi-day entries. */
+export function useAddCycleLogBatch() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (inputs: AddCycleLogInput[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const rows = inputs.map(input => ({
+        user_id: user.id,
+        date: input.date,
+        phase: input.phase,
+        flow_intensity: input.flow_intensity || null,
+        symptoms: input.symptoms ?? [],
+        energy_level: input.energy_level || null,
+        mood: input.mood || null,
+        notes: input.notes || null,
+        cervical_mucus: input.cervical_mucus || null,
+        pms_flag: input.pms_flag ?? false,
+        sexual_activity: input.sexual_activity || null,
+        basal_temp: input.basal_temp || null,
+      }));
+
+      const { data, error } = await supabase
+        .from('menstrual_cycle_logs')
+        .upsert(rows, { onConflict: 'user_id,date' })
+        .select();
+
+      if (error) throw error;
+      return data as MenstrualCycleLog[];
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CYCLE_KEY] });
+    },
+  });
+}
+
 /** Delete a cycle log by ID. */
 export function useDeleteCycleLog() {
   const queryClient = useQueryClient();

@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import { X, Info } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useAddCycleLog, getCyclePhaseEmoji, getCervicalMucusEmoji } from '../hooks/useMenstrualCycle';
+import { useAddCycleLog, useAddCycleLogBatch, getCyclePhaseEmoji, getCervicalMucusEmoji } from '../hooks/useMenstrualCycle';
 import { today } from '../../../lib/utils';
 import type { CyclePhase, FlowIntensity, CycleSymptom, CervicalMucus, SexualActivity } from '../../../types/health';
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  initialDate?: string;
 }
 
 const PHASES: CyclePhase[] = ['menstruation', 'follicular', 'ovulation', 'luteal', 'spotting'];
@@ -50,12 +51,13 @@ function getDayNum(isoDate: string): number {
   return parseInt(isoDate.split('-')[2], 10);
 }
 
-export function AddCycleLogDialog({ open, onClose }: Props) {
+export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
   const { t, language } = useTranslation();
   const addLog = useAddCycleLog();
+  const addLogBatch = useAddCycleLogBatch();
   const de = language === 'de';
 
-  const [selectedDates, setSelectedDates] = useState<string[]>([today()]);
+  const [selectedDates, setSelectedDates] = useState<string[]>([initialDate ?? today()]);
   const [phase, setPhase] = useState<CyclePhase>('menstruation');
   const [flowIntensity, setFlowIntensity] = useState<FlowIntensity>('normal');
   const [symptoms, setSymptoms] = useState<CycleSymptom[]>([]);
@@ -99,25 +101,30 @@ export function AddCycleLogDialog({ open, onClose }: Props) {
     }
 
     try {
-      // Save entry for each selected date
-      for (const date of selectedDates) {
-        await addLog.mutateAsync({
-          date,
-          phase,
-          flow_intensity: (phase === 'menstruation' || phase === 'spotting') ? flowIntensity : undefined,
-          symptoms: symptoms.length > 0 ? symptoms : undefined,
-          energy_level: energy,
-          mood,
-          notes: notes || undefined,
-          cervical_mucus: cervicalMucus || undefined,
-          pms_flag: pmsFlag || undefined,
-          sexual_activity: sexualActivity || undefined,
-          basal_temp: basalTemp ? parseFloat(basalTemp) : undefined,
-        });
+      const buildInput = (date: string) => ({
+        date,
+        phase,
+        flow_intensity: (phase === 'menstruation' || phase === 'spotting') ? flowIntensity : undefined,
+        symptoms: symptoms.length > 0 ? symptoms : undefined,
+        energy_level: energy,
+        mood,
+        notes: notes || undefined,
+        cervical_mucus: cervicalMucus || undefined,
+        pms_flag: pmsFlag || undefined,
+        sexual_activity: sexualActivity || undefined,
+        basal_temp: basalTemp ? parseFloat(basalTemp) : undefined,
+      });
+
+      if (selectedDates.length === 1) {
+        // Single day — use original hook
+        await addLog.mutateAsync(buildInput(selectedDates[0]));
+      } else {
+        // Multiple days — atomic batch upsert (single DB request)
+        await addLogBatch.mutateAsync(selectedDates.map(buildInput));
       }
 
       // Reset
-      setSelectedDates([today()]);
+      setSelectedDates([initialDate ?? today()]);
       setMultiMode(false);
       setPhase('menstruation');
       setFlowIntensity('normal');

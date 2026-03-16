@@ -20,7 +20,7 @@ interface CycleInfo {
   phases: Array<{ phase: CyclePhase; startDay: number; endDay: number }>;
 }
 
-const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
+export const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
   menstruation: 'bg-red-400',
   follicular: 'bg-green-400',
   ovulation: 'bg-amber-400',
@@ -28,7 +28,7 @@ const PHASE_BAR_COLORS: Record<CyclePhase, string> = {
   spotting: 'bg-orange-400',
 };
 
-const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
+export const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
   menstruation: 'text-red-600',
   follicular: 'text-green-600',
   ovulation: 'text-amber-600',

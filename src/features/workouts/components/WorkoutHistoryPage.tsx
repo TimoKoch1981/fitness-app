@@ -85,12 +85,35 @@ export function WorkoutHistoryPage(_props: WorkoutHistoryPageProps) {
 
 // ── Sessions List ────────────────────────────────────────────────────────
 
+interface DayGroup {
+  date: string;
+  workouts: Workout[];
+  totalCalories: number;
+  totalDuration: number;
+}
+
 function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale: string; isDE: boolean }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedExercises, setEditedExercises] = useState<WorkoutExerciseResult[]>([]);
   const [saving, setSaving] = useState(false);
   const updateWorkout = useUpdateWorkout();
+
+  // Group workouts by date for daily summaries
+  const groupedByDate = useMemo((): DayGroup[] => {
+    const groups = new Map<string, Workout[]>();
+    for (const w of workouts) {
+      const existing = groups.get(w.date) || [];
+      existing.push(w);
+      groups.set(w.date, existing);
+    }
+    return Array.from(groups.entries()).map(([date, dayWorkouts]) => ({
+      date,
+      workouts: dayWorkouts,
+      totalCalories: dayWorkouts.reduce((s, w) => s + (w.calories_burned ?? 0), 0),
+      totalDuration: dayWorkouts.reduce((s, w) => s + (w.duration_minutes ?? 0), 0),
+    }));
+  }, [workouts]);
 
   const toggle = (id: string) => {
     setExpanded(prev => {
@@ -137,8 +160,37 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
   };
 
   return (
-    <div className="space-y-2">
-      {workouts.map(w => {
+    <div className="space-y-3">
+      {groupedByDate.map(group => (
+        <div key={group.date}>
+          {/* Day header — always shown; summary line when multiple workouts */}
+          <div className="flex items-center justify-between px-1 mb-1.5">
+            <p className="text-xs font-semibold text-gray-500">
+              {new Date(group.date).toLocaleDateString(locale, {
+                weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+              })}
+            </p>
+            {group.workouts.length > 1 && (
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-[10px] font-medium text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full">
+                  {group.workouts.length} {isDE ? 'Trainings' : 'sessions'}
+                </span>
+                {group.totalDuration > 0 && (
+                  <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
+                    <Clock className="h-2.5 w-2.5" /> {group.totalDuration}m
+                  </span>
+                )}
+                {group.totalCalories > 0 && (
+                  <span className="flex items-center gap-0.5 text-[10px] font-medium text-orange-500">
+                    <Flame className="h-2.5 w-2.5" /> {group.totalCalories}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+          {group.workouts.map(w => {
         const isOpen = expanded.has(w.id);
         const isEditing = editingId === w.id;
         const displayExercises = isEditing
@@ -159,11 +211,13 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{w.name}</p>
+                {group.workouts.length === 1 && (
                 <p className="text-xs text-gray-400">
                   {new Date(w.date).toLocaleDateString(locale, {
                     weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
                   })}
                 </p>
+                )}
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 {w.duration_minutes && (
@@ -291,6 +345,9 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
           </div>
         );
       })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

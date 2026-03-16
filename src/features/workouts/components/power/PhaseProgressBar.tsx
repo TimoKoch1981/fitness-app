@@ -11,6 +11,7 @@ import { useTranslation } from '../../../../i18n';
 import { useProfile } from '../../../auth/hooks/useProfile';
 import { useActivePhaseCycle, useAdvancePhase } from '../../hooks/usePhaseCycles';
 import type { TrainingPhase } from '../../../../types/health';
+import type { TrainingPhaseCycle } from '../../types/phaseCycle';
 
 const PHASE_CONFIG: Record<TrainingPhase, {
   icon: typeof TrendingUp;
@@ -156,7 +157,7 @@ export function PhaseProgressBar({ onClick }: PhaseProgressBarProps = {}) {
 }
 
 /** Separate component to safely call useAdvancePhase hook */
-function PhaseAdvanceBanner({ activeCycle, de }: { activeCycle: { id: string; phases: { phase: string; weeks: number }[]; current_phase_index: number; auto_repeat: boolean }; de: boolean }) {
+function PhaseAdvanceBanner({ activeCycle, de }: { activeCycle: TrainingPhaseCycle; de: boolean }) {
   const advancePhase = useAdvancePhase();
   const [confirming, setConfirming] = useState(false);
 
@@ -170,7 +171,7 @@ function PhaseAdvanceBanner({ activeCycle, de }: { activeCycle: { id: string; ph
       : activeCycle.phases[nextIndex];
 
   const handleAdvance = () => {
-    advancePhase.mutate(activeCycle.id);
+    advancePhase.mutate(activeCycle);
     setConfirming(false);
   };
 

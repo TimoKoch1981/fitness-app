@@ -11,7 +11,7 @@
 import { useState, useMemo } from 'react';
 import {
   X, ChevronRight, ChevronLeft, Play, Pause, SkipForward,
-  Plus, Trash2, GripVertical, RotateCcw, Check, Copy,
+  Plus, Trash2, RotateCcw, Check, Copy,
   TrendingUp, TrendingDown, Minus, Zap, RotateCcw as ReverseIcon, Sun,
 } from 'lucide-react';
 import { useTranslation } from '../../../../i18n';
