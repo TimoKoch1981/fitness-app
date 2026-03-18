@@ -3,6 +3,8 @@
  *
  * Shows day tabs/panels with exercise lists. Users can add exercises
  * from the ExercisePicker, reorder with DnD, or let Buddy populate them.
+ *
+ * Phase 2: Added day_type dropdown for mixed/combo plans + dayType pass-through to ExercisePicker.
  */
 
 import { useState } from 'react';
@@ -19,7 +21,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove as _arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -32,14 +33,16 @@ import {
 } from 'lucide-react';
 import { usePlanWizard } from '../context/PlanWizardContext';
 import { ExercisePicker } from './ExercisePicker';
+import { DAY_TYPE_OPTIONS, getDefaultDayType } from '../data/planConstants';
 import { useTranslation } from '../../../i18n';
-import type { PlanExercise, CatalogExercise } from '../../../types/health';
+import type { PlanExercise, CatalogExercise, DayType } from '../../../types/health';
 
 export function PlanWizardExerciseStep() {
   const { language } = useTranslation();
   const isDE = language === 'de';
 
   const {
+    splitType,
     days,
     updateDay,
     addExerciseToDay,
@@ -60,6 +63,16 @@ export function PlanWizardExerciseStep() {
 
   const exerciseIds = currentDay.exercises.map((_, i) => `ex-${activeTab}-${i}`);
 
+  // Determine the effective day_type for the current day
+  const effectiveDayType: DayType | undefined =
+    currentDay.day_type ?? getDefaultDayType(splitType);
+
+  // Show day_type dropdown only for mixed/combo plans
+  const showDayTypeDropdown = splitType === 'mixed';
+
+  // Determine if exercises are yoga/flexibility style (hold-based, not sets/reps)
+  const isFlexDay = effectiveDayType === 'yoga' || effectiveDayType === 'tai_chi' || effectiveDayType === 'five_tibetans';
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -71,26 +84,42 @@ export function PlanWizardExerciseStep() {
   };
 
   const handleAddFromCatalog = (catalogEx: CatalogExercise) => {
-    const newEx: PlanExercise = {
-      name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
-      exercise_id: catalogEx.id,
-      exercise_type: catalogEx.category,
-      sets: 3,
-      reps: catalogEx.is_compound ? '8-10' : '10-12',
-    };
+    const newEx: PlanExercise = isFlexDay
+      ? {
+          name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
+          exercise_id: catalogEx.id,
+          exercise_type: catalogEx.category,
+          sets: 1,
+          reps: catalogEx.hold_duration_seconds ? `${catalogEx.hold_duration_seconds}s` : '30s',
+        }
+      : {
+          name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
+          exercise_id: catalogEx.id,
+          exercise_type: catalogEx.category,
+          sets: 3,
+          reps: catalogEx.is_compound ? '8-10' : '10-12',
+        };
     addExerciseToDay(activeTab, newEx);
     setShowPicker(false);
   };
 
   const handleMultiSelectConfirm = (exercises: CatalogExercise[]) => {
     for (const catalogEx of exercises) {
-      const newEx: PlanExercise = {
-        name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
-        exercise_id: catalogEx.id,
-        exercise_type: catalogEx.category,
-        sets: 3,
-        reps: catalogEx.is_compound ? '8-10' : '10-12',
-      };
+      const newEx: PlanExercise = isFlexDay
+        ? {
+            name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
+            exercise_id: catalogEx.id,
+            exercise_type: catalogEx.category,
+            sets: 1,
+            reps: catalogEx.hold_duration_seconds ? `${catalogEx.hold_duration_seconds}s` : '30s',
+          }
+        : {
+            name: isDE ? catalogEx.name : (catalogEx.name_en ?? catalogEx.name),
+            exercise_id: catalogEx.id,
+            exercise_type: catalogEx.category,
+            sets: 3,
+            reps: catalogEx.is_compound ? '8-10' : '10-12',
+          };
       addExerciseToDay(activeTab, newEx);
     }
     setShowPicker(false);
@@ -120,6 +149,7 @@ export function PlanWizardExerciseStep() {
             multiSelect
             onMultiSelectConfirm={handleMultiSelectConfirm}
             maxHeight="50vh"
+            dayType={effectiveDayType}
           />
         </div>
       </div>
@@ -158,8 +188,8 @@ export function PlanWizardExerciseStep() {
         ))}
       </div>
 
-      {/* Day Name + Focus */}
-      <div className="grid grid-cols-2 gap-2 mb-3 flex-shrink-0">
+      {/* Day Name + Focus + Day Type (for mixed plans) */}
+      <div className={`grid gap-2 mb-3 flex-shrink-0 ${showDayTypeDropdown ? 'grid-cols-3' : 'grid-cols-2'}`}>
         <div>
           <label className="text-[10px] text-gray-400 mb-0.5 block">
             {isDE ? 'Tag-Name' : 'Day Name'}
@@ -183,6 +213,24 @@ export function PlanWizardExerciseStep() {
             className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-400"
           />
         </div>
+        {showDayTypeDropdown && (
+          <div>
+            <label className="text-[10px] text-gray-400 mb-0.5 block">
+              {isDE ? 'Typ' : 'Type'}
+            </label>
+            <select
+              value={currentDay.day_type ?? 'mixed'}
+              onChange={(e) => updateDay(activeTab, { day_type: e.target.value as DayType })}
+              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white"
+            >
+              {DAY_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.icon} {isDE ? opt.labelDE : opt.labelEN}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Exercise List with DnD */}
@@ -197,6 +245,7 @@ export function PlanWizardExerciseStep() {
                 index={idx}
                 total={currentDay.exercises.length}
                 isDE={isDE}
+                isFlexDay={isFlexDay}
                 onUpdate={(field, value) => handleUpdateExercise(idx, field, value)}
                 onRemove={() => removeExerciseFromDay(activeTab, idx)}
                 onMoveUp={() => { if (idx > 0) reorderExerciseInDay(activeTab, idx, idx - 1); }}
@@ -225,7 +274,7 @@ export function PlanWizardExerciseStep() {
   );
 }
 
-// ── Sortable Exercise Row ─────────────────────────────────────────────────────
+// -- Sortable Exercise Row -------------------------------------------------------
 
 interface SortableExerciseRowProps {
   id: string;
@@ -233,13 +282,14 @@ interface SortableExerciseRowProps {
   index: number;
   total: number;
   isDE: boolean;
+  isFlexDay?: boolean;
   onUpdate: (field: keyof PlanExercise, value: string | number | undefined) => void;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }
 
-function SortableExerciseRow({ id, exercise, index, total, isDE, onUpdate, onRemove, onMoveUp, onMoveDown }: SortableExerciseRowProps) {
+function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUpdate, onRemove, onMoveUp, onMoveDown }: SortableExerciseRowProps) {
   const {
     attributes,
     listeners,
@@ -256,7 +306,7 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, onUpdate, onRem
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isStrength = !exercise.exercise_type || exercise.exercise_type === 'strength' || exercise.exercise_type === 'functional';
+  const isStrength = !isFlexDay && (!exercise.exercise_type || exercise.exercise_type === 'strength' || exercise.exercise_type === 'functional');
 
   return (
     <div
@@ -303,8 +353,20 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, onUpdate, onRem
         placeholder={isDE ? 'Übungsname' : 'Exercise name'}
       />
 
-      {/* Sets / Reps / Weight */}
-      {isStrength ? (
+      {/* Sets / Reps / Weight — or Hold Duration for flex days */}
+      {isFlexDay ? (
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <input
+            type="text"
+            value={exercise.reps ?? ''}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onChange={(e) => onUpdate('reps', e.target.value || undefined)}
+            className="w-14 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
+            placeholder={isDE ? 'Dauer' : 'Hold'}
+          />
+        </div>
+      ) : isStrength ? (
         <div className="flex items-center gap-1 flex-shrink-0">
           <input
             type="number"
@@ -316,7 +378,7 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, onUpdate, onRem
             className="w-8 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="3"
           />
-          <span className="text-xs text-gray-300">×</span>
+          <span className="text-xs text-gray-300">&times;</span>
           <input
             type="text"
             value={exercise.reps ?? ''}

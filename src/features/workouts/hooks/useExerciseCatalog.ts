@@ -41,6 +41,10 @@ export interface ExerciseFilters {
   isCompound?: boolean;
   equipment?: string;
   muscle?: string;
+  /** Filter by subcategory prefix (e.g. 'yoga' matches 'yoga_hatha', 'yoga_vinyasa', etc.) */
+  subcategoryPrefix?: string;
+  /** Filter by pose_category (e.g. 'standing', 'backbend') */
+  poseCategory?: string;
 }
 
 export function useFilteredExercises(
@@ -89,6 +93,23 @@ export function useFilteredExercises(
           ex.primary_muscles?.some((pm) => pm.toLowerCase().includes(m)) ||
           ex.secondary_muscles?.some((sm) => sm.toLowerCase().includes(m));
         if (!hasMuscle) return false;
+      }
+
+      // Subcategory prefix filter (e.g. 'yoga' → yoga_hatha, yoga_vinyasa, ...)
+      if (filters.subcategoryPrefix) {
+        const sub = (ex as unknown as Record<string, unknown>).subcategory as string | undefined;
+        if (!sub) return false;
+        if (filters.subcategoryPrefix === 'five_tibetans') {
+          if (sub !== 'five_tibetans') return false;
+        } else if (!sub.startsWith(filters.subcategoryPrefix)) {
+          return false;
+        }
+      }
+
+      // Pose category filter
+      if (filters.poseCategory) {
+        const pose = (ex as unknown as Record<string, unknown>).pose_category as string | undefined;
+        if (pose !== filters.poseCategory) return false;
       }
 
       return true;

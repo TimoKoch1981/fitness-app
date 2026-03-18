@@ -46,7 +46,44 @@ export const bodyRegionNames: Record<BodyRegion, { de: string; en: string }> = {
   core: { de: 'Core', en: 'Core' },
   full_body: { de: 'Ganzkörper', en: 'Full Body' },
   cardio: { de: 'Cardio', en: 'Cardio' },
+  mind_body: { de: 'Mind & Body', en: 'Mind & Body' },
 };
+
+// ── Pose Category Names (for Yoga / Mind-Body filter chips) ─────────
+
+import type { PoseCategory } from '../../../types/health';
+
+export const poseCategoryNames: Record<PoseCategory, { de: string; en: string; icon: string }> = {
+  standing: { de: 'Stehend', en: 'Standing', icon: '🧍' },
+  seated: { de: 'Sitzend', en: 'Seated', icon: '🪷' },
+  forward_fold: { de: 'Vorbeuge', en: 'Forward Fold', icon: '🙇' },
+  backbend: { de: 'Rückbeuge', en: 'Backbend', icon: '🌙' },
+  twist: { de: 'Drehung', en: 'Twist', icon: '🔄' },
+  inversion: { de: 'Umkehr', en: 'Inversion', icon: '🙃' },
+  balance: { de: 'Balance', en: 'Balance', icon: '⚖️' },
+  core: { de: 'Core', en: 'Core', icon: '🎯' },
+  flow: { de: 'Flow', en: 'Flow', icon: '🌊' },
+  restorative: { de: 'Regenerativ', en: 'Restorative', icon: '😌' },
+  tai_chi_form: { de: 'Form', en: 'Form', icon: '🥋' },
+  tai_chi_qigong: { de: 'Qigong', en: 'Qigong', icon: '🌬️' },
+  tibetan_rite: { de: 'Tibeter', en: 'Tibetan Rite', icon: '🌀' },
+};
+
+/**
+ * Get localized pose category name.
+ */
+export function getPoseCategoryName(category: string, lang: 'de' | 'en' = 'de'): string {
+  const entry = poseCategoryNames[category as PoseCategory];
+  return entry ? entry[lang] : category;
+}
+
+/**
+ * Get pose category icon.
+ */
+export function getPoseCategoryIcon(category: string): string {
+  const entry = poseCategoryNames[category as PoseCategory];
+  return entry?.icon ?? '🏋️';
+}
 
 // ── Movement Pattern Names ──────────────────────────────────────────────
 
@@ -66,6 +103,10 @@ export const movementPatternNames: Record<MovementPattern, { de: string; en: str
   cardio_interval: { de: 'Cardio (Intervall)', en: 'Interval Cardio' },
   flexibility: { de: 'Flexibilität', en: 'Flexibility' },
   plyometric: { de: 'Plyometrie', en: 'Plyometric' },
+  yoga_static: { de: 'Yoga (statisch)', en: 'Yoga (Static)' },
+  yoga_flow: { de: 'Yoga (Flow)', en: 'Yoga (Flow)' },
+  tai_chi_form: { de: 'Tai Chi Form', en: 'Tai Chi Form' },
+  mind_body_dynamic: { de: 'Mind-Body (dynamisch)', en: 'Mind-Body (Dynamic)' },
   other: { de: 'Sonstige', en: 'Other' },
 };
 

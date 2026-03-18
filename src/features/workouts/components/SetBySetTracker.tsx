@@ -64,6 +64,8 @@ export function SetBySetTracker({
 
   // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
   const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
+  // No-weight exercises (bodyweight, Five Tibetans, etc.) — show only reps, full width
+  const noWeight = !isCardio && exercise.sets.every(s => s.target_weight_kg == null);
 
   /** Cycle the current set's tag */
   const cycleCurrentTag = useCallback(() => {
@@ -262,8 +264,8 @@ export function SetBySetTracker({
         </div>
       )}
 
-      {/* Input Fields — adaptive for cardio (Duration+Distance) vs strength (Reps+Weight) */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Input Fields — adaptive for cardio / no-weight / strength */}
+      <div className={`grid gap-3 ${isCardio || !noWeight ? 'grid-cols-2' : 'grid-cols-1 max-w-xs mx-auto'}`}>
         {isCardio ? (
           <>
             <div>
@@ -301,6 +303,24 @@ export function SetBySetTracker({
               </p>
             </div>
           </>
+        ) : noWeight ? (
+          /* No-weight exercises (Five Tibetans, Bodyweight, etc.) — reps only, centered */
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block font-medium text-center">
+              {isDE ? 'Wiederholungen' : 'Reps'}
+            </label>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={reps}
+              onChange={e => setReps(e.target.value)}
+              placeholder={currentSet.target_reps}
+              className="w-full px-3 py-3.5 text-center text-2xl font-bold border-2 border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-400 bg-white placeholder:text-gray-300 placeholder:font-normal"
+            />
+            <p className="text-[10px] text-gray-400 mt-1 text-center">
+              {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+            </p>
+          </div>
         ) : (
           <>
             <div>

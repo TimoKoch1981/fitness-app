@@ -29,10 +29,28 @@ const MET_VALUES: Record<string, number> = {
   // HIIT
   hiit: 8.0,
   circuit_training: 8.0,
-  // Flexibility
+  // Flexibility / Mind-Body
   yoga: 3.0,
+  yoga_hatha: 2.5,
+  yoga_vinyasa: 4.0,
+  yoga_power: 4.5,
+  yoga_ashtanga: 5.0,
+  yoga_yin: 2.0,
+  yoga_restorative: 1.5,
+  yoga_bikram: 5.0,
+  yoga_kundalini: 3.0,
+  sun_salutation: 3.5,
   stretching: 2.5,
   pilates: 3.0,
+  pilates_reformer: 4.0,
+  // Tai Chi
+  tai_chi: 3.0,
+  tai_chi_yang24: 3.0,
+  tai_chi_yang48: 3.0,
+  tai_chi_chen: 4.0,
+  tai_chi_qigong: 2.5,
+  // Five Tibetans
+  five_tibetans: 3.5,
   // Sports
   boxing: 7.8,
   kickboxing: 10.3,
@@ -107,10 +125,17 @@ export function calculateWarmupCalories(
 }
 
 /**
- * Get MET value for an exercise based on its type.
+ * Get MET value for an exercise based on its type and subcategory.
+ * For Mind-Body exercises, uses granular MET values when subcategory is available.
  */
 function getMETForExercise(ex: WorkoutExerciseResult): number {
   const type = ex.exercise_type ?? 'strength';
+
+  // Check subcategory first for granular Mind-Body MET values
+  const subcategory = (ex as unknown as Record<string, unknown>).subcategory as string | undefined;
+  if (subcategory && MET_VALUES[subcategory]) {
+    return MET_VALUES[subcategory];
+  }
 
   switch (type) {
     case 'cardio':

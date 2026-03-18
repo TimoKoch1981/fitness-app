@@ -52,6 +52,8 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
 
   // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
   const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
+  // No-weight exercises (Five Tibetans, bodyweight) — hide weight column
+  const noWeight = !isCardio && exercise.sets.every(s => s.target_weight_kg == null);
 
   /** Cycle set tag: normal → warmup → drop → failure → normal */
   const cycleTag = useCallback((setIdx: number) => {
@@ -219,12 +221,12 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
       </div>
 
       {/* Table Header — adaptive columns */}
-      <div className="grid grid-cols-12 gap-1 px-3 text-xs text-gray-400 font-medium border-b border-gray-100 pb-2">
+      <div className={`grid gap-1 px-3 text-xs text-gray-400 font-medium border-b border-gray-100 pb-2 ${noWeight ? 'grid-cols-10' : 'grid-cols-12'}`}>
         <div className="col-span-1">#</div>
         <div className="col-span-2">{isDE ? 'Ziel' : 'Target'}</div>
         <div className="col-span-2">{isDE ? 'Vorh.' : 'Prev'}</div>
-        <div className="col-span-3">{col3Label}</div>
-        <div className="col-span-3">{col4Label}</div>
+        <div className={noWeight ? 'col-span-4' : 'col-span-3'}>{col3Label}</div>
+        {!noWeight && <div className="col-span-3">{col4Label}</div>}
         <div className="col-span-1"></div>
       </div>
 
@@ -244,7 +246,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
         return (
           <div key={idx} className="space-y-0">
             <div
-              className={`grid grid-cols-12 gap-1 items-center px-3 py-2.5 rounded-xl transition-all ${
+              className={`grid gap-1 items-center px-3 py-2.5 rounded-xl transition-all ${noWeight ? 'grid-cols-10' : 'grid-cols-12'} ${
                 isDone
                   ? 'bg-teal-50/60 border border-teal-200/60 opacity-70'
                   : isSkipped
@@ -315,7 +317,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               </div>
 
               {/* Field 1: Duration (cardio) or Reps (strength) — Input / Completed Value */}
-              <div className="col-span-3">
+              <div className={noWeight ? 'col-span-4' : 'col-span-3'}>
                 {isDone ? (
                   <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
                     {isCardio ? (set.actual_duration_minutes ?? '-') : set.actual_reps}
@@ -347,7 +349,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               </div>
 
               {/* Field 2: Distance (cardio) or Weight (strength) — Input / Completed Value */}
-              <div className="col-span-3">
+              {!noWeight && <div className="col-span-3">
                 {isDone ? (
                   <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
                     {isCardio ? (set.actual_distance_km ?? '-') : (set.actual_weight_kg ?? '-')}
@@ -376,7 +378,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                     }`}
                   />
                 )}
-              </div>
+              </div>}
 
               {/* Action Button */}
               <div className="col-span-1 flex justify-center">

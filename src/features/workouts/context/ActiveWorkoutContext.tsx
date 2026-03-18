@@ -182,7 +182,7 @@ export function buildExercisesFromPlan(
     return {
       name: pe.name,
       exercise_id: pe.exercise_id,
-      exercise_type: isIsometric ? ('strength' as const) : pe.exercise_type,
+      exercise_type: (isIsometric && !defaults.isMindBody) ? ('strength' as const) : pe.exercise_type,
       plan_exercise_index: idx,
       sets,
       duration_minutes: isIsometric ? targetDurationMinutes : pe.duration_minutes,

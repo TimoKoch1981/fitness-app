@@ -8,10 +8,10 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAddTrainingPlan, useUpdateTrainingPlan } from '../hooks/useTrainingPlans';
-import { getDefaultDayNames } from '../data/planConstants';
+import { getDefaultDayNames, getDefaultDayType } from '../data/planConstants';
 import { useTranslation } from '../../../i18n';
 import { useInlineBuddyChat } from '../../../shared/components/InlineBuddyChatContext';
-import type { TrainingPlan, SplitType, PlanExercise } from '../../../types/health';
+import type { TrainingPlan, SplitType, DayType, PlanExercise } from '../../../types/health';
 
 // ── Types ───────────────────────────────────────────────────────────────────────
 
@@ -22,6 +22,7 @@ export interface WizardDay {
   day_number: number;
   name: string;
   focus: string;
+  day_type?: DayType;
   exercises: PlanExercise[];
   notes: string;
 }
@@ -134,6 +135,7 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
           day_number: d.day_number,
           name: d.name,
           focus: d.focus ?? '',
+          day_type: d.day_type,
           exercises: d.exercises ?? [],
           notes: d.notes ?? '',
         })));
@@ -196,11 +198,27 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
   const goToStep2 = useCallback(() => {
     if (days.length === 0 || days.length !== daysPerWeek) {
       const defaultNames = getDefaultDayNames(splitType, daysPerWeek, isDE);
+      const defaultDayType = getDefaultDayType(splitType);
+
+      // Five Tibetans: auto-populate all 5 rites (same for every day)
+      const fiveTibetansExercises: PlanExercise[] = splitType === 'five_tibetans'
+        ? [
+            { name: isDE ? 'Tibeter 1: Drehung' : 'Tibetan Rite 1: Spinning', exercise_type: 'flexibility', sets: 1, reps: '21' },
+            { name: isDE ? 'Tibeter 2: Beinheben' : 'Tibetan Rite 2: Leg Raises', exercise_type: 'flexibility', sets: 1, reps: '21' },
+            { name: isDE ? 'Tibeter 3: Kamel-Rückbeuge' : 'Tibetan Rite 3: Kneeling Backbend', exercise_type: 'flexibility', sets: 1, reps: '21' },
+            { name: isDE ? 'Tibeter 4: Tischplatte' : 'Tibetan Rite 4: Tabletop', exercise_type: 'flexibility', sets: 1, reps: '21' },
+            { name: isDE ? 'Tibeter 5: Zwei Hunde' : 'Tibetan Rite 5: Two Dogs', exercise_type: 'flexibility', sets: 1, reps: '21' },
+          ]
+        : [];
+
       setDays(defaultNames.map((dayName, i) => ({
         day_number: i + 1,
         name: dayName,
         focus: '',
-        exercises: days[i]?.exercises ?? [],
+        day_type: days[i]?.day_type ?? defaultDayType,
+        exercises: days[i]?.exercises?.length
+          ? days[i].exercises
+          : (splitType === 'five_tibetans' ? fiveTibetansExercises : []),
         notes: days[i]?.notes ?? '',
       })));
     }
@@ -219,6 +237,7 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
         day_number: d.day_number,
         name: d.name,
         focus: d.focus ?? '',
+        day_type: (d as { day_type?: DayType }).day_type,
         exercises: d.exercises ?? [],
         notes: d.notes ?? '',
       })));
@@ -243,6 +262,7 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
             day_number: d.day_number,
             name: d.name.trim() || `${isDE ? 'Tag' : 'Day'} ${d.day_number}`,
             focus: d.focus.trim() || undefined,
+            day_type: d.day_type,
             exercises: d.exercises,
             notes: d.notes.trim() || undefined,
           })),
@@ -276,6 +296,7 @@ export function PlanWizardProvider({ children }: { children: ReactNode }) {
               .update({
                 name: day.name,
                 focus: day.focus || null,
+                day_type: day.day_type || null,
                 exercises: day.exercises,
                 notes: day.notes || null,
               })

@@ -23,6 +23,8 @@ export interface ExerciseDefaults {
   isIsometric: boolean;
   /** Hold duration in seconds (only for isometric) */
   holdSeconds?: number;
+  /** Whether this is a Mind-Body exercise (Yoga, Tai Chi, Five Tibetans) */
+  isMindBody?: boolean;
 }
 
 // Bodyweight exercise patterns (no external weight needed)
@@ -82,6 +84,24 @@ export function suggestExerciseDefaults(
   exerciseName: string,
   catalogEntry?: CatalogExercise,
 ): ExerciseDefaults {
+  // 0. Mind-Body detection (Yoga, Tai Chi, Five Tibetans)
+  const sub = catalogEntry?.subcategory;
+  if (sub) {
+    // Five Tibetans: use reps (5→21), no weight
+    if (sub === 'five_tibetans') {
+      return { weight_kg: undefined, reps: '7', isIsometric: false, isMindBody: true };
+    }
+    // Tai Chi forms: duration-based, no reps/weight
+    if (sub.startsWith('tai_chi')) {
+      return { weight_kg: undefined, reps: '1', isIsometric: false, holdSeconds: 0, isMindBody: true };
+    }
+    // Yoga poses: hold-duration-based
+    if (sub.startsWith('yoga')) {
+      const hold = catalogEntry?.hold_duration_seconds ?? 30;
+      return { weight_kg: undefined, reps: '1', isIsometric: true, holdSeconds: hold, isMindBody: true };
+    }
+  }
+
   // 1. Isometric detection (Plank, Dead Hang, Wall Sit, L-Sit, Hold)
   const isIso = ISOMETRIC_PATTERNS.some(p => p.test(exerciseName));
   if (isIso) {

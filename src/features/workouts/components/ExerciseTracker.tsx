@@ -95,12 +95,23 @@ export function ExerciseTracker() {
   const isCardio = exercise.exercise_type === 'cardio';
   // Isometric detection (Plank, Dead Hang, Wall Sit, L-Sit)
   const isIsometric = ISOMETRIC_PATTERNS.some(p => p.test(exercise.name));
+
+  // Mind-Body subcategory detection from catalog
+  const subcategory = catalogEntry?.subcategory ?? '';
+  const isFiveTibetans = subcategory === 'five_tibetans';
+  const isTaiChi = subcategory.startsWith('tai_chi');
+  const isYoga = subcategory.startsWith('yoga');
+
   // Timed exercises use ExerciseTimer (flexibility, isometric holds; cardio uses set trackers with Duration+Distance)
+  // Exception: Five Tibetans are rep-based, NOT timed
   const isTimedExercise = (
-    exercise.exercise_type === 'flexibility' ||
+    (exercise.exercise_type === 'flexibility' && !isFiveTibetans) ||
     isIsometric ||
     (!isCardio && exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
   );
+
+  // Timer variant: 'hold' for yoga/isometric, 'flow' for tai chi
+  const timerVariant: 'hold' | 'flow' = isTaiChi ? 'flow' : 'hold';
 
   const handleLogSetAndAdvance = (exIdx: number, setIdx: number, reps: number, weightKg?: number, notes?: string, durationMinutes?: number, distanceKm?: number) => {
     logSet(exIdx, setIdx, reps, weightKg, notes, durationMinutes, distanceKm);
@@ -214,7 +225,7 @@ export function ExerciseTracker() {
           </div>
         </div>
 
-        {/* Exercise info hint — adaptive for cardio vs strength */}
+        {/* Exercise info hint — adaptive for cardio / mind-body / strength */}
         {isCardio ? (
           <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
             <span>{exercise.sets.length} {exercise.sets.length === 1 ? (isDE ? 'Intervall' : 'Interval') : (isDE ? 'Intervalle' : 'Intervals')}</span>
@@ -225,6 +236,25 @@ export function ExerciseTracker() {
               <span>{exercise.distance_km} km</span>
             )}
             {exercise.pace && <span>{exercise.pace}</span>}
+          </div>
+        ) : isFiveTibetans ? (
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+            <span>🌀 {isDE ? 'Tibetischer Rite' : 'Tibetan Rite'}</span>
+            <span>{exercise.sets[0]?.target_reps ?? '21'} {isDE ? 'Wdh' : 'Reps'}</span>
+          </div>
+        ) : isYoga ? (
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+            <span>🧘 {isDE ? 'Haltezeit' : 'Hold'}</span>
+            {exercise.duration_minutes != null && (
+              <span>{Math.round(exercise.duration_minutes * 60)}s</span>
+            )}
+            {catalogEntry?.breathing_cue && (
+              <span className="text-teal-400">{isDE ? catalogEntry.breathing_cue.de : catalogEntry.breathing_cue.en}</span>
+            )}
+          </div>
+        ) : isTaiChi ? (
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+            <span>🥋 {isDE ? 'Form-Übung' : 'Form Practice'}</span>
           </div>
         ) : exercise.sets[0]?.target_weight_kg != null && (
           <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
@@ -275,6 +305,8 @@ export function ExerciseTracker() {
             exerciseName={exercise.name}
             onComplete={handleTimedComplete}
             onSkip={handleTimedSkip}
+            variant={timerVariant}
+            breathingCue={catalogEntry?.breathing_cue ? (isDE ? catalogEntry.breathing_cue.de : catalogEntry.breathing_cue.en) : undefined}
           />
         ) : state.mode === 'set-by-set' ? (
           <SetBySetTracker

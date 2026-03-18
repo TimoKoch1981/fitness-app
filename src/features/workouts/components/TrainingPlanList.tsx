@@ -57,6 +57,8 @@ const SPLIT_TYPE_LABELS: Record<SplitType, { de: string; en: string }> = {
   swimming: { de: 'Schwimmen', en: 'Swimming' },
   cycling: { de: 'Radfahren', en: 'Cycling' },
   yoga: { de: 'Yoga', en: 'Yoga' },
+  tai_chi: { de: 'Tai Chi', en: 'Tai Chi' },
+  five_tibetans: { de: 'Five Tibetans', en: 'Five Tibetans' },
   martial_arts: { de: 'Kampfsport', en: 'Martial Arts' },
   mixed: { de: 'Gemischt', en: 'Mixed' },
 };

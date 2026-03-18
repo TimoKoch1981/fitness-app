@@ -59,10 +59,18 @@ export const ISOMETRIC_PATTERNS = [
   /isometr/i,
 ];
 
+// Mind-Body exercise patterns
+export const MIND_BODY_PATTERNS = [
+  /yoga|asana|krieger|warrior|kobra|cobra|herabschau|downward.*dog|sonnengruß|sun.*salut/i,
+  /tai\s*chi|qigong|qi\s*gong|yang\s*\d+|wildpferd|kranich|peitsche|wolken/i,
+  /tibeter|tibetan|drehung.*spinning|tischplatte.*tabletop|zwei.*hunde/i,
+];
+
 export function detectCategory(name: string): ExerciseCategory {
   if (ISOMETRIC_PATTERNS.some(p => p.test(name))) return 'isometric';
   if (COMPOUND_PATTERNS.some(p => p.test(name))) return 'compound';
   if (/lauf|run|jog|sprint|schwimm|swim|rad|bike|cycling|cardio/i.test(name)) return 'cardio';
+  if (MIND_BODY_PATTERNS.some(p => p.test(name))) return 'flexibility';
   if (/stretch|dehn|yoga|mobil/i.test(name)) return 'flexibility';
   return 'isolation';
 }

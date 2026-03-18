@@ -607,7 +607,7 @@ export interface Recommendation {
 
 // === EXERCISE CATALOG ===
 
-export type BodyRegion = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'full_body' | 'cardio';
+export type BodyRegion = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'full_body' | 'cardio' | 'mind_body';
 
 export type MovementPattern =
   | 'horizontal_push' | 'horizontal_pull'
@@ -615,7 +615,14 @@ export type MovementPattern =
   | 'hip_hinge' | 'squat' | 'lunge'
   | 'carry' | 'rotation' | 'anti_rotation'
   | 'isolation' | 'cardio_steady' | 'cardio_interval'
-  | 'flexibility' | 'plyometric' | 'other';
+  | 'flexibility' | 'plyometric' | 'other'
+  | 'yoga_static' | 'yoga_flow' | 'tai_chi_form' | 'mind_body_dynamic';
+
+/** Pose category for Mind-Body exercises (Yoga, Tai Chi, Five Tibetans) */
+export type PoseCategory =
+  | 'standing' | 'seated' | 'forward_fold' | 'backbend' | 'twist'
+  | 'inversion' | 'balance' | 'core' | 'flow' | 'restorative'
+  | 'tai_chi_form' | 'tai_chi_qigong' | 'tibetan_rite';
 
 export type ForceType = 'push' | 'pull' | 'static' | 'dynamic';
 
@@ -677,6 +684,12 @@ export interface CatalogExercise {
   alternatives: string[];
   sort_order: number;
   updated_at?: string;
+  // v3 Mind-Body fields
+  subcategory?: string;
+  pose_category?: PoseCategory;
+  hold_duration_seconds?: number;
+  sanskrit_name?: string;
+  breathing_cue?: { de: string; en: string };
 }
 
 // === EQUIPMENT ===
@@ -720,7 +733,12 @@ export type ExerciseCategory = 'strength' | 'cardio' | 'flexibility' | 'function
 
 export type SplitType =
   | 'ppl' | 'upper_lower' | 'full_body' | 'custom'
-  | 'running' | 'swimming' | 'cycling' | 'yoga' | 'martial_arts' | 'mixed';
+  | 'running' | 'swimming' | 'cycling'
+  | 'yoga' | 'tai_chi' | 'five_tibetans'
+  | 'martial_arts' | 'mixed';
+
+/** Training day type for mixed/combo plans — determines ExercisePicker filter */
+export type DayType = 'strength' | 'yoga' | 'tai_chi' | 'five_tibetans' | 'cardio' | 'mixed';
 
 export interface PlanExercise {
   name: string;
@@ -746,6 +764,7 @@ export interface TrainingPlanDay {
   day_number: number;
   name: string;
   focus?: string;
+  day_type?: DayType;
   exercises: PlanExercise[];
   notes?: string;
   created_at: string;

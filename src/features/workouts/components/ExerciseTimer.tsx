@@ -17,9 +17,13 @@ interface ExerciseTimerProps {
   onComplete: (actualSeconds: number) => void;
   /** Called when user skips */
   onSkip: () => void;
+  /** Timer variant: 'hold' for yoga/isometric (countdown), 'flow' for tai chi (count up) */
+  variant?: 'hold' | 'flow';
+  /** Optional breathing cue from catalog */
+  breathingCue?: string;
 }
 
-export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, onComplete, onSkip }: ExerciseTimerProps) {
+export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, onComplete, onSkip, variant = 'hold', breathingCue }: ExerciseTimerProps) {
   const { t } = useTranslation();
   const [remaining, setRemaining] = useState(durationSeconds);
   const [isRunning, setIsRunning] = useState(false);
@@ -79,11 +83,22 @@ export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, on
       {/* Label */}
       <div className="text-center mb-4">
         <p className="text-sm font-medium text-gray-500">
-          {t.workout?.timedExercise ?? 'Timed Exercise'}
+          {variant === 'flow'
+            ? '🥋 Form Practice'
+            : (t.workout?.timedExercise ?? '🧘 Timed Exercise')
+          }
         </p>
         <p className="text-xs text-gray-400 mt-0.5">
-          {t.workout?.holdFor ?? 'Hold for'} {durationSeconds}s
+          {variant === 'flow'
+            ? `${Math.floor(durationSeconds / 60)} Min`
+            : `${t.workout?.holdFor ?? 'Hold for'} ${durationSeconds}s`
+          }
         </p>
+        {breathingCue && (
+          <p className="text-xs text-teal-500 mt-1 italic">
+            💨 {breathingCue}
+          </p>
+        )}
       </div>
 
       {/* Circular Timer */}
