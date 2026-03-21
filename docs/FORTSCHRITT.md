@@ -3649,4 +3649,40 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 
 ---
 
-*Letzte Aktualisierung: 2026-03-14*
+---
+
+### v13.3 — Zyklustracker v3: Period-First UX + Auto-Phase-Berechnung (2026-03-21)
+
+**Paradigmenwechsel** von manueller Phasenauswahl zu Period-First UX (Flo/Clue-Ansatz).
+
+**Kernänderungen:**
+- **AddCycleLogDialog komplett umgebaut:** 5 Phasen-Buttons → 3-Button Period-Toggle (Ja, Periode / Schmierblutung / Nein)
+- **Auto-Phase-Berechnung:** Backward-Counting-Methode (Ovulation = Zykluslänge − 14 Tage, Lutealphase ist am konstantesten)
+- **Quick-Toggle im Kalender:** Mehrere Periode-Tage auf einmal markieren/entfernen (Clue-Style)
+- **useCyclePrediction erweitert:** averagePeriodLength aus tatsächlichen Daten statt Hardcode (5 Tage)
+- **DB-Schema:** phase nullable (NULL = auto-berechnet, menstruation/spotting = user-reported)
+- **Amenorrhoe-Warnung:** 60 → 45 Tage (Gynäkologin-Empfehlung)
+- **Erweitert-Sektion:** Zervixschleim, BBT, Sexualaktivität aufklappbar statt immer sichtbar
+- **Null-Safety:** CycleTimeline, CyclePage, generateDoctorReport abgesichert
+- **Konzeptdoku:** Marktanalyse (Flo, Clue, Natural Cycles, Ovia) + 6-Experten-Review
+
+**Neue Dateien (2):**
+- docs/KONZEPT_ZYKLUSTRACKER_V3.md (Konzept + Expertenpanel-Review)
+- supabase/migrations/20260320000001_cycle_phase_nullable.sql
+
+**Geänderte Dateien (9):**
+- src/features/medical/components/AddCycleLogDialog.tsx (komplett umgebaut)
+- src/features/medical/components/CycleCalendarView.tsx (+Quick-Toggle)
+- src/features/medical/components/CycleTimeline.tsx (Null-Safety)
+- src/features/medical/hooks/useCyclePatterns.ts (Amenorrhoe 45d)
+- src/features/medical/hooks/useCyclePrediction.ts (+averagePeriodLength, estimatePhase)
+- src/features/medical/hooks/useMenstrualCycle.ts (phase nullable)
+- src/features/medical/utils/generateDoctorReport.ts (Null-Safety)
+- src/pages/CyclePage.tsx (Null-Safety)
+- src/types/health.ts (phase: CyclePhase | null)
+
+**Deployed + live getestet auf fudda.de.**
+
+---
+
+*Letzte Aktualisierung: 2026-03-21*

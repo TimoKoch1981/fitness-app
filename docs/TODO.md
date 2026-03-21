@@ -1,6 +1,6 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-14, v12.89
+> **Stand:** 2026-03-21, v13.3
 > **Letzte Konsolidierung:** Rezept-Bugfixes + Favoriten-Filter + Rezept-Import Konzept (v12.89)
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
