@@ -20,21 +20,30 @@ interface CycleCalendarViewProps {
   onDayClick?: (date: string) => void;
 }
 
-// Calendar-specific background colors (lighter for better readability)
+// Calendar-specific background colors — strong enough to be clearly visible
 const PHASE_BG: Record<CyclePhase, string> = {
-  menstruation: 'bg-red-200',
-  follicular: 'bg-green-200',
-  ovulation: 'bg-amber-200',
+  menstruation: 'bg-red-300',
+  follicular: 'bg-emerald-200',
+  ovulation: 'bg-amber-300',
   luteal: 'bg-purple-200',
-  spotting: 'bg-orange-200',
+  spotting: 'bg-orange-300',
 };
 
 const PHASE_BG_PREDICTED: Record<CyclePhase, string> = {
-  menstruation: 'bg-red-100 border-dashed border border-red-300',
-  follicular: 'bg-green-50',
-  ovulation: 'bg-amber-100 border-dashed border border-amber-300',
-  luteal: 'bg-purple-50',
-  spotting: 'bg-orange-50',
+  menstruation: 'bg-red-200 border-dashed border border-red-400',
+  follicular: 'bg-emerald-100 border-dashed border border-emerald-300',
+  ovulation: 'bg-amber-200 border-dashed border border-amber-400',
+  luteal: 'bg-purple-100 border-dashed border border-purple-300',
+  spotting: 'bg-orange-100 border-dashed border border-orange-300',
+};
+
+/** Phase emoji shown in each calendar day cell */
+const PHASE_EMOJI: Record<CyclePhase, string> = {
+  menstruation: '\u{1FA78}',   // 🩸
+  follicular: '\u{1F331}',     // 🌱
+  ovulation: '\u{1F95A}',      // 🥚
+  luteal: '\u{1F319}',         // 🌙
+  spotting: '\u{1F4A7}',       // 💧
 };
 
 const WEEKDAY_LABELS_DE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -60,6 +69,29 @@ interface CalendarDay {
   isFertile?: boolean;
 }
 
+/**
+ * Find all menstruation start dates from logs (ascending).
+ * A start = menstruation entry not preceded by another menstruation within 2 days.
+ */
+function findPeriodStarts(logsMap: Map<string, MenstrualCycleLog>): string[] {
+  const mensLogs = Array.from(logsMap.values())
+    .filter(l => l.phase === 'menstruation' || l.phase === 'spotting')
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const starts: string[] = [];
+  for (let i = 0; i < mensLogs.length; i++) {
+    const prev = mensLogs[i - 1];
+    if (!prev || daysDiff(prev.date, mensLogs[i].date) > 2) {
+      starts.push(mensLogs[i].date);
+    }
+  }
+  return starts;
+}
+
+function daysDiff(a: string, b: string): number {
+  return Math.round((new Date(b + 'T12:00:00').getTime() - new Date(a + 'T12:00:00').getTime()) / 86400000);
+}
+
 function getMonthGrid(year: number, month: number, logsMap: Map<string, MenstrualCycleLog>, prediction: ReturnType<typeof useCyclePrediction>): CalendarDay[] {
   const todayStr = new Date().toISOString().split('T')[0];
   const firstDay = new Date(year, month, 1);
@@ -67,7 +99,20 @@ function getMonthGrid(year: number, month: number, logsMap: Map<string, Menstrua
   const startDow = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+  // Pre-compute all period starts for phase prediction across all months
+  const periodStarts = findPeriodStarts(logsMap);
+
   const days: CalendarDay[] = [];
+
+  const makeDay = (dateStr: string, dayNum: number, isCurrentMonth: boolean): CalendarDay => ({
+    date: dateStr,
+    dayNum,
+    isCurrentMonth,
+    isToday: dateStr === todayStr,
+    log: logsMap.get(dateStr),
+    predictedPhase: getPredictedPhase(dateStr, prediction, periodStarts),
+    isFertile: isInFertileWindow(dateStr, prediction, periodStarts),
+  });
 
   // Fill leading days from previous month
   const prevMonthDays = new Date(year, month, 0).getDate();
@@ -76,29 +121,13 @@ function getMonthGrid(year: number, month: number, logsMap: Map<string, Menstrua
     const prevMonth = month === 0 ? 11 : month - 1;
     const prevYear = month === 0 ? year - 1 : year;
     const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push({
-      date: dateStr,
-      dayNum: d,
-      isCurrentMonth: false,
-      isToday: dateStr === todayStr,
-      log: logsMap.get(dateStr),
-      predictedPhase: getPredictedPhase(dateStr, prediction),
-      isFertile: isInFertileWindow(dateStr, prediction),
-    });
+    days.push(makeDay(dateStr, d, false));
   }
 
   // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push({
-      date: dateStr,
-      dayNum: d,
-      isCurrentMonth: true,
-      isToday: dateStr === todayStr,
-      log: logsMap.get(dateStr),
-      predictedPhase: getPredictedPhase(dateStr, prediction),
-      isFertile: isInFertileWindow(dateStr, prediction),
-    });
+    days.push(makeDay(dateStr, d, true));
   }
 
   // Fill trailing days to complete last row
@@ -108,34 +137,34 @@ function getMonthGrid(year: number, month: number, logsMap: Map<string, Menstrua
       const nextMonth = month === 11 ? 0 : month + 1;
       const nextYear = month === 11 ? year + 1 : year;
       const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      days.push({
-        date: dateStr,
-        dayNum: d,
-        isCurrentMonth: false,
-        isToday: dateStr === todayStr,
-        log: logsMap.get(dateStr),
-        predictedPhase: getPredictedPhase(dateStr, prediction),
-        isFertile: isInFertileWindow(dateStr, prediction),
-      });
+      days.push(makeDay(dateStr, d, false));
     }
   }
 
   return days;
 }
 
-function getPredictedPhase(dateStr: string, prediction: ReturnType<typeof useCyclePrediction>): CyclePhase | undefined {
-  if (!prediction || prediction.confidence === 'none' || !prediction.lastPeriodStart) return undefined;
-  const { predictedCycleLength, averagePeriodLength, lastPeriodStart } = prediction;
-  if (!lastPeriodStart) return undefined;
+/**
+ * Get predicted phase for a date.
+ * Uses ALL known period starts to color historical months correctly.
+ * For future dates, uses the last period start + predicted cycle length.
+ */
+function getPredictedPhase(
+  dateStr: string,
+  prediction: ReturnType<typeof useCyclePrediction>,
+  periodStarts: string[],
+): CyclePhase | undefined {
+  if (!prediction || prediction.confidence === 'none') return undefined;
+  const { predictedCycleLength, averagePeriodLength } = prediction;
 
-  const date = new Date(dateStr + 'T12:00:00');
-  const lastStart = new Date(lastPeriodStart + 'T12:00:00');
-  const diffDays = Math.round((date.getTime() - lastStart.getTime()) / 86400000);
+  // Find the relevant cycle start for this date
+  const cycleStart = findCycleStartForDate(dateStr, periodStarts, predictedCycleLength);
+  if (!cycleStart) return undefined;
 
-  // Only predict within 1 cycle length into the future
-  if (diffDays < 0 || diffDays > predictedCycleLength * 2) return undefined;
+  const diff = daysDiff(cycleStart, dateStr);
+  if (diff < 0 || diff >= predictedCycleLength * 2) return undefined;
 
-  const cycleDay = (diffDays % predictedCycleLength) + 1;
+  const cycleDay = (diff % predictedCycleLength) + 1;
   const ovulationDay = Math.max(averagePeriodLength + 1, predictedCycleLength - 14);
 
   if (cycleDay <= averagePeriodLength) return 'menstruation';
@@ -144,9 +173,56 @@ function getPredictedPhase(dateStr: string, prediction: ReturnType<typeof useCyc
   return 'luteal';
 }
 
-function isInFertileWindow(dateStr: string, prediction: ReturnType<typeof useCyclePrediction>): boolean {
-  if (!prediction?.fertileWindowStart || !prediction?.fertileWindowEnd) return false;
-  return dateStr >= prediction.fertileWindowStart && dateStr <= prediction.fertileWindowEnd;
+/**
+ * Find the cycle start date that "owns" a given date.
+ * For historical dates: find the period start that is <= dateStr and closest.
+ * For future dates: project from the last period start using predicted cycle length.
+ */
+function findCycleStartForDate(dateStr: string, periodStarts: string[], predictedCycleLength: number): string | null {
+  if (periodStarts.length === 0) return null;
+
+  // Find the last period start that is <= dateStr
+  let bestStart: string | null = null;
+  for (const start of periodStarts) {
+    if (start <= dateStr) bestStart = start;
+    else break; // sorted ascending, no need to continue
+  }
+
+  if (bestStart) {
+    // Check if the date is within a reasonable range of this cycle
+    const diff = daysDiff(bestStart, dateStr);
+    if (diff < predictedCycleLength * 2) return bestStart;
+  }
+
+  // For future dates beyond all known starts, project from last start
+  const lastStart = periodStarts[periodStarts.length - 1];
+  const diff = daysDiff(lastStart, dateStr);
+  if (diff >= 0 && diff < predictedCycleLength * 2) return lastStart;
+
+  return null;
+}
+
+/**
+ * Check if a date falls within a fertile window.
+ * Works for both current cycle and historical/future cycles.
+ */
+function isInFertileWindow(
+  dateStr: string,
+  prediction: ReturnType<typeof useCyclePrediction>,
+  periodStarts: string[],
+): boolean {
+  if (!prediction || prediction.confidence === 'none') return false;
+  const { predictedCycleLength, averagePeriodLength } = prediction;
+
+  const cycleStart = findCycleStartForDate(dateStr, periodStarts, predictedCycleLength);
+  if (!cycleStart) return false;
+
+  const diff = daysDiff(cycleStart, dateStr);
+  const cycleDay = (diff % predictedCycleLength) + 1;
+  const ovulationDay = Math.max(averagePeriodLength + 1, predictedCycleLength - 14);
+
+  // Fertile window: ovulation -5 to ovulation +1
+  return cycleDay >= ovulationDay - 5 && cycleDay <= ovulationDay + 1;
 }
 
 export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCalendarViewProps) {
@@ -400,20 +476,21 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
               <span className={`text-xs font-medium ${
                 isQuickAdded ? 'text-white' :
                 isQuickRemoved ? 'text-gray-400 line-through' :
-                hasLog ? 'text-gray-800' : predicted ? 'text-gray-500' : 'text-gray-600'
+                hasLog ? 'text-gray-900' : predicted ? 'text-gray-700' : 'text-gray-600'
               }`}>
                 {day.dayNum}
               </span>
-              {hasLog && !isQuickRemoved && phase && (
-                <span className="text-[8px] leading-none mt-0.5">
-                  {getCyclePhaseEmoji(phase)}
+              {/* Phase emoji — shown for both logged AND predicted phases */}
+              {!isQuickRemoved && !isQuickAdded && (phase || predicted) && (
+                <span className={`text-[10px] leading-none mt-0.5 ${predicted && !phase ? 'opacity-60' : ''}`}>
+                  {PHASE_EMOJI[(phase || predicted) as CyclePhase]}
                 </span>
               )}
               {isQuickAdded && (
-                <span className="text-[8px] leading-none mt-0.5">{'\u{1FA78}'}</span>
+                <span className="text-[10px] leading-none mt-0.5">{'\u{1FA78}'}</span>
               )}
-              {day.isFertile && !hasLog && !isQuickAdded && (
-                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-pink-400" />
+              {day.isFertile && !isQuickAdded && (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-pink-500 border border-white" />
               )}
             </button>
           );
@@ -421,19 +498,20 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-2 border-t bg-gray-50 flex flex-wrap gap-2">
+      <div className="px-4 py-2.5 border-t bg-gray-50 flex flex-wrap gap-x-3 gap-y-1">
         {(['menstruation', 'follicular', 'ovulation', 'luteal'] as CyclePhase[]).map(p => (
           <div key={p} className="flex items-center gap-1">
-            <div className={`w-2.5 h-2.5 rounded-sm ${PHASE_BAR_COLORS[p]}`} />
-            <span className="text-[9px] text-gray-500">{t.cycle?.[p as keyof typeof t.cycle] ?? p}</span>
+            <span className="text-[11px]">{PHASE_EMOJI[p]}</span>
+            <div className={`w-2.5 h-2.5 rounded-sm ${PHASE_BG[p]}`} />
+            <span className="text-[9px] text-gray-600 font-medium">{t.cycle?.[p as keyof typeof t.cycle] ?? p}</span>
           </div>
         ))}
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm bg-pink-200 border border-dashed border-pink-400" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-purple-100 border border-dashed border-purple-300" />
           <span className="text-[9px] text-gray-500">{de ? 'Vorhersage' : 'Predicted'}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+          <div className="w-2 h-2 rounded-full bg-pink-500" />
           <span className="text-[9px] text-gray-500">{de ? 'Fruchtbar' : 'Fertile'}</span>
         </div>
       </div>
