@@ -1,21 +1,19 @@
 /**
  * CycleCalendarView — Monatskalender-Ansicht fuer Zyklus-Tracking (Flo/Clue-Style).
  *
- * Features:
- * - 7-Spalten-Grid (Mo-So) mit 5-6 Zeilen pro Monat
- * - Farbkodierung pro Tag basierend auf Log-Daten + Vorhersagen
- * - Tag antippen oeffnet Detail-Sheet
- * - Monatsweise Navigation (Pfeil-Buttons)
- * - Vorhersage-Overlay (halbtransparente Farben)
+ * v3: Period-First UX
+ * - Quick-Toggle-Modus: Tage antippen = Periode an/aus
+ * - Phase wird NIE manuell gesetzt — immer auto-berechnet
+ * - Vereinfachtes Detail-Sheet (kein Phase-Edit)
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Droplets } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useMenstrualCycleLogs, getCyclePhaseEmoji, useDeleteCycleLog } from '../hooks/useMenstrualCycle';
+import { useMenstrualCycleLogs, getCyclePhaseEmoji, useDeleteCycleLog, useAddCycleLogBatch } from '../hooks/useMenstrualCycle';
 import { useCyclePrediction } from '../hooks/useCyclePrediction';
 import { PHASE_BAR_COLORS } from './CycleTimeline';
-import type { MenstrualCycleLog, CyclePhase } from '../../../types/health';
+import type { MenstrualCycleLog, CyclePhase, FlowIntensity } from '../../../types/health';
 
 interface CycleCalendarViewProps {
   cycleTrackingEnabled?: boolean;
@@ -44,6 +42,13 @@ const WEEKDAY_LABELS_EN = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 const MOOD_EMOJIS = ['\u{1F622}', '\u{1F615}', '\u{1F610}', '\u{1F642}', '\u{1F60A}'];
 const ENERGY_EMOJIS = ['\u{1FAB6}', '\u{1F634}', '\u{1F610}', '\u{26A1}', '\u{1F525}'];
+
+const FLOW_OPTIONS: { key: FlowIntensity; emoji: string }[] = [
+  { key: 'light', emoji: '\u{1F4A7}' },
+  { key: 'normal', emoji: '\u{1F4A7}\u{1F4A7}' },
+  { key: 'heavy', emoji: '\u{1F4A7}\u{1F4A7}\u{1F4A7}' },
+  { key: 'very_heavy', emoji: '\u{1FA78}' },
+];
 
 interface CalendarDay {
   date: string;           // ISO date
@@ -120,7 +125,7 @@ function getMonthGrid(year: number, month: number, logsMap: Map<string, Menstrua
 
 function getPredictedPhase(dateStr: string, prediction: ReturnType<typeof useCyclePrediction>): CyclePhase | undefined {
   if (!prediction || prediction.confidence === 'none' || !prediction.lastPeriodStart) return undefined;
-  const { predictedCycleLength, lastPeriodStart } = prediction;
+  const { predictedCycleLength, averagePeriodLength, lastPeriodStart } = prediction;
   if (!lastPeriodStart) return undefined;
 
   const date = new Date(dateStr + 'T12:00:00');
@@ -131,11 +136,11 @@ function getPredictedPhase(dateStr: string, prediction: ReturnType<typeof useCyc
   if (diffDays < 0 || diffDays > predictedCycleLength * 2) return undefined;
 
   const cycleDay = (diffDays % predictedCycleLength) + 1;
-  const ovulationDay = predictedCycleLength - 14;
+  const ovulationDay = Math.max(averagePeriodLength + 1, predictedCycleLength - 14);
 
-  if (cycleDay <= 5) return 'menstruation';
-  if (cycleDay <= ovulationDay - 1) return 'follicular';
-  if (cycleDay >= ovulationDay && cycleDay <= ovulationDay + 1) return 'ovulation';
+  if (cycleDay <= averagePeriodLength) return 'menstruation';
+  if (cycleDay < ovulationDay) return 'follicular';
+  if (cycleDay <= ovulationDay + 1) return 'ovulation';
   return 'luteal';
 }
 
@@ -152,6 +157,13 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const deleteCycle = useDeleteCycleLog();
+
+  // Quick-Toggle state
+  const [quickToggleMode, setQuickToggleMode] = useState(false);
+  const [quickToggleFlow, setQuickToggleFlow] = useState<FlowIntensity>('normal');
+  const [quickToggleDates, setQuickToggleDates] = useState<Set<string>>(new Set());
+  const [quickToggleRemoves, setQuickToggleRemoves] = useState<Set<string>>(new Set());
+  const addLogBatch = useAddCycleLogBatch();
 
   const { data: logs } = useMenstrualCycleLogs(365);
   const prediction = useCyclePrediction();
@@ -193,7 +205,64 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
     setViewMonth(now.getMonth());
   }, []);
 
+  // Quick-Toggle handlers
+  const handleQuickToggleDay = useCallback((day: CalendarDay) => {
+    const date = day.date;
+    const existingLog = day.log;
+    const isPeriodLog = existingLog && (existingLog.phase === 'menstruation' || existingLog.phase === 'spotting');
+
+    if (isPeriodLog) {
+      // Toggle OFF: mark for removal
+      setQuickToggleRemoves(prev => {
+        const next = new Set(prev);
+        if (next.has(date)) next.delete(date); else next.add(date);
+        return next;
+      });
+      // Also remove from adds if it was there
+      setQuickToggleDates(prev => { const next = new Set(prev); next.delete(date); return next; });
+    } else {
+      // Toggle ON: mark for adding
+      setQuickToggleDates(prev => {
+        const next = new Set(prev);
+        if (next.has(date)) next.delete(date); else next.add(date);
+        return next;
+      });
+      // Also remove from removes if it was there
+      setQuickToggleRemoves(prev => { const next = new Set(prev); next.delete(date); return next; });
+    }
+  }, []);
+
+  const handleQuickToggleSave = useCallback(async () => {
+    const adds = Array.from(quickToggleDates);
+    const removes = Array.from(quickToggleRemoves);
+
+    // Delete removed period logs
+    for (const date of removes) {
+      const log = logsMap.get(date);
+      if (log) await deleteCycle.mutateAsync(log.id);
+    }
+
+    // Add new period logs
+    if (adds.length > 0) {
+      await addLogBatch.mutateAsync(
+        adds.map(date => ({
+          date,
+          phase: 'menstruation' as const,
+          flow_intensity: quickToggleFlow,
+        }))
+      );
+    }
+
+    setQuickToggleMode(false);
+    setQuickToggleDates(new Set());
+    setQuickToggleRemoves(new Set());
+  }, [quickToggleDates, quickToggleRemoves, quickToggleFlow, logsMap, deleteCycle, addLogBatch]);
+
   const handleDayClick = (day: CalendarDay) => {
+    if (quickToggleMode) {
+      handleQuickToggleDay(day);
+      return;
+    }
     if (day.log) {
       setSelectedDay(day);
     } else if (onDayClick) {
@@ -202,6 +271,8 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
   };
 
   if (!cycleTrackingEnabled) return null;
+
+  const hasQuickChanges = quickToggleDates.size > 0 || quickToggleRemoves.size > 0;
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -218,6 +289,75 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
         </button>
       </div>
 
+      {/* Quick-Toggle Bar */}
+      <div className="px-3 py-2 border-b bg-gray-50 flex items-center justify-between">
+        <button
+          onClick={() => {
+            if (quickToggleMode) {
+              // Cancel
+              setQuickToggleMode(false);
+              setQuickToggleDates(new Set());
+              setQuickToggleRemoves(new Set());
+            } else {
+              setQuickToggleMode(true);
+            }
+          }}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            quickToggleMode
+              ? 'bg-rose-500 text-white'
+              : 'bg-rose-100 text-rose-600 hover:bg-rose-200'
+          }`}
+        >
+          <Droplets className="h-3.5 w-3.5" />
+          {quickToggleMode
+            ? (de ? 'Abbrechen' : 'Cancel')
+            : (de ? 'Periode eintragen' : 'Log period')}
+        </button>
+
+        {quickToggleMode && (
+          <div className="flex items-center gap-2">
+            {/* Flow selector */}
+            <div className="flex gap-0.5">
+              {FLOW_OPTIONS.map(({ key, emoji }) => (
+                <button
+                  key={key}
+                  onClick={() => setQuickToggleFlow(key)}
+                  className={`px-1.5 py-1 rounded text-[10px] transition-all ${
+                    quickToggleFlow === key ? 'bg-rose-200 ring-1 ring-rose-400' : 'bg-white hover:bg-gray-100'
+                  }`}
+                  title={key}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            {/* Save button */}
+            {hasQuickChanges && (
+              <button
+                onClick={handleQuickToggleSave}
+                disabled={addLogBatch.isPending}
+                className="px-3 py-1.5 rounded-full text-xs font-medium bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 transition-all"
+              >
+                {addLogBatch.isPending
+                  ? '...'
+                  : `${de ? 'Speichern' : 'Save'} (${quickToggleDates.size + quickToggleRemoves.size})`}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {quickToggleMode && (
+        <div className="px-3 py-1.5 bg-rose-50 border-b">
+          <p className="text-[10px] text-rose-600">
+            {de
+              ? 'Tippe auf Tage, um Periode an/aus zu schalten. Waehle die Staerke rechts.'
+              : 'Tap days to toggle period on/off. Select flow intensity on the right.'}
+          </p>
+        </div>
+      )}
+
       {/* Weekday headers */}
       <div className="grid grid-cols-7 border-b bg-gray-50">
         {weekdays.map(wd => (
@@ -232,8 +372,16 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
           const phase = day.log?.phase;
           const predicted = !hasLog ? day.predictedPhase : undefined;
 
+          // Quick-toggle visual overrides
+          const isQuickAdded = quickToggleDates.has(day.date);
+          const isQuickRemoved = quickToggleRemoves.has(day.date);
+
           let bgClass = '';
-          if (hasLog && phase) {
+          if (isQuickAdded) {
+            bgClass = 'bg-red-300 ring-2 ring-red-500 ring-inset';
+          } else if (isQuickRemoved) {
+            bgClass = 'bg-gray-100 line-through';
+          } else if (hasLog && phase) {
             bgClass = PHASE_BG[phase];
           } else if (predicted) {
             bgClass = PHASE_BG_PREDICTED[predicted];
@@ -247,19 +395,24 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
                 day.isCurrentMonth ? '' : 'opacity-30'
               } ${bgClass} ${
                 day.isToday ? 'ring-2 ring-rose-500 ring-inset rounded-sm z-10' : ''
-              } ${day.isFertile && !hasLog ? 'ring-1 ring-pink-300 ring-inset' : ''} hover:brightness-95`}
+              } ${day.isFertile && !hasLog && !isQuickAdded ? 'ring-1 ring-pink-300 ring-inset' : ''} hover:brightness-95`}
             >
               <span className={`text-xs font-medium ${
+                isQuickAdded ? 'text-white' :
+                isQuickRemoved ? 'text-gray-400 line-through' :
                 hasLog ? 'text-gray-800' : predicted ? 'text-gray-500' : 'text-gray-600'
               }`}>
                 {day.dayNum}
               </span>
-              {hasLog && (
+              {hasLog && !isQuickRemoved && phase && (
                 <span className="text-[8px] leading-none mt-0.5">
-                  {getCyclePhaseEmoji(phase!)}
+                  {getCyclePhaseEmoji(phase)}
                 </span>
               )}
-              {day.isFertile && !hasLog && (
+              {isQuickAdded && (
+                <span className="text-[8px] leading-none mt-0.5">{'\u{1FA78}'}</span>
+              )}
+              {day.isFertile && !hasLog && !isQuickAdded && (
                 <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-pink-400" />
               )}
             </button>
@@ -292,6 +445,7 @@ export function CycleCalendarView({ cycleTrackingEnabled, onDayClick }: CycleCal
           log={selectedDay.log}
           de={de}
           t={t}
+          prediction={prediction}
           onClose={() => setSelectedDay(null)}
           onEdit={() => {
             setSelectedDay(null);
@@ -314,15 +468,19 @@ interface DayDetailSheetProps {
   log: MenstrualCycleLog;
   de: boolean;
   t: ReturnType<typeof useTranslation>['t'];
+  prediction: ReturnType<typeof useCyclePrediction>;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-function DayDetailSheet({ day, log, de, t, onClose, onEdit, onDelete }: DayDetailSheetProps) {
+function DayDetailSheet({ day, log, de, t, prediction, onClose, onEdit, onDelete }: DayDetailSheetProps) {
   const locale = de ? 'de-DE' : 'en-US';
-  const phaseLabel = t.cycle?.[log.phase as keyof typeof t.cycle] ?? log.phase;
+  // Show logged phase, or auto-calculated phase from prediction
+  const displayPhase = log.phase ?? prediction.currentPhase;
+  const phaseLabel = displayPhase ? (t.cycle?.[displayPhase as keyof typeof t.cycle] ?? displayPhase) : (de ? 'Kein Phase' : 'No phase');
   const symptoms = log.symptoms as string[] ?? [];
+  const isPeriod = log.phase === 'menstruation' || log.phase === 'spotting';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
@@ -338,7 +496,12 @@ function DayDetailSheet({ day, log, de, t, onClose, onEdit, onDelete }: DayDetai
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-sm font-semibold text-gray-900">
-              {getCyclePhaseEmoji(log.phase)} {phaseLabel}
+              {displayPhase && getCyclePhaseEmoji(displayPhase)} {phaseLabel}
+              {!log.phase && displayPhase && (
+                <span className="ml-1.5 text-[10px] font-normal text-gray-400">
+                  ({de ? 'berechnet' : 'calculated'})
+                </span>
+              )}
             </p>
             <p className="text-xs text-gray-400">
               {new Date(day.date).toLocaleDateString(locale, {
@@ -428,6 +591,14 @@ function DayDetailSheet({ day, log, de, t, onClose, onEdit, onDelete }: DayDetai
           >
             {de ? 'Bearbeiten' : 'Edit'}
           </button>
+          {isPeriod && (
+            <button
+              onClick={onDelete}
+              className="py-2 px-4 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              {de ? 'Periode entfernen' : 'Remove period'}
+            </button>
+          )}
           <button
             onClick={onDelete}
             className="py-2 px-4 text-xs font-medium bg-gray-100 text-red-500 rounded-lg hover:bg-red-50 transition-colors"

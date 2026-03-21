@@ -498,7 +498,7 @@ export interface MenstrualCycleLog {
   id: string;
   user_id: string;
   date: string;                    // ISO date YYYY-MM-DD
-  phase: CyclePhase;
+  phase: CyclePhase | null;        // v3: nullable — NULL = auto-calculated, menstruation/spotting = user-reported
   flow_intensity?: FlowIntensity;  // relevant during menstruation/spotting
   symptoms?: CycleSymptom[];
   energy_level?: number;           // 1-5

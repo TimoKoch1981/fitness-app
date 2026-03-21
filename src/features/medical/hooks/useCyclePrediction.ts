@@ -40,6 +40,8 @@ export interface CyclePrediction {
   currentCycleDay: number | null;
   /** Predicted cycle length used */
   predictedCycleLength: number;
+  /** Average period (menstruation) duration in days */
+  averagePeriodLength: number;
   /** Current estimated phase */
   currentPhase: CyclePhase | null;
   /** Confidence level */
@@ -79,6 +81,33 @@ function findMenstruationStarts(sortedLogs: MenstrualCycleLog[]): string[] {
 }
 
 /**
+ * Calculate average period (menstruation) duration from logged data.
+ * Counts consecutive menstruation days per period, then averages.
+ */
+function calculateAveragePeriodLength(sortedLogs: MenstrualCycleLog[]): number {
+  const DEFAULT_PERIOD_LENGTH = 5;
+  const periodDurations: number[] = [];
+  let currentDuration = 0;
+  let lastMensDate: string | null = null;
+
+  for (const log of sortedLogs) {
+    if (log.phase === 'menstruation') {
+      if (lastMensDate && daysBetweenDates(lastMensDate, log.date) <= 2) {
+        currentDuration += daysBetweenDates(lastMensDate, log.date);
+      } else {
+        if (currentDuration > 0) periodDurations.push(currentDuration);
+        currentDuration = 1;
+      }
+      lastMensDate = log.date;
+    }
+  }
+  if (currentDuration > 0) periodDurations.push(currentDuration);
+
+  if (periodDurations.length === 0) return DEFAULT_PERIOD_LENGTH;
+  return Math.round(periodDurations.reduce((s, v) => s + v, 0) / periodDurations.length);
+}
+
+/**
  * Calculate valid cycle lengths from menstruation start dates.
  * Filters out physiologically implausible values (< 18 or > 45 days).
  */
@@ -113,12 +142,14 @@ function weightedAverage(lengths: number[]): number {
 }
 
 /**
- * Estimate current cycle phase from cycle day and predicted length.
+ * Estimate current cycle phase from cycle day, predicted length, and average period duration.
+ * Uses backward-counting: ovulation = cycleLength - 14 (luteal phase is most consistent).
  */
-function estimatePhase(cycleDay: number, cycleLength: number): CyclePhase {
-  if (cycleDay <= 5) return 'menstruation';
-  if (cycleDay <= Math.round(cycleLength * 0.5)) return 'follicular';
-  if (cycleDay <= Math.round(cycleLength * 0.5) + 2) return 'ovulation';
+function estimatePhase(cycleDay: number, cycleLength: number, periodLength = 5): CyclePhase {
+  const ovulationDay = Math.max(periodLength + 1, cycleLength - 14);
+  if (cycleDay <= periodLength) return 'menstruation';
+  if (cycleDay < ovulationDay) return 'follicular';
+  if (cycleDay <= ovulationDay + 1) return 'ovulation';
   return 'luteal';
 }
 
@@ -165,6 +196,7 @@ export function useCyclePrediction(): CyclePrediction {
         daysUntilOvulation: null,
         currentCycleDay: null,
         predictedCycleLength: POPULATION_PRIOR,
+        averagePeriodLength: 5,
         currentPhase: null,
         confidence: 'none',
         cyclesUsed: 0,
@@ -180,6 +212,7 @@ export function useCyclePrediction(): CyclePrediction {
     // Sort ascending for analysis
     const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
     const starts = findMenstruationStarts(sorted);
+    const avgPeriodLen = calculateAveragePeriodLength(sorted);
 
     if (starts.length === 0) {
       return {
@@ -189,6 +222,7 @@ export function useCyclePrediction(): CyclePrediction {
         daysUntilOvulation: null,
         currentCycleDay: null,
         predictedCycleLength: POPULATION_PRIOR,
+        averagePeriodLength: avgPeriodLen,
         currentPhase: null,
         confidence: 'none',
         cyclesUsed: 0,
@@ -252,7 +286,7 @@ export function useCyclePrediction(): CyclePrediction {
     const effectiveCycleDay = currentCycleDay <= predictedLength
       ? currentCycleDay
       : ((currentCycleDay - 1) % predictedLength) + 1;
-    const currentPhase = estimatePhase(effectiveCycleDay, predictedLength);
+    const currentPhase = estimatePhase(effectiveCycleDay, predictedLength, avgPeriodLen);
 
     // Fertile window: Ovulation -5 days to Ovulation +1 day
     // Sperm can survive up to 5 days, egg viable ~24h after ovulation
@@ -292,6 +326,7 @@ export function useCyclePrediction(): CyclePrediction {
       daysUntilOvulation,
       currentCycleDay: effectiveCycleDay,
       predictedCycleLength: predictedLength,
+      averagePeriodLength: avgPeriodLen,
       currentPhase,
       confidence,
       cyclesUsed: cycleLengths.length,

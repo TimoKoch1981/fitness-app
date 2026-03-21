@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
-import { X, Info, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { X, Info, ChevronLeft, ChevronRight, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { useAddCycleLog, useAddCycleLogBatch, getCyclePhaseEmoji, getCervicalMucusEmoji } from '../hooks/useMenstrualCycle';
+import { useAddCycleLog, useAddCycleLogBatch, getCervicalMucusEmoji } from '../hooks/useMenstrualCycle';
+import { useCyclePrediction } from '../hooks/useCyclePrediction';
 import { today } from '../../../lib/utils';
-import type { CyclePhase, FlowIntensity, CycleSymptom, CervicalMucus, SexualActivity } from '../../../types/health';
+import type { FlowIntensity, CycleSymptom, CervicalMucus, SexualActivity } from '../../../types/health';
 
 interface Props {
   open: boolean;
@@ -11,7 +12,8 @@ interface Props {
   initialDate?: string;
 }
 
-const PHASES: CyclePhase[] = ['menstruation', 'follicular', 'ovulation', 'luteal', 'spotting'];
+/** What the user is logging */
+type PeriodStatus = 'period' | 'spotting' | 'none';
 
 const SYMPTOMS: CycleSymptom[] = [
   'cramping', 'bloating', 'mood_changes', 'fatigue',
@@ -30,7 +32,7 @@ const ENERGY_EMOJIS = ['\u{1FAB6}', '\u{1F634}', '\u{1F610}', '\u{26A1}', '\u{1F
 
 /** Per-day override data for multi-day variation mode */
 interface PerDayData {
-  phase: CyclePhase;
+  periodStatus: PeriodStatus;
   flowIntensity: FlowIntensity;
   symptoms: CycleSymptom[];
   mood: number;
@@ -44,7 +46,7 @@ interface PerDayData {
 
 function makeDefaultPerDay(): PerDayData {
   return {
-    phase: 'menstruation',
+    periodStatus: 'period',
     flowIntensity: 'normal',
     symptoms: [],
     mood: 3,
@@ -84,10 +86,11 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
   const { t, language } = useTranslation();
   const addLog = useAddCycleLog();
   const addLogBatch = useAddCycleLogBatch();
+  const prediction = useCyclePrediction();
   const de = language === 'de';
 
   const [selectedDates, setSelectedDates] = useState<string[]>([initialDate ?? today()]);
-  const [phase, setPhase] = useState<CyclePhase>('menstruation');
+  const [periodStatus, setPeriodStatus] = useState<PeriodStatus>('period');
   const [flowIntensity, setFlowIntensity] = useState<FlowIntensity>('normal');
   const [symptoms, setSymptoms] = useState<CycleSymptom[]>([]);
   const [mood, setMood] = useState(3);
@@ -98,6 +101,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
   const [sexualActivity, setSexualActivity] = useState<SexualActivity | null>(null);
   const [basalTemp, setBasalTemp] = useState('');
   const [showMucusInfo, setShowMucusInfo] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
   const [multiMode, setMultiMode] = useState(false);
 
@@ -131,7 +135,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
 
   // Get effective values — in per-day mode, read from perDayData; otherwise from shared state
   const eff = {
-    phase: currentDay?.phase ?? phase,
+    periodStatus: currentDay?.periodStatus ?? periodStatus,
     flowIntensity: currentDay?.flowIntensity ?? flowIntensity,
     symptoms: currentDay?.symptoms ?? symptoms,
     mood: currentDay?.mood ?? mood,
@@ -144,7 +148,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
   };
 
   // Setters that work in both modes
-  const setEffPhase = (v: CyclePhase) => { if (perDayMode && currentDate) updateCurrentDay('phase', v); else setPhase(v); };
+  const setEffPeriodStatus = (v: PeriodStatus) => { if (perDayMode && currentDate) updateCurrentDay('periodStatus', v); else setPeriodStatus(v); };
   const setEffFlow = (v: FlowIntensity) => { if (perDayMode && currentDate) updateCurrentDay('flowIntensity', v); else setFlowIntensity(v); };
   const setEffMood = (v: number) => { if (perDayMode && currentDate) updateCurrentDay('mood', v); else setMood(v); };
   const setEffEnergy = (v: number) => { if (perDayMode && currentDate) updateCurrentDay('energy', v); else setEnergy(v); };
@@ -177,18 +181,36 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
     }
   };
 
+  /** Auto-calculate phase based on period status and cycle prediction */
+  const autoPhase = (date: string, status: PeriodStatus) => {
+    if (status === 'period') return 'menstruation' as const;
+    if (status === 'spotting') return 'spotting' as const;
+    // Auto-calculate from prediction
+    if (!prediction.lastPeriodStart || prediction.confidence === 'none') return null;
+    const dateObj = new Date(date + 'T12:00:00');
+    const lastStart = new Date(prediction.lastPeriodStart + 'T12:00:00');
+    const diffDays = Math.round((dateObj.getTime() - lastStart.getTime()) / 86400000);
+    if (diffDays < 0) return null;
+    const cycleDay = (diffDays % prediction.predictedCycleLength) + 1;
+    const ovulationDay = Math.max(prediction.averagePeriodLength + 1, prediction.predictedCycleLength - 14);
+    if (cycleDay <= prediction.averagePeriodLength) return 'menstruation' as const;
+    if (cycleDay < ovulationDay) return 'follicular' as const;
+    if (cycleDay <= ovulationDay + 1) return 'ovulation' as const;
+    return 'luteal' as const;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (selectedDates.length === 0) {
-      setError(de ? 'Bitte mindestens ein Datum wählen' : 'Please select at least one date');
+      setError(de ? 'Bitte mindestens ein Datum waehlen' : 'Please select at least one date');
       return;
     }
 
     try {
       const buildInput = (date: string, d?: PerDayData) => {
-        const p = d?.phase ?? phase;
+        const status = d?.periodStatus ?? periodStatus;
         const fi = d?.flowIntensity ?? flowIntensity;
         const sy = d?.symptoms ?? symptoms;
         const mo = d?.mood ?? mood;
@@ -198,10 +220,11 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
         const pm = d?.pmsFlag ?? pmsFlag;
         const sa = d?.sexualActivity ?? sexualActivity;
         const bt = d?.basalTemp ?? basalTemp;
+        const phase = autoPhase(date, status);
         return {
           date,
-          phase: p,
-          flow_intensity: (p === 'menstruation' || p === 'spotting') ? fi : undefined,
+          phase,
+          flow_intensity: (status === 'period' || status === 'spotting') ? fi : undefined,
           symptoms: sy.length > 0 ? sy : undefined,
           energy_level: en,
           mood: mo,
@@ -216,11 +239,9 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
       if (selectedDates.length === 1) {
         await addLog.mutateAsync(buildInput(selectedDates[0]));
       } else if (perDayMode) {
-        // Per-day variation — each day has its own data
         const inputs = selectedDates.map(date => buildInput(date, perDayData[date]));
         await addLogBatch.mutateAsync(inputs);
       } else {
-        // Shared data for all days
         await addLogBatch.mutateAsync(selectedDates.map(date => buildInput(date)));
       }
 
@@ -230,7 +251,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
       setPerDayMode(false);
       setPerDayData({});
       setCurrentDayIdx(0);
-      setPhase('menstruation');
+      setPeriodStatus('period');
       setFlowIntensity('normal');
       setSymptoms([]);
       setMood(3);
@@ -240,6 +261,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
       setPmsFlag(false);
       setSexualActivity(null);
       setBasalTemp('');
+      setShowAdvanced(false);
       onClose();
     } catch {
       setError(t.common.saveError);
@@ -262,6 +284,8 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
     appetite_changes: 'appetiteChanges', skin_changes: 'skinChanges',
     irritability: 'irritability',
   };
+
+  const showFlow = eff.periodStatus === 'period' || eff.periodStatus === 'spotting';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -289,10 +313,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
                   type="button"
                   onClick={() => {
                     setMultiMode(!multiMode);
-                    if (!multiMode) {
-                      // Keep current selection when entering multi mode
-                    } else {
-                      // When leaving multi mode, keep only last selected
+                    if (multiMode) {
                       setSelectedDates(prev => prev.length > 0 ? [prev[prev.length - 1]] : [today()]);
                     }
                   }}
@@ -308,7 +329,7 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
             </div>
             {multiMode && (
               <p className="text-[10px] text-rose-500 mb-1.5">
-                {de ? '💡 Tippe auf mehrere Tage, um sie gleichzeitig nachzutragen' : '💡 Tap multiple days to log them at once'}
+                {de ? 'Tippe auf mehrere Tage, um sie gleichzeitig nachzutragen' : 'Tap multiple days to log them at once'}
               </p>
             )}
             <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
@@ -347,10 +368,9 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
                   setPerDayMode(e.target.checked);
                   setCurrentDayIdx(0);
                   if (e.target.checked && Object.keys(perDayData).length === 0) {
-                    // Initialize all days with current shared values
                     const init: Record<string, PerDayData> = {};
                     for (const d of selectedDates) {
-                      init[d] = { phase, flowIntensity, symptoms: [...symptoms], mood, energy, notes, cervicalMucus, pmsFlag, sexualActivity, basalTemp };
+                      init[d] = { periodStatus, flowIntensity, symptoms: [...symptoms], mood, energy, notes, cervicalMucus, pmsFlag, sexualActivity, basalTemp };
                     }
                     setPerDayData(init);
                   }
@@ -395,24 +415,44 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
             </div>
           )}
 
-          {/* Phase Selection — 5 Phases (2+2+1 grid) */}
+          {/* === PERIOD STATUS (replaces Phase Selection) === */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">{label('phase', de ? 'Phase' : 'Phase')}</label>
-            <div className="grid grid-cols-2 gap-2">
-              {PHASES.map((p) => (
-                <button key={p} type="button" onClick={() => setEffPhase(p)}
-                  className={`py-2 px-3 rounded-lg text-center transition-all text-sm ${
-                    eff.phase === p ? 'bg-rose-100 ring-2 ring-rose-500 font-medium' : 'bg-gray-50 hover:bg-gray-100'
-                  } ${p === 'spotting' ? 'col-span-2' : ''}`}>
-                  <span className="text-lg mr-1">{getCyclePhaseEmoji(p)}</span>
-                  {label(p, p)}
-                </button>
-              ))}
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              {de ? 'Habe ich meine Tage?' : 'Am I on my period?'}
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button type="button" onClick={() => setEffPeriodStatus('period')}
+                className={`py-3 px-2 rounded-xl text-center transition-all ${
+                  eff.periodStatus === 'period'
+                    ? 'bg-red-100 ring-2 ring-red-500 font-semibold'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}>
+                <span className="text-xl block mb-0.5">{'\u{1FA78}'}</span>
+                <span className="text-xs">{de ? 'Ja, Periode' : 'Yes, period'}</span>
+              </button>
+              <button type="button" onClick={() => setEffPeriodStatus('spotting')}
+                className={`py-3 px-2 rounded-xl text-center transition-all ${
+                  eff.periodStatus === 'spotting'
+                    ? 'bg-orange-100 ring-2 ring-orange-500 font-semibold'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}>
+                <span className="text-xl block mb-0.5">{'\u{1F538}'}</span>
+                <span className="text-xs">{de ? 'Schmierblutung' : 'Spotting'}</span>
+              </button>
+              <button type="button" onClick={() => setEffPeriodStatus('none')}
+                className={`py-3 px-2 rounded-xl text-center transition-all ${
+                  eff.periodStatus === 'none'
+                    ? 'bg-green-100 ring-2 ring-green-500 font-semibold'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}>
+                <span className="text-xl block mb-0.5">{'\u{2705}'}</span>
+                <span className="text-xs">{de ? 'Nein' : 'No'}</span>
+              </button>
             </div>
           </div>
 
-          {/* Flow Intensity — during menstruation or spotting (4 options) */}
-          {(eff.phase === 'menstruation' || eff.phase === 'spotting') && (
+          {/* Flow Intensity — only during period or spotting */}
+          {showFlow && (
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-2">
                 {label('flowIntensity', de ? 'Blutungsstaerke' : 'Flow intensity')}
@@ -433,76 +473,6 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
               </div>
             </div>
           )}
-
-          {/* Cervical Mucus — all phases */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <label className="text-xs font-medium text-gray-500">
-                {label('cervicalMucus', de ? 'Zervixschleim' : 'Cervical mucus')}
-              </label>
-              <button type="button" onClick={() => setShowMucusInfo(!showMucusInfo)}
-                className="p-0.5 text-gray-400 hover:text-rose-500">
-                <Info className="w-3 h-3" />
-              </button>
-            </div>
-            {showMucusInfo && (
-              <p className="mb-2 px-3 py-2 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-rose-700">
-                {de
-                  ? 'Zervixschleim veraendert sich im Zyklus. Spinnbarer (eiweissartiger) Schleim zeigt hohe Fruchtbarkeit an.'
-                  : 'Cervical mucus changes throughout the cycle. Egg-white mucus indicates high fertility.'}
-              </p>
-            )}
-            <div className="grid grid-cols-4 gap-1.5">
-              {MUCUS_OPTIONS.map((m) => (
-                <button key={m} type="button"
-                  onClick={() => setEffMucus(eff.cervicalMucus === m ? null : m)}
-                  className={`py-2 rounded-lg text-center transition-all text-xs flex flex-col items-center gap-0.5 ${
-                    eff.cervicalMucus === m ? 'bg-rose-100 ring-2 ring-rose-500 font-medium' : 'bg-gray-50 hover:bg-gray-100'
-                  }`}>
-                  <span className="text-base">{getCervicalMucusEmoji(m)}</span>
-                  <span>{label(m === 'none' ? 'mucusNone' : m === 'sticky' ? 'mucusSticky' : m === 'creamy' ? 'mucusCreamy' : 'mucusEggWhite',
-                    m === 'none' ? (de ? 'Keiner' : 'None') :
-                    m === 'sticky' ? (de ? 'Klebrig' : 'Sticky') :
-                    m === 'creamy' ? (de ? 'Cremig' : 'Creamy') :
-                    (de ? 'Spinnbar' : 'Egg white'))}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* PMS Toggle — show in luteal + menstruation + spotting */}
-          {(eff.phase === 'luteal' || eff.phase === 'menstruation' || eff.phase === 'spotting') && (
-            <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2.5">
-              <span className="text-sm text-gray-700">
-                {label('pmsToday', de ? 'PMS heute?' : 'PMS today?')}
-              </span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" checked={eff.pmsFlag} onChange={(e) => setEffPms(e.target.checked)} className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
-              </label>
-            </div>
-          )}
-
-          {/* Sexual Activity */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">
-              {label('sexualActivity', de ? 'Sexuelle Aktivitaet' : 'Sexual activity')}
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {SEX_OPTIONS.map((s) => (
-                <button key={s} type="button"
-                  onClick={() => setEffSex(eff.sexualActivity === s ? null : s)}
-                  className={`py-2 rounded-lg text-center transition-all text-xs ${
-                    eff.sexualActivity === s ? 'bg-rose-100 ring-2 ring-rose-500 font-medium' : 'bg-gray-50 hover:bg-gray-100'
-                  }`}>
-                  {label(s === 'none' ? 'sexNone' : s === 'protected' ? 'sexProtected' : 'sexUnprotected',
-                    s === 'none' ? (de ? 'Keine' : 'None') :
-                    s === 'protected' ? (de ? 'Geschuetzt' : 'Protected') :
-                    (de ? 'Ungeschuetzt' : 'Unprotected'))}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Symptoms */}
           <div>
@@ -561,37 +531,122 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
             </div>
           </div>
 
-          {/* Basal Temperature */}
-          <div>
-            <label htmlFor="cycle-basal-temp" className="block text-xs font-medium text-gray-500 mb-1">
-              {label('basalTemp', de ? 'Basaltemperatur (°C)' : 'Basal temperature (°C)')}
-            </label>
-            <input
-              id="cycle-basal-temp"
-              type="number"
-              step="0.01"
-              min="35.0"
-              max="42.0"
-              value={eff.basalTemp}
-              onChange={(e) => setEffBasal(e.target.value)}
-              placeholder={de ? 'z.B. 36.50' : 'e.g. 36.50'}
-              aria-label={label('basalTemp', de ? 'Basaltemperatur' : 'Basal temperature')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-sm"
-            />
-          </div>
+          {/* === ADVANCED SECTION (collapsible) === */}
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors w-full"
+          >
+            {showAdvanced ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            <span className="font-medium">{de ? 'Erweitert' : 'Advanced'}</span>
+            <span className="text-[10px] text-gray-400">
+              {de ? '(Zervixschleim, Temperatur, ...)' : '(Cervical mucus, temperature, ...)'}
+            </span>
+          </button>
 
-          {/* Notes */}
-          <div>
-            <label htmlFor="cycle-notes" className="block text-xs font-medium text-gray-500 mb-1">{t.common.notes}</label>
-            <input
-              id="cycle-notes"
-              type="text"
-              value={eff.notes}
-              onChange={(e) => setEffNotes(e.target.value)}
-              placeholder="Optional"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-sm"
-            />
-          </div>
+          {showAdvanced && (
+            <div className="space-y-4 border-t pt-3">
+              {/* Cervical Mucus */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-xs font-medium text-gray-500">
+                    {label('cervicalMucus', de ? 'Zervixschleim' : 'Cervical mucus')}
+                  </label>
+                  <button type="button" onClick={() => setShowMucusInfo(!showMucusInfo)}
+                    className="p-0.5 text-gray-400 hover:text-rose-500">
+                    <Info className="w-3 h-3" />
+                  </button>
+                </div>
+                {showMucusInfo && (
+                  <p className="mb-2 px-3 py-2 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-rose-700">
+                    {de
+                      ? 'Zervixschleim veraendert sich im Zyklus. Spinnbarer (eiweissartiger) Schleim zeigt hohe Fruchtbarkeit an.'
+                      : 'Cervical mucus changes throughout the cycle. Egg-white mucus indicates high fertility.'}
+                  </p>
+                )}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {MUCUS_OPTIONS.map((m) => (
+                    <button key={m} type="button"
+                      onClick={() => setEffMucus(eff.cervicalMucus === m ? null : m)}
+                      className={`py-2 rounded-lg text-center transition-all text-xs flex flex-col items-center gap-0.5 ${
+                        eff.cervicalMucus === m ? 'bg-rose-100 ring-2 ring-rose-500 font-medium' : 'bg-gray-50 hover:bg-gray-100'
+                      }`}>
+                      <span className="text-base">{getCervicalMucusEmoji(m)}</span>
+                      <span>{label(m === 'none' ? 'mucusNone' : m === 'sticky' ? 'mucusSticky' : m === 'creamy' ? 'mucusCreamy' : 'mucusEggWhite',
+                        m === 'none' ? (de ? 'Keiner' : 'None') :
+                        m === 'sticky' ? (de ? 'Klebrig' : 'Sticky') :
+                        m === 'creamy' ? (de ? 'Cremig' : 'Creamy') :
+                        (de ? 'Spinnbar' : 'Egg white'))}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* PMS Toggle */}
+              <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2.5">
+                <span className="text-sm text-gray-700">
+                  {label('pmsToday', de ? 'PMS heute?' : 'PMS today?')}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked={eff.pmsFlag} onChange={(e) => setEffPms(e.target.checked)} className="sr-only peer" />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+                </label>
+              </div>
+
+              {/* Sexual Activity */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-2">
+                  {label('sexualActivity', de ? 'Sexuelle Aktivitaet' : 'Sexual activity')}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {SEX_OPTIONS.map((s) => (
+                    <button key={s} type="button"
+                      onClick={() => setEffSex(eff.sexualActivity === s ? null : s)}
+                      className={`py-2 rounded-lg text-center transition-all text-xs ${
+                        eff.sexualActivity === s ? 'bg-rose-100 ring-2 ring-rose-500 font-medium' : 'bg-gray-50 hover:bg-gray-100'
+                      }`}>
+                      {label(s === 'none' ? 'sexNone' : s === 'protected' ? 'sexProtected' : 'sexUnprotected',
+                        s === 'none' ? (de ? 'Keine' : 'None') :
+                        s === 'protected' ? (de ? 'Geschuetzt' : 'Protected') :
+                        (de ? 'Ungeschuetzt' : 'Unprotected'))}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Basal Temperature */}
+              <div>
+                <label htmlFor="cycle-basal-temp" className="block text-xs font-medium text-gray-500 mb-1">
+                  {label('basalTemp', de ? 'Basaltemperatur (°C)' : 'Basal temperature (°C)')}
+                </label>
+                <input
+                  id="cycle-basal-temp"
+                  type="number"
+                  step="0.01"
+                  min="35.0"
+                  max="42.0"
+                  value={eff.basalTemp}
+                  onChange={(e) => setEffBasal(e.target.value)}
+                  placeholder={de ? 'z.B. 36.50' : 'e.g. 36.50'}
+                  aria-label={label('basalTemp', de ? 'Basaltemperatur' : 'Basal temperature')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-sm"
+                />
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label htmlFor="cycle-notes" className="block text-xs font-medium text-gray-500 mb-1">{t.common.notes}</label>
+                <input
+                  id="cycle-notes"
+                  type="text"
+                  value={eff.notes}
+                  onChange={(e) => setEffNotes(e.target.value)}
+                  placeholder="Optional"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-sm"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Per-day progress dots */}
           {perDayMode && selectedDates.length > 1 && (
@@ -612,9 +667,9 @@ export function AddCycleLogDialog({ open, onClose, initialDate }: Props) {
 
           {error && <p className="text-xs text-red-500 text-center" role="alert">{error}</p>}
 
-          <button type="submit" disabled={addLog.isPending || selectedDates.length === 0}
+          <button type="submit" disabled={addLog.isPending || addLogBatch.isPending || selectedDates.length === 0}
             className="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-medium rounded-lg hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all">
-            {addLog.isPending
+            {(addLog.isPending || addLogBatch.isPending)
               ? t.common.loading
               : selectedDates.length > 1
                 ? `${t.common.save} (${selectedDates.length} ${de ? 'Tage' : 'days'})`

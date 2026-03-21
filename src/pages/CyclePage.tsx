@@ -108,9 +108,10 @@ export function CyclePage() {
               ) : cycleLogs && cycleLogs.length > 0 ? (
                 <div className="divide-y divide-gray-50">
                   {cycleLogs.map((log) => {
-                    const phaseEmoji = getCyclePhaseEmoji(log.phase);
-                    const phaseLabel = t.cycle?.[log.phase as keyof typeof t.cycle] ?? log.phase;
-                    const flowLabel = log.flow_intensity && log.phase === 'menstruation'
+                    const displayPhase = log.phase ?? 'follicular';
+                    const phaseEmoji = getCyclePhaseEmoji(displayPhase);
+                    const phaseLabel = t.cycle?.[displayPhase as keyof typeof t.cycle] ?? displayPhase;
+                    const flowLabel = log.flow_intensity && (log.phase === 'menstruation' || log.phase === 'spotting')
                       ? t.cycle?.[`flow${log.flow_intensity.charAt(0).toUpperCase()}${log.flow_intensity.slice(1)}` as keyof typeof t.cycle]
                       : null;
                     const symptomCount = (log.symptoms ?? []).length;

@@ -108,13 +108,14 @@ function buildPhasesForCycle(
   let phaseStartDay = 0;
 
   for (const log of cycleLogs) {
+    const logPhase = log.phase ?? 'follicular';
     const dayNum = daysBetweenDates(startDate, log.date);
     if (currentPhase === null) {
-      currentPhase = log.phase;
+      currentPhase = logPhase;
       phaseStartDay = dayNum;
-    } else if (log.phase !== currentPhase) {
+    } else if (logPhase !== currentPhase) {
       phases.push({ phase: currentPhase, startDay: phaseStartDay, endDay: dayNum - 1 });
-      currentPhase = log.phase;
+      currentPhase = logPhase;
       phaseStartDay = dayNum;
     }
   }

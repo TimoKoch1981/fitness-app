@@ -145,7 +145,7 @@ export function useMenstrualCycleLogs(limit = 30) {
 
 export interface AddCycleLogInput {
   date: string;
-  phase: CyclePhase;
+  phase?: CyclePhase | null;  // v3: optional — auto-calculated if not provided
   flow_intensity?: FlowIntensity;
   symptoms?: CycleSymptom[];
   energy_level?: number;
@@ -172,7 +172,7 @@ export function useAddCycleLog() {
           {
             user_id: user.id,
             date: input.date,
-            phase: input.phase,
+            phase: input.phase ?? null,
             flow_intensity: input.flow_intensity || null,
             symptoms: input.symptoms ?? [],
             energy_level: input.energy_level || null,
@@ -209,7 +209,7 @@ export function useAddCycleLogBatch() {
       const rows = inputs.map(input => ({
         user_id: user.id,
         date: input.date,
-        phase: input.phase,
+        phase: input.phase ?? null,
         flow_intensity: input.flow_intensity || null,
         symptoms: input.symptoms ?? [],
         energy_level: input.energy_level || null,

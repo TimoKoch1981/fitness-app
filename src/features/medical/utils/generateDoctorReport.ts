@@ -417,8 +417,8 @@ export function generateDoctorReport(data: DoctorReportData): void {
 
     const cycleRows = recentCycleLogs!.slice(0, 10).map(cl => [
       cl.date,
-      phaseLabel(cl.phase),
-      cl.phase === 'menstruation' ? flowLabel(cl.flow_intensity) : '—',
+      phaseLabel(cl.phase ?? 'follicular'),
+      (cl.phase === 'menstruation' || cl.phase === 'spotting') ? flowLabel(cl.flow_intensity) : '—',
       (cl.symptoms ?? []).length > 0 ? `${(cl.symptoms ?? []).length}` : '—',
       energyStr(cl.energy_level),
       moodStr(cl.mood),

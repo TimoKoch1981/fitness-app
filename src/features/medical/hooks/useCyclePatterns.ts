@@ -161,12 +161,12 @@ function generateInsights(
     }
   }
 
-  // Amenorrhea warning: no period for > 60 days
+  // Amenorrhea warning: no period for > 45 days (v3: threshold lowered per gynecologist review)
   if (menstruationStarts.length > 0) {
     const lastStart = menstruationStarts[menstruationStarts.length - 1];
     const todayStr = new Date().toISOString().split('T')[0];
     const daysSince = daysBetweenDates(lastStart, todayStr);
-    if (daysSince > 60) {
+    if (daysSince > 45) {
       insights.push({
         type: 'warning',
         key: 'amenorrhea',
