@@ -1,22 +1,20 @@
 # FitBuddy — TODO-Liste (Konsolidiert)
 
-> **Stand:** 2026-03-21, v13.3
-> **Letzte Konsolidierung:** Rezept-Bugfixes + Favoriten-Filter + Rezept-Import Konzept (v12.89)
+> **Stand:** 2026-03-21, v13.3.1
+> **Letzte Konsolidierung:** Zyklustracker v3 + Kalender-Verbesserungen + Feature-Audit
 > Prioritaet: P0 = Blocker, P1 = Wichtig, P2 = Nice-to-Have, P3 = Irgendwann
 
 ---
 
 ## ❌ Offene Bugs
 
-### Multi-Plan v12.70-12.71 Bugs
-
-*Keine offenen Multi-Plan-Bugs. B5+B7 gefixt in v12.71, B6 konnte nach Test nicht reproduziert werden (Save-Flow funktioniert korrekt).*
+*Keine offenen Bugs. Alle gefixt.*
 
 ---
 
 ## ⚠️ UX-Probleme (kein Crash, aber schlecht)
 
-*Keine offenen UX-Probleme. U3 (z-index Schichtung) gefixt — Finish-Button jetzt z-20, ExerciseListBar z-10.*
+*Keine offenen UX-Probleme.*
 
 ---
 
@@ -28,23 +26,6 @@
 |---|---------|--------|---------|
 | F1 | **Apple OAuth** | OFFEN — extern blockiert | Button hinter Feature-Flag (`apple_oauth=false`). Braucht: Apple Developer Account ($99/Jahr), Service ID, Key-Erstellung (macOS noetig), GoTrue-Config auf Server |
 | F3 | **Alte Quick-Logs DB-Migration** | ENTSCHEIDUNG NOETIG | ~100 alte Workouts haben nur `exercises[]` (kein `session_exercises`). Aktuell: Runtime-Konvertierung via `convertLegacyExercises()`. Option: DB-Migration die alle alten Rows nachtraeglich befuellt (einmalig, dann saubere Daten) |
-
-### P1.5 — Wichtig (Konzept noetig)
-
-| # | Feature | Status | Details |
-|---|---------|--------|---------|
-| F15 | **Bodybuilder-Modus** | KONZEPT NOETIG | Spezieller Modus fuer Bodybuilder (zu-/abschaltbar, default ON in Power/Power+ Mode). Umfasst: Phasen-Management (Ladephase/Massephase/Diaet/Wettkampf/Reverse Diet), exakte Essenszeiten-Planung (6-8 Mahlzeiten/Tag), Mahlzeiten-Inhalt-Planung (pre/post-Workout, vor dem Schlafen etc.), Supplement-Scheduling (Kreatin, BCAA, Glutamin, Timing), Makro-Cycling (High/Low/Medium Carb Days), Wasserhaushalt-Management (Wettkampf), Peak-Week-Protokoll. Braucht: Detail-Recherche, Konzeptpapier, Experten-Review (Dr. Nutrition + Coach Pump) |
-| F16 | **Vorrat Phase B: Kochen mit Vorrat** | OFFEN | Rezept-Filter-Chip "Aus meinem Vorrat", Zutaten-Matching, Buddy-Integration, fehlende Zutaten anzeigen |
-| F17 | **Vorrat Phase C: Smarte Einkaufsliste** | OFFEN | Shopping-List UI, Rezept→Liste, Vorrat-Subtraktion, Bring!-Export |
-
-### P2 — Nice-to-Have
-
-| # | Feature | Status | Details |
-|---|---------|--------|---------|
-| F6 | **Workout-Musik: eigene YouTube-Links** | UNKLAR | Deep-Test sagt "YouTube-Links einfuegbar" — muss verifiziert werden ob das noch funktioniert |
-| F7 | **MFP-Import** | OFFEN | MyFitnessPal CSV-Import fuer Ernaehrungsdaten. Konzept existiert, nicht implementiert |
-| F8 | **API Versioning** | OFFEN | Versionierte API-Endpunkte fuer zukuenftige Kompatibilitaet |
-| F14 | **Rezept-Import aus dem Internet** | KONZEPT FERTIG | URL einfuegen → JSON-LD/Microdata Extraktion → KI-Fallback → Vorschau → Speichern. Konzept: `docs/KONZEPT_REZEPT_IMPORT.md` |
 
 ### P3 — Irgendwann
 
@@ -62,6 +43,51 @@
 
 <details>
 <summary>Alle abgeschlossenen Items aufklappen</summary>
+
+### Zyklustracker v3 + Kalender (v13.1-v13.3.1) ✅
+- [x] **Period-First UX** — AddCycleLogDialog komplett rewritten: 5 Phase-Buttons → 3-Button Toggle (Ja, Periode / Schmierblutung / Nein)
+- [x] **Auto-Phase-Berechnung** — Backward-Counting (Zykluslaenge - 14 = Ovulation), kein manuelles Phase-Setzen
+- [x] **Quick-Toggle** — Tage im Kalender antippen = Periode an/aus (Clue/Flo-Style)
+- [x] **Gewichteter Durchschnitt** — Zykluslaenge aus historischen Daten (lineare Gewichtung, neuere staerker)
+- [x] **Durchschnittliche Periodenlaenge** — Berechnet aus tatsaechlichen Menstruationstagen
+- [x] **Phase nullable** — DB-Migration: `ALTER TABLE menstrual_cycle_logs ALTER COLUMN phase DROP NOT NULL`
+- [x] **Historische Phasen im Kalender** — getPredictedPhase nutzt ALLE Periodenstarts (nicht nur letzten)
+- [x] **Kraeftige Farben + Emojis** — Jeder Kalendertag zeigt Phase-Emoji (🩸🌱🥚🌙) + satte Hintergrundfarben
+- [x] **Fruchtbare Tage** — Rosa Punkte rund um berechneten Eisprung (Ovulation -5 bis +1)
+- [x] **Amenorrhoe-Warnung** — Schwellwert 60 → 45 Tage (per Gynaekologin-Review)
+- [x] **Konzeptdokument** — `docs/KONZEPT_ZYKLUSTRACKER_V3.md` (Marktanalyse, med. Grundlagen, Expertenpanel)
+
+### Bodybuilder-Modus / Power Mode (F15) ✅
+- [x] **Power/Power+ Modi** — Standard/Power/Power+ Training Modes, DB-Migration, Feature-Flags
+- [x] **Phasen-Management** — PhaseProgressBar, PhaseCyclePlanner (Bulk/Cut/Maintenance)
+- [x] **Peak Week** — PeakWeekPlanner, PhaseSetupWizard, RefeedPlanner
+- [x] **Makro-Berechnung** — phaseMacroCalculator.ts, phaseTransitionAdvisor.ts
+- [x] **Konzeptdokument** — `docs/BODYBUILDER_MODUS_KONZEPT.md`
+
+### Vorrat + Einkaufsliste (F16, F17) ✅
+- [x] **F16: Kochen mit Vorrat** — Pantry-Modul (usePantry, PantryTabContent, PantrySetupWizard, pantryMatcher, AddCustomIngredientDialog)
+- [x] **F17: Smarte Einkaufsliste** — ShoppingListView, ShoppingTabContent, useShoppingLists, shoppingListBuilder (Mengen-Aggregation, Einheiten-Normalisierung, Kategorie-Sortierung, Pantry-Subtraktion, Clipboard-Export)
+- [x] **DB-Tabellen** — shopping_lists + shopping_list_items
+- [x] **Konzeptdokument** — `docs/KONZEPT_VORRAT_EINKAUF.md`
+
+### Workout-Musik / YouTube (F6) ✅
+- [x] **YouTube-Embeds** — youtube-nocookie.com (Privacy, CSP-konform)
+- [x] **Spotify-Integration** — SpotifyCallback, useSpotifyPlayer (Web Playback SDK, OAuth)
+- [x] **WorkoutMusicPlayer** — Kuratierte Playlists (Workout/Cardio/Focus/Chill), Play/Pause/Skip
+
+### MFP-Import (F7) ✅
+- [x] **MyFitnessPal CSV-Import** — MFPImportDialog, mfpParser.ts, useDataImport Hook
+- [x] **Vorschau + Fortschritt** — Preview-Tabelle, Progress-Indicator, Fehlerbehandlung
+
+### API Versioning (F8) ✅
+- [x] **Versionierung** — lib/api/version.ts (API_VERSION='v1', Headers, Deprecation-Tracking)
+- [x] **API Client** — apiClient.ts mit versionierten Endpunkten
+
+### Rezept-Import aus URL (F14) ✅ (v12.89)
+- [x] **3-Tier-Extraktion** — JSON-LD (80%) → Microdata → KI-Fallback (gpt-4o-mini)
+- [x] **Edge Function** — supabase/functions/recipe-import (SSRF-Schutz, Rate-Limiting 10/User/h)
+- [x] **ImportRecipeDialog** — URL-Eingabe → Vorschau → Speichern
+- [x] **Allergen-Erkennung** — 10 EU-Kategorien, Auto-Tags
 
 ### PlanEditor UX v12.72 ✅
 - [x] **Tab-Switch-Fix** — PlanEditorDialog `onSaved` nutzt `queryClient.invalidateQueries()` statt `window.location.reload()`. Bleibt auf "Mein Plan" Tab statt auf "Heute" zu springen
@@ -151,15 +177,13 @@
 
 | Kategorie | Anzahl |
 |-----------|--------|
-| ❌ Offene Bugs | 0 (alle gefixt in v12.68) |
-| ⚠️ UX-Probleme | 0 (U3 gefixt) |
-| 📋 P1 Features | 2 |
-| 📋 P2 Features | 4 |
+| ❌ Offene Bugs | 0 |
+| ⚠️ UX-Probleme | 0 |
+| 📋 P1 Features | 2 (Apple OAuth extern blockiert, Legacy-Migration) |
 | 📋 P3 Features | 5 |
-| ✅ Erledigt | ~70+ Items |
+| ✅ Erledigt | ~85+ Items |
 
 ### Empfohlene Reihenfolge fuer naechste Session:
-1. **F14: Rezept-Import aus dem Internet** — Konzept fertig (KONZEPT_REZEPT_IMPORT.md), Implementierung (~4-6h)
-2. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
-3. **F6: YouTube-Links** — Verifizieren ob Feature noch funktioniert (15 min)
-4. **F7: MFP-Import** — MyFitnessPal CSV-Import implementieren (2-3h)
+1. **F3: Legacy-Migration Entscheidung** — DB-Migration vs. Runtime-Konvertierung (Entscheidung + ggf. 1h)
+2. **F13: Supersets / Circuit Training** — Uebungen gruppieren (2-4h)
+3. **F9: Cloud Push-Notifications** — Firebase Cloud Messaging Setup (4-6h)
