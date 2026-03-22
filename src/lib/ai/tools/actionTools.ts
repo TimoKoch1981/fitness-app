@@ -49,7 +49,7 @@ const TOOL_DESCRIPTIONS: Record<ActionType, string> = {
   restart_tour: 'Produkttour neu starten. Startet die gefuehrte Tour durch die App.',
   save_recipe: 'Rezept speichern. Erstellt ein neues Rezept mit Zutaten, Zubereitungsschritten und Naehrwerten.',
   import_recipe: 'Rezept von URL importieren. Extrahiert Titel, Zutaten, Schritte und Makros von einer Webseite.',
-  update_pantry: 'Vorrat verwalten: Zutaten hinzufuegen, entfernen oder Status aendern. Der Nutzer sagt z.B. "Ich habe eingekauft: Reis, Haehnchen, Brokkoli" oder "Der Reis ist alle". Nutze "add" zum Hinzufuegen, "remove" zum Entfernen, "set_status" zum Status-Update (available/low/empty).',
+  update_pantry: 'Vorrat verwalten (3-Listen-Modell): Zutaten hinzufuegen, entfernen, Status aendern oder ausschliessen. Nutze "add" zum Hinzufuegen (mit buy_preference="always" fuer Basics, "sometimes" fuer normale Zutaten, "never" zum Ausschliessen), "remove" zum Entfernen, "set_status" zum Status-Update (available/low/empty). Beispiele: "Ich habe eingekauft: Reis" → add, "Reis ist alle" → set_status empty, "Ich mag keine Pilze" → add mit buy_preference=never.',
 };
 
 // ── Zod schemas (duplicated from schemas.ts to avoid .refine()/.transform() issues) ──

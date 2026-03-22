@@ -11,6 +11,7 @@ import { useAuth } from '../../../app/providers/AuthProvider';
 import type { Recipe, RecipeFilter, RecipeSortBy, LegacyRecipe } from '../types';
 import { DEFAULT_RECIPE_FILTER, convertLegacyRecipe, recipeFitsDietaryPrefs } from '../types';
 import type { PantryItem } from '../../pantry/types';
+import { normalizeIngredient } from '../../pantry/types';
 import { matchRecipeAgainstPantry, sortByPantryMatch } from '../../pantry/utils/pantryMatcher';
 
 const LEGACY_STORAGE_KEY = 'fitbuddy_recipes';
@@ -18,12 +19,26 @@ const MIGRATION_FLAG = 'fitbuddy_recipes_migrated';
 
 // ── Filtering & sorting (pure functions, exported for testing) ──────────
 
-export function filterRecipes(recipes: Recipe[], filters: RecipeFilter, pantryItems?: PantryItem[]): Recipe[] {
+export function filterRecipes(recipes: Recipe[], filters: RecipeFilter, pantryItems?: PantryItem[], excludedItems?: PantryItem[]): Recipe[] {
   let result = [...recipes];
 
   // Filter by favorites
   if (filters.favoritesOnly) {
     result = result.filter((r) => r.is_favorite);
+  }
+
+  // "Passt zu mir" — exclude recipes that contain any excluded ingredient (buy_preference='never')
+  if (filters.fitsMyBasics && excludedItems && excludedItems.length > 0) {
+    const excludedNormalized = excludedItems.map((ei) => ei.ingredient_normalized);
+    result = result.filter((r) => {
+      if (!r.ingredients || r.ingredients.length === 0) return true;
+      return !r.ingredients.some((ing) => {
+        const norm = normalizeIngredient(ing.name);
+        return excludedNormalized.some(
+          (en) => en.includes(norm) || norm.includes(en),
+        );
+      });
+    });
   }
 
   // Filter by pantry availability
@@ -194,10 +209,11 @@ export function useRecipes() {
 
   // Filtered & sorted (pantryItems passed externally via setPantryItems)
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [excludedItems, setExcludedItems] = useState<PantryItem[]>([]);
 
   const filteredRecipes = useMemo(
-    () => filterRecipes(recipes, filters, pantryItems),
-    [recipes, filters, pantryItems]
+    () => filterRecipes(recipes, filters, pantryItems, excludedItems),
+    [recipes, filters, pantryItems, excludedItems]
   );
 
   // All unique tags
@@ -309,6 +325,7 @@ export function useRecipes() {
     filters,
     setFilters,
     setPantryItems,
+    setExcludedItems,
     addRecipe,
     updateRecipe,
     deleteRecipe,

@@ -481,7 +481,7 @@ export function generateCycleLogSkill(data: UserSkillData): string {
 
   // Latest entry = current phase estimate
   const latest = recentCycleLogs[0];
-  skill += `Aktuelle Phase: **${phaseLabels[latest.phase] ?? latest.phase}** (${latest.date})\n`;
+  skill += `Aktuelle Phase: **${phaseLabels[latest.phase as keyof typeof phaseLabels] ?? latest.phase}** (${latest.date})\n`;
 
   if (latest.energy_level) skill += `Energie heute: ${latest.energy_level}/5\n`;
   if (latest.mood) skill += `Stimmung heute: ${latest.mood}/5\n`;
@@ -527,7 +527,7 @@ export function generateCycleLogSkill(data: UserSkillData): string {
     skill += `\n### Letzte Eintraege\n`;
     for (const log of recentCycleLogs.slice(0, 7)) {
       const s = (log.symptoms ?? []).length;
-      skill += `- ${log.date}: ${phaseLabels[log.phase] ?? log.phase}`;
+      skill += `- ${log.date}: ${phaseLabels[log.phase as keyof typeof phaseLabels] ?? log.phase}`;
       if (log.energy_level) skill += `, Energie ${log.energy_level}/5`;
       if (log.mood) skill += `, Stimmung ${log.mood}/5`;
       if (s > 0) skill += `, ${s} Symptom${s > 1 ? 'e' : ''}`;
@@ -921,12 +921,33 @@ function generatePantryInventorySkill(data: UserSkillData): string {
     skill += neverBuy.map(i => i.ingredient_name).join(', ') + '\n';
   }
 
-  skill += `\n### REGELN FÜR VORRAT-INTERAKTION\n`;
-  skill += `- Wenn der Nutzer sagt "Ich habe eingekauft: ..." → update_pantry action mit action="add"\n`;
-  skill += `- Wenn der Nutzer sagt "X ist alle/leer" → update_pantry action mit action="set_status", status="empty"\n`;
-  skill += `- Wenn der Nutzer sagt "X wird knapp" → update_pantry action mit action="set_status", status="low"\n`;
-  skill += `- Wenn der Nutzer fragt "Was kann ich kochen?" → Rezepte basierend auf verfügbaren Zutaten vorschlagen\n`;
+  // Basics (buy_preference='always') info
+  const basics = pantryItems.filter(i => i.buy_preference === 'always');
+  const emptyBasics = basics.filter(i => i.status === 'empty');
+  if (basics.length > 0) {
+    skill += `\n### ❤️ Basics (${basics.length} Grundzutaten, ${emptyBasics.length} leer)\n`;
+    if (emptyBasics.length > 0) {
+      skill += `Leere Basics: ${emptyBasics.map(i => i.ingredient_name).join(', ')}\n`;
+    }
+  }
+
+  skill += `\n### REGELN FÜR VORRAT-INTERAKTION (3-Listen-Modell)\n`;
+  skill += `Der Vorrat hat 3 Bereiche:\n`;
+  skill += `1. ❤️ **Meine Basics** (buy_preference='always') — Grundausstattung, kauft der Nutzer immer\n`;
+  skill += `2. 📦 **Vorrat** (status='available'/'low') — was aktuell im Haus ist\n`;
+  skill += `3. 🚫 **Nie** (buy_preference='never') — ausgeschlossene Zutaten\n\n`;
+  skill += `**Aktionen:**\n`;
+  skill += `- "Ich habe eingekauft: ..." → update_pantry action="add", items mit status="available"\n`;
+  skill += `- "X ist alle/leer" → update_pantry action="set_status", status="empty"\n`;
+  skill += `- "X wird knapp" → update_pantry action="set_status", status="low"\n`;
+  skill += `- "Ich mag keine X" / "X ausschliessen" → update_pantry action="add", items mit buy_preference="never"\n`;
+  skill += `- "X ist ein Basic" / "X kaufe ich immer" → update_pantry action="add", items mit buy_preference="always"\n`;
+  skill += `- "Was kann ich kochen?" → Rezepte basierend auf verfügbaren Zutaten vorschlagen\n`;
   skill += `- Priorisiere Rezepte die bald ablaufende Zutaten verwenden\n`;
+  skill += `- Schlage NIEMALS Rezepte mit ausgeschlossenen Zutaten (buy_preference='never') vor!\n`;
+  if (emptyBasics.length > 0) {
+    skill += `\n**⚠️ ${emptyBasics.length} Basics sind leer!** Frage proaktiv ob der Nutzer einkaufen gehen moechte.\n`;
+  }
 
   return skill;
 }

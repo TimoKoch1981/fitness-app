@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, X, Droplets } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useMenstrualCycleLogs, getCyclePhaseEmoji, useDeleteCycleLog, useAddCycleLogBatch } from '../hooks/useMenstrualCycle';
 import { useCyclePrediction } from '../hooks/useCyclePrediction';
-import { PHASE_BAR_COLORS } from './CycleTimeline';
+// PHASE_BAR_COLORS from CycleTimeline available if needed
 import type { MenstrualCycleLog, CyclePhase, FlowIntensity } from '../../../types/health';
 
 interface CycleCalendarViewProps {

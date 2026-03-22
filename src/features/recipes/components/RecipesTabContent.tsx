@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRecipes } from '../hooks/useRecipes';
-import { usePantry } from '../../pantry/hooks/usePantry';
+import { usePantry, useExcludedItems } from '../../pantry/hooks/usePantry';
 import { computePantryMatchMap } from '../../pantry/utils/pantryMatcher';
 import { SAMPLE_RECIPES } from '../data/sampleRecipes';
 import { RecipeList } from './RecipeList';
@@ -41,6 +41,7 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
     filters,
     setFilters,
     setPantryItems,
+    setExcludedItems,
     addRecipe,
     updateRecipe,
     deleteRecipe,
@@ -48,8 +49,9 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
     isLoading,
   } = useRecipes();
 
-  // Load pantry for matching
+  // Load pantry for matching + excluded items for filtering
   const { data: pantryItems } = usePantry();
+  const { data: excludedPantryItems } = useExcludedItems();
   const createShoppingList = useCreateShoppingList();
   const { data: profile } = useProfile();
 
@@ -82,10 +84,14 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
     }
   }, [profile, profileSynced, profileAllergens, profileDietaryPrefs, setFilters, filters]);
 
-  // Feed pantry into useRecipes for filtering/sorting
+  // Feed pantry + excluded items into useRecipes for filtering/sorting
   useEffect(() => {
     setPantryItems(pantryItems ?? []);
   }, [pantryItems, setPantryItems]);
+
+  useEffect(() => {
+    setExcludedItems(excludedPantryItems ?? []);
+  }, [excludedPantryItems, setExcludedItems]);
 
   // Compute match map for UI badges
   const pantryMatchMap = useMemo(() => {
@@ -316,6 +322,7 @@ export function RecipesTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDi
         isLoadingSamples={loadingSamples}
         pantryMatchMap={pantryMatchMap}
         hasPantry={!!pantryItems && pantryItems.length > 0}
+        hasExcludedItems={!!excludedPantryItems && excludedPantryItems.length > 0}
         profileAllergens={profileAllergens}
         profileDietaryPrefs={profileDietaryPrefs}
       />

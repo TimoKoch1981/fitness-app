@@ -82,6 +82,8 @@ export interface RecipeFilter {
   mealType: string | null;
   favoritesOnly: boolean;
   pantryOnly: boolean;
+  /** "Passt zu mir" — exclude recipes containing excluded pantry ingredients (buy_preference='never') */
+  fitsMyBasics: boolean;
   maxPrepTime: number | null;
   maxCalories: number | null;
   sortBy: RecipeSortBy;
@@ -101,6 +103,7 @@ export const DEFAULT_RECIPE_FILTER: RecipeFilter = {
   mealType: null,
   favoritesOnly: false,
   pantryOnly: false,
+  fitsMyBasics: false,
   maxPrepTime: null,
   maxCalories: null,
   sortBy: 'newest',

@@ -57,6 +57,29 @@ export function usePantryAll() {
   });
 }
 
+/** Load excluded items (buy_preference = 'never') — for "Nie" tab */
+export function useExcludedItems() {
+  const { user } = useAuth();
+
+  return useQuery<PantryItem[]>({
+    queryKey: ['user-pantry-excluded', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('user_pantry')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('buy_preference', 'never')
+        .order('ingredient_name');
+
+      if (error) throw error;
+      return (data ?? []) as PantryItem[];
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+}
+
 // ── Mutation: Add items to pantry (batch) ─────────────────────────────
 
 interface AddPantryItemInput {
@@ -102,6 +125,7 @@ export function useAddPantryItems() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }
@@ -139,6 +163,7 @@ export function useAddFromCatalog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }
@@ -178,6 +203,7 @@ export function useUpdatePantryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }
@@ -199,6 +225,7 @@ export function useRemovePantryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }
@@ -220,6 +247,7 @@ export function useHardDeletePantryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }
@@ -243,6 +271,7 @@ export function useClearPantry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
+      queryClient.invalidateQueries({ queryKey: ['user-pantry-excluded'] });
     },
   });
 }

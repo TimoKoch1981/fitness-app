@@ -18,6 +18,7 @@ import {
   Package,
   Image as ImageIcon,
   ShieldAlert,
+  ShieldCheck,
   Leaf,
   RefreshCw,
 } from 'lucide-react';
@@ -42,6 +43,8 @@ interface RecipeListProps {
   pantryMatchMap?: Map<string, PantryMatchResult>;
   /** Whether pantry data is available */
   hasPantry?: boolean;
+  /** Whether excluded pantry items exist */
+  hasExcludedItems?: boolean;
   /** Profile allergens (mapped to recipe allergen keys) for sync indicator */
   profileAllergens?: string[];
   /** Profile dietary preferences for sync indicator */
@@ -70,6 +73,7 @@ export function RecipeList({
   isLoadingSamples,
   pantryMatchMap,
   hasPantry,
+  hasExcludedItems,
   profileAllergens,
   profileDietaryPrefs,
 }: RecipeListProps) {
@@ -105,8 +109,18 @@ export function RecipeList({
     onSetFilters({
       ...filters,
       pantryOnly: newPantryOnly,
+      fitsMyBasics: false,
       // Auto-switch to bestMatch sort when enabling, revert when disabling
       sortBy: newPantryOnly ? 'bestMatch' : filters.sortBy === 'bestMatch' ? 'newest' : filters.sortBy,
+    });
+  };
+
+  const handleFitsMyBasicsToggle = () => {
+    onSetFilters({
+      ...filters,
+      fitsMyBasics: !filters.fitsMyBasics,
+      pantryOnly: false,
+      favoritesOnly: false,
     });
   };
 
@@ -218,10 +232,10 @@ export function RecipeList({
       {/* Meal type chips (horizontal scroll) */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         <button
-          onClick={() => onSetFilters({ ...filters, mealType: null, favoritesOnly: false, pantryOnly: false })}
+          onClick={() => onSetFilters({ ...filters, mealType: null, favoritesOnly: false, pantryOnly: false, fitsMyBasics: false })}
           className={cn(
             'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
-            !filters.mealType && !filters.favoritesOnly && !filters.pantryOnly
+            !filters.mealType && !filters.favoritesOnly && !filters.pantryOnly && !filters.fitsMyBasics
               ? 'bg-teal-500 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           )}
@@ -240,6 +254,20 @@ export function RecipeList({
           <Heart className={cn('h-3 w-3', filters.favoritesOnly ? 'fill-white' : '')} />
           {language === 'de' ? 'Favoriten' : 'Favorites'}
         </button>
+        {hasExcludedItems && (
+          <button
+            onClick={handleFitsMyBasicsToggle}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1',
+              filters.fitsMyBasics
+                ? 'bg-violet-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            )}
+          >
+            <ShieldCheck className="h-3 w-3" />
+            {language === 'de' ? 'Passt zu mir' : 'Fits me'}
+          </button>
+        )}
         {hasPantry && (
           <button
             onClick={handlePantryToggle}
@@ -251,7 +279,7 @@ export function RecipeList({
             )}
           >
             <Package className="h-3 w-3" />
-            {language === 'de' ? 'Aus Vorrat' : 'From Pantry'}
+            {language === 'de' ? 'Jetzt kochbar' : 'Cook now'}
           </button>
         )}
         {RECIPE_MEAL_TYPES.map((type) => (
