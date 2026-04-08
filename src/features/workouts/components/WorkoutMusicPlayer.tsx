@@ -20,12 +20,17 @@ import { useMusicPlayer } from '../context/MusicPlayerContext';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Curated workout playlists (YouTube playlist IDs). */
+/**
+ * Curated workout categories — each uses YouTube's built-in search-based playback
+ * (`listType=search&list=KEYWORDS`). This works reliably without hardcoding specific
+ * playlist IDs (which break when playlists go private/are deleted, and YouTube Music
+ * radio mix IDs like `RDCLAK5uy_*` are personalized and don't embed publicly).
+ */
 const PLAYLISTS = [
-  { id: 'RDCLAK5uy_n9Fb4e2UPSuzcbxRuakVBkAE85BEY_sjM', label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
-  { id: 'RDCLAK5uy_kgXMHMfuABcnFNOum4kVIhEa97Q1W-S00', label: 'cardio', emoji: '\u{1F3C3}' },
-  { id: 'RDCLAK5uy_mfz4WCU2OEqJieBi8jXB-bSBhLqrnY0e0', label: 'focus', emoji: '\u{1F3AF}' },
-  { id: 'RDCLAK5uy_m1IWBQ2x7HOQAX_2O6CVVxMFINT8RJDM', label: 'chill', emoji: '\u{1F60C}' },
+  { id: 'workout+music+mix+2024',         label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
+  { id: 'cardio+running+music+mix',        label: 'cardio',  emoji: '\u{1F3C3}' },
+  { id: 'focus+concentration+music+mix',   label: 'focus',   emoji: '\u{1F3AF}' },
+  { id: 'chill+lofi+beats+mix',            label: 'chill',   emoji: '\u{1F60C}' },
 ] as const;
 
 const PLAYLIST_LABELS: Record<string, Record<string, string>> = {
@@ -52,14 +57,23 @@ function extractPlaylistId(url: string): string | null {
 }
 
 /**
- * Build a YouTube embed URL for a playlist or single video.
+ * Build a YouTube embed URL.
  * Uses youtube-nocookie.com for privacy (matching our CSP frame-src).
+ *
+ * Supports three input formats:
+ *  1. URL with `?list=PLAYLIST_ID` → videoseries embed
+ *  2. URL with `?v=VIDEO_ID` or youtu.be short link → single video loop
+ *  3. Plain string like `workout+music+mix` → search-based playback (listType=search)
  */
 function buildEmbedUrl(source: string): string | null {
-  const isRawPlaylistId = !source.includes('/') && !source.includes('.');
+  // Case 3: plain keyword string (our curated categories use this)
+  const isKeywordSearch = !source.includes('/') && !source.includes('.');
 
-  if (isRawPlaylistId) {
-    return `https://www.youtube-nocookie.com/embed/videoseries?list=${source}&autoplay=1&loop=1`;
+  if (isKeywordSearch) {
+    // YouTube search-based playback — reliable, no playlist-ID maintenance,
+    // returns whatever matches the query right now.
+    const query = encodeURIComponent(source);
+    return `https://www.youtube-nocookie.com/embed?listType=search&list=${query}&autoplay=1&loop=1`;
   }
 
   const playlistId = extractPlaylistId(source);
@@ -260,10 +274,14 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
               </button>
             </div>
 
-            {/* Open in YouTube link */}
+            {/* Open in YouTube link — search-based for keyword categories, direct for playlist IDs */}
             {activePlaylistId && (
               <a
-                href={`https://www.youtube.com/playlist?list=${activePlaylistId}`}
+                href={
+                  activePlaylistId.includes('+')
+                    ? `https://www.youtube.com/results?search_query=${encodeURIComponent(activePlaylistId.replace(/\+/g, ' '))}`
+                    : `https://www.youtube.com/playlist?list=${activePlaylistId}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"

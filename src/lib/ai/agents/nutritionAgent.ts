@@ -292,31 +292,35 @@ User: "500g Skyr und 2 Orangen"
 Assistant: "500g Skyr hat ca. 330 kcal und 50g Protein, 2 Orangen bringen weitere 100 kcal..."
 → Das ist FALSCH! Kein ACTION_REQUEST Block = Daten werden NICHT gespeichert!
 
-### ✅ SO RICHTIG:
+### ✅ SO RICHTIG (Klartext-Beschreibung, KEIN JSON):
 User: "500g Skyr und 2 Orangen"
 Assistant: "Guter Snack! Ich rechne mit ca. 430 kcal und 52g Protein.
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"500g Skyr mit 2 Orangen","type":"snack","calories":430,"protein":52,"carbs":58,"fat":2}
+data: 500g Skyr mit 2 Orangen, Snack, 430 kcal, 52g Protein, 58g Kohlenhydrate, 2g Fett.
 [/ACTION_REQUEST]"
+
+### WICHTIG: Im data-Feld schreibst du eine KURZE NATUERLICHSPRACHLICHE Beschreibung (1-2 Zeilen), KEIN JSON!
+Der System-Agent wandelt das via Function Calling in das strukturierte Format um.
+Pflicht-Infos im Text: Name, Mahlzeittyp (Fruehstueck/Mittag/Abend/Snack), Kalorien, Protein, Kohlenhydrate, Fett.
 
 ### EINZIGE Ausnahme für KEINEN Action-Block:
 Reine Wissensfragen wo der Nutzer NICHT gegessen hat: "Wie viel Protein hat ein Ei?" oder "Was ist besser, Reis oder Nudeln?"
 
-### Format:
+### Format (Klartext):
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Name der Mahlzeit","type":"lunch","calories":500,"protein":40,"carbs":50,"fat":10}
+data: [Name der Mahlzeit], [Mahlzeittyp], [Kalorien] kcal, [Protein]g Protein, [Carbs]g Kohlenhydrate, [Fett]g Fett.
 [/ACTION_REQUEST]
 
 MEHRERE Items in einer Nachricht → SEPARATE Action-Blöcke:
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Proteinshake","type":"breakfast","calories":150,"protein":30,"carbs":8,"fat":2}
+data: Proteinshake, Fruehstueck, 150 kcal, 30g Protein, 8g Kohlenhydrate, 2g Fett.
 [/ACTION_REQUEST]
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Hähnchen mit Reis","type":"lunch","calories":500,"protein":48,"carbs":55,"fat":8}
+data: Haehnchen mit Reis, Mittagessen, 500 kcal, 48g Protein, 55g Kohlenhydrate, 8g Fett.
 [/ACTION_REQUEST]
 
 REGELN für Action-Blöcke:
@@ -471,31 +475,35 @@ User: "500g yogurt and 2 oranges"
 Assistant: "500g yogurt has about 330 kcal and 50g protein, 2 oranges add 100 kcal..."
 → This is WRONG! No ACTION_REQUEST block = data NOT saved!
 
-### ✅ CORRECT:
+### ✅ CORRECT (plain text description, NO JSON):
 User: "500g yogurt and 2 oranges"
 Assistant: "Great snack! That's about 430 kcal and 52g protein.
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"500g yogurt with 2 oranges","type":"snack","calories":430,"protein":52,"carbs":58,"fat":2}
+data: 500g yogurt with 2 oranges, snack, 430 kcal, 52g protein, 58g carbs, 2g fat.
 [/ACTION_REQUEST]"
+
+### IMPORTANT: In the data field write a SHORT NATURAL-LANGUAGE description (1-2 lines), NOT JSON!
+The System Agent converts it via Function Calling into structured format.
+Required info in the text: name, meal type (breakfast/lunch/dinner/snack), calories, protein, carbs, fat.
 
 ### ONLY exception for NO ACTION_REQUEST block:
 Pure knowledge questions where the user did NOT eat: "How much protein does an egg have?" or "What's better, rice or pasta?"
 
-### Format:
+### Format (plain text):
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Meal name","type":"lunch","calories":500,"protein":40,"carbs":50,"fat":10}
+data: [Meal name], [meal type], [calories] kcal, [protein]g protein, [carbs]g carbs, [fat]g fat.
 [/ACTION_REQUEST]
 
 MULTIPLE items in one message → SEPARATE ACTION_REQUEST blocks:
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Protein shake","type":"breakfast","calories":150,"protein":30,"carbs":8,"fat":2}
+data: Protein shake, breakfast, 150 kcal, 30g protein, 8g carbs, 2g fat.
 [/ACTION_REQUEST]
 [ACTION_REQUEST]
 type: log_meal
-data: {"name":"Chicken with rice","type":"lunch","calories":500,"protein":48,"carbs":55,"fat":8}
+data: Chicken with rice, lunch, 500 kcal, 48g protein, 55g carbs, 8g fat.
 [/ACTION_REQUEST]
 
 RULES for ACTION_REQUEST blocks:
