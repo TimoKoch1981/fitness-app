@@ -21,16 +21,22 @@ import { useMusicPlayer } from '../context/MusicPlayerContext';
 // ---------------------------------------------------------------------------
 
 /**
- * Curated workout categories — each uses YouTube's built-in search-based playback
- * (`listType=search&list=KEYWORDS`). This works reliably without hardcoding specific
- * playlist IDs (which break when playlists go private/are deleted, and YouTube Music
- * radio mix IDs like `RDCLAK5uy_*` are personalized and don't embed publicly).
+ * Workout music categories — open a YouTube search in a new tab.
+ *
+ * Historie:
+ *  - RDCLAK5uy_* (v12.x): YouTube Music Radio-Mix-IDs → personalisiert, nicht embeddable
+ *  - listType=search (v13.6): YouTube hat Search-basiertes Embedding Nov 2020 deprecated
+ *    → 4xx "Dieses Video ist nicht verfuegbar"
+ *
+ * Loesung: Die 4 Buttons oeffnen YouTube extern (neuer Tab) mit einer Suche,
+ * der User kann dann einen konkreten Link kopieren und unten ins Custom-URL-Feld
+ * einfuegen. Der embedded Player funktioniert garantiert mit echten Video-URLs.
  */
 const PLAYLISTS = [
-  { id: 'workout+music+mix+2024',         label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
-  { id: 'cardio+running+music+mix',        label: 'cardio',  emoji: '\u{1F3C3}' },
-  { id: 'focus+concentration+music+mix',   label: 'focus',   emoji: '\u{1F3AF}' },
-  { id: 'chill+lofi+beats+mix',            label: 'chill',   emoji: '\u{1F60C}' },
+  { query: 'best workout music mix 2024 1 hour',     label: 'workout', emoji: '\u{1F3CB}\u{FE0F}' },
+  { query: 'best cardio running music mix 2024',     label: 'cardio',  emoji: '\u{1F3C3}' },
+  { query: 'focus concentration music 1 hour',       label: 'focus',   emoji: '\u{1F3AF}' },
+  { query: 'lofi chill beats 1 hour',                 label: 'chill',   emoji: '\u{1F60C}' },
 ] as const;
 
 const PLAYLIST_LABELS: Record<string, Record<string, string>> = {
@@ -57,27 +63,22 @@ function extractPlaylistId(url: string): string | null {
 }
 
 /**
- * Build a YouTube embed URL.
+ * Build a YouTube embed URL from a user-provided link.
  * Uses youtube-nocookie.com for privacy (matching our CSP frame-src).
  *
- * Supports three input formats:
- *  1. URL with `?list=PLAYLIST_ID` → videoseries embed
- *  2. URL with `?v=VIDEO_ID` or youtu.be short link → single video loop
- *  3. Plain string like `workout+music+mix` → search-based playback (listType=search)
+ * Supports:
+ *  - URL with `?list=PL...` → videoseries embed (real public playlist)
+ *  - URL with `?v=VIDEO_ID` or youtu.be short link → single video on loop
+ *
+ * Note: Keyword search embeds (`listType=search`) were deprecated by YouTube in
+ * Nov 2020 and return 4xx ("Video not available"). We no longer support them.
  */
 function buildEmbedUrl(source: string): string | null {
-  // Case 3: plain keyword string (our curated categories use this)
-  const isKeywordSearch = !source.includes('/') && !source.includes('.');
+  const trimmed = source.trim();
+  if (!trimmed) return null;
 
-  if (isKeywordSearch) {
-    // YouTube search-based playback — reliable, no playlist-ID maintenance,
-    // returns whatever matches the query right now.
-    const query = encodeURIComponent(source);
-    return `https://www.youtube-nocookie.com/embed?listType=search&list=${query}&autoplay=1&loop=1`;
-  }
-
-  const playlistId = extractPlaylistId(source);
-  const videoId = extractYouTubeId(source);
+  const playlistId = extractPlaylistId(trimmed);
+  const videoId = extractYouTubeId(trimmed);
 
   if (playlistId) {
     return `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&autoplay=1&loop=1`;
@@ -124,7 +125,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
   const isDE = language === 'de';
 
   // Global music state from context — NOT local!
-  const { embedUrl, activePlaylistId, isPlaying, play, stop } = useMusicPlayer();
+  const { embedUrl, isPlaying, play, stop } = useMusicPlayer();
 
   // Expanded state stays local (UI-only, per-component)
   const [isExpanded, setIsExpanded] = useState(false);
@@ -133,9 +134,18 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
   // -------------------------------------------------------------------
   // Play handlers
   // -------------------------------------------------------------------
-  const handlePlayPlaylist = (playlistId: string) => {
-    const url = buildEmbedUrl(playlistId);
-    if (url) play(url, playlistId);
+
+  /**
+   * Open YouTube search in a new tab. User picks a video/playlist and
+   * pastes the URL into the Custom URL field to play it in-app.
+   *
+   * Rationale: Hardcoded playlist IDs break constantly (playlists deleted,
+   * privatized, YT Music radio-mix IDs not embeddable, listType=search
+   * deprecated). External search = always works, user control.
+   */
+  const handleOpenYouTubeSearch = (query: string) => {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handlePlayCustom = () => {
@@ -146,6 +156,8 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
     if (url) {
       play(url, null);
       setCustomUrl('');
+    } else {
+      console.warn('[WorkoutMusicPlayer] Could not extract video/playlist ID from:', trimmed);
     }
   };
 
@@ -195,35 +207,10 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
           </button>
         </div>
 
-        {/* Playlists */}
+        {/* Custom URL — primary in-app play path */}
         <div className="px-4 py-3">
-          <p className="text-xs text-gray-400 mb-2">
-            {t.workout.musicChoose}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {PLAYLISTS.map(pl => (
-              <button
-                key={pl.id}
-                onClick={() => handlePlayPlaylist(pl.id)}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
-                  activePlaylistId === pl.id
-                    ? 'bg-teal-500 text-white'
-                    : 'bg-gray-700 text-gray-200 hover:bg-gray-600',
-                )}
-              >
-                <span>{pl.emoji}</span>
-                <span>{PLAYLIST_LABELS[pl.label]?.[language] ?? pl.label}</span>
-                {activePlaylistId === pl.id && <EqualizerBars />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Custom URL */}
-        <div className="px-4 pb-3">
           <p className="text-xs text-gray-400 mb-1.5">
-            {t.workout.musicCustom}
+            {isDE ? 'YouTube-Link einfuegen und abspielen:' : 'Paste YouTube link and play:'}
           </p>
           <div className="flex gap-2">
             <input
@@ -231,83 +218,73 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
               value={customUrl}
               onChange={e => setCustomUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handlePlayCustom()}
-              placeholder="https://youtube.com/..."
+              placeholder="https://youtube.com/watch?v=..."
               className="flex-1 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
             <button
               onClick={handlePlayCustom}
               disabled={!customUrl.trim()}
               className="px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              title={isDE ? 'Abspielen' : 'Play'}
             >
               {'\u25B6'}
             </button>
           </div>
         </div>
 
-        {/* Status + Controls when playing */}
+        {/* Category shortcuts — open YouTube search in new tab */}
+        <div className="px-4 pb-3">
+          <p className="text-xs text-gray-400 mb-2">
+            {isDE ? 'Oder Vorschlaege auf YouTube suchen:' : 'Or browse suggestions on YouTube:'}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {PLAYLISTS.map(pl => (
+              <button
+                key={pl.label}
+                onClick={() => handleOpenYouTubeSearch(pl.query)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors bg-gray-700 text-gray-200 hover:bg-gray-600"
+                title={isDE ? 'Auf YouTube oeffnen' : 'Open on YouTube'}
+              >
+                <span>{pl.emoji}</span>
+                <span className="flex-1 text-left">{PLAYLIST_LABELS[pl.label]?.[language] ?? pl.label}</span>
+                <ExternalLink className="h-3 w-3 opacity-60" />
+              </button>
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-500 mt-2">
+            {isDE
+              ? '\uD83D\uDCA1 Tipp: Video auf YouTube oeffnen, URL kopieren, oben einfuegen.'
+              : '\uD83D\uDCA1 Tip: Open a video on YouTube, copy the URL, paste it above.'}
+          </p>
+        </div>
+
+        {/* Status + Stop button when playing */}
         {embedUrl && (
-          <div className="px-4 pb-3 space-y-2">
+          <div className="px-4 pb-3">
             <div className="flex items-center gap-3 px-3 py-2 bg-gray-700/50 rounded-lg">
-              <div className="w-8 h-8 bg-teal-500/20 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-teal-500/20 rounded-full flex items-center justify-center shrink-0">
                 <Music className="w-4 h-4 text-teal-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-white truncate">
-                  {activePlaylistId
-                    ? PLAYLIST_LABELS[PLAYLISTS.find(p => p.id === activePlaylistId)?.label ?? '']?.[language] ?? 'Playlist'
-                    : (isDE ? 'Eigene URL' : 'Custom URL')}
-                </p>
                 <div className="flex items-center gap-1.5">
                   <EqualizerBars />
-                  <span className="text-[10px] text-gray-400">
+                  <span className="text-xs text-gray-300">
                     {t.workout.musicPlaying}
                   </span>
                 </div>
+                <p className="text-[10px] text-gray-500 mt-0.5">
+                  {isDE ? 'Player oben rechts' : 'Player top-right'}
+                </p>
               </div>
               <button
                 onClick={stop}
-                className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs"
+                className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs shrink-0"
                 aria-label={isDE ? 'Stoppen' : 'Stop'}
               >
                 <Square className="h-3 w-3" />
                 {isDE ? 'Stopp' : 'Stop'}
               </button>
             </div>
-
-            {/* Open in YouTube link — search-based for keyword categories, direct for playlist IDs */}
-            {activePlaylistId && (
-              <a
-                href={
-                  activePlaylistId.includes('+')
-                    ? `https://www.youtube.com/results?search_query=${encodeURIComponent(activePlaylistId.replace(/\+/g, ' '))}`
-                    : `https://www.youtube.com/playlist?list=${activePlaylistId}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
-              >
-                <ExternalLink className="h-3 w-3" />
-                {isDE ? 'In YouTube oeffnen' : 'Open in YouTube'}
-              </a>
-            )}
-
-            {/* Hint */}
-            <p className="text-[10px] text-gray-500 text-center">
-              {isDE
-                ? '\uD83D\uDCA1 Musik laeuft weiter beim Zuklappen, Seiten-Wechsel und Scroll'
-                : '\uD83D\uDCA1 Music keeps playing on collapse, navigation and scroll'}
-            </p>
-          </div>
-        )}
-
-        {/* No music hint when nothing is playing */}
-        {!embedUrl && (
-          <div className="px-4 pb-3">
-            <p className="text-[10px] text-gray-500 text-center">
-              {isDE
-                ? 'Waehle eine Playlist oder fuege einen YouTube-Link ein'
-                : 'Choose a playlist or paste a YouTube link'}
-            </p>
           </div>
         )}
       </div>
