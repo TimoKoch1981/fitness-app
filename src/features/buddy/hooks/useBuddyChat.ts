@@ -239,23 +239,31 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       let parsedActions: ParsedAction[] = [];
       let fcErrorMessage: string | undefined;
 
+      // VERBOSE DEBUG: Log the raw agent response for diagnosis
+      console.log('[BuddyChat] === Stream finished ===');
+      console.log('[BuddyChat] Agent:', result.agentType, '| Length:', result.content.length, 'chars');
+      console.log('[BuddyChat] Content preview:', result.content.slice(0, 800));
+      const hasActionRequest = /\[ACTION_REQUEST\]/i.test(result.content);
+      const hasActionBlock = /```ACTION:/i.test(result.content);
+      console.log('[BuddyChat] Has [ACTION_REQUEST]:', hasActionRequest, '| Has ```ACTION::', hasActionBlock);
+
       // Path 1: Function Calling via System Agent (OpenAI/Supabase only)
       const provider = getAIProvider();
       if (providerSupportsTools(provider)) {
         const actionRequests = extractActionRequest(result.content);
         if (actionRequests) {
-          console.log(`[BuddyChat] FC path: ${actionRequests.length} action_request(s) found, calling System Agent...`);
-          // Pass original user message as context so SystemAgent FC has full info
-          // to generate complete structured output (e.g. all days of a multi-day training plan)
+          console.log('[BuddyChat] FC path: extracted', actionRequests.length, 'action_request(s):', actionRequests.map(r => ({ type: r.type, descLen: r.description.length, descPreview: r.description.slice(0, 120) })));
           const fcResult = await executeSystemAgent(actionRequests, provider, language, userMessage.trim());
+          console.log('[BuddyChat] FC result:', { success: fcResult.success, error: fcResult.error, actionCount: fcResult.actions?.length, details: fcResult.details });
           if (fcResult.success && fcResult.actions) {
             parsedActions = fcResult.actions;
-            console.log(`[BuddyChat] FC path: ${parsedActions.length} validated action(s)`);
+            console.log('[BuddyChat] FC path: validated', parsedActions.length, 'action(s):', parsedActions.map(a => a.type));
           } else if (fcResult.error) {
-            console.warn(`[BuddyChat] FC path failed: ${fcResult.error}`, fcResult.details);
+            console.warn('[BuddyChat] FC path failed:', fcResult.error, fcResult.details);
             fcErrorMessage = fcResult.userMessage;
-            // Fall through to legacy regex path
           }
+        } else {
+          console.log('[BuddyChat] FC path: no [ACTION_REQUEST] blocks found in agent response');
         }
       }
 
@@ -336,6 +344,29 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               parsedActions = [{ type: 'log_body', data: { weight_kg: weightKg, date: today }, rawJson: JSON.stringify({ weight_kg: weightKg, date: today }) }];
             }
           }
+        }
+      }
+
+      // Fallback: detect log_meal from text if the nutrition agent claims "gespeichert / geloggt"
+      // but didn't produce a parseable ACTION_REQUEST block. Surface as error so the user knows.
+      if (parsedActions.length === 0 && result.agentType === 'nutrition') {
+        const claimsSaved = /(?:geloggt|gespeichert|eingetragen|erfasst|notiert|logged|saved|recorded|tracked)/i.test(result.content);
+        const hasFoodKeyword = /(?:kalori|kcal|protein|carb|fett|gramm|frühstück|mittag|abend|snack|breakfast|lunch|dinner)/i.test(result.content);
+        if (claimsSaved && hasFoodKeyword) {
+          console.error('[BuddyChat] ⚠ Nutrition agent CLAIMS saved but NO action was parsed! Agent response:', result.content.slice(0, 500));
+          // Surface as an error chat message so the user sees it didn't actually save
+          setTimeout(() => {
+            setMessages(prev => [...prev, {
+              id: crypto.randomUUID(),
+              role: 'assistant' as const,
+              content: language === 'de'
+                ? '\u26A0\uFE0F Der Buddy hat behauptet, die Mahlzeit sei geloggt, aber es wurde KEIN Action-Block erkannt. Bitte nochmal versuchen — oder in der Konsole (F12) schauen was der Agent geantwortet hat.'
+                : '\u26A0\uFE0F The buddy claimed the meal was logged but NO action block was parsed. Please try again — or check the console (F12) for the agent response.',
+              timestamp: new Date(),
+              agentIcon: '\u26A0\uFE0F',
+              isError: true,
+            }]);
+          }, 100);
         }
       }
 

@@ -90,63 +90,55 @@ interface GlobalMusicIframeProps {
  * Key-Invarianten:
  *  - React.memo + stable key="persistent-music-iframe"  → NIE re-mounted
  *  - Position: fixed, top-right, z-index high           → ueberlebt Page-Navigation
- *  - 2 Modi per CSS: visible (80px pill oben rechts) / hidden (display:none)
+ *  - Iframe muss SICHTBAR und mindestens 200x120 sein   → YouTube erlaubt sonst kein Audio
  *  - Beim Stop wird das Iframe komplett unmounted (src=null) = aktiver Stop
  *
- * Autoplay-Policy-Trick: Das Iframe wird erst gemountet wenn play() aufgerufen
- * wurde — also IMMER nach einer User-Geste. Danach darf es so lange leben wie
- * es will, Autoplay ist freigegeben.
+ * LERNEFFEKT aus v13.5: Ein 10x10px off-screen Iframe spielt KEIN Audio auf
+ * YouTube — Google pruefte Visibility im Viewport. Deshalb hier: echtes
+ * sichtbares 240x135 Mini-Video oben rechts, mit Stop-Button darueber.
  */
 const GlobalMusicIframe = memo(function GlobalMusicIframe({ embedUrl, onStop }: GlobalMusicIframeProps) {
   if (!embedUrl) return null;
 
   return (
     <div
-      className="fixed top-3 right-3 z-[9999] flex items-center gap-2 bg-gray-900/95 backdrop-blur-sm text-white rounded-full shadow-xl border border-teal-500/30 px-2 py-1.5 pointer-events-auto"
-      style={{ maxWidth: 220 }}
+      className="fixed top-3 right-3 z-[9999] flex flex-col gap-1 pointer-events-auto"
+      style={{ width: 240 }}
       role="status"
       aria-label="Musik-Player"
     >
-      {/* Animated musical indicator */}
-      <div className="flex items-center justify-center w-7 h-7 bg-teal-500/20 rounded-full shrink-0">
-        <Music className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+      {/* Header with status + stop button */}
+      <div className="flex items-center gap-2 bg-gray-900/95 backdrop-blur-sm text-white rounded-t-lg shadow-xl border border-b-0 border-teal-500/30 px-2 py-1">
+        <div className="flex items-center justify-center w-5 h-5 bg-teal-500/20 rounded-full shrink-0">
+          <Music className="w-3 h-3 text-teal-400 animate-pulse" />
+        </div>
+        <span className="text-[10px] font-medium text-gray-200 whitespace-nowrap flex-1">
+          Musik
+        </span>
+        <button
+          onClick={onStop}
+          className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 hover:bg-red-500/40 transition-colors shrink-0"
+          aria-label="Musik stoppen"
+          title="Stoppen"
+        >
+          <X className="w-3 h-3 text-red-400" />
+        </button>
       </div>
 
-      {/* Status text */}
-      <span className="text-[10px] font-medium text-gray-200 whitespace-nowrap">
-        Musik laeuft
-      </span>
-
-      {/* Stop button */}
-      <button
-        onClick={onStop}
-        className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20 hover:bg-red-500/40 transition-colors shrink-0"
-        aria-label="Musik stoppen"
-        title="Stoppen"
-      >
-        <X className="w-3 h-3 text-red-400" />
-      </button>
-
       {/*
-        The actual YouTube iframe — kept at 1 fixed size to avoid re-render issues.
-        Hidden via absolute positioning off-screen but NOT display:none (which would
-        pause some browsers) and NOT width:0 (which throttles audio on iOS).
-        Using 10x10px minimum + opacity 0 + pointer-events none = audio plays reliably.
+        VISIBLE YouTube iframe — 240x135 (16:9). Must be visible in viewport for
+        YouTube to route audio. NOT offscreen, NOT opacity:0, NOT width<200.
       */}
       <iframe
         key="persistent-music-iframe"
         src={embedUrl}
         title="Workout Music"
-        allow="autoplay; encrypted-media"
-        aria-hidden="true"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        className="rounded-b-lg shadow-xl border border-t-0 border-teal-500/30 bg-black"
         style={{
-          position: 'absolute',
-          width: 10,
-          height: 10,
-          left: -9999,
-          top: -9999,
-          opacity: 0,
-          pointerEvents: 'none',
+          width: 240,
+          height: 135,
           border: 0,
         }}
       />

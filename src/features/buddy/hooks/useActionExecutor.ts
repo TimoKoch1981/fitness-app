@@ -160,10 +160,12 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     const actionToExecute = actionOverride ?? pendingAction;
     if (!actionToExecute) return { success: false, error: 'No action to execute' };
 
+    console.log('[ActionExecutor] === executeAction ===', actionToExecute.type, 'data:', JSON.stringify(actionToExecute.data).slice(0, 300));
+
     // Idempotency check — prevents double-execution when user / auto-execute collide
     const idempotencyKey = makeIdempotencyKey(actionToExecute, userId);
     if (isDuplicate(idempotencyKey)) {
-      console.log('[ActionExecutor] Idempotency skip:', actionToExecute.type);
+      console.warn('[ActionExecutor] Idempotency skip — duplicate within 60s:', actionToExecute.type, 'key:', idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
       return { success: true };
@@ -188,12 +190,14 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       }
 
       // Execute via registry (schema + display + execute all in one place)
+      console.log('[ActionExecutor] calling descriptor.execute for', actionToExecute.type, 'userId:', uid);
       await descriptor.execute(actionToExecute.data as Record<string, unknown>, {
         userId: uid,
         mutations,
         activeSubstances: activeSubstances ?? undefined,
         equipmentCatalog: equipmentCatalog ?? undefined,
       });
+      console.log('[ActionExecutor] ✓ SUCCESS for', actionToExecute.type);
 
       markExecuted(idempotencyKey);
       setActionStatus('executed');
