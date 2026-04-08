@@ -8,7 +8,11 @@
 
 ## ❌ Offene Bugs
 
-*Keine offenen Bugs. Alle gefixt.*
+| # | Bug | Prio | Analyse |
+|---|-----|------|---------|
+| **B19** | **Plan-Speichern / Multi-Day-Split unzuverlaessig** | **P0** | User-Report 2026-04-08: "speichere" muss 3x gesagt werden, 4-Tage-Split legt nur Tag 1 an. **Root Causes:** (1) JSON-Truncation in `actionParser.ts:74-82` killt stille unvollstaendige Tage; (2) `trainingAgent.ts:172-193` erzwingt Single-Call `save_training_plan` statt inkrementell; (3) `ActionConfirmBanner.tsx` zeigt nur die erste Action, weitere gehen verloren; (4) `useBuddyChat.ts:240-263` cached letzte Action nicht → jedes "speichere" ist neuer LLM-Call; (5) `useActionExecutor.ts:150-184` surfaced DB-Errors nicht klar. **Fix:** IN ARBEIT (siehe Expertenreview unten). |
+| **B20** | **Workout-Musik-Player unzuverlaessig** | **P1** | User-Report 2026-04-08: "gleiches Problem wie immer". **Analyse (2026-04-08):** Spotify-Code in `useSpotifyPlayer.ts` / `SpotifyCallback.tsx` / `spotify.d.ts` ist **toter Code** — nie in Production gelaufen, durch CSP `script-src 'self'` blockiert (Spotify SDK braucht externes `sdk.scdn.co`-Script), Premium-Pflicht. **Aktueller Player** `WorkoutMusicPlayer.tsx` nutzt `youtube-nocookie.com`-iframes — gleicher Ansatz wie funktionierende Exercise-Videos. **Wahrscheinliche Restprobleme:** (a) Collapsed 1x1-iframe — iOS/Safari killt Audio in <10x10-iframes; (b) Re-Mount beim Collapse → Autoplay-Policy blockt; (c) iframe nicht global gemountet → stirbt bei Navigation. **Fix-Konzept:** (1) Spotify-Code komplett loeschen (~600 Zeilen), (2) iframe global in App.tsx mounten, (3) Collapse = CSS-hide (height:1px, opacity:0, position:absolute) statt unmount, (4) expliziter User-Geste-Start, (5) Testen auf iOS/Android. **Aufwand:** ~3h. |
+| **B21** | **Supabase Studio Container unhealthy** | P3 | `fitbuddy-studio-1` zeigt `unhealthy` — Next.js startet aber Healthcheck scheitert mit `ECONNREFUSED 127.0.0.1:3000` (falsche Interface-Bindung / zu frueher Check). Funktional OK (Studio ist nur Admin-UI, blockiert keine User). **Fix:** Healthcheck in `deploy/docker-compose.yml` anpassen — `start_period: 60s` + `retries: 20` ODER `healthcheck: disable: true`. **Aufwand:** 15 min. |
 
 ---
 

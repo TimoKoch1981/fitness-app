@@ -45,8 +45,53 @@ interface UseActionExecutorReturn {
   setPendingAction: (action: ParsedAction | null) => void;
   /** Execute action — optionally pass action directly (avoids state race) */
   executeAction: (action?: ParsedAction) => Promise<{ success: boolean; error?: string }>;
+  /**
+   * Execute an array of actions sequentially.
+   * Stops at first failure and returns results for all completed actions.
+   * Idempotent: duplicate actions within a 60s window are silently skipped.
+   */
+  executeActions: (actions: ParsedAction[]) => Promise<{
+    success: boolean;
+    executed: number;
+    failed: number;
+    error?: string;
+  }>;
   /** User dismissed — reject the pending action */
   rejectAction: () => void;
+}
+
+// ── Idempotency cache (module-level, persists across renders) ──────────
+// Prevents duplicate action execution within a 60s window.
+// Keyed by: userId + actionType + JSON-hash of data
+const IDEMPOTENCY_WINDOW_MS = 60_000;
+const idempotencyCache = new Map<string, number>();
+
+function makeIdempotencyKey(action: ParsedAction, userId?: string): string {
+  const dataStr = JSON.stringify(action.data);
+  // Simple hash (FNV-1a style) — sufficient for collision-avoidance in a single session
+  let hash = 2166136261;
+  for (let i = 0; i < dataStr.length; i++) {
+    hash ^= dataStr.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `${userId ?? 'anon'}:${action.type}:${(hash >>> 0).toString(36)}`;
+}
+
+function isDuplicate(key: string): boolean {
+  const now = Date.now();
+  const last = idempotencyCache.get(key);
+  if (last && now - last < IDEMPOTENCY_WINDOW_MS) return true;
+  // Cleanup stale entries occasionally
+  if (idempotencyCache.size > 100) {
+    for (const [k, t] of idempotencyCache.entries()) {
+      if (now - t > IDEMPOTENCY_WINDOW_MS) idempotencyCache.delete(k);
+    }
+  }
+  return false;
+}
+
+function markExecuted(key: string): void {
+  idempotencyCache.set(key, Date.now());
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────
@@ -109,10 +154,20 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
    * Execute an action via the ActionRegistry.
    * Accepts an action directly (preferred) or falls back to pendingAction state.
    * Returns { success, error } to avoid stale closure issues.
+   * Idempotent: duplicate actions within a 60s window are silently skipped (returns success).
    */
   const executeAction = useCallback(async (actionOverride?: ParsedAction): Promise<{ success: boolean; error?: string }> => {
     const actionToExecute = actionOverride ?? pendingAction;
     if (!actionToExecute) return { success: false, error: 'No action to execute' };
+
+    // Idempotency check — prevents double-execution when user / auto-execute collide
+    const idempotencyKey = makeIdempotencyKey(actionToExecute, userId);
+    if (isDuplicate(idempotencyKey)) {
+      console.log('[ActionExecutor] Idempotency skip:', actionToExecute.type);
+      setActionStatus('executed');
+      setPendingAction(null);
+      return { success: true };
+    }
 
     setActionStatus('executing');
     setErrorMessage(null);
@@ -140,6 +195,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
         equipmentCatalog: equipmentCatalog ?? undefined,
       });
 
+      markExecuted(idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
       return { success: true };
@@ -184,6 +240,42 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     }
   }, [pendingAction, activeSubstances, userId, mutations, equipmentCatalog]);
 
+  /**
+   * Execute multiple actions sequentially (e.g. save_training_plan + add_training_day).
+   * Stops at first failure. Each action is idempotency-checked individually.
+   */
+  const executeActions = useCallback(async (actions: ParsedAction[]): Promise<{
+    success: boolean;
+    executed: number;
+    failed: number;
+    error?: string;
+  }> => {
+    if (!actions.length) return { success: true, executed: 0, failed: 0 };
+
+    let executed = 0;
+    let failed = 0;
+    let lastError: string | undefined;
+
+    for (const action of actions) {
+      const result = await executeAction(action);
+      if (result.success) {
+        executed++;
+      } else {
+        failed++;
+        lastError = result.error;
+        // Hard stop on failure — dependent actions (e.g. add_training_day after save_training_plan) won't work
+        break;
+      }
+    }
+
+    return {
+      success: failed === 0,
+      executed,
+      failed,
+      error: lastError,
+    };
+  }, [executeAction]);
+
   /** User dismissed the pending action */
   const rejectAction = useCallback(() => {
     setActionStatus('rejected');
@@ -204,6 +296,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     errorMessage,
     setPendingAction: handleSetPendingAction,
     executeAction,
+    executeActions,
     rejectAction,
   };
 }

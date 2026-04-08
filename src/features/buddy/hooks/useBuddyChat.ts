@@ -103,6 +103,29 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       timestamp: new Date(),
     };
 
+    // Re-save fallback: if user says "speichere" / "save" / "speichern" / "jetzt speichern"
+    // and there's a recent unexecuted pendingAction, re-emit it so auto-execute picks it up.
+    // Idempotency in useActionExecutor prevents double-saves.
+    const saveRetryRegex = /^\s*(bitte\s+)?(jetzt\s+)?(noch(\s*mal)?\s+)?(speicher[ne]?|sav(e|ieren?)|ok\s*speicher|speicher\s*das|speicher\s*jetzt|save\s*it|save\s*now|sichern)\s*[.!?]*\s*$/i;
+    if (saveRetryRegex.test(userMessage.trim())) {
+      const lastActionMsg = [...messagesRef.current].reverse().find(m => m.pendingActions && m.pendingActions.length > 0);
+      if (lastActionMsg) {
+        console.log('[BuddyChat] Save-retry detected, re-emitting last pendingAction');
+        // Add the user "speichere" message and a short confirmation — the useEffect in BuddyPage/InlineBuddyChat
+        // will re-pick up the pendingActions from lastActionMsg (we bump executedActionsRef tracker by cloning the message id)
+        setMessages(prev => [...prev, userMsg, {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: language === 'de' ? 'Wird gespeichert…' : 'Saving…',
+          timestamp: new Date(),
+          pendingActions: lastActionMsg.pendingActions,
+          agentType: lastActionMsg.agentType,
+          agentIcon: lastActionMsg.agentIcon,
+        }]);
+        return;
+      }
+    }
+
     // Add user message
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
@@ -222,7 +245,9 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         const actionRequests = extractActionRequest(result.content);
         if (actionRequests) {
           console.log(`[BuddyChat] FC path: ${actionRequests.length} action_request(s) found, calling System Agent...`);
-          const fcResult = await executeSystemAgent(actionRequests, provider, language);
+          // Pass original user message as context so SystemAgent FC has full info
+          // to generate complete structured output (e.g. all days of a multi-day training plan)
+          const fcResult = await executeSystemAgent(actionRequests, provider, language, userMessage.trim());
           if (fcResult.success && fcResult.actions) {
             parsedActions = fcResult.actions;
             console.log(`[BuddyChat] FC path: ${parsedActions.length} validated action(s)`);
@@ -409,7 +434,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         if (providerSupportsTools(getAIProvider())) {
           const followUpRequests = extractActionRequest(followUpResult.content);
           if (followUpRequests) {
-            const fcFollowUp = await executeSystemAgent(followUpRequests, getAIProvider(), language);
+            const fcFollowUp = await executeSystemAgent(followUpRequests, getAIProvider(), language, userMessage.trim());
             if (fcFollowUp.success && fcFollowUp.actions) {
               followUpActions = fcFollowUp.actions;
             }

@@ -110,17 +110,24 @@ function buildSystemPrompt(language: string): string {
       '## System-Steuerungs-Agent',
       '',
       'Du bist der System-Agent der FitBuddy-App. Deine einzige Aufgabe:',
-      'Wandle die Beschreibung des Experten-Agents in einen praezisen Function Call um.',
+      'Wandle die Beschreibung des Experten-Agents in einen praezisen, VOLLSTAENDIGEN Function Call um.',
       '',
       '### Regeln:',
-      '1. Rufe GENAU EINE Funktion auf (die zum Typ passt)',
-      '2. Extrahiere ALLE genannten Werte aus der Beschreibung',
-      '3. Verwende sinnvolle Defaults fuer fehlende Felder:',
+      '1. Rufe GENAU EINE Funktion pro Aktion auf (die zum Typ passt)',
+      '2. Extrahiere ALLE genannten Werte aus der Beschreibung und dem Original-Kontext',
+      '3. Bei save_training_plan MIT mehreren Tagen: Das Tool-Argument days[] MUSS ALLE im Text erwaehnten Tage enthalten. Wenn der Text "4 Tage" sagt, MUSST du 4 Tages-Objekte zurueckgeben. Niemals weniger!',
+      '4. Wenn die Beschreibung zu kurz ist oder Luecken hat: Ergaenze sinnvolle Defaults basierend auf dem Original-Kontext (Ziele, Erfahrung, Geraete).',
+      '5. Verwende sinnvolle Defaults fuer fehlende Felder:',
       '   - date: heutiges Datum (YYYY-MM-DD)',
       '   - time: aktuelle Uhrzeit (HH:MM)',
       '   - source: "ai"',
-      '4. Runde Naehrwerte auf ganze Zahlen',
-      '5. Bei mehreren Aktionen: rufe mehrere Funktionen auf',
+      '6. Runde Naehrwerte auf ganze Zahlen',
+      '7. Bei mehreren Aktionen in der Anfrage: rufe mehrere Funktionen auf',
+      '',
+      '### Vollstaendigkeit (WICHTIG):',
+      '- Trainingsplaene: ALLE Tage, alle Uebungen, alle Saetze/Reps/Gewichte. Niemals Tage weglassen!',
+      '- Wenn 4-Tage-Split verlangt → exakt 4 days-Objekte im Tool-Aufruf',
+      '- days_per_week MUSS zur Anzahl der days-Objekte passen',
       '',
       '### Fehler vermeiden:',
       '- Pflichtfelder MUESSEN gesetzt werden (siehe Funktionsdefinition)',
@@ -134,17 +141,24 @@ function buildSystemPrompt(language: string): string {
     '## System Control Agent',
     '',
     'You are the system agent for the FitBuddy app. Your only task:',
-    'Convert the expert agent description into a precise function call.',
+    'Convert the expert agent description into a precise, COMPLETE function call.',
     '',
     '### Rules:',
-    '1. Call EXACTLY ONE function (matching the type)',
-    '2. Extract ALL mentioned values from the description',
-    '3. Use sensible defaults for missing fields:',
+    '1. Call EXACTLY ONE function per action (matching the type)',
+    '2. Extract ALL mentioned values from the description and original context',
+    '3. For save_training_plan with multiple days: the tool argument days[] MUST contain ALL days mentioned. If the text says "4 days", you MUST return 4 day objects. Never fewer!',
+    '4. If the description is too short: fill sensible defaults based on original context (goals, experience, equipment).',
+    '5. Use sensible defaults for missing fields:',
     '   - date: today (YYYY-MM-DD)',
     '   - time: current time (HH:MM)',
     '   - source: "ai"',
-    '4. Round nutritional values to whole numbers',
-    '5. For multiple actions: call multiple functions',
+    '6. Round nutritional values to whole numbers',
+    '7. For multiple actions in the request: call multiple functions',
+    '',
+    '### Completeness (IMPORTANT):',
+    '- Training plans: ALL days, all exercises, all sets/reps/weights. Never omit days!',
+    '- If 4-day split requested → exactly 4 day objects in tool call',
+    '- days_per_week MUST match the number of day objects',
     '',
     '### Avoid errors:',
     '- Required fields MUST be set (see function definition)',
@@ -163,19 +177,29 @@ function buildSystemPrompt(language: string): string {
  * @param actionRequests - Extracted action_request blocks from expert text
  * @param provider - The AI provider to use (must support tools)
  * @param language - User language for error messages
+ * @param originalUserMessage - Optional: the user's original message for context (improves multi-day plan fidelity)
  * @returns SystemAgentResult with validated ParsedAction[] or error info
  */
 export async function executeSystemAgent(
   actionRequests: ActionRequest[],
   provider: AIProvider,
   language: string = 'de',
+  originalUserMessage?: string,
 ): Promise<SystemAgentResult> {
+  const startTime = Date.now();
   try {
     // Build messages for the System Agent
     const systemPrompt = buildSystemPrompt(language);
 
     // Combine all action requests into one user message
-    const userContent = actionRequests.map(req => {
+    // Include original user message as context so FC has enough info to generate complete structured output
+    const contextPrefix = originalUserMessage
+      ? (language === 'de'
+          ? `Original-Nachricht des Nutzers: "${originalUserMessage}"\n\n`
+          : `Original user message: "${originalUserMessage}"\n\n`)
+      : '';
+
+    const userContent = contextPrefix + actionRequests.map(req => {
       return 'Aktion: ' + req.type + '\nBeschreibung: ' + req.description;
     }).join('\n---\n');
 
@@ -235,6 +259,20 @@ export async function executeSystemAgent(
         const fieldErrors = validation.errors?.join(', ') ?? 'Unknown validation error';
         errors.push(raw.type + ': ' + fieldErrors);
         console.warn('[SystemAgent] Validation failed for', raw.type, ':', validation.errors);
+      }
+    }
+
+    // Telemetry: log completeness for training plans (helps diagnose multi-day issues)
+    for (const a of validatedActions) {
+      if (a.type === 'save_training_plan') {
+        const d = a.data as { days_per_week?: number; days?: unknown[] };
+        const expected = d.days_per_week ?? 0;
+        const actual = Array.isArray(d.days) ? d.days.length : 0;
+        if (expected > 0 && actual < expected) {
+          console.warn('[SystemAgent] ⚠️ Training plan incomplete: expected', expected, 'days, got', actual);
+        } else {
+          console.log('[SystemAgent] ✓ Training plan complete:', actual, '/', expected, 'days,', Date.now() - startTime, 'ms');
+        }
       }
     }
 

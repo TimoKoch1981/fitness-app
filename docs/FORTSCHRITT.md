@@ -8,6 +8,7 @@
 
 | Version | Datum      | Beschreibung                                       | Status     |
 |---------|------------|-----------------------------------------------------|------------|
+| 13.4    | 2026-04-08 | **B19 Fix: Plan-Speichern Zuverlaessigkeit**        | Erledigt   |
 | 0.1     | 2026-02-16 | Projektstruktur angelegt                            | Erledigt   |
 | 0.2     | 2026-02-16 | Expertenpanel (14 Rollen) definiert                 | Erledigt   |
 | 0.3     | 2026-02-16 | Lovable Prompt-Historie analysiert                  | Erledigt   |
@@ -3247,6 +3248,60 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 **Status:** Konzept fertig, User-Diskussion ausstehend
 
 ---
+
+## v13.4 — B19 Fix: Plan-Speichern Zuverlaessigkeit (2026-04-08)
+
+**Was:** User-Report: "speichere" muss 3x gesagt werden bis es klappt, 4-Tage-Split legt nur Tag 1 an. Grundsaetzlicher Fix des Plan-Speicher-Flows nach Expertenreview (7 Experten, 2 Runden).
+
+**Root Causes identifiziert:**
+1. **JSON-Truncation:** Trainings-Agent schrieb volles JSON als Text in `data:` Feld des ACTION_REQUEST Blocks — bei 4-Tage-Split wurde das Text-Payload >5KB und vom LLM-Stream teilweise abgeschnitten. `actionParser.ts:74-82` hat truncierte Tage still entfernt.
+2. **Agent-Prompt ambiguos:** Keine Anweisung, wann Text vs. strukturiertes Output
+3. **Original-User-Message fehlte beim SystemAgent:** Der Function-Calling-Layer (SystemAgent) bekam nur die Experten-Beschreibung ohne den urspruenglichen User-Wunsch → konnte fehlende Tage nicht rekonstruieren
+4. **Fehlende Idempotenz:** Doppelklicks/Race-Conditions konnten Doppel-Saves ausloesen
+5. **"Speichere nochmal"-Fallback fehlte:** Wenn User "speichere" sagte und der neue LLM-Call keinen ACTION-Block produzierte, war die letzte Action verloren
+
+**Loesung (Strict Structured Output + Kontext-Anreicherung):**
+
+Phase 1 — Strukturelles Prompt-Redesign (`trainingAgent.ts`):
+- ACTION_REQUEST `data:` Feld erwartet jetzt KURZE NATUERLICHSPRACHLICHE Beschreibung (max. 15 Zeilen), KEIN volles JSON
+- Alle Beispiele (4-Tage, Lauf, Yoga, Kombi, add/modify/remove day) auf Klartext umgestellt
+- Text-Payload schrumpft um ~90% → Truncation praktisch unmoeglich
+- Der bestehende SystemAgent Function-Calling-Layer (OpenAI `tool_choice: 'required'`) generiert aus dem Klartext das vollstaendige strukturierte JSON per FC — garantiert schema-valide
+
+Phase 2 — SystemAgent-Kontext-Anreicherung (`systemAgent.ts`):
+- Neuer Parameter `originalUserMessage` in `executeSystemAgent()`
+- Die Original-User-Nachricht wird als Context-Prefix an den FC-Call uebergeben
+- System-Prompt erweitert: explizite Anweisung "days[] MUSS ALLE im Text erwaehnten Tage enthalten — wenn 4 Tage verlangt, MUSS exakt 4 days-Objekte zurueckgeben"
+- Telemetrie: Logging von `days expected vs. actual` + Latenz fuer Diagnose
+
+Phase 3 — Idempotenz + Retry-Fallback (`useActionExecutor.ts` + `useBuddyChat.ts`):
+- `executeAction()` hat jetzt Idempotenz-Check per FNV-1a-Hash (`userId + actionType + data-Hash`), 60s-Window, module-level Map
+- Duplikate werden still geskipped statt gespeichert
+- Neuer `executeActions(actions[])`: sequenzielle Ausfuehrung mit Stop-on-first-failure
+- **Save-Retry-Fallback** in `useBuddyChat.sendMessage()`: wenn User "speichere" / "nochmal speichern" etc. sagt UND eine unausgefuehrte pendingAction existiert → direkt re-emit ohne neuen LLM-Call. Idempotenz-Cache verhindert Doppel-Save bei bereits ausgefuehrten Actions.
+
+Phase 4 — Prompt-Cleanup:
+- Im gleichen Zug wie Phase 1: Beispiele gekuerzt, klarere Regeln
+
+**Geaenderte Dateien:**
+- `src/lib/ai/agents/trainingAgent.ts` — Prompt-Rewrite (save_training_plan, add/modify/remove_training_day Beispiele auf Klartext)
+- `src/lib/ai/agents/systemAgent.ts` — `executeSystemAgent()` akzeptiert `originalUserMessage`, System-Prompt betont Vollstaendigkeit, Telemetrie fuer Plan-Vollstaendigkeit
+- `src/features/buddy/hooks/useActionExecutor.ts` — Idempotenz-Cache, `executeActions()` Array-Support
+- `src/features/buddy/hooks/useBuddyChat.ts` — Save-Retry-Fallback, `originalUserMessage` an `executeSystemAgent()` durchgereicht
+- `docs/TODO.md` — B19, B20, B21 dokumentiert
+- `docs/FORTSCHRITT.md` — dieses Eintrag
+
+**Architektur-Erkenntnis:** Das bestehende 2-Stufen-System (Expert-Agent schreibt Text + SystemAgent macht Function Calling) ist grundsaetzlich richtig, wurde aber durch das Einbetten von JSON in den Text unterlaufen. Durch Umstellung auf Klartext-Description holt der FC-Call seine Struktur dort ab wo er sie sicher generieren kann: in den OpenAI-Tool-Args mit Zod-Schema-Garantie.
+
+**Nicht erledigt (bewusst):**
+- Telemetry-Tabelle `agent_telemetry` in DB — console.log vorerst ausreichend, DB-Migration waere Overhead
+- Strict JSON-Schema per OpenAI Structured Outputs — funktioniert nicht mit `.refine()`/`.optional`-Zod-Schemas, Tool-Calling mit `tool_choice:'required'` liefert gleichen Effekt
+- Neuer Container-Healthcheck fuer Studio (B21) — als P3 dokumentiert, spaeter
+
+**Build:** 0 TS-Fehler, 47s Build-Zeit, 130 PWA Precache Entries
+**Deploy:** fudda.de LIVE, HTTP 200, neuer Bundle-Hash `index-i2ijeUl0.js`
+**Test:** Browser-MCP-Extension war waehrend Live-Test unresponsive — manueller User-Test ausstehend
+**Commit:** siehe git log
 
 ---
 
