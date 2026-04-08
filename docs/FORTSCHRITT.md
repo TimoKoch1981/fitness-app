@@ -8,6 +8,7 @@
 
 | Version | Datum      | Beschreibung                                       | Status     |
 |---------|------------|-----------------------------------------------------|------------|
+| 13.5    | 2026-04-08 | **B20 Fix: Workout-Musik-Player (Persistent Iframe)**| Erledigt   |
 | 13.4    | 2026-04-08 | **B19 Fix: Plan-Speichern Zuverlaessigkeit**        | Erledigt   |
 | 0.1     | 2026-02-16 | Projektstruktur angelegt                            | Erledigt   |
 | 0.2     | 2026-02-16 | Expertenpanel (14 Rollen) definiert                 | Erledigt   |
@@ -3246,6 +3247,70 @@ Sicherheits-Blocker vor Go-Live: Der OpenAI API-Key war ueber VITE_OPENAI_API_KE
 **Dateien:** 1 neu (MUSIK_TIMER_KONZEPT.md), 2 modifiziert (TODO.md, FORTSCHRITT.md)
 **Geschaetzter Aufwand Implementierung:** ~16h (M1-M3 + T1-T5)
 **Status:** Konzept fertig, User-Diskussion ausstehend
+
+---
+
+## v13.5 — B20 Fix: Workout-Musik-Player (Persistent Single Iframe) (2026-04-08)
+
+**Was:** B20 gefixt. User-Report: Musik-Player stoppt unzuverlaessig (gleiches Problem wie immer). Grundsaetzlicher Fix der Player-Architektur nach Expertenreview (7 Experten, 2 Runden).
+
+**Root Causes identifiziert:**
+1. **Iframe wird bei jedem Collapse/Expand neu gemountet** — Player war in `WorkoutMusicPlayer.tsx` lokal montiert, beim Toggle zwischen Mini- und Full-View wurden zwei verschiedene `<iframe>`-Instanzen erzeugt → React mountete die alte ab und erzeugte eine neue → Mobile-Browser-Autoplay-Policy blockierte den Re-Start still
+2. **1×1px-Iframe** im Hintergrund-Mode — iOS Safari throttled/killt Audio in Iframes <10×10px
+3. **Iframe stirbt bei Page-Navigation** — Player war an `ActiveWorkoutPage` gebunden, Wechsel zu Cockpit/Profile zerstoerte ihn
+4. **Spotify-Dead-Code** (600 Zeilen) — `useSpotifyPlayer.ts`, `SpotifyCallback.tsx`, `spotify.d.ts` waren nie funktional (CSP `script-src 'self'` blockiert das `sdk.scdn.co`-SDK-Script, Premium-Account-Pflicht)
+
+**Loesung — Persistent Single Iframe Architektur:**
+
+1. **`MusicPlayerContext` + `MusicPlayerProvider`** (neue Datei `features/workouts/context/MusicPlayerContext.tsx`):
+   - React Context mit `embedUrl`, `activePlaylistId`, `isPlaying`, `play()`, `stop()`
+   - Provider rendert ein **einziges** `GlobalMusicIframe` als Children-Sibling
+   - Logging bei Play/Stop fuer Debug-Telemetrie
+
+2. **`GlobalMusicIframe`** (memoized Komponente innerhalb des Providers):
+   - `React.memo` + stable `key="persistent-music-iframe"` → niemals re-mounted
+   - Position: `fixed top-3 right-3 z-[9999]` als kompakter Status-Pill mit Equalizer-Indikator + Stop-Button
+   - Iframe selbst ist 10x10px (ueber iOS-Audio-Throttle-Schwelle), absolut off-screen positioniert (`left: -9999px`)
+   - Erscheint NUR wenn `embedUrl !== null` — d.h. nach User-Geste → Autoplay-Policy erlaubt
+   - Stop-Button entfernt das Iframe komplett (aktiver Stop)
+
+3. **Provider-Position in `App.tsx`:** Innerhalb von `RestTimerProvider`, ausserhalb von `InlineBuddyChatProvider` und `AppRoutes`. Damit ueberlebt der Player jeden Route-Wechsel, jedes Page-Unmount, jeden Scroll.
+
+4. **`WorkoutMusicPlayer.tsx` Umbau:**
+   - Komponente ist jetzt ein reines **Control-Panel** ohne eigenes Iframe
+   - Liest globalen State via `useMusicPlayer()`-Hook
+   - Lokaler State nur fuer `isExpanded` (UI-only) und `customUrl` (Input)
+   - Beim Klick auf Playlist ruft `play(embedUrl, playlistId)` aus dem Context
+   - Beim Klick auf Stopp ruft `stop()` aus dem Context
+
+5. **Spotify Dead Code Cleanup:**
+   - `src/features/workouts/hooks/useSpotifyPlayer.ts` geloescht (-433 Zeilen)
+   - `src/features/workouts/components/SpotifyCallback.tsx` geloescht (-73 Zeilen)
+   - `src/types/spotify.d.ts` geloescht (-94 Zeilen)
+   - Spotify-Route in `App.tsx` entfernt (`/spotify/callback`)
+   - Total: -600 Zeilen toter Code
+
+**Geaenderte Dateien:**
+- `src/features/workouts/context/MusicPlayerContext.tsx` (NEU, ~150 Zeilen)
+- `src/features/workouts/components/WorkoutMusicPlayer.tsx` (umgebaut, kein eigenes Iframe mehr)
+- `src/app/App.tsx` (Provider integriert, Spotify-Route + Lazy-Import entfernt)
+- `src/features/workouts/hooks/useSpotifyPlayer.ts` (GELOESCHT)
+- `src/features/workouts/components/SpotifyCallback.tsx` (GELOESCHT)
+- `src/types/spotify.d.ts` (GELOESCHT)
+- `docs/TODO.md` (B20 als gefixt markiert)
+- `docs/FORTSCHRITT.md` (dieser Eintrag)
+
+**Architektur-Erkenntnis:** Der bisherige Ansatz war strukturell falsch — ein Audio-Player darf NIEMALS an eine Komponente gebunden sein, die unmounted wird. Die Loesung ist Standard-Pattern: globaler State + globales DOM-Element, Komponenten nutzen es nur als Controller. Genau wie Notification-Provider, Toast-Provider, Timer-Provider — die gibt es alle bereits in der App.
+
+**Was nicht erledigt wurde (bewusst):**
+- BPM-Metadata fuer Playlists (Sportwissenschaft-Wunsch) → P3-TODO fuer spaeter
+- KI-empfohlene Playlists basierend auf Tagesziel (KI-Experten-Wunsch) → P3-TODO fuer spaeter
+- Drag-to-Move des Mini-Players (Trainer-Wunsch) → top-right ist sicher genug, unten links waeren die +/− Buttons im Weg
+
+**Build:** 0 TS-Fehler, 57.64s Build-Zeit, 129 PWA Precache Entries
+**Deploy:** fudda.de LIVE, HTTP 200, Bundle `index-Dgo1Qwy1.js`
+**Test:** Console clean (nur Sentry-Warning), neuer Bundle-Hash bestaetigt. Audio-Test braucht manuelle User-Verifikation (Mensch muss hoeren ob die Musik weiterlaeuft beim Page-Wechsel).
+**Commit:** siehe git log
 
 ---
 

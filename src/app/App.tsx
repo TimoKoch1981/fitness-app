@@ -50,7 +50,7 @@ const JoinPage = lazy(() => import('../features/invite/components/JoinPage').the
 // Lazy-loaded Workout Session
 const ActiveWorkoutProvider = lazy(() => import('../features/workouts/context/ActiveWorkoutContext').then(m => ({ default: m.ActiveWorkoutProvider })));
 const ActiveWorkoutPage = lazy(() => import('../features/workouts/components/ActiveWorkoutPage').then(m => ({ default: m.ActiveWorkoutPage })));
-const SpotifyCallback = lazy(() => import('../features/workouts/components/SpotifyCallback').then(m => ({ default: m.SpotifyCallback })));
+import { MusicPlayerProvider } from '../features/workouts/context/MusicPlayerContext';
 
 // Lazy-loaded Admin Pages
 const AdminRoute = lazy(() => import('../features/admin/components/AdminRoute').then(m => ({ default: m.AdminRoute })));
@@ -249,9 +249,6 @@ function AppRoutes() {
           }
         />
 
-        {/* Spotify OAuth Callback (popup window, no nav) */}
-        <Route path="/spotify/callback" element={<SpotifyCallback />} />
-
         {/* Redirects for old URLs */}
         <Route path="/dashboard" element={<Navigate to="/cockpit" replace />} />
         <Route path="/meals" element={<Navigate to="/nutrition" replace />} />
@@ -279,14 +276,16 @@ export default function App() {
                   <NotificationSchedulerProvider>
                     <CelebrationProvider>
                       <RestTimerProvider>
-                        <InlineBuddyChatProvider>
-                          <AppRoutes />
-                          <FloatingBuddyAvatar />
-                          <Suspense fallback={null}>
-                            <InlineBuddyChat />
-                          </Suspense>
-                          <GlobalTimerOverlay />
-                        </InlineBuddyChatProvider>
+                        <MusicPlayerProvider>
+                          <InlineBuddyChatProvider>
+                            <AppRoutes />
+                            <FloatingBuddyAvatar />
+                            <Suspense fallback={null}>
+                              <InlineBuddyChat />
+                            </Suspense>
+                            <GlobalTimerOverlay />
+                          </InlineBuddyChatProvider>
+                        </MusicPlayerProvider>
                       </RestTimerProvider>
                     </CelebrationProvider>
                   </NotificationSchedulerProvider>

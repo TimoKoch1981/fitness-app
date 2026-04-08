@@ -1,14 +1,11 @@
 /**
- * WorkoutMusicPlayer — Floating music player for workout sessions.
+ * WorkoutMusicPlayer — Control-UI fuer den globalen Musik-Player.
  *
- * Uses simple YouTube iframe embeds (NOT the IFrame Player API).
- * This works with Content-Security-Policy because:
- * - frame-src allows youtube.com / youtube-nocookie.com ✅
- * - No external script needed (IFrame API was blocked by script-src 'self') ✅
+ * Dieses Component ist NUR noch das Control-Panel (Playlist-Buttons + Custom-URL).
+ * Das eigentliche YouTube-Iframe lebt global im MusicPlayerProvider (App-Root)
+ * und wird NIE re-mounted — das loest B20 (Musik stoppt beim Collapse/Navigate).
  *
- * Architecture:
- * - Expanded: Shows playlist buttons + visible YouTube player (small embed)
- * - Collapsed: Shows mini button, iframe stays in DOM (audio keeps playing)
+ * @see features/workouts/context/MusicPlayerContext.tsx
  */
 
 import { useState } from 'react';
@@ -17,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { cn } from '../../../lib/utils';
+import { useMusicPlayer } from '../context/MusicPlayerContext';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -58,7 +56,6 @@ function extractPlaylistId(url: string): string | null {
  * Uses youtube-nocookie.com for privacy (matching our CSP frame-src).
  */
 function buildEmbedUrl(source: string): string | null {
-  // Raw playlist ID (no URL chars)
   const isRawPlaylistId = !source.includes('/') && !source.includes('.');
 
   if (isRawPlaylistId) {
@@ -112,21 +109,19 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
   const { t, language } = useTranslation();
   const isDE = language === 'de';
 
-  // State
+  // Global music state from context — NOT local!
+  const { embedUrl, activePlaylistId, isPlaying, play, stop } = useMusicPlayer();
+
+  // Expanded state stays local (UI-only, per-component)
   const [isExpanded, setIsExpanded] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
-  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
-  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
 
   // -------------------------------------------------------------------
   // Play handlers
   // -------------------------------------------------------------------
   const handlePlayPlaylist = (playlistId: string) => {
     const url = buildEmbedUrl(playlistId);
-    if (url) {
-      setEmbedUrl(url);
-      setActivePlaylistId(playlistId);
-    }
+    if (url) play(url, playlistId);
   };
 
   const handlePlayCustom = () => {
@@ -135,37 +130,16 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
 
     const url = buildEmbedUrl(trimmed);
     if (url) {
-      setEmbedUrl(url);
-      setActivePlaylistId(null);
+      play(url, null);
       setCustomUrl('');
     }
   };
-
-  const handleStop = () => {
-    setEmbedUrl(null);
-    setActivePlaylistId(null);
-  };
-
-  const isPlaying = embedUrl != null;
 
   // -------------------------------------------------------------------
   // RENDER
   // -------------------------------------------------------------------
   return (
     <>
-      {/* ── YouTube iframe — always in DOM when playing ──────────── */}
-      {/* Hidden when collapsed (tiny), visible when expanded        */}
-      {embedUrl && !isExpanded && (
-        <iframe
-          src={embedUrl}
-          className="fixed"
-          style={{ width: 1, height: 1, top: 0, left: 0, opacity: 0.01, pointerEvents: 'none' }}
-          allow="autoplay; encrypted-media"
-          title="Workout Music"
-          aria-hidden="true"
-        />
-      )}
-
       {/* ── Collapsed mini-bar ──────────────────────────────────── */}
       {!isExpanded ? (
         <button
@@ -251,63 +225,59 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
               disabled={!customUrl.trim()}
               className="px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              ▶
+              {'\u25B6'}
             </button>
           </div>
         </div>
 
-        {/* Embedded YouTube player (visible when playing) */}
+        {/* Status + Controls when playing */}
         {embedUrl && (
           <div className="px-4 pb-3 space-y-2">
-            {/* Player iframe — visible and functional */}
-            <div className="rounded-lg overflow-hidden bg-black aspect-video">
-              <iframe
-                src={embedUrl}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title="Workout Music Player"
-              />
-            </div>
-
-            {/* Controls below player */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-3 py-2 bg-gray-700/50 rounded-lg">
+              <div className="w-8 h-8 bg-teal-500/20 rounded-full flex items-center justify-center">
+                <Music className="w-4 h-4 text-teal-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-white truncate">
+                  {activePlaylistId
+                    ? PLAYLIST_LABELS[PLAYLISTS.find(p => p.id === activePlaylistId)?.label ?? '']?.[language] ?? 'Playlist'
+                    : (isDE ? 'Eigene URL' : 'Custom URL')}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <EqualizerBars />
+                  <span className="text-[10px] text-gray-400">
+                    {t.workout.musicPlaying}
+                  </span>
+                </div>
+              </div>
               <button
-                onClick={handleStop}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs"
+                onClick={stop}
+                className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs"
+                aria-label={isDE ? 'Stoppen' : 'Stop'}
               >
                 <Square className="h-3 w-3" />
                 {isDE ? 'Stopp' : 'Stop'}
               </button>
-
-              {isPlaying && (
-                <div className="flex items-center gap-2 flex-1">
-                  <EqualizerBars />
-                  <span className="text-xs text-gray-400">
-                    {t.workout.musicPlaying}
-                  </span>
-                </div>
-              )}
-
-              {/* Open in YouTube link */}
-              {activePlaylistId && (
-                <a
-                  href={`https://www.youtube.com/playlist?list=${activePlaylistId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  YouTube
-                </a>
-              )}
             </div>
 
+            {/* Open in YouTube link */}
+            {activePlaylistId && (
+              <a
+                href={`https://www.youtube.com/playlist?list=${activePlaylistId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {isDE ? 'In YouTube oeffnen' : 'Open in YouTube'}
+              </a>
+            )}
+
             {/* Hint */}
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-gray-500 text-center">
               {isDE
-                ? '💡 Zuklappen = Musik spielt weiter im Hintergrund'
-                : '💡 Collapse = Music keeps playing in background'}
+                ? '\uD83D\uDCA1 Musik laeuft weiter beim Zuklappen, Seiten-Wechsel und Scroll'
+                : '\uD83D\uDCA1 Music keeps playing on collapse, navigation and scroll'}
             </p>
           </div>
         )}
@@ -317,7 +287,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
           <div className="px-4 pb-3">
             <p className="text-[10px] text-gray-500 text-center">
               {isDE
-                ? 'Wähle eine Playlist oder füge einen YouTube-Link ein'
+                ? 'Waehle eine Playlist oder fuege einen YouTube-Link ein'
                 : 'Choose a playlist or paste a YouTube link'}
             </p>
           </div>
