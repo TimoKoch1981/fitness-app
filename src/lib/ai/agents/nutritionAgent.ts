@@ -357,13 +357,18 @@ User: "Kannst du mir die Rezepte anlegen?"
 Assistant: "Ich lege die Rezepte für dich an! Hier sind die Details: 1. Hähnchen Bowl..."
 → Das ist FALSCH! Kein ACTION_REQUEST Block = Rezept wird NICHT gespeichert!
 
-### ✅ SO RICHTIG:
+### ✅ SO RICHTIG (Klartext-Beschreibung, KEIN JSON!):
 User: "Leg mir das Rezept an"
 Assistant: "Ich speichere das Rezept für dich!
 [ACTION_REQUEST]
 type: save_recipe
-data: {"title":"Haehnchen-Reis Bowl","description":"Proteinreiche Bowl","servings":2,"prep_time_min":15,"cook_time_min":25,"calories_per_serving":679,"protein_per_serving":58,"carbs_per_serving":89,"fat_per_serving":10,"ingredients":[{"name":"Haehnchenbrust","amount":400,"unit":"g"},{"name":"Basmatireis","amount":200,"unit":"g"}],"steps":[{"text":"Reis kochen"},{"text":"Haehnchen braten"}],"tags":["High-Protein","Meal-Prep"]}
+data: Titel: Haehnchen-Reis Bowl. Beschreibung: Proteinreiche Bowl. Portionen: 2. Vorbereitung: 15 Min, Kochzeit: 25 Min. Pro Portion: 679 kcal, 58g Protein, 89g Kohlenhydrate, 10g Fett.
+Zutaten: 400g Haehnchenbrust, 200g Basmatireis, 2 EL Sojasauce, 1 Zwiebel, 200g Brokkoli.
+Schritte: 1) Reis nach Packungsanleitung kochen. 2) Haehnchen in Wuerfel schneiden und scharf anbraten. 3) Brokkoli dazugeben, Sojasauce dazu, 5 Min koecheln.
+Tags: High-Protein, Meal-Prep.
 [/ACTION_REQUEST]"
+
+### WICHTIG: KEIN volles JSON schreiben! Der System-Agent wandelt den Klartext per Function Calling in strukturiertes JSON um. Du schreibst NUR den Rezept-Inhalt in natuerlicher Sprache.
 
 ### REGELN für save_recipe:
 - JEDES Rezept braucht einen EIGENEN ACTION_REQUEST Block
@@ -540,13 +545,18 @@ User: "Can you save those recipes for me?"
 Assistant: "I'll create the recipes! Here are the details: 1. Chicken Bowl..."
 → WRONG! No ACTION_REQUEST block = recipe NOT saved!
 
-### ✅ CORRECT:
+### ✅ CORRECT (plain text description, NOT JSON!):
 User: "Save that recipe for me"
 Assistant: "I'll save the recipe for you!
 [ACTION_REQUEST]
 type: save_recipe
-data: {"title":"Chicken Rice Bowl","description":"High-protein bowl","servings":2,"prep_time_min":15,"cook_time_min":25,"calories_per_serving":679,"protein_per_serving":58,"carbs_per_serving":89,"fat_per_serving":10,"ingredients":[{"name":"Chicken breast","amount":400,"unit":"g"},{"name":"Basmati rice","amount":200,"unit":"g"}],"steps":[{"text":"Cook rice"},{"text":"Pan-fry chicken"}],"tags":["High-Protein","Meal-Prep"]}
+data: Title: Chicken Rice Bowl. Description: High-protein bowl. Servings: 2. Prep: 15 min, Cook: 25 min. Per serving: 679 kcal, 58g protein, 89g carbs, 10g fat.
+Ingredients: 400g chicken breast, 200g basmati rice, 2 tbsp soy sauce, 1 onion, 200g broccoli.
+Steps: 1) Cook rice according to package. 2) Dice chicken and pan-fry. 3) Add broccoli and soy sauce, simmer 5 min.
+Tags: High-Protein, Meal-Prep.
 [/ACTION_REQUEST]"
+
+### IMPORTANT: DO NOT write full JSON! The System Agent converts your plain text to structured JSON via Function Calling. You write the recipe content in natural language only.
 
 ### RULES for save_recipe:
 - EACH recipe needs its OWN ACTION_REQUEST block

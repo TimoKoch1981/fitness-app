@@ -105,6 +105,15 @@ export function stripActionRequest(text: string): string {
  * Kept minimal (~500 tokens) since this is a utility call, not a conversation.
  */
 function buildSystemPrompt(language: string): string {
+  // CRITICAL: Inject current date explicitly — gpt-4o-mini hallucinates its training
+  // cutoff date (2023-10-04) when asked for "today" without an explicit anchor.
+  // This caused meals to be saved with date=2023-10-04 → invisible in "today" view.
+  const now = new Date();
+  const todayISO = now.toISOString().split('T')[0];           // YYYY-MM-DD
+  const currentTime = now.toTimeString().slice(0, 5);         // HH:MM
+  const dayOfWeekDE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][now.getDay()];
+  const dayOfWeekEN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+
   if (language === 'de') {
     return [
       '## System-Steuerungs-Agent',
@@ -112,15 +121,24 @@ function buildSystemPrompt(language: string): string {
       'Du bist der System-Agent der FitBuddy-App. Deine einzige Aufgabe:',
       'Wandle die Beschreibung des Experten-Agents in einen praezisen, VOLLSTAENDIGEN Function Call um.',
       '',
+      '### ⚠️ AKTUELLES DATUM UND UHRZEIT (PFLICHT-ANKER — NICHT ERFINDEN!):',
+      `- HEUTE ist: ${todayISO} (${dayOfWeekDE})`,
+      `- Aktuelle Uhrzeit: ${currentTime}`,
+      '- Wenn im date-Feld "heute", "jetzt", "morgens", "mittags", "abends" oder gar nichts steht:',
+      `  → VERWENDE IMMER ${todayISO} als date!`,
+      '- NIEMALS ein anderes Datum (z.B. 2023-10-04) verwenden, auch wenn es "ueblich" erscheint!',
+      '- Bei "gestern" = HEUTE minus 1 Tag, bei "vorgestern" = HEUTE minus 2 Tage',
+      '',
       '### Regeln:',
       '1. Rufe GENAU EINE Funktion pro Aktion auf (die zum Typ passt)',
       '2. Extrahiere ALLE genannten Werte aus der Beschreibung und dem Original-Kontext',
       '3. Bei save_training_plan MIT mehreren Tagen: Das Tool-Argument days[] MUSS ALLE im Text erwaehnten Tage enthalten. Wenn der Text "4 Tage" sagt, MUSST du 4 Tages-Objekte zurueckgeben. Niemals weniger!',
       '4. Wenn die Beschreibung zu kurz ist oder Luecken hat: Ergaenze sinnvolle Defaults basierend auf dem Original-Kontext (Ziele, Erfahrung, Geraete).',
-      '5. Verwende sinnvolle Defaults fuer fehlende Felder:',
-      '   - date: heutiges Datum (YYYY-MM-DD)',
-      '   - time: aktuelle Uhrzeit (HH:MM)',
+      '5. Defaults fuer fehlende Felder:',
+      `   - date: ${todayISO} (siehe oben)`,
+      `   - time: ${currentTime}`,
       '   - source: "ai"',
+      '   - Bei log_meal name: beschreibender Name aus dem Text (z.B. "500g Skyr mit Mango und Banane"), NICHT generisch "Snack"',
       '6. Runde Naehrwerte auf ganze Zahlen',
       '7. Bei mehreren Aktionen in der Anfrage: rufe mehrere Funktionen auf',
       '',
@@ -143,15 +161,24 @@ function buildSystemPrompt(language: string): string {
     'You are the system agent for the FitBuddy app. Your only task:',
     'Convert the expert agent description into a precise, COMPLETE function call.',
     '',
+    '### ⚠️ CURRENT DATE AND TIME (MANDATORY ANCHOR — DO NOT INVENT!):',
+    `- TODAY is: ${todayISO} (${dayOfWeekEN})`,
+    `- Current time: ${currentTime}`,
+    '- If the date field contains "today", "now", "morning", "noon", "evening" or is empty:',
+    `  → ALWAYS use ${todayISO} as date!`,
+    '- NEVER use a different date (e.g. 2023-10-04), even if it seems "usual"!',
+    '- "yesterday" = TODAY minus 1 day, "the day before yesterday" = TODAY minus 2 days',
+    '',
     '### Rules:',
     '1. Call EXACTLY ONE function per action (matching the type)',
     '2. Extract ALL mentioned values from the description and original context',
     '3. For save_training_plan with multiple days: the tool argument days[] MUST contain ALL days mentioned. If the text says "4 days", you MUST return 4 day objects. Never fewer!',
-    '4. If the description is too short: fill sensible defaults based on original context (goals, experience, equipment).',
-    '5. Use sensible defaults for missing fields:',
-    '   - date: today (YYYY-MM-DD)',
-    '   - time: current time (HH:MM)',
+    '4. If the description is too short: fill sensible defaults based on original context.',
+    '5. Defaults for missing fields:',
+    `   - date: ${todayISO} (see above)`,
+    `   - time: ${currentTime}`,
     '   - source: "ai"',
+    '   - For log_meal name: descriptive name from the text (e.g. "500g yogurt with mango and banana"), NOT generic "Snack"',
     '6. Round nutritional values to whole numbers',
     '7. For multiple actions in the request: call multiple functions',
     '',
