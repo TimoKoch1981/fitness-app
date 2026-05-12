@@ -50,7 +50,7 @@ const JoinPage = lazy(() => import('../features/invite/components/JoinPage').the
 // Lazy-loaded Workout Session
 const ActiveWorkoutProvider = lazy(() => import('../features/workouts/context/ActiveWorkoutContext').then(m => ({ default: m.ActiveWorkoutProvider })));
 const ActiveWorkoutPage = lazy(() => import('../features/workouts/components/ActiveWorkoutPage').then(m => ({ default: m.ActiveWorkoutPage })));
-import { MusicPlayerProvider } from '../features/workouts/context/MusicPlayerContext';
+// MusicPlayerProvider removed in v14.7 (P1-5): music is now external deep-links only.
 
 // Lazy-loaded Admin Pages
 const AdminRoute = lazy(() => import('../features/admin/components/AdminRoute').then(m => ({ default: m.AdminRoute })));
@@ -276,16 +276,14 @@ export default function App() {
                   <NotificationSchedulerProvider>
                     <CelebrationProvider>
                       <RestTimerProvider>
-                        <MusicPlayerProvider>
-                          <InlineBuddyChatProvider>
-                            <AppRoutes />
-                            <FloatingBuddyAvatar />
-                            <Suspense fallback={null}>
-                              <InlineBuddyChat />
-                            </Suspense>
-                            <GlobalTimerOverlay />
-                          </InlineBuddyChatProvider>
-                        </MusicPlayerProvider>
+                        <InlineBuddyChatProvider>
+                          <AppRoutes />
+                          <FloatingBuddyAvatar />
+                          <Suspense fallback={null}>
+                            <InlineBuddyChat />
+                          </Suspense>
+                          <GlobalTimerOverlay />
+                        </InlineBuddyChatProvider>
                       </RestTimerProvider>
                     </CelebrationProvider>
                   </NotificationSchedulerProvider>
