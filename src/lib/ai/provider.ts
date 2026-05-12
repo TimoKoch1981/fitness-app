@@ -19,6 +19,7 @@ import type { ToolDefinition } from './tools/actionTools';
 import { OllamaProvider } from './ollama';
 import { OpenAIProvider } from './openai';
 import { SupabaseAIProvider } from './supabaseProxy';
+import { AnthropicProxyProvider } from './anthropicProxy';
 
 /** Options for chat/chatStream calls — enables Function Calling */
 export interface ChatOptions {
@@ -146,4 +147,62 @@ export function getAIProvider(config?: Partial<AIProviderConfig>): AIProvider {
 export function isUsingProxy(): boolean {
   const provider = (import.meta.env.VITE_AI_PROVIDER as string) || '';
   return provider === 'supabase' || (!provider && isCloudEnvironment());
+}
+
+// ── Per-call-type provider selection ───────────────────────────────────
+//
+// Different call types have different reasoning requirements:
+//   - Expert agents (Nutrition/Training/...): chat, streaming, cheap → gpt-4o-mini
+//   - System Agent (Function Calling):       structured tool-call, costs little → can afford Sonnet
+//   - Vision (meal/body photo):              multimodal → gpt-4o-mini (Claude vision is fine too but $$)
+//
+// Driven by env vars so we can flip per call-type without redeploy:
+//   VITE_AI_SYSTEM_PROVIDER       'openai' | 'anthropic'  (default: 'openai')
+//   VITE_ANTHROPIC_MODEL_SYSTEM   default: 'claude-sonnet-4-5'
+//   VITE_OPENAI_MODEL_SYSTEM      default: VITE_OPENAI_MODEL or 'gpt-4o-mini'
+
+let systemAgentProvider: AIProvider | null = null;
+let systemAgentProviderKey: string = ''; // cache invalidation key
+
+/**
+ * Get the AI provider to use for the System Agent (Function Calling layer).
+ *
+ * Falls back gracefully:
+ *   1. If VITE_AI_SYSTEM_PROVIDER='anthropic' → AnthropicProxyProvider via ai-proxy
+ *   2. Otherwise → same provider as expert agents (typically Supabase/OpenAI)
+ *
+ * If the Anthropic call fails at runtime (e.g. server key missing), the
+ * caller (executeSystemAgent) catches AnthropicUnavailableError and retries
+ * with the expert-agent provider.
+ */
+export function getSystemAgentProvider(): AIProvider {
+  const requested = (import.meta.env.VITE_AI_SYSTEM_PROVIDER as string) || '';
+  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+  const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+  const claudeModel = (import.meta.env.VITE_ANTHROPIC_MODEL_SYSTEM as string) || 'claude-sonnet-4-5';
+
+  // Cache key includes the requested provider AND model so changes invalidate
+  const key = `${requested}|${claudeModel}|${supabaseUrl}`;
+  if (systemAgentProvider && systemAgentProviderKey === key) {
+    return systemAgentProvider;
+  }
+
+  if (requested === 'anthropic' && supabaseUrl && anonKey) {
+    systemAgentProvider = new AnthropicProxyProvider(supabaseUrl, anonKey, claudeModel);
+    systemAgentProviderKey = key;
+    return systemAgentProvider;
+  }
+
+  // Default: same as expert agents (OpenAI via Supabase Proxy in production)
+  systemAgentProvider = getAIProvider();
+  systemAgentProviderKey = key;
+  return systemAgentProvider;
+}
+
+/**
+ * True when a separate Anthropic provider is configured for the System Agent.
+ * The caller uses this to decide whether to set up fallback logic.
+ */
+export function systemAgentUsesAnthropic(): boolean {
+  return (import.meta.env.VITE_AI_SYSTEM_PROVIDER as string) === 'anthropic';
 }

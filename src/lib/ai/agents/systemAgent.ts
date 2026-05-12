@@ -20,10 +20,13 @@
  */
 
 import type { AIProvider, ChatOptions } from '../provider';
+import { getSystemAgentProvider, systemAgentUsesAnthropic } from '../provider';
+import { AnthropicUnavailableError } from '../anthropicProxy';
 import type { ChatMessage } from '../types';
 import type { ActionType, ParsedAction } from '../actions/types';
 import { getActionTools, parseToolCalls } from '../tools/actionTools';
 import { validateAction } from '../actions/schemas';
+import { logActionEvent } from '../../telemetry/actionLog';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -209,40 +212,69 @@ function buildSystemPrompt(language: string): string {
  */
 export async function executeSystemAgent(
   actionRequests: ActionRequest[],
-  provider: AIProvider,
+  fallbackProvider: AIProvider,
   language: string = 'de',
   originalUserMessage?: string,
 ): Promise<SystemAgentResult> {
   const startTime = Date.now();
+
+  // Build messages once — used by both primary and fallback provider attempts
+  const systemPrompt = buildSystemPrompt(language);
+  const contextPrefix = originalUserMessage
+    ? (language === 'de'
+        ? `Original-Nachricht des Nutzers: "${originalUserMessage}"\n\n`
+        : `Original user message: "${originalUserMessage}"\n\n`)
+    : '';
+  const userContent = contextPrefix + actionRequests.map(req => {
+    return 'Aktion: ' + req.type + '\nBeschreibung: ' + req.description;
+  }).join('\n---\n');
+
+  const messages: ChatMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userContent },
+  ];
+
+  const options: ChatOptions = {
+    tools: getActionTools(),
+    tool_choice: 'required',
+  };
+
+  // ── Provider selection: Anthropic-first if configured, with OpenAI fallback ──
+  const primaryProvider = getSystemAgentProvider();
+  const useAnthropic = systemAgentUsesAnthropic();
+
   try {
-    // Build messages for the System Agent
-    const systemPrompt = buildSystemPrompt(language);
+    let response;
+    let activeProviderLabel = primaryProvider.getName();
+    try {
+      response = await primaryProvider.chat(messages, undefined, options);
+    } catch (primaryErr) {
+      // Anthropic-specific: fall back to OpenAI silently if the proxy says so
+      if (useAnthropic && primaryErr instanceof AnthropicUnavailableError) {
+        console.warn('[SystemAgent] Anthropic unavailable, falling back to OpenAI:', primaryErr.message);
+        void logActionEvent({
+          actionType: actionRequests[0]?.type ?? 'unknown',
+          phase: 'validate',
+          status: 'failed',
+          errorCode: 'provider_error',
+          errorDetail: `Anthropic fallback: ${primaryErr.message}`,
+          metadata: { primary_provider: 'anthropic', http_status: primaryErr.httpStatus },
+        });
+        response = await fallbackProvider.chat(messages, undefined, options);
+        activeProviderLabel = `${fallbackProvider.getName()} (anthropic fallback)`;
+      } else {
+        throw primaryErr;
+      }
+    }
 
-    // Combine all action requests into one user message
-    // Include original user message as context so FC has enough info to generate complete structured output
-    const contextPrefix = originalUserMessage
-      ? (language === 'de'
-          ? `Original-Nachricht des Nutzers: "${originalUserMessage}"\n\n`
-          : `Original user message: "${originalUserMessage}"\n\n`)
-      : '';
-
-    const userContent = contextPrefix + actionRequests.map(req => {
-      return 'Aktion: ' + req.type + '\nBeschreibung: ' + req.description;
-    }).join('\n---\n');
-
-    const messages: ChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userContent },
-    ];
-
-    // Function Calling options: all 18 action tools, force a call
-    const options: ChatOptions = {
-      tools: getActionTools(),
-      tool_choice: 'required',
-    };
-
-    // Non-streaming call (System Agent is not user-facing)
-    const response = await provider.chat(messages, undefined, options);
+    // Telemetry: which provider answered (success path)
+    void logActionEvent({
+      actionType: actionRequests[0]?.type ?? 'unknown',
+      phase: 'validate',
+      status: 'attempted',
+      latencyMs: Date.now() - startTime,
+      metadata: { provider: activeProviderLabel },
+    });
 
     // Check for tool_calls in response
     if (!response.tool_calls?.length) {

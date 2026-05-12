@@ -22,10 +22,12 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Expose-Headers': 'X-Token-Count, Retry-After',
+  'Access-Control-Expose-Headers': 'X-Token-Count, Retry-After, X-Provider',
 };
 
 const OPENAI_BASE_URL = 'https://api.openai.com/v1';
+const ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1';
+const ANTHROPIC_VERSION = '2023-06-01';
 
 // ── Rate Limiting ─────────────────────────────────────────────────────
 const RATE_LIMIT_MAX_REQUESTS = 60;
@@ -150,15 +152,6 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // ── Get OpenAI key from server secrets ──────────────────────────────
-  const openaiKey = Deno.env.get('OPENAI_API_KEY');
-  if (!openaiKey) {
-    return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured on server' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
     const body = await req.json();
     const {
@@ -172,11 +165,52 @@ Deno.serve(async (req: Request) => {
       stream_options,
       tools,
       tool_choice,
+      provider = 'openai', // NEW: 'openai' | 'anthropic'
     } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'messages array is required' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ── Branch: Anthropic ──────────────────────────────────────────────
+    // Anthropic only supports non-streaming for our use case (SystemAgent).
+    // If streaming is requested with Anthropic, fall back to OpenAI silently.
+    if (provider === 'anthropic' && !stream) {
+      const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+      if (!anthropicKey) {
+        // Key not configured → caller should fall back to OpenAI client-side
+        return new Response(
+          JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured on server', fallback: 'openai' }),
+          {
+            status: 503,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+              'X-Provider': 'anthropic-missing',
+            },
+          },
+        );
+      }
+      return await handleAnthropicRequest({
+        anthropicKey,
+        userId,
+        model,
+        messages,
+        max_tokens,
+        temperature,
+        tools,
+        tool_choice,
+      });
+    }
+
+    // ── Get OpenAI key (default path) ─────────────────────────────────
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiKey) {
+      return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured on server' }), {
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -256,6 +290,7 @@ Deno.serve(async (req: Request) => {
       responseHeaders['X-Token-Count'] = String(usage.total_tokens);
     }
 
+    responseHeaders['X-Provider'] = 'openai';
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: responseHeaders,
@@ -268,3 +303,169 @@ Deno.serve(async (req: Request) => {
     });
   }
 });
+
+// ── Anthropic Handler ────────────────────────────────────────────────────
+//
+// Anthropic's Messages API differs from OpenAI in three places:
+//   1. The system message is a top-level `system` field (not a message role)
+//   2. Tools use `input_schema` (not `parameters` wrapped in a function object)
+//   3. The response has `content[]` blocks with type 'text' | 'tool_use' instead
+//      of `choices[].message.tool_calls`
+//
+// We translate the OpenAI-shaped request to Anthropic-shape, fire the call,
+// then translate the response BACK to OpenAI shape so the frontend's existing
+// sseParser / parseCompletionResponse path keeps working unchanged.
+
+interface AnthropicRequestArgs {
+  anthropicKey: string;
+  userId: string;
+  model: string;
+  messages: Array<{ role: string; content: unknown }>;
+  max_tokens: number;
+  temperature: number;
+  tools?: Array<{ type: string; function: { name: string; description?: string; parameters: unknown } }>;
+  tool_choice?: string | { type: string; function?: { name: string } };
+}
+
+async function handleAnthropicRequest(args: AnthropicRequestArgs): Promise<Response> {
+  const { anthropicKey, userId, model, messages, max_tokens, temperature, tools, tool_choice } = args;
+
+  // ── Split out system message(s) ────────────────────────────────────
+  const systemParts: string[] = [];
+  const userAssistantMessages: Array<{ role: string; content: unknown }> = [];
+  for (const m of messages) {
+    if (m.role === 'system' && typeof m.content === 'string') {
+      systemParts.push(m.content);
+    } else if (m.role === 'user' || m.role === 'assistant') {
+      userAssistantMessages.push(m);
+    }
+  }
+
+  // ── Map OpenAI tools → Anthropic tools ─────────────────────────────
+  const anthropicTools = (tools ?? [])
+    .filter((t) => t.type === 'function')
+    .map((t) => ({
+      name: t.function.name,
+      description: t.function.description ?? '',
+      input_schema: t.function.parameters,
+    }));
+
+  // ── Map OpenAI tool_choice → Anthropic tool_choice ────────────────
+  let anthropicToolChoice: Record<string, unknown> | undefined;
+  if (tool_choice === 'required') {
+    anthropicToolChoice = { type: 'any' };
+  } else if (tool_choice === 'auto') {
+    anthropicToolChoice = { type: 'auto' };
+  } else if (tool_choice === 'none') {
+    anthropicToolChoice = undefined; // no tools usage — Anthropic uses no field for this; just omit tools
+  } else if (typeof tool_choice === 'object' && tool_choice?.type === 'function') {
+    anthropicToolChoice = { type: 'tool', name: tool_choice.function?.name };
+  }
+
+  // ── Build Anthropic request ────────────────────────────────────────
+  const anthropicBody: Record<string, unknown> = {
+    model,
+    messages: userAssistantMessages,
+    max_tokens,
+    temperature,
+  };
+  if (systemParts.length > 0) {
+    anthropicBody.system = systemParts.join('\n\n');
+  }
+  if (anthropicTools.length > 0) {
+    anthropicBody.tools = anthropicTools;
+    if (anthropicToolChoice) anthropicBody.tool_choice = anthropicToolChoice;
+  }
+
+  console.log(`[ai-proxy] Anthropic request | user=${userId} | model=${model} | tools=${anthropicTools.length}`);
+
+  const anthropicResponse = await fetch(`${ANTHROPIC_BASE_URL}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
+      'anthropic-version': ANTHROPIC_VERSION,
+    },
+    body: JSON.stringify(anthropicBody),
+  });
+
+  if (!anthropicResponse.ok) {
+    const errorData = await anthropicResponse.json().catch(() => ({}));
+    const errorMsg = (errorData as { error?: { message?: string } }).error?.message
+      ?? `Anthropic HTTP ${anthropicResponse.status}`;
+    console.warn(`[ai-proxy] Anthropic error: ${errorMsg}`);
+    return new Response(
+      JSON.stringify({ error: errorMsg, fallback: 'openai' }),
+      {
+        status: anthropicResponse.status,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'X-Provider': 'anthropic-error',
+        },
+      },
+    );
+  }
+
+  const anthropicData = await anthropicResponse.json() as {
+    model?: string;
+    content?: Array<{ type: string; text?: string; id?: string; name?: string; input?: unknown }>;
+    stop_reason?: string;
+    usage?: { input_tokens?: number; output_tokens?: number };
+  };
+
+  // ── Map Anthropic response → OpenAI shape ─────────────────────────
+  const textBlocks = (anthropicData.content ?? [])
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text ?? '')
+    .join('');
+
+  const toolUseBlocks = (anthropicData.content ?? []).filter((b) => b.type === 'tool_use');
+  const tool_calls = toolUseBlocks.length > 0
+    ? toolUseBlocks.map((b) => ({
+        id: b.id ?? '',
+        type: 'function' as const,
+        function: {
+          name: b.name ?? '',
+          arguments: JSON.stringify(b.input ?? {}),
+        },
+      }))
+    : undefined;
+
+  const promptTokens = anthropicData.usage?.input_tokens ?? 0;
+  const completionTokens = anthropicData.usage?.output_tokens ?? 0;
+  const totalTokens = promptTokens + completionTokens;
+
+  console.log(
+    `[ai-proxy] Anthropic usage | user=${userId} | model=${anthropicData.model ?? model} | ` +
+    `prompt=${promptTokens} | completion=${completionTokens} | total=${totalTokens}`
+  );
+
+  const openaiShapedResponse = {
+    model: anthropicData.model ?? model,
+    choices: [{
+      index: 0,
+      message: {
+        role: 'assistant' as const,
+        content: textBlocks,
+        ...(tool_calls ? { tool_calls } : {}),
+      },
+      finish_reason: anthropicData.stop_reason === 'tool_use' ? 'tool_calls' : 'stop',
+    }],
+    usage: {
+      prompt_tokens: promptTokens,
+      completion_tokens: completionTokens,
+      total_tokens: totalTokens,
+    },
+  };
+
+  return new Response(JSON.stringify(openaiShapedResponse), {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+      'X-Provider': 'anthropic',
+      'X-Token-Count': String(totalTokens),
+    },
+  });
+}
