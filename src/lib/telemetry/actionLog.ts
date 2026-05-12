@@ -135,3 +135,78 @@ export function startActionTimer(
     });
   };
 }
+
+// ── withTelemetry — wraps a mutation fn with attempted/success/failed events ──
+//
+// Use for direct UI-Mutations (AddSubstanceDialog, AddMealDialog, …) so the
+// telemetry sees ALL save attempts, not just those triggered via the agent
+// pipeline. Without this, the dashboard would be blind to UI-form bugs —
+// which is exactly the v14.8 use case (user clicks "Substanz anlegen" → crash
+// before server). The wrapper preserves the original fn signature and
+// rethrows on failure, so callers and react-query semantics are unchanged.
+
+export type TelemetrySource = 'ui' | 'agent' | 'background';
+
+function classifyError(err: unknown): { code: ErrorCode; detail: string } {
+  const msg = err instanceof Error
+    ? err.message
+    : (typeof err === 'object' && err !== null && 'message' in err)
+      ? String((err as Record<string, unknown>).message)
+      : (typeof err === 'object' && err !== null)
+        ? JSON.stringify(err)
+        : String(err);
+  if (/not\s*authenticated|jwt|expired|session/i.test(msg)) {
+    return { code: 'auth_error', detail: msg };
+  }
+  if (/rls|row-level|policy|denied|permission/i.test(msg)) {
+    return { code: 'rls_error', detail: msg };
+  }
+  return { code: 'mutation_error', detail: msg };
+}
+
+/**
+ * Wrap an async mutation function with attempted/success/failed telemetry.
+ * The original behaviour is preserved 1:1; errors are rethrown unchanged.
+ *
+ * @param actionType ActionType the mutation corresponds to (e.g. 'add_substance')
+ * @param source     'ui' for direct dialogs, 'agent' for agent-driven, 'background' for housekeeping
+ * @param fn         the original mutationFn
+ */
+export function withTelemetry<TArgs, TResult>(
+  actionType: ActionType | string,
+  source: TelemetrySource,
+  fn: (args: TArgs) => Promise<TResult>,
+): (args: TArgs) => Promise<TResult> {
+  return async (args: TArgs): Promise<TResult> => {
+    const t0 = Date.now();
+    void logActionEvent({
+      actionType,
+      phase: 'execute',
+      status: 'attempted',
+      metadata: { source },
+    });
+    try {
+      const result = await fn(args);
+      void logActionEvent({
+        actionType,
+        phase: 'execute',
+        status: 'success',
+        latencyMs: Date.now() - t0,
+        metadata: { source },
+      });
+      return result;
+    } catch (err) {
+      const { code, detail } = classifyError(err);
+      void logActionEvent({
+        actionType,
+        phase: 'execute',
+        status: 'failed',
+        errorCode: code,
+        errorDetail: detail,
+        latencyMs: Date.now() - t0,
+        metadata: { source },
+      });
+      throw err;
+    }
+  };
+}

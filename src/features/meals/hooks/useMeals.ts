@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Meal, MealType, DataSource } from '../../../types/health';
 
 const MEALS_KEY = 'meals';
@@ -85,7 +86,7 @@ export function useAddMeal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddMealInput) => {
+    mutationFn: withTelemetry<AddMealInput, Meal>('log_meal', 'ui', async (input) => {
       let userId = input.user_id;
       if (!userId) {
         const { ensureFreshSession } = await import('../../../lib/refreshSession');
@@ -112,7 +113,7 @@ export function useAddMeal() {
 
       if (error) throw error;
       return data as Meal;
-    },
+    }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [MEALS_KEY, data.date] });
     },

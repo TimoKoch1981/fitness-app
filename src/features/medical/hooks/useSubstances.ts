@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Substance, SubstanceLog, SubstanceCategory, SubstanceAdminType, InjectionSite } from '../../../types/health';
 
 const SUBSTANCES_KEY = 'substances';
@@ -43,7 +44,7 @@ export function useAddSubstance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddSubstanceInput) => {
+    mutationFn: withTelemetry('add_substance', 'ui', async (input: AddSubstanceInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -55,7 +56,7 @@ export function useAddSubstance() {
 
       if (error) throw error;
       return data as Substance;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCES_KEY] });
     },
@@ -141,7 +142,7 @@ export function useLogSubstance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: LogSubstanceInput) => {
+    mutationFn: withTelemetry('log_substance', 'ui', async (input: LogSubstanceInput) => {
       let userId = input.user_id;
       if (!userId) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -164,7 +165,7 @@ export function useLogSubstance() {
 
       if (error) throw error;
       return data as SubstanceLog;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });
     },

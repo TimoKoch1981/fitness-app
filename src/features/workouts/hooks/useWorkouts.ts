@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import { convertLegacyExercises } from './useWorkoutHistory';
 import type { Workout, WorkoutType, ExerciseSet } from '../../../types/health';
 
@@ -63,7 +64,7 @@ export function useAddWorkout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddWorkoutInput) => {
+    mutationFn: withTelemetry<AddWorkoutInput, Workout>('log_workout', 'ui', async (input) => {
       let userId = input.user_id;
       if (!userId) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -98,7 +99,7 @@ export function useAddWorkout() {
 
       if (error) throw error;
       return data as Workout;
-    },
+    }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY, data.date] });
       queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY, 'recent'] });

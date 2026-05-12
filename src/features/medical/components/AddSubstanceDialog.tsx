@@ -70,9 +70,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
 
   const hasPresets = presets.length > 0;
 
-  if (!open) return null;
-
-  // Check if current name has a matching catalog item (for pantry linking)
+  // Check if current name has a matching catalog item (for pantry linking).
+  // IMPORTANT: must run BEFORE the early-return `if (!open)` below, otherwise
+  // React detects a changing hook count when the dialog mounts/unmounts and
+  // throws a render error — which is exactly the v14.8 user-facing crash:
+  // user clicks "Substanz anlegen" → component error → no POST reaches server.
   const hasCatalogMatch = useMemo(() => {
     if (!ingredientCatalog || category !== 'supplement') return false;
     const preset = SUPPLEMENT_PRESETS.find(p => p.name === name);
@@ -84,6 +86,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
         normalizeIngredient(item.name_de).includes(norm)
     );
   }, [ingredientCatalog, name, category]);
+
+  if (!open) return null;
 
   // Apply a preset to the form
   const applyPreset = (preset: SubstancePreset) => {
@@ -208,8 +212,17 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
       setShowPresets(true);
       setAddToPantry(false);
       onClose();
-    } catch {
-      setError(t.common.saveError);
+    } catch (err) {
+      // Surface the actual error so users (and we, via telemetry) can act on it.
+      // Telemetry already logged the error_code/detail via withTelemetry — but the
+      // user sees nothing without this. The previous catch{} swallowed everything.
+      const msg = err instanceof Error
+        ? err.message
+        : (typeof err === 'object' && err !== null && 'message' in err)
+          ? String((err as Record<string, unknown>).message)
+          : String(err);
+      console.error('[AddSubstanceDialog] submit failed:', err);
+      setError(`${t.common.saveError}${msg ? ` (${msg.slice(0, 120)})` : ''}`);
     }
   };
 

@@ -7,6 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { ensureFreshSession } from '../../../lib/refreshSession';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { BloodWork } from '../../../types/health';
 
 const BW_KEY = 'blood_work';
@@ -112,7 +113,7 @@ export function useAddBloodWork() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddBloodWorkInput) => {
+    mutationFn: withTelemetry('log_blood_work', 'ui', async (input: AddBloodWorkInput) => {
       let userId = input.user_id;
       if (!userId) {
         userId = await ensureFreshSession();
@@ -132,7 +133,7 @@ export function useAddBloodWork() {
 
       if (error) throw error;
       return data as BloodWork;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [BW_KEY] });
     },

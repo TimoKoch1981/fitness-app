@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
 import { calculateBMI, calculateLeanMass } from '../../../lib/calculations';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { BodyMeasurement, DataSource } from '../../../types/health';
 
 const BODY_KEY = 'body_measurements';
@@ -66,7 +67,7 @@ export function useAddBodyMeasurement() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddBodyMeasurementInput) => {
+    mutationFn: withTelemetry('log_body', 'ui', async (input: AddBodyMeasurementInput) => {
       let userId = input.user_id;
       if (!userId) {
         const { ensureFreshSession } = await import('../../../lib/refreshSession');
@@ -106,7 +107,7 @@ export function useAddBodyMeasurement() {
 
       if (error) throw error;
       return data as BodyMeasurement;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [BODY_KEY] });
     },

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { classifyBloodPressure } from '../../../lib/calculations';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { BloodPressure } from '../../../types/health';
 
 const BP_KEY = 'blood_pressure';
@@ -41,7 +42,7 @@ export function useAddBloodPressure() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddBPInput) => {
+    mutationFn: withTelemetry('log_blood_pressure', 'ui', async (input: AddBPInput) => {
       let userId = input.user_id;
       if (!userId) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -63,7 +64,7 @@ export function useAddBloodPressure() {
 
       if (error) throw error;
       return data as BloodPressure;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [BP_KEY] });
     },
