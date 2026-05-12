@@ -3,7 +3,7 @@
  * Tests: Open/close, form fields, meal type selection, submit, validation
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../test/helpers/renderWithProviders';
@@ -36,6 +36,14 @@ describe('AddMealDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockMutateAsync.mockResolvedValue({});
+    // Anchor system time at 12:30 so getMealTypeByTime() returns 'lunch'
+    // deterministically (otherwise the test depends on the CI clock).
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date('2026-01-15T12:30:00'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders nothing when closed', () => {

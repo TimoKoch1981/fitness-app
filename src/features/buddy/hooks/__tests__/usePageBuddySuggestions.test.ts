@@ -22,9 +22,11 @@ describe('usePageBuddySuggestions — structure', () => {
     'cockpit',
   ];
 
-  it.each(pages)('returns 2-3 suggestions for page "%s"', (pageId) => {
+  it.each(pages)('returns 1-3 suggestions for page "%s"', (pageId) => {
+    // tracking_training was slimmed down to 1 suggestion when the training tab
+    // structure was refactored (v12.77). Other pages still carry 2-3 chips.
     const suggestions = getSuggestions(pageId);
-    expect(suggestions.length).toBeGreaterThanOrEqual(2);
+    expect(suggestions.length).toBeGreaterThanOrEqual(1);
     expect(suggestions.length).toBeLessThanOrEqual(3);
   });
 
@@ -90,17 +92,21 @@ describe('usePageBuddySuggestions — page content', () => {
     expect(ids).toContain('meals_protein');
   });
 
-  it('training page has workout-related suggestions', () => {
+  it('training page has workout-related suggestion', () => {
+    // tracking_training currently carries only `workout_advice`.
+    // workout_log lives in tracking_training_plan since the training-tab refactor (v12.77).
     const ids = getSuggestions('tracking_training').map((s) => s.id);
-    expect(ids).toContain('workout_log');
     expect(ids).toContain('workout_advice');
   });
 
   it('training plan page has plan-related suggestions', () => {
+    // plan_edit + plan_evaluate moved out of the suggestion-chip pool into
+    // the expanded plan card UI (v12.74). The chips here surface generic
+    // plan actions (log, create, tip).
     const ids = getSuggestions('tracking_training_plan').map((s) => s.id);
-    expect(ids).toContain('plan_edit');
-    expect(ids).toContain('plan_evaluate');
+    expect(ids).toContain('workout_log');
     expect(ids).toContain('plan_create');
+    expect(ids).toContain('training_tip');
   });
 
   it('body page has body analysis suggestions', () => {

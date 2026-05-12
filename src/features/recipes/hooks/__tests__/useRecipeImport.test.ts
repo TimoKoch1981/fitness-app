@@ -72,12 +72,12 @@ Haehnchenstreifen braten
 Alles anrichten`;
 
     const result = parseRecipeText(text);
-    expect(result.name).toBe('Haehnchen-Reis Bowl');
+    expect(result.title).toBe('Haehnchen-Reis Bowl');
     expect(result.ingredients).toHaveLength(3);
     expect(result.ingredients![0].name).toBe('Haehnchenbrust');
     expect(result.ingredients![1].amount).toBe(150);
-    expect(result.instructions).toHaveLength(3);
-    expect(result.instructions![0]).toBe('Reis kochen');
+    expect(result.steps).toHaveLength(3);
+    expect(result.steps![0].text).toBe('Reis kochen');
   });
 
   it('parses recipe with numbered steps', () => {
@@ -93,9 +93,9 @@ Zubereitung:
 3. In der Pfanne backen`;
 
     const result = parseRecipeText(text);
-    expect(result.instructions).toHaveLength(3);
-    expect(result.instructions![0]).toBe('Haferflocken mahlen');
-    expect(result.instructions![2]).toBe('In der Pfanne backen');
+    expect(result.steps).toHaveLength(3);
+    expect(result.steps![0].text).toBe('Haferflocken mahlen');
+    expect(result.steps![2].text).toBe('In der Pfanne backen');
   });
 
   it('parses recipe with Portionen header', () => {
@@ -122,13 +122,13 @@ Zutaten:
 1 Stueck Tortilla`;
 
     const result = parseRecipeText(text);
-    expect(result.prepTime).toBe(10);
-    expect(result.cookTime).toBe(5);
+    expect(result.prep_time_min).toBe(10);
+    expect(result.cook_time_min).toBe(5);
   });
 
   it('handles single line input as title', () => {
     const result = parseRecipeText('Mein Lieblings-Rezept');
-    expect(result.name).toBe('Mein Lieblings-Rezept');
+    expect(result.title).toBe('Mein Lieblings-Rezept');
   });
 
   it('handles malformed text gracefully', () => {
@@ -136,8 +136,8 @@ Zutaten:
 more random text
 nothing useful here`;
     const result = parseRecipeText(text);
-    // Should at least get a name from first line
-    expect(result.name).toBe('Some random text');
+    // Should at least get a title from first line
+    expect(result.title).toBe('Some random text');
   });
 
   it('handles recipe with English section headers', () => {
@@ -152,8 +152,8 @@ Cook rice
 Grill chicken`;
 
     const result = parseRecipeText(text);
-    expect(result.name).toBe('Quick Bowl');
+    expect(result.title).toBe('Quick Bowl');
     expect(result.ingredients).toHaveLength(2);
-    expect(result.instructions).toHaveLength(2);
+    expect(result.steps).toHaveLength(2);
   });
 });

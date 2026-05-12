@@ -37,15 +37,17 @@ describe('MealPhotoCapture', () => {
     expect(screen.getByText('Foto-Analyse')).toBeInTheDocument();
   });
 
-  it('renders camera and gallery buttons in idle state', () => {
+  it('renders upload button in idle state (desktop UA — jsdom default)', () => {
+    // MealPhotoCapture branches on isMobileDevice() (UA-sniff + touch + screen width).
+    // In jsdom the default UA is desktop, so we render the single "Bild auswählen"
+    // upload button, not the Mobile "Kamera"/"Galerie" pair.
     renderWithProviders(<MealPhotoCapture {...defaultProps} />);
-    expect(screen.getByText('Kamera')).toBeInTheDocument();
-    expect(screen.getByText('Galerie')).toBeInTheDocument();
+    expect(screen.getByText('Bild auswählen')).toBeInTheDocument();
   });
 
-  it('renders hint text', () => {
+  it('renders hint text (desktop variant)', () => {
     renderWithProviders(<MealPhotoCapture {...defaultProps} />);
-    expect(screen.getByText(/Fotografiere deine Mahlzeit/)).toBeInTheDocument();
+    expect(screen.getByText(/Lade ein Foto deiner Mahlzeit/)).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', async () => {

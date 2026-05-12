@@ -1,6 +1,9 @@
 /**
  * Navigation Component Tests
- * Tests: 5 nav items, active state, links, i18n labels
+ * Tests: 6 base nav items (+1 optional cycle for female users), active state, links, i18n labels
+ *
+ * Note: Phase-F-Benchmark recommends removing Social (P3-1) — when that happens,
+ * update this test back to 5 items.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -9,10 +12,10 @@ import { renderWithProviders } from '../../../test/helpers/renderWithProviders';
 import { Navigation } from '../Navigation';
 
 describe('Navigation', () => {
-  it('renders 5 navigation items', () => {
+  it('renders 6 base navigation items (without cycle)', () => {
     renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const links = screen.getAllByRole('menuitem');
-    expect(links).toHaveLength(5);
+    expect(links).toHaveLength(6);
   });
 
   it('renders correct nav labels (German)', () => {
@@ -21,6 +24,7 @@ describe('Navigation', () => {
     expect(screen.getByText('Ernährung')).toBeInTheDocument();
     expect(screen.getByText('Training')).toBeInTheDocument();
     expect(screen.getByText('Medizin')).toBeInTheDocument();
+    expect(screen.getByText('Community')).toBeInTheDocument();
     expect(screen.getByText('Profil')).toBeInTheDocument();
   });
 
@@ -32,6 +36,7 @@ describe('Navigation', () => {
     expect(hrefs).toContain('/nutrition');
     expect(hrefs).toContain('/training');
     expect(hrefs).toContain('/medical');
+    expect(hrefs).toContain('/social');
     expect(hrefs).toContain('/profile');
   });
 

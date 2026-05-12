@@ -382,10 +382,13 @@ describe('SET_PHASE', () => {
 // ── FINISH_SESSION ───────────────────────────────────────────────────
 
 describe('FINISH_SESSION', () => {
-  it('moves to summary and marks inactive', () => {
+  it('moves to summary; isActive stays true until CLEAR_SESSION (v12.77)', () => {
+    // FINISH_SESSION intentionally keeps isActive=true so the summary state
+    // survives a Suspense/ProtectedRoute remount. CLEAR_SESSION (after save
+    // or discard) is what flips isActive to false.
     const state = reducer(startedState({ phase: 'exercise' }), { type: 'FINISH_SESSION' });
     expect(state.phase).toBe('summary');
-    expect(state.isActive).toBe(false);
+    expect(state.isActive).toBe(true);
   });
 });
 
@@ -449,9 +452,13 @@ describe('Full session flow', () => {
     state = reducer(state, { type: 'NEXT_EXERCISE' });
     expect(state.phase).toBe('summary');
 
-    // Finish
+    // Finish — isActive stays true until CLEAR_SESSION (v12.77 intentional)
     state = reducer(state, { type: 'FINISH_SESSION' });
-    expect(state.isActive).toBe(false);
+    expect(state.isActive).toBe(true);
     expect(state.phase).toBe('summary');
+
+    // CLEAR_SESSION flips isActive to false
+    state = reducer(state, { type: 'CLEAR_SESSION' });
+    expect(state.isActive).toBe(false);
   });
 });

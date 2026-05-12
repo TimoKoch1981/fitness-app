@@ -65,7 +65,8 @@ describe('Feature Flags', () => {
     expect(Object.keys(DEFAULT_FLAGS)).toContain('barcode_scanner');
     expect(Object.keys(DEFAULT_FLAGS)).toContain('social_features');
     expect(Object.keys(DEFAULT_FLAGS)).toContain('marketplace');
-    expect(Object.keys(DEFAULT_FLAGS).length).toBe(10);
+    expect(Object.keys(DEFAULT_FLAGS)).toContain('apple_oauth'); // added v12.68
+    expect(Object.keys(DEFAULT_FLAGS).length).toBe(11);
   });
 
   it('useFeatureFlag hook returns correct value', () => {

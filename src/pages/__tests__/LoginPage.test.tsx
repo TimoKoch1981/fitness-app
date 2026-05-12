@@ -79,10 +79,11 @@ describe('LoginPage', () => {
     expect(screen.getByText('Passwort vergessen?')).toBeInTheDocument();
   });
 
-  it('renders OAuth buttons (Google and Apple)', () => {
+  it('renders Google OAuth; Apple is hidden behind the apple_oauth feature flag (v12.68)', () => {
     renderWithProviders(<LoginPage />, { initialRoute: '/login' });
     expect(screen.getByRole('button', { name: /Google/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Apple/i })).toBeInTheDocument();
+    // Apple is gated by useFeatureFlag('apple_oauth'), default OFF until Apple Developer Account is configured
+    expect(screen.queryByRole('button', { name: /Apple/i })).toBeNull();
   });
 
   it('renders language selector', () => {
