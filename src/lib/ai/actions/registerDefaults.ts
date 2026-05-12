@@ -185,6 +185,38 @@ const ToolSchemaMap: Partial<Record<ActionType, z.ZodObject<z.ZodRawShape>>> = {
       notes: z.string().describe('Notizen zum Tag').optional(),
     })),
   }),
+  add_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer (1-14)'),
+    name: z.string().describe('Tagesname, z.B. Push Day'),
+    focus: z.string().describe('Trainingsfokus').optional(),
+    exercises: z.array(z.object({
+      name: z.string().describe('Uebungsname'),
+      sets: z.number().describe('Saetze').optional(),
+      reps: z.string().describe('Wiederholungen').optional(),
+      weight_kg: z.number().describe('Gewicht in kg').optional(),
+      rest_seconds: z.number().describe('Pausenzeit in Sekunden').optional(),
+      notes: z.string().describe('Notizen').optional(),
+    })),
+    notes: z.string().describe('Notizen zum Tag').optional(),
+  }),
+  modify_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer des zu aendernden Tages (1-14)'),
+    name: z.string().describe('Neuer Tagesname').optional(),
+    focus: z.string().describe('Neuer Trainingsfokus').optional(),
+    exercises: z.array(z.object({
+      name: z.string().describe('Uebungsname'),
+      sets: z.number().describe('Saetze').optional(),
+      reps: z.string().describe('Wiederholungen').optional(),
+      weight_kg: z.number().describe('Gewicht in kg').optional(),
+      rest_seconds: z.number().describe('Pausenzeit in Sekunden').optional(),
+      notes: z.string().describe('Notizen').optional(),
+    })),
+    notes: z.string().describe('Notizen zum Tag').optional(),
+  }),
+  remove_training_day: z.object({
+    day_number: z.number().describe('Tag-Nummer des zu entfernenden Tages (1-14)'),
+    day_name: z.string().describe('Name des Tages (zur Bestaetigung)').optional(),
+  }),
   save_product: z.object({
     name: z.string().describe('Produktname'),
     brand: z.string().describe('Marke').optional(),
@@ -526,7 +558,7 @@ export function registerDefaultActions(): void {
       });
     },
     toolDescription: 'Trainingstag zum aktiven Plan hinzufuegen. Erfasse Tag-Nummer, Name, Fokus und Uebungen.',
-    toolSchema: ToolSchemaMap.save_training_plan, // Reuse plan schema structure
+    toolSchema: ToolSchemaMap.add_training_day,
     agentHint: 'training',
   });
 
@@ -551,6 +583,7 @@ export function registerDefaultActions(): void {
       });
     },
     toolDescription: 'Bestehenden Trainingstag im aktiven Plan aendern. Erfasse Tag-Nummer und neue Uebungen.',
+    toolSchema: ToolSchemaMap.modify_training_day,
     agentHint: 'training',
   });
 
@@ -571,6 +604,7 @@ export function registerDefaultActions(): void {
       });
     },
     toolDescription: 'Trainingstag aus dem aktiven Plan entfernen. Erfasse die Tag-Nummer.',
+    toolSchema: ToolSchemaMap.remove_training_day,
     agentHint: 'training',
   });
 

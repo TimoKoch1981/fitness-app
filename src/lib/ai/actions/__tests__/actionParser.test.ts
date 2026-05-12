@@ -1,8 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { parseActionFromResponse, parseAllActionsFromResponse, stripActionBlock } from '../actionParser';
+import { registerDefaultActions } from '../registerDefaults';
 
 // Suppress console.warn during tests (expected for invalid inputs)
 vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+// Since v14.6 (P0-4) the registry is the only schema source. actionParser
+// calls validateAction internally, so we must populate the registry once.
+beforeAll(() => {
+  registerDefaultActions();
+});
 
 describe('parseActionFromResponse', () => {
   it('parses a valid log_meal action', () => {

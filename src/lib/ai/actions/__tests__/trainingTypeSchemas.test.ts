@@ -1,5 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { validateAction } from '../schemas';
+import { registerDefaultActions } from '../registerDefaults';
+
+// Since v14.6 (P0-4) the registry is the only schema source. Populate it
+// once before any test calls validateAction.
+beforeAll(() => {
+  registerDefaultActions();
+});
 
 // ── PlanExercise Schema Tests ─────────────────────────────────────────
 

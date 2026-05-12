@@ -423,31 +423,6 @@ export const UpdatePantrySchema = z.object({
   })).optional().default([]),
 });
 
-// ── Schema Registry ─────────────────────────────────────────────────────
-
-const SCHEMA_MAP: Record<ActionType, z.ZodSchema> = {
-  log_meal: LogMealSchema,
-  log_workout: LogWorkoutSchema,
-  log_body: LogBodySchema,
-  log_blood_pressure: LogBloodPressureSchema,
-  log_blood_work: LogBloodWorkSchema,
-  log_substance: LogSubstanceSchema,
-  save_training_plan: SaveTrainingPlanSchema,
-  add_training_day: AddTrainingDaySchema,
-  modify_training_day: ModifyTrainingDaySchema,
-  remove_training_day: RemoveTrainingDaySchema,
-  save_product: SaveProductSchema,
-  add_substance: AddSubstanceSchema,
-  add_reminder: AddReminderSchema,
-  update_profile: UpdateProfileSchema,
-  update_equipment: UpdateEquipmentSchema,
-  search_product: SearchProductSchema,
-  restart_tour: RestartTourSchema,
-  save_recipe: SaveRecipeSchema,
-  import_recipe: ImportRecipeSchema,
-  update_pantry: UpdatePantrySchema,
-};
-
 // ── Public API ──────────────────────────────────────────────────────────
 
 export interface ValidationResult {
@@ -457,12 +432,16 @@ export interface ValidationResult {
 }
 
 /**
- * Validate and transform action data using the appropriate Zod schema.
- * Returns cleaned data with defaults applied, or errors if invalid.
+ * Validate and transform action data using the schema from the ActionRegistry.
+ * Returns cleaned data with defaults applied (date-clamping, source='ai'), or
+ * errors if invalid.
+ *
+ * Single source of truth: the registry (populated by registerDefaultActions()
+ * at app startup). P0-4 (v14.6) deleted the SCHEMA_MAP duplicate that used to
+ * live here as a fallback — the registry is the only path now.
  */
 export function validateAction(type: ActionType, data: unknown): ValidationResult {
-  // Registry is primary source, SCHEMA_MAP is fallback
-  const schema = actionRegistry.getSchema(type) ?? SCHEMA_MAP[type];
+  const schema = actionRegistry.getSchema(type);
   if (!schema) {
     return { success: false, data: {}, errors: [`Unknown action type: ${type}`] };
   }

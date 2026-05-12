@@ -6,13 +6,20 @@
  * the save still works.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { clampDate } from '../schemas';
 import { validateAction } from '../schemas';
+import { registerDefaultActions } from '../registerDefaults';
 
 // Anchor system time so we can predict "today" deterministically.
 const FAKE_NOW = new Date('2026-05-12T14:00:00Z');
 const TODAY_ISO = '2026-05-12';
+
+// Since v14.6 (P0-4) the registry is the only schema source — populate it
+// once before any test calls validateAction.
+beforeAll(() => {
+  registerDefaultActions();
+});
 
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: false });
