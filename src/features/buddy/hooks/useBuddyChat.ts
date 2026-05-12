@@ -41,6 +41,7 @@ import { extractActionRequest, stripActionRequest, executeSystemAgent, providerS
 import type { ActionType } from '../../../lib/ai/actions/types';
 import { validateAction } from '../../../lib/ai/actions/schemas';
 import type { HealthContext } from '../../../types/health';
+import { logActionEvent } from '../../../lib/telemetry/actionLog';
 
 export interface DisplayMessage {
   id: string;
@@ -258,9 +259,33 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           if (fcResult.success && fcResult.actions) {
             parsedActions = fcResult.actions;
             console.log('[BuddyChat] FC path: validated', parsedActions.length, 'action(s):', parsedActions.map(a => a.type));
+            // Telemetry: FC path succeeded
+            for (const a of parsedActions) {
+              void logActionEvent({
+                actionType: a.type,
+                phase: 'parse',
+                status: 'success',
+                parsingPath: 'fc',
+                agentType: result.agentType,
+              });
+            }
           } else if (fcResult.error) {
             console.warn('[BuddyChat] FC path failed:', fcResult.error, fcResult.details);
             fcErrorMessage = fcResult.userMessage;
+            // Telemetry: FC path failed (we don't know the action_type yet, use first request)
+            void logActionEvent({
+              actionType: actionRequests[0]?.type ?? 'unknown',
+              phase: 'parse',
+              status: 'failed',
+              parsingPath: 'fc',
+              errorCode: fcResult.error === 'no_tool_call'
+                ? 'no_tool_call'
+                : fcResult.error === 'validation_failed'
+                  ? 'validation_failed'
+                  : 'provider_error',
+              errorDetail: fcResult.details ?? fcResult.userMessage,
+              agentType: result.agentType,
+            });
           }
         } else {
           console.log('[BuddyChat] FC path: no [ACTION_REQUEST] blocks found in agent response');
@@ -286,6 +311,16 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           if (parsedActions.length > 0) {
             console.log(`[BuddyChat] Direct parse path: ${parsedActions.length} actions from ACTION_REQUEST blocks`);
             fcErrorMessage = undefined; // Clear FC error since direct parse succeeded
+            // Telemetry: direct_json path succeeded
+            for (const a of parsedActions) {
+              void logActionEvent({
+                actionType: a.type,
+                phase: 'parse',
+                status: 'success',
+                parsingPath: 'direct_json',
+                agentType: result.agentType,
+              });
+            }
           }
         }
       }
@@ -293,6 +328,17 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       // Path 2: Legacy regex fallback (Ollama, transition period, FC failure)
       if (parsedActions.length === 0) {
         parsedActions = parseAllActionsFromResponse(result.content);
+        if (parsedActions.length > 0) {
+          for (const a of parsedActions) {
+            void logActionEvent({
+              actionType: a.type,
+              phase: 'parse',
+              status: 'success',
+              parsingPath: 'regex',
+              agentType: result.agentType,
+            });
+          }
+        }
       }
 
       // Fallback: If the LLM said "Ich suche die Nährwerte für..." but the ACTION block
@@ -305,6 +351,13 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
             const data = JSON.parse(jsonMatch[0]);
             parsedActions = [{ type: 'search_product', data, rawJson: jsonMatch[0] }];
             console.log(`[BuddyChat] Fallback extraction successful: query="${data.query}"`);
+            void logActionEvent({
+              actionType: 'search_product',
+              phase: 'parse',
+              status: 'success',
+              parsingPath: 'text_heuristic_search',
+              agentType: result.agentType,
+            });
           } catch { /* ignore parse errors */ }
         }
       }
@@ -316,6 +369,13 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           const extractedQuery = searchPhraseMatch[1].trim().replace(/["""„….]+$/, '');
           console.warn(`[BuddyChat] No ACTION block found, but search phrase detected: "${extractedQuery}"`);
           parsedActions = [{ type: 'search_product', data: { query: extractedQuery }, rawJson: `{"query":"${extractedQuery}"}` }];
+          void logActionEvent({
+            actionType: 'search_product',
+            phase: 'parse',
+            status: 'success',
+            parsingPath: 'text_heuristic_search',
+            agentType: result.agentType,
+          });
         }
       }
 
@@ -326,6 +386,13 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         if (tourTextMatch) {
           console.warn('[BuddyChat] No ACTION:restart_tour block, but tour-related text detected — injecting action');
           parsedActions.push({ type: 'restart_tour', data: {}, rawJson: '{}' });
+          void logActionEvent({
+            actionType: 'restart_tour',
+            phase: 'parse',
+            status: 'success',
+            parsingPath: 'text_heuristic_tour',
+            agentType: result.agentType,
+          });
         }
       }
 
@@ -342,6 +409,13 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               console.warn(`[BuddyChat] No ACTION:log_body block, but weight text detected: ${weightKg} kg — injecting action`);
               const today = new Date().toISOString().split('T')[0];
               parsedActions = [{ type: 'log_body', data: { weight_kg: weightKg, date: today }, rawJson: JSON.stringify({ weight_kg: weightKg, date: today }) }];
+              void logActionEvent({
+                actionType: 'log_body',
+                phase: 'parse',
+                status: 'success',
+                parsingPath: 'text_heuristic_body',
+                agentType: result.agentType,
+              });
             }
           }
         }
@@ -354,6 +428,17 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         const hasFoodKeyword = /(?:kalori|kcal|protein|carb|fett|gramm|frühstück|mittag|abend|snack|breakfast|lunch|dinner)/i.test(result.content);
         if (claimsSaved && hasFoodKeyword) {
           console.error('[BuddyChat] ⚠ Nutrition agent CLAIMS saved but NO action was parsed! Agent response:', result.content.slice(0, 500));
+          // Telemetry: This is the worst-case "ghost save" failure mode (#1 user-reported pain).
+          // We log it as a parse-phase failure with a dedicated path so we can count occurrences.
+          void logActionEvent({
+            actionType: 'log_meal',
+            phase: 'parse',
+            status: 'failed',
+            parsingPath: 'agent_claim_no_block',
+            errorCode: 'agent_no_action_block',
+            errorDetail: result.content.slice(0, 500),
+            agentType: result.agentType,
+          });
           // Surface as an error chat message so the user sees it didn't actually save
           setTimeout(() => {
             setMessages(prev => [...prev, {

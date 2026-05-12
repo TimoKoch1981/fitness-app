@@ -31,6 +31,7 @@ import { ensureFreshSession } from '../../../lib/refreshSession';
 import { actionRegistry } from '../../../lib/ai/actions/registry';
 import type { MutationMap } from '../../../lib/ai/actions/registry';
 import type { ParsedAction, ActionStatus } from '../../../lib/ai/actions/types';
+import { logActionEvent } from '../../../lib/telemetry/actionLog';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -162,12 +163,27 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
 
     console.log('[ActionExecutor] === executeAction ===', actionToExecute.type, 'data:', JSON.stringify(actionToExecute.data).slice(0, 300));
 
+    // Telemetry: log attempt
+    void logActionEvent({
+      actionType: actionToExecute.type,
+      phase: 'execute',
+      status: 'attempted',
+    });
+    const execStart = Date.now();
+
     // Idempotency check — prevents double-execution when user / auto-execute collide
     const idempotencyKey = makeIdempotencyKey(actionToExecute, userId);
     if (isDuplicate(idempotencyKey)) {
       console.warn('[ActionExecutor] Idempotency skip — duplicate within 60s:', actionToExecute.type, 'key:', idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
+      void logActionEvent({
+        actionType: actionToExecute.type,
+        phase: 'execute',
+        status: 'success',
+        errorCode: 'duplicate_idempotency',
+        latencyMs: Date.now() - execStart,
+      });
       return { success: true };
     }
 
@@ -202,6 +218,12 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       markExecuted(idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
+      void logActionEvent({
+        actionType: actionToExecute.type,
+        phase: 'execute',
+        status: 'success',
+        latencyMs: Date.now() - execStart,
+      });
       return { success: true };
     };
 
@@ -233,6 +255,14 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           console.error('[ActionExecutor] Retry also failed:', retryMsg);
           setErrorMessage(retryMsg);
           setActionStatus('failed');
+          void logActionEvent({
+            actionType: actionToExecute.type,
+            phase: 'execute',
+            status: 'failed',
+            errorCode: 'auth_error',
+            errorDetail: retryMsg,
+            latencyMs: Date.now() - execStart,
+          });
           return { success: false, error: retryMsg };
         }
       }
@@ -240,6 +270,16 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       console.error('[ActionExecutor] Failed:', msg, error);
       setErrorMessage(msg);
       setActionStatus('failed');
+      void logActionEvent({
+        actionType: actionToExecute.type,
+        phase: 'execute',
+        status: 'failed',
+        errorCode: /rls|row-level|policy|denied/i.test(msg)
+          ? 'rls_error'
+          : 'mutation_error',
+        errorDetail: msg,
+        latencyMs: Date.now() - execStart,
+      });
       return { success: false, error: msg };
     }
   }, [pendingAction, activeSubstances, userId, mutations, equipmentCatalog]);
