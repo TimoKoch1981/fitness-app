@@ -31,10 +31,67 @@ function inferMealType(): 'breakfast' | 'morning_snack' | 'lunch' | 'afternoon_s
   return 'snack';
 }
 
+// ── Date guard (P0-3, fixes v13.9 date hallucination class) ────────────
+//
+// gpt-4o-mini has a training cutoff of 2023-10-04 and hallucinates that as
+// "today" when no explicit anchor is given. v13.9 fixed the symptom in the
+// SystemAgent prompt; this clamps the schema itself, which is the structural
+// fix: even if a new date-bearing action gets added in the future and someone
+// forgets the prompt anchor, the date will still be sane.
+//
+// Strategy: silent-clamp (NOT reject). Rejecting would surface as a "save
+// failed" error to the user; clamping to today keeps the save working and
+// only logs a console.warn for telemetry.
+
+const MIN_ALLOWED_YEAR = 2024; // hard floor — anything earlier is hallucination
+const MAX_FUTURE_DAYS = 30;    // a few weeks ahead is fine (planned meals etc.)
+const MAX_PAST_DAYS = 365;     // a year of backfill is plausible
+
+/** Clamp a date string to a sane range; fallback to today on any anomaly. */
+export function clampDate(input: unknown): string {
+  const todayISO = today();
+  if (input == null || input === '') return todayISO;
+  if (typeof input !== 'string') {
+    console.warn('[schemas.clampDate] Non-string date, defaulting to today:', input);
+    return todayISO;
+  }
+  // Normalize: strip whitespace, accept YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS
+  const trimmed = input.trim();
+  const isoDateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!isoDateMatch) {
+    console.warn('[schemas.clampDate] Date not ISO-shaped, defaulting to today:', input);
+    return todayISO;
+  }
+  const ymd = `${isoDateMatch[1]}-${isoDateMatch[2]}-${isoDateMatch[3]}`;
+  const parsed = new Date(`${ymd}T12:00:00Z`); // noon UTC avoids TZ edge cases
+  if (Number.isNaN(parsed.getTime())) {
+    console.warn('[schemas.clampDate] Date unparseable, defaulting to today:', input);
+    return todayISO;
+  }
+  const year = parsed.getUTCFullYear();
+  if (year < MIN_ALLOWED_YEAR) {
+    console.warn(`[schemas.clampDate] Date year ${year} < ${MIN_ALLOWED_YEAR} (LLM hallucination), defaulting to today:`, input);
+    return todayISO;
+  }
+  const diffDays = (parsed.getTime() - Date.now()) / 86_400_000;
+  if (diffDays > MAX_FUTURE_DAYS) {
+    console.warn(`[schemas.clampDate] Date ${diffDays.toFixed(0)}d in the future (>${MAX_FUTURE_DAYS}d), defaulting to today:`, input);
+    return todayISO;
+  }
+  if (diffDays < -MAX_PAST_DAYS) {
+    console.warn(`[schemas.clampDate] Date ${Math.abs(diffDays).toFixed(0)}d in the past (>${MAX_PAST_DAYS}d), defaulting to today:`, input);
+    return todayISO;
+  }
+  return ymd;
+}
+
+/** Zod schema for a date field that auto-clamps LLM hallucinations to today. */
+const safeDate = z.preprocess(clampDate, z.string());
+
 // ── Schemas ─────────────────────────────────────────────────────────────
 
 export const LogMealSchema = z.object({
-  date: z.string().default(today),
+  date: safeDate,
   name: z.string().min(1),
   type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).default(inferMealType),
   calories: z.number().nonnegative(),
@@ -55,7 +112,7 @@ const ExerciseSetSchema = z.object({
 });
 
 export const LogWorkoutSchema = z.object({
-  date: z.string().default(today),
+  date: safeDate,
   name: z.string().min(1),
   type: z.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sports', 'other']).default('strength'),
   duration_minutes: z.number().positive().optional(),
@@ -66,7 +123,7 @@ export const LogWorkoutSchema = z.object({
 });
 
 export const LogBodySchema = z.object({
-  date: z.string().default(today),
+  date: safeDate,
   weight_kg: z.number().positive().optional(),
   body_fat_pct: z.number().min(1).max(60).optional(),
   muscle_mass_kg: z.number().positive().optional(),
@@ -88,7 +145,7 @@ export const LogBodySchema = z.object({
 );
 
 export const LogBloodPressureSchema = z.object({
-  date: z.string().default(today),
+  date: safeDate,
   time: z.string().default(nowTime),
   systolic: z.number().int().min(60).max(300),
   diastolic: z.number().int().min(30).max(200),
@@ -97,7 +154,7 @@ export const LogBloodPressureSchema = z.object({
 });
 
 export const LogBloodWorkSchema = z.object({
-  date: z.string().default(today),
+  date: safeDate,
   // Hormones (9)
   testosterone_total: z.number().positive().optional(),
   testosterone_free: z.number().positive().optional(),
@@ -157,7 +214,7 @@ export const LogBloodWorkSchema = z.object({
 
 export const LogSubstanceSchema = z.object({
   substance_name: z.string().min(1),
-  date: z.string().default(today),
+  date: safeDate,
   time: z.string().default(nowTime),
   dosage_taken: z.string().optional(),
   site: z.enum([
