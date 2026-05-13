@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 import { UserQuickMenu } from './UserQuickMenu';
+import { ModeBar } from './ModeBar';
 
 interface PageShellProps {
   title: string;
@@ -8,14 +9,17 @@ interface PageShellProps {
   className?: string;
   /** Extra actions rendered in the header (right side) */
   actions?: ReactNode;
+  /** Hide the mode bar (e.g. for fullscreen flows like onboarding) */
+  hideModeBar?: boolean;
 }
 
 /**
  * Shared page layout shell.
- * Provides consistent padding for bottom navigation (pb-20)
- * and a sticky header with user quick-access menu.
+ * Provides consistent padding for bottom navigation (pb-20),
+ * a sticky header, and an optional ModeBar surfacing active profile toggles
+ * (Power+, Cut/Bulk, Stillzeit, …) — v14.14 / P1-4.
  */
-export function PageShell({ title, children, className, actions }: PageShellProps) {
+export function PageShell({ title, children, className, actions, hideModeBar }: PageShellProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50">
       {/* Header */}
@@ -27,6 +31,7 @@ export function PageShell({ title, children, className, actions }: PageShellProp
             <UserQuickMenu />
           </div>
         </div>
+        {!hideModeBar && <ModeBar />}
       </header>
 
       {/* Content with bottom padding for navigation */}
