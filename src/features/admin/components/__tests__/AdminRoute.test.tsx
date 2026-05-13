@@ -8,10 +8,20 @@ import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../../test/helpers/renderWithProviders';
 import { AdminRoute } from '../AdminRoute';
 
-// Mock useAuth
-const mockUseAuth = vi.fn();
+// Mock useAuth — also re-export AuthContext so renderWithProviders can wrap.
+// Tests that mock this module must keep AuthContext intact since
+// renderWithProviders writes to it (v14.10).
+// vi.hoisted because vi.mock is hoisted above imports.
+const { mockUseAuth, _mockAuthContext } = vi.hoisted(() => {
+  const React = require('react');
+  return {
+    mockUseAuth: vi.fn(),
+    _mockAuthContext: React.createContext(null),
+  };
+});
 vi.mock('../../../../app/providers/AuthProvider', () => ({
   useAuth: () => mockUseAuth(),
+  AuthContext: _mockAuthContext,
 }));
 
 describe('AdminRoute', () => {

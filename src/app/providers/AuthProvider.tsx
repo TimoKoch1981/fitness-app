@@ -18,7 +18,13 @@ interface AuthContextType {
   resendConfirmation: (email: string) => Promise<{ error: Error | null }>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+/**
+ * Exported for test wrappers that want to inject a mock auth state directly
+ * without spinning up the real AuthProvider (which subscribes to Supabase
+ * auth-state-change events). Production code should never import this — use
+ * <AuthProvider> + useAuth() instead.
+ */
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function useAuth() {
   const context = useContext(AuthContext);

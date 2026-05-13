@@ -2,18 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
 import { calculateBMI, calculateLeanMass } from '../../../lib/calculations';
+import { useAuth } from '../../../app/providers/AuthProvider';
 import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { BodyMeasurement, DataSource } from '../../../types/health';
 
 const BODY_KEY = 'body_measurements';
 
-export function useBodyMeasurements(limit = 30) {
-  return useQuery({
-    queryKey: [BODY_KEY, limit],
-    queryFn: async (): Promise<BodyMeasurement[]> => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+// v14.10: queryKey scoped per user.id + `enabled` waits for auth-ready —
+// same fix as useProfile, otherwise the cache holds a stale `null` from the
+// first render before the session arrived (caused onboarding-reset on every
+// login because useOnboarding got `latestBody=null`).
 
+export function useBodyMeasurements(limit = 30) {
+  const { user, loading: authLoading } = useAuth();
+  return useQuery({
+    queryKey: [BODY_KEY, user?.id, limit],
+    queryFn: async (): Promise<BodyMeasurement[]> => {
+      if (!user) return [];
       const { data, error } = await supabase
         .from('body_measurements')
         .select('*')
@@ -24,16 +29,16 @@ export function useBodyMeasurements(limit = 30) {
       if (error) throw error;
       return data ?? [];
     },
+    enabled: !authLoading && !!user,
   });
 }
 
 export function useLatestBodyMeasurement() {
+  const { user, loading: authLoading } = useAuth();
   return useQuery({
-    queryKey: [BODY_KEY, 'latest'],
+    queryKey: [BODY_KEY, user?.id, 'latest'],
     queryFn: async (): Promise<BodyMeasurement | null> => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-
       const { data, error } = await supabase
         .from('body_measurements')
         .select('*')
@@ -45,6 +50,7 @@ export function useLatestBodyMeasurement() {
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
       return data ?? null;
     },
+    enabled: !authLoading && !!user,
   });
 }
 

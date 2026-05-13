@@ -9,13 +9,23 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../test/helpers/renderWithProviders';
 import { LoginPage } from '../LoginPage';
 
-// Mock useAuth
-const mockSignIn = vi.fn();
-const mockSignInWithOAuth = vi.fn();
-const mockResendConfirmation = vi.fn();
-const mockUseAuth = vi.fn();
+// Mock useAuth — also re-export AuthContext so renderWithProviders can wrap.
+// Tests that mock this module must keep AuthContext intact since
+// renderWithProviders writes to it (v14.10).
+// vi.hoisted because vi.mock is hoisted above imports.
+const { mockSignIn, mockSignInWithOAuth, mockResendConfirmation, mockUseAuth, _mockAuthContext } = vi.hoisted(() => {
+  const React = require('react');
+  return {
+    mockSignIn: vi.fn(),
+    mockSignInWithOAuth: vi.fn(),
+    mockResendConfirmation: vi.fn(),
+    mockUseAuth: vi.fn(),
+    _mockAuthContext: React.createContext(null),
+  };
+});
 vi.mock('../../app/providers/AuthProvider', () => ({
   useAuth: () => mockUseAuth(),
+  AuthContext: _mockAuthContext,
 }));
 
 // Mock LanguageSelector (to avoid complex i18n context dependencies)

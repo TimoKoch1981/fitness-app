@@ -8,9 +8,15 @@ import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../test/helpers/renderWithProviders';
 import { PageShell } from '../PageShell';
 
-// Mock AuthProvider — UserQuickMenu inside PageShell requires useAuth
+// Mock AuthProvider — UserQuickMenu inside PageShell requires useAuth.
+// AuthContext must also be exported because renderWithProviders wraps in it (v14.10).
+const { _mockAuthContext } = vi.hoisted(() => {
+  const React = require('react');
+  return { _mockAuthContext: React.createContext(null) };
+});
 vi.mock('../../../app/providers/AuthProvider', () => ({
   useAuth: () => ({ user: null, signOut: vi.fn() }),
+  AuthContext: _mockAuthContext,
 }));
 
 // Mock useProfile — UserQuickMenu reads profile data

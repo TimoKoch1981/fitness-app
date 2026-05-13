@@ -1,19 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../app/providers/AuthProvider';
 import type { UserProfile, Gender, BMRFormula, PersonalGoals, TrainingMode, TrainingPhase, CycleStatus, BuddyAvatarStyle } from '../../../types/health';
 
 export const PROFILE_KEY = 'profile';
 
 /**
  * Fetch the current user's profile.
+ *
+ * v14.10 (P0 fix): queryKey now scoped per user.id, and `enabled` gates the
+ * query on auth-ready state. Before, the query ran once at app boot with
+ * queryKey=['profile'] before the session had arrived, returned null, then
+ * never re-ran because the key never changed — so the in-memory cache held
+ * `null` forever and `useOnboarding(null)` triggered the redirect to
+ * /onboarding on every login. Now: query waits for `user`, refetches when
+ * the auth user changes.
  */
 export function useProfile() {
+  const { user, loading: authLoading } = useAuth();
   return useQuery({
-    queryKey: [PROFILE_KEY],
+    queryKey: [PROFILE_KEY, user?.id],
     queryFn: async (): Promise<UserProfile | null> => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -23,6 +31,7 @@ export function useProfile() {
       if (error && error.code !== 'PGRST116') throw error;
       return data ?? null;
     },
+    enabled: !authLoading && !!user,
   });
 }
 
