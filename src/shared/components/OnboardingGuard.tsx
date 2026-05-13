@@ -19,21 +19,41 @@ interface OnboardingGuardProps {
 
 export function OnboardingGuard({ children }: OnboardingGuardProps) {
   const { user, loading: authLoading } = useAuth();
-  const { data: profile, isLoading: profileLoading, isFetched: profileFetched } = useProfile();
-  const { data: latestBody, isLoading: bodyLoading, isFetched: bodyFetched } = useLatestBodyMeasurement();
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    isFetched: profileFetched,
+    isError: profileError,
+  } = useProfile();
+  const {
+    data: latestBody,
+    isLoading: bodyLoading,
+    isFetched: bodyFetched,
+    isError: bodyError,
+  } = useLatestBodyMeasurement();
   const location = useLocation();
   const { needsOnboarding } = useOnboarding(profile ?? null, latestBody);
 
-  // v14.10: stronger gates than before. The previous guard only checked
-  // `isLoading` from each query, but with the new `enabled: !authLoading &&
-  // !!user` queries report `isLoading: false` BEFORE they've ever run if auth
-  // isn't ready yet — so the guard would fire on an empty profile and bounce
-  // the user to /onboarding. Now we wait until auth is settled AND both
-  // queries have actually fetched at least once.
+  // v14.10: gate on `isFetched` so we don't bounce users while queries are
+  // still pending.
+  // v14.13: gate ALSO on `isError`. If the profile fetch transiently fails
+  // (network blip, cold-start race, brief 5xx), `isFetched` becomes true but
+  // `data` stays undefined. `useOnboarding(undefined)` then reports
+  // `needsOnboarding=true` and the guard kicks the user to /onboarding —
+  // which is exactly the "Timo gets onboarding every login" symptom.
+  // Treat error as "not ready yet" and render nothing; the next render
+  // (or a retry) will resolve properly.
   if (authLoading) return null;
   if (!user) return null; // ProtectedRoute upstream handles redirect to /login
   if (profileLoading || bodyLoading) return null;
   if (!profileFetched || !bodyFetched) return null;
+  if (profileError || bodyError) return null;
+
+  // Belt-and-suspenders: `profile` should never be `undefined` at this point
+  // (isFetched=true + isError=false ⇒ data is either a row or null), but the
+  // hook signature allows undefined, so we treat it as "still loading" to
+  // avoid a false-positive redirect.
+  if (profile === undefined) return null;
 
   // Redirect to onboarding if profile is incomplete
   // Skip if already on /onboarding (avoid redirect loop)

@@ -236,11 +236,24 @@ function InlineBuddyChatContent() {
   // Active agent display config (icon, color, greeting)
   const agentConfig = useMemo(() => getAgentDisplayConfig(activeThread), [activeThread]);
 
-  // Daily preference inference — run once per 24h on mount (fire-and-forget)
+  // Daily preference inference — run once per 24h, deferred until the browser
+  // is idle so it doesn't compete with the chat-sheet mount for main-thread time.
+  // (v14.13: previously fired eagerly on mount and added two DB queries to the
+  // 21-query mount-burst — measurable cold-start lag on iPad Chrome.)
   useEffect(() => {
-    if (user?.id && shouldRunDailyInference()) {
-      runDailyPreferenceInference(user.id);
+    if (!user?.id || !shouldRunDailyInference()) return;
+    type IdleCallback = (cb: () => void, opts?: { timeout?: number }) => number;
+    const ric = (window as unknown as { requestIdleCallback?: IdleCallback }).requestIdleCallback;
+    if (typeof ric === 'function') {
+      const handle = ric(() => runDailyPreferenceInference(user.id), { timeout: 5000 });
+      return () => {
+        const cic = (window as unknown as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
+        if (cic) cic(handle);
+      };
     }
+    // Fallback for Safari (no requestIdleCallback): use setTimeout with a 2s delay
+    const handle = setTimeout(() => runDailyPreferenceInference(user.id), 2000);
+    return () => clearTimeout(handle);
   }, [user?.id]);
 
   // Proactive warnings — auto-inject critical health alerts into chat
@@ -302,9 +315,21 @@ function InlineBuddyChatContent() {
 
   // ── Effects ─────────────────────────────────────────────────────────────
 
-  // Check connection on mount
+  // Check connection on mount — deferred to idle so it doesn't add to the
+  // cold-start burst (v14.13). The first send() will also implicitly verify
+  // connectivity via the streaming call, so a delayed health-check is fine.
   useEffect(() => {
-    checkConnection();
+    type IdleCallback = (cb: () => void, opts?: { timeout?: number }) => number;
+    const ric = (window as unknown as { requestIdleCallback?: IdleCallback }).requestIdleCallback;
+    if (typeof ric === 'function') {
+      const handle = ric(() => checkConnection(), { timeout: 3000 });
+      return () => {
+        const cic = (window as unknown as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
+        if (cic) cic(handle);
+      };
+    }
+    const handle = setTimeout(() => checkConnection(), 800);
+    return () => clearTimeout(handle);
   }, [checkConnection]);
 
   // Auto-scroll to bottom on new messages + re-focus input after AI response
@@ -538,7 +563,9 @@ function InlineBuddyChatContent() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={t.buddy.placeholder}
             className="flex-1 px-3 py-2 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition-colors"
-            disabled={isLoading}
+            // v14.13: input stays enabled while the bot is streaming — the user
+            // can already type the next question. handleSubmit guards against
+            // sending while isLoading, so we don't race the in-flight reply.
             autoFocus
           />
           {voiceSupported && (

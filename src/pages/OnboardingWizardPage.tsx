@@ -13,7 +13,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -140,9 +140,21 @@ function toggleChip<T>(arr: T[], value: T): T[] {
 export function OnboardingWizardPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data: profile } = useProfile();
+  const { data: profile, isFetched: profileFetched } = useProfile();
   const updateProfile = useUpdateProfile();
   const addBody = useAddBodyMeasurement();
+
+  // v14.13: Defense-in-depth against the "onboarding every login" bug.
+  // OnboardingGuard already blocks redirects when profile is loading or
+  // errored — but if a user navigates here directly (deep link, browser
+  // history, manual URL) with a complete profile, send them home instead
+  // of forcing them to re-enter the same data.
+  const profileIsComplete = !!(
+    profile?.height_cm
+    && profile?.birth_date
+    && profile?.gender
+  );
+  const shouldSkipWizard = profileFetched && profileIsComplete;
 
   const o = t.onboarding as Record<string, unknown> | undefined;
   const label = (key: string, fallback: string): string =>
@@ -211,6 +223,14 @@ export function OnboardingWizardPage() {
 
   // ── Progress Bar ───────────────────────────────────────────────────────────
   const progressPct = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
+
+  // ── Skip if already complete (v14.13) ──────────────────────────────────────
+  // If a complete profile lands here (deep link, history, false-positive
+  // redirect from a flaky guard), bounce to the cockpit instead of forcing
+  // the user through the wizard again.
+  if (shouldSkipWizard) {
+    return <Navigate to="/cockpit" replace />;
+  }
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
