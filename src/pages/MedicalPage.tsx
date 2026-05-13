@@ -158,7 +158,7 @@ export function MedicalPage() {
                     </div>
                     <button
                       onClick={() => deleteBloodWork.mutate(bw.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -225,7 +225,7 @@ export function MedicalPage() {
                       </div>
                       <button
                         onClick={() => deleteBP.mutate(bp.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                        className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -302,7 +302,7 @@ export function MedicalPage() {
                     </div>
                     <button
                       onClick={() => deleteSymptom.mutate(log.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -359,7 +359,7 @@ export function MedicalPage() {
                     </div>
                     <button
                       onClick={() => deleteSleep.mutate(log.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -434,7 +434,7 @@ export function MedicalPage() {
                             if (linkedReminder) deleteReminder.mutate(linkedReminder.id);
                             deleteSubstance.mutate(sub.id);
                           }}
-                          className="p-1 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                          className="p-1 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                           title={t.medical.deleteSubstance}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
