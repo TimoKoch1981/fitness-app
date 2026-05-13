@@ -8,7 +8,13 @@ import { useIngredientCatalog } from '../../pantry/hooks/useIngredientCatalog';
 import { findCatalogItemForPreset } from '../../pantry/utils/supplementLinker';
 import { normalizeIngredient } from '../../pantry/types';
 import { SUBSTANCE_CATEGORIES, SUBSTANCE_TYPES } from '../../../lib/constants';
-import { parseFrequencyToReminder } from '../../reminders/lib/parseFrequency';
+import {
+  ReminderPicker,
+  DEFAULT_REMINDER_SCHEDULE,
+  scheduleToReminderFields,
+  suggestScheduleFromFrequency,
+  type ReminderScheduleValue,
+} from '../../reminders/components/ReminderPicker';
 import {
   getFilteredPresets,
   PRESET_GROUP_LABELS,
@@ -40,7 +46,10 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
   const [frequency, setFrequency] = useState('');
   const [ester, setEster] = useState('');
   const [halfLife, setHalfLife] = useState('');
-  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  // v14.12: full reminder flexibility via shared ReminderPicker.
+  // Replaces the old selectedDays + parseFrequencyToReminder logic.
+  const [createReminder, setCreateReminder] = useState(true);
+  const [schedule, setSchedule] = useState<ReminderScheduleValue>(DEFAULT_REMINDER_SCHEDULE);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
@@ -99,6 +108,11 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
     setFrequency(preset.defaultFrequency || '');
     setEster(preset.ester || '');
     setHalfLife(preset.halfLifeDays?.toString() || '');
+    // Pre-fill the reminder schedule based on the preset frequency
+    // (user can still fine-tune via ReminderPicker)
+    if (preset.defaultFrequency) {
+      setSchedule(suggestScheduleFromFrequency(preset.defaultFrequency));
+    }
     setSearchQuery('');
     setShowPresets(false);
     // Auto-suggest adding to pantry for supplement presets with catalog match
@@ -151,27 +165,24 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
         notes: notes || undefined,
       });
 
-      // Auto-create linked reminder if frequency is set
-      if (frequency && substance?.id) {
-        // Use explicit weekday selection if user picked days, otherwise parse from frequency string
-        const reminderConfig = selectedDays.length > 0
-          ? { repeat_mode: 'weekly' as const, days_of_week: selectedDays }
-          : parseFrequencyToReminder(frequency);
-        if (reminderConfig) {
-          try {
-            const title = language === 'de'
-              ? `${name} einnehmen`
-              : `Take ${name}`;
-            await addReminder.mutateAsync({
-              type: 'substance',
-              title,
-              substance_id: substance.id,
-              time_period: 'morning',
-              ...reminderConfig,
-            });
-          } catch {
-            // Non-critical: substance was saved, reminder failed silently
-          }
+      // Auto-create linked reminder if user opted in (v14.12).
+      // Uses the shared ReminderPicker schedule so the user has full flexibility:
+      // exact time vs time-of-day, weekly day-picker or "every N days", etc.
+      if (createReminder && substance?.id) {
+        try {
+          const title = language === 'de'
+            ? `${name} einnehmen`
+            : `Take ${name}`;
+          const scheduleFields = scheduleToReminderFields(schedule);
+          await addReminder.mutateAsync({
+            type: 'substance',
+            title,
+            substance_id: substance.id,
+            ...scheduleFields,
+          });
+        } catch {
+          // Non-critical: substance was saved, reminder failed silently.
+          // (Telemetry already logged the error via withTelemetry.)
         }
       }
 
@@ -206,7 +217,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
       setFrequency('');
       setEster('');
       setHalfLife('');
-      setSelectedDays([]);
+      setCreateReminder(true);
+      setSchedule(DEFAULT_REMINDER_SCHEDULE);
       setNotes('');
       setSearchQuery('');
       setShowPresets(true);
@@ -470,41 +482,38 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
             <input
               type="text"
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
+              onChange={(e) => {
+                setFrequency(e.target.value);
+                // Auto-suggest schedule from typed frequency (user can override below)
+                setSchedule(suggestScheduleFromFrequency(e.target.value));
+              }}
               placeholder={language === 'de' ? 'Oder eigenen Rhythmus eingeben...' : 'Or enter custom frequency...'}
               className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
             />
-            {/* Weekday selector for weekly frequencies */}
-            {/woche|week/i.test(frequency) && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-medium text-gray-500">
-                  {language === 'de' ? 'An welchen Tagen?' : 'On which days?'}
-                </p>
-                <div className="flex gap-1.5 justify-center">
-                  {(language === 'de' ? ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']).map((label, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedDays(prev =>
-                        prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx].sort()
-                      )}
-                      className={`w-8 h-8 rounded-full text-[10px] font-medium transition-all ${
-                        selectedDays.includes(idx)
-                          ? 'bg-teal-500 text-white'
-                          : 'bg-white border border-gray-200 text-gray-400 hover:border-teal-300'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {frequency && (
-              <p className="text-[10px] text-teal-600 flex items-center gap-1">
-                <Bell className="h-3 w-3" />
-                {language === 'de' ? 'Erinnerung wird automatisch angelegt' : 'Reminder will be created automatically'}
-              </p>
+          </div>
+
+          {/* Reminder block — full ReminderPicker for flexibility (v14.12) */}
+          <div className="bg-teal-50/40 border border-teal-100 rounded-xl p-3 space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={createReminder}
+                onChange={(e) => setCreateReminder(e.target.checked)}
+                className="h-4 w-4 rounded text-teal-500 focus:ring-teal-500"
+              />
+              <Bell className="h-4 w-4 text-teal-600" />
+              <span className="text-sm font-medium text-gray-700">
+                {language === 'de' ? 'Erinnerung anlegen' : 'Create reminder'}
+              </span>
+            </label>
+            {createReminder && (
+              <ReminderPicker
+                value={schedule}
+                onChange={setSchedule}
+                language={language}
+                hideDescription
+                compact
+              />
             )}
           </div>
 

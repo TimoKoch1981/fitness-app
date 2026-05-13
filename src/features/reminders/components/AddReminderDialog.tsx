@@ -1,20 +1,34 @@
 /**
  * Add Reminder Dialog — modal form for creating new reminders.
  *
- * Supports 4 types: substance, blood_pressure, body_measurement, custom.
- * Weekly mode (pick days) or interval mode (every N days).
+ * Supports 5 types: substance, meal_logging, blood_pressure, body_measurement, custom.
+ * Schedule UI is delegated to the shared ReminderPicker component (also used by
+ * AddSubstanceDialog so both flows have identical flexibility).
+ *
+ * Substance-typed reminders REQUIRE a substance_id selection (v14.12 / Issue #3):
+ * a "Substanz einnehmen" reminder without a linked substance has no log target.
+ * If the user has no active substances, we surface a clear hint instead of
+ * letting them save a dangling reminder.
  */
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddReminder } from '../hooks/useReminders';
 import { useSubstances } from '../../medical/hooks/useSubstances';
-import type { ReminderType, RepeatMode, TimePeriod } from '../../../types/health';
+import {
+  ReminderPicker,
+  DEFAULT_REMINDER_SCHEDULE,
+  scheduleToReminderFields,
+  type ReminderScheduleValue,
+} from './ReminderPicker';
+import type { ReminderType } from '../../../types/health';
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Optional: pre-select a substance (used when chaining from AddSubstanceDialog) */
+  initialSubstanceId?: string;
 }
 
 const TYPE_OPTIONS: { type: ReminderType; icon: string; labelKey: string }[] = [
@@ -25,9 +39,6 @@ const TYPE_OPTIONS: { type: ReminderType; icon: string; labelKey: string }[] = [
   { type: 'custom', icon: '📌', labelKey: 'custom' },
 ];
 
-const DAY_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-const DAY_LABELS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
 const DEFAULT_TITLES: Record<ReminderType, { de: string; en: string }> = {
   substance: { de: 'Substanz einnehmen', en: 'Take substance' },
   meal_logging: { de: 'Mahlzeit loggen', en: 'Log meal' },
@@ -36,36 +47,31 @@ const DEFAULT_TITLES: Record<ReminderType, { de: string; en: string }> = {
   custom: { de: '', en: '' },
 };
 
-export function AddReminderDialog({ open, onClose }: Props) {
+export function AddReminderDialog({ open, onClose, initialSubstanceId }: Props) {
   const { t, language } = useTranslation();
   const addReminder = useAddReminder();
   const { data: substances } = useSubstances(true);
 
   // Form state
-  const [type, setType] = useState<ReminderType>('substance');
+  const [type, setType] = useState<ReminderType>(initialSubstanceId ? 'substance' : 'substance');
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [time, setTime] = useState('08:00');
-  const [timePeriod, setTimePeriod] = useState<TimePeriod | null>(null);
-  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>('weekly');
-  const [intervalDays, setIntervalDays] = useState('7');
-  const [substanceId, setSubstanceId] = useState('');
-  const [useTimePeriod, setUseTimePeriod] = useState(false);
+  const [substanceId, setSubstanceId] = useState(initialSubstanceId ?? '');
+  const [schedule, setSchedule] = useState<ReminderScheduleValue>(DEFAULT_REMINDER_SCHEDULE);
   const [error, setError] = useState('');
 
   if (!open) return null;
 
-  const dayLabels = language === 'de' ? DAY_LABELS : DAY_LABELS_EN;
-
-  const toggleDay = (day: number) => {
-    setDaysOfWeek(prev =>
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day].sort()
-    );
-  };
-
   const lang = language === 'de' ? 'de' : 'en';
   const effectiveTitle = title || DEFAULT_TITLES[type][lang];
+
+  const hasActiveSubstances = !!substances && substances.length > 0;
+  const substanceRequired = type === 'substance';
+  const substanceMissing = substanceRequired && !substanceId;
+  const noSubstancesAvailable = substanceRequired && !hasActiveSubstances;
+  const submitDisabled = addReminder.isPending
+    || !effectiveTitle
+    || substanceMissing
+    || noSubstancesAvailable;
 
   const handleTypeChange = (newType: ReminderType) => {
     setType(newType);
@@ -75,36 +81,35 @@ export function AddReminderDialog({ open, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError('');
 
+    // Hard guard: substance-typed reminders need a substance_id (Issue #3)
+    if (substanceMissing) {
+      setError(language === 'de'
+        ? 'Bitte wähle eine Substanz aus, an die die Erinnerung gekoppelt sein soll.'
+        : 'Please select a substance to link this reminder to.');
+      return;
+    }
+
     try {
+      const scheduleFields = scheduleToReminderFields(schedule);
       await addReminder.mutateAsync({
         type,
         title: effectiveTitle,
-        description: description || undefined,
-        time: useTimePeriod ? undefined : time,
-        time_period: useTimePeriod && timePeriod ? timePeriod : undefined,
-        days_of_week: repeatMode === 'weekly' ? daysOfWeek : undefined,
-        repeat_mode: repeatMode,
-        interval_days: repeatMode === 'interval' ? parseInt(intervalDays) || 7 : undefined,
+        ...scheduleFields,
         substance_id: type === 'substance' && substanceId ? substanceId : undefined,
       });
 
       // Reset
       setType('substance');
       setTitle('');
-      setDescription('');
-      setTime('08:00');
-      setTimePeriod(null);
-      setDaysOfWeek([0, 1, 2, 3, 4, 5, 6]);
-      setRepeatMode('weekly');
-      setIntervalDays('7');
       setSubstanceId('');
-      setUseTimePeriod(false);
+      setSchedule(DEFAULT_REMINDER_SCHEDULE);
       onClose();
-    } catch {
-      setError(t.common.saveError);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[AddReminderDialog] submit failed:', err);
+      setError(`${t.common.saveError}${msg ? ` (${msg.slice(0, 120)})` : ''}`);
     }
   };
 
@@ -122,7 +127,9 @@ export function AddReminderDialog({ open, onClose }: Props) {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Type Selection */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">Typ</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              {language === 'de' ? 'Typ' : 'Type'}
+            </label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {TYPE_OPTIONS.map(opt => (
                 <button
@@ -142,26 +149,44 @@ export function AddReminderDialog({ open, onClose }: Props) {
             </div>
           </div>
 
-          {/* Substance dropdown (only for substance type) */}
-          {type === 'substance' && substances && substances.length > 0 && (
+          {/* Substance dropdown — REQUIRED for type='substance' (Issue #3) */}
+          {type === 'substance' && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Substanz</label>
-              <select
-                value={substanceId}
-                onChange={e => setSubstanceId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
-              >
-                <option value="">{language === 'de' ? '— Substanz wählen —' : '— Select substance —'}</option>
-                {substances.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {language === 'de' ? 'Substanz *' : 'Substance *'}
+              </label>
+              {hasActiveSubstances ? (
+                <select
+                  value={substanceId}
+                  onChange={e => setSubstanceId(e.target.value)}
+                  required
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                    substanceMissing && error ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">{language === 'de' ? '— Substanz wählen —' : '— Select substance —'}</option>
+                  {substances!.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    {language === 'de'
+                      ? 'Du hast noch keine aktiven Substanzen. Lege erst eine Substanz an, bevor du eine Substanz-Erinnerung erstellst.'
+                      : 'You have no active substances yet. Add a substance first before creating a substance reminder.'}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Titel</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              {language === 'de' ? 'Titel' : 'Title'}
+            </label>
             <input
               type="text"
               value={title}
@@ -171,131 +196,12 @@ export function AddReminderDialog({ open, onClose }: Props) {
             />
           </div>
 
-          {/* Time: exact or period */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-gray-500">
-                {language === 'de' ? 'Uhrzeit' : 'Time'}
-              </label>
-              <button
-                type="button"
-                onClick={() => setUseTimePeriod(!useTimePeriod)}
-                className="text-[10px] text-teal-600 hover:underline"
-              >
-                {useTimePeriod
-                  ? (language === 'de' ? 'Exakte Uhrzeit' : 'Exact time')
-                  : (language === 'de' ? 'Tageszeit wählen' : 'Pick time period')}
-              </button>
-            </div>
-
-            {useTimePeriod ? (
-              <div className="grid grid-cols-3 gap-2">
-                {(['morning', 'noon', 'evening'] as TimePeriod[]).map(period => (
-                  <button
-                    key={period}
-                    type="button"
-                    onClick={() => setTimePeriod(period)}
-                    className={`p-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                      timePeriod === period
-                        ? 'border-teal-500 bg-teal-50 text-teal-700'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    {period === 'morning' ? '🌅' : period === 'noon' ? '☀️' : '🌙'}{' '}
-                    {t.reminders[period as keyof typeof t.reminders]}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <input
-                type="time"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
-              />
-            )}
-          </div>
-
-          {/* Repeat mode */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">
-              {language === 'de' ? 'Wiederholung' : 'Repeat'}
-            </label>
-            <div className="flex gap-2 mb-3">
-              <button
-                type="button"
-                onClick={() => setRepeatMode('weekly')}
-                className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                  repeatMode === 'weekly'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-gray-200 text-gray-600'
-                }`}
-              >
-                {t.reminders.weekly}
-              </button>
-              <button
-                type="button"
-                onClick={() => setRepeatMode('interval')}
-                className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                  repeatMode === 'interval'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-gray-200 text-gray-600'
-                }`}
-              >
-                {t.reminders.interval}
-              </button>
-            </div>
-
-            {repeatMode === 'weekly' ? (
-              <div className="flex gap-1 justify-between">
-                {dayLabels.map((label, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => toggleDay(index)}
-                    className={`w-9 h-9 rounded-full text-xs font-medium transition-all ${
-                      daysOfWeek.includes(index)
-                        ? 'bg-teal-500 text-white'
-                        : 'bg-gray-100 text-gray-400'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {language === 'de' ? 'Alle' : 'Every'}
-                </span>
-                <input
-                  type="number"
-                  value={intervalDays}
-                  onChange={e => setIntervalDays(e.target.value)}
-                  min="1"
-                  max="365"
-                  className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-teal-500 outline-none"
-                />
-                <span className="text-xs text-gray-500">
-                  {language === 'de' ? 'Tage' : 'days'}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Description (optional) */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
-              {language === 'de' ? 'Beschreibung (optional)' : 'Description (optional)'}
-            </label>
-            <input
-              type="text"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder={language === 'de' ? 'Zusätzliche Hinweise...' : 'Additional notes...'}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
-            />
-          </div>
+          {/* Shared schedule picker (time / repeat / description) */}
+          <ReminderPicker
+            value={schedule}
+            onChange={setSchedule}
+            language={language}
+          />
 
           {/* Error */}
           {error && (
@@ -305,7 +211,7 @@ export function AddReminderDialog({ open, onClose }: Props) {
           {/* Submit */}
           <button
             type="submit"
-            disabled={addReminder.isPending || !effectiveTitle}
+            disabled={submitDisabled}
             className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
           >
             {addReminder.isPending ? t.common.loading : t.common.save}
