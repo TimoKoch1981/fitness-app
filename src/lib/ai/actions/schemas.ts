@@ -90,24 +90,28 @@ const safeDate = z.preprocess(clampDate, z.string());
 
 // ── Schemas ─────────────────────────────────────────────────────────────
 
+// v14.17 / P2-5: plausibility refines. Caps an absurd LLM output (e.g. a
+// 50.000 kcal meal because the agent confused kJ/kcal) before it lands in the
+// DB. Loose enough to never reject a real legitimate value.
+
 export const LogMealSchema = z.object({
   date: safeDate,
   name: z.string().min(1),
   type: z.enum(['breakfast', 'morning_snack', 'lunch', 'afternoon_snack', 'dinner', 'snack']).default(inferMealType),
-  calories: z.number().nonnegative(),
-  protein: z.number().nonnegative(),
-  carbs: z.number().nonnegative(),
-  fat: z.number().nonnegative(),
-  fiber: z.number().nonnegative().optional(),
+  calories: z.number().nonnegative().max(10000),  // realistic upper bound for a single meal
+  protein: z.number().nonnegative().max(500),
+  carbs: z.number().nonnegative().max(1500),
+  fat: z.number().nonnegative().max(500),
+  fiber: z.number().nonnegative().max(200).optional(),
   source: z.literal('ai').default('ai'),
 });
 
 const ExerciseSetSchema = z.object({
   name: z.string().min(1),
-  sets: z.number().positive().optional(),
-  reps: z.number().positive().optional(),
-  weight_kg: z.number().nonnegative().optional(),
-  duration_minutes: z.number().positive().optional(),
+  sets: z.number().positive().max(50).optional(),
+  reps: z.number().positive().max(1000).optional(),
+  weight_kg: z.number().nonnegative().max(1000).optional(),
+  duration_minutes: z.number().positive().max(600).optional(),
   notes: z.string().optional(),
 });
 
@@ -115,23 +119,23 @@ export const LogWorkoutSchema = z.object({
   date: safeDate,
   name: z.string().min(1),
   type: z.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sports', 'other']).default('strength'),
-  duration_minutes: z.number().positive().optional(),
-  calories_burned: z.number().nonnegative().optional(),
-  met_value: z.number().positive().optional(),
+  duration_minutes: z.number().positive().max(600).optional(),  // 10h cap
+  calories_burned: z.number().nonnegative().max(20000).optional(),
+  met_value: z.number().positive().max(30).optional(),
   exercises: z.array(ExerciseSetSchema).default([]),
   notes: z.string().optional(),
 });
 
 export const LogBodySchema = z.object({
   date: safeDate,
-  weight_kg: z.number().positive().optional(),
+  weight_kg: z.number().min(20).max(500).optional(),    // 20-500 kg (handles bariatric extremes)
   body_fat_pct: z.number().min(1).max(60).optional(),
-  muscle_mass_kg: z.number().positive().optional(),
+  muscle_mass_kg: z.number().min(10).max(200).optional(),
   water_pct: z.number().min(20).max(80).optional(),
-  waist_cm: z.number().positive().optional(),
-  chest_cm: z.number().positive().optional(),
-  arm_cm: z.number().positive().optional(),
-  leg_cm: z.number().positive().optional(),
+  waist_cm: z.number().min(30).max(250).optional(),
+  chest_cm: z.number().min(40).max(250).optional(),
+  arm_cm: z.number().min(15).max(100).optional(),
+  leg_cm: z.number().min(20).max(150).optional(),
   source: z.literal('ai').default('ai'),
 }).refine(
   (data) => {

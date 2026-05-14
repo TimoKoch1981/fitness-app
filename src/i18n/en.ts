@@ -446,7 +446,7 @@ export const en: TranslationKeys = {
     clearChat: 'Clear Chat',
     clearThread: 'Clear this thread',
     clearAllThreads: 'Clear all threads',
-    connectionError: 'Failed to connect to AI model. Is Ollama running?',
+    connectionError: 'Failed to connect to AI model. Try again or reload the app.',
     helpHint: 'Tip: Tell me what you ate or ask me about nutrition!',
     you: 'You',
     onboardingGreeting:

@@ -1,6 +1,6 @@
 /**
- * MealsTabContent — Inner content of the Meals tab, extracted from MealsPage.
- * Used inside TrackingPage as one of 3 tracking tabs.
+ * MealsTabContent — Inner content of the Meals tab.
+ * Used inside NutritionPage as one of its tabs.
  */
 
 import { useState, useMemo, useCallback } from 'react';

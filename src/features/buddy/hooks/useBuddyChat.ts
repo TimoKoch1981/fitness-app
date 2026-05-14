@@ -681,8 +681,12 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
           ? {
               ...m,
               content: language === 'de'
-                ? `Verbindungsfehler: ${errorMsg}. Läuft Ollama? (ollama serve)`
-                : `Connection error: ${errorMsg}. Is Ollama running? (ollama serve)`,
+                // v14.17: provider-agnostic error message. The old text only made
+                // sense when Ollama was the local dev provider — in production
+                // (Supabase Proxy → OpenAI/Anthropic) "Läuft Ollama?" was simply
+                // confusing for the user.
+                ? `Verbindungsfehler: ${errorMsg}. Versuche es nochmal — wenn das Problem bleibt, lade die App neu.`
+                : `Connection error: ${errorMsg}. Try again — if the issue persists, reload the app.`,
               isLoading: false,
               isStreaming: false,
               isError: true,

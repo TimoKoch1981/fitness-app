@@ -1,7 +1,7 @@
 /**
- * WorkoutsTabContent — Inner content of the Workouts tab, extracted from WorkoutsPage.
+ * WorkoutsTabContent — Inner content of the Workouts tab.
  * Contains sub-tabs: Plan | History | Progress (full analytics dashboard).
- * Used inside TrackingPage as one of 3 tracking tabs.
+ * Used inside TrainingPage.
  *
  * Plan tab now shows:
  * - TrainingPlanList (accordion: expandable plan cards with inline DayCards)
