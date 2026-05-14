@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, type ReactNode } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
@@ -158,15 +158,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  // v14.24 / A-13 fix: alle Auth-Methoden via useCallback stabilisieren,
+  // damit der Context-Value sich nur bei echten Auth-State-Aenderungen
+  // aendert. Vorher wurden bei jedem Render neue Funktionen erstellt; das
+  // useMemo darunter listete sie zwar nicht als deps, gab aber damit das
+  // alte value-Objekt zurueck — funktionierte zufaellig, war aber fragil
+  // und triggerte downstream Re-Render-Bursts in der useAuth-Konsumenten.
+  const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return {
       error: error ? new Error(error.message) : null,
       errorCode: error?.code,
     };
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -180,13 +186,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       error: error ? new Error(error.message) : null,
       autoConfirmed: !!data?.session,
     };
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, []);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     // v14.22 / A-01 fix: GoTrue muss wissen, wohin der User nach dem
     // Token-Verify geleitet werden soll. Ohne diese Option landet er auf
     // GOTRUE_SITE_URL ("/"), nicht auf der ResetPasswordPage.
@@ -194,19 +200,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     return { error: error ? new Error(error.message) : null };
-  };
+  }, []);
 
-  const updatePassword = async (password: string) => {
+  const updatePassword = useCallback(async (password: string) => {
     const { error } = await supabase.auth.updateUser({ password });
     return { error: error ? new Error(error.message) : null };
-  };
+  }, []);
 
-  const resendConfirmation = async (email: string) => {
+  const resendConfirmation = useCallback(async (email: string) => {
     const { error } = await supabase.auth.resend({ type: 'signup', email });
     return { error: error ? new Error(error.message) : null };
-  };
+  }, []);
 
-  const signInWithOAuth = async (provider: OAuthProvider) => {
+  const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -214,11 +220,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       },
     });
     return { error: error ? new Error(error.message) : null };
-  };
+  }, []);
 
   const value = useMemo(
     () => ({ user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, resetPassword, updatePassword, resendConfirmation }),
-    [user, session, loading, isAdmin],
+    [user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, resetPassword, updatePassword, resendConfirmation],
   );
 
   return (
