@@ -9,10 +9,11 @@ import { APP_NAME } from '../lib/constants';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { useFeatureFlag } from '../lib/featureFlags/useFeatureFlag';
 import { MFAVerificationDialog } from '../features/auth/components/MFAVerificationDialog';
+import { localizeAuthError } from '../lib/auth/localizeAuthError';
 
 export function LoginPage() {
   const { signIn, signInWithOAuth, resendConfirmation, user, loading } = useAuth();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +65,9 @@ export function LoginPage() {
         if (errorCode === 'email_not_confirmed') {
           setEmailNotConfirmed(true);
         } else {
-          setError(error.message);
+          // v14.25: gemeinsamer Localizer — neutralisiert Account-Enumeration
+          // ("Invalid login credentials" wird zu "E-Mail oder Passwort stimmt nicht").
+          setError(localizeAuthError(error.message, language).message);
         }
         return;
       }

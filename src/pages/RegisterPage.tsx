@@ -5,6 +5,7 @@ import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
 import { APP_NAME } from '../lib/constants';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { localizeAuthError } from '../lib/auth/localizeAuthError';
 
 export function RegisterPage() {
   const { signUp, user, loading } = useAuth();
@@ -44,7 +45,19 @@ export function RegisterPage() {
     try {
       const { error, autoConfirmed } = await signUp(email.trim(), pw);
       if (error) {
-        setError(error.message);
+        // v14.25 / A-07: Account-Enumeration-Schutz. "User already registered"
+        // wird zur neutralen Bestaetigungs-Mitteilung — der Angreifer kann
+        // nicht aus dem Response unterscheiden, ob die Email schon vergeben
+        // ist. Echte Neukunden erhalten die Mail und werden bestaetigt;
+        // Bestandsuser bekommen GoTrue-seitig (resend) keine Reset-Mail,
+        // koennen sich aber normal anmelden.
+        const localized = localizeAuthError(error.message, language);
+        if (localized.isEnumerationGuard) {
+          // Zeige Success-style UX statt rotem Banner.
+          setSuccess(true);
+        } else {
+          setError(localized.message);
+        }
       } else if (autoConfirmed) {
         setAutoLogging(true);
         return;

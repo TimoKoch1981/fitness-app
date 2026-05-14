@@ -13,50 +13,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Info, RotateCw } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useTranslation } from '../i18n';
-
-/**
- * Localize GoTrue / Supabase error messages to German.
- * Supabase returns errors in English regardless of request language.
- */
-function localizeAuthError(raw: string, language: string): { message: string; cooldownSec?: number } {
-  const isDE = language === 'de';
-
-  // Rate limit: "For security purposes, you can only request this after NN seconds."
-  const rateLimitMatch = raw.match(/after\s+(\d+)\s+seconds?/i);
-  if (rateLimitMatch) {
-    const sec = parseInt(rateLimitMatch[1], 10);
-    return {
-      message: isDE
-        ? `Aus Sicherheitsgruenden kannst du erst in ${sec} Sekunden einen neuen Reset anfordern.`
-        : `For security reasons, you can request a new reset in ${sec} seconds.`,
-      cooldownSec: sec,
-    };
-  }
-
-  if (/rate\s*limit|too\s*many/i.test(raw)) {
-    return {
-      message: isDE
-        ? 'Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.'
-        : 'Too many requests. Please wait a moment and try again.',
-      cooldownSec: 60,
-    };
-  }
-
-  if (/invalid.*email|email.*invalid/i.test(raw)) {
-    return { message: isDE ? 'Ungueltige E-Mail-Adresse.' : 'Invalid email address.' };
-  }
-
-  // Account-Enumeration-resistant: never reveal whether the email is registered.
-  if (/user.*not.*found|not\s*registered/i.test(raw)) {
-    return {
-      message: isDE
-        ? 'Falls diese E-Mail registriert ist, haben wir einen Link gesendet.'
-        : 'If this email is registered, we have sent a link.',
-    };
-  }
-
-  return { message: raw };
-}
+import { localizeAuthError } from '../lib/auth/localizeAuthError';
 
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth();
