@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { ensureFreshSession } from '../../../lib/refreshSession';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { ActiveWorkoutState } from '../context/ActiveWorkoutContext';
 import type { PlanExercise, SessionFeedback } from '../../../types/health';
 import { calculateSessionCalories } from '../utils/calorieCalculation';
@@ -28,7 +29,9 @@ export function useSaveWorkoutSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: SaveSessionInput) => {
+    // v14.20 / regression-shield: wrap with telemetry. Was the largest
+    // blind spot — the workout session save path bypassed useActionExecutor.
+    mutationFn: withTelemetry('save_workout_session', 'ui', async (input: SaveSessionInput) => {
       const { session, weightKg } = input;
 
       // Ensure fresh session — fixes stale JWT / RLS rejections
@@ -159,7 +162,7 @@ export function useSaveWorkoutSession() {
       await updateMesocycleWeek(session);
 
       return workout;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
       queryClient.invalidateQueries({ queryKey: ['training_plans'] });

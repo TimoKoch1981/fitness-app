@@ -22,6 +22,7 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus, X, Utensils, Dumbbell, Pill, Heart, Scale, Camera,
 } from 'lucide-react';
@@ -29,11 +30,16 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { useTranslation } from '../../i18n';
 import { AddMealDialog } from '../../features/meals/components/AddMealDialog';
 import { AddWorkoutDialog } from '../../features/workouts/components/AddWorkoutDialog';
+import { WorkoutStartDialog } from '../../features/workouts/components/WorkoutStartDialog';
 import { LogSubstanceDialog } from '../../features/medical/components/LogSubstanceDialog';
 import { AddBloodPressureDialog } from '../../features/medical/components/AddBloodPressureDialog';
 import { AddBodyMeasurementDialog } from '../../features/body/components/AddBodyMeasurementDialog';
 
 type QuickAction = 'meal' | 'workout' | 'substance' | 'blood_pressure' | 'body' | 'meal_photo';
+// v14.20: 'workout' opens WorkoutStartDialog (3-way: Free / Quick-Log / Create-Plan)
+// so users find the "Freies Training" entry that exists on the Training page
+// but was hidden in the QuickAdd path. Consistent with TrainingPage's plus button.
+type ActiveOverlay = QuickAction | 'workout_quicklog' | null;
 
 interface ActionDef {
   key: QuickAction;
@@ -56,16 +62,31 @@ export function QuickAddFAB() {
   const { user } = useAuth();
   const { language } = useTranslation();
   const isDE = language === 'de';
+  const navigate = useNavigate();
 
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [activeDialog, setActiveDialog] = useState<QuickAction | null>(null);
+  const [activeOverlay, setActiveOverlay] = useState<ActiveOverlay>(null);
 
   // Don't show before auth resolves
   if (!user) return null;
 
+  const closeOverlay = () => setActiveOverlay(null);
+
   const handlePick = (action: QuickAction) => {
     setSheetOpen(false);
-    setActiveDialog(action);
+    // 'workout' → 3-way picker (Free / Quick-Log / Plan). All others go
+    // straight to their dedicated dialog (single intent).
+    setActiveOverlay(action);
+  };
+
+  // WorkoutStartDialog → Quick-Log: switch from the picker to AddWorkoutDialog.
+  const handleQuickLog = () => setActiveOverlay('workout_quicklog');
+
+  // WorkoutStartDialog → Create Plan: send user to TrainingPage so the
+  // existing CreatePlanDialog flow takes over (no duplicate plan UI here).
+  const handleCreatePlan = () => {
+    closeOverlay();
+    navigate('/training?tab=plan&action=create');
   };
 
   return (
@@ -134,12 +155,23 @@ export function QuickAddFAB() {
       )}
 
       {/* Dialogs — re-use the existing per-page forms */}
-      <AddMealDialog open={activeDialog === 'meal'} onClose={() => setActiveDialog(null)} />
-      <AddMealDialog open={activeDialog === 'meal_photo'} onClose={() => setActiveDialog(null)} />
-      <AddWorkoutDialog open={activeDialog === 'workout'} onClose={() => setActiveDialog(null)} />
-      <LogSubstanceDialog open={activeDialog === 'substance'} onClose={() => setActiveDialog(null)} />
-      <AddBloodPressureDialog open={activeDialog === 'blood_pressure'} onClose={() => setActiveDialog(null)} />
-      <AddBodyMeasurementDialog open={activeDialog === 'body'} onClose={() => setActiveDialog(null)} />
+      <AddMealDialog open={activeOverlay === 'meal'} onClose={closeOverlay} />
+      <AddMealDialog open={activeOverlay === 'meal_photo'} onClose={closeOverlay} />
+
+      {/* Workout: 3-way picker mirrors TrainingPage's plus-button. The
+          QuickAddFAB previously dumped users straight into Quick-Log, hiding
+          the "Freies Training" entry that exists on the Training page. */}
+      <WorkoutStartDialog
+        open={activeOverlay === 'workout'}
+        onClose={closeOverlay}
+        onQuickLog={handleQuickLog}
+        onCreatePlan={handleCreatePlan}
+      />
+      <AddWorkoutDialog open={activeOverlay === 'workout_quicklog'} onClose={closeOverlay} />
+
+      <LogSubstanceDialog open={activeOverlay === 'substance'} onClose={closeOverlay} />
+      <AddBloodPressureDialog open={activeOverlay === 'blood_pressure'} onClose={closeOverlay} />
+      <AddBodyMeasurementDialog open={activeOverlay === 'body'} onClose={closeOverlay} />
     </>
   );
 }

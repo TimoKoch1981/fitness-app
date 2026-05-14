@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy } from 'lucide-react';
+import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy, Pencil, Split } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
@@ -43,8 +43,11 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const { exercise, exerciseIndex, lastExercise, onLogSet, onSkipSet, onAllDone, maxWeight } = props;
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { state: workoutState, setTag } = useActiveWorkout();
+  const { state: workoutState, setTag, toggleUnilateral, editLoggedSet } = useActiveWorkout();
   const setReady = workoutState.setReady;
+
+  // v14.20 / Punkt 4: which completed set is currently being re-edited
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
   // Catalog lookup for movement pattern (carry exercises use distance/duration like cardio)
   const { data: catalog } = useExerciseCatalog();
@@ -189,6 +192,31 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
         </div>
       )}
 
+      {/* v14.20 / Punkt 3: L/R toggle — flips pending sets between bilateral
+          and unilateral (left + right). Useful for cable rope work the user
+          decides to do single-arm. Completed sets are preserved. */}
+      {!isCardio && (
+        <div className="flex items-center justify-end px-2">
+          <button
+            type="button"
+            onClick={() => toggleUnilateral(exerciseIndex)}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+              exercise.sets.some(s => s.side != null)
+                ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+            title={isDE
+              ? 'Einseitig (links/rechts pro Satz) statt beidseitig'
+              : 'Switch to single-side (left/right per set) instead of bilateral'}
+          >
+            <Split className="h-3 w-3" />
+            {exercise.sets.some(s => s.side != null)
+              ? (isDE ? 'L/R aktiv' : 'L/R active')
+              : (isDE ? 'L/R einseitig' : 'L/R single-side')}
+          </button>
+        </div>
+      )}
+
       {/* Progress indicator */}
       <div className="flex items-center justify-between px-2">
         <span className="text-xs text-gray-400">
@@ -318,10 +346,41 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
 
               {/* Field 1: Duration (cardio) or Reps (strength) — Input / Completed Value */}
               <div className={noWeight ? 'col-span-4' : 'col-span-3'}>
-                {isDone ? (
-                  <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
+                {isDone && editingIdx !== idx ? (
+                  // v14.20 / Punkt 4: completed values are now clickable —
+                  // tap to re-edit. No need to wait for WorkoutSummary.
+                  <button
+                    type="button"
+                    onClick={() => setEditingIdx(idx)}
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold hover:bg-teal-200 transition-colors"
+                    title={isDE ? 'Tippen zum Korrigieren' : 'Tap to edit'}
+                  >
                     {isCardio ? (set.actual_duration_minutes ?? '-') : set.actual_reps}
-                  </div>
+                  </button>
+                ) : isDone && editingIdx === idx ? (
+                  // Inline edit input. Commit on blur or Enter.
+                  <input
+                    type="number"
+                    inputMode={isCardio ? 'decimal' : 'numeric'}
+                    step={isCardio ? '0.1' : undefined}
+                    autoFocus
+                    defaultValue={isCardio
+                      ? (set.actual_duration_minutes?.toString() ?? '')
+                      : (set.actual_reps?.toString() ?? '')}
+                    onBlur={(e) => {
+                      const v = e.target.value === '' ? undefined : Number(e.target.value);
+                      if (v != null && !isNaN(v)) {
+                        editLoggedSet(exerciseIndex, idx,
+                          isCardio ? { durationMinutes: v } : { reps: v });
+                      }
+                      setEditingIdx(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                      if (e.key === 'Escape') setEditingIdx(null);
+                    }}
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-teal-400 bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
                 ) : (
                   <input
                     type="number"
@@ -350,10 +409,37 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
 
               {/* Field 2: Distance (cardio) or Weight (strength) — Input / Completed Value */}
               {!noWeight && <div className="col-span-3">
-                {isDone ? (
-                  <div className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold">
+                {isDone && editingIdx !== idx ? (
+                  <button
+                    type="button"
+                    onClick={() => setEditingIdx(idx)}
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold hover:bg-teal-200 transition-colors"
+                    title={isDE ? 'Tippen zum Korrigieren' : 'Tap to edit'}
+                  >
                     {isCardio ? (set.actual_distance_km ?? '-') : (set.actual_weight_kg ?? '-')}
-                  </div>
+                  </button>
+                ) : isDone && editingIdx === idx ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step={isCardio ? '0.01' : '0.1'}
+                    defaultValue={isCardio
+                      ? (set.actual_distance_km?.toString() ?? '')
+                      : (set.actual_weight_kg?.toString() ?? '')}
+                    onBlur={(e) => {
+                      const v = e.target.value === '' ? undefined : Number(e.target.value);
+                      if (v != null && !isNaN(v)) {
+                        editLoggedSet(exerciseIndex, idx,
+                          isCardio ? { distanceKm: v } : { weightKg: v });
+                      }
+                      setEditingIdx(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                      if (e.key === 'Escape') setEditingIdx(null);
+                    }}
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-teal-400 bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
                 ) : (
                   <input
                     type="number"
@@ -383,13 +469,20 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               {/* Action Button */}
               <div className="col-span-1 flex justify-center">
                 {isDone ? (
-                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center"
-                    title={isCardio
-                      ? `${set.actual_duration_minutes ?? '-'} min · ${set.actual_distance_km ?? '-'} km`
-                      : `${set.actual_reps} × ${set.actual_weight_kg ?? '-'} kg`}
+                  // v14.20 / Punkt 4: tap = edit mode toggle. Pencil hints
+                  // the affordance; tap also returns to the green check.
+                  <button
+                    type="button"
+                    onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                    className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center hover:bg-teal-200 transition-colors"
+                    title={editingIdx === idx
+                      ? (isDE ? 'Fertig' : 'Done')
+                      : (isDE ? 'Tippen zum Korrigieren' : 'Tap to edit')}
                   >
-                    <Check className="h-4 w-4 text-teal-500" />
-                  </div>
+                    {editingIdx === idx
+                      ? <Check className="h-4 w-4 text-teal-600" />
+                      : <Pencil className="h-3.5 w-3.5 text-teal-500" />}
+                  </button>
                 ) : isSkipped ? (
                   <span className="text-xs text-gray-300">—</span>
                 ) : isCurrent && isLocked ? (

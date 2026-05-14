@@ -85,6 +85,8 @@ type Action =
   | { type: 'EDIT_EXERCISE'; exerciseIndex: number; updates: ExerciseEditPayload }
   | { type: 'SET_READY' }
   | { type: 'SET_TAG'; exerciseIndex: number; setIndex: number; tag: import('../../../types/health').SetTag }
+  | { type: 'TOGGLE_UNILATERAL'; exerciseIndex: number }
+  | { type: 'EDIT_LOGGED_SET'; exerciseIndex: number; setIndex: number; actualReps?: number; actualWeightKg?: number; actualDurationMinutes?: number; actualDistanceKm?: number }
   | { type: 'REPLACE_EXERCISES'; exercises: WorkoutExerciseResult[] }
   | { type: 'CLEAR_SESSION' };
 
@@ -361,6 +363,101 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       return { ...state, exercises };
     }
 
+    case 'TOGGLE_UNILATERAL': {
+      // v14.20 / Punkt 3: Per-exercise L/R toggle. Catalog says bilateral
+      // by default, but many cable/rope exercises (Trizeps Pushdown, Curls,
+      // Lateral Raises) are commonly done single-arm. The user can flip
+      // mid-session. Only PENDING sets are restructured — completed and
+      // skipped sets keep their existing structure so we never lose data.
+      const exercises = [...state.exercises];
+      const ex = { ...exercises[action.exerciseIndex] };
+      const sets = [...ex.sets];
+
+      // Split into [touched] + [pending]. Pending = trailing sets that are
+      // neither completed nor skipped. (We restructure only the contiguous
+      // pending tail; restructuring "holes" in the middle would confuse the
+      // currentSetIndex pointer.)
+      let firstPendingIdx = sets.length;
+      for (let i = sets.length - 1; i >= 0; i--) {
+        if (!sets[i].completed && !sets[i].skipped) firstPendingIdx = i;
+        else break;
+      }
+      const touched = sets.slice(0, firstPendingIdx);
+      const pending = sets.slice(firstPendingIdx);
+
+      // Detect current direction from the pending tail. If any pending set
+      // carries a side → currently unilateral, flip to bilateral. Else flip
+      // to unilateral.
+      const isCurrentlyUnilateral = pending.some(s => s.side != null);
+
+      let restructured: SetResult[];
+      if (isCurrentlyUnilateral) {
+        // unilateral → bilateral: collapse adjacent L+R pairs to a single set.
+        // The L set's targets win (they're identical to the R set anyway).
+        const collapsed: SetResult[] = [];
+        for (let i = 0; i < pending.length; i++) {
+          const s = pending[i];
+          if (s.side === 'left' && pending[i + 1]?.side === 'right') {
+            // pair — keep one, drop side
+            const { side: _drop, ...rest } = s;
+            void _drop;
+            collapsed.push({ ...rest });
+            i++; // skip the R
+          } else {
+            const { side: _drop, ...rest } = s;
+            void _drop;
+            collapsed.push({ ...rest });
+          }
+        }
+        restructured = collapsed.map((s, i) => ({
+          ...s,
+          set_number: touched.length + i + 1,
+        }));
+      } else {
+        // bilateral → unilateral: each pending set becomes L + R.
+        const expanded: SetResult[] = [];
+        pending.forEach((s) => {
+          expanded.push({ ...s, side: 'left' as const });
+          expanded.push({ ...s, side: 'right' as const });
+        });
+        // Re-number so set_number stays human-readable. L and R of the same
+        // "round" share a set_number, so the badge reads "1L", "1R", "2L"…
+        let setCounter = touched.length > 0 ? (touched[touched.length - 1].set_number) : 0;
+        for (let i = 0; i < expanded.length; i++) {
+          if (expanded[i].side === 'left') setCounter += 1;
+          expanded[i] = { ...expanded[i], set_number: setCounter };
+        }
+        restructured = expanded;
+      }
+
+      ex.sets = [...touched, ...restructured];
+      exercises[action.exerciseIndex] = ex;
+      // currentSetIndex may now point past the new array — clamp it.
+      const newCurrentSet = Math.min(state.currentSetIndex, ex.sets.length - 1);
+      return { ...state, exercises, currentSetIndex: Math.max(0, newCurrentSet) };
+    }
+
+    case 'EDIT_LOGGED_SET': {
+      // v14.20 / Punkt 4: Inline edit of an already-logged set. The user
+      // can correct typos without waiting for WorkoutSummary at the end.
+      // Only completed sets can be edited (otherwise this is just LOG_SET).
+      const exercises = [...state.exercises];
+      const ex = { ...exercises[action.exerciseIndex] };
+      const sets = [...ex.sets];
+      const current = sets[action.setIndex];
+      if (!current?.completed) return state; // guard
+      sets[action.setIndex] = {
+        ...current,
+        ...(action.actualReps != null && { actual_reps: action.actualReps }),
+        ...(action.actualWeightKg != null && { actual_weight_kg: action.actualWeightKg }),
+        ...(action.actualDurationMinutes != null && { actual_duration_minutes: action.actualDurationMinutes }),
+        ...(action.actualDistanceKm != null && { actual_distance_km: action.actualDistanceKm }),
+      };
+      ex.sets = sets;
+      exercises[action.exerciseIndex] = ex;
+      return { ...state, exercises };
+    }
+
     case 'REPLACE_EXERCISES':
       return { ...state, exercises: action.exercises };
 
@@ -528,6 +625,14 @@ interface ActiveWorkoutContextValue {
   reorderExercises: (fromIndex: number, toIndex: number) => void;
   markSetReady: () => void;
   setTag: (exerciseIdx: number, setIdx: number, tag: import('../../../types/health').SetTag) => void;
+  /** v14.20 / Punkt 3: Flip a single exercise between bilateral and L/R. */
+  toggleUnilateral: (exerciseIdx: number) => void;
+  /** v14.20 / Punkt 4: Edit a set that's already been logged (typo fix). */
+  editLoggedSet: (
+    exerciseIdx: number,
+    setIdx: number,
+    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number },
+  ) => void;
   toggleMode: () => void;
   toggleTimer: () => void;
   setTimerSeconds: (seconds: number) => void;
@@ -655,6 +760,26 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   const setTag = useCallback((exerciseIdx: number, setIdx: number, tag: import('../../../types/health').SetTag) => {
     dispatch({ type: 'SET_TAG', exerciseIndex: exerciseIdx, setIndex: setIdx, tag });
   }, []);
+  // v14.20 / Punkt 3: Per-exercise L/R toggle (Trizeps Pushdown, Curls, …).
+  const toggleUnilateral = useCallback((exerciseIdx: number) => {
+    dispatch({ type: 'TOGGLE_UNILATERAL', exerciseIndex: exerciseIdx });
+  }, []);
+  // v14.20 / Punkt 4: Inline edit of an already-completed set.
+  const editLoggedSet = useCallback((
+    exerciseIdx: number,
+    setIdx: number,
+    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number },
+  ) => {
+    dispatch({
+      type: 'EDIT_LOGGED_SET',
+      exerciseIndex: exerciseIdx,
+      setIndex: setIdx,
+      actualReps: overrides.reps,
+      actualWeightKg: overrides.weightKg,
+      actualDurationMinutes: overrides.durationMinutes,
+      actualDistanceKm: overrides.distanceKm,
+    });
+  }, []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
   const toggleTimer = useCallback(() => dispatch({ type: 'TOGGLE_TIMER' }), []);
   const setTimerSeconds = useCallback((seconds: number) => dispatch({ type: 'SET_TIMER_SECONDS', seconds }), []);
@@ -666,7 +791,9 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       state, dispatch,
       startSession, startFreeSession, logWarmup, skipWarmup, logSet, skipSet,
       nextExercise, prevExercise, goToExercise, skipExercise,
-      removeExercise, addExercise, editExercise, reorderExercises, markSetReady, setTag, toggleMode, toggleTimer,
+      removeExercise, addExercise, editExercise, reorderExercises, markSetReady, setTag,
+      toggleUnilateral, editLoggedSet,
+      toggleMode, toggleTimer,
       setTimerSeconds, finishSession, clearSession,
     }}>
       {children}

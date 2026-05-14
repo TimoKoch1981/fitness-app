@@ -5,7 +5,8 @@
  * Progress photos timeline and comparison available when posing photos are enabled.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Sparkles, Heart } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
@@ -50,6 +51,30 @@ export function TrainingPage() {
 
   const [showPhaseWizard, setShowPhaseWizard] = useState(false);
   const [showCyclePlanner, setShowCyclePlanner] = useState(false);
+
+  // v14.20: Deep-link from QuickAddFAB → "Plan erstellen" lands here.
+  // /training?tab=plan&action=create activates the Plan tab and opens the
+  // CreatePlanDialog. We consume the params once, then strip them so a
+  // refresh doesn't reopen the dialog.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('tab') === 'plan') {
+      setForceTab('plan');
+    }
+    if (searchParams.get('action') === 'create') {
+      setOpenCreatePlan(true);
+    }
+    if (searchParams.has('tab') || searchParams.has('action')) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('tab');
+      next.delete('action');
+      setSearchParams(next, { replace: true });
+    }
+    // Only on mount / when the deep-link arrives — internal state changes
+    // do not need to re-trigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const showPowerWidgets = showCompetitionFeatures || showPhaseProgress || showNaturalLimits || showRefeedPlanner;
   const showPowerPlusWidgets = showCycleTracker || showPCTCountdown || showHematocritAlert || showBloodWorkDashboard;
 
