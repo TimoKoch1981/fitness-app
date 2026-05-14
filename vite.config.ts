@@ -66,6 +66,15 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // v14.19 / P2-8-followup: split the AI pipeline into 3 named chunks
+          // so the cache invalidates granularly when only one area changes.
+          // BuddyPage + InlineBuddyChat dynamic-import these — so they stay
+          // lazy (not on the TTI path), but a skill-text edit no longer busts
+          // the cache for the entire agents+actions chunk.
+          if (id.includes('/src/lib/ai/skills/')) return 'vendor-ai-skills';
+          if (id.includes('/src/lib/ai/agents/')) return 'vendor-ai-agents';
+          if (id.includes('/src/lib/ai/actions/registerDefaults')) return 'vendor-ai-actions';
+
           // Only split node_modules into named vendor chunks.
           // Using a function prevents Rollup from statically linking
           // heavy vendor chunks (pdf, charts) into the entry point.

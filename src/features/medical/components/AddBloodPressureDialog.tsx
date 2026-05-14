@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useAddBloodPressure, useBloodPressureLogs } from '../hooks/useBloodPressure';
 import { classifyBloodPressure } from '../../../lib/calculations';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { today } from '../../../lib/utils';
+import { DialogShell } from '../../../shared/components/DialogShell';
 
 interface Props {
   open: boolean;
@@ -23,8 +23,8 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
-  if (!open) return null;
-
+  // v14.19: early-return moved AFTER hooks (Rules of Hooks).
+  // Then we delegate the chrome to DialogShell.
   const sys = parseInt(systolic) || 0;
   const dia = parseInt(diastolic) || 0;
   const preview = sys > 0 && dia > 0
@@ -70,16 +70,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-xl">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">{t.medical.addBP}</h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
+    <DialogShell open={open} onClose={onClose} title={t.medical.addBP} bodyClassName="p-0">
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -178,7 +169,6 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
             {addBP.isPending ? t.common.loading : t.common.save}
           </button>
         </form>
-      </div>
-    </div>
+    </DialogShell>
   );
 }
