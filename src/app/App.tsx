@@ -14,6 +14,7 @@ import { FeatureFlagProvider } from '../lib/featureFlags/FeatureFlagProvider';
 // InlineBuddyChat is heavy (pulls in all feature hooks + AI agents) — lazy-load it
 const InlineBuddyChat = lazy(() => import('../shared/components/InlineBuddyChat').then(m => ({ default: m.InlineBuddyChat })));
 import { FloatingBuddyAvatar } from '../shared/components/FloatingBuddyAvatar';
+import { QuickAddFAB } from '../shared/components/QuickAddFAB';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 import { OnboardingGuard } from '../shared/components/OnboardingGuard';
 import { Navigation } from '../shared/components/Navigation';
@@ -278,6 +279,7 @@ export default function App() {
                       <RestTimerProvider>
                         <InlineBuddyChatProvider>
                           <AppRoutes />
+                          <QuickAddFAB />
                           <FloatingBuddyAvatar />
                           <Suspense fallback={null}>
                             <InlineBuddyChat />
