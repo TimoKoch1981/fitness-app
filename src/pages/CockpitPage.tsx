@@ -65,6 +65,7 @@ import { BadgeGrid } from '../features/gamification/components/BadgeGrid';
 import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyChallengeCard';
 import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidget';
 import { AlternativeScoringCard } from '../features/nutrition/components/AlternativeScoringCard';
+import { LeadingMetricCard } from '../features/nutrition/components/LeadingMetricCard';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -306,6 +307,19 @@ export function CockpitPage() {
 
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />
+
+        {/* Leading metric — one dominant number per phase (v14.15 / P1-1).
+            Renders nothing when the profile isn't complete enough for goals. */}
+        <LeadingMetricCard
+          caloriesConsumed={totals.calories}
+          caloriesGoal={caloriesGoal}
+          proteinConsumed={totals.protein}
+          proteinGoal={proteinGoal}
+          caloriesBurned={totalCaloriesBurned}
+          tdee={tdee}
+          profile={profile}
+          profileComplete={profileComplete}
+        />
 
         {/* Setup Goals CTA — shown when profile is incomplete */}
         {!profileComplete && (
