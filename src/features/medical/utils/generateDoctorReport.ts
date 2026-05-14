@@ -11,8 +11,7 @@
  * Uses jsPDF + jspdf-autotable for clean medical report formatting.
  */
 
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { loadPdf } from '../../../lib/pdf/lazyPdf';
 import type {
   UserProfile,
   BloodWork,
@@ -188,7 +187,8 @@ function calculateAge(birthDate: string): number {
   return age;
 }
 
-export function generateDoctorReport(data: DoctorReportData): void {
+export async function generateDoctorReport(data: DoctorReportData): Promise<void> {
+  const { jsPDF, autoTable } = await loadPdf();
   const { profile, latestBloodWork, recentBP, activeSubstances, latestBody, recentCycleLogs, language } = data;
   const l = LABELS[language as keyof typeof LABELS] ?? LABELS.en;
   const isDE = language === 'de';

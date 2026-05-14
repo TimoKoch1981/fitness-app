@@ -10,8 +10,8 @@
  * @reference docs/PROJEKTPLAN.md — Teil 3: Trainingsplan-PDF
  */
 
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { loadPdf } from '../../../lib/pdf/lazyPdf';
+import type { jsPDF } from 'jspdf';
 import type { TrainingPlan, TrainingPlanDay, PlanExercise, WorkoutExerciseResult, Workout } from '../../../types/health';
 import { supabase } from '../../../lib/supabase';
 
@@ -67,11 +67,13 @@ const SPLIT_LABELS: Record<string, Record<string, string>> = {
 
 /**
  * Generate and download a PDF for the given training plan.
+ * v14.18 / P2-8: jsPDF stack lazy-loaded.
  */
-export function generateTrainingPlanPDF(
+export async function generateTrainingPlanPDF(
   plan: TrainingPlan,
   language: string = 'de'
-): void {
+): Promise<void> {
+  const { jsPDF, autoTable } = await loadPdf();
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -316,11 +318,12 @@ export interface LastExerciseData {
  *
  * For endurance exercises: single row with duration/distance info.
  */
-export function generateTrainingLogPDF(
+export async function generateTrainingLogPDF(
   plan: TrainingPlan,
   lastWorkoutsByDay?: LastWorkoutsByDay,
   language: string = 'de'
-): void {
+): Promise<void> {
+  const { jsPDF, autoTable } = await loadPdf();
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',

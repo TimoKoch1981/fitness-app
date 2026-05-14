@@ -49,7 +49,7 @@ export function DoctorReportButton() {
         .limit(1);
 
       const { generateDoctorReport } = await loadDoctorReport();
-      generateDoctorReport({
+      await generateDoctorReport({
         profile,
         latestBloodWork: latestBloodWork ?? null,
         recentBP: recentBP ?? [],

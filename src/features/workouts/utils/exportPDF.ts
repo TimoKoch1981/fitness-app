@@ -1,9 +1,9 @@
 /**
  * exportPDF — Generates a PDF report with embedded chart screenshots and data tables.
- * Uses jsPDF + jspdf-autotable + html2canvas.
+ * Uses jsPDF + jspdf-autotable + html2canvas. jsPDF stack is lazy-loaded
+ * via loadPdf() (v14.18 / P2-8).
  */
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { loadPdf } from '../../../lib/pdf/lazyPdf';
 import html2canvas from 'html2canvas';
 
 interface ExportData {
@@ -21,6 +21,7 @@ interface ExportData {
  * Capture all visible chart elements in the progress dashboard and build a PDF report.
  */
 export async function exportToPDF(data: ExportData, isDE: boolean): Promise<void> {
+  const { jsPDF, autoTable } = await loadPdf();
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = pdf.internal.pageSize.getWidth();
   const margin = 14;

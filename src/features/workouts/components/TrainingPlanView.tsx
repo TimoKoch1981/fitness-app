@@ -229,7 +229,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                       setShowPdfMenu(false);
                       try {
                         const { generateTrainingPlanPDF } = await loadTrainingPlanPDF();
-                        generateTrainingPlanPDF(plan, language);
+                        await generateTrainingPlanPDF(plan, language);
                       } finally {
                         setIsExporting(false);
                       }
@@ -248,12 +248,12 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                         // Fetch last workout data per day for Soll/Ist comparison
                         const dayNumbers = (plan.days ?? []).map(d => d.day_number);
                         const lastWorkouts = await fetchLastWorkoutsForPlan(plan.id, dayNumbers);
-                        generateTrainingLogPDF(plan, lastWorkouts, language);
+                        await generateTrainingLogPDF(plan, lastWorkouts, language);
                       } catch (err) {
                         console.error('PDF generation failed:', err);
                         // Fallback: generate without last workout data
                         const { generateTrainingLogPDF } = await loadTrainingPlanPDF();
-                        generateTrainingLogPDF(plan, undefined, language);
+                        await generateTrainingLogPDF(plan, undefined, language);
                       } finally {
                         setIsExporting(false);
                       }

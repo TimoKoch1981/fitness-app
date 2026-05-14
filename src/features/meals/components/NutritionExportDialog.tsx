@@ -91,7 +91,7 @@ export function NutritionExportDialog({ timeRange, history, balanceData, activeS
     } else {
       setExporting(true);
       try {
-        exportNutritionPDF(exportData, isDE);
+        await exportNutritionPDF(exportData, isDE);
       } finally {
         setExporting(false);
       }

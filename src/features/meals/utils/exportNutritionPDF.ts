@@ -1,12 +1,11 @@
 /**
  * exportNutritionPDF — Generates a PDF report for nutrition history + energy balance.
- * Uses jsPDF + jspdf-autotable.
+ * Uses jsPDF + jspdf-autotable, lazy-loaded on demand (v14.18 / P2-8).
  *
  * NOTE: jsPDF default fonts only support latin-1. Avoid Unicode symbols
  * like Σ, Ø, emojis etc. — use ASCII alternatives instead.
  */
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { loadPdf } from '../../../lib/pdf/lazyPdf';
 import type { MealHistoryData } from '../hooks/useMealHistory';
 import type { NutritionBalanceData } from '../hooks/useNutritionBalance';
 import type { ScoringResult } from '../../nutrition/utils/alternativeScoring';
@@ -20,7 +19,8 @@ interface NutritionExportData {
   avgScores?: ScoringResult;
 }
 
-export function exportNutritionPDF(data: NutritionExportData, isDE: boolean): void {
+export async function exportNutritionPDF(data: NutritionExportData, isDE: boolean): Promise<void> {
+  const { jsPDF, autoTable } = await loadPdf();
   const { history, balanceData, metrics, dayScores, avgScores } = data;
   const hasBalance = balanceData?.hasProfile && (metrics.includes('expenditure') || metrics.includes('balance'));
   const hasWWSmart = metrics.includes('wwSmartPoints') && dayScores;
