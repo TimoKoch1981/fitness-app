@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy } from 'lucide-react';
+import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy, Split } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -53,7 +53,7 @@ export function SetBySetTracker({
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { setTag } = useActiveWorkout();
+  const { setTag, toggleUnilateral } = useActiveWorkout();
 
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
@@ -190,6 +190,25 @@ export function SetBySetTracker({
             </button>
           );
         })()}
+        {/* v14.21 / Punkt 3 Teil 3: L/R-Toggle (Parität mit ExerciseOverviewTracker).
+            Cardio bekommt's nicht — Laufen/Radfahren ist nicht unilateral. */}
+        {!isCardio && (
+          <button
+            type="button"
+            onClick={() => toggleUnilateral(exerciseIndex)}
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors border inline-flex items-center gap-1 ${
+              exercise.sets.some(s => s.side != null)
+                ? 'bg-indigo-100 text-indigo-700 border-indigo-300'
+                : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
+            }`}
+            title={isDE
+              ? 'Einseitig (links/rechts pro Satz) statt beidseitig'
+              : 'Switch to single-side (left/right per set) instead of bilateral'}
+          >
+            <Split className="h-2.5 w-2.5" />
+            {isDE ? 'L/R' : 'L/R'}
+          </button>
+        )}
       </div>
 
       {/* Target — adaptive for cardio vs strength */}
