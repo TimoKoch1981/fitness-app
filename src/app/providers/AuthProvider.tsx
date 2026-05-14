@@ -187,7 +187,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    // v14.22 / A-01 fix: GoTrue muss wissen, wohin der User nach dem
+    // Token-Verify geleitet werden soll. Ohne diese Option landet er auf
+    // GOTRUE_SITE_URL ("/"), nicht auf der ResetPasswordPage.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     return { error: error ? new Error(error.message) : null };
   };
 
