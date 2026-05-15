@@ -30,9 +30,16 @@ import { ExerciseListBar } from './ExerciseListBar';
 import { AddExerciseDialog } from './AddExerciseDialog';
 import { suggestRestTime } from '../utils/suggestRestTimes';
 import type { WorkoutExerciseResult } from '../../../types/health';
+import { useTempSurfaceMode } from '../../../lib/theme/ThemeContext';
 
 export function ActiveWorkoutPage() {
   const { language } = useTranslation();
+
+  // v14.28 Stufe 3: Auto-Switch auf Power Console waehrend Active Workout —
+  // nur wenn der User die Option im Profil aktiviert hat. Im Console-Theme
+  // ist Lesbarkeit im halbdunklen Studio besser (Marco/Daniel Phase 8 §3.2).
+  useTempSurfaceMode('console', true);
+
   const isDE = language === 'de';
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
