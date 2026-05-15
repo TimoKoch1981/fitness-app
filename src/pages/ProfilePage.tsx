@@ -397,8 +397,8 @@ export function ProfilePage() {
                     onClick={() => setBuddyVerbosity(v as BuddyVerbosity)}
                     className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       buddyVerbosity === v
-                        ? 'bg-violet-500 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-theme-primary text-theme-primary-on'
+                        : 'bg-theme-surface-2 text-theme-ink-2 hover:bg-theme-surface-3'
                     }`}
                   >
                     {label}
@@ -421,8 +421,8 @@ export function ProfilePage() {
                     onClick={() => setBuddyExpertise(e as BuddyExpertise)}
                     className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       buddyExpertise === e
-                        ? 'bg-violet-500 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-theme-primary text-theme-primary-on'
+                        : 'bg-theme-surface-2 text-theme-ink-2 hover:bg-theme-surface-3'
                     }`}
                   >
                     {label}

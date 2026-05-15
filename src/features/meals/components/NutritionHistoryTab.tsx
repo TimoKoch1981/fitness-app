@@ -226,7 +226,9 @@ export function NutritionHistoryTab() {
           <div className="flex items-center gap-1.5 mb-3">
             <BarChart3 className="h-4 w-4 text-theme-primary" />
             <p className="text-xs text-gray-500 font-medium">
-              {isDE ? `Tagesdurchschnitt (${history.daysWithData} Tage)` : `Daily Average (${history.daysWithData} days)`}
+              {isDE
+                ? `Tagesdurchschnitt (${history.daysWithData} ${history.daysWithData === 1 ? 'Tag' : 'Tage'})`
+                : `Daily Average (${history.daysWithData} ${history.daysWithData === 1 ? 'day' : 'days'})`}
             </p>
           </div>
 

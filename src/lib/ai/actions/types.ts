@@ -16,6 +16,7 @@ export type ActionType =
   | 'log_blood_pressure'
   | 'log_blood_work'
   | 'log_substance'
+  | 'log_water'
   | 'save_training_plan'
   | 'add_training_day'
   | 'modify_training_day'
@@ -32,7 +33,7 @@ export type ActionType =
   | 'update_pantry';
 
 /** Action types that are auto-executed (no user confirmation needed) */
-export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product', 'restart_tour'];
+export const AUTO_EXECUTE_ACTIONS: ActionType[] = ['search_product', 'restart_tour', 'log_water'];
 
 /** Parsed action extracted from an LLM response */
 export interface ParsedAction {

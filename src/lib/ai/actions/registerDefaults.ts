@@ -18,6 +18,7 @@ import {
   LogBloodPressureSchema,
   LogBloodWorkSchema,
   LogSubstanceSchema,
+  LogWaterSchema,
   SaveTrainingPlanSchema,
   AddTrainingDaySchema,
   ModifyTrainingDaySchema,
@@ -161,6 +162,10 @@ const ToolSchemaMap: Partial<Record<ActionType, z.ZodObject<z.ZodRawShape>>> = {
     dosage_taken: z.string().describe('Eingenommene Dosis, z.B. 250mg').optional(),
     site: z.enum(['glute_left', 'glute_right', 'delt_left', 'delt_right', 'quad_left', 'quad_right', 'ventro_glute_left', 'ventro_glute_right', 'abdomen', 'other']).describe('Injektionsstelle').optional(),
     notes: z.string().describe('Notizen').optional(),
+  }),
+  log_water: z.object({
+    glasses: z.number().describe('Anzahl Glaeser (1 Glas = 250ml). Default: 1.').optional(),
+    amount_ml: z.number().describe('Menge in Millilitern. Alternative zu glasses.').optional(),
   }),
   save_training_plan: z.object({
     name: z.string().describe('Name des Trainingsplans'),
@@ -504,6 +509,33 @@ export function registerDefaultActions(): void {
     toolDescription: 'Substanz-Einnahme loggen. Erfasse welche Substanz eingenommen wurde, Dosierung und optional die Injektionsstelle.',
     toolSchema: ToolSchemaMap.log_substance,
     agentHint: 'medical',
+  });
+
+  // ── log_water ──────────────────────────────────────────────────────────
+  actionRegistry.register({
+    type: 'log_water',
+    schema: LogWaterSchema,
+    display: {
+      icon: '💧',
+      titleDE: 'Wasser loggen?',
+      titleEN: 'Log water?',
+      summary: (d) => {
+        const ml = (d.amount_ml as number) ?? 250;
+        const glasses = Math.round(ml / 250);
+        return glasses === 1 ? `1 Glas (${ml} ml)` : `${glasses} Glaeser (${ml} ml)`;
+      },
+    },
+    execute: async (d: Record<string, unknown>, ctx: ExecutionContext) => {
+      const amountMl = (d.amount_ml as number) ?? 250;
+      if (!ctx.mutations.addWater) {
+        throw new Error('addWater mutation not available in context');
+      }
+      ctx.mutations.addWater(amountMl);
+    },
+    autoExecute: true, // No confirmation needed for water — trivial, fast.
+    toolDescription: 'Wasseraufnahme protokollieren. Default: 1 Glas (250ml). Bei "2 Glaeser" oder "500ml" entsprechend.',
+    toolSchema: ToolSchemaMap.log_water,
+    agentHint: 'nutrition',
   });
 
   // ── save_training_plan ─────────────────────────────────────────────────

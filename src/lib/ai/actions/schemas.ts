@@ -231,6 +231,20 @@ export const LogSubstanceSchema = z.object({
   notes: z.string().optional(),
 });
 
+/**
+ * log_water — add a single water intake entry.
+ * Either glasses (1 glass = 250 ml) or amount_ml is required.
+ * Auto-defaults to 1 glass (250ml) when both are omitted.
+ */
+export const LogWaterSchema = z.object({
+  glasses: z.preprocess((v) => (v != null && v !== '' ? Number(v) : undefined), z.number().positive().optional()),
+  amount_ml: z.preprocess((v) => (v != null && v !== '' ? Number(v) : undefined), z.number().positive().optional()),
+}).transform((data) => {
+  if (data.amount_ml) return { amount_ml: Math.round(data.amount_ml) };
+  if (data.glasses) return { amount_ml: Math.round(data.glasses * 250) };
+  return { amount_ml: 250 }; // Default: 1 glass
+});
+
 /** Coerce to number if truthy, else undefined */
 const toNum = (v: unknown) => (v != null && v !== '' ? Number(v) : undefined);
 /** Coerce to string if truthy, else undefined */

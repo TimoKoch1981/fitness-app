@@ -42,6 +42,8 @@ export interface MutationMap {
   updateProfile: MutationHook;
   setUserEquipment: MutationHook;
   addRecipe: MutationHook;
+  /** Water-intake mutator — takes amount_ml number. localStorage-backed. */
+  addWater?: (amountMl: number) => void;
   // Pantry (optional — execute uses direct supabase calls, only needs invalidation)
   clearPantry?: MutationHook;
   invalidatePantry?: () => void;

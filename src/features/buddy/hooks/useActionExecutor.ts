@@ -26,6 +26,7 @@ import { useUpdateProfile } from '../../auth/hooks/useProfile';
 import { useEquipmentCatalog, useSetUserEquipment } from '../../equipment/hooks/useEquipment';
 import { useAddRecipe } from '../../recipes/hooks/useAddRecipe';
 import { useClearPantry } from '../../pantry/hooks/usePantry';
+import { useWaterIntake } from '../../water/hooks/useWaterIntake';
 import { useQueryClient } from '@tanstack/react-query';
 import { ensureFreshSession } from '../../../lib/refreshSession';
 import { actionRegistry } from '../../../lib/ai/actions/registry';
@@ -120,6 +121,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
   const setUserEquipment = useSetUserEquipment();
   const addRecipe = useAddRecipe();
   const clearPantry = useClearPantry();
+  const water = useWaterIntake();
   const queryClient = useQueryClient();
   const { data: equipmentCatalog } = useEquipmentCatalog();
 
@@ -145,6 +147,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
     setUserEquipment,
     addRecipe,
     clearPantry,
+    addWater: water.addWater,
     invalidatePantry: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
