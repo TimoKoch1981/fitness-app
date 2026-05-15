@@ -210,7 +210,7 @@ export function RestTimerWidget({ onMinimize }: RestTimerWidgetProps) {
             <button
               key={preset}
               onClick={() => handlePreset(preset)}
-              className="px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium bg-theme-surface-2 text-theme-primary rounded-lg hover:bg-theme-surface-2 transition-colors"
             >
               {presetLabels[preset]}
             </button>

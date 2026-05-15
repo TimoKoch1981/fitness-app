@@ -48,12 +48,12 @@ function ConsentCheckbox({
 }) {
   const needsAttention = highlight && !checked;
   return (
-    <label className={`flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl border transition-colors ${needsAttention ? 'border-red-400 bg-red-50 animate-[pulse_0.5s_ease-in-out_1]' : 'border-gray-200 hover:border-teal-300'}`}>
+    <label className={`flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl border transition-colors ${needsAttention ? 'border-red-400 bg-red-50 animate-[pulse_0.5s_ease-in-out_1]' : 'border-gray-200 hover:border-theme-primary'}`}>
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className={`mt-0.5 h-5 w-5 rounded text-teal-600 focus:ring-teal-500 flex-shrink-0 ${needsAttention ? 'border-red-400' : 'border-gray-300'}`}
+        className={`mt-0.5 h-5 w-5 rounded text-theme-primary focus:ring-theme-primary flex-shrink-0 ${needsAttention ? 'border-red-400' : 'border-gray-300'}`}
         required={required}
       />
       <div>
@@ -204,11 +204,11 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
             {/* Link zu Datenschutzerklaerung */}
             <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
               <LinkIcon className="h-3 w-3" />
-              <Link to="/datenschutz" target="_blank" className="hover:text-teal-600 underline">
+              <Link to="/datenschutz" target="_blank" className="hover:text-theme-primary underline">
                 {t.legal.privacyPolicy}
               </Link>
               <span className="mx-1">|</span>
-              <Link to="/impressum" target="_blank" className="hover:text-teal-600 underline">
+              <Link to="/impressum" target="_blank" className="hover:text-theme-primary underline">
                 {t.legal.impressumTitle}
               </Link>
             </div>
@@ -224,7 +224,7 @@ export function DisclaimerModal({ onAccepted, readOnly = false, onClose }: Discl
             <button
               onClick={handleAccept}
               disabled={saving}
-              className={`w-full py-3 rounded-xl font-semibold text-white transition-all active:scale-[0.98] ${allConsentsGranted ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-400 hover:bg-gray-500'}`}
+              className={`w-full py-3 rounded-xl font-semibold text-white transition-all active:scale-[0.98] ${allConsentsGranted ? 'bg-theme-primary-2 hover:bg-theme-primary-2' : 'bg-gray-400 hover:bg-gray-500'}`}
             >
               {saving ? t.common.loading : t.disclaimer.accept}
             </button>

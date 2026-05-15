@@ -62,7 +62,7 @@ export function FrequencyChart({ workouts, timeRange }: FrequencyChartProps) {
       {/* Stats */}
       <div className="flex gap-4 mb-3">
         <div className="flex items-center gap-1.5">
-          <CalendarDays className="h-4 w-4 text-teal-500" />
+          <CalendarDays className="h-4 w-4 text-theme-primary" />
           <span className="text-sm font-bold text-gray-900">{avgPerWeek}</span>
           <span className="text-[10px] text-gray-400">/{isDE ? 'Woche' : 'week'}</span>
         </div>

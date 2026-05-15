@@ -79,7 +79,7 @@ export function TimerSectionRow({
           type="checkbox"
           checked={section.enabled}
           onChange={() => onToggle(section.id)}
-          className="h-4 w-4 rounded border-gray-600 text-teal-500 focus:ring-teal-500 bg-gray-700"
+          className="h-4 w-4 rounded border-gray-600 text-theme-primary focus:ring-theme-primary bg-gray-700"
         />
       </td>
 
@@ -97,7 +97,7 @@ export function TimerSectionRow({
             onChange={e => setEditValue(e.target.value)}
             onBlur={handleSaveEdit}
             onKeyDown={e => e.key === 'Enter' && handleSaveEdit()}
-            className="w-16 text-sm text-center bg-gray-600 text-white rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-teal-400 font-mono"
+            className="w-16 text-sm text-center bg-gray-600 text-white rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-theme-primary font-mono"
             autoFocus
           />
         ) : (
@@ -106,7 +106,7 @@ export function TimerSectionRow({
             disabled={!isActive}
             className={cn(
               'text-sm tabular-nums font-mono',
-              isActive ? 'text-gray-400 hover:text-teal-300 cursor-pointer' : 'text-gray-600 cursor-default',
+              isActive ? 'text-gray-400 hover:text-theme-ink-3 cursor-pointer' : 'text-gray-600 cursor-default',
             )}
           >
             {formatTime(section.targetSeconds)}
@@ -120,7 +120,7 @@ export function TimerSectionRow({
           <span
             className={cn(
               'text-base font-mono tabular-nums font-bold',
-              section.isRunning && 'text-teal-400',
+              section.isRunning && 'text-theme-primary',
               !section.isRunning && !isOvertime && 'text-gray-500',
               isOvertime && 'text-red-400',
             )}
@@ -131,7 +131,7 @@ export function TimerSectionRow({
               formatTime(displaySeconds)
             )}
             {section.isRunning && (
-              <span className="ml-0.5 text-xs text-teal-500 align-top animate-pulse">&bull;</span>
+              <span className="ml-0.5 text-xs text-theme-primary align-top animate-pulse">&bull;</span>
             )}
           </span>
         ) : (

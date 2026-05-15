@@ -40,14 +40,14 @@ export function CompetitionCountdown() {
     if (isPast) return 'bg-gray-50 border-gray-200';
     if (days <= 7) return 'bg-red-50 border-red-200';
     if (days <= 28) return 'bg-amber-50 border-amber-200';
-    return 'bg-teal-50 border-teal-200';
+    return 'bg-theme-surface-2 border-theme-line';
   };
 
   const getAccent = (days: number) => {
     if (isPast) return 'text-gray-500';
     if (days <= 7) return 'text-red-600';
     if (days <= 28) return 'text-amber-600';
-    return 'text-teal-600';
+    return 'text-theme-primary';
   };
 
   const federation = profile?.show_federation;

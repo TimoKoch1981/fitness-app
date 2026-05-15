@@ -138,7 +138,7 @@ export function MealTimingPlanner({ baseMacros, bodyWeight }: MealTimingPlannerP
 
             {/* Dot on timeline */}
             <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-              meal.isPreWorkout || meal.isPostWorkout ? 'bg-purple-500' : 'bg-teal-400'
+              meal.isPreWorkout || meal.isPostWorkout ? 'bg-purple-500' : 'bg-theme-primary'
             }`} />
 
             {/* Label */}
@@ -153,7 +153,7 @@ export function MealTimingPlanner({ baseMacros, bodyWeight }: MealTimingPlannerP
             <span className="text-[10px] text-gray-500">
               {meal.calories} kcal
             </span>
-            <span className="text-[10px] text-teal-600">{meal.protein}P</span>
+            <span className="text-[10px] text-theme-primary">{meal.protein}P</span>
             <span className="text-[10px] text-blue-600">{meal.carbs}C</span>
             <span className="text-[10px] text-amber-600">{meal.fat}F</span>
           </button>

@@ -38,8 +38,8 @@ export function FeatureRequestList({ onSubmitNew }: Props) {
   return (
     <div className="space-y-4">
       {/* Promise banner */}
-      <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-3 text-center">
-        <p className="text-xs text-teal-700 font-medium">{t.feedback.topFeaturePromise}</p>
+      <div className="bg-gradient-to-r bg-theme-bg border border-theme-line rounded-xl p-3 text-center">
+        <p className="text-xs text-theme-primary font-medium">{t.feedback.topFeaturePromise}</p>
       </div>
 
       {/* Sort + Filter controls */}
@@ -51,7 +51,7 @@ export function FeatureRequestList({ onSubmitNew }: Props) {
               onClick={() => setSortBy(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 sortBy === s
-                  ? 'bg-teal-100 text-teal-700'
+                  ? 'bg-theme-surface-2 text-theme-primary'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -86,7 +86,7 @@ export function FeatureRequestList({ onSubmitNew }: Props) {
           <p className="text-sm text-gray-400 mb-4">{t.feedback.noFeatureRequests}</p>
           <button
             onClick={onSubmitNew}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-medium rounded-lg"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r bg-theme-primary text-white text-sm font-medium rounded-lg"
           >
             <Plus className="h-4 w-4" />
             {t.feedback.submitFeature}
@@ -110,7 +110,7 @@ export function FeatureRequestList({ onSubmitNew }: Props) {
       {filteredRequests.length > 0 && (
         <button
           onClick={onSubmitNew}
-          className="fixed bottom-20 right-4 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all"
+          className="fixed bottom-20 right-4 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all"
         >
           <Plus className="h-5 w-5" />
           {t.feedback.submitFeature}

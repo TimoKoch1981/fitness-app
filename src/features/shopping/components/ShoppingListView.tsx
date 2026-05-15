@@ -113,7 +113,7 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-2 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-left"
       >
-        <ShoppingCart className="h-4 w-4 text-teal-500 flex-shrink-0" />
+        <ShoppingCart className="h-4 w-4 text-theme-primary flex-shrink-0" />
         <span className="flex-1 text-sm font-medium text-gray-800 truncate">
           {list.name || t.untitled}
         </span>
@@ -123,7 +123,7 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
         {/* Progress bar mini */}
         <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${allChecked ? 'bg-green-500' : 'bg-teal-500'}`}
+            className={`h-full rounded-full transition-all ${allChecked ? 'bg-green-500' : 'bg-theme-primary'}`}
             style={{ width: `${totalCount > 0 ? (checkedCount / totalCount) * 100 : 0}%` }}
           />
         </div>
@@ -178,7 +178,7 @@ export function ShoppingListView({ list }: ShoppingListViewProps) {
                       {item.is_checked && !addedToPantry.has(item.id) && (
                         <button
                           onClick={() => handleAddItemToPantry(item)}
-                          className="px-1.5 py-1 text-[10px] text-teal-600 bg-teal-50 rounded hover:bg-teal-100 transition-colors flex items-center gap-0.5 flex-shrink-0"
+                          className="px-1.5 py-1 text-[10px] text-theme-primary bg-theme-surface-2 rounded hover:bg-theme-surface-2 transition-colors flex items-center gap-0.5 flex-shrink-0"
                           title={language === 'de' ? 'Zum Vorrat' : 'Add to pantry'}
                         >
                           <Package className="h-3 w-3" />

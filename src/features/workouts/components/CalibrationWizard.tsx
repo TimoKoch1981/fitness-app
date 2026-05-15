@@ -207,7 +207,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 key={idx}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                   idx + 1 <= step
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-400'
                 }`}
               >
@@ -225,7 +225,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
           </div>
           <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-teal-500 rounded-full transition-all duration-500"
+              className="h-full bg-theme-primary rounded-full transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -251,7 +251,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                   onClick={() => setExperienceLevel(key)}
                   className={`w-full text-left px-4 py-4 rounded-xl border-2 transition-all ${
                     experienceLevel === key
-                      ? 'border-teal-500 bg-teal-50'
+                      ? 'border-theme-primary bg-theme-surface-2'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -280,7 +280,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 <button
                   onClick={goNext}
                   disabled={!experienceLevel}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
                 >
                   {label('next', 'Weiter')}
                   <ChevronRight className="w-4 h-4" />
@@ -308,7 +308,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
               {hasSuggestions && (
                 <button
                   onClick={applySuggestions}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-teal-50 text-teal-700 font-medium text-sm rounded-xl border border-teal-200 hover:bg-teal-100 active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-theme-surface-2 text-theme-primary font-medium text-sm rounded-xl border border-theme-line hover:bg-theme-surface-2 active:scale-[0.98] transition-all"
                 >
                   <CheckCheck className="w-4 h-4" />
                   {label('applySuggestions', 'Vorschlaege uebernehmen')}
@@ -333,7 +333,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-700 truncate">{ex.name}</p>
                         {ex.matchedReference ? (
-                          <p className="text-[10px] text-teal-500">
+                          <p className="text-[10px] text-theme-primary">
                             ≈ {ex.matchedReference}
                           </p>
                         ) : ex.isBodyweight ? (
@@ -358,7 +358,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                           value={ex.userWeight ?? ''}
                           onChange={(e) => updateExerciseWeight(idx, e.target.value)}
                           placeholder={ex.suggestedWeight?.toString() ?? '–'}
-                          className="w-16 px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                          className="w-16 px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-all"
                         />
                         <span className="text-[10px] text-gray-400">kg</span>
                       </div>
@@ -374,7 +374,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
               )}
 
               {/* Hint */}
-              <p className="text-xs text-teal-600 bg-teal-50 px-3 py-2 rounded-lg">
+              <p className="text-xs text-theme-primary bg-theme-surface-2 px-3 py-2 rounded-lg">
                 💡 {label('weightsHint', 'Keine Sorge — die Gewichte werden in den ersten Sessions automatisch angepasst.')}
               </p>
 
@@ -389,7 +389,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 </button>
                 <button
                   onClick={goNext}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all flex items-center justify-center gap-1"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all flex items-center justify-center gap-1"
                 >
                   {label('next', 'Weiter')}
                   <ChevronRight className="w-4 h-4" />
@@ -418,14 +418,14 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                   </label>
                   <button
                     onClick={() => setShowMesoInfo(!showMesoInfo)}
-                    className="p-0.5 text-gray-400 hover:text-teal-500 transition-colors"
+                    className="p-0.5 text-gray-400 hover:text-theme-primary transition-colors"
                     type="button"
                   >
                     <Info className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 {showMesoInfo && (
-                  <div className="mb-2 px-3 py-2 bg-teal-50 border border-teal-100 rounded-lg text-xs text-teal-700 animate-in fade-in">
+                  <div className="mb-2 px-3 py-2 bg-theme-surface-2 border border-theme-line rounded-lg text-xs text-theme-primary animate-in fade-in">
                     {label('mesoInfoText', 'Ein Mesozyklus ist ein Trainingsblock von mehreren Wochen mit steigender Belastung. Am Ende steht optional eine Deload-Woche zur Erholung. Typisch: 4-6 Wochen.')}
                   </div>
                 )}
@@ -440,7 +440,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                       setMesocycleWeeks(v);
                       if (deloadEnabled && deloadWeek > v) setDeloadWeek(v);
                     }}
-                    className="flex-1 accent-teal-500"
+                    className="flex-1 accent-theme-primary"
                   />
                   <span className="text-sm font-semibold text-gray-700 w-8 text-center">
                     {mesocycleWeeks}
@@ -461,7 +461,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                       onChange={(e) => setDeloadEnabled(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500" />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-primary" />
                   </label>
                 </div>
                 {deloadEnabled ? (
@@ -472,7 +472,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                       max={Math.max(mesocycleWeeks, 8)}
                       value={deloadWeek}
                       onChange={(e) => setDeloadWeek(Number(e.target.value))}
-                      className="flex-1 accent-teal-500"
+                      className="flex-1 accent-theme-primary"
                     />
                     <span className="text-sm font-semibold text-gray-700 w-8 text-center">
                       {deloadWeek}
@@ -515,7 +515,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                     onChange={(e) => setAiTrainerEnabled(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary" />
                 </label>
               </div>
 
@@ -531,7 +531,7 @@ export function CalibrationWizard({ plan, onComplete, onSkip }: CalibrationWizar
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1"
                 >
                   {saving
                     ? label('saving', 'Speichern...')

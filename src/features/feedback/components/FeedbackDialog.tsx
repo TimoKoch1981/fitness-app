@@ -102,7 +102,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
           {success && (
             <div className="text-center py-8">
               <div className="text-4xl mb-3">&#10003;</div>
-              <p className="text-lg font-medium text-teal-600">{t.feedback.thankYou}</p>
+              <p className="text-lg font-medium text-theme-primary">{t.feedback.thankYou}</p>
             </div>
           )}
 
@@ -113,7 +113,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                 onClick={() => setMode('quick')}
                 className="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors text-left"
               >
-                <MessageSquare className="h-5 w-5 text-teal-500 shrink-0" />
+                <MessageSquare className="h-5 w-5 text-theme-primary shrink-0" />
                 <div>
                   <p className="font-medium text-gray-900">{t.feedback.quickFeedback}</p>
                   <p className="text-xs text-gray-500">{t.feedback.thumbsUp} / {t.feedback.thumbsDown}</p>
@@ -179,7 +179,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                     onClick={() => setCategory(cat)}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
                       category === cat
-                        ? 'bg-teal-100 text-teal-700 ring-1 ring-teal-500'
+                        ? 'bg-theme-surface-2 text-theme-primary ring-1 ring-teal-500'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -195,7 +195,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t.feedback.messagePlaceholder}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm min-h-20 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary outline-none text-sm min-h-20 resize-none"
               />
 
               {error && <p className="text-xs text-red-500 text-center">{error}</p>}
@@ -203,7 +203,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={isPending || !rating}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg disabled:opacity-50 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg disabled:opacity-50 transition-all"
               >
                 <Send className="h-4 w-4" />
                 {isPending ? t.common.loading : t.feedback.submitFeedback}
@@ -225,7 +225,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t.feedback.bugDescription}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm min-h-28 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary outline-none text-sm min-h-28 resize-none"
                 autoFocus
               />
 
@@ -234,7 +234,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={isPending || !message.trim()}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg disabled:opacity-50 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg disabled:opacity-50 transition-all"
               >
                 <Send className="h-4 w-4" />
                 {isPending ? t.common.loading : t.feedback.submitFeedback}
@@ -254,7 +254,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                   value={featureTitle}
                   onChange={(e) => setFeatureTitle(e.target.value)}
                   placeholder={t.feedback.featureTitlePlaceholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary outline-none text-sm"
                   required
                   autoFocus
                   maxLength={200}
@@ -269,7 +269,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
                   value={featureDescription}
                   onChange={(e) => setFeatureDescription(e.target.value)}
                   placeholder={t.feedback.featureDescriptionPlaceholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm min-h-20 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary outline-none text-sm min-h-20 resize-none"
                   maxLength={2000}
                 />
               </div>
@@ -279,7 +279,7 @@ export function FeedbackDialog({ open, onClose }: Props) {
               <button
                 onClick={handleSubmitFeature}
                 disabled={isPending || !featureTitle.trim()}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg disabled:opacity-50 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg disabled:opacity-50 transition-all"
               >
                 <Send className="h-4 w-4" />
                 {isPending ? t.common.loading : t.feedback.submitFeature}

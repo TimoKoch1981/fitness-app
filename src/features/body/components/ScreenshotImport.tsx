@@ -174,9 +174,9 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                 {/* Camera Button */}
                 <button
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-teal-400 hover:bg-teal-50/50 transition-all"
+                  className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-theme-primary hover:bg-theme-surface-2/50 transition-all"
                 >
-                  <Camera className="h-8 w-8 text-teal-500" />
+                  <Camera className="h-8 w-8 text-theme-primary" />
                   <span className="text-sm font-medium text-gray-700">{t.screenshot.camera}</span>
                 </button>
                 <input
@@ -191,9 +191,9 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                 {/* Gallery Button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-teal-400 hover:bg-teal-50/50 transition-all"
+                  className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-theme-primary hover:bg-theme-surface-2/50 transition-all"
                 >
-                  <Upload className="h-8 w-8 text-teal-500" />
+                  <Upload className="h-8 w-8 text-theme-primary" />
                   <span className="text-sm font-medium text-gray-700">{t.screenshot.gallery}</span>
                 </button>
                 <input
@@ -224,7 +224,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                 </div>
               )}
               <div className="text-center py-6">
-                <Loader2 className="h-8 w-8 text-teal-500 animate-spin mx-auto mb-3" />
+                <Loader2 className="h-8 w-8 text-theme-primary animate-spin mx-auto mb-3" />
                 <p className="text-sm font-medium text-gray-700">{t.screenshot.analyzing}</p>
                 <p className="text-xs text-gray-400 mt-1">{t.screenshot.analyzingHint}</p>
               </div>
@@ -275,7 +275,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                     value={editWeight}
                     onChange={(e) => setEditWeight(e.target.value)}
                     placeholder="—"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="30"
                     max="300"
                     step="0.1"
@@ -290,7 +290,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                     value={editBodyFat}
                     onChange={(e) => setEditBodyFat(e.target.value)}
                     placeholder="—"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="3"
                     max="60"
                     step="0.1"
@@ -305,7 +305,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                     value={editMuscleMass}
                     onChange={(e) => setEditMuscleMass(e.target.value)}
                     placeholder="—"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="10"
                     max="100"
                     step="0.1"
@@ -320,7 +320,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                     value={editWater}
                     onChange={(e) => setEditWater(e.target.value)}
                     placeholder="—"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="30"
                     max="80"
                     step="0.1"
@@ -345,7 +345,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
                 <button
                   onClick={handleSave}
                   disabled={saving || (!editWeight && !editBodyFat && !editMuscleMass)}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all text-sm flex items-center justify-center gap-1"
+                  className="flex-1 py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all text-sm flex items-center justify-center gap-1"
                 >
                   {saving ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -379,7 +379,7 @@ export function ScreenshotImport({ open, onClose }: ScreenshotImportProps) {
 
               <button
                 onClick={reset}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 transition-all text-sm flex items-center justify-center gap-1"
+                className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 transition-all text-sm flex items-center justify-center gap-1"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 {t.screenshot.retry}

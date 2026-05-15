@@ -111,7 +111,7 @@ export function PeriodizationView() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
       </div>
     );
   }
@@ -135,7 +135,7 @@ export function PeriodizationView() {
       {/* Header with Toggle */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-teal-500" />
+          <BarChart3 className="h-4 w-4 text-theme-primary" />
           <h3 className="text-sm font-semibold text-gray-700">
             {pt?.title ?? (language === 'de' ? 'Periodisierung' : 'Periodization')}
           </h3>

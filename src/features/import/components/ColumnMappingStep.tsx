@@ -106,7 +106,7 @@ export function ColumnMappingStep({
               onClick={() => handleDataTypeChange(opt.type)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 dataType === opt.type
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-theme-primary text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -145,7 +145,7 @@ export function ColumnMappingStep({
                 className={`text-sm border rounded-lg px-2 py-1.5 w-full ${
                   mapping.targetField
                     ? mapping.autoDetected
-                      ? 'border-teal-300 bg-teal-50 text-teal-800'
+                      ? 'border-theme-primary bg-theme-surface-2 text-theme-ink'
                       : 'border-blue-300 bg-blue-50 text-blue-800'
                     : 'border-gray-200 text-gray-400'
                 }`}
@@ -163,7 +163,7 @@ export function ColumnMappingStep({
       {/* Legend */}
       <div className="flex gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded border border-teal-300 bg-teal-50" />
+          <span className="w-3 h-3 rounded border border-theme-primary bg-theme-surface-2" />
           {isDE ? 'Automatisch erkannt' : 'Auto-detected'}
         </span>
         <span className="flex items-center gap-1">
@@ -183,7 +183,7 @@ export function ColumnMappingStep({
         <button
           onClick={() => onConfirm(mappings, dataType)}
           disabled={mappedCount === 0}
-          className="flex-1 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
         >
           <Check className="h-4 w-4" />
           {mappedCount} {isDE ? 'Spalten uebernehmen' : 'columns mapped'}

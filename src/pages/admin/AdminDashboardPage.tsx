@@ -145,7 +145,7 @@ function StatCard({ icon, label, value, subtext, color }: {
   const colorMap = {
     blue: 'bg-blue-50 text-blue-700',
     green: 'bg-green-50 text-green-700',
-    teal: 'bg-teal-50 text-teal-700',
+    teal: 'bg-theme-surface-2 text-theme-primary',
     purple: 'bg-purple-50 text-purple-700',
   };
 

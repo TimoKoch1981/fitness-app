@@ -16,7 +16,7 @@ export function ShoppingTabContent() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin h-8 w-8 border-2 border-teal-500 border-t-transparent rounded-full mx-auto mb-3" />
+        <div className="animate-spin h-8 w-8 border-2 border-theme-primary border-t-transparent rounded-full mx-auto mb-3" />
         <p className="text-sm text-gray-500">{t.loading}</p>
       </div>
     );
@@ -36,9 +36,9 @@ export function ShoppingTabContent() {
     <div className="space-y-3">
       {/* Stats */}
       <div className="flex gap-2">
-        <div className="flex-1 bg-teal-50 rounded-lg px-3 py-2 text-center">
-          <p className="text-lg font-bold text-teal-700">{lists.length}</p>
-          <p className="text-xs text-teal-600">{t.activeLists}</p>
+        <div className="flex-1 bg-theme-surface-2 rounded-lg px-3 py-2 text-center">
+          <p className="text-lg font-bold text-theme-primary">{lists.length}</p>
+          <p className="text-xs text-theme-primary">{t.activeLists}</p>
         </div>
         <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-center">
           <p className="text-lg font-bold text-gray-700">

@@ -41,7 +41,7 @@ export function ActionConfirmBanner({
       <div className={`rounded-xl border p-3 shadow-sm ${
         isFailed
           ? 'bg-red-50 border-red-200'
-          : 'bg-gradient-to-r from-teal-50 to-emerald-50 border-teal-200'
+          : 'bg-gradient-to-r bg-theme-bg border-theme-line'
       }`}>
         {/* Header: Icon + Title */}
         <div className="flex items-center gap-2 mb-1.5">
@@ -65,7 +65,7 @@ export function ActionConfirmBanner({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               isExecuting
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-teal-600 text-white hover:bg-teal-700 active:scale-95'
+                : 'bg-theme-primary-2 text-white hover:bg-theme-primary-2 active:scale-95'
             }`}
           >
             {isExecuting ? (

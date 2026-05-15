@@ -69,7 +69,7 @@ export function DoctorReportButton() {
     <button
       onClick={handleGenerate}
       disabled={isGenerating || !profile}
-      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
+      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-theme-primary bg-theme-surface-2 border border-theme-line rounded-lg hover:bg-theme-surface-2 transition-colors disabled:opacity-50"
     >
       {isGenerating ? (
         <Loader2 className="h-4 w-4 animate-spin" />

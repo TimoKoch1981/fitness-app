@@ -12,7 +12,7 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
   submitted: 'bg-gray-100 text-gray-600',
   under_review: 'bg-blue-100 text-blue-700',
-  planned: 'bg-teal-100 text-teal-700',
+  planned: 'bg-theme-surface-2 text-theme-primary',
   in_progress: 'bg-amber-100 text-amber-700',
   completed: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-600',
@@ -41,15 +41,15 @@ export function FeatureRequestCard({ request, myVote, onVote, isVoting }: Props)
           disabled={isVoting}
           className={`p-1.5 rounded-lg transition-colors ${
             myVoteType === 'up'
-              ? 'bg-teal-100 text-teal-600'
-              : 'text-gray-400 hover:text-teal-500 hover:bg-gray-100'
+              ? 'bg-theme-surface-2 text-theme-primary'
+              : 'text-gray-400 hover:text-theme-primary hover:bg-gray-100'
           }`}
           aria-label={t.feedback.upvote}
         >
           <ChevronUp className="h-5 w-5" />
         </button>
         <span className={`text-sm font-bold ${
-          request.vote_count > 0 ? 'text-teal-600' :
+          request.vote_count > 0 ? 'text-theme-primary' :
           request.vote_count < 0 ? 'text-red-500' :
           'text-gray-400'
         }`}>
@@ -84,7 +84,7 @@ export function FeatureRequestCard({ request, myVote, onVote, isVoting }: Props)
           <span>{new Date(request.created_at).toLocaleDateString('de-DE')}</span>
           {request.author_name && <span>{request.author_name}</span>}
           {request.planned_month && (
-            <span className="text-teal-500">{t.feedback.plannedMonth} {request.planned_month}</span>
+            <span className="text-theme-primary">{t.feedback.plannedMonth} {request.planned_month}</span>
           )}
         </div>
       </div>

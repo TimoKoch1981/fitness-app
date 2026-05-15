@@ -226,8 +226,8 @@ export function RefeedCalendar({ language, weeksIntoCut, tdee, bodyWeight, phase
                   <p className="text-[8px] text-gray-500">kcal</p>
                 </div>
                 <div className="bg-white/70 rounded py-1">
-                  <p className="text-xs font-bold text-teal-700">{refeedMacros.protein}g</p>
-                  <p className="text-[8px] text-teal-600">Protein</p>
+                  <p className="text-xs font-bold text-theme-primary">{refeedMacros.protein}g</p>
+                  <p className="text-[8px] text-theme-primary">Protein</p>
                 </div>
                 <div className="bg-white/70 rounded py-1">
                   <p className="text-xs font-bold text-blue-700">{refeedMacros.carbs}g</p>

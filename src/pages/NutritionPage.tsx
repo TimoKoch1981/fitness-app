@@ -48,7 +48,7 @@ export function NutritionPage() {
         activeTab !== 'history' && activeTab !== 'pantry' && activeTab !== 'shopping' ? (
           <button
             onClick={handleAddAction}
-            className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            className="p-2 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -64,7 +64,7 @@ export function NutritionPage() {
             className={cn(
               'flex-1 py-2 text-xs font-medium rounded-md transition-all',
               activeTab === tab.key
-                ? 'bg-white text-teal-600 shadow-sm'
+                ? 'bg-white text-theme-primary shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             )}
           >

@@ -151,7 +151,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
           <button
             type="button"
             onClick={() => update({ useTimePeriod: !value.useTimePeriod })}
-            className="text-[10px] text-teal-600 hover:underline"
+            className="text-[10px] text-theme-primary hover:underline"
           >
             {value.useTimePeriod
               ? (isDE ? 'Exakte Uhrzeit' : 'Exact time')
@@ -168,7 +168,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
                 onClick={() => update({ timePeriod: period })}
                 className={`p-2 rounded-lg border-2 text-xs font-medium transition-all ${
                   value.timePeriod === period
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
+                    ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
@@ -184,7 +184,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
             type="time"
             value={value.time}
             onChange={e => update({ time: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
           />
         )}
       </div>
@@ -200,7 +200,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
             onClick={() => update({ repeatMode: 'weekly' })}
             className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
               value.repeatMode === 'weekly'
-                ? 'border-teal-500 bg-teal-50 text-teal-700'
+                ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                 : 'border-gray-200 text-gray-600'
             }`}
           >
@@ -211,7 +211,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
             onClick={() => update({ repeatMode: 'interval' })}
             className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
               value.repeatMode === 'interval'
-                ? 'border-teal-500 bg-teal-50 text-teal-700'
+                ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                 : 'border-gray-200 text-gray-600'
             }`}
           >
@@ -228,7 +228,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
                 onClick={() => toggleDay(index)}
                 className={`w-9 h-9 rounded-full text-xs font-medium transition-all ${
                   value.daysOfWeek.includes(index)
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-400'
                 }`}
               >
@@ -245,7 +245,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
               onChange={e => update({ intervalDays: e.target.value })}
               min="1"
               max="365"
-              className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-teal-500 outline-none"
+              className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-theme-primary outline-none"
             />
             <span className="text-xs text-gray-500">{isDE ? 'Tage' : 'days'}</span>
           </div>
@@ -263,7 +263,7 @@ export function ReminderPicker({ value, onChange, language, hideDescription, com
             value={value.description}
             onChange={e => update({ description: e.target.value })}
             placeholder={isDE ? 'Zusätzliche Hinweise...' : 'Additional notes...'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
           />
         </div>
       )}

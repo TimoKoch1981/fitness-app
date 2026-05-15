@@ -23,7 +23,7 @@ interface CycleCalendarViewProps {
 // Calendar-specific background colors — strong enough to be clearly visible
 const PHASE_BG: Record<CyclePhase, string> = {
   menstruation: 'bg-red-300',
-  follicular: 'bg-emerald-200',
+  follicular: 'bg-theme-success',
   ovulation: 'bg-amber-300',
   luteal: 'bg-purple-200',
   spotting: 'bg-orange-300',
@@ -31,7 +31,7 @@ const PHASE_BG: Record<CyclePhase, string> = {
 
 const PHASE_BG_PREDICTED: Record<CyclePhase, string> = {
   menstruation: 'bg-red-200 border-dashed border border-red-400',
-  follicular: 'bg-emerald-100 border-dashed border border-emerald-300',
+  follicular: 'bg-theme-surface-2 border-dashed border border-emerald-300',
   ovulation: 'bg-amber-200 border-dashed border border-amber-400',
   luteal: 'bg-purple-100 border-dashed border border-purple-300',
   spotting: 'bg-orange-100 border-dashed border border-orange-300',

@@ -50,7 +50,7 @@ function renderContentWithCitations(content: string): ReactNode[] {
         href={`https://pubmed.ncbi.nlm.nih.gov/${pmid}/`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-0.5 text-[10px] text-teal-600 bg-teal-50 px-1 py-0.5 rounded font-mono hover:bg-teal-100 transition-colors no-underline"
+        className="inline-flex items-center gap-0.5 text-[10px] text-theme-primary bg-theme-surface-2 px-1 py-0.5 rounded font-mono hover:bg-theme-surface-2 transition-colors no-underline"
         title={`PubMed PMID:${pmid}`}
       >
         <BookOpen className="h-2.5 w-2.5" />
@@ -121,7 +121,7 @@ function SkillSourcesFooter({ skillVersions, pmids, language }: {
         <BookOpen className="h-2.5 w-2.5" />
         <span>{de ? 'Quellen' : 'Sources'}</span>
         {hasPmids && (
-          <span className="bg-teal-50 text-teal-600 px-1 rounded text-[8px] font-medium">
+          <span className="bg-theme-surface-2 text-theme-primary px-1 rounded text-[8px] font-medium">
             {pmids.length} PMID{pmids.length > 1 ? 's' : ''}
           </span>
         )}
@@ -151,7 +151,7 @@ function SkillSourcesFooter({ skillVersions, pmids, language }: {
                     href={`https://pubmed.ncbi.nlm.nih.gov/${pmid}/`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-teal-500 hover:text-teal-700 hover:underline"
+                    className="text-theme-primary hover:text-theme-primary hover:underline"
                   >
                     PMID:{pmid}
                   </a>
@@ -184,9 +184,9 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
         <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm max-w-[85%]">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-2 h-2 bg-theme-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-theme-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-theme-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
             <span className="text-xs text-gray-400">Denkt nach...</span>
           </div>
@@ -198,7 +198,7 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
   if (isUser) {
     return (
       <div className="flex gap-3 mb-3 justify-end">
-        <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl rounded-tr-md p-4 shadow-sm max-w-[85%]">
+        <div className="bg-gradient-to-r bg-theme-primary rounded-2xl rounded-tr-md p-4 shadow-sm max-w-[85%]">
           <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
             {message.content}
           </p>
@@ -247,7 +247,7 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
             ? renderContentWithCitations(displayContent)
             : displayContent}
           {/* Blinking cursor during streaming */}
-          {message.isStreaming && <span className="inline-block w-1.5 h-4 bg-teal-500 animate-pulse ml-0.5 align-text-bottom" />}
+          {message.isStreaming && <span className="inline-block w-1.5 h-4 bg-theme-primary animate-pulse ml-0.5 align-text-bottom" />}
         </p>
         {/* AI accuracy disclaimer — shown on completed, non-error messages */}
         {isComplete && (

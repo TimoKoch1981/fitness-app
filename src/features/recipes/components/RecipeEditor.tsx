@@ -234,9 +234,9 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
             {imagePreview ? (
               <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-teal-50 to-emerald-50 flex flex-col items-center justify-center">
-                <Camera className="h-8 w-8 text-teal-300 mb-1" />
-                <span className="text-xs text-teal-400">Foto hinzufuegen</span>
+              <div className="w-full h-full bg-gradient-to-br bg-theme-bg flex flex-col items-center justify-center">
+                <Camera className="h-8 w-8 text-theme-ink-3 mb-1" />
+                <span className="text-xs text-theme-primary">Foto hinzufuegen</span>
               </div>
             )}
             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -264,7 +264,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t.recipes.recipeNamePlaceholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               required
               autoFocus
             />
@@ -278,7 +278,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t.recipes.descriptionPlaceholder}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm resize-none"
             />
           </div>
 
@@ -293,7 +293,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                   onClick={() => setMealType(mealType === type ? null : type)}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                     mealType === type
-                      ? 'bg-teal-500 text-white'
+                      ? 'bg-theme-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -312,7 +312,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                 value={servings}
                 onChange={(e) => setServings(e.target.value)}
                 min="1"
-                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs"
               />
             </div>
             <div>
@@ -322,7 +322,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                 value={prepTime}
                 onChange={(e) => setPrepTime(e.target.value)}
                 min="0"
-                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs"
               />
             </div>
             <div>
@@ -332,7 +332,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                 value={cookTime}
                 onChange={(e) => setCookTime(e.target.value)}
                 min="0"
-                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs"
               />
             </div>
             <div>
@@ -340,7 +340,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs bg-white"
               >
                 <option value="easy">Einfach</option>
                 <option value="medium">Mittel</option>
@@ -363,12 +363,12 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                     placeholder="0"
                     min="0"
                     step="any"
-                    className="w-14 px-1.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-14 px-1.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                   />
                   <select
                     value={ing.unit}
                     onChange={(e) => updateIngredient(i, 'unit', e.target.value)}
-                    className="w-16 px-1 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none bg-white"
+                    className="w-16 px-1 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none bg-white"
                   >
                     <option value="g">g</option>
                     <option value="kg">kg</option>
@@ -385,7 +385,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                     value={ing.name}
                     onChange={(e) => updateIngredient(i, 'name', e.target.value)}
                     placeholder={t.recipes.ingredientName}
-                    className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                   />
                   <button
                     type="button"
@@ -401,7 +401,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
             <button
               type="button"
               onClick={addIngredient}
-              className="mt-2 flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700"
+              className="mt-2 flex items-center gap-1 text-xs text-theme-primary hover:text-theme-primary"
             >
               <Plus className="h-3.5 w-3.5" />
               {t.recipes.addIngredient}
@@ -414,7 +414,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
             <div className="space-y-2">
               {steps.map((step, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold flex items-center justify-center mt-1.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-theme-surface-2 text-theme-primary text-[10px] font-bold flex items-center justify-center mt-1.5">
                     {i + 1}
                   </span>
                   <div className="flex-1 space-y-1">
@@ -423,7 +423,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                       onChange={(e) => updateStep(i, 'text', e.target.value)}
                       placeholder={`Schritt ${i + 1}...`}
                       rows={2}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none resize-none"
                     />
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3 text-gray-400" />
@@ -433,7 +433,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                         onChange={(e) => updateStep(i, 'duration_min', parseInt(e.target.value) || 0)}
                         placeholder="Min (optional)"
                         min="0"
-                        className="w-24 px-1.5 py-1 border border-gray-200 rounded text-[10px] focus:ring-1 focus:ring-teal-500 outline-none"
+                        className="w-24 px-1.5 py-1 border border-gray-200 rounded text-[10px] focus:ring-1 focus:ring-theme-primary outline-none"
                       />
                     </div>
                   </div>
@@ -451,7 +451,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
             <button
               type="button"
               onClick={addStep}
-              className="mt-2 flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700"
+              className="mt-2 flex items-center gap-1 text-xs text-theme-primary hover:text-theme-primary"
             >
               <Plus className="h-3.5 w-3.5" />
               Schritt hinzufuegen
@@ -465,10 +465,10 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-50 text-teal-700 text-xs rounded-full"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-theme-surface-2 text-theme-primary text-xs rounded-full"
                 >
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="text-teal-400 hover:text-teal-600">
+                  <button type="button" onClick={() => removeTag(tag)} className="text-theme-primary hover:text-theme-primary">
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -480,7 +480,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               placeholder={t.recipes.tagsPlaceholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
             <div className="flex flex-wrap gap-1 mt-1.5">
               {SUGGESTED_TAGS.filter((st) => !tags.includes(st)).slice(0, 5).map((st) => (
@@ -503,7 +503,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
               <button
                 type="button"
                 onClick={calculateMacros}
-                className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700"
+                className="flex items-center gap-1 text-xs text-theme-primary hover:text-theme-primary"
               >
                 <Calculator className="h-3.5 w-3.5" />
                 {t.recipes.autoCalculate}
@@ -518,7 +518,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                   onChange={(e) => setCalories(e.target.value)}
                   placeholder="kcal"
                   min="0"
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                 />
               </div>
               <div>
@@ -530,7 +530,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                   placeholder="0"
                   min="0"
                   step="any"
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                 />
               </div>
               <div>
@@ -542,7 +542,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                   placeholder="0"
                   min="0"
                   step="any"
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                 />
               </div>
               <div>
@@ -554,7 +554,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
                   placeholder="0"
                   min="0"
                   step="any"
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary outline-none"
                 />
               </div>
             </div>
@@ -567,7 +567,7 @@ export function RecipeEditor({ recipe, importedData, onSave, onClose }: RecipeEd
           <button
             type="submit"
             disabled={uploading}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {uploading ? 'Bild wird hochgeladen...' : t.common.save}
           </button>

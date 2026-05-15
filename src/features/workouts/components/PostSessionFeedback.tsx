@@ -108,7 +108,7 @@ export function PostSessionFeedback({
             onClick={() => setFeeling(opt.key)}
             className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 transition-all ${
               feeling === opt.key
-                ? 'border-teal-500 bg-teal-50'
+                ? 'border-theme-primary bg-theme-surface-2'
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}
           >
@@ -191,7 +191,7 @@ export function PostSessionFeedback({
       <button
         onClick={handleSubmit}
         disabled={!feeling || isSaving}
-        className="w-full py-3 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
+        className="w-full py-3 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
       >
         {isSaving
           ? (isDE ? 'Speichern...' : 'Saving...')

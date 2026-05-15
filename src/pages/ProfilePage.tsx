@@ -237,7 +237,7 @@ export function ProfilePage() {
         {saveStatus !== 'idle' && (
           <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shadow-lg transition-all ${
             saveStatus === 'saved'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              ? 'bg-theme-surface-2 text-theme-success border border-theme-line'
               : 'bg-red-50 text-red-700 border border-red-200'
           }`}>
             {saveStatus === 'saved' ? (
@@ -272,7 +272,7 @@ export function ProfilePage() {
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as Language)}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-theme-primary"
             >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.code} value={opt.code}>
@@ -298,7 +298,7 @@ export function ProfilePage() {
                   onClick={() => setFontSize(size as FontSize)}
                   className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                     fontSize === size
-                      ? 'bg-teal-500 text-white'
+                      ? 'bg-theme-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -377,17 +377,17 @@ export function ProfilePage() {
                   onClick={() => updateProfile.mutate({ buddy_avatar_style: v })}
                   className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
                     isSelected
-                      ? 'border-teal-500 bg-teal-50 shadow-sm'
+                      ? 'border-theme-primary bg-theme-surface-2 shadow-sm'
                       : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
                   }`}
                 >
                   <BuddyAvatar size="preview" variant={v} />
                   <div className="text-center">
-                    <p className={`text-xs font-semibold ${isSelected ? 'text-teal-700' : 'text-gray-700'}`}>{cfg.label[isDE ? 'de' : 'en']}</p>
+                    <p className={`text-xs font-semibold ${isSelected ? 'text-theme-primary' : 'text-gray-700'}`}>{cfg.label[isDE ? 'de' : 'en']}</p>
                     <p className="text-[10px] text-gray-400 leading-tight mt-0.5">{cfg.description[isDE ? 'de' : 'en']}</p>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-theme-primary rounded-full flex items-center justify-center">
                       <Check className="h-3 w-3 text-white" />
                     </div>
                   )}
@@ -406,7 +406,7 @@ export function ProfilePage() {
           }}
           className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 hover:bg-gray-50 active:scale-[0.99] transition-all text-left"
         >
-          <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-theme-surface-2 flex items-center justify-center flex-shrink-0">
             <span className="text-lg">🎯</span>
           </div>
           <div className="flex-1 min-w-0">
@@ -427,7 +427,7 @@ export function ProfilePage() {
 
           {isLoading ? (
             <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto" />
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-theme-primary mx-auto" />
             </div>
           ) : (
             <div className="space-y-3">
@@ -439,7 +439,7 @@ export function ProfilePage() {
                   type="text"
                   value={displayName}
                   onChange={(e) => handleChange(setDisplayName)(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 />
               </div>
 
@@ -453,7 +453,7 @@ export function ProfilePage() {
                     value={heightCm}
                     onChange={(e) => handleChange(setHeightCm)(e.target.value)}
                     placeholder="180"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="100"
                     max="250"
                   />
@@ -466,7 +466,7 @@ export function ProfilePage() {
                     type="date"
                     value={birthDate}
                     onChange={(e) => handleChange(setBirthDate)(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                   />
                 </div>
               </div>
@@ -495,7 +495,7 @@ export function ProfilePage() {
                         }}
                         className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                           gender === val
-                            ? 'bg-teal-500 text-white'
+                            ? 'bg-theme-primary text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -522,7 +522,7 @@ export function ProfilePage() {
                   <select
                     value={bmrFormula}
                     onChange={(e) => handleChange(setBmrFormula)(e.target.value as BMRFormula)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm bg-white"
                   >
                     <option value="auto">{t.profile.auto}</option>
                     <option value="mifflin">{t.profile.mifflin}</option>
@@ -535,7 +535,7 @@ export function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowBmrHelp(!showBmrHelp)}
-                className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+                className="flex items-center gap-1 text-[11px] text-theme-primary hover:text-theme-primary transition-colors"
               >
                 <HelpCircle className="h-3.5 w-3.5" />
                 {t.profile.bmrHelpToggle}
@@ -558,7 +558,7 @@ export function ProfilePage() {
                 <select
                   value={activityLevel}
                   onChange={(e) => handleChange(setActivityLevel)(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm bg-white"
                 >
                   {palOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -572,7 +572,7 @@ export function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowPalHelp(!showPalHelp)}
-                className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+                className="flex items-center gap-1 text-[11px] text-theme-primary hover:text-theme-primary transition-colors"
               >
                 <HelpCircle className="h-3.5 w-3.5" />
                 {t.profile.activityLevelHelpToggle}
@@ -587,7 +587,7 @@ export function ProfilePage() {
                     <p>💪 {t.profile.palVeryActive}</p>
                     <p>🏋️ {t.profile.palExtremelyActive}</p>
                   </div>
-                  <p className="text-teal-600 font-medium mt-2">💡 {t.profile.palTip}</p>
+                  <p className="text-theme-primary font-medium mt-2">💡 {t.profile.palTip}</p>
                 </div>
               )}
             </div>
@@ -625,7 +625,7 @@ export function ProfilePage() {
                     type="number"
                     value={caloriesGoal}
                     onChange={(e) => handleChange(setCaloriesGoal)(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="1000"
                     max="10000"
                   />
@@ -641,7 +641,7 @@ export function ProfilePage() {
                     type="number"
                     value={proteinGoal}
                     onChange={(e) => handleChange(setProteinGoal)(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="50"
                     max="500"
                   />
@@ -657,7 +657,7 @@ export function ProfilePage() {
                     type="number"
                     value={waterGoal}
                     onChange={(e) => handleChange(setWaterGoal)(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                     min="1"
                     max="20"
                   />
@@ -691,7 +691,7 @@ export function ProfilePage() {
                 });
                 setRecommendedGoals(result);
               }}
-              className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+              className="flex items-center gap-1.5 text-xs text-theme-primary hover:text-theme-primary font-medium transition-colors"
             >
               <Calculator className="h-3.5 w-3.5" />
               {t.profile.calculateGoals}
@@ -704,23 +704,23 @@ export function ProfilePage() {
               </p>
             )}
             {recommendedGoals && (
-              <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 space-y-2">
-                <p className="text-xs font-semibold text-teal-800">{t.profile.recommendedValues}</p>
-                <div className="grid grid-cols-3 gap-2 text-[10px] text-teal-700">
+              <div className="bg-theme-surface-2 border border-theme-line rounded-lg p-3 space-y-2">
+                <p className="text-xs font-semibold text-theme-ink">{t.profile.recommendedValues}</p>
+                <div className="grid grid-cols-3 gap-2 text-[10px] text-theme-primary">
                   <div>
-                    <span className="block text-teal-500">{t.profile.caloriesGoal}</span>
+                    <span className="block text-theme-primary">{t.profile.caloriesGoal}</span>
                     <span className="font-bold">{recommendedGoals.calories} kcal</span>
                   </div>
                   <div>
-                    <span className="block text-teal-500">{t.profile.proteinGoal}</span>
+                    <span className="block text-theme-primary">{t.profile.proteinGoal}</span>
                     <span className="font-bold">{recommendedGoals.protein}g</span>
                   </div>
                   <div>
-                    <span className="block text-teal-500">{t.profile.waterGoal}</span>
+                    <span className="block text-theme-primary">{t.profile.waterGoal}</span>
                     <span className="font-bold">{recommendedGoals.water_glasses} {t.dashboard.glasses}</span>
                   </div>
                 </div>
-                <div className="text-[9px] text-teal-500">
+                <div className="text-[9px] text-theme-primary">
                   BMR: {recommendedGoals.bmr} kcal ({recommendedGoals.bmr_formula === 'katch' ? t.profile.katch : t.profile.mifflin}) | TDEE: {recommendedGoals.tdee} kcal
                   {isBreastfeeding && (
                     <span className="ml-1 text-pink-500 font-medium">| 🤱 +400 kcal {language === 'de' ? 'Stillzeit' : 'Lactation'}</span>
@@ -734,7 +734,7 @@ export function ProfilePage() {
                     handleChange(setWaterGoal)(recommendedGoals.water_glasses.toString());
                     setRecommendedGoals(null);
                   }}
-                  className="w-full mt-1 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors"
+                  className="w-full mt-1 py-1.5 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
                 >
                   {t.profile.applyRecommendation}
                 </button>
@@ -825,7 +825,7 @@ export function ProfilePage() {
                   }}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary" />
               </label>
             </div>
           </div>
@@ -861,7 +861,7 @@ export function ProfilePage() {
                 }}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary" />
             </label>
           </div>
           {profile?.ai_trainer_enabled && (
@@ -886,14 +886,14 @@ export function ProfilePage() {
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-teal-600" />
+              <BarChart3 className="h-4 w-4 text-theme-primary" />
               <h3 className="font-semibold text-gray-900">{t.report.weeklyReport}</h3>
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-1 mb-3">{t.report.weeklyReportDesc}</p>
           <button
             onClick={() => setShowWeeklyReport(true)}
-            className="w-full py-2.5 bg-teal-50 text-teal-600 text-sm font-medium rounded-lg hover:bg-teal-100 transition-colors"
+            className="w-full py-2.5 bg-theme-surface-2 text-theme-primary text-sm font-medium rounded-lg hover:bg-theme-surface-2 transition-colors"
           >
             {t.report.showReport}
           </button>
@@ -905,7 +905,7 @@ export function ProfilePage() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowFeedback(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-teal-50 text-teal-600 rounded-xl font-medium hover:bg-teal-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-theme-surface-2 text-theme-primary rounded-xl font-medium hover:bg-theme-surface-2 transition-colors"
           >
             <MessageSquare className="h-4 w-4" />
             {t.feedback.feedbackButton}
@@ -964,7 +964,7 @@ export function ProfilePage() {
               const val = e.target.value === '' ? null : parseInt(e.target.value);
               updateProfile.mutate({ data_retention_months: val });
             }}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-theme-primary focus:border-theme-primary"
           >
             <option value="">{t.dataRetention?.unlimited || 'Unbegrenzt (Standard)'}</option>
             <option value="12">{t.dataRetention?.months12 || '1 Jahr'}</option>
@@ -1007,11 +1007,11 @@ export function ProfilePage() {
 
         {/* Legal Links */}
         <div className="flex justify-center gap-4 text-xs text-gray-400">
-          <Link to="/impressum" className="hover:text-teal-600 transition-colors">
+          <Link to="/impressum" className="hover:text-theme-primary transition-colors">
             {t.legal.impressumTitle}
           </Link>
           <span>|</span>
-          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">
+          <Link to="/datenschutz" className="hover:text-theme-primary transition-colors">
             {t.legal.privacyPolicy}
           </Link>
         </div>
@@ -1019,7 +1019,7 @@ export function ProfilePage() {
         {/* MFP Import */}
         <button
           onClick={() => setShowMFPImport(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-teal-500 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
         >
           <Upload className="h-3.5 w-3.5" />
           {t.dataImport.title}
@@ -1032,7 +1032,7 @@ export function ProfilePage() {
         {/* Data Export (DSGVO Art. 20) */}
         <button
           onClick={() => setShowDataExport(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-teal-500 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
         >
           <Download className="h-3.5 w-3.5" />
           {t.dataExport.profileButton}

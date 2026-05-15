@@ -87,7 +87,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
   };
 
   const confidenceColor = (conf: number) => {
-    if (conf >= 0.8) return 'text-emerald-600';
+    if (conf >= 0.8) return 'text-theme-success';
     if (conf >= 0.5) return 'text-amber-500';
     return 'text-red-500';
   };
@@ -150,7 +150,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
               <button
                 type="button"
                 onClick={() => cameraRef.current?.click()}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+                className="flex items-center justify-center gap-2 py-3 px-4 bg-theme-surface-2 border border-theme-line rounded-xl text-theme-primary text-sm font-medium hover:bg-theme-surface-2 transition-colors"
               >
                 <Camera className="h-5 w-5" />
                 {meals.photoCamera || 'Kamera'}
@@ -158,7 +158,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
               <button
                 type="button"
                 onClick={() => galleryRef.current?.click()}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+                className="flex items-center justify-center gap-2 py-3 px-4 bg-theme-surface-2 border border-theme-line rounded-xl text-theme-primary text-sm font-medium hover:bg-theme-surface-2 transition-colors"
               >
                 <Image className="h-5 w-5" />
                 {meals.photoGallery || 'Galerie'}
@@ -169,7 +169,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
             <button
               type="button"
               onClick={() => galleryRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-theme-surface-2 border border-theme-line rounded-xl text-theme-primary text-sm font-medium hover:bg-theme-surface-2 transition-colors"
             >
               <Upload className="h-5 w-5" />
               {language === 'de' ? 'Bild auswählen' : 'Choose image'}
@@ -192,7 +192,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
             )}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white/90 rounded-full p-3 shadow-lg">
-                <Loader2 className="h-8 w-8 text-teal-600 animate-spin" />
+                <Loader2 className="h-8 w-8 text-theme-primary animate-spin" />
               </div>
             </div>
           </div>
@@ -218,7 +218,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
           )}
 
           {/* Detected name */}
-          <div className="bg-teal-50 rounded-lg p-3">
+          <div className="bg-theme-surface-2 rounded-lg p-3">
             <p className="text-sm font-semibold text-gray-900">{result.name}</p>
             {result.portion_description && (
               <p className="text-xs text-gray-500 mt-0.5">{result.portion_description}</p>
@@ -273,7 +273,7 @@ export function MealPhotoCapture({ onAccept, onClose }: MealPhotoCaptureProps) {
             <button
               type="button"
               onClick={handleAccept}
-              className="flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 transition-all"
+              className="flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-all"
             >
               <Check className="h-4 w-4" />
               {meals.photoAccept || 'Werte uebernehmen'}

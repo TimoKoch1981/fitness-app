@@ -43,7 +43,7 @@ export function MFAVerificationDialog({ factorId, onSuccess, onCancel }: MFAVeri
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-teal-600" />
+          <ShieldCheck className="h-5 w-5 text-theme-primary" />
           <h3 className="text-lg font-semibold text-gray-900">{mfa.challengeTitle || 'Zwei-Faktor-Authentifizierung'}</h3>
         </div>
 
@@ -65,14 +65,14 @@ export function MFAVerificationDialog({ factorId, onSuccess, onCancel }: MFAVeri
           onKeyDown={handleKeyDown}
           placeholder="000000"
           aria-label={mfa.enterCode || '6-digit MFA code'}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-mono tracking-[0.5em] focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-mono tracking-[0.5em] focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
           autoFocus
         />
 
         <button
           onClick={handleVerify}
           disabled={code.length !== 6 || loading}
-          className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+          className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
         >
           {loading ? (t.common?.loading || 'Laden...') : (mfa.verify || 'Verifizieren')}
         </button>

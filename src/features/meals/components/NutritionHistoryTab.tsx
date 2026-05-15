@@ -172,13 +172,13 @@ export function NutritionHistoryTab() {
     const pct = previous > 0 ? Math.round((diff / previous) * 100) : 0;
     if (Math.abs(pct) < 3) return <Minus className="h-3 w-3 text-gray-400" />;
     if (diff > 0) return <TrendingUp className="h-3 w-3 text-red-400" />;
-    return <TrendingDown className="h-3 w-3 text-emerald-500" />;
+    return <TrendingDown className="h-3 w-3 text-theme-success" />;
   };
 
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
       </div>
     );
   }
@@ -194,7 +194,7 @@ export function NutritionHistoryTab() {
           onClick={() => handleQuickPreset('yesterday')}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             quickPreset === 'yesterday'
-              ? 'bg-teal-500 text-white'
+              ? 'bg-theme-primary text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -204,7 +204,7 @@ export function NutritionHistoryTab() {
           onClick={() => handleQuickPreset('thisWeek')}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             quickPreset === 'thisWeek'
-              ? 'bg-teal-500 text-white'
+              ? 'bg-theme-primary text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -213,7 +213,7 @@ export function NutritionHistoryTab() {
         <div className="flex-1" />
         <button
           onClick={() => setShowExport(true)}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-teal-600 bg-teal-50 rounded-full hover:bg-teal-100 transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-theme-primary bg-theme-surface-2 rounded-full hover:bg-theme-surface-2 transition-colors"
         >
           <Download className="h-3.5 w-3.5" />
           Export
@@ -224,7 +224,7 @@ export function NutritionHistoryTab() {
       {history && history.daysWithData > 0 && (
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-1.5 mb-3">
-            <BarChart3 className="h-4 w-4 text-teal-500" />
+            <BarChart3 className="h-4 w-4 text-theme-primary" />
             <p className="text-xs text-gray-500 font-medium">
               {isDE ? `Tagesdurchschnitt (${history.daysWithData} Tage)` : `Daily Average (${history.daysWithData} days)`}
             </p>
@@ -241,7 +241,7 @@ export function NutritionHistoryTab() {
             </div>
             <div>
               <div className="flex items-center justify-center gap-1">
-                <p className="text-lg font-bold text-teal-600">{history.averages.protein}</p>
+                <p className="text-lg font-bold text-theme-primary">{history.averages.protein}</p>
                 {prevAvg && <TrendIcon current={history.averages.protein} previous={prevAvg.protein} />}
               </div>
               <p className="text-[10px] text-gray-400">{t.meals.protein}</p>
@@ -267,7 +267,7 @@ export function NutritionHistoryTab() {
               </div>
               <div className="grid grid-cols-3 text-center gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-600">+{history.averages.calories}</p>
+                  <p className="text-sm font-semibold text-theme-success">+{history.averages.calories}</p>
                   <p className="text-[9px] text-gray-400">{isDE ? 'ø Aufnahme' : 'ø Intake'}</p>
                 </div>
                 <div>
@@ -294,7 +294,7 @@ export function NutritionHistoryTab() {
               <p className="text-[9px] text-gray-300">{isDE ? 'Gesamt kcal' : 'Total kcal'}</p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-teal-500">{Math.round(history.totals.protein)}g</p>
+              <p className="text-sm font-semibold text-theme-primary">{Math.round(history.totals.protein)}g</p>
               <p className="text-[9px] text-gray-300">{isDE ? 'Gesamt P' : 'Total P'}</p>
             </div>
             <div>
@@ -438,7 +438,7 @@ export function NutritionHistoryTab() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-gray-900">{day.calories} kcal</p>
                     <div className="flex gap-2 text-[10px] text-gray-400">
-                      <span className="text-teal-500">P: {Math.round(day.protein)}g</span>
+                      <span className="text-theme-primary">P: {Math.round(day.protein)}g</span>
                       <span className="text-blue-500">K: {Math.round(day.carbs)}g</span>
                       <span className="text-amber-500">F: {Math.round(day.fat)}g</span>
                     </div>
@@ -516,7 +516,7 @@ export function NutritionHistoryTab() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-gray-900">{day.calories} kcal</p>
                     <div className="flex gap-2 text-[10px] text-gray-400">
-                      <span className="text-teal-500">P: {Math.round(day.protein)}g</span>
+                      <span className="text-theme-primary">P: {Math.round(day.protein)}g</span>
                       <span className="text-blue-500">K: {Math.round(day.carbs)}g</span>
                       <span className="text-amber-500">F: {Math.round(day.fat)}g</span>
                     </div>

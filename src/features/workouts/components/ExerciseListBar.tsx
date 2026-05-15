@@ -88,10 +88,10 @@ function SortableExerciseItem({
       {...listeners}
       className={cn(
         'flex items-center gap-1 pl-1 rounded-lg transition-colors cursor-grab active:cursor-grabbing touch-none',
-        isCurrent && 'bg-teal-50 ring-2 ring-teal-400',
+        isCurrent && 'bg-theme-surface-2 ring-2 ring-theme-primary',
         !isCurrent && allDone && 'bg-green-50/50',
         !isCurrent && isSkipped && 'opacity-50',
-        isDragging && 'shadow-lg bg-white ring-2 ring-teal-300',
+        isDragging && 'shadow-lg bg-white ring-2 ring-theme-primary',
       )}
     >
       {/* Reorder arrows — horizontal, large tap targets */}
@@ -100,7 +100,7 @@ function SortableExerciseItem({
           onClick={(e) => { e.stopPropagation(); onMoveUp(idx); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={idx === 0}
-          className="p-1.5 text-gray-400 hover:text-teal-500 active:bg-teal-50 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
+          className="p-1.5 text-gray-400 hover:text-theme-primary active:bg-theme-surface-2 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
         >
           <ChevronUp className="h-5 w-5" />
         </button>
@@ -108,7 +108,7 @@ function SortableExerciseItem({
           onClick={(e) => { e.stopPropagation(); onMoveDown(idx); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={idx === totalExercises - 1}
-          className="p-1.5 text-gray-400 hover:text-teal-500 active:bg-teal-50 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
+          className="p-1.5 text-gray-400 hover:text-theme-primary active:bg-theme-surface-2 rounded transition-colors disabled:opacity-20 disabled:hover:text-gray-400"
         >
           <ChevronDown className="h-5 w-5" />
         </button>
@@ -125,7 +125,7 @@ function SortableExerciseItem({
         {/* Status icon */}
         <div className={cn(
           'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-          isCurrent && 'bg-teal-500 text-white',
+          isCurrent && 'bg-theme-primary text-white',
           !isCurrent && allDone && 'bg-green-100 text-green-600',
           !isCurrent && isSkipped && 'bg-gray-100 text-gray-400',
           !isCurrent && !allDone && !isSkipped && 'bg-gray-100 text-gray-500',
@@ -157,7 +157,7 @@ function SortableExerciseItem({
         <div className="flex-1 min-w-0">
           <p className={cn(
             'text-xs font-medium truncate',
-            isCurrent && 'text-teal-700',
+            isCurrent && 'text-theme-primary',
             !isCurrent && allDone && 'text-green-600',
             !isCurrent && isSkipped && 'text-gray-400 line-through',
             !isCurrent && !allDone && !isSkipped && 'text-gray-700',
@@ -169,7 +169,7 @@ function SortableExerciseItem({
         {/* Set progress */}
         <span className={cn(
           'text-[10px] flex-shrink-0',
-          isCurrent ? 'text-teal-500 font-semibold' : 'text-gray-400',
+          isCurrent ? 'text-theme-primary font-semibold' : 'text-gray-400',
         )}>
           {completedSets}/{totalSets}
         </span>
@@ -246,13 +246,13 @@ export function ExerciseListBar() {
         className="w-full px-3 py-2 flex items-center justify-between"
       >
         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
-          <ChevronRight className={cn('h-4 w-4 text-teal-500 transition-transform', expanded && 'rotate-90')} />
+          <ChevronRight className={cn('h-4 w-4 text-theme-primary transition-transform', expanded && 'rotate-90')} />
           {isDE ? 'Übungen' : 'Exercises'}
           <span className="ml-1 text-[11px] text-gray-400 normal-case tracking-normal font-normal">
             — {isDE ? 'tippen zum Wechseln, ziehen zum Sortieren' : 'tap to switch, drag to reorder'}
           </span>
         </span>
-        <span className="text-xs font-semibold text-teal-600">
+        <span className="text-xs font-semibold text-theme-primary">
           {completedCount}/{state.exercises.length}
         </span>
       </button>
@@ -270,7 +270,7 @@ export function ExerciseListBar() {
                 onClick={() => goToExercise(idx)}
                 className={cn(
                   'flex-shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all',
-                  isCurrent && 'bg-teal-500 text-white shadow-md',
+                  isCurrent && 'bg-theme-primary text-white shadow-md',
                   !isCurrent && allDone && 'bg-green-50 text-green-600',
                   !isCurrent && ex.skipped && 'bg-gray-50 text-gray-400 line-through',
                   !isCurrent && !allDone && !ex.skipped && 'bg-gray-50 text-gray-600',
@@ -279,7 +279,7 @@ export function ExerciseListBar() {
                 {allDone && !isCurrent ? <Check className="h-3 w-3" /> : <Dumbbell className="h-3 w-3" />}
                 <span className="max-w-[80px] truncate">{ex.name}</span>
                 {!allDone && !ex.skipped && ex.sets.length > 1 && (
-                  <span className={cn('text-[9px]', isCurrent ? 'text-teal-100' : 'text-gray-400')}>
+                  <span className={cn('text-[9px]', isCurrent ? 'text-theme-ink-2' : 'text-gray-400')}>
                     {completedSets}/{ex.sets.length}
                   </span>
                 )}

@@ -41,7 +41,7 @@ export function PlateCalculatorPopup({ weight, barWeight = 20 }: PlateCalculator
     <div className="mt-1">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-teal-500 transition-colors"
+        className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-theme-primary transition-colors"
       >
         <Calculator className="h-3 w-3" />
         <span>{isDE ? 'Hantelbeladung' : 'Plate Loading'}</span>

@@ -78,7 +78,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
                 onClick={() => onPrimaryGoalChange(primaryGoal === val ? '' : val)}
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                   primaryGoal === val
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -92,7 +92,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
         <button
           type="button"
           onClick={() => onShowGoalsHelpChange(!showGoalsHelp)}
-          className="flex items-center gap-1 text-[11px] text-teal-600 hover:text-teal-700 transition-colors"
+          className="flex items-center gap-1 text-[11px] text-theme-primary hover:text-theme-primary transition-colors"
         >
           <HelpCircle className="h-3.5 w-3.5" />
           {t.profile.goalsHelpToggle}
@@ -121,7 +121,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
                 value={targetWeight}
                 onChange={(e) => onTargetWeightChange(e.target.value)}
                 placeholder="85"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="30"
                 max="300"
               />
@@ -138,7 +138,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
                 value={targetBodyFat}
                 onChange={(e) => onTargetBodyFatChange(e.target.value)}
                 placeholder="15"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="3"
                 max="50"
               />
@@ -153,7 +153,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
               type="date"
               value={targetDate}
               onChange={(e) => onTargetDateChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
           </div>
         </div>
@@ -167,7 +167,7 @@ export function ProfilePersonalGoalsSection(props: ProfilePersonalGoalsSectionPr
             value={goalNotes}
             onChange={(e) => onGoalNotesChange(e.target.value)}
             placeholder={language === 'de' ? 'z.B. Sixpack bis Sommer' : 'e.g. Get a sixpack by summer'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
           />
         </div>
       </div>

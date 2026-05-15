@@ -111,7 +111,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br bg-theme-primary flex items-center justify-center">
               <User className="h-8 w-8 text-white" />
             </div>
           )}
@@ -129,7 +129,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isBusy}
-          className="absolute -bottom-1 -right-1 w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm hover:bg-teal-600 transition-colors disabled:opacity-50"
+          className="absolute -bottom-1 -right-1 w-7 h-7 bg-theme-primary rounded-full flex items-center justify-center border-2 border-white shadow-sm hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
         >
           <Camera className="h-3.5 w-3.5 text-white" />
         </button>

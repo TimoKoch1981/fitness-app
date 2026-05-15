@@ -78,7 +78,7 @@ export function PlanWizardDialog() {
               </button>
             )}
             <div className="flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-teal-500" />
+              <Dumbbell className="h-5 w-5 text-theme-primary" />
               <h3 className="text-base font-semibold text-gray-900">{title}</h3>
             </div>
           </div>
@@ -90,8 +90,8 @@ export function PlanWizardDialog() {
         {/* Step indicator */}
         <div className="px-5 pt-3 flex-shrink-0">
           <div className="flex gap-2">
-            <div className={`flex-1 h-1 rounded-full ${step >= 1 ? 'bg-teal-500' : 'bg-gray-200'}`} />
-            <div className={`flex-1 h-1 rounded-full ${step >= 2 ? 'bg-teal-500' : 'bg-gray-200'}`} />
+            <div className={`flex-1 h-1 rounded-full ${step >= 1 ? 'bg-theme-primary' : 'bg-gray-200'}`} />
+            <div className={`flex-1 h-1 rounded-full ${step >= 2 ? 'bg-theme-primary' : 'bg-gray-200'}`} />
           </div>
           <p className="text-xs text-gray-400 mt-1">
             {step === 1 ? (t?.step1 ?? 'Plan Details') : (t?.step2 ?? (isDE ? 'Übungen zuweisen' : 'Assign Exercises'))}
@@ -120,7 +120,7 @@ export function PlanWizardDialog() {
               <button
                 onClick={goToStep2}
                 disabled={!name.trim()}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isDE ? 'Weiter' : 'Next'}
                 <ChevronRight className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function PlanWizardDialog() {
               {!buddyDocked && (
                 <button
                   onClick={handleBuddyHelp}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-theme-primary bg-theme-surface-2 rounded-xl hover:bg-theme-surface-2 transition-colors"
                 >
                   <MessageCircle className="h-4 w-4" />
                   {isDE ? 'Buddy helfen lassen' : 'Let Buddy help'}
@@ -140,7 +140,7 @@ export function PlanWizardDialog() {
               <button
                 onClick={() => saveWizard()}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 {isSaving
@@ -153,7 +153,7 @@ export function PlanWizardDialog() {
               {!buddyDocked && (
                 <button
                   onClick={handleBuddyHelp}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-theme-primary bg-theme-surface-2 rounded-xl hover:bg-theme-surface-2 transition-colors"
                 >
                   <MessageCircle className="h-4 w-4" />
                   {isDE ? 'Buddy helfen lassen' : 'Let Buddy help'}

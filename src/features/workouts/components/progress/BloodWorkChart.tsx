@@ -79,7 +79,7 @@ export function BloodWorkChart({ timeRange }: BloodWorkChartProps) {
       <select
         value={selectedMarker}
         onChange={e => setSelectedMarker(e.target.value)}
-        className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+        className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary"
       >
         {Object.entries(MARKER_GROUPS).map(([group, markers]) => {
           const available = markers.filter(m => availableMarkers.includes(m));

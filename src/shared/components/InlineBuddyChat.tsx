@@ -562,7 +562,7 @@ function InlineBuddyChatContent() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t.buddy.placeholder}
-            className="flex-1 px-3 py-2 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition-colors"
+            className="flex-1 px-3 py-2 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-theme-primary focus:bg-white outline-none transition-colors"
             // v14.13: input stays enabled while the bot is streaming — the user
             // can already type the next question. handleSubmit guards against
             // sending while isLoading, so we don't race the in-flight reply.
@@ -575,7 +575,7 @@ function InlineBuddyChatContent() {
               className={`relative p-2 rounded-full transition-all ${
                 isListening
                   ? 'text-red-500 bg-red-50 ring-2 ring-red-400 ring-opacity-75 animate-pulse'
-                  : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'
+                  : 'text-gray-400 hover:text-theme-primary hover:bg-theme-surface-2'
               }`}
               title={isListening ? t.buddy.voiceListening : t.buddy.voiceInput}
               disabled={isLoading}
@@ -586,7 +586,7 @@ function InlineBuddyChatContent() {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="px-3 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-full text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-teal-600 hover:to-emerald-700 transition-all flex items-center gap-1"
+            className="px-3 py-2 bg-gradient-to-r bg-theme-primary text-white rounded-full text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-theme-primary-2 transition-all flex items-center gap-1"
           >
             <Send className="h-3.5 w-3.5" />
           </button>

@@ -300,7 +300,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white rounded-xl shadow-sm p-3 text-center">
-          <Clock className="h-5 w-5 text-teal-500 mx-auto mb-1" />
+          <Clock className="h-5 w-5 text-theme-primary mx-auto mb-1" />
           <p className="text-lg font-bold text-gray-900">{stats.durationMin}</p>
           <p className="text-xs text-gray-400">Min</p>
         </div>
@@ -454,7 +454,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                     targetMet ? 'bg-green-500' : 'bg-yellow-500'
                   }`} />
                   <span className="text-sm text-gray-700 truncate">
-                    {ex.is_addition && <span className="text-teal-500 mr-1">+</span>}
+                    {ex.is_addition && <span className="text-theme-primary mr-1">+</span>}
                     {ex.name}
                   </span>
                 </div>
@@ -515,7 +515,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                           step={exIsCardio ? '0.1' : '1'}
                           value={exIsCardio ? (set.actual_duration_minutes ?? '') : (set.actual_reps ?? '')}
                           onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'duration' : 'reps', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
                           placeholder={exIsCardio ? 'Min' : (isDE ? 'Wdh' : 'Reps')}
                         />
                         {/* Value 2: Weight or Distance */}
@@ -525,7 +525,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                           step={exIsCardio ? '0.01' : '0.5'}
                           value={exIsCardio ? (set.actual_distance_km ?? '') : (set.actual_weight_kg ?? '')}
                           onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'distance' : 'weight', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
                           placeholder={exIsCardio ? 'km' : 'kg'}
                         />
                         {/* Delete set button */}
@@ -542,7 +542,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                   {/* Add Set Button */}
                   <button
                     onClick={() => addSet(exIdx)}
-                    className="w-full flex items-center justify-center gap-1 py-2 text-xs text-teal-600 hover:text-teal-700 hover:bg-teal-50/50 transition-colors"
+                    className="w-full flex items-center justify-center gap-1 py-2 text-xs text-theme-primary hover:text-theme-primary hover:bg-theme-surface-2/50 transition-colors"
                   >
                     <Plus className="h-3 w-3" />
                     {isDE ? 'Satz hinzufügen' : 'Add set'}
@@ -661,7 +661,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-medium disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {isSaving

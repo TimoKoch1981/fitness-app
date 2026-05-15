@@ -192,7 +192,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
               >
                 <Save className="h-3 w-3" />
                 {saving ? '...' : (isDE ? 'Speichern' : 'Save')}
@@ -213,7 +213,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
                 type="text"
                 value={dayName}
                 onChange={(e) => { setDayName(e.target.value); markChanged(); }}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
               />
             </div>
             <div>
@@ -223,7 +223,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
                 value={dayFocus}
                 onChange={(e) => { setDayFocus(e.target.value); markChanged(); }}
                 placeholder={isDE ? 'z.B. Oberkörper' : 'e.g. Upper Body'}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
           {/* Add Exercise Button */}
           <button
             onClick={() => setShowPicker(true)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
           >
             <Plus className="h-4 w-4" />
             {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
@@ -278,7 +278,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-medium disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               {saving
@@ -341,7 +341,7 @@ function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove,
           onClick={(e) => { e.stopPropagation(); onMoveUp(exercise._id); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={index === 0}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+          className="p-0.5 text-gray-300 hover:text-theme-primary transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
         >
           <ChevronUp className="h-3.5 w-3.5" />
         </button>
@@ -350,7 +350,7 @@ function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove,
           onClick={(e) => { e.stopPropagation(); onMoveDown(exercise._id); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={index === total - 1}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
+          className="p-0.5 text-gray-300 hover:text-theme-primary transition-colors disabled:opacity-20 disabled:hover:text-gray-300"
         >
           <ChevronDown className="h-3.5 w-3.5" />
         </button>

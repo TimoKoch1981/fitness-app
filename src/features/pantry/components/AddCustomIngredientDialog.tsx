@@ -240,14 +240,14 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder={t.searchPlaceholder}
-                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-transparent text-sm"
                 autoFocus
               />
             </div>
             <button
               onClick={handleSearch}
               disabled={searching || query.length < 2}
-              className="px-4 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-colors"
             >
               {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : t.search}
             </button>
@@ -263,13 +263,13 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                 <button
                   key={i}
                   onClick={() => selectResult(result)}
-                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-teal-300 hover:bg-teal-50 transition-colors space-y-1"
+                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-theme-primary hover:bg-theme-surface-2 transition-colors space-y-1"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-800">{result.name}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                       result.source === 'catalog'
-                        ? 'bg-teal-100 text-teal-700'
+                        ? 'bg-theme-surface-2 text-theme-primary'
                         : result.source === 'openfoodfacts'
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-purple-100 text-purple-700'
@@ -300,9 +300,9 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
 
           {/* Selected — Edit & Confirm */}
           {selected && (
-            <div className="space-y-3 border border-teal-200 bg-teal-50/50 rounded-xl p-4">
+            <div className="space-y-3 border border-theme-line bg-theme-surface-2/50 rounded-xl p-4">
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-teal-500" />
+                <Package className="h-4 w-4 text-theme-primary" />
                 <p className="text-sm font-medium text-gray-800">{t.confirmTitle}</p>
               </div>
 
@@ -313,7 +313,7 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary text-sm"
                 />
               </div>
 
@@ -328,8 +328,8 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                       onClick={() => setEditCategory(cat)}
                       className={`py-1 px-2 rounded-lg text-[11px] font-medium transition-colors ${
                         editCategory === cat
-                          ? 'bg-teal-500 text-white'
-                          : 'bg-white border border-gray-200 text-gray-600 hover:border-teal-300'
+                          ? 'bg-theme-primary text-white'
+                          : 'bg-white border border-gray-200 text-gray-600 hover:border-theme-primary'
                       }`}
                     >
                       {CATEGORY_INFO[cat]?.icon} {language === 'de' ? CATEGORY_INFO[cat]?.labelDe : CATEGORY_INFO[cat]?.labelEn}
@@ -346,8 +346,8 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                     <p className="text-[9px] text-gray-500">kcal</p>
                   </div>
                   <div className="bg-white rounded-lg py-1.5">
-                    <p className="text-xs font-bold text-teal-700">{selected.protein_per_100g}g</p>
-                    <p className="text-[9px] text-teal-600">Protein</p>
+                    <p className="text-xs font-bold text-theme-primary">{selected.protein_per_100g}g</p>
+                    <p className="text-[9px] text-theme-primary">Protein</p>
                   </div>
                   <div className="bg-white rounded-lg py-1.5">
                     <p className="text-xs font-bold text-blue-700">{selected.carbs_per_100g}g</p>
@@ -378,7 +378,7 @@ export function AddCustomIngredientDialog({ open, onClose }: AddCustomIngredient
                 <button
                   onClick={handleSave}
                   disabled={saving || saved || !editName}
-                  className="flex-1 py-2 text-sm font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2 text-sm font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {saved ? (
                     <><Check className="h-4 w-4" /> {t.saved}</>

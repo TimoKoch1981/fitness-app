@@ -343,7 +343,7 @@ export function RecipeSearchDialog({ open, onClose, onImported }: RecipeSearchDi
             {phase === 'preview' && importedRecipe && (
               <button
                 onClick={handleConfirmImport}
-                className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-theme-primary-2 text-white rounded-lg text-sm font-medium hover:bg-theme-primary-2 flex items-center justify-center gap-1.5"
               >
                 {de ? 'Bearbeiten & Speichern' : 'Edit & Save'}
                 <ChevronRight className="w-4 h-4" />

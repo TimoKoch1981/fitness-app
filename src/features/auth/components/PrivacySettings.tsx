@@ -83,7 +83,7 @@ export function PrivacySettings() {
     <div className="space-y-3">
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Shield className="h-4 w-4 text-teal-600" />
+        <Shield className="h-4 w-4 text-theme-primary" />
         <h3 className="text-sm font-semibold text-gray-800">
           {t.privacySettings.title}
         </h3>
@@ -99,12 +99,12 @@ export function PrivacySettings() {
             key={consent.id}
             className={`rounded-xl border p-3 ${
               consent.granted
-                ? 'border-teal-200 bg-teal-50/50'
+                ? 'border-theme-line bg-theme-surface-2/50'
                 : 'border-gray-200 bg-gray-50'
             }`}
           >
             <div className="flex items-start gap-3">
-              <div className={`mt-0.5 ${consent.granted ? 'text-teal-600' : 'text-gray-400'}`}>
+              <div className={`mt-0.5 ${consent.granted ? 'text-theme-primary' : 'text-gray-400'}`}>
                 {consent.icon}
               </div>
               <div className="flex-1 min-w-0">
@@ -113,7 +113,7 @@ export function PrivacySettings() {
                     {consent.label}
                   </span>
                   {consent.granted ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-theme-primary bg-theme-surface-2 px-1.5 py-0.5 rounded-full">
                       <Check className="h-3 w-3" />
                       {t.privacySettings.granted}
                     </span>

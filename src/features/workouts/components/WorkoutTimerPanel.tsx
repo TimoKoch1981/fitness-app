@@ -123,10 +123,10 @@ export function WorkoutTimerPanel({
           className,
         )}
       >
-        <Timer className="h-3.5 w-3.5 text-teal-400" />
+        <Timer className="h-3.5 w-3.5 text-theme-primary" />
         <span className="font-mono tabular-nums">{totalStr}</span>
         {runningCount > 0 && (
-          <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
+          <span className="h-1.5 w-1.5 rounded-full bg-theme-primary animate-pulse" />
         )}
         <ChevronDown className="h-3 w-3 text-gray-400 ml-1" />
       </button>
@@ -149,7 +149,7 @@ export function WorkoutTimerPanel({
             onClick={onToggleGlobal}
             className={cn(
               'p-1 rounded transition-colors',
-              state.globalEnabled ? 'text-teal-400' : 'text-gray-500',
+              state.globalEnabled ? 'text-theme-primary' : 'text-gray-500',
             )}
             title={isDE ? 'Timer ein/aus' : 'Timer on/off'}
           >
@@ -164,7 +164,7 @@ export function WorkoutTimerPanel({
           {/* Alert mode toggle */}
           <button
             onClick={handleAlertCycle}
-            className="p-1 rounded text-gray-400 hover:text-teal-300 transition-colors"
+            className="p-1 rounded text-gray-400 hover:text-theme-ink-3 transition-colors"
             title={`Alert: ${state.alertMode}`}
           >
             <AlertModeIcon mode={state.alertMode} />
@@ -175,7 +175,7 @@ export function WorkoutTimerPanel({
             onClick={() => setShowSettings(v => !v)}
             className={cn(
               'p-1 rounded transition-colors',
-              showSettings ? 'text-teal-400' : 'text-gray-400 hover:text-gray-300',
+              showSettings ? 'text-theme-primary' : 'text-gray-400 hover:text-gray-300',
             )}
           >
             <Settings className="h-3.5 w-3.5" />
@@ -199,7 +199,7 @@ export function WorkoutTimerPanel({
               type="checkbox"
               checked={state.autoAdvance}
               onChange={onToggleAutoAdvance}
-              className="h-3 w-3 rounded border-gray-600 text-teal-500 bg-gray-700"
+              className="h-3 w-3 rounded border-gray-600 text-theme-primary bg-gray-700"
             />
             <span>{isDE ? 'Auto-Weiter' : 'Auto-Advance'}</span>
           </label>

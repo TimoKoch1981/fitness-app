@@ -279,7 +279,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                 onClick={() => handleCategoryChange(cat)}
                 className={`py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
                   category === cat
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -329,7 +329,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               <button
                 type="button"
                 onClick={() => setShowPresets(!showPresets)}
-                className="flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700"
+                className="flex items-center gap-1.5 text-xs font-medium text-theme-primary hover:text-theme-primary"
               >
                 {showPresets ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                 {language === 'de' ? 'Vorschlaege' : 'Suggestions'}
@@ -346,7 +346,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={language === 'de' ? 'Substanz suchen...' : 'Search substance...'}
-                      className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-gray-50"
+                      className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs bg-gray-50"
                     />
                   </div>
 
@@ -363,7 +363,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                               key={preset.name}
                               type="button"
                               onClick={() => applyPreset(preset)}
-                              className="py-1 px-2 bg-gray-50 border border-gray-200 rounded-lg text-[11px] text-gray-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-all"
+                              className="py-1 px-2 bg-gray-50 border border-gray-200 rounded-lg text-[11px] text-gray-700 hover:bg-theme-surface-2 hover:border-theme-primary hover:text-theme-primary transition-all"
                             >
                               <span className="mr-1">{preset.groupIcon}</span>
                               {preset.name}
@@ -388,7 +388,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               value={name}
               onChange={(e) => { setName(e.target.value); setSearchQuery(e.target.value); }}
               placeholder={category === 'trt' ? 'Testosteron Enantat' : category === 'supplement' ? 'z.B. Kreatin, Omega-3...' : 'Substanz-Name'}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               required
               autoFocus
             />
@@ -407,7 +407,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                   onClick={() => setAdminType(at)}
                   className={`py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
                     adminType === at
-                      ? 'bg-teal-500 text-white'
+                      ? 'bg-theme-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -428,7 +428,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                 value={dosage}
                 onChange={(e) => setDosage(e.target.value)}
                 placeholder="250"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               />
             </div>
             <div>
@@ -438,7 +438,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm bg-white"
               >
                 <option value="mg">mg</option>
                 <option value="ml">ml</option>
@@ -452,7 +452,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
           {/* Frequency — prominent with quick-select buttons */}
           <div className="bg-gray-50 rounded-xl p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-teal-500" />
+              <Bell className="h-4 w-4 text-theme-primary" />
               <label className="text-sm font-medium text-gray-700">
                 {language === 'de' ? 'Einnahme-Rhythmus' : 'Frequency'}
               </label>
@@ -471,8 +471,8 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                   onClick={() => setFrequency(frequency === opt.value ? '' : opt.value)}
                   className={`py-1 px-2.5 rounded-lg text-xs font-medium transition-all ${
                     frequency === opt.value
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-white border border-gray-200 text-gray-600 hover:border-teal-300'
+                      ? 'bg-theme-primary text-white'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-theme-primary'
                   }`}
                 >
                   {opt.label}
@@ -488,20 +488,20 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                 setSchedule(suggestScheduleFromFrequency(e.target.value));
               }}
               placeholder={language === 'de' ? 'Oder eigenen Rhythmus eingeben...' : 'Or enter custom frequency...'}
-              className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs bg-white"
+              className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs bg-white"
             />
           </div>
 
           {/* Reminder block — full ReminderPicker for flexibility (v14.12) */}
-          <div className="bg-teal-50/40 border border-teal-100 rounded-xl p-3 space-y-3">
+          <div className="bg-theme-surface-2/40 border border-theme-line rounded-xl p-3 space-y-3">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={createReminder}
                 onChange={(e) => setCreateReminder(e.target.checked)}
-                className="h-4 w-4 rounded text-teal-500 focus:ring-teal-500"
+                className="h-4 w-4 rounded text-theme-primary focus:ring-theme-primary"
               />
-              <Bell className="h-4 w-4 text-teal-600" />
+              <Bell className="h-4 w-4 text-theme-primary" />
               <span className="text-sm font-medium text-gray-700">
                 {language === 'de' ? 'Erinnerung anlegen' : 'Create reminder'}
               </span>
@@ -529,7 +529,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                   value={ester}
                   onChange={(e) => setEster(e.target.value)}
                   placeholder="Enantat"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 />
               </div>
               <div>
@@ -541,7 +541,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
                   value={halfLife}
                   onChange={(e) => setHalfLife(e.target.value)}
                   placeholder="4.5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                   min="0.1"
                   step="0.1"
                 />
@@ -557,22 +557,22 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm resize-none"
               rows={2}
             />
           </div>
 
           {/* Add to Pantry option (supplements only) */}
           {category === 'supplement' && hasCatalogMatch && (
-            <label className="flex items-center gap-2 p-2.5 bg-teal-50 rounded-lg border border-teal-200 cursor-pointer">
+            <label className="flex items-center gap-2 p-2.5 bg-theme-surface-2 rounded-lg border border-theme-line cursor-pointer">
               <input
                 type="checkbox"
                 checked={addToPantry}
                 onChange={(e) => setAddToPantry(e.target.checked)}
-                className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                className="w-4 h-4 rounded border-theme-primary text-theme-primary focus:ring-theme-primary"
               />
-              <Package className="h-4 w-4 text-teal-500 flex-shrink-0" />
-              <span className="text-xs text-teal-700">
+              <Package className="h-4 w-4 text-theme-primary flex-shrink-0" />
+              <span className="text-xs text-theme-primary">
                 {language === 'de'
                   ? 'Auch zum Vorrat hinzufuegen (Ernaehrung → Vorrat)'
                   : 'Also add to pantry (Nutrition → Pantry)'}
@@ -589,7 +589,7 @@ export function AddSubstanceDialog({ open, onClose }: AddSubstanceDialogProps) {
           <button
             type="submit"
             disabled={addSubstance.isPending || !name}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {addSubstance.isPending ? t.common.loading : t.common.save}
           </button>

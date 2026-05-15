@@ -95,7 +95,7 @@ export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, on
           }
         </p>
         {breathingCue && (
-          <p className="text-xs text-teal-500 mt-1 italic">
+          <p className="text-xs text-theme-primary mt-1 italic">
             💨 {breathingCue}
           </p>
         )}
@@ -124,7 +124,7 @@ export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, on
             {minutes}:{secs.toString().padStart(2, '0')}
           </span>
           {isRunning && (
-            <span className="text-xs text-teal-500 mt-1">
+            <span className="text-xs text-theme-primary mt-1">
               {t.workout?.timerRunning ?? 'Running'}
             </span>
           )}
@@ -141,7 +141,7 @@ export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, on
         {!isCompleted && !isRunning && (
           <button
             onClick={handleStart}
-            className="flex items-center gap-2 px-6 py-2.5 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
           >
             <Play className="h-4 w-4" />
             {t.workout?.timerStart ?? 'Start'}
@@ -179,7 +179,7 @@ export function ExerciseTimer({ durationSeconds, exerciseName: _exerciseName, on
         <button
           onClick={handleDone}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm text-white rounded-lg font-medium transition-colors ${
-            isCompleted ? 'bg-green-500 hover:bg-green-600' : 'bg-teal-500 hover:bg-teal-600'
+            isCompleted ? 'bg-green-500 hover:bg-green-600' : 'bg-theme-primary hover:bg-theme-primary-2'
           }`}
         >
           <Check className="h-4 w-4" />

@@ -74,7 +74,7 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
         {step === 'qr' && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-teal-600" />
+              <ShieldCheck className="h-5 w-5 text-theme-primary" />
               <h3 className="text-lg font-semibold text-gray-900">{mfa.setupTitle || '2FA einrichten'}</h3>
             </div>
 
@@ -98,22 +98,22 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
                   <p className="text-xs text-gray-500 mb-1">{mfa.manualEntry || 'Manueller Schluessel:'}</p>
                   <div className="flex items-center gap-2">
                     <code className="text-xs font-mono text-gray-700 break-all flex-1">{enrollment.totp.secret}</code>
-                    <button onClick={handleCopySecret} className="text-gray-400 hover:text-teal-600 shrink-0">
-                      {copied ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                    <button onClick={handleCopySecret} className="text-gray-400 hover:text-theme-primary shrink-0">
+                      {copied ? <CheckCircle className="h-4 w-4 text-theme-success" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setStep('verify')}
-                  className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 transition-all"
+                  className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 transition-all"
                 >
                   {mfa.next || 'Weiter'}
                 </button>
               </>
             ) : (
               <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-theme-primary border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </div>
@@ -122,7 +122,7 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
         {step === 'verify' && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-teal-600" />
+              <ShieldCheck className="h-5 w-5 text-theme-primary" />
               <h3 className="text-lg font-semibold text-gray-900">{mfa.verifyTitle || 'Code eingeben'}</h3>
             </div>
 
@@ -143,14 +143,14 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               placeholder="000000"
               aria-label={mfa.enterCode || '6-digit MFA code'}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-mono tracking-[0.5em] focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-mono tracking-[0.5em] focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
               autoFocus
             />
 
             <button
               onClick={handleVerify}
               disabled={code.length !== 6 || loading}
-              className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+              className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
             >
               {loading ? (t.common?.loading || 'Laden...') : (mfa.verify || 'Verifizieren')}
             </button>
@@ -166,8 +166,8 @@ export function MFASetupDialog({ open, onClose, onSuccess }: MFASetupDialogProps
 
         {step === 'success' && (
           <div className="text-center space-y-4 py-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="h-8 w-8 text-emerald-600" />
+            <div className="w-16 h-16 bg-theme-surface-2 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="h-8 w-8 text-theme-success" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900">{mfa.setupSuccess || '2FA aktiviert!'}</h3>
             <p className="text-sm text-gray-600">{mfa.setupSuccessDesc || 'Dein Konto ist jetzt durch Zwei-Faktor-Authentifizierung geschuetzt.'}</p>

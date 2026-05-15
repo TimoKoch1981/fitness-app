@@ -34,7 +34,7 @@ export function WorkoutHistoryPage(_props: WorkoutHistoryPageProps) {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
       </div>
     );
   }
@@ -172,7 +172,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
             </p>
             {group.workouts.length > 1 && (
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-[10px] font-medium text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] font-medium text-theme-primary bg-theme-surface-2 px-1.5 py-0.5 rounded-full">
                   {group.workouts.length} {isDE ? 'Trainings' : 'sessions'}
                 </span>
                 {group.totalDuration > 0 && (
@@ -240,7 +240,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                 {!isEditing && displayExercises && displayExercises.length > 0 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); startEdit(w); }}
-                    className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 py-2"
+                    className="flex items-center gap-1 text-xs text-theme-primary hover:text-theme-primary py-2"
                   >
                     <Pencil className="h-3 w-3" />
                     {isDE ? 'Bearbeiten' : 'Edit'}
@@ -266,7 +266,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                       return (
                         <div key={exIdx} className="py-1.5">
                           <p className="text-xs font-medium text-gray-700 mb-1">
-                            {ex.is_addition && <span className="text-teal-500">+ </span>}
+                            {ex.is_addition && <span className="text-theme-primary">+ </span>}
                             {ex.name}
                           </p>
                           <div className="space-y-1 pl-3">
@@ -279,7 +279,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                                     type="number"
                                     value={set.actual_reps ?? 0}
                                     onChange={(e) => updateSetValue(exIdx, setIdx, 'actual_reps', parseInt(e.target.value) || 0)}
-                                    className="w-14 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                                    className="w-14 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-theme-primary focus:outline-none"
                                   />
                                   <span className="text-gray-400">Reps</span>
                                   <input
@@ -287,7 +287,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                                     step="0.1"
                                     value={set.actual_weight_kg ?? 0}
                                     onChange={(e) => updateSetValue(exIdx, setIdx, 'actual_weight_kg', parseFloat(e.target.value) || 0)}
-                                    className="w-16 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                                    className="w-16 px-1.5 py-1 text-center border border-gray-200 rounded text-xs focus:ring-1 focus:ring-theme-primary focus:outline-none"
                                   />
                                   <span className="text-gray-400">kg</span>
                                 </div>
@@ -309,7 +309,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                     return (
                       <div key={exIdx} className="flex items-center justify-between py-1 pl-6">
                         <span className="text-xs text-gray-600 truncate">
-                          {ex.is_addition && <span className="text-teal-500">+ </span>}
+                          {ex.is_addition && <span className="text-theme-primary">+ </span>}
                           {ex.name}
                         </span>
                         <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
@@ -326,7 +326,7 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                     <button
                       onClick={saveEdit}
                       disabled={saving}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
                     >
                       <Check className="h-3.5 w-3.5" />
                       {saving ? (isDE ? 'Speichert...' : 'Saving...') : (isDE ? 'Speichern' : 'Save')}
@@ -374,7 +374,7 @@ function ExerciseTrends({ workouts, isDE }: { workouts: Workout[]; isDE: boolean
       <select
         value={selectedExercise}
         onChange={e => setSelectedExercise(e.target.value)}
-        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-theme-primary"
       >
         {exerciseNames.map(name => (
           <option key={name} value={name}>{name}</option>
@@ -384,11 +384,11 @@ function ExerciseTrends({ workouts, isDE }: { workouts: Workout[]; isDE: boolean
       {/* Best stats */}
       {progressData.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-teal-50 rounded-lg p-3 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-teal-600" />
+          <div className="bg-theme-surface-2 rounded-lg p-3 flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-theme-primary" />
             <div>
-              <p className="text-xs text-teal-600">{isDE ? 'Bestes Gewicht' : 'Best Weight'}</p>
-              <p className="text-sm font-bold text-teal-700">{bestWeight} kg</p>
+              <p className="text-xs text-theme-primary">{isDE ? 'Bestes Gewicht' : 'Best Weight'}</p>
+              <p className="text-sm font-bold text-theme-primary">{bestWeight} kg</p>
             </div>
           </div>
           <div className="bg-indigo-50 rounded-lg p-3 flex items-center gap-2">

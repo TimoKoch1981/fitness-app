@@ -239,7 +239,7 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 onClick={() => setType(mt.value)}
                 className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
                   type === mt.value
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -256,7 +256,7 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
               value={mealDate}
               onChange={(e) => setMealDate(e.target.value)}
               max={today()}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-gray-700"
+              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm text-gray-700"
             />
           </div>
 
@@ -335,7 +335,7 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 value={name}
                 onChange={(e) => { setName(e.target.value); setIsEstimated(false); }}
                 placeholder={language === 'de' ? 'z.B. Hähnchenbrust mit Reis' : 'e.g. Chicken breast with rice'}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 required
                 autoFocus
               />
@@ -345,8 +345,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 onClick={() => { setShowBarcodeScanner(!showBarcodeScanner); if (showPhotoCapture) setShowPhotoCapture(false); }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
                   showBarcodeScanner
-                    ? 'bg-teal-600'
-                    : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700'
+                    ? 'bg-theme-primary-2'
+                    : 'bg-gradient-to-r bg-theme-primary hover:bg-theme-primary-2'
                 }`}
                 title={language === 'de' ? 'Barcode scannen' : 'Scan barcode'}
               >
@@ -358,8 +358,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 onClick={() => { setShowPhotoCapture(!showPhotoCapture); if (showBarcodeScanner) setShowBarcodeScanner(false); }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
                   showPhotoCapture
-                    ? 'bg-teal-600'
-                    : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700'
+                    ? 'bg-theme-primary-2'
+                    : 'bg-gradient-to-r bg-theme-primary hover:bg-theme-primary-2'
                 }`}
                 title={language === 'de' ? 'Mahlzeit per Foto erfassen' : 'Log meal by photo'}
               >
@@ -385,14 +385,14 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
               <p className="text-[10px] text-red-400 mt-1">{estimateError}</p>
             )}
             {isEstimated && !estimateError && (
-              <p className={`text-[10px] mt-1 ${barcodeSource ? 'text-teal-500' : 'text-violet-500'}`}>
+              <p className={`text-[10px] mt-1 ${barcodeSource ? 'text-theme-primary' : 'text-violet-500'}`}>
                 {barcodeSource
                   ? (language === 'de' ? 'Barcode-Daten — bitte prüfen & anpassen' : 'Barcode data — please review & adjust')
                   : (language === 'de' ? 'KI-Schätzung — bitte prüfen & anpassen' : 'AI estimate — please review & adjust')}
               </p>
             )}
             {nameWasCorrected && (
-              <p className="text-[10px] mt-0.5 text-emerald-600">
+              <p className="text-[10px] mt-0.5 text-theme-success">
                 {language === 'de' ? '✓ Name wurde automatisch korrigiert' : '✓ Name was auto-corrected'}
               </p>
             )}
@@ -410,8 +410,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 placeholder="0"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
-                  isEstimated ? (barcodeSource ? 'border-teal-300 bg-teal-50' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm ${
+                  isEstimated ? (barcodeSource ? 'border-theme-primary bg-theme-surface-2' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
                 }`}
                 required
                 min="0"
@@ -427,8 +427,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
                 placeholder="0"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
-                  isEstimated ? (barcodeSource ? 'border-teal-300 bg-teal-50' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm ${
+                  isEstimated ? (barcodeSource ? 'border-theme-primary bg-theme-surface-2' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
                 }`}
                 min="0"
                 step="0.1"
@@ -444,8 +444,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 value={carbs}
                 onChange={(e) => setCarbs(e.target.value)}
                 placeholder="0"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
-                  isEstimated ? (barcodeSource ? 'border-teal-300 bg-teal-50' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm ${
+                  isEstimated ? (barcodeSource ? 'border-theme-primary bg-theme-surface-2' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
                 }`}
                 min="0"
                 step="0.1"
@@ -461,8 +461,8 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
                 value={fat}
                 onChange={(e) => setFat(e.target.value)}
                 placeholder="0"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
-                  isEstimated ? (barcodeSource ? 'border-teal-300 bg-teal-50' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm ${
+                  isEstimated ? (barcodeSource ? 'border-theme-primary bg-theme-surface-2' : 'border-violet-300 bg-violet-50') : 'border-gray-300'
                 }`}
                 min="0"
                 step="0.1"
@@ -479,7 +479,7 @@ export function AddMealDialog({ open, onClose, defaultType, date }: AddMealDialo
           <button
             type="submit"
             disabled={addMeal.isPending || !name || !calories}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {addMeal.isPending ? safeT(common?.loading, 'Laden...') : safeT(common?.save, 'Speichern')}
           </button>

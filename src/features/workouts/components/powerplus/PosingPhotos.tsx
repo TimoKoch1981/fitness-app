@@ -188,7 +188,7 @@ export function PosingPhotos() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Camera className="h-4 w-4 text-teal-500" />
+            <Camera className="h-4 w-4 text-theme-primary" />
             <h3 className="text-sm font-semibold text-gray-900">
               {t.powerPlus.posingPhotos ?? 'Posing Photos'}
             </h3>
@@ -265,7 +265,7 @@ export function PosingPhotos() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={upload.isPending}
-          className="flex items-center justify-center gap-2 w-full mt-3 py-2 text-sm font-medium text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
+          className="flex items-center justify-center gap-2 w-full mt-3 py-2 text-sm font-medium text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors disabled:opacity-50"
         >
           <Upload className="h-4 w-4" />
           {upload.isPending

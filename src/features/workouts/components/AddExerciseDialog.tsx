@@ -140,7 +140,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
             <button
               onClick={() => setMultiSelectMode(!multiSelectMode)}
               className={`p-1.5 rounded-lg transition-colors mr-1 ${
-                multiSelectMode ? 'bg-teal-100 text-teal-600' : 'text-gray-400 hover:bg-gray-100'
+                multiSelectMode ? 'bg-theme-surface-2 text-theme-primary' : 'text-gray-400 hover:bg-gray-100'
               }`}
               title={isDE ? 'Mehrfachauswahl' : 'Multi-select'}
             >
@@ -166,7 +166,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
               {/* Custom exercise button */}
               <button
                 onClick={handleCustom}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 {isDE ? 'Eigene Übung eingeben' : 'Enter Custom Exercise'}
@@ -181,7 +181,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                   type="text"
                   value={customName}
                   onChange={e => setCustomName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
                 />
               </div>
 
@@ -193,7 +193,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                       {selected.primary_muscles.map((m) => (
                         <span
                           key={m}
-                          className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium"
+                          className="text-[10px] px-1.5 py-0.5 rounded-full bg-theme-surface-2 text-theme-primary font-medium"
                         >
                           {m}
                         </span>
@@ -209,7 +209,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                     </div>
                   )}
                   {selected.is_compound && (
-                    <span className="text-[10px] text-teal-600 font-medium">
+                    <span className="text-[10px] text-theme-primary font-medium">
                       Compound · {selected.equipment_needed?.join(', ') || (isDE ? 'Körpergewicht' : 'Bodyweight')}
                     </span>
                   )}
@@ -225,7 +225,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                     inputMode="numeric"
                     value={sets}
                     onChange={e => setSets(e.target.value)}
-                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
                   />
                 </div>
                 <div>
@@ -235,7 +235,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                     value={reps}
                     onChange={e => setReps(e.target.value)}
                     placeholder="8-10"
-                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
                   />
                 </div>
                 <div>
@@ -247,7 +247,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                     value={weight}
                     onChange={e => setWeight(e.target.value)}
                     placeholder="-"
-                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full px-3 py-2 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
                   />
                 </div>
               </div>
@@ -259,7 +259,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
                     type="checkbox"
                     checked={permanent}
                     onChange={e => setPermanent(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                    className="w-4 h-4 rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
                   />
                   <span className="text-sm text-gray-700">
                     {isDE ? 'Dauerhaft zum Plan hinzufügen' : 'Add permanently to plan'}
@@ -271,7 +271,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
               <button
                 onClick={handleAdd}
                 disabled={!customName.trim()}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-medium disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 {isDE ? 'Übung hinzufügen' : 'Add Exercise'}

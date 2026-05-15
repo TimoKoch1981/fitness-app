@@ -73,7 +73,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
         {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-2xl sm:rounded-t-2xl border-b border-gray-100 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5 text-teal-500" />
+            <Dumbbell className="h-5 w-5 text-theme-primary" />
             <h3 className="font-semibold text-gray-900 text-base">{name}</h3>
           </div>
           <button
@@ -90,7 +90,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${diffColor}`}>
               {diffLabel}
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-theme-surface-2 text-theme-primary">
               {exercise.is_compound
                 ? 'Compound'
                 : 'Isolation'}
@@ -125,7 +125,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
                     {exercise.primary_muscles.map((m) => (
                       <span
                         key={`p-${m}`}
-                        className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium"
+                        className="text-xs bg-theme-surface-2 text-theme-primary px-2 py-0.5 rounded-full font-medium"
                       >
                         {getMuscleName(m, lang)}
                       </span>

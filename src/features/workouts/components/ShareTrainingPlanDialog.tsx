@@ -116,7 +116,7 @@ export function ShareTrainingPlanDialog({ plan, onClose }: ShareTrainingPlanDial
             onClick={() => setActiveTab('text')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-colors ${
               activeTab === 'text'
-                ? 'bg-teal-50 text-teal-700'
+                ? 'bg-theme-surface-2 text-theme-primary'
                 : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
             }`}
           >
@@ -127,7 +127,7 @@ export function ShareTrainingPlanDialog({ plan, onClose }: ShareTrainingPlanDial
             onClick={() => setActiveTab('qr')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-colors ${
               activeTab === 'qr'
-                ? 'bg-teal-50 text-teal-700'
+                ? 'bg-theme-surface-2 text-theme-primary'
                 : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
             }`}
           >
@@ -150,7 +150,7 @@ export function ShareTrainingPlanDialog({ plan, onClose }: ShareTrainingPlanDial
               {/* Copy Text Button */}
               <button
                 onClick={handleCopyText}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-teal-600 hover:to-emerald-700 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r bg-theme-primary text-white rounded-xl text-sm font-medium hover:bg-theme-primary-2 transition-all"
               >
                 {copiedText ? (
                   <>
@@ -209,7 +209,7 @@ export function ShareTrainingPlanDialog({ plan, onClose }: ShareTrainingPlanDial
               {/* Copy Link Button — always available */}
               <button
                 onClick={handleCopyLink}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-teal-600 hover:to-emerald-700 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r bg-theme-primary text-white rounded-xl text-sm font-medium hover:bg-theme-primary-2 transition-all"
               >
                 {copiedLink ? (
                   <>

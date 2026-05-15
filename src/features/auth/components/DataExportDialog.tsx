@@ -72,7 +72,7 @@ export function DataExportDialog({ open, onClose }: DataExportDialogProps) {
                 t.dataExport.catPlans,
               ].map((cat) => (
                 <span key={cat} className="text-[10px] text-gray-500 flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-teal-400" />
+                  <span className="w-1 h-1 rounded-full bg-theme-primary" />
                   {cat}
                 </span>
               ))}
@@ -83,14 +83,14 @@ export function DataExportDialog({ open, onClose }: DataExportDialogProps) {
           {isExporting && progress && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 text-teal-500 animate-spin" />
+                <Loader2 className="h-4 w-4 text-theme-primary animate-spin" />
                 <span className="text-sm text-gray-600">
                   {t.dataExport.exporting} ({progress.current}/{progress.total})
                 </span>
               </div>
               <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-teal-500 rounded-full h-1.5 transition-all duration-300"
+                  className="bg-theme-primary rounded-full h-1.5 transition-all duration-300"
                   style={{ width: `${(progress.current / progress.total) * 100}%` }}
                 />
               </div>
@@ -141,7 +141,7 @@ export function DataExportDialog({ open, onClose }: DataExportDialogProps) {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="px-4 py-2 text-sm font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {isExporting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

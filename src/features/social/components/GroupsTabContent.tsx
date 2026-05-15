@@ -41,7 +41,7 @@ function CreateGroupForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-teal-100 rounded-xl p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white border border-theme-line rounded-xl p-4 space-y-3">
       <h3 className="text-sm font-semibold text-gray-800">
         {isDE ? 'Neue Gruppe erstellen' : 'Create New Group'}
       </h3>
@@ -51,7 +51,7 @@ function CreateGroupForm({ onClose }: { onClose: () => void }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder={isDE ? 'Gruppenname' : 'Group name'}
-        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
         maxLength={100}
         required
       />
@@ -60,7 +60,7 @@ function CreateGroupForm({ onClose }: { onClose: () => void }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder={isDE ? 'Beschreibung (optional)' : 'Description (optional)'}
-        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary resize-none"
         rows={2}
         maxLength={500}
       />
@@ -85,7 +85,7 @@ function CreateGroupForm({ onClose }: { onClose: () => void }) {
           className={cn(
             'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all',
             visibility === 'public'
-              ? 'bg-teal-500 text-white'
+              ? 'bg-theme-primary text-white'
               : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
           )}
         >
@@ -105,7 +105,7 @@ function CreateGroupForm({ onClose }: { onClose: () => void }) {
         <button
           type="submit"
           disabled={!name.trim() || createGroup.isPending}
-          className="flex-1 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 disabled:opacity-50"
+          className="flex-1 py-2 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50"
         >
           {createGroup.isPending
             ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
@@ -138,13 +138,13 @@ function GroupCard({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-teal-100 transition-colors">
+    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-theme-line transition-colors">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 p-3 text-left"
       >
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br bg-theme-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
           {group.name.slice(0, 2).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
@@ -152,7 +152,7 @@ function GroupCard({
             <p className="text-sm font-semibold text-gray-800 truncate">{group.name}</p>
             {isOwner && <Crown className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
             {group.visibility === 'public'
-              ? <Globe className="h-3 w-3 text-teal-400 flex-shrink-0" />
+              ? <Globe className="h-3 w-3 text-theme-primary flex-shrink-0" />
               : <Lock className="h-3 w-3 text-gray-400 flex-shrink-0" />
             }
           </div>
@@ -200,7 +200,7 @@ function GroupCard({
               <button
                 onClick={() => joinGroup.mutate(group.id)}
                 disabled={joinGroup.isPending}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2"
               >
                 <Users className="h-3.5 w-3.5" />
                 {isDE ? 'Beitreten' : 'Join'}
@@ -276,7 +276,7 @@ export function GroupsTabContent() {
         className={cn(
           'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
           showCreate
-            ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-200'
+            ? 'bg-theme-surface-2 text-theme-primary ring-1 ring-theme-line'
             : 'bg-gray-50 text-gray-600 hover:bg-gray-100',
         )}
       >
@@ -295,7 +295,7 @@ export function GroupsTabContent() {
           onClick={() => setTab('my')}
           className={cn(
             'flex-1 py-1.5 text-xs font-medium rounded-md transition-all',
-            tab === 'my' ? 'bg-white text-teal-600 shadow-sm' : 'text-gray-500',
+            tab === 'my' ? 'bg-white text-theme-primary shadow-sm' : 'text-gray-500',
           )}
         >
           {isDE ? 'Meine Gruppen' : 'My Groups'}
@@ -304,7 +304,7 @@ export function GroupsTabContent() {
           onClick={() => setTab('discover')}
           className={cn(
             'flex-1 py-1.5 text-xs font-medium rounded-md transition-all',
-            tab === 'discover' ? 'bg-white text-teal-600 shadow-sm' : 'text-gray-500',
+            tab === 'discover' ? 'bg-white text-theme-primary shadow-sm' : 'text-gray-500',
           )}
         >
           {isDE ? 'Entdecken' : 'Discover'}
@@ -315,7 +315,7 @@ export function GroupsTabContent() {
       {tab === 'my' && (
         loadingMy ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
           </div>
         ) : myGroups && myGroups.length > 0 ? (
           <div className="space-y-2">
@@ -343,7 +343,7 @@ export function GroupsTabContent() {
       {tab === 'discover' && (
         loadingPublic ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
           </div>
         ) : publicGroups && publicGroups.length > 0 ? (
           <div className="space-y-2">

@@ -229,17 +229,17 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 key={i}
                 className={`w-2.5 h-2.5 rounded-full transition-colors ${
                   s.completed
-                    ? (s.side === 'left' ? 'bg-indigo-500' : s.side === 'right' ? 'bg-purple-500' : 'bg-teal-500')
+                    ? (s.side === 'left' ? 'bg-indigo-500' : s.side === 'right' ? 'bg-purple-500' : 'bg-theme-primary')
                     : s.skipped
                       ? 'bg-gray-300'
                       : i === nextSetIndex
-                        ? (s.side === 'left' ? 'bg-indigo-300 ring-2 ring-indigo-200 animate-pulse' : s.side === 'right' ? 'bg-purple-300 ring-2 ring-purple-200 animate-pulse' : 'bg-teal-300 ring-2 ring-teal-200 animate-pulse')
+                        ? (s.side === 'left' ? 'bg-indigo-300 ring-2 ring-indigo-200 animate-pulse' : s.side === 'right' ? 'bg-purple-300 ring-2 ring-purple-200 animate-pulse' : 'bg-theme-primary ring-2 ring-theme-line animate-pulse')
                         : 'bg-gray-200'
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs font-medium text-teal-600">
+          <span className="text-xs font-medium text-theme-primary">
             {completedCount}/{exercise.sets.length}
             {skippedCount > 0 && (
               <span className="text-gray-400 ml-1">({skippedCount} {isDE ? 'übersp.' : 'skip'})</span>
@@ -276,11 +276,11 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
             <div
               className={`grid gap-1 items-center px-3 py-2.5 rounded-xl transition-all ${noWeight ? 'grid-cols-10' : 'grid-cols-12'} ${
                 isDone
-                  ? 'bg-teal-50/60 border border-teal-200/60 opacity-70'
+                  ? 'bg-theme-surface-2/60 border border-theme-line/60 opacity-70'
                   : isSkipped
                     ? 'bg-gray-50 opacity-30 line-through'
                     : isCurrent
-                      ? 'bg-teal-50 border-2 border-teal-400 shadow-md shadow-teal-100'
+                      ? 'bg-theme-surface-2 border-2 border-theme-primary shadow-md shadow-teal-100'
                       : hasWarning
                         ? 'bg-amber-50 border-2 border-amber-300'
                         : 'bg-gray-50/50'
@@ -289,7 +289,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               {/* Set Number / Tag (tap to cycle: normal → W → D → F) */}
               <div className="col-span-1">
                 {isDone ? (
-                  <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-theme-primary flex items-center justify-center">
                     <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
                   </div>
                 ) : (() => {
@@ -302,7 +302,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                         tag !== 'normal'
                           ? `${config.bg} ${config.text}`
                           : isCurrent
-                            ? 'text-teal-600 bg-teal-50'
+                            ? 'text-theme-primary bg-theme-surface-2'
                             : 'text-gray-400 hover:bg-gray-100'
                       }`}
                       title={isDE ? 'Tippen: Satz-Typ ändern (W/D/F)' : 'Tap: change set type (W/D/F)'}
@@ -314,14 +314,14 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               </div>
 
               {/* Target — adaptive */}
-              <div className={`col-span-2 text-xs ${isCurrent ? 'text-teal-700 font-semibold' : isDone ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
+              <div className={`col-span-2 text-xs ${isCurrent ? 'text-theme-primary font-semibold' : isDone ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
                 {isCardio ? (
                   <>
                     {set.target_duration_minutes != null && (
                       <>{set.target_duration_minutes}<span className="text-[10px] opacity-70"> min</span></>
                     )}
                     {set.target_distance_km != null && (
-                      <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> {set.target_distance_km}<span className="text-[10px] opacity-70"> km</span></span>
+                      <span className={isCurrent ? 'text-theme-primary' : 'text-gray-400'}> {set.target_distance_km}<span className="text-[10px] opacity-70"> km</span></span>
                     )}
                     {set.target_duration_minutes == null && set.target_distance_km == null && '—'}
                   </>
@@ -329,7 +329,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                   <>
                     {set.target_reps}{set.target_reps != null && <span className="text-[10px] opacity-70"> {isDE ? 'Wdh' : 'reps'}</span>}
                     {set.target_weight_kg != null && (
-                      <span className={isCurrent ? 'text-teal-600' : 'text-gray-400'}> @{set.target_weight_kg}<span className="text-[10px] opacity-70"> kg</span></span>
+                      <span className={isCurrent ? 'text-theme-primary' : 'text-gray-400'}> @{set.target_weight_kg}<span className="text-[10px] opacity-70"> kg</span></span>
                     )}
                   </>
                 )}
@@ -352,7 +352,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                   <button
                     type="button"
                     onClick={() => setEditingIdx(idx)}
-                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold hover:bg-teal-200 transition-colors"
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-theme-surface-2 text-theme-primary font-bold hover:bg-theme-surface-2 transition-colors"
                     title={isDE ? 'Tippen zum Korrigieren' : 'Tap to edit'}
                   >
                     {isCardio ? (set.actual_duration_minutes ?? '-') : set.actual_reps}
@@ -379,7 +379,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                       if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
                       if (e.key === 'Escape') setEditingIdx(null);
                     }}
-                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-teal-400 bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-theme-primary bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-theme-primary"
                   />
                 ) : (
                   <input
@@ -392,9 +392,9 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                     placeholder={isCardio
                       ? (set.target_duration_minutes?.toString() ?? '-')
                       : set.target_reps.split('-').pop()}
-                    className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
+                    className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
                       isCurrent && setReady
-                        ? 'border-2 border-teal-300 bg-white font-semibold text-gray-900'
+                        ? 'border-2 border-theme-primary bg-white font-semibold text-gray-900'
                         : isLocked
                           ? 'border border-gray-200 bg-gray-100 text-gray-400'
                           : hasWarning
@@ -413,7 +413,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                   <button
                     type="button"
                     onClick={() => setEditingIdx(idx)}
-                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-teal-100 text-teal-700 font-bold hover:bg-teal-200 transition-colors"
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg bg-theme-surface-2 text-theme-primary font-bold hover:bg-theme-surface-2 transition-colors"
                     title={isDE ? 'Tippen zum Korrigieren' : 'Tap to edit'}
                   >
                     {isCardio ? (set.actual_distance_km ?? '-') : (set.actual_weight_kg ?? '-')}
@@ -438,7 +438,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                       if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
                       if (e.key === 'Escape') setEditingIdx(null);
                     }}
-                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-teal-400 bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-2 py-2 text-sm text-center rounded-lg border-2 border-theme-primary bg-white font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-theme-primary"
                   />
                 ) : (
                   <input
@@ -451,9 +451,9 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                     placeholder={isCardio
                       ? (set.target_distance_km?.toString() ?? '-')
                       : (set.target_weight_kg?.toString() ?? '-')}
-                    className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
+                    className={`w-full px-2 py-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary disabled:text-gray-400 disabled:bg-gray-100 transition-all ${
                       isCurrent && setReady
-                        ? 'border-2 border-teal-300 bg-white font-semibold text-gray-900'
+                        ? 'border-2 border-theme-primary bg-white font-semibold text-gray-900'
                         : isLocked
                           ? 'border border-gray-200 bg-gray-100 text-gray-400'
                           : hasWarning
@@ -474,14 +474,14 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                   <button
                     type="button"
                     onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
-                    className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center hover:bg-teal-200 transition-colors"
+                    className="w-8 h-8 rounded-full bg-theme-surface-2 flex items-center justify-center hover:bg-theme-surface-2 transition-colors"
                     title={editingIdx === idx
                       ? (isDE ? 'Fertig' : 'Done')
                       : (isDE ? 'Tippen zum Korrigieren' : 'Tap to edit')}
                   >
                     {editingIdx === idx
-                      ? <Check className="h-4 w-4 text-teal-600" />
-                      : <Pencil className="h-3.5 w-3.5 text-teal-500" />}
+                      ? <Check className="h-4 w-4 text-theme-primary" />
+                      : <Pencil className="h-3.5 w-3.5 text-theme-primary" />}
                   </button>
                 ) : isSkipped ? (
                   <span className="text-xs text-gray-300">—</span>
@@ -495,7 +495,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 ) : isCurrent ? (
                   <button
                     onClick={() => handleSetDone(idx)}
-                    className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center hover:bg-teal-600 active:bg-teal-700 transition-colors shadow-md"
+                    className="w-10 h-10 rounded-full bg-theme-primary text-white flex items-center justify-center hover:bg-theme-primary-2 active:bg-theme-primary-2 transition-colors shadow-md"
                     title={isDE ? 'Satz bestätigen' : 'Confirm set'}
                   >
                     <Check className="h-5 w-5" strokeWidth={3} />
@@ -503,7 +503,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 ) : (
                   <button
                     onClick={() => handleSetDone(idx)}
-                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center hover:bg-teal-100 hover:text-teal-500 transition-colors"
+                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center hover:bg-theme-surface-2 hover:text-theme-primary transition-colors"
                     title={isDE ? 'Satz bestätigen' : 'Confirm set'}
                   >
                     <Check className="h-4 w-4" />
@@ -613,18 +613,18 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
       {allCompleted ? (
         <div className="space-y-2 pt-2">
           {/* Summary of completed sets — adaptive */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3">
-            <p className="text-xs font-medium text-teal-700 mb-2">
+          <div className="bg-theme-surface-2 border border-theme-line rounded-xl p-3">
+            <p className="text-xs font-medium text-theme-primary mb-2">
               {isDE ? 'Zusammenfassung:' : 'Summary:'}
             </p>
             <div className="space-y-1">
               {exercise.sets.map((set, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs">
-                  <span className={`font-medium ${set.completed ? 'text-teal-600' : 'text-gray-400'}`}>
+                  <span className={`font-medium ${set.completed ? 'text-theme-primary' : 'text-gray-400'}`}>
                     {isCardio ? (isDE ? 'Int.' : 'Int.') : (isDE ? 'Satz' : 'Set')} {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : idx + 1}:
                   </span>
                   {set.completed ? (
-                    <span className="text-teal-700 font-semibold">
+                    <span className="text-theme-primary font-semibold">
                       {isCardio ? (
                         <>
                           {set.actual_duration_minutes != null && `${set.actual_duration_minutes} Min`}
@@ -646,7 +646,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
           </div>
           <button
             onClick={onAllDone}
-            className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-medium shadow-sm"
           >
             <ChevronRight className="h-4 w-4" />
             {isDE ? 'Nächste Übung' : 'Next Exercise'}
@@ -667,7 +667,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
             disabled={!setReady}
             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm rounded-xl transition-colors font-medium ${
               setReady
-                ? 'text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100'
+                ? 'text-theme-primary bg-theme-surface-2 border border-theme-line hover:bg-theme-surface-2'
                 : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
             }`}
           >

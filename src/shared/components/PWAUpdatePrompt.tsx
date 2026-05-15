@@ -36,7 +36,7 @@ export function PWAUpdatePrompt() {
           <div className="rounded-xl bg-gray-800 px-4 py-3 shadow-lg border border-gray-700">
             {needRefresh ? (
               <div className="flex items-center gap-3">
-                <RefreshCw className="h-5 w-5 shrink-0 text-teal-400" />
+                <RefreshCw className="h-5 w-5 shrink-0 text-theme-primary" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white">
                     {t.pwa.updateAvailable}
@@ -54,7 +54,7 @@ export function PWAUpdatePrompt() {
                   </button>
                   <button
                     onClick={updateServiceWorker}
-                    className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-500 transition-colors"
+                    className="rounded-lg bg-theme-primary-2 px-3 py-1.5 text-xs font-medium text-white hover:bg-theme-primary transition-colors"
                   >
                     {t.pwa.update}
                   </button>

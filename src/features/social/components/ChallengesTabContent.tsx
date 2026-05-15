@@ -32,7 +32,7 @@ const CHALLENGE_TYPE_CONFIG: Record<ChallengeType, {
   calories_logged: { icon: Flame, colorClass: 'bg-red-100 text-red-600', labelDE: 'Kalorien', labelEN: 'Calories' },
   streak_days: { icon: Calendar, colorClass: 'bg-green-100 text-green-600', labelDE: 'Streak', labelEN: 'Streak' },
   body_measurements: { icon: Target, colorClass: 'bg-purple-100 text-purple-600', labelDE: 'Körpermaße', labelEN: 'Body' },
-  custom: { icon: Trophy, colorClass: 'bg-teal-100 text-teal-600', labelDE: 'Benutzerdefiniert', labelEN: 'Custom' },
+  custom: { icon: Trophy, colorClass: 'bg-theme-surface-2 text-theme-primary', labelDE: 'Benutzerdefiniert', labelEN: 'Custom' },
 };
 
 // ── Create Challenge Form ───────────────────────────────────────────
@@ -74,7 +74,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-teal-100 rounded-xl p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white border border-theme-line rounded-xl p-4 space-y-3">
       <h3 className="text-sm font-semibold text-gray-800">
         {isDE ? 'Neue Challenge erstellen' : 'Create New Challenge'}
       </h3>
@@ -84,7 +84,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder={isDE ? 'Challenge-Name' : 'Challenge name'}
-        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
         required
       />
 
@@ -92,7 +92,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder={isDE ? 'Beschreibung (optional)' : 'Description (optional)'}
-        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary resize-none"
         rows={2}
       />
 
@@ -131,7 +131,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
             type="number"
             value={targetValue}
             onChange={(e) => setTargetValue(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
             min="1"
             step="any"
             required
@@ -146,7 +146,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
             value={targetUnit}
             onChange={(e) => setTargetUnit(e.target.value)}
             placeholder={isDE ? 'z.B. Workouts' : 'e.g. Workouts'}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
           />
         </div>
       </div>
@@ -161,7 +161,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
             required
           />
         </div>
@@ -174,7 +174,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             min={startDate}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
             required
           />
         </div>
@@ -189,7 +189,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
           <select
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
           >
             <option value="">{isDE ? 'Keine Gruppe' : 'No group'}</option>
             {groups.map(g => (
@@ -206,7 +206,7 @@ function CreateChallengeForm({ onClose }: { onClose: () => void }) {
         <button
           type="submit"
           disabled={!title.trim() || createChallenge.isPending}
-          className="flex-1 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 disabled:opacity-50"
+          className="flex-1 py-2 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50"
         >
           {createChallenge.isPending
             ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
@@ -242,7 +242,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
   const daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-teal-100 transition-colors">
+    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-theme-line transition-colors">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 p-3 text-left"
@@ -268,7 +268,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
           {/* Time progress bar */}
           <div className="mt-1.5 h-1 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full transition-all"
+              className="h-full bg-gradient-to-r bg-theme-primary rounded-full transition-all"
               style={{ width: `${timeProgressPct}%` }}
             />
           </div>
@@ -315,7 +315,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
                         <div
                           className={cn(
                             'h-full rounded-full transition-all',
-                            pct >= 100 ? 'bg-green-500' : 'bg-teal-400',
+                            pct >= 100 ? 'bg-green-500' : 'bg-theme-primary',
                           )}
                           style={{ width: `${pct}%` }}
                         />
@@ -347,7 +347,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
                 placeholder="0"
                 step="any"
                 min="0"
-                className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary"
               />
             </div>
             <button
@@ -357,7 +357,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
                 setProgressInput('');
               }}
               disabled={!progressInput || updateProgress.isPending}
-              className="px-3 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 disabled:opacity-50"
+              className="px-3 py-1.5 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50"
             >
               {isDE ? 'Aktualisieren' : 'Update'}
             </button>
@@ -411,7 +411,7 @@ export function ChallengesTabContent() {
         className={cn(
           'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
           showCreate
-            ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-200'
+            ? 'bg-theme-surface-2 text-theme-primary ring-1 ring-theme-line'
             : 'bg-gray-50 text-gray-600 hover:bg-gray-100',
         )}
       >
@@ -427,7 +427,7 @@ export function ChallengesTabContent() {
       {/* Challenges list */}
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
         </div>
       ) : challenges && challenges.length > 0 ? (
         <div className="space-y-2">

@@ -101,7 +101,7 @@ export function ImportRecipeDialog({ open, onClose, onImported }: ImportRecipeDi
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-teal-600" />
+              <Globe className="w-5 h-5 text-theme-primary" />
               <h2 className="text-lg font-semibold">
                 {de ? 'Rezept importieren' : 'Import Recipe'}
               </h2>
@@ -127,7 +127,7 @@ export function ImportRecipeDialog({ open, onClose, onImported }: ImportRecipeDi
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="https://chefkoch.de/rezepte/..."
-                    className="w-full pl-9 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-theme-primary focus:border-theme-primary"
                     disabled={isLoading}
                     autoFocus
                   />
@@ -135,7 +135,7 @@ export function ImportRecipeDialog({ open, onClose, onImported }: ImportRecipeDi
                 <button
                   onClick={handleImport}
                   disabled={!url.trim() || isLoading}
-                  className="px-4 py-2.5 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-4 py-2.5 bg-theme-primary-2 text-white rounded-lg text-sm font-medium hover:bg-theme-primary-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -152,7 +152,7 @@ export function ImportRecipeDialog({ open, onClose, onImported }: ImportRecipeDi
               <div className={`flex items-center gap-2 text-sm rounded-lg p-3 ${
                 status === 'error'
                   ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                  : 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400'
+                  : 'bg-theme-surface-2 dark:bg-theme-surface-2 text-theme-primary dark:text-theme-primary'
               }`}>
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />}
                 {status === 'error' && <AlertCircle className="w-4 h-4 flex-shrink-0" />}
@@ -208,7 +208,7 @@ export function ImportRecipeDialog({ open, onClose, onImported }: ImportRecipeDi
             {recipe && status === 'done' && (
               <button
                 onClick={handleConfirm}
-                className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-theme-primary-2 text-white rounded-lg text-sm font-medium hover:bg-theme-primary-2 flex items-center justify-center gap-1.5"
               >
                 {de ? 'Bearbeiten & Speichern' : 'Edit & Save'}
                 <ChevronRight className="w-4 h-4" />

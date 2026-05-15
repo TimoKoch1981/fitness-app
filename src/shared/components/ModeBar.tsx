@@ -35,7 +35,7 @@ interface ModePill {
 const TONE_BULLET: Record<ModePill['tone'], string> = {
   amber:  'text-amber-600',
   pink:   'text-pink-600',
-  teal:   'text-teal-600',
+  teal:   'text-theme-primary',
   orange: 'text-orange-600',
   violet: 'text-violet-600',
 };

@@ -119,9 +119,9 @@ export function PeakWeekPlanner({ tdee, bodyWeight, bodyFatPct }: PeakWeekPlanne
               <p className="text-sm font-bold text-gray-900">{selected.macros.calories}</p>
               <p className="text-[10px] text-gray-500">kcal</p>
             </div>
-            <div className="bg-teal-50 rounded-lg py-2">
-              <p className="text-sm font-bold text-teal-700">{selected.macros.protein}g</p>
-              <p className="text-[10px] text-teal-600">Protein</p>
+            <div className="bg-theme-surface-2 rounded-lg py-2">
+              <p className="text-sm font-bold text-theme-primary">{selected.macros.protein}g</p>
+              <p className="text-[10px] text-theme-primary">Protein</p>
             </div>
             <div className="bg-blue-50 rounded-lg py-2">
               <p className="text-sm font-bold text-blue-700">{selected.macros.carbs}g</p>

@@ -84,7 +84,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
                 onChange={(e) => setSystolic(e.target.value)}
                 placeholder="120"
                 aria-label={`${t.medical.systolic} ${t.medical.mmHg}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm text-center"
                 required
                 min="50"
                 max="300"
@@ -102,7 +102,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
                 onChange={(e) => setDiastolic(e.target.value)}
                 placeholder="80"
                 aria-label={`${t.medical.diastolic} ${t.medical.mmHg}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm text-center"
                 required
                 min="30"
                 max="200"
@@ -119,7 +119,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
                 onChange={(e) => setPulse(e.target.value)}
                 placeholder="72"
                 aria-label={`${t.medical.pulse} ${t.medical.bpm}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm text-center"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm text-center"
                 min="30"
                 max="250"
               />
@@ -153,7 +153,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Optional"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
           </div>
 
@@ -164,7 +164,7 @@ export function AddBloodPressureDialog({ open, onClose }: Props) {
           <button
             type="submit"
             disabled={addBP.isPending || !systolic || !diastolic}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {addBP.isPending ? t.common.loading : t.common.save}
           </button>

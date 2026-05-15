@@ -138,7 +138,7 @@ export function AddReminderDialog({ open, onClose, initialSubstanceId }: Props) 
                   onClick={() => handleTypeChange(opt.type)}
                   className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-xs ${
                     type === opt.type
-                      ? 'border-teal-500 bg-teal-50 text-teal-700 font-medium'
+                      ? 'border-theme-primary bg-theme-surface-2 text-theme-primary font-medium'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
@@ -160,7 +160,7 @@ export function AddReminderDialog({ open, onClose, initialSubstanceId }: Props) 
                   value={substanceId}
                   onChange={e => setSubstanceId(e.target.value)}
                   required
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm ${
                     substanceMissing && error ? 'border-red-300' : 'border-gray-300'
                   }`}
                 >
@@ -192,7 +192,7 @@ export function AddReminderDialog({ open, onClose, initialSubstanceId }: Props) 
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder={DEFAULT_TITLES[type][lang]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
           </div>
 
@@ -212,7 +212,7 @@ export function AddReminderDialog({ open, onClose, initialSubstanceId }: Props) 
           <button
             type="submit"
             disabled={submitDisabled}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {addReminder.isPending ? t.common.loading : t.common.save}
           </button>

@@ -122,7 +122,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             <button
               onClick={onImportDefault}
               disabled={isImporting}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-theme-primary text-white text-sm rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
             >
               <Download className="h-4 w-4" />
               {isImporting ? '...' : t.workouts.loadDefault}
@@ -160,7 +160,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
           <div>
             <h3 className="font-semibold text-gray-900">{plan.name}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-theme-surface-2 text-theme-primary px-2 py-0.5 rounded-full">
                 {splitTypeLabels[plan.split_type] ?? plan.split_type}
               </span>
               <span className="text-xs text-gray-400">
@@ -198,7 +198,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                 const firstDay = plan.days?.[0];
                 if (firstDay) setEditingDay(firstDay);
               }}
-              className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-theme-primary transition-colors"
               title={t.workouts.editPlan}
             >
               <Pencil className="h-4 w-4" />
@@ -206,7 +206,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
             {/* Share Button */}
             <button
               onClick={() => setShowShareDialog(true)}
-              className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-theme-primary transition-colors"
               title={t.share.sharePlan}
             >
               <Share2 className="h-4 w-4" />
@@ -216,7 +216,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
               <button
                 onClick={() => setShowPdfMenu(!showPdfMenu)}
                 disabled={isExporting}
-                className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors disabled:opacity-50"
+                className="p-1.5 text-gray-400 hover:text-theme-primary transition-colors disabled:opacity-50"
                 title={language === 'de' ? 'PDF exportieren' : 'Export PDF'}
               >
                 <Download className="h-4 w-4" />
@@ -236,7 +236,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                     }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    <FileText className="h-4 w-4 text-teal-500" />
+                    <FileText className="h-4 w-4 text-theme-primary" />
                     {language === 'de' ? 'Plan drucken' : 'Print Plan'}
                   </button>
                   <button
@@ -307,14 +307,14 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
 
       {/* AI Trainer Offer Banner (for non-supervised plans) */}
       {aiOffer.shouldOffer && !aiOfferDismissed && (
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 shadow-sm">
+        <div className="bg-theme-surface-2 border border-theme-line rounded-xl p-4 shadow-sm">
           <div className="flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-teal-500 flex-shrink-0 mt-0.5" />
+            <Sparkles className="h-5 w-5 text-theme-primary flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-teal-900">
+              <h4 className="text-sm font-semibold text-theme-ink">
                 {language === 'de' ? 'KI-Trainer aktivieren?' : 'Enable AI Trainer?'}
               </h4>
-              <p className="text-xs text-teal-600 mt-0.5">
+              <p className="text-xs text-theme-primary mt-0.5">
                 {language === 'de'
                   ? 'Soll ich diesen Plan als KI-Trainer begleiten? Automatische Gewichtsanpassung, Fortschrittsanalyse und Mesozyklus-Reviews.'
                   : 'Should I coach this plan as AI Trainer? Automatic weight adjustment, progress analysis, and mesocycle reviews.'}
@@ -326,7 +326,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                     setShowCalibration(true);
                   }}
                   disabled={aiOffer.isAccepting}
-                  className="text-xs bg-teal-500 text-white px-3 py-1.5 rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                  className="text-xs bg-theme-primary text-white px-3 py-1.5 rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
                 >
                   {language === 'de' ? 'Ja, aktivieren' : 'Yes, enable'}
                 </button>
@@ -335,7 +335,7 @@ export function TrainingPlanView({ plan, onDelete, onImportDefault, isImporting 
                     aiOffer.dismissOffer();
                     setAiOfferDismissed(true);
                   }}
-                  className="text-xs text-teal-600 px-3 py-1.5 rounded-lg hover:bg-teal-100 transition-colors"
+                  className="text-xs text-theme-primary px-3 py-1.5 rounded-lg hover:bg-theme-surface-2 transition-colors"
                 >
                   {language === 'de' ? 'Nein, danke' : 'No, thanks'}
                 </button>

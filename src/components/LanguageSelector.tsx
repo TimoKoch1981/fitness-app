@@ -54,8 +54,8 @@ export function LanguageSelector() {
                 setLanguage(lang.code as Language);
                 setOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-teal-50 transition-colors ${
-                lang.code === language ? 'bg-teal-50 text-teal-700 font-medium' : 'text-gray-700'
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-theme-surface-2 transition-colors ${
+                lang.code === language ? 'bg-theme-surface-2 text-theme-primary font-medium' : 'text-gray-700'
               }`}
             >
               <span className="text-base leading-none">{lang.flag}</span>

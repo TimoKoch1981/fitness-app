@@ -391,7 +391,7 @@ export function MedicalPage() {
               {substances && substances.length > 0 && (
                 <button
                   onClick={() => setShowLogSubstanceDialog(true)}
-                  className="p-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                  className="p-1.5 bg-theme-surface-20 text-white rounded-lg hover:bg-theme-success transition-colors"
                   title={t.medical.logSubstance}
                 >
                   <ClipboardList className="h-3.5 w-3.5" />

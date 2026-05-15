@@ -138,7 +138,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ArrowLeftRight className="h-4 w-4 text-teal-500" />
+          <ArrowLeftRight className="h-4 w-4 text-theme-primary" />
           <h3 className="text-sm font-semibold text-gray-900">
             {tBody?.compare ?? (language === 'de' ? 'Vorher/Nachher Vergleich' : 'Before/After Comparison')}
           </h3>
@@ -156,7 +156,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
         <select
           value={filterPose}
           onChange={e => setFilterPose(e.target.value as Pose | 'all')}
-          className="appearance-none pl-3 pr-8 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="appearance-none pl-3 pr-8 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-theme-primary"
         >
           <option value="all">{language === 'de' ? 'Alle Posen' : 'All Poses'}</option>
           {POSES.map(pose => (
@@ -176,7 +176,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
           <select
             value={beforePhoto?.name ?? ''}
             onChange={e => handleBeforeChange(e.target.value)}
-            className="w-full text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-theme-primary"
           >
             {filteredPhotos.map(p => (
               <option key={p.name} value={p.name}>
@@ -193,7 +193,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
           <select
             value={afterPhoto?.name ?? ''}
             onChange={e => handleAfterChange(e.target.value)}
-            className="w-full text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-theme-primary"
           >
             {filteredPhotos.map(p => (
               <option key={p.name} value={p.name}>
@@ -265,7 +265,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
               onClick={() => setShowOverlay(!showOverlay)}
               className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border transition-colors ${
                 showOverlay
-                  ? 'bg-teal-50 border-teal-200 text-teal-700'
+                  ? 'bg-theme-surface-2 border-theme-line text-theme-primary'
                   : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -283,7 +283,7 @@ export function ProgressComparison({ photos, initialBefore, initialAfter, onClos
                   step="0.01"
                   value={opacity}
                   onChange={e => setOpacity(Number(e.target.value))}
-                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-theme-primary"
                 />
                 <span className="text-[10px] text-gray-400">{tBody?.after ?? 'Nachher'}</span>
               </div>

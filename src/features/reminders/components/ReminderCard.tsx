@@ -58,7 +58,7 @@ export function ReminderCard({ reminder, onToggle, onDelete, onEdit }: Props) {
           : (language === 'de' ? 'Erinnerung aktivieren' : 'Enable reminder')}
       >
         <div className={`w-10 h-5 rounded-full relative transition-colors ${
-          reminder.is_active ? 'bg-teal-500' : 'bg-gray-300'
+          reminder.is_active ? 'bg-theme-primary' : 'bg-gray-300'
         }`}>
           <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
             reminder.is_active ? 'translate-x-5' : 'translate-x-0.5'
@@ -95,7 +95,7 @@ export function ReminderCard({ reminder, onToggle, onDelete, onEdit }: Props) {
                   title={label}
                   className={`w-3.5 h-3.5 rounded-full text-[8px] font-medium flex items-center justify-center ${
                     reminder.days_of_week.includes(i)
-                      ? 'bg-teal-100 text-teal-700'
+                      ? 'bg-theme-surface-2 text-theme-primary'
                       : 'bg-gray-50 text-gray-300'
                   }`}
                 >
