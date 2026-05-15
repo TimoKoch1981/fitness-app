@@ -22,10 +22,13 @@ interface PageShellProps {
 export function PageShell({ title, children, className, actions, hideModeBar }: PageShellProps) {
   return (
     <div className="min-h-screen bg-theme-bg">
-      {/* Header — Studio-Look: weisser Surface mit 1px-Border-Bottom statt Glassmorphism */}
+      {/* Header — Editorial-Look: Page-Titel als Source Serif Display,
+          hoeher (h-16 statt h-14), grosszuegigeres Padding. */}
       <header className="sticky top-0 z-40 bg-theme-surface/90 backdrop-blur-md border-b border-theme-line">
-        <div className="max-w-lg md:max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-theme-ink tracking-tight">{title}</h1>
+        <div className="max-w-lg md:max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-theme-ink font-theme-display tracking-tight">
+            {title}
+          </h1>
           <div className="flex items-center gap-2">
             {actions}
             <UserQuickMenu />
@@ -34,8 +37,8 @@ export function PageShell({ title, children, className, actions, hideModeBar }: 
         {!hideModeBar && <ModeBar />}
       </header>
 
-      {/* Content with bottom padding for navigation */}
-      <main className={cn('max-w-lg md:max-w-2xl mx-auto px-4 py-4 pb-20', className)}>
+      {/* Content — generoese Padding fuer editorialen Eindruck */}
+      <main className={cn('max-w-lg md:max-w-2xl mx-auto px-5 py-6 pb-24', className)}>
         {children}
       </main>
     </div>

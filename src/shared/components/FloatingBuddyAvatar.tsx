@@ -12,11 +12,10 @@
 
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { MessageSquare } from 'lucide-react';
 import { useInlineBuddyChat } from './InlineBuddyChatContext';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useTranslation } from '../../i18n';
-import { BuddyAvatar, BUDDY_VARIANTS } from './BuddyAvatar';
-import { useProfile } from '../../features/auth/hooks/useProfile';
 import type { AgentType } from '../../lib/ai/agents/types';
 
 // Routes where the FAB should NOT appear
@@ -57,9 +56,6 @@ export function FloatingBuddyAvatar() {
   const { isOpen, openBuddyChat } = useInlineBuddyChat();
   const location = useLocation();
   const { t } = useTranslation();
-  const { data: profile } = useProfile();
-  const buddyStyle = profile?.buddy_avatar_style ?? 'coach';
-  const variantConfig = BUDDY_VARIANTS[buddyStyle];
 
   // Don't render for unauthenticated users or while loading
   if (loading || !user) return null;
@@ -70,6 +66,10 @@ export function FloatingBuddyAvatar() {
   // Don't render when the inline chat is already open
   if (isOpen) return null;
 
+  // v14.28 Stufe 2b: 3D-Render-Buddy ist visueller Bruch im flachen Studio-
+  // Layout (Phase 8 §1.1 Lina, §3 Persona-Reviews). Reframe als Mono-
+  // Sprechblase mit Studio-Surface — der 3D-Avatar lebt ab jetzt nur noch
+  // auf der Buddy-Vollchat-Page und in den Buddy-Settings.
   return (
     <AnimatePresence>
       <motion.button
@@ -81,15 +81,11 @@ export function FloatingBuddyAvatar() {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className={`fixed bottom-20 right-4 z-[51] w-14 h-14 rounded-full shadow-lg flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:${variantConfig.ring} focus-visible:ring-offset-2 active:scale-95 transition-transform`}
+        className="fixed bottom-20 right-4 z-[51] w-14 h-14 rounded-full shadow-md flex items-center justify-center bg-theme-surface border border-theme-line text-theme-primary hover:bg-theme-surface-2 hover:border-theme-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2 active:scale-95 transition-colors"
         aria-label={t.buddy.floatingHint}
         title={t.buddy.floatingHint}
       >
-        {/* Pulse ring — draws attention */}
-        <span className={`absolute inset-0 rounded-full ${variantConfig.pingColor} opacity-75 animate-ping`} />
-
-        {/* Inner circle with avatar */}
-        <BuddyAvatar size="fab" variant={buddyStyle} useVideo />
+        <MessageSquare className="h-6 w-6" strokeWidth={1.5} />
       </motion.button>
     </AnimatePresence>
   );

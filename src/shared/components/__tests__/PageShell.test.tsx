@@ -66,10 +66,11 @@ describe('PageShell', () => {
     expect(main?.className).toContain('custom-class');
   });
 
-  it('has bottom padding for navigation (pb-20)', () => {
+  it('has bottom padding for navigation (pb-24 in v14.28 editorial layout)', () => {
+    // v14.28 Stufe 2b: pb-20 → pb-24 fuer grosszuegigeres Editorial-Layout.
     const { container } = renderWithProviders(<PageShell title="T">C</PageShell>);
     const main = container.querySelector('main');
-    expect(main?.className).toContain('pb-20');
+    expect(main?.className).toContain('pb-24');
   });
 
   it('header is sticky', () => {

@@ -264,7 +264,7 @@ export function CockpitPage() {
 
   return (
     <PageShell title={t.cockpit.title}>
-      <div className="space-y-4">
+      <div className="space-y-7">
         {/* Motivation Banner — shown when inactive 3+ days */}
         <MotivationBanner />
 
@@ -338,45 +338,62 @@ export function CockpitPage() {
           </button>
         )}
 
-        {/* Macro Stats Grid — Phase 7 §3.2: 4 Stat-Cards mit konsistenter Studio-Hierarchie */}
-        <div className="grid grid-cols-2 gap-3">
-          {stats.map((stat) => {
-            const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
-            return (
-              <div key={stat.label} className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
-                <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{stat.label}</p>
-                <NumericValue
-                  value={stat.value}
-                  unit={stat.unit}
-                  variant="inline"
-                  className="!text-2xl !font-bold text-theme-ink mt-1 block"
-                  locale={language === 'de' ? 'de-DE' : 'en-US'}
-                />
-                {profileComplete ? (
-                  <>
-                    <div className="mt-2 bg-theme-surface-2 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className="bg-theme-primary rounded-full h-1.5 transition-all duration-500"
-                        style={{ width: `${pct}%` }}
+        {/* Macro Stats — Editorial-Layout: Section-Header + 2x2-Tabelle als
+            zusammenhaengende Karte statt 4 Cards. Mono-Werte (NumericValue),
+            duenne Trennlinien. */}
+        <section>
+          <div className="flex items-baseline justify-between mb-3 px-1">
+            <h2 className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
+              {language === 'de' ? 'Makros heute' : 'Macros today'}
+            </h2>
+            <span className="text-[10px] text-theme-ink-3 font-theme-numeric tabular-nums">
+              {language === 'de' ? 'Ziel / Status' : 'Goal / Status'}
+            </span>
+          </div>
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
+            <div className="grid grid-cols-2 divide-x divide-theme-line">
+              {stats.map((stat, idx) => {
+                const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
+                const isBottomRow = idx >= 2;
+                return (
+                  <div key={stat.label} className={`p-5 ${isBottomRow ? 'border-t border-theme-line' : ''}`}>
+                    <p className="text-[10px] text-theme-ink-2 font-semibold uppercase tracking-[0.12em] mb-2">{stat.label}</p>
+                    <div className="flex items-baseline gap-1">
+                      <NumericValue
+                        value={stat.value}
+                        variant="inline"
+                        className="!text-3xl !font-semibold text-theme-ink leading-none tabular-nums"
+                        locale={language === 'de' ? 'de-DE' : 'en-US'}
                       />
+                      <span className="text-sm text-theme-ink-3 font-theme-numeric">{stat.unit}</span>
                     </div>
-                    <p className="text-[10px] text-theme-ink-3 mt-1">
-                      {stat.goal - stat.value > 0
-                        ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
-                        : `${t.dashboard.goal} ${t.dashboard.consumed}`
-                      }
-                    </p>
-                    {(stat as { badge?: string }).badge && (
-                      <p className="text-[9px] text-theme-ink-2 mt-0.5 font-medium italic">{(stat as { badge?: string }).badge}</p>
+                    {profileComplete ? (
+                      <>
+                        <div className="mt-3 bg-theme-surface-2 rounded-full h-1 overflow-hidden">
+                          <div
+                            className="bg-theme-primary rounded-full h-1 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-theme-ink-3 mt-1.5 font-theme-numeric tabular-nums">
+                          {stat.goal - stat.value > 0
+                            ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
+                            : `${t.dashboard.goal} ${t.dashboard.consumed}`
+                          }
+                        </p>
+                        {(stat as { badge?: string }).badge && (
+                          <p className="text-[9px] text-theme-ink-2 mt-0.5 italic">{(stat as { badge?: string }).badge}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-[10px] text-theme-ink-3 mt-2">{t.cockpit.noGoalSet}</p>
                     )}
-                  </>
-                ) : (
-                  <p className="text-[10px] text-theme-ink-3 mt-2">{t.cockpit.noGoalSet}</p>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         {/* Alternative Scoring (WW Points, Noom, Nutri-Score) */}
         <AlternativeScoringCard totals={totals} />
@@ -389,26 +406,33 @@ export function CockpitPage() {
         {/* Water Widget — Quick Water Tracking */}
         <WaterWidget />
 
-        {/* Energy Balance */}
-        <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Flame className="h-4 w-4 text-theme-accent" strokeWidth={1.5} />
-            <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{t.dashboard.balance}</p>
+        {/* Energy Balance — editorial: linker Block Hero-Zahl, rechts Bilanz-Splits */}
+        <section>
+          <div className="flex items-baseline justify-between mb-3 px-1">
+            <h2 className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
+              {language === 'de' ? 'Energiebilanz' : 'Energy balance'}
+            </h2>
+            <span className="text-[10px] text-theme-ink-3 font-theme-numeric">{t.dashboard.net} kcal</span>
           </div>
-          <div className="text-center">
-            <NumericValue
-              value={netCalories}
-              variant="inline"
-              className={`!text-2xl !font-bold block ${profileComplete && netCalories > caloriesGoal ? 'text-theme-danger' : 'text-theme-ink'}`}
-              locale={language === 'de' ? 'de-DE' : 'en-US'}
-            />
-            <p className="text-[10px] text-theme-ink-3 mt-1">{t.dashboard.net} kcal</p>
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md p-5">
+            <div className="flex items-center gap-5">
+              <Flame className="h-5 w-5 text-theme-accent flex-shrink-0" strokeWidth={1.5} />
+              <div className="flex-1 min-w-0">
+                <span
+                  className={`text-4xl md:text-5xl font-semibold tracking-tight font-theme-display tabular-nums leading-none block ${
+                    profileComplete && netCalories > caloriesGoal ? 'text-theme-danger' : 'text-theme-ink'
+                  }`}
+                >
+                  {netCalories.toLocaleString(language === 'de' ? 'de-DE' : 'en-US')}
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-theme-line flex justify-between text-[11px] text-theme-ink-2 font-theme-numeric tabular-nums">
+              <span>+ {totals.calories.toLocaleString(language === 'de' ? 'de-DE' : 'en-US')} {t.dashboard.consumed}</span>
+              <span>− {totalCaloriesBurned.toLocaleString(language === 'de' ? 'de-DE' : 'en-US')} {t.dashboard.burned}</span>
+            </div>
           </div>
-          <div className="mt-2 flex justify-between text-[10px] text-theme-ink-3">
-            <span>+{totals.calories} {t.dashboard.consumed}</span>
-            <span>-{totalCaloriesBurned} {t.dashboard.burned}</span>
-          </div>
-        </div>
+        </section>
 
         {/* Weekly Calorie Chart */}
         {weekMeals.data && weekMeals.data.some(d => d.calories > 0) && (
