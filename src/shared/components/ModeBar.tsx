@@ -29,14 +29,15 @@ interface ModePill {
   tone: 'amber' | 'pink' | 'teal' | 'orange' | 'violet';
 }
 
-// Studio-Look: Surface-2 BG + 3px Border-Left in Domain-Farbe (statt Pastell-Pill).
-// Emojis bleiben als kompakter Tag-Identifier — schneller scanbar als Text-Only.
-const TONE_CLASSES: Record<ModePill['tone'], string> = {
-  amber:  'bg-theme-surface-2 text-theme-ink border-theme-line border-l-[3px] border-l-amber-600',
-  pink:   'bg-theme-surface-2 text-theme-ink border-theme-line border-l-[3px] border-l-pink-600',
-  teal:   'bg-theme-surface-2 text-theme-ink border-theme-line border-l-[3px] border-l-teal-600',
-  orange: 'bg-theme-surface-2 text-theme-ink border-theme-line border-l-[3px] border-l-orange-600',
-  violet: 'bg-theme-surface-2 text-theme-ink border-theme-line border-l-[3px] border-l-violet-600',
+// v14.28 Stufe 2c: ModeBar als sekundaerer Status-Strip — kein Tab-Look mehr.
+// Reduzierte Pills, Mono-Font, kein Border-Left (das wirkte wie Akkordeon-Trigger).
+// Domain-Akzent nur ueber kleinen Bullet-Punkt (●) vor dem Label.
+const TONE_BULLET: Record<ModePill['tone'], string> = {
+  amber:  'text-amber-600',
+  pink:   'text-pink-600',
+  teal:   'text-teal-600',
+  orange: 'text-orange-600',
+  violet: 'text-violet-600',
 };
 
 export function ModeBar() {
@@ -91,22 +92,26 @@ export function ModeBar() {
   if (pills.length === 0) return null;
 
   return (
-    <div className="max-w-lg md:max-w-2xl mx-auto px-4 pt-2 pb-1 flex items-center gap-1.5 overflow-x-auto">
-      <span className="text-[10px] uppercase tracking-[0.12em] text-theme-ink-3 font-semibold flex-shrink-0">
+    <div className="max-w-lg md:max-w-2xl mx-auto px-5 pt-1 pb-2 flex items-center gap-3 overflow-x-auto">
+      <span className="text-[10px] uppercase tracking-[0.16em] text-theme-ink-3 font-semibold flex-shrink-0">
         {isDE ? 'Modus' : 'Mode'}
       </span>
-      {pills.map((p) => (
-        <button
-          key={p.key}
-          type="button"
-          onClick={() => navigate('/profile')}
-          className={`flex items-center gap-1 px-2 py-0.5 rounded-theme-sm text-[11px] font-medium border whitespace-nowrap transition-colors hover:bg-theme-surface-3 ${TONE_CLASSES[p.tone]}`}
-          title={isDE ? 'Im Profil aendern' : 'Change in profile'}
-        >
-          <span>{p.emoji}</span>
-          <span>{isDE ? p.labelDE : p.labelEN}</span>
-        </button>
-      ))}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        {pills.map((p, idx) => (
+          <span key={p.key} className="flex items-center gap-3">
+            {idx > 0 && <span className="text-theme-ink-3" aria-hidden="true">·</span>}
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.12em] text-theme-ink hover:text-theme-primary whitespace-nowrap transition-colors"
+              title={isDE ? 'Im Profil aendern' : 'Change in profile'}
+            >
+              <span className={TONE_BULLET[p.tone]} aria-hidden="true">●</span>
+              <span>{isDE ? p.labelDE : p.labelEN}</span>
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
