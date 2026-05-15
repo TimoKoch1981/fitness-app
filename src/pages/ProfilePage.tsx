@@ -34,11 +34,13 @@ import { InviteCard } from '../features/invite/components/InviteCard';
 import { MFPImportDialog } from '../features/import/components/MFPImportDialog';
 import { ProfileDietHealthSection } from '../features/auth/components/ProfileDietHealthSection';
 import { ProfilePersonalGoalsSection } from '../features/auth/components/ProfilePersonalGoalsSection';
+import { useTheme } from '../lib/theme/ThemeContext';
 
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user, signOut, isAdmin } = useAuth();
   const { t, language, setLanguage, fontSize, setFontSize, buddyVerbosity, setBuddyVerbosity, buddyExpertise, setBuddyExpertise } = useTranslation();
+  const { surfaceMode, setSurfaceMode, autoSwitchWorkout, setAutoSwitchWorkout } = useTheme();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const isDE = language === 'de';
@@ -249,20 +251,88 @@ export function ProfilePage() {
         )}
 
         {/* User Info + Avatar */}
-        <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4 flex items-center gap-4">
           <AvatarUpload
             avatarUrl={profile?.avatar_url}
             displayName={profile?.display_name}
           />
           <div>
-            <p className="font-semibold text-gray-900">
+            <p className="font-semibold text-theme-ink">
               {profile?.display_name ?? user?.email ?? 'Benutzer'}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-theme-ink-3">
               {user?.email}
             </p>
           </div>
         </div>
+
+        {/* v14.28 Stufe 3 — Darstellung (Theme + Auto-Switch) */}
+        <section className="bg-theme-surface border border-theme-line rounded-theme-md p-5">
+          <h3 className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.16em] mb-4">
+            {language === 'de' ? 'Darstellung' : 'Appearance'}
+          </h3>
+
+          {/* Theme-Radio */}
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-theme-ink mb-2">
+              {language === 'de' ? 'Theme' : 'Theme'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setSurfaceMode('studio')}
+                aria-pressed={surfaceMode === 'studio'}
+                className={`flex-1 min-h-[44px] px-4 py-2 rounded-theme-md border text-sm font-medium transition-colors ${
+                  surfaceMode === 'studio'
+                    ? 'bg-theme-surface-2 border-theme-primary text-theme-primary'
+                    : 'bg-theme-surface border-theme-line text-theme-ink-2 hover:border-theme-ink-3'
+                }`}
+              >
+                <span className="block text-base font-semibold">Studio</span>
+                <span className="block text-[11px] mt-0.5 font-normal">
+                  {language === 'de' ? 'Hell · Default' : 'Light · default'}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSurfaceMode('console')}
+                aria-pressed={surfaceMode === 'console'}
+                className={`flex-1 min-h-[44px] px-4 py-2 rounded-theme-md border text-sm font-medium transition-colors ${
+                  surfaceMode === 'console'
+                    ? 'bg-theme-surface-2 border-theme-primary text-theme-primary'
+                    : 'bg-theme-surface border-theme-line text-theme-ink-2 hover:border-theme-ink-3'
+                }`}
+              >
+                <span className="block text-base font-semibold">Power Console</span>
+                <span className="block text-[11px] mt-0.5 font-normal">
+                  {language === 'de' ? 'Dunkel · für Power+' : 'Dark · for Power+'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Auto-Switch-Checkbox (nur wenn Theme = Studio, sonst ohne Effekt) */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={autoSwitchWorkout}
+              onChange={(e) => setAutoSwitchWorkout(e.target.checked)}
+              className="mt-0.5 w-5 h-5 rounded border-theme-line text-theme-primary focus:ring-theme-primary focus:ring-offset-0 accent-theme-primary"
+            />
+            <span className="flex-1 text-sm text-theme-ink">
+              <span className="block font-medium">
+                {language === 'de'
+                  ? 'Beim Workout automatisch auf Power Console wechseln'
+                  : 'Auto-switch to Power Console during workout'}
+              </span>
+              <span className="block text-[12px] text-theme-ink-3 mt-0.5">
+                {language === 'de'
+                  ? 'Für besseres Lesen im halbdunklen Studio. Setzt sich nach dem Workout zurück.'
+                  : 'Better for low-light gym sessions. Reverts after the workout.'}
+              </span>
+            </span>
+          </label>
+        </section>
 
         {/* Language Switch */}
         <div className="bg-white rounded-xl p-4 shadow-sm">

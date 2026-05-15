@@ -10,6 +10,7 @@ import { InlineBuddyChatProvider } from '../shared/components/InlineBuddyChatCon
 import { RestTimerProvider } from '../features/timer/context/RestTimerContext';
 import { GlobalTimerOverlay } from '../features/timer/components/GlobalTimerOverlay';
 import { FeatureFlagProvider } from '../lib/featureFlags/FeatureFlagProvider';
+import { ThemeProvider } from '../lib/theme/ThemeContext';
 
 // InlineBuddyChat is heavy (pulls in all feature hooks + AI agents) — lazy-load it
 const InlineBuddyChat = lazy(() => import('../shared/components/InlineBuddyChat').then(m => ({ default: m.InlineBuddyChat })));
@@ -271,6 +272,7 @@ export default function App() {
       <QueryProvider>
         <I18nProvider>
           <FeatureFlagProvider>
+            <ThemeProvider>
             <AuthProvider>
               <BuddyChatProvider>
                 <BrowserRouter>
@@ -292,6 +294,7 @@ export default function App() {
                 </BrowserRouter>
               </BuddyChatProvider>
             </AuthProvider>
+            </ThemeProvider>
           </FeatureFlagProvider>
           {/* PWA: global overlays (outside router, inside I18nProvider for translations) */}
           <PWAUpdatePrompt />

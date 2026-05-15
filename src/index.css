@@ -64,14 +64,24 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* v14.28 Stufe 3: BG auf html (iOS-Bounce-Scroll-tauglich). Body erbt
+     via Tailwind-v4-CSS-Var-Inheritance nicht zuverlaessig, daher hier. */
+  background-color: var(--theme-bg);
+  color: var(--theme-ink);
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* v14.28 Stufe 3: System-Font-Stack zuerst (iOS lädt SF Pro sofort, sieht
+     nativ aus + groesser auf Mobile). Inter als Fallback. */
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter',
+               system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0fdfa; /* teal-50 */
+  /* BG-Color liegt auf <html> (iOS-Bounce-Scroll). Body bleibt transparent,
+     damit der html-BG sichtbar bleibt — Theme-Switch greift dadurch sofort. */
+  background-color: transparent;
   min-width: 320px;
 }
 
