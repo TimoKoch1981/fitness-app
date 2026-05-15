@@ -15,25 +15,44 @@ initSentry();
 registerDefaultActions();
 
 // Register service worker (PWA offline support).
-// Dispatches custom events so the React useServiceWorker hook can react.
+//
+// v14.28 Stufe 1.5: vollautomatisches Auto-Update.
+// Wenn ein neuer Build verfuegbar ist, wird er sofort aktiviert und der Tab
+// einmalig reloaded — ohne User-Prompt. Hintergrund: PWA-Cache hielt frueher
+// alte Versionen fest, weil der "Neue Version verfuegbar"-Toast haeufig
+// uebersehen wurde und der alte SW so unbegrenzt lang weiter servierte.
+//
+// Workbox-Seite (vite.config.ts): skipWaiting=true + clientsClaim=true sorgen
+// dafuer, dass der neue SW direkt installiert wird und alle Tabs uebernimmt.
+// Hier (Client-Seite): updateSW(true) loest den Page-Reload aus, sobald ein
+// neuer SW bereitsteht.
+//
+// Wer den frueheren Prompt zurueckhaben will: onNeedRefresh wieder durch
+// window.dispatchEvent(new Event('sw:need-refresh')) ersetzen — PWAUpdatePrompt
+// und useServiceWorker bleiben im Code als Fallback erhalten.
 const updateSW = registerSW({
   onNeedRefresh() {
-    window.dispatchEvent(new Event('sw:need-refresh'));
+    // Bei neuem Build: sofort SW aktivieren + Page reloaden.
+    // updateSW(true) ruft skipWaiting + reload automatisch auf.
+    updateSW(true);
   },
   onOfflineReady() {
     window.dispatchEvent(new Event('sw:offline-ready'));
   },
   onRegisteredSW(_swUrl, registration) {
-    // Periodically check for SW updates (every 60 minutes)
+    // Update-Check-Intervall: 10 Minuten (vorher 60 min).
+    // Mit Auto-Reload bekommt der Nutzer einen frischen Build innerhalb dieser
+    // Zeit, ohne dass er manuell reloaden muss.
     if (registration) {
       setInterval(() => {
         registration.update();
-      }, 60 * 60 * 1000);
+      }, 10 * 60 * 1000);
     }
   },
 });
 
-// Listen for update requests from the React UI (useServiceWorker hook)
+// Fallback: useServiceWorker-Hook + PWAUpdatePrompt bleiben funktional, falls
+// onNeedRefresh wieder auf "Prompt"-Strategie umgestellt wird.
 window.addEventListener('sw:update', () => {
   updateSW(true);
 });
