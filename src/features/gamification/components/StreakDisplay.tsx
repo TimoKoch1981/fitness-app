@@ -16,8 +16,8 @@ export function StreakDisplay() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
-        <div className="h-6 bg-gray-100 rounded w-40" />
+      <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4 animate-pulse">
+        <div className="h-6 bg-theme-surface-2 rounded w-40" />
       </div>
     );
   }
@@ -27,7 +27,7 @@ export function StreakDisplay() {
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-      className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-4 shadow-sm"
+      className="bg-theme-surface border border-theme-line border-l-[3px] border-l-theme-accent rounded-theme-md p-4"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -41,10 +41,10 @@ export function StreakDisplay() {
                 {'\u{1F525}'}
               </motion.span>
               <div>
-                <p className="text-lg font-bold text-teal-800">
+                <p className="text-lg font-bold text-theme-ink tabular-nums">
                   {currentStreak} {t.gamification.streakDays}
                 </p>
-                <p className="text-[10px] text-teal-600">
+                <p className="text-[10px] text-theme-ink-2">
                   {t.gamification.longestStreak}: {longestStreak} {t.gamification.days}
                 </p>
               </div>
@@ -53,11 +53,11 @@ export function StreakDisplay() {
             <>
               <span className="text-2xl opacity-50">{'\u{1F525}'}</span>
               <div>
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-theme-ink-2">
                   {t.gamification.noStreak}
                 </p>
                 {longestStreak > 0 && (
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-theme-ink-3">
                     {t.gamification.longestStreak}: {longestStreak} {t.gamification.days}
                   </p>
                 )}
@@ -67,7 +67,7 @@ export function StreakDisplay() {
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-teal-600 font-medium">
+          <p className="text-xs text-theme-ink-2 font-medium tabular-nums">
             {totalActiveDays} {t.gamification.totalActiveDays}
           </p>
         </div>

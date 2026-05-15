@@ -81,7 +81,7 @@ export function UserQuickMenu() {
       {/* Avatar trigger */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-700 font-semibold text-xs ring-2 ring-white shadow-sm overflow-hidden focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all hover:ring-teal-300"
+        className="flex items-center justify-center w-8 h-8 rounded-full bg-theme-surface-2 border border-theme-line text-theme-primary font-semibold text-xs overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-1 hover:border-theme-primary transition-colors"
         aria-label={t.quickMenu.profile}
         aria-expanded={open}
         aria-haspopup="true"
@@ -105,48 +105,48 @@ export function UserQuickMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200/60 z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-56 bg-theme-surface rounded-theme-md shadow-lg border border-theme-line z-50 overflow-hidden"
             role="menu"
           >
             {/* User info header */}
-            <div className="px-4 py-3 border-b border-gray-100">
+            <div className="px-4 py-3 border-b border-theme-line">
               {displayName && (
-                <p className="text-sm font-semibold text-gray-900 truncate">
+                <p className="text-sm font-semibold text-theme-ink truncate">
                   {displayName}
                 </p>
               )}
-              <p className="text-xs text-gray-500 truncate">{email}</p>
+              <p className="text-xs text-theme-ink-2 truncate">{email}</p>
             </div>
 
             {/* Menu items */}
             <div className="py-1">
               <button
                 onClick={() => handleNavigate('/profile')}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-teal-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-theme-ink hover:bg-theme-surface-2 transition-colors"
                 role="menuitem"
               >
-                <User className="w-4 h-4 text-teal-600" />
+                <User className="w-4 h-4 text-theme-primary" strokeWidth={1.5} />
                 {t.quickMenu.profile}
               </button>
 
               <button
                 onClick={() => handleNavigate('/profile')}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-teal-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-theme-ink hover:bg-theme-surface-2 transition-colors"
                 role="menuitem"
               >
-                <Settings className="w-4 h-4 text-teal-600" />
+                <Settings className="w-4 h-4 text-theme-primary" strokeWidth={1.5} />
                 {t.quickMenu.settings}
               </button>
             </div>
 
             {/* Divider + Logout */}
-            <div className="border-t border-gray-100 py-1">
+            <div className="border-t border-theme-line py-1">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-theme-danger hover:bg-red-50 transition-colors"
                 role="menuitem"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4" strokeWidth={1.5} />
                 {t.quickMenu.logout}
               </button>
             </div>

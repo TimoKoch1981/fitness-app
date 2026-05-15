@@ -21,11 +21,11 @@ interface PageShellProps {
  */
 export function PageShell({ title, children, className, actions, hideModeBar }: PageShellProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+    <div className="min-h-screen bg-theme-bg">
+      {/* Header — Studio-Look: weisser Surface mit 1px-Border-Bottom statt Glassmorphism */}
+      <header className="sticky top-0 z-40 bg-theme-surface/90 backdrop-blur-md border-b border-theme-line">
         <div className="max-w-lg md:max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-gray-900">{title}</h1>
+          <h1 className="text-lg font-semibold text-theme-ink tracking-tight">{title}</h1>
           <div className="flex items-center gap-2">
             {actions}
             <UserQuickMenu />

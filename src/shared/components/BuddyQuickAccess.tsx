@@ -32,19 +32,19 @@ export function BuddyQuickAccess({ suggestions, onSuggestionClick }: BuddyQuickA
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-3 mb-4">
+    <div className="bg-theme-surface border border-theme-line rounded-theme-md p-3 mb-4">
       {/* Header row — tapping opens buddy chat */}
       <button
         onClick={() => goToBuddy(undefined)}
         className="w-full flex items-center gap-2 mb-2 group"
       >
-        <div className="w-6 h-6 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
-          <MessageCircle className="h-3 w-3 text-white" />
+        <div className="w-6 h-6 bg-theme-primary rounded-theme-sm flex items-center justify-center flex-shrink-0">
+          <MessageCircle className="h-3 w-3 text-theme-primary-on" strokeWidth={2} />
         </div>
-        <span className="text-xs font-semibold text-gray-700 flex-1 text-left">
+        <span className="text-xs font-semibold text-theme-ink flex-1 text-left">
           {t.buddyAccess.title}
         </span>
-        <ChevronRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-teal-500 transition-colors" />
+        <ChevronRight className="h-3.5 w-3.5 text-theme-ink-3 group-hover:text-theme-primary transition-colors" strokeWidth={1.5} />
       </button>
 
       {/* Suggestion chips — horizontal scrollable */}
@@ -53,7 +53,7 @@ export function BuddyQuickAccess({ suggestions, onSuggestionClick }: BuddyQuickA
           <button
             key={s.id}
             onClick={() => goToBuddy(s)}
-            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 rounded-full border border-teal-200 hover:bg-teal-100 hover:border-teal-300 transition-colors whitespace-nowrap"
+            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-theme-surface-2 text-theme-ink rounded-theme-sm border border-theme-line hover:border-theme-primary hover:text-theme-primary transition-colors whitespace-nowrap"
           >
             {s.icon && <span className="mr-1">{s.icon}</span>}
             {s.label}
