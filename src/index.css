@@ -90,3 +90,151 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* ============================================================================
+ * v14.28 Stufe 0 — Token-Architektur "Studio + Power Console"
+ * ----------------------------------------------------------------------------
+ * Two-Theme-System aus Phase 7+8 (docs/lookfeel/PHASE7+8_*.md).
+ *
+ * - Studio       (Default, Light): Indigo+Bone, Source Serif Hero, ruhig
+ * - Power Console (Opt-in, Dark) : Charcoal+Acid-Lime, Telemetrie-Look
+ * - Print        (auto, A4 S/W) : Surface-Mode für Doctor-Report (Stufe 2.5)
+ *
+ * Variablen leben PARALLEL zu shadcn (--background, --primary, …) — keine
+ * Überschreibung bestehender Komponenten. Migration läuft inkrementell:
+ * eine Komponente ersetzt `bg-white` durch `bg-theme-surface`, usw.
+ *
+ * Drei Master-Schalter:
+ *   data-surface-mode  : studio | console      (auf <html> oder Container)
+ *   data-density       : spacious | comfortable | compact
+ *   --theme-font-numeric : Monospace-Font für tabular-nums
+ *
+ * Status Stufe 0: Variablen + NumericValue-Component, kein UI-Refactor.
+ * Heutige Pages sehen visuell unverändert aus.
+ * ============================================================================ */
+
+/* Tailwind v4 @theme-mapping: macht --theme-* als bg-theme-* / text-theme-* nutzbar */
+@theme inline {
+  --color-theme-bg:         var(--theme-bg);
+  --color-theme-surface:    var(--theme-surface);
+  --color-theme-surface-2:  var(--theme-surface-2);
+  --color-theme-surface-3:  var(--theme-surface-3);
+  --color-theme-ink:        var(--theme-ink);
+  --color-theme-ink-2:      var(--theme-ink-2);
+  --color-theme-ink-3:      var(--theme-ink-3);
+  --color-theme-line:       var(--theme-line);
+  --color-theme-primary:    var(--theme-primary);
+  --color-theme-primary-2:  var(--theme-primary-2);
+  --color-theme-primary-on: var(--theme-primary-on);
+  --color-theme-accent:     var(--theme-accent);
+  --color-theme-success:    var(--theme-success);
+  --color-theme-warning:    var(--theme-warning);
+  --color-theme-danger:     var(--theme-danger);
+  --font-theme-display:     var(--theme-font-display);
+  --font-theme-numeric:     var(--theme-font-numeric);
+  --font-theme-sans:        var(--theme-font-sans);
+}
+
+/* ── Studio (Default, Light) ───────────────────────────────────────────────── */
+:root {
+  /* Studio-Palette */
+  --theme-bg:          #FAF8F4;
+  --theme-surface:     #FFFFFF;
+  --theme-surface-2:   #F5F1EB;
+  --theme-surface-3:   #EDE6D8;
+  --theme-ink:         #1A1814;
+  --theme-ink-2:       #5C5247;
+  --theme-ink-3:       #8C8479;
+  --theme-line:        #E6DFD3;
+  --theme-primary:     #3D4FB8;
+  --theme-primary-2:   #2F3E96;
+  --theme-primary-on:  #FFFFFF;
+  --theme-accent:      #B8612E;
+  --theme-success:     #3F7A4D;
+  --theme-warning:     #A8742F;
+  --theme-danger:      #9C2F2F;
+
+  /* Radius — bewusst kleiner als heute (10/12/16 → 4/6/10) */
+  --theme-r-sm: 4px;
+  --theme-r-md: 6px;
+  --theme-r-lg: 10px;
+
+  /* Typografie-Stacks */
+  --theme-font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+  --theme-font-display: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --theme-font-numeric: 'JetBrains Mono', 'iA Writer Mono', Consolas, monospace;
+
+  /* Density — Default Comfortable (Spacious / Compact siehe unten) */
+  --theme-density-pad-sm:     8px;
+  --theme-density-pad-md:    16px;
+  --theme-density-pad-lg:    24px;
+  --theme-density-row:       44px;
+  --theme-density-gap:       12px;
+  --theme-section-spacing:   24px;
+}
+
+/* ── Power Console (Opt-in, Dark) ──────────────────────────────────────────── */
+[data-surface-mode="console"] {
+  --theme-bg:          #0B0D0F;
+  --theme-surface:     #15181B;
+  --theme-surface-2:   #1D2125;
+  --theme-surface-3:   #252A30;
+  --theme-ink:         #EDEEF0;
+  --theme-ink-2:       #9BA1A8;
+  --theme-ink-3:       #7A8088;     /* Marco-Empfehlung: Kontrast erhöht (WCAG AA) */
+  --theme-line:        #272C32;
+  --theme-primary:     #A8E635;     /* Acid Lime */
+  --theme-primary-2:   #84B82A;
+  --theme-primary-on:  #0B0D0F;
+  --theme-accent:      #5DB8F0;     /* Cyan */
+  --theme-success:     #A8E635;
+  --theme-warning:     #F0A53D;
+  --theme-danger:      #F05D5D;
+
+  /* Radius — eckiger im Console */
+  --theme-r-sm: 2px;
+  --theme-r-md: 4px;
+  --theme-r-lg: 6px;
+}
+
+/* ── Density-Modi ──────────────────────────────────────────────────────────── */
+[data-density="spacious"] {
+  --theme-density-pad-sm:    12px;
+  --theme-density-pad-md:    24px;
+  --theme-density-pad-lg:    32px;
+  --theme-density-row:       56px;
+  --theme-density-gap:       16px;
+  --theme-section-spacing:   32px;
+}
+
+[data-density="compact"] {
+  --theme-density-pad-sm:     4px;
+  --theme-density-pad-md:     8px;
+  --theme-density-pad-lg:    12px;
+  --theme-density-row:       32px;
+  --theme-density-gap:        8px;
+  --theme-section-spacing:   16px;
+}
+
+/* ── Print (Stufe 2.5 — Doctor-Report) ─────────────────────────────────────── *
+ * Surface-Mode "print" als auto-Override via @media print. Konkretes
+ * Print-Stylesheet kommt in Stufe 2.5 (eigener Sprint). Hier nur Tokens-
+ * Override-Skelett, damit Stufe 0 sich nicht für späteren Code im Weg steht.
+ */
+@media print {
+  :root {
+    --theme-bg:          #FFFFFF;
+    --theme-surface:     #FFFFFF;
+    --theme-surface-2:   #FFFFFF;
+    --theme-ink:         #000000;
+    --theme-ink-2:       #333333;
+    --theme-ink-3:       #666666;
+    --theme-line:        #999999;
+    --theme-primary:     #000000;
+    --theme-primary-on:  #FFFFFF;
+    --theme-accent:      #000000;
+    --theme-success:     #000000;
+    --theme-warning:     #000000;
+    --theme-danger:      #000000;
+  }
+}
