@@ -137,7 +137,7 @@ export function PhotoTrackingSection() {
           type="button"
           onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
           disabled={uploading}
-          className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 flex-shrink-0"
+          className="p-2 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50 flex-shrink-0"
         >
           <Upload className={`h-3.5 w-3.5 ${uploading ? 'animate-pulse' : ''}`} />
         </button>
@@ -177,7 +177,7 @@ export function PhotoTrackingSection() {
               onClick={() => setPhotoTab('progress')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-md transition-colors ${
                 photoTab === 'progress'
-                  ? 'bg-white text-teal-600 shadow-sm'
+                  ? 'bg-white text-theme-primary shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -188,7 +188,7 @@ export function PhotoTrackingSection() {
               onClick={() => setPhotoTab('compare')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-md transition-colors ${
                 photoTab === 'compare'
-                  ? 'bg-white text-teal-600 shadow-sm'
+                  ? 'bg-white text-theme-primary shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -200,7 +200,7 @@ export function PhotoTrackingSection() {
                 onClick={() => setPhotoTab('poses')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-md transition-colors ${
                   photoTab === 'poses'
-                    ? 'bg-white text-teal-600 shadow-sm'
+                    ? 'bg-white text-theme-primary shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >

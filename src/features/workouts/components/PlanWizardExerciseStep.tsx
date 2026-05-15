@@ -160,7 +160,7 @@ export function PlanWizardExerciseStep() {
     <div className="flex flex-col h-full">
       {/* Day Count Header */}
       <div className="flex items-center gap-2 mb-2 flex-shrink-0">
-        <span className="text-xs font-medium text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
+        <span className="text-xs font-medium text-theme-primary bg-theme-surface-2 px-2 py-0.5 rounded-full">
           {days.length} {isDE ? (days.length === 1 ? 'Trainingstag' : 'Trainingstage') : (days.length === 1 ? 'Training Day' : 'Training Days')}
         </span>
         <span className="text-[10px] text-gray-400">
@@ -176,7 +176,7 @@ export function PlanWizardExerciseStep() {
             onClick={() => setActiveTab(i)}
             className={`flex-shrink-0 px-3 py-1.5 text-xs rounded-lg transition-colors ${
               activeTab === i
-                ? 'bg-teal-500 text-white font-medium'
+                ? 'bg-theme-primary text-white font-medium'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -198,7 +198,7 @@ export function PlanWizardExerciseStep() {
             type="text"
             value={currentDay.name}
             onChange={(e) => updateDay(activeTab, { name: e.target.value })}
-            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-400"
+            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
           />
         </div>
         <div>
@@ -210,7 +210,7 @@ export function PlanWizardExerciseStep() {
             value={currentDay.focus}
             onChange={(e) => updateDay(activeTab, { focus: e.target.value })}
             placeholder={isDE ? 'z.B. Oberkörper' : 'e.g. Upper Body'}
-            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-400"
+            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary"
           />
         </div>
         {showDayTypeDropdown && (
@@ -221,7 +221,7 @@ export function PlanWizardExerciseStep() {
             <select
               value={currentDay.day_type ?? 'mixed'}
               onChange={(e) => updateDay(activeTab, { day_type: e.target.value as DayType })}
-              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white"
+              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary bg-white"
             >
               {DAY_TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -265,7 +265,7 @@ export function PlanWizardExerciseStep() {
       {/* Add Exercise Button */}
       <button
         onClick={() => setShowPicker(true)}
-        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors flex-shrink-0"
+        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 text-sm text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors flex-shrink-0"
       >
         <Plus className="h-4 w-4" />
         {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
@@ -324,7 +324,7 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUp
           onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={index === 0}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20"
+          className="p-0.5 text-gray-300 hover:text-theme-primary transition-colors disabled:opacity-20"
         >
           <ChevronUp className="h-3.5 w-3.5" />
         </button>
@@ -333,7 +333,7 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUp
           onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
           onPointerDown={(e) => e.stopPropagation()}
           disabled={index === total - 1}
-          className="p-0.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-20"
+          className="p-0.5 text-gray-300 hover:text-theme-primary transition-colors disabled:opacity-20"
         >
           <ChevronDown className="h-3.5 w-3.5" />
         </button>

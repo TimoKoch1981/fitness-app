@@ -65,13 +65,13 @@ export function NotificationSettings() {
       {/* Header with Master Toggle */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-teal-600" />
+          <Bell className="h-5 w-5 text-theme-primary" />
           <h3 className="font-semibold text-gray-900">{t.notifications.title}</h3>
         </div>
         <button
           onClick={handleToggleEnabled}
           className={`relative w-11 h-6 rounded-full transition-colors ${
-            prefs.enabled ? 'bg-teal-500' : 'bg-gray-300'
+            prefs.enabled ? 'bg-theme-primary' : 'bg-gray-300'
           }`}
         >
           <span
@@ -104,7 +104,7 @@ export function NotificationSettings() {
                   <button
                     onClick={() => toggleType(type)}
                     className={`relative w-9 h-5 rounded-full transition-colors ${
-                      prefs.types[type] ? 'bg-teal-500' : 'bg-gray-300'
+                      prefs.types[type] ? 'bg-theme-primary' : 'bg-gray-300'
                     }`}
                   >
                     <span
@@ -128,7 +128,7 @@ export function NotificationSettings() {
               type="time"
               value={prefs.dailySummaryTime}
               onChange={(e) => setDailySummaryTime(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+              className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
             />
           </div>
 
@@ -142,7 +142,7 @@ export function NotificationSettings() {
               <button
                 onClick={toggleQuietHours}
                 className={`relative w-9 h-5 rounded-full transition-colors ${
-                  prefs.quietHours.enabled ? 'bg-teal-500' : 'bg-gray-300'
+                  prefs.quietHours.enabled ? 'bg-theme-primary' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -159,14 +159,14 @@ export function NotificationSettings() {
                   type="time"
                   value={prefs.quietHours.start}
                   onChange={(e) => setQuietHoursRange(e.target.value, prefs.quietHours.end)}
-                  className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                  className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
                 />
                 <span>{t.notifications.quietHoursTo}</span>
                 <input
                   type="time"
                   value={prefs.quietHours.end}
                   onChange={(e) => setQuietHoursRange(prefs.quietHours.start, e.target.value)}
-                  className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                  className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
                 />
               </div>
             )}

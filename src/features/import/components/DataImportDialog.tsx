@@ -216,7 +216,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
                 onClick={() => { setMode('csv'); fileInputRef.current?.click(); }}
                 className="w-full flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors text-left"
               >
-                <FileSpreadsheet className="h-6 w-6 text-teal-500" />
+                <FileSpreadsheet className="h-6 w-6 text-theme-primary" />
                 <div>
                   <p className="font-medium text-gray-900">
                     {isDE ? 'CSV-Datei' : 'CSV File'}
@@ -260,12 +260,12 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
                 value={emailText}
                 onChange={(e) => setEmailText(e.target.value)}
                 placeholder={isDE ? 'E-Mail-Text, Laborbericht, Notizen...' : 'Email text, lab report, notes...'}
-                className="w-full h-40 p-3 border rounded-xl text-sm resize-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full h-40 p-3 border rounded-xl text-sm resize-none focus:ring-2 focus:ring-theme-primary focus:border-transparent"
               />
               <button
                 onClick={handleEmailExtract}
                 disabled={!emailText.trim()}
-                className="w-full py-3 bg-teal-500 text-white font-medium rounded-xl hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-3 bg-theme-primary text-white font-medium rounded-xl hover:bg-theme-primary-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {isDE ? 'Analysieren' : 'Analyze'}
               </button>
@@ -281,7 +281,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
           {/* Step: Analyzing */}
           {step === 'analyzing' && (
             <div className="text-center py-12">
-              <Loader2 className="h-10 w-10 animate-spin text-teal-500 mx-auto mb-3" />
+              <Loader2 className="h-10 w-10 animate-spin text-theme-primary mx-auto mb-3" />
               <p className="text-sm text-gray-600">{isDE ? 'Daten werden analysiert...' : 'Analyzing data...'}</p>
             </div>
           )}
@@ -311,7 +311,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
           {step === 'review' && (
             <div className="space-y-3">
               {scaleFormat && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 text-teal-700 text-xs font-medium rounded-full">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-theme-surface-2 text-theme-primary text-xs font-medium rounded-full">
                   <Check className="h-3.5 w-3.5" />
                   {scaleFormat} {isDE ? 'erkannt' : 'detected'}
                 </div>
@@ -328,7 +328,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
                       type="checkbox"
                       checked={row.selected}
                       onChange={() => toggleRow(row.id)}
-                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-teal-600"
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-theme-primary"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-500">{row.date}</p>
@@ -357,7 +357,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
                 <button
                   onClick={handleSave}
                   disabled={selectedCount === 0}
-                  className="flex-1 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 disabled:opacity-40 transition-colors"
+                  className="flex-1 py-2.5 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 disabled:opacity-40 transition-colors"
                 >
                   {selectedCount} {isDE ? 'speichern' : 'save'}
                 </button>
@@ -368,7 +368,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
           {/* Step: Saving */}
           {step === 'saving' && (
             <div className="text-center py-12">
-              <Loader2 className="h-10 w-10 animate-spin text-teal-500 mx-auto mb-3" />
+              <Loader2 className="h-10 w-10 animate-spin text-theme-primary mx-auto mb-3" />
               <p className="text-sm text-gray-600">{isDE ? 'Wird gespeichert...' : 'Saving...'}</p>
             </div>
           )}
@@ -384,7 +384,7 @@ export function DataImportDialog({ open, onClose }: DataImportDialogProps) {
               </p>
               <button
                 onClick={handleClose}
-                className="mt-4 px-6 py-2 bg-teal-500 text-white text-sm font-medium rounded-xl hover:bg-teal-600"
+                className="mt-4 px-6 py-2 bg-theme-primary text-white text-sm font-medium rounded-xl hover:bg-theme-primary-2"
               >
                 {t.common.close}
               </button>

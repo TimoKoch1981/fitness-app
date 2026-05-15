@@ -18,14 +18,14 @@ const ACTIVITY_CONFIG: Record<ActivityType, {
   colorClass: string;
   bgClass: string;
 }> = {
-  workout_completed: { icon: Dumbbell, colorClass: 'text-teal-600', bgClass: 'bg-teal-100' },
+  workout_completed: { icon: Dumbbell, colorClass: 'text-theme-primary', bgClass: 'bg-theme-surface-2' },
   goal_achieved: { icon: Target, colorClass: 'text-green-600', bgClass: 'bg-green-100' },
   badge_earned: { icon: Award, colorClass: 'text-amber-600', bgClass: 'bg-amber-100' },
   challenge_joined: { icon: Trophy, colorClass: 'text-blue-600', bgClass: 'bg-blue-100' },
   challenge_completed: { icon: Trophy, colorClass: 'text-purple-600', bgClass: 'bg-purple-100' },
   streak_milestone: { icon: Flame, colorClass: 'text-orange-600', bgClass: 'bg-orange-100' },
   body_goal_reached: { icon: Target, colorClass: 'text-pink-600', bgClass: 'bg-pink-100' },
-  recipe_shared: { icon: UtensilsCrossed, colorClass: 'text-emerald-600', bgClass: 'bg-emerald-100' },
+  recipe_shared: { icon: UtensilsCrossed, colorClass: 'text-theme-success', bgClass: 'bg-theme-surface-2' },
 };
 
 // ── Time Ago ────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ export function ActivityFeedTabContent() {
     <div className="space-y-2">
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
         </div>
       ) : feed && feed.length > 0 ? (
         feed.map((item: ActivityFeedItem) => (

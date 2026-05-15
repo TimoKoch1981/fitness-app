@@ -44,7 +44,7 @@ export function formatExerciseDetails(ex: PlanExercise): React.ReactNode {
     <>
       {ex.sets != null && ex.reps != null ? `${ex.sets}×${ex.reps}` : ''}
       {ex.weight_kg != null && (
-        <span className="text-teal-600 ml-1">@ {ex.weight_kg}kg</span>
+        <span className="text-theme-primary ml-1">@ {ex.weight_kg}kg</span>
       )}
     </>
   );
@@ -112,7 +112,7 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-teal-600">
+            <span className="text-xs font-medium text-theme-primary">
               {t.workouts.dayLabel} {day.day_number}
             </span>
             <span className="font-medium text-gray-900 truncate">{day.name}</span>
@@ -137,7 +137,7 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
           <span
             role="button"
             onClick={(e) => { e.stopPropagation(); onEdit(day); }}
-            className="p-1 text-gray-300 hover:text-teal-500 transition-colors"
+            className="p-1 text-gray-300 hover:text-theme-primary transition-colors"
             title={isDE ? 'Tag bearbeiten' : 'Edit day'}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -157,7 +157,7 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
               className={`flex items-center gap-1 px-2.5 py-1 text-white text-xs font-medium rounded-lg transition-colors ${
                 inProgressWorkout
                   ? 'bg-orange-500 hover:bg-orange-600'
-                  : 'bg-teal-500 hover:bg-teal-600'
+                  : 'bg-theme-primary hover:bg-theme-primary-2'
               }`}
               title={inProgressWorkout
                 ? (isDE ? 'Training fortsetzen' : 'Resume Workout')
@@ -228,7 +228,7 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
                     {catalogEntry ? (
                       <button
                         onClick={() => onExerciseClick(catalogEntry)}
-                        className="text-gray-700 font-medium underline decoration-dotted decoration-teal-400 underline-offset-2 hover:text-teal-600 transition-colors text-left"
+                        className="text-gray-700 font-medium underline decoration-dotted decoration-teal-400 underline-offset-2 hover:text-theme-primary transition-colors text-left"
                       >
                         {ex.name}
                       </button>

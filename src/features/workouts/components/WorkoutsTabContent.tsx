@@ -163,7 +163,7 @@ export function WorkoutsTabContent({
         /* Plan Sub-Tab — Now with Multi-Plan List + Detail View */
         isPlanLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
           </div>
         ) : (
           <div className="space-y-4">

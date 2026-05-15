@@ -71,7 +71,7 @@ export function TimeRangeSelector({ value, onChange }: Props) {
             onClick={() => handlePreset(p.key)}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               value.preset === p.key && !showCustom
-                ? 'bg-teal-500 text-white'
+                ? 'bg-theme-primary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -81,7 +81,7 @@ export function TimeRangeSelector({ value, onChange }: Props) {
         <button
           onClick={() => setShowCustom(!showCustom)}
           className={`p-1.5 rounded-lg transition-colors ${
-            showCustom ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            showCustom ? 'bg-theme-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
           title={isDE ? 'Benutzerdefiniert' : 'Custom range'}
         >
@@ -94,18 +94,18 @@ export function TimeRangeSelector({ value, onChange }: Props) {
             type="date"
             value={customFrom}
             onChange={e => setCustomFrom(e.target.value)}
-            className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-theme-primary"
           />
           <span className="text-gray-400">–</span>
           <input
             type="date"
             value={customTo}
             onChange={e => setCustomTo(e.target.value)}
-            className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-theme-primary"
           />
           <button
             onClick={handleCustomApply}
-            className="px-3 py-1.5 text-xs font-medium bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
           >
             {isDE ? 'OK' : 'Apply'}
           </button>

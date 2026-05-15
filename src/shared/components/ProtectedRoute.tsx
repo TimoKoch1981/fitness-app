@@ -13,8 +13,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br bg-theme-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-primary-2" />
       </div>
     );
   }
@@ -26,8 +26,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Show loading while checking disclaimer status
   if (disclaimerAccepted === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br bg-theme-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-primary-2" />
       </div>
     );
   }

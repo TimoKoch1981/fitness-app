@@ -45,8 +45,8 @@ export function AddRecipeMethodDialog({
       titleKey: 'methodManual',
       descKey: 'methodManualDesc',
       onClick: () => { onClose(); onManual(); },
-      color: 'text-teal-600',
-      bgColor: 'bg-teal-50 dark:bg-teal-900/20',
+      color: 'text-theme-primary',
+      bgColor: 'bg-theme-surface-2 dark:bg-theme-surface-2',
     },
     {
       id: 'url',

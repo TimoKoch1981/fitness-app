@@ -210,7 +210,7 @@ export function RecipeList({
           <button
             onClick={onLoadSampleRecipes}
             disabled={isLoadingSamples}
-            className="px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-theme-primary text-white text-sm rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoadingSamples
               ? (language === 'de' ? 'Wird geladen...' : 'Loading...')
@@ -236,7 +236,7 @@ export function RecipeList({
           className={cn(
             'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
             !filters.mealType && !filters.favoritesOnly && !filters.pantryOnly && !filters.fitsMyBasics
-              ? 'bg-teal-500 text-white'
+              ? 'bg-theme-primary text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           )}
         >
@@ -274,7 +274,7 @@ export function RecipeList({
             className={cn(
               'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1',
               filters.pantryOnly
-                ? 'bg-emerald-500 text-white'
+                ? 'bg-theme-surface-20 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
@@ -289,7 +289,7 @@ export function RecipeList({
             className={cn(
               'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
               filters.mealType === type
-                ? 'bg-teal-500 text-white'
+                ? 'bg-theme-primary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
@@ -307,7 +307,7 @@ export function RecipeList({
             value={filters.searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={t.recipes.search}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
           />
           {filters.searchQuery && (
             <button
@@ -323,9 +323,9 @@ export function RecipeList({
           className={cn(
             'p-2 rounded-lg border transition-colors relative',
             showFilters
-              ? 'bg-teal-50 border-teal-300 text-teal-600'
+              ? 'bg-theme-surface-2 border-theme-primary text-theme-primary'
               : activeFilterCount > 0
-              ? 'bg-teal-50 border-teal-200 text-teal-600'
+              ? 'bg-theme-surface-2 border-theme-line text-theme-primary'
               : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
           )}
         >
@@ -352,7 +352,7 @@ export function RecipeList({
       {!showFilters && activeFilterCount > 0 && (
         <button
           onClick={() => setShowFilters(true)}
-          className="flex items-center gap-1.5 flex-wrap px-3 py-1.5 bg-teal-50 rounded-lg border border-teal-100"
+          className="flex items-center gap-1.5 flex-wrap px-3 py-1.5 bg-theme-surface-2 rounded-lg border border-theme-line"
         >
           {filters.allergenFilterEnabled && filters.excludeAllergens.length > 0 && (
             <span className="flex items-center gap-0.5 text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
@@ -398,7 +398,7 @@ export function RecipeList({
                   className={cn(
                     'px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
                     filters.sortBy === opt
-                      ? 'bg-teal-500 text-white'
+                      ? 'bg-theme-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
                 >
@@ -427,7 +427,7 @@ export function RecipeList({
                     className={cn(
                       'px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
                       filters.tags.includes(tag)
-                        ? 'bg-teal-500 text-white'
+                        ? 'bg-theme-primary text-white'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     )}
                   >
@@ -450,7 +450,7 @@ export function RecipeList({
                 onChange={(e) => handleMaxPrepTimeChange(e.target.value)}
                 placeholder="Min"
                 min="0"
-                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
               />
             </div>
             <div>
@@ -463,7 +463,7 @@ export function RecipeList({
                 onChange={(e) => handleMaxCaloriesChange(e.target.value)}
                 placeholder="kcal"
                 min="0"
-                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
               />
             </div>
           </div>
@@ -479,7 +479,7 @@ export function RecipeList({
                 {allergensDifferFromProfile && (
                   <button
                     onClick={handleSyncAllergens}
-                    className="flex items-center gap-0.5 text-[10px] text-teal-600 hover:text-teal-700"
+                    className="flex items-center gap-0.5 text-[10px] text-theme-primary hover:text-theme-primary"
                     title={language === 'de' ? 'Mit Profil synchronisieren' : 'Sync with profile'}
                   >
                     <RefreshCw className="h-2.5 w-2.5" />
@@ -528,7 +528,7 @@ export function RecipeList({
                 {dietaryDiffersFromProfile && (
                   <button
                     onClick={handleSyncDietary}
-                    className="flex items-center gap-0.5 text-[10px] text-teal-600 hover:text-teal-700"
+                    className="flex items-center gap-0.5 text-[10px] text-theme-primary hover:text-theme-primary"
                     title={language === 'de' ? 'Mit Profil synchronisieren' : 'Sync with profile'}
                   >
                     <RefreshCw className="h-2.5 w-2.5" />
@@ -571,7 +571,7 @@ export function RecipeList({
       {/* Action button */}
       <button
         onClick={onAddRecipe}
-        className="w-full flex items-center justify-center gap-1.5 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors"
+        className="w-full flex items-center justify-center gap-1.5 py-2 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
       >
         <Plus className="h-4 w-4" />
         {t.recipes.addRecipe}
@@ -631,11 +631,11 @@ function RecipeCardGrid({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps
             alt={recipe.title}
             className="w-full h-28 object-cover"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-teal-100', 'to-emerald-100', 'flex', 'items-center', 'justify-center'); }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'bg-theme-surface-2', 'bg-theme-surface-2', 'flex', 'items-center', 'justify-center'); }}
           />
         ) : (
-          <div className="w-full h-28 bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
-            <ImageIcon className="h-8 w-8 text-teal-300" />
+          <div className="w-full h-28 bg-gradient-to-br bg-theme-surface-2 flex items-center justify-center">
+            <ImageIcon className="h-8 w-8 text-theme-ink-3" />
           </div>
         )}
       </div>
@@ -665,7 +665,7 @@ function RecipeCardGrid({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps
             <Flame className="h-3 w-3 text-orange-400" />
             {recipe.calories_per_serving}
           </span>
-          <span className="text-[10px] text-teal-600 font-medium">
+          <span className="text-[10px] text-theme-primary font-medium">
             {recipe.protein_per_serving}g P
           </span>
         </div>
@@ -689,7 +689,7 @@ function RecipeCardGrid({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps
           {displayTags.map((tag) => (
             <span
               key={tag}
-              className="px-1.5 py-0.5 bg-teal-50 text-teal-600 text-[9px] rounded-full"
+              className="px-1.5 py-0.5 bg-theme-surface-2 text-theme-primary text-[9px] rounded-full"
             >
               {tag}
             </span>
@@ -746,11 +746,11 @@ function RecipeCardList({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps
             alt={recipe.title}
             className="w-full h-full object-cover"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-teal-100', 'to-emerald-100', 'flex', 'items-center', 'justify-center'); }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'bg-theme-surface-2', 'bg-theme-surface-2', 'flex', 'items-center', 'justify-center'); }}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
-            <ImageIcon className="h-6 w-6 text-teal-300" />
+          <div className="w-full h-full bg-gradient-to-br bg-theme-surface-2 flex items-center justify-center">
+            <ImageIcon className="h-6 w-6 text-theme-ink-3" />
           </div>
         )}
       </div>
@@ -769,7 +769,7 @@ function RecipeCardList({ recipe, onClick, t: _t, pantryMatch }: RecipeCardProps
             <Flame className="h-3 w-3 text-orange-400" />
             {recipe.calories_per_serving} kcal
           </span>
-          <span className="text-teal-600 font-medium">
+          <span className="text-theme-primary font-medium">
             {recipe.protein_per_serving}g P
           </span>
           {pantryMatch && (

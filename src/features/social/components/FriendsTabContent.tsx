@@ -37,7 +37,7 @@ function UserAvatar({ profile, size = 'md' }: { profile?: FriendProfile | null; 
   }
 
   return (
-    <div className={cn(sizeClass, 'rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-semibold')}>
+    <div className={cn(sizeClass, 'rounded-full bg-theme-surface-2 text-theme-primary flex items-center justify-center font-semibold')}>
       {initials}
     </div>
   );
@@ -69,7 +69,7 @@ function AddFriendSection() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={isDE ? 'Nutzer suchen...' : 'Search users...'}
-          className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent"
         />
         {query && (
           <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -81,7 +81,7 @@ function AddFriendSection() {
       {/* Results */}
       {isLoading && query.length >= 2 && (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
+          <Loader2 className="h-5 w-5 animate-spin text-theme-primary" />
         </div>
       )}
 
@@ -96,7 +96,7 @@ function AddFriendSection() {
                 </p>
               </div>
               {sentIds.has(user.id) ? (
-                <span className="text-xs text-teal-500 font-medium flex items-center gap-1">
+                <span className="text-xs text-theme-primary font-medium flex items-center gap-1">
                   <UserCheck className="h-3.5 w-3.5" />
                   {isDE ? 'Gesendet' : 'Sent'}
                 </span>
@@ -104,7 +104,7 @@ function AddFriendSection() {
                 <button
                   onClick={() => handleSend(user.id)}
                   disabled={sendRequest.isPending}
-                  className="px-3 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
                 </button>
@@ -198,7 +198,7 @@ export function FriendsTabContent() {
         className={cn(
           'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
           showSearch
-            ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-200'
+            ? 'bg-theme-surface-2 text-theme-primary ring-1 ring-theme-line'
             : 'bg-gray-50 text-gray-600 hover:bg-gray-100',
         )}
       >
@@ -228,14 +228,14 @@ export function FriendsTabContent() {
 
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
           </div>
         ) : friends && friends.length > 0 ? (
           <div className="space-y-1">
             {friends.map((f: Friendship) => (
               <div
                 key={f.id}
-                className="flex items-center gap-3 p-2.5 bg-white border border-gray-100 rounded-xl hover:border-teal-100 transition-colors"
+                className="flex items-center gap-3 p-2.5 bg-white border border-gray-100 rounded-xl hover:border-theme-line transition-colors"
               >
                 <UserAvatar profile={f.friend_profile} />
                 <div className="flex-1 min-w-0">

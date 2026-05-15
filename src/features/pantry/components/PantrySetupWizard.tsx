@@ -162,7 +162,7 @@ export function PantrySetupWizard({ open, onClose, onComplete }: PantrySetupWiza
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-teal-500" />
+            <Package className="h-5 w-5 text-theme-primary" />
             <h2 className="text-lg font-semibold text-gray-900">{t.title}</h2>
           </div>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
@@ -178,7 +178,7 @@ export function PantrySetupWizard({ open, onClose, onComplete }: PantrySetupWiza
                 key={s}
                 className={cn(
                   'flex-1 h-1.5 rounded-full transition-colors',
-                  s <= step ? 'bg-teal-500' : 'bg-gray-200'
+                  s <= step ? 'bg-theme-primary' : 'bg-gray-200'
                 )}
               />
             ))}
@@ -242,7 +242,7 @@ export function PantrySetupWizard({ open, onClose, onComplete }: PantrySetupWiza
           {step === 2 && (
             <button
               onClick={() => setStep(3)}
-              className="flex-1 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600"
+              className="flex-1 py-2.5 text-sm font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2"
             >
               {t.next} ({selectedItems.size} {t.selected})
             </button>
@@ -251,7 +251,7 @@ export function PantrySetupWizard({ open, onClose, onComplete }: PantrySetupWiza
             <button
               onClick={handleSave}
               disabled={saving || selectedArray.length === 0}
-              className="flex-1 py-2.5 text-sm font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 text-sm font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {saving ? t.saving : t.saveAndStart}
@@ -281,7 +281,7 @@ function Step1Templates({
   if (catalogLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-theme-primary" />
       </div>
     );
   }
@@ -298,7 +298,7 @@ function Step1Templates({
           <button
             key={key}
             onClick={() => onSelect(key)}
-            className="w-full flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-left"
+            className="w-full flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-theme-surface-2 hover:border-theme-line border border-gray-100 transition-all text-left"
           >
             <span className="text-2xl">{tmpl.icon}</span>
             <div className="flex-1 min-w-0">
@@ -316,7 +316,7 @@ function Step1Templates({
       {/* 5th option: Browse by category */}
       <button
         onClick={() => onSelect('empty')}
-        className="w-full flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-left"
+        className="w-full flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-theme-surface-2 hover:border-theme-line border border-gray-100 transition-all text-left"
       >
         <span className="text-2xl">🗂️</span>
         <div className="flex-1 min-w-0">
@@ -377,7 +377,7 @@ function Step2Categories({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t.searchPlaceholder}
-          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-transparent"
         />
       </div>
 
@@ -429,8 +429,8 @@ function Step2Categories({
                   className={cn(
                     'px-2 py-0.5 text-xs rounded-full border transition-colors',
                     allSelected
-                      ? 'bg-teal-100 text-teal-700 border-teal-200'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-teal-300'
+                      ? 'bg-theme-surface-2 text-theme-primary border-theme-line'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-theme-primary'
                   )}
                 >
                   {allSelected ? t.deselectAll : t.selectAll}
@@ -485,8 +485,8 @@ function Step3Summary({
   if (saved) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-          <Check className="h-8 w-8 text-teal-600" />
+        <div className="w-16 h-16 bg-theme-surface-2 rounded-full flex items-center justify-center mb-4">
+          <Check className="h-8 w-8 text-theme-primary" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900">{t.savedTitle}</h3>
         <p className="text-sm text-gray-500 mt-1">
@@ -499,7 +499,7 @@ function Step3Summary({
   return (
     <div className="space-y-4 pt-2">
       <div className="text-center">
-        <p className="text-3xl font-bold text-teal-600">{totalCount}</p>
+        <p className="text-3xl font-bold text-theme-primary">{totalCount}</p>
         <p className="text-sm text-gray-600">{t.itemsSelected}</p>
       </div>
 
@@ -512,7 +512,7 @@ function Step3Summary({
               <span className="flex-1 text-sm text-gray-700">
                 {language === 'de' ? info.labelDe : info.labelEn}
               </span>
-              <span className="text-sm font-medium text-teal-600">{count}</span>
+              <span className="text-sm font-medium text-theme-primary">{count}</span>
             </div>
           );
         })}
@@ -544,8 +544,8 @@ function ItemChip({
       className={cn(
         'inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full border transition-all',
         selected
-          ? 'bg-teal-100 text-teal-800 border-teal-200'
-          : 'bg-white text-gray-600 border-gray-200 hover:border-teal-300'
+          ? 'bg-theme-surface-2 text-theme-ink border-theme-line'
+          : 'bg-white text-gray-600 border-gray-200 hover:border-theme-primary'
       )}
     >
       {selected && <Check className="h-3 w-3" />}

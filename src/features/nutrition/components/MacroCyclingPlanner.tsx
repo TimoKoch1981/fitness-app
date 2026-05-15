@@ -71,7 +71,7 @@ export function MacroCyclingPlanner({ baseMacros }: MacroCyclingPlannerProps) {
               </button>
               <div className="text-[10px] text-gray-600 space-y-0.5">
                 <p className="font-medium">{day.calories}</p>
-                <p className="text-teal-600">{day.protein}P</p>
+                <p className="text-theme-primary">{day.protein}P</p>
                 <p className="text-blue-600">{day.carbs}C</p>
                 <p className="text-amber-600">{day.fat}F</p>
               </div>

@@ -84,7 +84,7 @@ export function ManualTimer({ initialSeconds }: ManualTimerProps) {
         <button
           onClick={() => { setMode('stopwatch'); handleReset(); }}
           className={`px-3 py-1 text-xs rounded-full transition-colors ${
-            mode === 'stopwatch' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-500'
+            mode === 'stopwatch' ? 'bg-theme-primary text-white' : 'bg-gray-200 text-gray-500'
           }`}
         >
           {t.workout?.stopwatch ?? 'Stopwatch'}
@@ -92,7 +92,7 @@ export function ManualTimer({ initialSeconds }: ManualTimerProps) {
         <button
           onClick={() => { setMode('countdown'); handleReset(); }}
           className={`px-3 py-1 text-xs rounded-full transition-colors ${
-            mode === 'countdown' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-500'
+            mode === 'countdown' ? 'bg-theme-primary text-white' : 'bg-gray-200 text-gray-500'
           }`}
         >
           {t.workout?.countdown ?? 'Countdown'}
@@ -139,7 +139,7 @@ export function ManualTimer({ initialSeconds }: ManualTimerProps) {
             className={`p-2 rounded-full transition-colors ${
               isRunning
                 ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
-                : 'bg-teal-100 text-teal-600 hover:bg-teal-200'
+                : 'bg-theme-surface-2 text-theme-primary hover:bg-theme-surface-2'
             }`}
           >
             {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

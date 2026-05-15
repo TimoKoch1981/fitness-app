@@ -52,14 +52,14 @@ const TOUR_STEPS: TourStep[] = [
     titleKey: 'cockpitTitle',
     descKey: 'cockpitDesc',
     icon: <LayoutDashboard className="h-6 w-6" />,
-    gradient: 'from-teal-400 to-teal-600',
+    gradient: 'bg-theme-primary',
   },
   {
     navKey: 'nutrition',
     titleKey: 'nutritionTitle',
     descKey: 'nutritionDesc',
     icon: <UtensilsCrossed className="h-6 w-6" />,
-    gradient: 'from-emerald-400 to-emerald-600',
+    gradient: 'bg-theme-success',
   },
   {
     navKey: 'training',
@@ -197,7 +197,7 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
               className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
             >
               {/* Header */}
-              <div className="bg-gradient-to-br from-teal-400 to-emerald-500 p-8 text-white text-center">
+              <div className="bg-gradient-to-br bg-theme-primary p-8 text-white text-center">
                 <div className="text-5xl mb-4" role="img" aria-label="Robot">
                   {'\u{1F916}'}
                 </div>
@@ -215,7 +215,7 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
               <div className="px-6 pb-6 flex flex-col gap-3">
                 <button
                   onClick={handleStartTour}
-                  className="w-full py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all"
+                  className="w-full py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all"
                 >
                   {gt.startTour}
                 </button>
@@ -277,7 +277,7 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
-                className="absolute rounded-xl border-2 border-teal-400 shadow-[0_0_0_4px_rgba(20,184,166,0.2)]"
+                className="absolute rounded-xl border-2 border-theme-primary shadow-[0_0_0_4px_rgba(20,184,166,0.2)]"
                 style={{
                   left: highlightRect.left - 6,
                   top: highlightRect.top - 6,
@@ -342,9 +342,9 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
                         key={i}
                         className={`h-1.5 rounded-full transition-all duration-300 ${
                           i === currentStep
-                            ? 'w-5 bg-teal-500'
+                            ? 'w-5 bg-theme-primary'
                             : i < currentStep
-                              ? 'w-1.5 bg-teal-300'
+                              ? 'w-1.5 bg-theme-primary'
                               : 'w-1.5 bg-gray-200'
                         }`}
                       />
@@ -361,7 +361,7 @@ export function GuidedTour({ onComplete, onSkip }: GuidedTourProps) {
                     </button>
                     <button
                       onClick={handleNext}
-                      className="px-4 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 active:scale-[0.97] transition-all"
+                      className="px-4 py-1.5 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2 active:scale-[0.97] transition-all"
                     >
                       {isLastStep ? gt.finish : gt.next}
                     </button>

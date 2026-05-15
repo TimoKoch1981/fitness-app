@@ -47,7 +47,7 @@ export function FeatureTour({ userId, onComplete, onSendMessage }: FeatureTourPr
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps: TourStep[] = [
-    { icon: <Utensils className="h-8 w-8" />, titleKey: 'step1Title', descKey: 'step1Desc', exampleKey: 'step1Example', gradient: 'from-emerald-400 to-teal-500' },
+    { icon: <Utensils className="h-8 w-8" />, titleKey: 'step1Title', descKey: 'step1Desc', exampleKey: 'step1Example', gradient: 'bg-theme-primary' },
     { icon: <Dumbbell className="h-8 w-8" />, titleKey: 'step2Title', descKey: 'step2Desc', exampleKey: 'step2Example', gradient: 'from-blue-400 to-indigo-500' },
     { icon: <ClipboardList className="h-8 w-8" />, titleKey: 'step3Title', descKey: 'step3Desc', exampleKey: 'step3Example', gradient: 'from-purple-400 to-fuchsia-500' },
     { icon: <Heart className="h-8 w-8" />, titleKey: 'step4Title', descKey: 'step4Desc', exampleKey: 'step4Example', gradient: 'from-rose-400 to-red-500' },
@@ -110,9 +110,9 @@ export function FeatureTour({ userId, onComplete, onSendMessage }: FeatureTourPr
           {/* Example message bubble */}
           <button
             onClick={handleExampleTap}
-            className="w-full text-left bg-teal-50 border border-teal-200 rounded-xl p-3 text-xs text-teal-700 hover:bg-teal-100 transition-colors"
+            className="w-full text-left bg-theme-surface-2 border border-theme-line rounded-xl p-3 text-xs text-theme-primary hover:bg-theme-surface-2 transition-colors"
           >
-            <span className="text-[10px] text-teal-500 block mb-1">
+            <span className="text-[10px] text-theme-primary block mb-1">
               {t.buddy.helpHint.split(':')[0]}:
             </span>
             &ldquo;{(t.tour as Record<string, string>)[step.exampleKey]}&rdquo;
@@ -128,7 +128,7 @@ export function FeatureTour({ userId, onComplete, onSendMessage }: FeatureTourPr
                 key={i}
                 className={`h-1.5 rounded-full transition-all ${
                   i === currentStep
-                    ? 'w-4 bg-teal-500'
+                    ? 'w-4 bg-theme-primary'
                     : 'w-1.5 bg-gray-200'
                 }`}
               />
@@ -145,7 +145,7 @@ export function FeatureTour({ userId, onComplete, onSendMessage }: FeatureTourPr
             </button>
             <button
               onClick={handleNext}
-              className="flex items-center gap-1 px-4 py-1.5 bg-teal-500 text-white text-xs font-medium rounded-lg hover:bg-teal-600 transition-colors"
+              className="flex items-center gap-1 px-4 py-1.5 bg-theme-primary text-white text-xs font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
             >
               {isLast ? t.tour.done : t.tour.next}
               {!isLast && <ChevronRight className="h-3 w-3" />}

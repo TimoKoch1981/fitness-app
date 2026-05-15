@@ -117,7 +117,7 @@ export function DialogShell({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="p-1 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary"
               aria-label="Close"
             >
               <X className="h-5 w-5" />

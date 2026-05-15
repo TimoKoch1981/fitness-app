@@ -25,7 +25,7 @@ export function InviteCard() {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* Header with gradient */}
-      <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-3">
+      <div className="bg-theme-primary px-4 py-3">
         <div className="flex items-center gap-2 text-white">
           <Gift className="w-5 h-5" />
           <h3 className="font-semibold text-sm">{(t.invite as Record<string, string>).title}</h3>
@@ -36,7 +36,7 @@ export function InviteCard() {
         {/* Invite code display */}
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">{(t.invite as Record<string, string>).yourCode}</p>
-          <p className="text-2xl font-mono font-bold text-teal-600 tracking-wider">{inviteCode}</p>
+          <p className="text-2xl font-mono font-bold text-theme-primary tracking-wider">{inviteCode}</p>
         </div>
 
         {/* Invite link + copy button */}
@@ -48,8 +48,8 @@ export function InviteCard() {
             onClick={copyToClipboard}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               copied
-                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                : 'bg-teal-50 text-teal-600 border border-teal-200 hover:bg-teal-100'
+                ? 'bg-theme-surface-2 text-theme-success border border-theme-line'
+                : 'bg-theme-surface-2 text-theme-primary border border-theme-line hover:bg-theme-surface-2'
             }`}
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -81,7 +81,7 @@ export function InviteCard() {
 
         {/* Referral count */}
         <div className="flex items-center justify-center gap-2 text-sm text-gray-500 pt-2 border-t border-gray-100">
-          <Users className="w-4 h-4 text-teal-500" />
+          <Users className="w-4 h-4 text-theme-primary" />
           <span>
             {(t.invite as Record<string, string>).referralCount?.replace('{count}', String(referralCount))}
           </span>

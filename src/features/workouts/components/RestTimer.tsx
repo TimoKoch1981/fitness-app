@@ -58,7 +58,7 @@ export function RestTimer({ seconds, onComplete, onSkip, onAdjust }: RestTimerPr
     <div className="flex flex-col items-center py-6">
       {/* Timer Label */}
       <div className="flex items-center gap-2 mb-4">
-        <Timer className="h-5 w-5 text-teal-500" />
+        <Timer className="h-5 w-5 text-theme-primary" />
         <span className="text-sm font-medium text-gray-500">
           {t.workout?.restTimer ?? 'Pause'}
         </span>
@@ -118,7 +118,7 @@ export function RestTimer({ seconds, onComplete, onSkip, onAdjust }: RestTimerPr
       {/* Skip Button */}
       <button
         onClick={onSkip}
-        className="mt-4 flex items-center gap-2 px-6 py-2.5 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors"
+        className="mt-4 flex items-center gap-2 px-6 py-2.5 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
       >
         <SkipForward className="h-4 w-4" />
         {t.workout?.skipTimer ?? 'Überspringen'}

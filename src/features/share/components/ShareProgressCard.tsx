@@ -54,7 +54,7 @@ export const ShareProgressCard = forwardRef<HTMLDivElement, ShareProgressCardPro
             <h3 className="text-lg font-bold">{data.displayName}</h3>
             <p className="text-xs text-gray-400">{data.weekLabel}</p>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br bg-theme-primary rounded-xl flex items-center justify-center">
             <span className="text-sm font-bold">FB</span>
           </div>
         </div>
@@ -124,7 +124,7 @@ export const ShareProgressCard = forwardRef<HTMLDivElement, ShareProgressCardPro
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-emerald-400" />
+              <Zap className="h-3.5 w-3.5 text-theme-success" />
               <span className="text-xs text-gray-300">
                 {isDE ? 'Ø Protein' : 'Avg Protein'}
               </span>
@@ -135,7 +135,7 @@ export const ShareProgressCard = forwardRef<HTMLDivElement, ShareProgressCardPro
           </div>
           <div className="bg-white/10 rounded-full h-2.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full h-2.5 transition-all"
+              className="bg-gradient-to-r bg-theme-success rounded-full h-2.5 transition-all"
               style={{ width: `${protPct}%` }}
             />
           </div>

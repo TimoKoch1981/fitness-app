@@ -127,7 +127,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
             <button
               onClick={() => setFormat('excel')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm rounded-lg border transition-colors ${
-                format === 'excel' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                format === 'excel' ? 'border-theme-primary bg-theme-surface-2 text-theme-primary' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <FileSpreadsheet className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
             <button
               onClick={() => setFormat('pdf')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm rounded-lg border transition-colors ${
-                format === 'pdf' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                format === 'pdf' ? 'border-theme-primary bg-theme-surface-2 text-theme-primary' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <FileText className="h-4 w-4" />
@@ -155,7 +155,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
                   type="checkbox"
                   checked={selectedMetrics.has(m.key)}
                   onChange={() => toggleMetric(m.key)}
-                  className="rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                  className="rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
                 />
                 <span className="text-sm text-gray-700">{isDE ? m.labelDE : m.labelEN}</span>
               </label>
@@ -174,7 +174,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
                 type="checkbox"
                 checked={allExercises}
                 onChange={() => setAllExercises(!allExercises)}
-                className="rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                className="rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
               />
               <span className="text-sm font-medium text-gray-700">{isDE ? 'Alle \u00dcbungen' : 'All exercises'}</span>
             </label>
@@ -186,7 +186,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
                       type="checkbox"
                       checked={selectedExercises.has(name)}
                       onChange={() => toggleExercise(name)}
-                      className="rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                      className="rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
                     />
                     <span className="text-xs text-gray-600">{name}</span>
                   </label>
@@ -200,7 +200,7 @@ export function ExportDialog({ timeRange, workouts, onClose }: ExportDialogProps
         <button
           onClick={handleExport}
           disabled={selectedMetrics.size === 0 || exporting}
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
         >
           {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {exporting ? (isDE ? 'Wird erstellt...' : 'Generating...') : (isDE ? 'Exportieren' : 'Export')}

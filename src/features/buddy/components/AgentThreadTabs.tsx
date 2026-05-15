@@ -70,7 +70,7 @@ export function AgentThreadTabs({ activeThread, onSelectThread, threads, compact
 
             {/* Unread dot — only if thread has messages and is NOT active */}
             {!isActive && hasMessages && (
-              <span className="absolute top-1 right-0.5 w-1.5 h-1.5 bg-teal-500 rounded-full" />
+              <span className="absolute top-1 right-0.5 w-1.5 h-1.5 bg-theme-primary rounded-full" />
             )}
 
             {/* Active indicator — colored bottom border */}

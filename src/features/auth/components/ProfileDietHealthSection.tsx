@@ -113,7 +113,7 @@ export function ProfileDietHealthSection(props: ProfileDietHealthSectionProps) {
                   onClick={() => onDietaryPreferencesChange(toggleValue(dietaryPreferences, opt.value))}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     isSelected
-                      ? 'bg-teal-500 text-white'
+                      ? 'bg-theme-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >

@@ -25,7 +25,7 @@ export function SuggestionChips({ suggestions, onTap, disabled }: SuggestionChip
           key={s.id}
           onClick={() => onTap(s.message)}
           disabled={disabled}
-          className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 rounded-full border border-teal-200 hover:bg-teal-100 hover:border-teal-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+          className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-theme-surface-2 text-theme-primary rounded-full border border-theme-line hover:bg-theme-surface-2 hover:border-theme-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
         >
           {s.text}
         </button>

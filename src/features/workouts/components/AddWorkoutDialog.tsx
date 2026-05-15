@@ -165,7 +165,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
             {/* Custom exercise button */}
             <button
               onClick={handleAddCustom}
-              className="w-full flex items-center gap-2 px-3 py-2.5 mt-3 text-sm text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2.5 mt-3 text-sm text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
             >
               <Plus className="h-4 w-4" />
               {isDE ? 'Eigene Übung eingeben' : 'Enter Custom Exercise'}
@@ -192,7 +192,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto flex-1">
           {/* Buddy Hint */}
-          <p className="text-[11px] text-teal-600 bg-teal-50 rounded-lg px-3 py-2 text-center">
+          <p className="text-[11px] text-theme-primary bg-theme-surface-2 rounded-lg px-3 py-2 text-center">
             💡 {isDE
               ? 'Tipp: Sag dem Buddy einfach was du trainiert hast — er loggt es automatisch!'
               : 'Tip: Just tell the Buddy what you trained — it logs automatically!'}
@@ -207,7 +207,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
                 onClick={() => setType(wt.value)}
                 className={`py-2 px-2 rounded-lg text-xs font-medium transition-colors ${
                   type === wt.value
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -227,7 +227,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={type === 'strength' ? 'Push Day' : (type === 'cardio' ? 'Laufen' : 'Workout')}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               required
               autoFocus
             />
@@ -244,7 +244,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 placeholder="60"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="1"
               />
             </div>
@@ -257,7 +257,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
                 value={caloriesBurned}
                 onChange={(e) => setCaloriesBurned(e.target.value)}
                 placeholder={isDE ? 'optional' : 'optional'}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="0"
               />
             </div>
@@ -267,13 +267,13 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                <Dumbbell className="h-4 w-4 text-teal-500" />
+                <Dumbbell className="h-4 w-4 text-theme-primary" />
                 {t.workouts.exercises}
               </label>
               <button
                 type="button"
                 onClick={() => setShowPicker(true)}
-                className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium"
+                className="flex items-center gap-1 text-xs text-theme-primary hover:text-theme-primary font-medium"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {isDE ? 'Hinzufügen' : 'Add'}
@@ -296,7 +296,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
               <button
                 type="button"
                 onClick={() => setShowPicker(true)}
-                className="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:border-teal-300 hover:text-teal-500 transition-colors"
+                className="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:border-theme-primary hover:text-theme-primary transition-colors"
               >
                 {isDE ? 'Übungen aus Katalog wählen...' : 'Choose exercises from catalog...'}
               </button>
@@ -311,7 +311,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm resize-none"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm resize-none"
               rows={2}
               placeholder={isDE ? 'Optional...' : 'Optional...'}
             />
@@ -326,7 +326,7 @@ export function AddWorkoutDialog({ open, onClose, date }: AddWorkoutDialogProps)
           <button
             type="submit"
             disabled={addWorkout.isPending || !name}
-            className="w-full py-3 bg-teal-500 text-white font-medium rounded-xl hover:bg-teal-600 disabled:opacity-50 transition-colors"
+            className="w-full py-3 bg-theme-primary text-white font-medium rounded-xl hover:bg-theme-primary-2 disabled:opacity-50 transition-colors"
           >
             {addWorkout.isPending
               ? (isDE ? 'Speichere...' : 'Saving...')
@@ -369,7 +369,7 @@ function ExerciseRow({ exercise, isDE, onUpdate, onRemove }: ExerciseRowProps) {
             value={exercise.name}
             onChange={(e) => onUpdate(exercise._id, 'name', e.target.value)}
             placeholder={isDE ? 'Übungsname' : 'Exercise name'}
-            className="flex-1 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="flex-1 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-theme-primary"
           />
         )}
         <button
@@ -387,7 +387,7 @@ function ExerciseRow({ exercise, isDE, onUpdate, onRemove }: ExerciseRowProps) {
           {exercise.catalog!.primary_muscles.slice(0, 3).map((m) => (
             <span
               key={m}
-              className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium"
+              className="text-[10px] px-1.5 py-0.5 rounded-full bg-theme-surface-2 text-theme-primary font-medium"
             >
               {getMuscleName(m, lang)}
             </span>

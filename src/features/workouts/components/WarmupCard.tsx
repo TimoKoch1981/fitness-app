@@ -151,7 +151,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
                 onClick={() => setCardioType(ct.key)}
                 className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
                   cardioType === ct.key
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -173,7 +173,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
                 onClick={() => setDuration(d)}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
                   duration === d
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -188,7 +188,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
             max={60}
             value={duration}
             onChange={e => setDuration(Math.max(1, parseInt(e.target.value) || 1))}
-            className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
             placeholder={isDE ? 'Oder eigene Dauer...' : 'Or custom duration...'}
           />
         </div>
@@ -202,7 +202,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
             type="text"
             value={customDescription}
             onChange={e => setCustomDescription(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
             placeholder={isDE ? 'z.B. Leichtes Joggen, Zone 2' : 'e.g. Light jogging, Zone 2'}
           />
         </div>
@@ -228,7 +228,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
           </button>
           <button
             onClick={handleStart}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors font-medium"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 transition-colors font-medium"
           >
             <Play className="h-4 w-4" />
             {isDE ? 'Starten' : 'Start'}
@@ -261,7 +261,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
       <div className="text-center py-4">
         {/* Remaining time (countdown) */}
         <div className={`text-5xl font-bold font-mono tabular-nums ${
-          isComplete ? 'text-green-500' : isRunning ? 'text-teal-500' : 'text-gray-400'
+          isComplete ? 'text-green-500' : isRunning ? 'text-theme-primary' : 'text-gray-400'
         }`}>
           {isComplete ? '00:00' : formatTime(remainingSeconds)}
         </div>
@@ -276,7 +276,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
         <div className="mt-4 mx-auto max-w-xs h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ease-linear ${
-              isComplete ? 'bg-green-500' : 'bg-teal-500'
+              isComplete ? 'bg-green-500' : 'bg-theme-primary'
             }`}
             style={{ width: `${Math.min(100, progressPct)}%` }}
           />
@@ -309,7 +309,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm rounded-xl transition-colors font-medium ${
               isRunning
                 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                : 'bg-teal-500 text-white hover:bg-teal-600'
+                : 'bg-theme-primary text-white hover:bg-theme-primary-2'
             }`}
           >
             {isRunning ? (
@@ -332,7 +332,7 @@ export function WarmupCard({ weightKg, onSave, onSkip }: WarmupCardProps) {
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm rounded-xl transition-colors font-medium ${
             isComplete
               ? 'bg-green-500 text-white hover:bg-green-600'
-              : 'bg-teal-500/20 text-teal-700 hover:bg-teal-500/30'
+              : 'bg-theme-primary/20 text-theme-primary hover:bg-theme-primary/30'
           }`}
         >
           <CheckCircle2 className="h-4 w-4" />

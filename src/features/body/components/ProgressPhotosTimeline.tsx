@@ -163,7 +163,7 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
               <select
                 value={filterPose}
                 onChange={e => setFilterPose(e.target.value as Pose | 'all')}
-                className="appearance-none pl-3 pr-8 py-1.5 text-xs bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="appearance-none pl-3 pr-8 py-1.5 text-xs bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-theme-primary"
               >
                 <option value="all">{language === 'de' ? 'Alle Posen' : 'All Poses'}</option>
                 {POSES.map(pose => (
@@ -180,13 +180,13 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
             </span>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-teal-100 text-teal-600' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-theme-surface-2 text-theme-primary' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <Grid className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-teal-100 text-teal-600' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-theme-surface-2 text-theme-primary' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <List className="h-3.5 w-3.5" />
             </button>
@@ -298,7 +298,7 @@ export function ProgressPhotosTimeline({ onSelectForCompare }: Props) {
                               {onSelectForCompare && (
                                 <button
                                   onClick={() => onSelectForCompare(photo)}
-                                  className="mt-1 text-[10px] text-teal-600 hover:text-teal-700 font-medium"
+                                  className="mt-1 text-[10px] text-theme-primary hover:text-theme-primary font-medium"
                                 >
                                   {t.bodyScan?.compare ?? (language === 'de' ? 'Vergleichen' : 'Compare')}
                                 </button>

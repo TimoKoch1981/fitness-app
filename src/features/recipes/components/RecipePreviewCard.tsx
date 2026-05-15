@@ -82,7 +82,7 @@ export function RecipePreviewCard({ recipe, language }: RecipePreviewCardProps) 
               <span>⏱ {prepTime} min</span>
             )}
             {mealType && (
-              <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded">
+              <span className="px-1.5 py-0.5 bg-theme-surface-2 dark:bg-theme-surface-2 text-theme-primary dark:text-theme-primary rounded">
                 {mealType}
               </span>
             )}
@@ -132,7 +132,7 @@ export function RecipePreviewCard({ recipe, language }: RecipePreviewCardProps) 
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-teal-600 hover:underline"
+              className="flex items-center gap-1 text-xs text-theme-primary hover:underline"
             >
               <ExternalLink className="w-3 h-3" />
               {de ? 'Quelle oeffnen' : 'Open source'}

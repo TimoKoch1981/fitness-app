@@ -101,7 +101,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                       }}
                       className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
                         selectedId === sub.id
-                          ? isPed ? 'border-amber-500 bg-amber-50' : 'border-teal-500 bg-teal-50'
+                          ? isPed ? 'border-amber-500 bg-amber-50' : 'border-theme-primary bg-theme-surface-2'
                           : isPed ? 'border-amber-200 hover:border-amber-300' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -170,7 +170,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                   value={dosageTaken}
                   onChange={(e) => setDosageTaken(e.target.value)}
                   placeholder={selectedSubstance?.dosage ?? '250 mg'}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                         onClick={() => setSite(s)}
                         className={`py-1.5 px-2 rounded-lg text-xs transition-colors ${
                           site === s
-                            ? 'bg-teal-500 text-white'
+                            ? 'bg-theme-primary text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -207,7 +207,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm resize-none"
                   rows={2}
                 />
               </div>
@@ -221,7 +221,7 @@ export function LogSubstanceDialog({ open, onClose }: LogSubstanceDialogProps) {
               <button
                 type="submit"
                 disabled={logSubstance.isPending}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+                className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
               >
                 {logSubstance.isPending ? t.common.loading : t.common.save}
               </button>

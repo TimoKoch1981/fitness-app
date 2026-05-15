@@ -183,7 +183,7 @@ export function ExerciseTracker() {
             {catalogEntry && !hasVideo && (
               <button
                 onClick={() => setShowVideo(true)}
-                className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
+                className="p-1.5 text-gray-400 hover:text-theme-primary transition-colors"
               >
                 <Info className="h-5 w-5" />
               </button>
@@ -249,7 +249,7 @@ export function ExerciseTracker() {
               <span>{Math.round(exercise.duration_minutes * 60)}s</span>
             )}
             {catalogEntry?.breathing_cue && (
-              <span className="text-teal-400">{isDE ? catalogEntry.breathing_cue.de : catalogEntry.breathing_cue.en}</span>
+              <span className="text-theme-primary">{isDE ? catalogEntry.breathing_cue.de : catalogEntry.breathing_cue.en}</span>
             )}
           </div>
         ) : isTaiChi ? (
@@ -268,13 +268,13 @@ export function ExerciseTracker() {
 
         {/* AI Rest Time Suggestion Badge */}
         {!isTimedExercise && (
-          <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-teal-50 border border-teal-100 rounded-lg">
-            <Clock className="h-3.5 w-3.5 text-teal-500 flex-shrink-0" />
+          <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-theme-surface-2 border border-theme-line rounded-lg">
+            <Clock className="h-3.5 w-3.5 text-theme-primary flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="text-xs font-medium text-teal-700">
+              <span className="text-xs font-medium text-theme-primary">
                 {isDE ? 'Empfohlene Pause' : 'Suggested Rest'}: {effectiveRestSeconds}s
               </span>
-              <p className="text-[10px] text-teal-500 leading-tight mt-0.5 truncate">
+              <p className="text-[10px] text-theme-primary leading-tight mt-0.5 truncate">
                 {isDE ? restSuggestion.reason : restSuggestion.reasonEN}
               </p>
             </div>
@@ -287,7 +287,7 @@ export function ExerciseTracker() {
       {!isTimedExercise && !state.setReady && !allSetsComplete && (
         <button
           onClick={markSetReady}
-          className="w-full flex items-center justify-center gap-3 py-4 bg-teal-500 text-white rounded-xl shadow-md hover:bg-teal-600 active:bg-teal-700 transition-colors font-semibold text-base"
+          className="w-full flex items-center justify-center gap-3 py-4 bg-theme-primary text-white rounded-xl shadow-md hover:bg-theme-primary-2 active:bg-theme-primary-2 transition-colors font-semibold text-base"
         >
           <Play className="h-5 w-5" />
           {isDE
@@ -345,7 +345,7 @@ export function ExerciseTracker() {
           )}
           <button
             onClick={nextExercise}
-            className="flex-1 flex items-center justify-center gap-1 py-2.5 text-sm text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors font-medium"
+            className="flex-1 flex items-center justify-center gap-1 py-2.5 text-sm text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 transition-colors font-medium"
           >
             {state.currentExerciseIndex < state.exercises.length - 1
               ? (isDE ? 'Nächste Übung' : 'Next Exercise')
@@ -363,11 +363,11 @@ export function ExerciseTracker() {
             onClick={() => goToExercise(i)}
             className={`w-2 h-2 rounded-full transition-colors ${
               i === state.currentExerciseIndex
-                ? 'bg-teal-500 w-4'
+                ? 'bg-theme-primary w-4'
                 : ex.skipped
                   ? 'bg-gray-300'
                   : ex.sets.every(s => s.completed || s.skipped)
-                    ? 'bg-teal-400'
+                    ? 'bg-theme-primary'
                     : 'bg-gray-200'
             }`}
           />

@@ -85,7 +85,7 @@ export function TrainingPage() {
       actions={
         <button
           onClick={() => setShowStartDialog(true)}
-          className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+          className="p-2 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -100,7 +100,7 @@ export function TrainingPage() {
               <PhaseProgressBar onClick={() => setShowPhaseWizard(true)} />
               <button
                 onClick={() => setShowCyclePlanner(true)}
-                className="w-full py-2 text-xs text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors font-medium"
+                className="w-full py-2 text-xs text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors font-medium"
               >
                 {language === 'de' ? '🔄 Phasen-Zyklus planen' : '🔄 Plan Phase Cycle'}
               </button>

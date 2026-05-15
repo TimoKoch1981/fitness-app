@@ -52,7 +52,7 @@ export function BalanceSummaryCard({ data, language = 'de' }: BalanceSummaryCard
         {/* Intake */}
         <div className="flex justify-between items-center">
           <span className="text-gray-500">{labels.intake}</span>
-          <span className="font-medium text-teal-600">
+          <span className="font-medium text-theme-primary">
             {totalIntake.toLocaleString('de-DE')} kcal
           </span>
         </div>

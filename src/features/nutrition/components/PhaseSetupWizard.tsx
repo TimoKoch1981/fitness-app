@@ -104,7 +104,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between rounded-t-2xl z-10">
           <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-teal-600" />
+            <Target className="h-5 w-5 text-theme-primary" />
             <h2 className="font-bold text-gray-900">
               {de ? 'Phase einrichten' : 'Setup Phase'}
             </h2>
@@ -117,7 +117,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
         {/* Step indicator */}
         <div className="px-4 pt-3 flex items-center gap-2">
           {[1, 2, 3].map((s) => (
-            <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-teal-500' : 'bg-gray-200'}`} />
+            <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-theme-primary' : 'bg-gray-200'}`} />
           ))}
         </div>
 
@@ -138,7 +138,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
                     }}
                     className={`w-full text-left p-3 rounded-xl border-2 transition-colors ${
                       selectedPhase === p.value
-                        ? 'border-teal-500 bg-teal-50'
+                        ? 'border-theme-primary bg-theme-surface-2'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -149,7 +149,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
                         <div className="text-xs text-gray-500 mt-0.5">{de ? p.descDe : p.descEn}</div>
                       </div>
                       {selectedPhase === p.value && (
-                        <div className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-5 h-5 bg-theme-primary rounded-full flex items-center justify-center flex-shrink-0">
                           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
@@ -161,7 +161,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
               </div>
               <button
                 onClick={() => setStep(2)}
-                className="w-full mt-4 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 transition-colors flex items-center justify-center gap-2"
               >
                 {de ? 'Weiter' : 'Next'}
                 <ChevronRight className="h-4 w-4" />
@@ -173,7 +173,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
           {step === 2 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-4 w-4 text-teal-600" />
+                <Calendar className="h-4 w-4 text-theme-primary" />
                 <p className="text-sm text-gray-600">
                   {de ? 'Geplante Dauer:' : 'Planned duration:'}
                 </p>
@@ -188,7 +188,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
                       onClick={() => setTargetWeeks(weeks)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         targetWeeks === weeks
-                          ? 'bg-teal-500 text-white'
+                          ? 'bg-theme-primary text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -267,7 +267,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
                 </button>
                 <button
                   onClick={() => setStep(3)}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 transition-colors flex items-center justify-center gap-2"
                 >
                   {de ? 'Weiter' : 'Next'}
                   <ChevronRight className="h-4 w-4" />
@@ -279,8 +279,8 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
           {/* Step 3: Confirm & Save */}
           {step === 3 && (
             <div>
-              <div className="bg-teal-50 rounded-xl p-4 mb-4">
-                <h3 className="font-semibold text-teal-900 mb-2">
+              <div className="bg-theme-surface-2 rounded-xl p-4 mb-4">
+                <h3 className="font-semibold text-theme-ink mb-2">
                   {de ? 'Zusammenfassung' : 'Summary'}
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -335,7 +335,7 @@ export function PhaseSetupWizard({ open, onClose }: PhaseSetupWizardProps) {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
                 >
                   {saving
                     ? (de ? 'Speichern...' : 'Saving...')

@@ -30,9 +30,9 @@ interface VariantConfig {
 export const BUDDY_VARIANTS: Record<BuddyAvatarStyle, VariantConfig> = {
   coach: {
     initials: 'C',
-    gradient: 'from-teal-500 to-emerald-600',
-    ring: 'ring-teal-400',
-    pingColor: 'bg-teal-400',
+    gradient: 'bg-theme-primary',
+    ring: 'ring-theme-primary',
+    pingColor: 'bg-theme-primary',
     label: { de: 'Coach', en: 'Coach' },
     description: { de: 'Freundlich & motivierend', en: 'Friendly & motivating' },
   },

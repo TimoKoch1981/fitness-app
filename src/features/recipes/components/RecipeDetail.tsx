@@ -72,8 +72,8 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
           {recipe.image_url ? (
             <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center">
-              <ImageIcon className="h-16 w-16 text-teal-300" />
+            <div className="w-full h-full bg-gradient-to-br bg-theme-surface-2 flex items-center justify-center">
+              <ImageIcon className="h-16 w-16 text-theme-ink-3" />
             </div>
           )}
           <button
@@ -124,7 +124,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
               {allTags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs rounded-full"
+                  className="px-2 py-0.5 bg-theme-surface-2 text-theme-primary text-xs rounded-full"
                 >
                   {tag}
                 </span>
@@ -149,7 +149,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
               href={recipe.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-teal-600 hover:underline px-1"
+              className="flex items-center gap-1.5 text-xs text-theme-primary hover:underline px-1"
             >
               <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
               {new URL(recipe.source_url).hostname.replace('www.', '')}
@@ -168,7 +168,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
                 <p className="text-[10px] text-gray-400">kcal</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-teal-600">{recipe.protein_per_serving}g</p>
+                <p className="text-lg font-bold text-theme-primary">{recipe.protein_per_serving}g</p>
                 <p className="text-[10px] text-gray-400">{t.recipes.protein}</p>
               </div>
               <div>
@@ -229,7 +229,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                       pantryMatch
                         ? isMissing ? 'bg-red-400' : 'bg-green-400'
-                        : 'bg-teal-400'
+                        : 'bg-theme-primary'
                     }`} />
                     <span className={isMissing ? 'text-red-600' : 'text-gray-900'}>
                       <span className="font-medium">{scaledAmount} {ing.unit}</span>{' '}
@@ -270,7 +270,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
                   ))}
                   {onAddToShoppingList && (
                     <button
-                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 bg-teal-50 text-teal-700 text-sm font-medium rounded-lg hover:bg-teal-100 transition-colors"
+                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 bg-theme-surface-2 text-theme-primary text-sm font-medium rounded-lg hover:bg-theme-surface-2 transition-colors"
                       onClick={() => onAddToShoppingList(recipe)}
                     >
                       <ShoppingCart className="h-4 w-4" />
@@ -310,13 +310,13 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, onToggleFavori
               <ol className="space-y-2.5">
                 {recipe.steps.map((step, i) => (
                   <li key={i} className="flex gap-3 text-sm">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 text-teal-700 text-xs font-bold flex items-center justify-center mt-0.5">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-theme-surface-2 text-theme-primary text-xs font-bold flex items-center justify-center mt-0.5">
                       {i + 1}
                     </span>
                     <div className="flex-1">
                       <span className="text-gray-700">{step.text}</span>
                       {step.duration_min && (
-                        <span className="ml-2 inline-flex items-center gap-0.5 text-xs text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full">
+                        <span className="ml-2 inline-flex items-center gap-0.5 text-xs text-theme-primary bg-theme-surface-2 px-1.5 py-0.5 rounded-full">
                           <Clock className="h-3 w-3" />
                           {step.duration_min} min
                         </span>

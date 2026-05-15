@@ -63,9 +63,9 @@ export function WorkoutStartDialog({ open, onClose, onQuickLog, onCreatePlan }: 
           {/* Primary: Start Free Workout */}
           <button
             onClick={handleFreeWorkout}
-            className="w-full flex items-center gap-4 p-4 bg-teal-50 border-2 border-teal-200 rounded-xl hover:bg-teal-100 hover:border-teal-300 transition-colors text-left group"
+            className="w-full flex items-center gap-4 p-4 bg-theme-surface-2 border-2 border-theme-line rounded-xl hover:bg-theme-surface-2 hover:border-theme-primary transition-colors text-left group"
           >
-            <div className="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-theme-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
               <Play className="h-6 w-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">

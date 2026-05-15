@@ -104,7 +104,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-700">
         <div className="flex items-center gap-2">
-          <Music className="h-4 w-4 text-teal-400" />
+          <Music className="h-4 w-4 text-theme-primary" />
           <span className="text-sm font-medium">{t.workout.musicWorkout}</span>
         </div>
         <button
@@ -154,7 +154,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
             placeholder="https://…"
             className={cn(
               'flex-1 px-3 py-1.5 bg-gray-700 border rounded-lg text-xs text-white placeholder-gray-400 focus:outline-none focus:ring-1',
-              urlError ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-teal-500',
+              urlError ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-theme-primary',
             )}
             aria-invalid={urlError}
           />
@@ -162,7 +162,7 @@ export function WorkoutMusicPlayer({ className }: WorkoutMusicPlayerProps) {
             type="button"
             onClick={handlePlayCustom}
             disabled={!customUrl.trim()}
-            className="flex items-center gap-1 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-theme-primary text-white rounded-lg text-xs font-medium hover:bg-theme-primary-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ExternalLink className="h-3 w-3" />
             {isDE ? 'Oeffnen' : 'Open'}

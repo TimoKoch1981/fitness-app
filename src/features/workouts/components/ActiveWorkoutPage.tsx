@@ -383,7 +383,7 @@ export function ActiveWorkoutPage() {
           </p>
           <button
             onClick={() => navigate('/training')}
-            className="px-6 py-2.5 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors"
+            className="px-6 py-2.5 bg-theme-primary text-white rounded-xl font-medium hover:bg-theme-primary-2 transition-colors"
           >
             {isDE ? 'Zurück zum Training' : 'Back to Training'}
           </button>
@@ -393,7 +393,7 @@ export function ActiveWorkoutPage() {
 
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary" />
       </div>
     );
   }
@@ -424,7 +424,7 @@ export function ActiveWorkoutPage() {
               {/* Mode Toggle */}
               <button
                 onClick={toggleMode}
-                className="p-1.5 text-gray-400 hover:text-teal-500 transition-colors"
+                className="p-1.5 text-gray-400 hover:text-theme-primary transition-colors"
                 title={state.mode === 'set-by-set'
                   ? (isDE ? 'Übungsansicht' : 'Exercise View')
                   : (isDE ? 'Satz-für-Satz' : 'Set by Set')}
@@ -439,7 +439,7 @@ export function ActiveWorkoutPage() {
           {/* Progress Bar */}
           <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-teal-500 rounded-full transition-all duration-500"
+              className="h-full bg-theme-primary rounded-full transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -474,13 +474,13 @@ export function ActiveWorkoutPage() {
         {state.phase === 'exercise' && state.setReady && setTimerRunning && (
           <div className="bg-gray-800 rounded-2xl p-4 mb-4 text-center shadow-lg">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <TimerIcon className="h-4 w-4 text-teal-400" />
+              <TimerIcon className="h-4 w-4 text-theme-primary" />
               <span className="text-xs uppercase tracking-wider text-gray-400 font-medium">
                 {isDE ? `Satz ${state.currentSetIndex + 1} läuft` : `Set ${state.currentSetIndex + 1} active`}
               </span>
-              <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-theme-primary animate-pulse" />
             </div>
-            <div className="text-4xl font-bold font-mono tabular-nums text-teal-400">
+            <div className="text-4xl font-bold font-mono tabular-nums text-theme-primary">
               {setTimerStr}
             </div>
           </div>
@@ -488,8 +488,8 @@ export function ActiveWorkoutPage() {
 
         {state.phase === 'exercise' && state.exercises.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center">
-              <Dumbbell className="h-8 w-8 text-teal-400" />
+            <div className="w-16 h-16 bg-theme-surface-2 rounded-full flex items-center justify-center">
+              <Dumbbell className="h-8 w-8 text-theme-primary" />
             </div>
             <div className="text-center">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -503,7 +503,7 @@ export function ActiveWorkoutPage() {
             </div>
             <button
               onClick={() => setShowAddExercise(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors shadow-md"
+              className="flex items-center gap-2 px-6 py-3 bg-theme-primary text-white rounded-xl font-medium hover:bg-theme-primary-2 transition-colors shadow-md"
             >
               <Plus className="h-5 w-5" />
               {isDE ? 'Übung hinzufügen' : 'Add Exercise'}
@@ -524,14 +524,14 @@ export function ActiveWorkoutPage() {
               </p>
 
               {/* Large countdown display */}
-              <div className="text-5xl font-bold font-mono tabular-nums text-teal-400 mb-4">
+              <div className="text-5xl font-bold font-mono tabular-nums text-theme-primary mb-4">
                 {restStr}
               </div>
 
               {/* Progress bar */}
               <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden mb-5">
                 <div
-                  className="h-full bg-teal-500 rounded-full transition-all duration-1000 ease-linear"
+                  className="h-full bg-theme-primary rounded-full transition-all duration-1000 ease-linear"
                   style={{ width: `${Math.min(100, restProgress)}%` }}
                 />
               </div>
@@ -539,7 +539,7 @@ export function ActiveWorkoutPage() {
               {/* Skip button */}
               <button
                 onClick={handleSkipRest}
-                className="flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-teal-500/20 text-teal-400 rounded-lg hover:bg-teal-500/30 transition-colors text-sm font-medium"
+                className="flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-theme-primary/20 text-theme-primary rounded-lg hover:bg-theme-primary/30 transition-colors text-sm font-medium"
               >
                 <SkipForward className="h-4 w-4" />
                 {isDE ? 'Überspringen' : 'Skip'}
@@ -571,7 +571,7 @@ export function ActiveWorkoutPage() {
         <div className="fixed bottom-[10.5rem] left-4 z-20">
           <button
             onClick={() => setShowAddExercise(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-teal-500 text-white rounded-full font-medium shadow-lg hover:bg-teal-600 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-theme-primary text-white rounded-full font-medium shadow-lg hover:bg-theme-primary-2 transition-colors text-sm"
           >
             <Plus className="h-4 w-4" />
             {isDE ? 'Übung' : 'Exercise'}
@@ -663,7 +663,7 @@ export function ActiveWorkoutPage() {
                   setShowFinishDialog(false);
                   finishSession();
                 }}
-                className="w-full py-3 text-sm font-semibold bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors shadow-sm"
+                className="w-full py-3 text-sm font-semibold bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors shadow-sm"
               >
                 <CheckCircle2 className="h-4 w-4 inline mr-2" />
                 {isDE ? 'Mit Speichern beenden' : 'Finish & Save'}
@@ -682,7 +682,7 @@ export function ActiveWorkoutPage() {
               {/* Cancel: Continue workout */}
               <button
                 onClick={() => setShowFinishDialog(false)}
-                className="w-full py-2 text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                className="w-full py-2 text-xs font-medium text-theme-primary hover:text-theme-primary transition-colors"
               >
                 {isDE ? 'Weitermachen' : 'Continue Workout'}
               </button>

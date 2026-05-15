@@ -62,7 +62,7 @@ export function ProgressDashboard() {
             onClick={() => setCategory(c.key)}
             className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
               category === c.key
-                ? 'bg-teal-500 text-white'
+                ? 'bg-theme-primary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -72,7 +72,7 @@ export function ProgressDashboard() {
         <div className="flex-1" />
         <button
           onClick={() => setShowExport(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-600 bg-teal-50 rounded-full hover:bg-teal-100 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-theme-primary bg-theme-surface-2 rounded-full hover:bg-theme-surface-2 transition-colors"
         >
           <Download className="h-3.5 w-3.5" />
           Export

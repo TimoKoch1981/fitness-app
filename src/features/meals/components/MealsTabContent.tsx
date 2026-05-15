@@ -319,7 +319,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
             <p className="text-[10px] text-gray-400">{t.meals.calories}</p>
           </div>
           <div>
-            <p className="text-lg font-bold text-teal-600">{totals.protein.toFixed(0)}</p>
+            <p className="text-lg font-bold text-theme-primary">{totals.protein.toFixed(0)}</p>
             <p className="text-[10px] text-gray-400">{t.meals.protein}</p>
           </div>
           <div>
@@ -385,7 +385,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           {/* Intake */}
           <div className="flex justify-between items-center text-xs mb-1">
             <span className="text-gray-500">{language === 'de' ? 'Aufnahme' : 'Intake'}</span>
-            <span className="font-semibold text-emerald-600">+{totals.calories} kcal</span>
+            <span className="font-semibold text-theme-success">+{totals.calories} kcal</span>
           </div>
 
           {/* Expenditure total */}
@@ -429,7 +429,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
               {/* Protein */}
               <div>
                 <div className="flex justify-between items-center text-xs mb-0.5">
-                  <span className="text-teal-600 font-medium">{t.meals.protein}</span>
+                  <span className="text-theme-primary font-medium">{t.meals.protein}</span>
                   <span className="text-gray-700 font-semibold">
                     {Math.round(totals.protein)}g
                     {energyBalance.proteinGoal > 0 && (
@@ -440,7 +440,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
                 {energyBalance.proteinGoal > 0 && (
                   <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-teal-500 rounded-full transition-all"
+                      className="h-full bg-theme-primary rounded-full transition-all"
                       style={{ width: `${Math.min(100, (totals.protein / energyBalance.proteinGoal) * 100)}%` }}
                     />
                   </div>
@@ -541,7 +541,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
             </p>
             <button
               onClick={() => setShowPhaseWizard(true)}
-              className="text-[10px] text-teal-500 hover:text-teal-600 font-medium"
+              className="text-[10px] text-theme-primary hover:text-theme-primary font-medium"
             >
               {language === 'de' ? 'Phase ändern' : 'Change Phase'}
             </button>
@@ -551,9 +551,9 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
               <p className="text-sm font-bold text-gray-900">{phaseMacros.calories}</p>
               <p className="text-[9px] text-gray-500">kcal</p>
             </div>
-            <div className="bg-teal-50 rounded-lg py-1.5">
-              <p className="text-sm font-bold text-teal-700">{phaseMacros.protein}g</p>
-              <p className="text-[9px] text-teal-600">Protein</p>
+            <div className="bg-theme-surface-2 rounded-lg py-1.5">
+              <p className="text-sm font-bold text-theme-primary">{phaseMacros.protein}g</p>
+              <p className="text-[9px] text-theme-primary">Protein</p>
             </div>
             <div className="bg-blue-50 rounded-lg py-1.5">
               <p className="text-sm font-bold text-blue-700">{phaseMacros.carbs}g</p>
@@ -656,7 +656,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           ))}
           <button
             onClick={() => setShowPhaseWizard(true)}
-            className="mt-1.5 text-[10px] text-teal-600 hover:text-teal-700 font-medium"
+            className="mt-1.5 text-[10px] text-theme-primary hover:text-theme-primary font-medium"
           >
             {language === 'de' ? 'Phase aendern →' : 'Change phase →'}
           </button>
@@ -701,12 +701,12 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           <button
             onClick={handleCopyYesterday}
             disabled={copyMeals.isPending}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-teal-600 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-theme-primary transition-colors disabled:opacity-50"
           >
             {copyMeals.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : copySuccess ? (
-              <Check className="h-4 w-4 text-teal-500" />
+              <Check className="h-4 w-4 text-theme-primary" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
@@ -723,7 +723,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
       {/* Meals List */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
         </div>
       ) : meals && meals.length > 0 ? (
         <div className="space-y-4">
@@ -748,7 +748,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           {isToday && (
             <button
               onClick={onOpenAddDialog}
-              className="w-full py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium text-teal-600 hover:bg-teal-50 transition-colors border border-teal-100"
+              className="w-full py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium text-theme-primary hover:bg-theme-surface-2 transition-colors border border-theme-line"
             >
               + {t.meals.addMeal}
             </button>
@@ -763,7 +763,7 @@ export function MealsTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDial
           {isToday && (
             <button
               onClick={onOpenAddDialog}
-              className="mt-3 px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+              className="mt-3 px-4 py-2 bg-theme-primary text-white text-sm rounded-lg hover:bg-theme-primary-2 transition-colors"
             >
               {t.meals.addMeal}
             </button>

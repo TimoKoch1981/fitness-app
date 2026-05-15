@@ -117,8 +117,8 @@ export function ReviewDialog({ plan, recentWorkouts, onClose }: ReviewDialogProp
         {/* Applied Success */}
         {applied && (
           <div className="p-6 text-center">
-            <CheckCircle className="h-12 w-12 text-teal-500 mx-auto mb-3" />
-            <p className="text-sm font-medium text-teal-700">
+            <CheckCircle className="h-12 w-12 text-theme-primary mx-auto mb-3" />
+            <p className="text-sm font-medium text-theme-primary">
               {isDE ? 'Änderungen angewendet!' : 'Changes applied!'}
             </p>
           </div>
@@ -222,7 +222,7 @@ export function ReviewDialog({ plan, recentWorkouts, onClose }: ReviewDialogProp
               <button
                 onClick={handleAccept}
                 disabled={applyChanges.isPending}
-                className="w-full py-2.5 bg-teal-500 text-white text-sm font-medium rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50"
+                className="w-full py-2.5 bg-theme-primary text-white text-sm font-medium rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50"
               >
                 {applyChanges.isPending
                   ? '...'
@@ -277,7 +277,7 @@ function getRecommendationLabel(rec: ReviewRecommendation, isDE: boolean): strin
 
 function getRecommendationIcon(rec: ReviewRecommendation) {
   switch (rec) {
-    case 'continue': return <TrendingUp className="h-4 w-4 text-teal-500" />;
+    case 'continue': return <TrendingUp className="h-4 w-4 text-theme-primary" />;
     case 'deload': return <TrendingDown className="h-4 w-4 text-blue-500" />;
     case 'swap': return <RefreshCw className="h-4 w-4 text-amber-500" />;
     case 'overhaul': return <AlertTriangle className="h-4 w-4 text-red-500" />;
@@ -286,7 +286,7 @@ function getRecommendationIcon(rec: ReviewRecommendation) {
 
 function getRecommendationColor(rec: ReviewRecommendation): string {
   switch (rec) {
-    case 'continue': return 'border-teal-200 bg-teal-50 text-teal-800';
+    case 'continue': return 'border-theme-line bg-theme-surface-2 text-theme-ink';
     case 'deload': return 'border-blue-200 bg-blue-50 text-blue-800';
     case 'swap': return 'border-amber-200 bg-amber-50 text-amber-800';
     case 'overhaul': return 'border-red-200 bg-red-50 text-red-800';

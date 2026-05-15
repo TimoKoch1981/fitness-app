@@ -24,7 +24,7 @@ interface PowerModeSetupWizardProps {
 }
 
 const PHASES: { value: TrainingPhase; de: string; en: string; icon: typeof TrendingUp; iconColor: string; descDe: string; descEn: string }[] = [
-  { value: 'bulk', de: 'Aufbauphase', en: 'Bulk Phase', icon: TrendingUp, iconColor: 'text-emerald-500', descDe: 'Muskelmasse aufbauen mit kalorischem Überschuss (+300-500 kcal)', descEn: 'Build muscle with caloric surplus (+300-500 kcal)' },
+  { value: 'bulk', de: 'Aufbauphase', en: 'Bulk Phase', icon: TrendingUp, iconColor: 'text-theme-success', descDe: 'Muskelmasse aufbauen mit kalorischem Überschuss (+300-500 kcal)', descEn: 'Build muscle with caloric surplus (+300-500 kcal)' },
   { value: 'cut', de: 'Definitionsphase', en: 'Cut Phase', icon: TrendingDown, iconColor: 'text-red-500', descDe: 'Körperfett reduzieren bei maximalem Muskelerhalt (-500 kcal)', descEn: 'Reduce body fat while maximizing muscle retention (-500 kcal)' },
   { value: 'maintenance', de: 'Erhaltung', en: 'Maintenance', icon: Minus, iconColor: 'text-blue-500', descDe: 'Gewicht und Körperkomposition halten', descEn: 'Maintain weight and body composition' },
   { value: 'reverse_diet', de: 'Reverse Diet', en: 'Reverse Diet', icon: RotateCcw, iconColor: 'text-purple-500', descDe: 'Kalorien nach Diät langsam steigern (+100 kcal/Woche)', descEn: 'Slowly increase calories after diet (+100 kcal/week)' },
@@ -217,7 +217,7 @@ export function PowerModeSetupWizard({ open, onClose, mode }: PowerModeSetupWiza
           {step === 2 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-4 w-4 text-teal-600" />
+                <Calendar className="h-4 w-4 text-theme-primary" />
                 <p className="text-sm font-medium text-gray-700">
                   {de ? 'Geplante Dauer:' : 'Planned duration:'}
                 </p>
@@ -282,7 +282,7 @@ export function PowerModeSetupWizard({ open, onClose, mode }: PowerModeSetupWiza
           {step === 3 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Target className="h-4 w-4 text-teal-600" />
+                <Target className="h-4 w-4 text-theme-primary" />
                 <p className="text-sm font-medium text-gray-700">
                   {de ? 'Ernährungsziele' : 'Nutrition Targets'}
                 </p>
@@ -327,12 +327,12 @@ export function PowerModeSetupWizard({ open, onClose, mode }: PowerModeSetupWiza
                   </div>
 
                   {/* Apply macros toggle */}
-                  <label className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl cursor-pointer mb-4">
+                  <label className="flex items-center gap-3 p-3 bg-theme-surface-2 rounded-xl cursor-pointer mb-4">
                     <input
                       type="checkbox"
                       checked={applyMacros}
                       onChange={(e) => setApplyMacros(e.target.checked)}
-                      className="rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                      className="rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
                     />
                     <div>
                       <p className="text-sm font-medium text-gray-900">
@@ -391,7 +391,7 @@ export function PowerModeSetupWizard({ open, onClose, mode }: PowerModeSetupWiza
               {/* Training recommendations based on phase */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Dumbbell className="h-4 w-4 text-teal-600" />
+                  <Dumbbell className="h-4 w-4 text-theme-primary" />
                   <p className="text-sm font-medium text-gray-700">
                     {de ? 'Training-Empfehlung' : 'Training Recommendation'}
                   </p>
@@ -441,8 +441,8 @@ export function PowerModeSetupWizard({ open, onClose, mode }: PowerModeSetupWiza
               </div>
 
               {/* Features that are now active */}
-              <div className="bg-teal-50 rounded-xl p-4 mb-4">
-                <p className="text-xs font-medium text-teal-800 mb-2">
+              <div className="bg-theme-surface-2 rounded-xl p-4 mb-4">
+                <p className="text-xs font-medium text-theme-ink mb-2">
                   {de ? 'Jetzt freigeschaltet:' : 'Now unlocked:'}
                 </p>
                 <div className="space-y-1.5">
@@ -534,8 +534,8 @@ function TrainingHint({ emoji, de: deTxt, en: enTxt, isDE }: { emoji: string; de
 function FeatureItem({ de: deTxt, en: enTxt, isDE }: { de: string; en: string; isDE: boolean }) {
   return (
     <div className="flex items-center gap-2">
-      <Check className="h-3 w-3 text-teal-500 flex-shrink-0" />
-      <span className="text-xs text-teal-700">{isDE ? deTxt : enTxt}</span>
+      <Check className="h-3 w-3 text-theme-primary flex-shrink-0" />
+      <span className="text-xs text-theme-primary">{isDE ? deTxt : enTxt}</span>
     </div>
   );
 }

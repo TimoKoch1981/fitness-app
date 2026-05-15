@@ -208,7 +208,7 @@ export function ExercisePicker({
         <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium ${
           isYogaDay ? 'bg-purple-50 text-purple-700' :
           isTaiChiDay ? 'bg-amber-50 text-amber-700' :
-          'bg-teal-50 text-teal-700'
+          'bg-theme-surface-2 text-theme-primary'
         }`}>
           <span className="text-base">
             {isYogaDay ? '🧘' : isTaiChiDay ? '🥋' : '🌀'}
@@ -240,7 +240,7 @@ export function ExercisePicker({
               isTaiChiDay ? (isDE ? 'Tai Chi Bewegung suchen...' : 'Search tai chi movement...') :
               (isDE ? 'Übung suchen...' : 'Search exercise...')
             }
-            className="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
             autoFocus
           />
           {search && (
@@ -263,7 +263,7 @@ export function ExercisePicker({
               onClick={() => setSelectedCategory(key)}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedCategory === key
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-theme-primary text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -294,7 +294,7 @@ export function ExercisePicker({
                 flexSubFilter === opt.key
                   ? opt.key === 'yoga' ? 'bg-purple-500 text-white'
                     : opt.key === 'tai_chi' ? 'bg-amber-500 text-white'
-                    : opt.key === 'five_tibetans' ? 'bg-teal-500 text-white'
+                    : opt.key === 'five_tibetans' ? 'bg-theme-primary text-white'
                     : 'bg-gray-700 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
@@ -361,7 +361,7 @@ export function ExercisePicker({
               onClick={() => setSelectedRegion(selectedRegion === region ? null : region)}
               className={`px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedRegion === region
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-theme-primary text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -379,7 +379,7 @@ export function ExercisePicker({
           </span>
           <button
             onClick={clearFilters}
-            className="text-xs text-teal-500 hover:text-teal-600"
+            className="text-xs text-theme-primary hover:text-theme-primary"
           >
             {isDE ? 'Filter zurücksetzen' : 'Clear filters'}
           </button>
@@ -403,7 +403,7 @@ export function ExercisePicker({
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-2 text-xs text-teal-500 hover:text-teal-600"
+                className="mt-2 text-xs text-theme-primary hover:text-theme-primary"
               >
                 {isDE ? 'Filter zurücksetzen' : 'Clear filters'}
               </button>
@@ -432,7 +432,7 @@ export function ExercisePicker({
       {multiSelect && selected.size > 0 && (
         <button
           onClick={handleConfirmMulti}
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-semibold shadow-md"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-semibold shadow-md"
         >
           <Plus className="h-4 w-4" />
           {selected.size} {isDE ? 'Übungen hinzufügen' : selected.size === 1 ? 'exercise' : 'exercises'}
@@ -481,7 +481,7 @@ function ExerciseCard({ exercise, isDE, isFav, isSelected, multiSelect, isMindBo
       onClick={() => onSelect(exercise)}
       className={`w-full flex items-center gap-2 px-3 py-2.5 text-left rounded-lg transition-colors group ${
         isSelected
-          ? 'bg-teal-50 border border-teal-200'
+          ? 'bg-theme-surface-2 border border-theme-line'
           : 'hover:bg-gray-50'
       }`}
     >
@@ -489,7 +489,7 @@ function ExerciseCard({ exercise, isDE, isFav, isSelected, multiSelect, isMindBo
       {multiSelect ? (
         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
           isSelected
-            ? 'bg-teal-500 border-teal-500'
+            ? 'bg-theme-primary border-theme-primary'
             : 'border-gray-300 group-hover:border-gray-400'
         }`}>
           {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
@@ -525,7 +525,7 @@ function ExerciseCard({ exercise, isDE, isFav, isSelected, multiSelect, isMindBo
           </span>
         )}
         {!isMindBodyDay && exercise.is_compound && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-600 font-medium">
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-theme-surface-2 text-theme-primary font-medium">
             Compound
           </span>
         )}

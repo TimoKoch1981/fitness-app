@@ -219,7 +219,7 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-          <ScanBarcode className="h-4 w-4 text-teal-600" />
+          <ScanBarcode className="h-4 w-4 text-theme-primary" />
           {meals.barcodeScan || 'Barcode scannen'}
         </h3>
         <button
@@ -243,7 +243,7 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
           <button
             type="button"
             onClick={startScanning}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 border border-teal-200 rounded-xl text-teal-700 text-sm font-medium hover:bg-teal-100 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-theme-surface-2 border border-theme-line rounded-xl text-theme-primary text-sm font-medium hover:bg-theme-surface-2 transition-colors"
           >
             <ScanBarcode className="h-5 w-5" />
             {meals.barcodeStartScan || (language === 'de' ? 'Scanner starten' : 'Start Scanner')}
@@ -271,8 +271,8 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
       {/* State: Loading — Spinner */}
       {state === 'loading' && (
         <div className="flex flex-col items-center gap-3 py-6">
-          <div className="bg-teal-50 rounded-full p-3">
-            <Loader2 className="h-8 w-8 text-teal-600 animate-spin" />
+          <div className="bg-theme-surface-2 rounded-full p-3">
+            <Loader2 className="h-8 w-8 text-theme-primary animate-spin" />
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">
@@ -288,7 +288,7 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
       {state === 'result' && product && (
         <div className="space-y-3">
           {/* Product image + name */}
-          <div className="flex gap-3 bg-teal-50 rounded-lg p-3">
+          <div className="flex gap-3 bg-theme-surface-2 rounded-lg p-3">
             {product.image_url && (
               <img
                 src={product.image_url}
@@ -303,7 +303,7 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
               )}
               <p className="text-[10px] text-gray-400 font-mono mt-1">{scannedBarcode}</p>
               {fromUserProducts && (
-                <span className="inline-block mt-1 px-1.5 py-0.5 bg-teal-100 text-teal-700 text-[10px] font-medium rounded">
+                <span className="inline-block mt-1 px-1.5 py-0.5 bg-theme-surface-2 text-theme-primary text-[10px] font-medium rounded">
                   {meals.barcodeFromDB || (language === 'de' ? 'Aus deiner DB' : 'From your DB')}
                 </span>
               )}
@@ -348,7 +348,7 @@ export function BarcodeScanner({ onAccept, onClose, onLookupUserProduct }: Barco
             <button
               type="button"
               onClick={handleAccept}
-              className="flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 transition-all"
+              className="flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-all"
             >
               <Check className="h-4 w-4" />
               {meals.barcodeUseProduct || (language === 'de' ? 'Übernehmen' : 'Use Product')}

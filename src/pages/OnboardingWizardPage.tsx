@@ -234,7 +234,7 @@ export function OnboardingWizardPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-teal-50 to-white flex flex-col">
+    <div className="min-h-dvh bg-gradient-to-b bg-theme-bg flex flex-col">
       {/* Progress header */}
       {step < TOTAL_STEPS && (
         <div className="px-4 pt-4 pb-2">
@@ -253,9 +253,9 @@ export function OnboardingWizardPage() {
                     key={i}
                     className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
                       i + 1 === step
-                        ? 'bg-teal-500 text-white'
+                        ? 'bg-theme-primary text-white'
                         : active
-                          ? 'bg-teal-200 text-teal-700'
+                          ? 'bg-theme-surface-2 text-theme-primary'
                           : 'bg-gray-200 text-gray-400'
                     }`}
                   >
@@ -267,7 +267,7 @@ export function OnboardingWizardPage() {
           </div>
           <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-teal-500 rounded-full transition-all duration-500"
+              className="h-full bg-theme-primary rounded-full transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -281,8 +281,8 @@ export function OnboardingWizardPage() {
           {/* ── Step 1: Welcome ─────────────────────────────────────────────── */}
           {step === 1 && (
             <div className="text-center space-y-6 animate-in fade-in">
-              <div className="w-20 h-20 mx-auto bg-teal-100 rounded-full flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-teal-600" />
+              <div className="w-20 h-20 mx-auto bg-theme-surface-2 rounded-full flex items-center justify-center">
+                <Sparkles className="w-10 h-10 text-theme-primary" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -294,7 +294,7 @@ export function OnboardingWizardPage() {
               </div>
               <button
                 onClick={goNext}
-                className="w-full py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {label('start', "Los geht's")}
                 <ChevronRight className="w-5 h-5" />
@@ -312,7 +312,7 @@ export function OnboardingWizardPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {label('bodySubtitle', 'Fuer personalisierte Empfehlungen')}
                 </p>
-                <p className="text-xs text-teal-600 mt-1">
+                <p className="text-xs text-theme-primary mt-1">
                   {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
                 </p>
               </div>
@@ -327,7 +327,7 @@ export function OnboardingWizardPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={label('namePlaceholder', 'Dein Name')}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-all"
                 />
               </div>
 
@@ -344,7 +344,7 @@ export function OnboardingWizardPage() {
                     placeholder="175"
                     min={100}
                     max={250}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -359,7 +359,7 @@ export function OnboardingWizardPage() {
                     min={30}
                     max={300}
                     step={0.1}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -374,7 +374,7 @@ export function OnboardingWizardPage() {
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-all"
                 />
               </div>
 
@@ -390,7 +390,7 @@ export function OnboardingWizardPage() {
                       onClick={() => setGender(g)}
                       className={`py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
                         gender === g
-                          ? 'border-teal-500 bg-teal-50 text-teal-700'
+                          ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
@@ -412,7 +412,7 @@ export function OnboardingWizardPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {label('goalSubtitle', 'Was moechtest du erreichen?')}
                 </p>
-                <p className="text-xs text-teal-600 mt-1">
+                <p className="text-xs text-theme-primary mt-1">
                   {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
                 </p>
               </div>
@@ -428,7 +428,7 @@ export function OnboardingWizardPage() {
                     onClick={() => setPrimaryGoal(goal)}
                     className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
                       primaryGoal === goal
-                        ? 'border-teal-500 bg-teal-50 text-teal-700'
+                        ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -450,7 +450,7 @@ export function OnboardingWizardPage() {
                     onClick={() => setActivityLevel(pal)}
                     className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
                       activityLevel === pal
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        ? 'border-theme-success bg-theme-surface-2 text-theme-success'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -482,7 +482,7 @@ export function OnboardingWizardPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   {label('dietSubtitle', 'Alles optional — hilft dem Buddy, dich besser zu beraten.')}
                 </p>
-                <p className="text-xs text-teal-600 mt-1">
+                <p className="text-xs text-theme-primary mt-1">
                   {label('changeableHint', 'Du kannst alle Angaben spaeter jederzeit aendern.')}
                 </p>
               </div>
@@ -491,7 +491,7 @@ export function OnboardingWizardPage() {
               <ChipSection
                 title={label('dietaryLabel', 'Ernährungsform')}
                 subtitle={label('dietaryHint', 'Keine Auswahl = keine Einschränkung')}
-                icon={<Utensils className="w-4 h-4 text-emerald-500" />}
+                icon={<Utensils className="w-4 h-4 text-theme-success" />}
                 options={DIET_OPTIONS}
                 selected={dietPrefs}
                 onToggle={(v) => setDietPrefs(toggleChip(dietPrefs, v))}
@@ -523,8 +523,8 @@ export function OnboardingWizardPage() {
           {/* ── Step 5: Done ────────────────────────────────────────────────── */}
           {step === 5 && (
             <div className="text-center space-y-6 animate-in fade-in">
-              <div className="w-24 h-24 mx-auto bg-emerald-100 rounded-full flex items-center justify-center animate-bounce">
-                <Check className="w-12 h-12 text-emerald-600" />
+              <div className="w-24 h-24 mx-auto bg-theme-surface-2 rounded-full flex items-center justify-center animate-bounce">
+                <Check className="w-12 h-12 text-theme-success" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -539,7 +539,7 @@ export function OnboardingWizardPage() {
                   markOnboardingJustCompleted();
                   navigate('/cockpit', { replace: true });
                 }}
-                className="w-full py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-theme-surface-20 text-white font-semibold rounded-xl hover:bg-theme-success active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {label('startApp', `${APP_NAME} starten`)}
                 <Sparkles className="w-5 h-5" />
@@ -563,7 +563,7 @@ export function OnboardingWizardPage() {
             <button
               onClick={goNext}
               disabled={(step === 2 && !step2Valid) || (step === 3 && !step3Valid) || saving}
-              className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 active:scale-[0.98] transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 active:scale-[0.98] transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -618,7 +618,7 @@ function ChipSection({
               onClick={() => onToggle(opt)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
                 active
-                  ? 'bg-teal-100 border-teal-400 text-teal-700'
+                  ? 'bg-theme-surface-2 border-theme-primary text-theme-primary'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >

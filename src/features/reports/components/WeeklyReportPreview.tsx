@@ -75,11 +75,11 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-gray-50 w-full max-w-lg max-h-[90vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-4 flex items-center justify-between shrink-0">
+        <div className="bg-theme-primary px-4 py-4 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-white font-semibold text-lg">{t.report.weeklyReport}</h2>
             {report && (
-              <p className="text-teal-100 text-xs mt-0.5">
+              <p className="text-theme-ink-2 text-xs mt-0.5">
                 {formatDateRange(report.startDate, report.endDate)}
               </p>
             )}
@@ -100,7 +100,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
             <select
               value={days}
               onChange={(e) => setDays(Number(e.target.value) as DateRangeOption)}
-              className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 pr-7 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 pr-7 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-theme-primary"
             >
               <option value={7}>7 {t.report.days}</option>
               <option value={14}>14 {t.report.days}</option>
@@ -114,7 +114,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
         <div className="overflow-y-auto flex-1 p-4 space-y-3">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 text-teal-500 animate-spin" />
+              <Loader2 className="h-6 w-6 text-theme-primary animate-spin" />
             </div>
           ) : !report ? (
             <div className="text-center py-12 text-gray-400 text-sm">
@@ -125,8 +125,8 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
               {/* Nutrition Summary */}
               <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 bg-teal-50 rounded-lg">
-                    <Utensils className="h-4 w-4 text-teal-600" />
+                  <div className="p-1.5 bg-theme-surface-2 rounded-lg">
+                    <Utensils className="h-4 w-4 text-theme-primary" />
                   </div>
                   <h3 className="font-semibold text-gray-900 text-sm">{t.report.nutritionSummary}</h3>
                 </div>
@@ -180,7 +180,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
                       <StatItem
                         label={t.report.weightChange}
                         value={`${report.body.weightChange > 0 ? '+' : ''}${report.body.weightChange} kg`}
-                        color={report.body.weightChange < 0 ? 'text-emerald-600' : report.body.weightChange > 0 ? 'text-amber-600' : undefined}
+                        color={report.body.weightChange < 0 ? 'text-theme-success' : report.body.weightChange > 0 ? 'text-amber-600' : undefined}
                       />
                     )}
                     {report.body.endWeight != null && (
@@ -190,7 +190,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
                       <StatItem
                         label={t.report.bodyFatChange}
                         value={`${report.body.bodyFatChange > 0 ? '+' : ''}${report.body.bodyFatChange}%`}
-                        color={report.body.bodyFatChange < 0 ? 'text-emerald-600' : report.body.bodyFatChange > 0 ? 'text-amber-600' : undefined}
+                        color={report.body.bodyFatChange < 0 ? 'text-theme-success' : report.body.bodyFatChange > 0 ? 'text-amber-600' : undefined}
                       />
                     )}
                   </div>
@@ -233,7 +233,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
         {/* Footer / Actions */}
         <div className="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-3 shrink-0">
           {sendResult === 'success' && (
-            <span className="text-xs text-emerald-600 font-medium">{t.report.emailSent}</span>
+            <span className="text-xs text-theme-success font-medium">{t.report.emailSent}</span>
           )}
           {sendResult === 'error' && (
             <span className="text-xs text-red-500 font-medium">{t.common.error}</span>
@@ -248,7 +248,7 @@ export function WeeklyReportPreview({ open, onClose }: WeeklyReportPreviewProps)
           <button
             onClick={handleSendEmail}
             disabled={sending || isLoading || !report}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

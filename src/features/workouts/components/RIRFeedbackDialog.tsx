@@ -78,13 +78,13 @@ export function RIRFeedbackDialog({
           {/* Passt */}
           <button
             onClick={onDismiss}
-            className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-teal-100 bg-teal-50 hover:border-teal-300 hover:bg-teal-100 transition-colors"
+            className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-theme-line bg-theme-surface-2 hover:border-theme-primary hover:bg-theme-surface-2 transition-colors"
           >
-            <ThumbsUp className="h-7 w-7 text-teal-500" />
-            <span className="text-xs font-medium text-teal-700">
+            <ThumbsUp className="h-7 w-7 text-theme-primary" />
+            <span className="text-xs font-medium text-theme-primary">
               {label('justRight', 'Passt', 'Just right')}
             </span>
-            <span className="text-[10px] text-teal-400 leading-tight text-center">
+            <span className="text-[10px] text-theme-primary leading-tight text-center">
               {label('justRightHint', '2-3 Wdh Reserve', '2-3 reps left')}
             </span>
           </button>

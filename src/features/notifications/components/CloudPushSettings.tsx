@@ -93,7 +93,7 @@ export function CloudPushSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-4">
-        <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
+        <Loader2 className="h-5 w-5 animate-spin text-theme-primary" />
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function CloudPushSettings() {
     <div className="bg-white rounded-xl p-4 shadow-sm space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <BellRing className="h-5 w-5 text-teal-600" />
+        <BellRing className="h-5 w-5 text-theme-primary" />
         <h3 className="font-semibold text-gray-900">
           {isDE ? 'Cloud-Push Kanäle' : 'Cloud Push Channels'}
         </h3>
@@ -133,7 +133,7 @@ export function CloudPushSettings() {
             disabled={!isWebPushSupported() || toggleWebPush.isPending}
             className={cn(
               'relative w-11 h-6 rounded-full transition-colors disabled:opacity-40',
-              hasWebPush ? 'bg-teal-500' : 'bg-gray-300',
+              hasWebPush ? 'bg-theme-primary' : 'bg-gray-300',
             )}
           >
             <span className={cn(

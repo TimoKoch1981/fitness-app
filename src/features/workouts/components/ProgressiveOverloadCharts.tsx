@@ -95,7 +95,7 @@ export function ProgressiveOverloadCharts() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export function ProgressiveOverloadCharts() {
         <select
           value={activeExercise}
           onChange={e => setSelectedExercise(e.target.value)}
-          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-theme-primary"
         >
           {exerciseNames.map(name => (
             <option key={name} value={name}>{name}</option>
@@ -136,7 +136,7 @@ export function ProgressiveOverloadCharts() {
               onClick={() => setTimeRange(weeks)}
               className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
                 timeRange === weeks
-                  ? 'bg-white text-teal-600 shadow-sm'
+                  ? 'bg-white text-theme-primary shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -149,32 +149,32 @@ export function ProgressiveOverloadCharts() {
       {/* 1RM Stats Cards */}
       {strengthData.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-teal-50 rounded-lg p-3">
+          <div className="bg-theme-surface-2 rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <Trophy className="h-3.5 w-3.5 text-teal-600" />
-              <p className="text-[10px] text-teal-600 font-medium">
+              <Trophy className="h-3.5 w-3.5 text-theme-primary" />
+              <p className="text-[10px] text-theme-primary font-medium">
                 {isDE ? 'Bestes 1RM' : 'Best 1RM'}
               </p>
             </div>
-            <p className="text-lg font-bold text-teal-700">{best1RM} kg</p>
+            <p className="text-lg font-bold text-theme-primary">{best1RM} kg</p>
           </div>
-          <div className="bg-emerald-50 rounded-lg p-3">
+          <div className="bg-theme-surface-2 rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-              <p className="text-[10px] text-emerald-600 font-medium">
+              <TrendingUp className="h-3.5 w-3.5 text-theme-success" />
+              <p className="text-[10px] text-theme-success font-medium">
                 {isDE ? 'Aktuell' : 'Current'}
               </p>
             </div>
-            <p className="text-lg font-bold text-emerald-700">{latest1RM} kg</p>
+            <p className="text-lg font-bold text-theme-success">{latest1RM} kg</p>
           </div>
-          <div className={`rounded-lg p-3 ${progressPct >= 0 ? 'bg-teal-50' : 'bg-red-50'}`}>
+          <div className={`rounded-lg p-3 ${progressPct >= 0 ? 'bg-theme-surface-2' : 'bg-red-50'}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <BarChart3 className={`h-3.5 w-3.5 ${progressPct >= 0 ? 'text-teal-600' : 'text-red-500'}`} />
-              <p className={`text-[10px] font-medium ${progressPct >= 0 ? 'text-teal-600' : 'text-red-500'}`}>
+              <BarChart3 className={`h-3.5 w-3.5 ${progressPct >= 0 ? 'text-theme-primary' : 'text-red-500'}`} />
+              <p className={`text-[10px] font-medium ${progressPct >= 0 ? 'text-theme-primary' : 'text-red-500'}`}>
                 {isDE ? 'Fortschritt' : 'Progress'}
               </p>
             </div>
-            <p className={`text-lg font-bold ${progressPct >= 0 ? 'text-teal-700' : 'text-red-600'}`}>
+            <p className={`text-lg font-bold ${progressPct >= 0 ? 'text-theme-primary' : 'text-red-600'}`}>
               {progressPct > 0 ? '+' : ''}{progressPct}%
             </p>
           </div>

@@ -106,7 +106,7 @@ export function MFPImportDialog({ open, onClose }: MFPImportDialogProps) {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isImporting}
-                className="w-full flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-teal-400 hover:bg-teal-50/50 transition-colors disabled:opacity-50"
+                className="w-full flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-theme-primary hover:bg-theme-surface-2/50 transition-colors disabled:opacity-50"
               >
                 <Upload className="h-8 w-8 text-gray-400" />
                 <span className="text-sm text-gray-600">{t.dataImport.selectFile}</span>
@@ -115,7 +115,7 @@ export function MFPImportDialog({ open, onClose }: MFPImportDialogProps) {
 
               {fileName && (
                 <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                  <FileText className="h-4 w-4 text-teal-500" />
+                  <FileText className="h-4 w-4 text-theme-primary" />
                   {fileName}
                 </div>
               )}
@@ -174,14 +174,14 @@ export function MFPImportDialog({ open, onClose }: MFPImportDialogProps) {
           {isImporting && progress && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 text-teal-500 animate-spin" />
+                <Loader2 className="h-4 w-4 text-theme-primary animate-spin" />
                 <span className="text-sm text-gray-600">
                   {t.dataImport.importing} ({progress.current}/{progress.total})
                 </span>
               </div>
               <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-teal-500 rounded-full h-1.5 transition-all duration-300"
+                  className="bg-theme-primary rounded-full h-1.5 transition-all duration-300"
                   style={{ width: `${(progress.current / progress.total) * 100}%` }}
                 />
               </div>
@@ -198,9 +198,9 @@ export function MFPImportDialog({ open, onClose }: MFPImportDialogProps) {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="text-center p-2 bg-teal-50 rounded-lg">
-                  <p className="text-lg font-bold text-teal-700">{result.imported}</p>
-                  <p className="text-[10px] text-teal-500">{t.dataImport.imported}</p>
+                <div className="text-center p-2 bg-theme-surface-2 rounded-lg">
+                  <p className="text-lg font-bold text-theme-primary">{result.imported}</p>
+                  <p className="text-[10px] text-theme-primary">{t.dataImport.imported}</p>
                 </div>
                 <div className="text-center p-2 bg-amber-50 rounded-lg">
                   <p className="text-lg font-bold text-amber-700">{result.skipped}</p>
@@ -236,7 +236,7 @@ export function MFPImportDialog({ open, onClose }: MFPImportDialogProps) {
             <button
               onClick={handleImport}
               disabled={isImporting || !user}
-              className="px-4 py-2 text-sm font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-theme-primary rounded-lg hover:bg-theme-primary-2 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {isImporting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

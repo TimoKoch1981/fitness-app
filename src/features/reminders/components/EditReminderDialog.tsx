@@ -130,7 +130,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                   onClick={() => handleTypeChange(opt.type)}
                   className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-xs ${
                     type === opt.type
-                      ? 'border-teal-500 bg-teal-50 text-teal-700 font-medium'
+                      ? 'border-theme-primary bg-theme-surface-2 text-theme-primary font-medium'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
@@ -150,7 +150,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
               <select
                 value={substanceId}
                 onChange={e => setSubstanceId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               >
                 <option value="">{language === 'de' ? '— Substanz wählen —' : '— Select substance —'}</option>
                 {substances.map(s => (
@@ -169,7 +169,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
           </div>
 
@@ -182,7 +182,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
               <button
                 type="button"
                 onClick={() => setUseTimePeriod(!useTimePeriod)}
-                className="text-[10px] text-teal-600 hover:underline"
+                className="text-[10px] text-theme-primary hover:underline"
               >
                 {useTimePeriod
                   ? (language === 'de' ? 'Exakte Uhrzeit' : 'Exact time')
@@ -199,7 +199,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                     onClick={() => setTimePeriod(period)}
                     className={`p-2 rounded-lg border-2 text-xs font-medium transition-all ${
                       timePeriod === period
-                        ? 'border-teal-500 bg-teal-50 text-teal-700'
+                        ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -213,7 +213,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                 type="time"
                 value={time}
                 onChange={e => setTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
               />
             )}
           </div>
@@ -229,7 +229,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                 onClick={() => setRepeatMode('weekly')}
                 className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
                   repeatMode === 'weekly'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
+                    ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                     : 'border-gray-200 text-gray-600'
                 }`}
               >
@@ -240,7 +240,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                 onClick={() => setRepeatMode('interval')}
                 className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition-all ${
                   repeatMode === 'interval'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
+                    ? 'border-theme-primary bg-theme-surface-2 text-theme-primary'
                     : 'border-gray-200 text-gray-600'
                 }`}
               >
@@ -257,7 +257,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                     onClick={() => toggleDay(index)}
                     className={`w-9 h-9 rounded-full text-xs font-medium transition-all ${
                       daysOfWeek.includes(index)
-                        ? 'bg-teal-500 text-white'
+                        ? 'bg-theme-primary text-white'
                         : 'bg-gray-100 text-gray-400'
                     }`}
                   >
@@ -276,7 +276,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
                   onChange={e => setIntervalDays(e.target.value)}
                   min="1"
                   max="365"
-                  className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-teal-500 outline-none"
+                  className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-theme-primary outline-none"
                 />
                 <span className="text-xs text-gray-500">
                   {language === 'de' ? 'Tage' : 'days'}
@@ -295,7 +295,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder={language === 'de' ? 'Zusätzliche Hinweise...' : 'Additional notes...'}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
             />
           </div>
 
@@ -308,7 +308,7 @@ export function EditReminderDialog({ reminder, onClose }: Props) {
           <button
             type="submit"
             disabled={updateReminder.isPending || !title.trim()}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {updateReminder.isPending ? t.common.loading : t.common.save}
           </button>

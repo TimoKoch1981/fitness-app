@@ -114,7 +114,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
         <p className="text-gray-400 text-sm">{plans?.noPlan ?? 'No plans yet'}</p>
         <button
           onClick={() => openWizard('create')}
-          className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+          className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 bg-theme-primary text-white text-sm rounded-lg hover:bg-theme-primary-2 transition-colors"
         >
           <Plus className="h-4 w-4" />
           {plans?.createNew ?? 'Create New Plan'}
@@ -215,7 +215,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
         </h3>
         <button
           onClick={() => openWizard('create')}
-          className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-theme-primary bg-theme-surface-2 rounded-lg hover:bg-theme-surface-2 transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
           {isDE ? 'Neu' : 'New'}
@@ -233,7 +233,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
             key={plan.id}
             className={`rounded-xl shadow-sm overflow-hidden transition-all ${
               isActive
-                ? 'bg-white ring-2 ring-teal-300'
+                ? 'bg-white ring-2 ring-theme-primary'
                 : isExpanded
                   ? 'bg-white ring-1 ring-gray-300'
                   : 'bg-white hover:bg-gray-50'
@@ -252,7 +252,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                       {plan.name}
                     </span>
                     {isActive && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-theme-primary bg-theme-surface-2 px-1.5 py-0.5 rounded-full flex-shrink-0">
                         <CheckCircle2 className="h-3 w-3" />
                         {plans?.active ?? 'Active'}
                       </span>
@@ -279,7 +279,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                     <button
                       onClick={(e) => handleActivate(plan.id, e)}
                       disabled={activatePlan.isPending}
-                      className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors disabled:opacity-50"
+                      className="p-1.5 text-gray-300 hover:text-theme-primary transition-colors disabled:opacity-50"
                       title={plans?.activate ?? 'Activate'}
                     >
                       <CheckCircle2 className="h-4 w-4" />
@@ -301,7 +301,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                     <Trash2 className="h-4 w-4" />
                   </button>
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-teal-400 ml-0.5" />
+                    <ChevronDown className="h-4 w-4 text-theme-primary ml-0.5" />
                   ) : (
                     <ChevronRight className="h-4 w-4 text-gray-200 ml-0.5" />
                   )}
@@ -316,7 +316,7 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => openWizard('edit', expandedPlanData)}
-                    className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-teal-100 transition-colors"
+                    className="text-xs bg-theme-surface-2 text-theme-primary px-2.5 py-1 rounded-full inline-flex items-center gap-1 hover:bg-theme-surface-2 transition-colors"
                   >
                     <Pencil className="h-3 w-3" />
                     {isDE ? 'Plan bearbeiten' : 'Edit plan'}

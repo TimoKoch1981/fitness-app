@@ -96,7 +96,7 @@ export function EquipmentSelector() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-6">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500" />
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-theme-primary" />
       </div>
     );
   }
@@ -119,7 +119,7 @@ export function EquipmentSelector() {
               onChange={(e) => {
                 if (e.target.value) applyProfile(e.target.value);
               }}
-              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white appearance-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white appearance-none focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
             >
               <option value="">{t.equipment.customSelection}</option>
               {gymProfiles.map(p => (
@@ -139,7 +139,7 @@ export function EquipmentSelector() {
           onClick={() => setFilterCategory('all')}
           className={`px-2.5 py-1 text-xs rounded-lg transition-colors ${
             filterCategory === 'all'
-              ? 'bg-teal-500 text-white'
+              ? 'bg-theme-primary text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -151,7 +151,7 @@ export function EquipmentSelector() {
             onClick={() => setFilterCategory(cat)}
             className={`px-2.5 py-1 text-xs rounded-lg transition-colors ${
               filterCategory === cat
-                ? 'bg-teal-500 text-white'
+                ? 'bg-theme-primary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -164,7 +164,7 @@ export function EquipmentSelector() {
       <div className="flex gap-2 text-xs">
         <button
           onClick={selectAll}
-          className="text-teal-600 hover:text-teal-700 font-medium"
+          className="text-theme-primary hover:text-theme-primary font-medium"
         >
           {t.equipment.selectAll}
         </button>
@@ -196,7 +196,7 @@ export function EquipmentSelector() {
                     onClick={() => toggle(item.id)}
                     className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-left text-sm transition-all ${
                       isSelected
-                        ? 'bg-teal-50 border border-teal-300 text-teal-800'
+                        ? 'bg-theme-surface-2 border border-theme-primary text-theme-ink'
                         : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
                   >
@@ -205,7 +205,7 @@ export function EquipmentSelector() {
                       {language === 'en' && item.name_en ? item.name_en : item.name}
                     </span>
                     {isSelected && (
-                      <Check className="h-3.5 w-3.5 text-teal-600 flex-shrink-0" />
+                      <Check className="h-3.5 w-3.5 text-theme-primary flex-shrink-0" />
                     )}
                   </button>
                 );
@@ -222,7 +222,7 @@ export function EquipmentSelector() {
         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
           saved
             ? 'bg-green-500 text-white'
-            : 'bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50'
+            : 'bg-theme-primary text-white hover:bg-theme-primary-2 disabled:opacity-50'
         }`}
       >
         {saved ? (

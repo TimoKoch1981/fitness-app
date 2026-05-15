@@ -38,7 +38,7 @@ export function SocialPage() {
             className={cn(
               'flex-1 py-2 text-xs font-medium rounded-md transition-all',
               activeTab === tab.key
-                ? 'bg-white text-teal-600 shadow-sm'
+                ? 'bg-white text-theme-primary shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             )}
           >

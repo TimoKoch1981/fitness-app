@@ -43,7 +43,7 @@ export function MFASettings() {
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-teal-500" />
+          <ShieldCheck className="h-4 w-4 text-theme-primary" />
           {mfa.title || 'Zwei-Faktor-Authentifizierung (2FA)'}
         </h3>
         <p className="text-xs text-gray-500 mb-3">
@@ -58,8 +58,8 @@ export function MFASettings() {
         ) : isEnabled ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-              <span className="text-emerald-700 font-medium">{mfa.enabled || '2FA ist aktiviert'}</span>
+              <div className="w-2 h-2 bg-theme-surface-20 rounded-full" />
+              <span className="text-theme-success font-medium">{mfa.enabled || '2FA ist aktiviert'}</span>
             </div>
             {confirmDisable ? (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-2">
@@ -93,7 +93,7 @@ export function MFASettings() {
         ) : (
           <button
             onClick={() => setShowSetup(true)}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg text-sm hover:from-teal-600 hover:to-emerald-700 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg text-sm hover:bg-theme-primary-2 transition-all"
           >
             {mfa.enable || '2FA aktivieren'}
           </button>

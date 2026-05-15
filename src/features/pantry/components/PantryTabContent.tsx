@@ -231,7 +231,7 @@ export function PantryTabContent() {
         <p className="text-sm text-gray-500 mb-6">{t.emptyDesc}</p>
         <button
           onClick={() => setShowWizard(true)}
-          className="px-6 py-2.5 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 transition-colors"
+          className="px-6 py-2.5 bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-colors"
         >
           {t.setupButton}
         </button>
@@ -355,9 +355,9 @@ export function PantryTabContent() {
         <>
           {/* Stats */}
           <div className="flex gap-2">
-            <div className="flex-1 bg-teal-50 rounded-lg px-3 py-2 text-center">
-              <p className="text-lg font-bold text-teal-700">{stockItems.length}</p>
-              <p className="text-[10px] text-teal-600">{t.totalItems}</p>
+            <div className="flex-1 bg-theme-surface-2 rounded-lg px-3 py-2 text-center">
+              <p className="text-lg font-bold text-theme-primary">{stockItems.length}</p>
+              <p className="text-[10px] text-theme-primary">{t.totalItems}</p>
             </div>
             <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-center">
               <p className="text-lg font-bold text-gray-700">{grouped.size}</p>
@@ -422,12 +422,12 @@ export function PantryTabContent() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={t.searchPlaceholder}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-transparent"
               />
             </div>
             <button
               onClick={() => setShowAddCustom(true)}
-              className="flex items-center gap-1 px-3 py-2 text-teal-600 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 text-xs font-medium"
+              className="flex items-center gap-1 px-3 py-2 text-theme-primary bg-theme-surface-2 border border-theme-line rounded-lg hover:bg-theme-surface-2 text-xs font-medium"
             >
               <Plus className="h-3.5 w-3.5" />
               {de ? 'Zutat' : 'Add'}
@@ -581,7 +581,7 @@ export function PantryTabContent() {
                 {/* Edit category */}
                 <button
                   onClick={e => { e.stopPropagation(); setEditingCategory(editingCategory === cat ? null : cat); if (!expandedCategories.has(cat)) toggleExpanded(cat); }}
-                  className={cn('p-1 transition-colors', editingCategory === cat ? 'text-teal-500' : 'text-gray-300 hover:text-teal-500')}
+                  className={cn('p-1 transition-colors', editingCategory === cat ? 'text-theme-primary' : 'text-gray-300 hover:text-theme-primary')}
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
@@ -597,7 +597,7 @@ export function PantryTabContent() {
               {expanded && editingCategory === cat && (
                 <div className="px-3 py-2">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-medium text-teal-600 uppercase tracking-wider">
+                    <p className="text-[10px] font-medium text-theme-primary uppercase tracking-wider">
                       {de ? 'Bearbeitungsmodus' : 'Edit Mode'}
                     </p>
                     <button onClick={() => setEditingCategory(null)} className="text-[10px] text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
@@ -613,13 +613,13 @@ export function PantryTabContent() {
                           key={catalogItem.id}
                           onClick={() => handleToggleCatalogItem(catalogItem, isInPantry)}
                           className={cn('w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors',
-                            isInPantry ? 'bg-teal-50 hover:bg-teal-100' : 'hover:bg-gray-50')}
+                            isInPantry ? 'bg-theme-surface-2 hover:bg-theme-surface-2' : 'hover:bg-gray-50')}
                         >
                           <div className={cn('w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
-                            isInPantry ? 'bg-teal-500 border-teal-500' : 'border-gray-300')}>
+                            isInPantry ? 'bg-theme-primary border-theme-primary' : 'border-gray-300')}>
                             {isInPantry && <Check className="h-3 w-3 text-white" />}
                           </div>
-                          <span className={cn('flex-1 text-sm', isInPantry ? 'text-teal-800 font-medium' : 'text-gray-600')}>
+                          <span className={cn('flex-1 text-sm', isInPantry ? 'text-theme-ink font-medium' : 'text-gray-600')}>
                             {catalogItem.name_de}
                           </span>
                           {catalogItem.is_staple && <span className="text-[9px] text-gray-400">{de ? 'Basis' : 'Staple'}</span>}
@@ -702,7 +702,7 @@ export function PantryTabContent() {
                             <button
                               key={item.id}
                               onClick={() => handleQuickAdd(item.name_de, cat, item.id)}
-                              className="px-2 py-0.5 text-[10px] text-teal-600 bg-teal-50 border border-teal-100 rounded-full hover:bg-teal-100 transition-colors"
+                              className="px-2 py-0.5 text-[10px] text-theme-primary bg-theme-surface-2 border border-theme-line rounded-full hover:bg-theme-surface-2 transition-colors"
                             >
                               + {item.name_de}
                             </button>

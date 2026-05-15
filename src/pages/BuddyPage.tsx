@@ -295,7 +295,7 @@ export function BuddyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br bg-theme-bg">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
@@ -320,7 +320,7 @@ export function BuddyPage() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowCapabilities(true)}
-              className="p-2 text-gray-400 hover:text-teal-500 transition-colors"
+              className="p-2 text-gray-400 hover:text-theme-primary transition-colors"
               title={t.buddy.whatCanIDo}
             >
               <Lightbulb className="h-4 w-4" />
@@ -369,7 +369,7 @@ export function BuddyPage() {
             <p className="text-xs text-yellow-700">{t.buddy.connectionError}</p>
             <button
               onClick={checkConnection}
-              className="mt-2 text-xs text-teal-600 hover:underline font-medium"
+              className="mt-2 text-xs text-theme-primary hover:underline font-medium"
             >
               {language === 'de' ? 'Erneut versuchen' : 'Retry'}
             </button>
@@ -424,7 +424,7 @@ export function BuddyPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t.buddy.placeholder}
-            className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition-colors"
+            className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:ring-2 focus:ring-theme-primary focus:bg-white outline-none transition-colors"
             // v14.13: input stays enabled — user can type ahead while bot streams
           />
           {/* Voice Input Button */}
@@ -435,7 +435,7 @@ export function BuddyPage() {
               className={`relative p-2.5 rounded-full transition-all ${
                 isListening
                   ? 'text-red-500 bg-red-50 ring-2 ring-red-400 ring-opacity-75 animate-pulse'
-                  : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'
+                  : 'text-gray-400 hover:text-theme-primary hover:bg-theme-surface-2'
               }`}
               title={isListening ? (t.buddy.voiceListening) : t.buddy.voiceInput}
               disabled={isLoading}
@@ -446,7 +446,7 @@ export function BuddyPage() {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-full text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-teal-600 hover:to-emerald-700 transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-gradient-to-r bg-theme-primary text-white rounded-full text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-theme-primary-2 transition-all flex items-center gap-1.5"
           >
             <Send className="h-3.5 w-3.5" />
             {t.buddy.send}

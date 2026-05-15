@@ -86,12 +86,12 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
   // ── Edit mode ──
   if (isEditing) {
     return (
-      <div className="bg-white rounded-xl p-3 shadow-sm space-y-2 border border-teal-200">
+      <div className="bg-white rounded-xl p-3 shadow-sm space-y-2 border border-theme-line">
         <input
           type="text"
           value={editName}
           onChange={(e) => setEditName(e.target.value)}
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"
+          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-theme-primary outline-none"
           autoFocus
         />
         <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
             type="date"
             value={editDate}
             onChange={(e) => setEditDate(e.target.value)}
-            className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"
+            className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:ring-1 focus:ring-theme-primary outline-none"
           />
         </div>
         {/* Meal type selector */}
@@ -112,7 +112,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
               onClick={() => setEditType(mt.value)}
               className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
                 editType === mt.value
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-theme-primary text-white'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
@@ -127,7 +127,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
               type="number"
               value={editCalories}
               onChange={(e) => setEditCalories(e.target.value)}
-              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-theme-primary"
               min="0"
             />
           </div>
@@ -137,7 +137,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
               type="number"
               value={editProtein}
               onChange={(e) => setEditProtein(e.target.value)}
-              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-theme-primary"
               min="0" step="0.1"
             />
           </div>
@@ -147,7 +147,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
               type="number"
               value={editCarbs}
               onChange={(e) => setEditCarbs(e.target.value)}
-              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-theme-primary"
               min="0" step="0.1"
             />
           </div>
@@ -157,7 +157,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
               type="number"
               value={editFat}
               onChange={(e) => setEditFat(e.target.value)}
-              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-theme-primary"
               min="0" step="0.1"
             />
           </div>
@@ -172,7 +172,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
           </button>
           <button
             onClick={handleSaveEdit}
-            className="px-3 py-1 text-xs bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            className="px-3 py-1 text-xs bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
           >
             <Check className="h-3.5 w-3.5 inline mr-1" />
             Speichern
@@ -209,7 +209,7 @@ export function MealCard({ meal, onDelete, onEdit }: MealCardProps) {
         {onEdit && (
           <button
             onClick={handleStartEdit}
-            className="p-1 text-gray-300 hover:text-teal-500 transition-colors"
+            className="p-1 text-gray-300 hover:text-theme-primary transition-colors"
             title="Bearbeiten"
           >
             <Pencil className="h-3.5 w-3.5" />

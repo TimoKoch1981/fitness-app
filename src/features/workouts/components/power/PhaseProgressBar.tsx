@@ -22,9 +22,9 @@ const PHASE_CONFIG: Record<TrainingPhase, {
 }> = {
   bulk: {
     icon: TrendingUp,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50 border-emerald-200',
-    barColor: 'bg-emerald-500',
+    color: 'text-theme-success',
+    bgColor: 'bg-theme-surface-2 border-theme-line',
+    barColor: 'bg-theme-surface-20',
     defaultWeeks: 16,
   },
   cut: {
@@ -135,7 +135,7 @@ export function PhaseProgressBar({ onClick }: PhaseProgressBarProps = {}) {
         </span>
         <div className="flex items-center gap-2">
           {activeCycle && (
-            <span className="text-[10px] text-teal-600 flex items-center gap-0.5">
+            <span className="text-[10px] text-theme-primary flex items-center gap-0.5">
               <RotateCcw className="h-2.5 w-2.5" />
               {activeCycle.current_phase_index + 1}/{activeCycle.phases.length}
             </span>
@@ -189,7 +189,7 @@ function PhaseAdvanceBanner({ activeCycle, de }: { activeCycle: TrainingPhaseCyc
         {nextPhase && !confirming && (
           <button
             onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
-            className="flex items-center gap-0.5 text-[10px] font-medium text-teal-600 hover:text-teal-700"
+            className="flex items-center gap-0.5 text-[10px] font-medium text-theme-primary hover:text-theme-primary"
           >
             <SkipForward className="h-3 w-3" />
             {de ? 'Weiter' : 'Advance'}
@@ -200,7 +200,7 @@ function PhaseAdvanceBanner({ activeCycle, de }: { activeCycle: TrainingPhaseCyc
             <button
               onClick={(e) => { e.stopPropagation(); handleAdvance(); }}
               disabled={advancePhase.isPending}
-              className="px-2 py-0.5 text-[10px] font-medium bg-teal-500 text-white rounded-full hover:bg-teal-600 disabled:opacity-50"
+              className="px-2 py-0.5 text-[10px] font-medium bg-theme-primary text-white rounded-full hover:bg-theme-primary-2 disabled:opacity-50"
             >
               {de ? 'Ja, weiter' : 'Yes, advance'}
             </button>

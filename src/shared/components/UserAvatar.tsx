@@ -47,7 +47,7 @@ export function UserAvatar({ avatarUrl, size = 'md', className = '' }: UserAvata
   }
 
   return (
-    <div className={`${sizeClass} bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex-shrink-0 flex items-center justify-center ${className}`}>
+    <div className={`${sizeClass} bg-gradient-to-br bg-theme-primary rounded-full flex-shrink-0 flex items-center justify-center ${className}`}>
       <User className={`${iconSize} text-white`} />
     </div>
   );

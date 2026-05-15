@@ -103,7 +103,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="85.0"
                 aria-label={`${t.body.weight} ${t.body.kg}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="30"
                 max="300"
                 step="0.1"
@@ -121,7 +121,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                 onChange={(e) => setBodyFat(e.target.value)}
                 placeholder="15.0"
                 aria-label={`${t.body.bodyFat} ${t.body.percent}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="3"
                 max="60"
                 step="0.1"
@@ -142,7 +142,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                 onChange={(e) => setMuscleMass(e.target.value)}
                 placeholder="40.0"
                 aria-label={`${t.body.muscleMass} ${t.body.kg}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="10"
                 max="100"
                 step="0.1"
@@ -159,7 +159,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                 onChange={(e) => setWaterPct(e.target.value)}
                 placeholder="55.0"
                 aria-label={`${t.body.waterPct} ${t.body.percent}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-sm"
                 min="30"
                 max="80"
                 step="0.1"
@@ -181,7 +181,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                   onChange={(e) => setWaist(e.target.value)}
                   placeholder={t.body.waist}
                   aria-label={`${t.body.waist} ${t.body.cm}`}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs text-center"
                   min="40"
                   max="200"
                   step="0.1"
@@ -196,7 +196,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                   onChange={(e) => setChest(e.target.value)}
                   placeholder={t.body.chest}
                   aria-label={`${t.body.chest} ${t.body.cm}`}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs text-center"
                   min="50"
                   max="200"
                   step="0.1"
@@ -211,7 +211,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                   onChange={(e) => setArm(e.target.value)}
                   placeholder={t.body.arm}
                   aria-label={`${t.body.arm} ${t.body.cm}`}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs text-center"
                   min="15"
                   max="60"
                   step="0.1"
@@ -226,7 +226,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
                   onChange={(e) => setLeg(e.target.value)}
                   placeholder={t.body.leg}
                   aria-label={`${t.body.leg} ${t.body.cm}`}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-xs text-center"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-xs text-center"
                   min="30"
                   max="100"
                   step="0.1"
@@ -245,7 +245,7 @@ export function AddBodyMeasurementDialog({ open, onClose }: AddBodyMeasurementDi
           <button
             type="submit"
             disabled={addMeasurement.isPending || (!weight && !bodyFat && !waist)}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r bg-theme-primary text-white font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all"
           >
             {addMeasurement.isPending ? t.common.loading : t.common.save}
           </button>

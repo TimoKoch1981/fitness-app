@@ -147,7 +147,7 @@ export function ImageUploadOptimizer({
       {/* Compression progress */}
       {isCompressing && (
         <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-500" />
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-theme-primary" />
           <span>Compressing image...</span>
         </div>
       )}
@@ -155,7 +155,7 @@ export function ImageUploadOptimizer({
       {/* Compression stats */}
       {stats && !isCompressing && (
         <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-          <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+          <CheckCircle className="h-3.5 w-3.5 text-theme-success" />
           <span>
             {stats.original} &rarr; {stats.compressed}
           </span>

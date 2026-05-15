@@ -93,7 +93,7 @@ export function BloodWorkDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Beaker className="h-4 w-4 text-teal-500" />
+          <Beaker className="h-4 w-4 text-theme-primary" />
           <h3 className="text-sm font-semibold text-gray-900">
             {t.powerPlus.bloodWorkDashboard}
           </h3>

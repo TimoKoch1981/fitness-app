@@ -101,7 +101,7 @@ export function PlanWizardMetaStep() {
                 onClick={() => handleGroupSelect(key, i)}
                 className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl text-center transition-all ${
                   isSelected
-                    ? 'bg-teal-500 text-white shadow-md scale-[1.02]'
+                    ? 'bg-theme-primary text-white shadow-md scale-[1.02]'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100'
                 }`}
               >
@@ -126,7 +126,7 @@ export function PlanWizardMetaStep() {
             value={name}
             onChange={(e) => updateMeta('name', e.target.value)}
             placeholder={isDE ? 'z.B. 4-Tage Upper/Lower' : 'e.g. 4-Day Upper/Lower'}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent"
+            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent"
             autoFocus
           />
         </div>
@@ -145,7 +145,7 @@ export function PlanWizardMetaStep() {
                 onClick={() => updateMeta('splitType', opt.value)}
                 className={`px-2.5 py-1.5 text-xs rounded-lg transition-colors ${
                   splitType === opt.value
-                    ? 'bg-teal-500 text-white font-medium'
+                    ? 'bg-theme-primary text-white font-medium'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -169,7 +169,7 @@ export function PlanWizardMetaStep() {
                 onClick={() => updateMeta('daysPerWeek', n)}
                 className={`w-10 h-10 text-sm font-medium rounded-xl transition-colors ${
                   daysPerWeek === n
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-theme-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -191,7 +191,7 @@ export function PlanWizardMetaStep() {
             onChange={(e) => updateMeta('notes', e.target.value)}
             rows={2}
             placeholder={isDE ? 'z.B. Fokus auf Hypertrophie' : 'e.g. Focus on hypertrophy'}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent resize-none"
           />
         </div>
       )}

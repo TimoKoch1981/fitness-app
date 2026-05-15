@@ -190,7 +190,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
             {mode !== 'menu' && (
               <button
                 onClick={() => setMode('menu')}
-                className="text-xs text-teal-500 hover:text-teal-600"
+                className="text-xs text-theme-primary hover:text-theme-primary"
               >
                 ← {isDE ? 'Zurück' : 'Back'}
               </button>
@@ -208,12 +208,12 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
             <>
               <button
                 onClick={() => setMode('edit')}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 bg-theme-surface-2 border border-theme-line rounded-xl hover:bg-theme-surface-2 transition-colors"
               >
-                <Edit3 className="h-5 w-5 text-teal-500" />
+                <Edit3 className="h-5 w-5 text-theme-primary" />
                 <div className="text-left">
                   <p className="font-medium">{isDE ? 'Übung bearbeiten' : 'Edit Exercise'}</p>
-                  <p className="text-xs text-teal-600">
+                  <p className="text-xs text-theme-primary">
                     {isDE ? 'Sätze, Gewicht, Wdh, Pause anpassen' : 'Adjust sets, weight, reps, rest'}
                   </p>
                 </div>
@@ -267,7 +267,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                     </button>
                     <button
                       onClick={addSet}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-theme-surface-2 text-theme-primary hover:bg-theme-surface-2 transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
@@ -287,12 +287,12 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                     <div
                       key={idx}
                       className={`grid grid-cols-12 gap-2 items-center px-2 py-1.5 rounded-lg ${
-                        s.completed ? 'bg-teal-50 opacity-60' : 'bg-gray-50'
+                        s.completed ? 'bg-theme-surface-2 opacity-60' : 'bg-gray-50'
                       }`}
                     >
                       <div className="col-span-2 text-xs font-medium text-gray-500">
                         {idx + 1}
-                        {s.completed && <span className="text-teal-500 ml-0.5">✓</span>}
+                        {s.completed && <span className="text-theme-primary ml-0.5">✓</span>}
                       </div>
                       <div className="col-span-5">
                         <input
@@ -301,7 +301,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                           value={s.target_reps}
                           onChange={e => updateSet(idx, 'target_reps', e.target.value)}
                           disabled={s.completed}
-                          className="w-full px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:text-gray-400"
+                          className="w-full px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary disabled:bg-gray-100 disabled:text-gray-400"
                           placeholder="8-10"
                         />
                       </div>
@@ -313,7 +313,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                           value={s.target_weight_kg}
                           onChange={e => updateSet(idx, 'target_weight_kg', e.target.value)}
                           disabled={s.completed}
-                          className="w-full px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:text-gray-400"
+                          className="w-full px-2 py-1.5 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-theme-primary disabled:bg-gray-100 disabled:text-gray-400"
                           placeholder="kg"
                         />
                       </div>
@@ -335,7 +335,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                     value={editRest}
                     onChange={e => setEditRest(e.target.value)}
                     placeholder={isDE ? 'z.B. 90' : 'e.g. 90'}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
                   />
                 </div>
               )}
@@ -353,7 +353,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                     value={editDuration}
                     onChange={e => setEditDuration(e.target.value)}
                     placeholder={isDE ? 'z.B. 10' : 'e.g. 10'}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-primary"
                   />
                 </div>
               )}
@@ -365,7 +365,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
                     type="checkbox"
                     checked={permanent}
                     onChange={e => setPermanent(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
                   />
                   <div>
                     <p className="text-sm font-medium text-gray-700">
@@ -384,7 +384,7 @@ export function ExerciseModifyDialog({ exerciseName, exerciseIndex, onClose }: E
               <button
                 onClick={handleSaveEdit}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-colors font-medium disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm text-white bg-theme-primary rounded-xl hover:bg-theme-primary-2 transition-colors font-medium disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 {isSaving

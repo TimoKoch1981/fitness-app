@@ -71,7 +71,7 @@ describe('AddMealDialog', () => {
   it('defaults to lunch meal type', () => {
     renderWithProviders(<AddMealDialog {...defaultProps} />);
     const lunchBtn = screen.getByText('Mittagessen');
-    expect(lunchBtn.className).toContain('bg-teal-500');
+    expect(lunchBtn.className).toContain('bg-theme-primary');
   });
 
   it('renders name and macro input fields', () => {
@@ -115,10 +115,10 @@ describe('AddMealDialog', () => {
 
     const breakfastBtn = screen.getByText('Frühstück');
     await user.click(breakfastBtn);
-    expect(breakfastBtn.className).toContain('bg-teal-500');
+    expect(breakfastBtn.className).toContain('bg-theme-primary');
 
     const lunchBtn = screen.getByText('Mittagessen');
-    expect(lunchBtn.className).not.toContain('bg-teal-500');
+    expect(lunchBtn.className).not.toContain('bg-theme-primary');
   });
 
   it('submits meal data and calls onClose', async () => {
@@ -160,7 +160,7 @@ describe('AddMealDialog', () => {
   it('uses defaultType prop', () => {
     renderWithProviders(<AddMealDialog {...defaultProps} defaultType="breakfast" />);
     const breakfastBtn = screen.getByText('Frühstück');
-    expect(breakfastBtn.className).toContain('bg-teal-500');
+    expect(breakfastBtn.className).toContain('bg-theme-primary');
   });
 
   it('displays error on submit failure', async () => {

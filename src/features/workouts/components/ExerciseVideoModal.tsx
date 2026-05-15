@@ -54,7 +54,7 @@ export function ExerciseVideoModal({ exercise, onClose }: ExerciseVideoModalProp
         {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 px-4 py-3 flex items-center justify-between z-10">
           <div className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5 text-teal-500" />
+            <Dumbbell className="h-5 w-5 text-theme-primary" />
             <h3 className="font-semibold text-gray-900 text-base truncate">{name}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition-colors">

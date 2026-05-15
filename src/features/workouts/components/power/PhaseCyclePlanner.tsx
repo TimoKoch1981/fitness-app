@@ -41,7 +41,7 @@ const PHASE_META: Record<TrainingPhase, {
   de: string;
   en: string;
 }> = {
-  bulk: { icon: TrendingUp, emoji: '💪', color: 'text-emerald-600', bgColor: 'bg-emerald-100', barColor: 'bg-emerald-500', de: 'Aufbau', en: 'Bulk' },
+  bulk: { icon: TrendingUp, emoji: '💪', color: 'text-theme-success', bgColor: 'bg-theme-surface-2', barColor: 'bg-theme-surface-20', de: 'Aufbau', en: 'Bulk' },
   cut: { icon: TrendingDown, emoji: '🔥', color: 'text-red-500', bgColor: 'bg-red-100', barColor: 'bg-red-500', de: 'Definition', en: 'Cut' },
   maintenance: { icon: Minus, emoji: '⚖️', color: 'text-blue-500', bgColor: 'bg-blue-100', barColor: 'bg-blue-500', de: 'Erhaltung', en: 'Maint.' },
   peak_week: { icon: Zap, emoji: '🏆', color: 'text-amber-600', bgColor: 'bg-amber-100', barColor: 'bg-amber-500', de: 'Peak Week', en: 'Peak Week' },
@@ -215,7 +215,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between rounded-t-2xl z-10">
           <div className="flex items-center gap-2">
-            <RotateCcw className="h-5 w-5 text-teal-600" />
+            <RotateCcw className="h-5 w-5 text-theme-primary" />
             <h2 className="font-bold text-gray-900">
               {de ? 'Phasen-Zyklus-Planer' : 'Phase Cycle Planner'}
             </h2>
@@ -233,11 +233,11 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
             <div className="space-y-4">
               {/* Active Cycle Banner */}
               {activeCycle && (
-                <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                <div className="bg-theme-surface-2 border border-theme-line rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-teal-900 text-sm">{activeCycle.name}</h3>
-                      <p className="text-[10px] text-teal-600 mt-0.5">
+                      <h3 className="font-semibold text-theme-ink text-sm">{activeCycle.name}</h3>
+                      <p className="text-[10px] text-theme-primary mt-0.5">
                         {activeCycle.auto_repeat
                           ? (de ? 'Automatische Wiederholung' : 'Auto-repeat')
                           : (de ? 'Einmaliger Durchlauf' : 'Single run')}
@@ -248,7 +248,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                     <div className="flex gap-1">
                       <button
                         onClick={() => setConfirmAdvance(true)}
-                        className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+                        className="p-2 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
                         title={de ? 'Nächste Phase' : 'Next Phase'}
                       >
                         <SkipForward className="h-4 w-4" />
@@ -290,7 +290,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                     <button
                       onClick={handleAdvance}
                       disabled={advancePhase.isPending}
-                      className="flex-1 py-2 bg-teal-500 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                      className="flex-1 py-2 bg-theme-primary text-white rounded-lg text-sm font-medium disabled:opacity-50"
                     >
                       {advancePhase.isPending
                         ? (de ? 'Wechsle...' : 'Switching...')
@@ -312,7 +312,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                       <button
                         key={tpl.name}
                         onClick={() => startFromTemplate(tpl.name)}
-                        className="w-full text-left p-3 rounded-xl border border-gray-200 hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
+                        className="w-full text-left p-3 rounded-xl border border-gray-200 hover:border-theme-primary hover:bg-theme-surface-2/30 transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{tpl.icon}</span>
@@ -349,7 +349,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                   {/* Custom */}
                   <button
                     onClick={startCustom}
-                    className="w-full text-left p-3 rounded-xl border border-dashed border-gray-300 hover:border-teal-400 hover:bg-teal-50/30 transition-colors"
+                    className="w-full text-left p-3 rounded-xl border border-dashed border-gray-300 hover:border-theme-primary hover:bg-theme-surface-2/30 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
@@ -385,7 +385,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                           <div className="flex gap-1">
                             <button
                               onClick={() => activateCycle.mutate(cycle.id)}
-                              className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg"
+                              className="p-1.5 text-theme-primary hover:bg-theme-surface-2 rounded-lg"
                               title={de ? 'Aktivieren' : 'Activate'}
                             >
                               <Play className="h-3.5 w-3.5" />
@@ -433,7 +433,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
 
               {isLoading && (
                 <div className="text-center py-8">
-                  <div className="animate-spin h-6 w-6 border-2 border-teal-500 border-t-transparent rounded-full mx-auto" />
+                  <div className="animate-spin h-6 w-6 border-2 border-theme-primary border-t-transparent rounded-full mx-auto" />
                 </div>
               )}
             </div>
@@ -453,7 +453,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                   type="text"
                   value={editorName}
                   onChange={(e) => setEditorName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none"
                 />
               </div>
 
@@ -510,7 +510,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                               onClick={() => updatePhaseWeeks(index, w)}
                               className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${
                                 entry.weeks === w
-                                  ? 'bg-teal-500 text-white'
+                                  ? 'bg-theme-primary text-white'
                                   : 'bg-white/80 text-gray-600 hover:bg-white'
                               }`}
                             >
@@ -544,7 +544,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                 {!addPhaseOpen ? (
                   <button
                     onClick={() => setAddPhaseOpen(true)}
-                    className="w-full mt-2 py-2 border border-dashed border-gray-300 rounded-xl text-xs text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-colors flex items-center justify-center gap-1"
+                    className="w-full mt-2 py-2 border border-dashed border-gray-300 rounded-xl text-xs text-gray-500 hover:border-theme-primary hover:text-theme-primary transition-colors flex items-center justify-center gap-1"
                   >
                     <Plus className="h-3 w-3" />
                     {de ? 'Phase hinzufügen' : 'Add Phase'}
@@ -600,7 +600,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                     onChange={(e) => setEditorAutoRepeat(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500" />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-primary" />
                 </label>
               </div>
 
@@ -612,7 +612,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                   </label>
                   <PhaseTimeline phases={editorPhases} currentIndex={-1} de={de} />
                   {editorAutoRepeat && (
-                    <div className="flex items-center justify-center mt-1.5 text-[10px] text-teal-600">
+                    <div className="flex items-center justify-center mt-1.5 text-[10px] text-theme-primary">
                       <RotateCcw className="h-3 w-3 mr-1" />
                       {de ? 'Wiederholt sich endlos' : 'Repeats infinitely'}
                     </div>
@@ -632,7 +632,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                 <button
                   onClick={handleSave}
                   disabled={editorPhases.length === 0 || createCycle.isPending || updateCycle.isPending}
-                  className="flex-1 py-3 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-theme-primary text-white font-semibold rounded-xl hover:bg-theme-primary-2 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Check className="h-4 w-4" />
                   {createCycle.isPending || updateCycle.isPending
@@ -705,7 +705,7 @@ function PhaseTimeline({
                 className="text-center px-0.5"
                 style={{ width: `${Math.max(widthPct, 5)}%` }}
               >
-                <span className={`text-[9px] ${isCurrent ? 'font-bold text-teal-700' : 'text-gray-500'}`}>
+                <span className={`text-[9px] ${isCurrent ? 'font-bold text-theme-primary' : 'text-gray-500'}`}>
                   {de ? meta.de : meta.en}
                 </span>
                 <br />

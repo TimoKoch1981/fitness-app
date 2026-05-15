@@ -36,7 +36,7 @@ const CATEGORY_ICONS: Record<CelebrationCategory, typeof Trophy> = {
 
 const CATEGORY_COLORS: Record<CelebrationCategory, string> = {
   training: 'from-amber-400 to-orange-500',
-  nutrition: 'from-emerald-400 to-teal-500',
+  nutrition: 'bg-theme-primary',
   body: 'from-blue-400 to-indigo-500',
   health: 'from-rose-400 to-pink-500',
   streak: 'from-orange-400 to-red-500',

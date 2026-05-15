@@ -40,9 +40,9 @@ export function AuthCallbackPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br bg-theme-bg flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <div className="w-12 h-12 border-4 border-theme-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-gray-600">{t.common?.loading || 'Laden...'}</p>
       </div>
     </div>

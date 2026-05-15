@@ -58,7 +58,7 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
 
   if (success) {
     return (
-      <div className={`flex items-center gap-2 text-teal-600 text-sm font-medium ${className}`}>
+      <div className={`flex items-center gap-2 text-theme-primary text-sm font-medium ${className}`}>
         <Check className="h-4 w-4" />
         {t.recipes.mealLogged}
       </div>
@@ -69,7 +69,7 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
     return (
       <button
         onClick={() => setShowOptions(true)}
-        className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 transition-all ${className}`}
+        className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 transition-all ${className}`}
       >
         <UtensilsCrossed className="h-4 w-4" />
         {t.recipes.logAsMeal}
@@ -108,7 +108,7 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
           <p className="text-[10px] text-gray-400">kcal</p>
         </div>
         <div>
-          <p className="text-sm font-bold text-teal-600">
+          <p className="text-sm font-bold text-theme-primary">
             {Math.round(recipe.protein_per_serving * scaleFactor)}g
           </p>
           <p className="text-[10px] text-gray-400">{t.recipes.protein}</p>
@@ -135,7 +135,7 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
             onClick={() => setMealType(mt.value)}
             className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               mealType === mt.value
-                ? 'bg-teal-500 text-white'
+                ? 'bg-theme-primary text-white'
                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
           >
@@ -155,7 +155,7 @@ export function RecipeToMealButton({ recipe, currentServings, className }: Recip
         <button
           onClick={handleLog}
           disabled={addMeal.isPending}
-          className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
+          className="flex-1 py-2 bg-gradient-to-r bg-theme-primary text-white text-sm font-medium rounded-lg hover:bg-theme-primary-2 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
         >
           {addMeal.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
