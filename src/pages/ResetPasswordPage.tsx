@@ -100,14 +100,14 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-theme-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t.auth.resetPassword}</h2>
+        <form onSubmit={handleSubmit} className="bg-theme-surface rounded-theme-lg border border-theme-line p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-theme-ink">{t.auth.resetPassword}</h2>
 
           {ready === 'pending' && (
-            <div className="flex items-center gap-3 bg-gray-50 text-gray-500 text-sm p-3 rounded-lg">
-              <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center gap-3 bg-theme-surface-2 text-theme-ink-2 text-sm p-3 rounded-theme-md">
+              <div className="w-4 h-4 border-2 border-theme-primary border-t-transparent rounded-full animate-spin" />
               {isDE
                 ? 'Reset-Link wird geprüft …'
                 : 'Verifying reset link …'}
@@ -116,14 +116,14 @@ export function ResetPasswordPage() {
 
           {ready === 'invalid_link' && (
             <div className="space-y-3">
-              <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">
+              <div className="bg-red-50 text-red-700 text-sm p-3 rounded-theme-md">
                 {isDE
                   ? 'Der Reset-Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.'
                   : 'The reset link is invalid or expired. Please request a new one.'}
               </div>
               <Link
                 to="/forgot-password"
-                className="block w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg text-center hover:from-teal-600 hover:to-emerald-700 transition-all"
+                className="block w-full py-2.5 bg-theme-primary text-theme-primary-on font-medium rounded-theme-md text-center hover:bg-theme-primary-2 transition-colors"
               >
                 {isDE ? 'Neuen Reset anfordern' : 'Request new reset'}
               </Link>
@@ -131,7 +131,7 @@ export function ResetPasswordPage() {
           )}
 
           {ready === 'ready' && success && (
-            <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg">
+            <div className="bg-green-50 text-green-700 text-sm p-3 rounded-theme-md">
               {t.auth.passwordUpdated}
             </div>
           )}
@@ -139,13 +139,13 @@ export function ResetPasswordPage() {
           {ready === 'ready' && !success && (
             <>
               {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg" role="alert">
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-theme-md" role="alert">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="reset-password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="reset-password" className="block text-sm font-medium text-theme-ink mb-1">
                   {t.auth.newPassword}
                 </label>
                 <input
@@ -154,12 +154,12 @@ export function ResetPasswordPage() {
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                  className="w-full px-3 py-2 bg-theme-surface border border-theme-line rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-colors"
                   required
                   minLength={8}
                   autoFocus
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-theme-ink-3 mt-1">
                   {isDE
                     ? 'Mindestens 8 Zeichen. Idealerweise lang und einzigartig.'
                     : 'At least 8 characters. Long and unique is best.'}
@@ -167,7 +167,7 @@ export function ResetPasswordPage() {
               </div>
 
               <div>
-                <label htmlFor="reset-confirm" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="reset-confirm" className="block text-sm font-medium text-theme-ink mb-1">
                   {t.auth.confirmNewPassword}
                 </label>
                 <input
@@ -176,7 +176,7 @@ export function ResetPasswordPage() {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                  className="w-full px-3 py-2 bg-theme-surface border border-theme-line rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-colors"
                   required
                   minLength={8}
                 />
@@ -185,7 +185,7 @@ export function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+                className="w-full py-2.5 bg-theme-primary text-theme-primary-on font-medium rounded-theme-md hover:bg-theme-primary-2 disabled:opacity-50 transition-colors"
               >
                 {submitting ? t.common.loading : t.auth.updatePassword}
               </button>

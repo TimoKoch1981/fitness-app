@@ -61,16 +61,16 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-theme-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-md p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t.auth.resetPassword}</h2>
+        <div className="bg-theme-surface rounded-theme-lg border border-theme-line p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-theme-ink">{t.auth.resetPassword}</h2>
 
           {sentTo ? (
             // v14.22: Reichere Success-UX. Vorher nur ein gruener Banner —
             // Nutzer wusste nicht, was zu tun ist, wenn keine Mail kommt.
             <div className="space-y-3">
-              <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-lg flex gap-3">
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-theme-md flex gap-3">
                 <Mail className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium">
@@ -84,7 +84,7 @@ export function ForgotPasswordPage() {
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs p-3 rounded-lg flex gap-2">
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs p-3 rounded-theme-md flex gap-2">
                 <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <p>
                   {isDE
@@ -97,7 +97,7 @@ export function ForgotPasswordPage() {
                 type="button"
                 onClick={handleResend}
                 disabled={cooldown > 0 || submitting}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-teal-300 text-teal-600 font-medium rounded-lg hover:bg-teal-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-theme-surface border border-theme-primary text-theme-primary font-medium rounded-theme-md hover:bg-theme-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 <RotateCw className="h-4 w-4" />
                 {submitting
@@ -110,27 +110,27 @@ export function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => { setSentTo(null); setEmail(''); }}
-                className="w-full text-xs text-gray-500 hover:text-gray-700 underline"
+                className="w-full text-xs text-theme-ink-2 hover:text-theme-ink underline"
               >
                 {isDE ? 'Andere E-Mail verwenden' : 'Use a different email'}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-theme-ink-2">
                 {isDE
                   ? 'Trag deine E-Mail ein — wir schicken dir einen Link zum Zurücksetzen.'
                   : 'Enter your email — we will send you a reset link.'}
               </p>
 
               {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg" role="alert">
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-theme-md" role="alert">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="forgot-email" className="block text-sm font-medium text-theme-ink mb-1">
                   {t.auth.email}
                 </label>
                 <input
@@ -139,7 +139,7 @@ export function ForgotPasswordPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                  className="w-full px-3 py-2 bg-theme-surface border border-theme-line rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-colors"
                   required
                   autoFocus
                 />
@@ -148,7 +148,7 @@ export function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={submitting || cooldown > 0}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full py-2.5 bg-theme-primary text-theme-primary-on font-medium rounded-theme-md hover:bg-theme-primary-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {submitting
                   ? t.common.loading
@@ -159,8 +159,8 @@ export function ForgotPasswordPage() {
             </form>
           )}
 
-          <p className="text-center text-sm text-gray-500 pt-2 border-t border-gray-100">
-            <Link to="/login" className="text-teal-600 hover:underline">
+          <p className="text-center text-sm text-theme-ink-2 pt-2 border-t border-theme-line">
+            <Link to="/login" className="text-theme-primary hover:underline">
               {t.common.back}
             </Link>
           </p>
