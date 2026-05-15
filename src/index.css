@@ -133,6 +133,9 @@ body {
   --font-theme-display:     var(--theme-font-display);
   --font-theme-numeric:     var(--theme-font-numeric);
   --font-theme-sans:        var(--theme-font-sans);
+  --radius-theme-sm:        var(--theme-r-sm);
+  --radius-theme-md:        var(--theme-r-md);
+  --radius-theme-lg:        var(--theme-r-lg);
 }
 
 /* ── Studio (Default, Light) ───────────────────────────────────────────────── */

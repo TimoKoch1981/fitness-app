@@ -147,7 +147,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-theme-bg flex items-center justify-center px-4 relative">
       {/* Language Selector — top right corner */}
       <div className="absolute top-4 right-4 z-10">
         <LanguageSelector />
@@ -156,31 +156,28 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg" aria-hidden="true">
-            <span className="text-2xl text-white font-bold">FB</span>
+          <div className="w-16 h-16 bg-theme-primary rounded-theme-lg mx-auto mb-4 flex items-center justify-center" aria-hidden="true">
+            <span className="text-2xl text-theme-primary-on font-bold tracking-tight">FB</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{APP_NAME}</h1>
-          <p className="text-sm text-gray-500 mt-1">{t.app.tagline}</p>
+          <h1 className="text-2xl font-semibold text-theme-ink font-theme-display tracking-tight">{APP_NAME}</h1>
+          <p className="text-sm text-theme-ink-2 mt-1">{t.app.tagline}</p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t.auth.login}</h2>
+        <form onSubmit={handleSubmit} className="bg-theme-surface rounded-theme-lg border border-theme-line p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-theme-ink">{t.auth.login}</h2>
 
           {error && (
-            <div role="alert" aria-live="assertive" className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
+            <div role="alert" aria-live="assertive" className="bg-red-50 text-red-600 text-sm p-3 rounded-theme-md">
               {error}
             </div>
           )}
 
           {emailNotConfirmed && (
-            <div role="alert" aria-live="assertive" className="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-lg space-y-2">
-              <div className="flex items-start gap-2">
-                <span className="text-lg leading-none">✉️</span>
-                <div>
-                  <p className="font-medium">{t.auth.emailNotConfirmedTitle}</p>
-                  <p className="text-amber-700 mt-0.5">{t.auth.emailNotConfirmedMessage}</p>
-                </div>
+            <div role="alert" aria-live="assertive" className="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-theme-md space-y-2">
+              <div>
+                <p className="font-medium">{t.auth.emailNotConfirmedTitle}</p>
+                <p className="text-amber-700 mt-0.5">{t.auth.emailNotConfirmedMessage}</p>
               </div>
               {/* OTP Code Input — enter 6-digit code from email */}
               <div className="flex gap-2">
@@ -191,20 +188,20 @@ export function LoginPage() {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                   placeholder={(t.auth as Record<string, string>).otpPlaceholder || '6-stelliger Code'}
-                  className="flex-1 px-3 py-1.5 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-center tracking-widest font-mono"
+                  className="flex-1 px-3 py-1.5 text-sm border border-amber-300 rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none text-center tracking-widest font-theme-numeric"
                 />
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={verifyingOtp || otpCode.length < 6}
-                  className="px-4 py-1.5 text-sm bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                  className="px-4 py-1.5 text-sm bg-theme-primary hover:bg-theme-primary-2 text-theme-primary-on font-medium rounded-theme-md transition-colors disabled:opacity-50"
                 >
                   {verifyingOtp ? '...' : ((t.auth as Record<string, string>).verifyCode || 'Bestätigen')}
                 </button>
               </div>
 
               {resendSuccess ? (
-                <p className="text-emerald-600 font-medium text-center">
+                <p className="text-theme-success font-medium text-center">
                   {t.auth.confirmationResent}
                 </p>
               ) : (
@@ -212,7 +209,7 @@ export function LoginPage() {
                   type="button"
                   onClick={handleResendConfirmation}
                   disabled={resending}
-                  className="w-full py-1.5 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-medium rounded-lg transition-colors disabled:opacity-50"
+                  className="w-full py-1.5 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-medium rounded-theme-md transition-colors disabled:opacity-50"
                 >
                   {resending ? t.common.loading : t.auth.resendConfirmation}
                 </button>
@@ -220,13 +217,15 @@ export function LoginPage() {
             </div>
           )}
 
-          {/* OAuth Social Login Buttons — always visible */}
+          {/* OAuth Social Login Buttons — always visible.
+              Brand-Farben (Google, Facebook, Apple) bleiben original — eigene Brand-Identitäten,
+              nicht Teil unseres Theme-Systems. */}
           <div className="space-y-2">
             <button
               type="button"
               onClick={() => handleOAuthSignIn('google')}
               disabled={!!oauthLoading || submitting}
-              className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 py-2.5 border border-theme-line rounded-theme-md bg-theme-surface hover:bg-theme-surface-2 text-theme-ink font-medium text-sm transition-colors disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -241,7 +240,7 @@ export function LoginPage() {
               type="button"
               onClick={() => handleOAuthSignIn('facebook')}
               disabled={!!oauthLoading || submitting}
-              className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium text-sm transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 py-2.5 rounded-theme-md bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium text-sm transition-colors disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -255,7 +254,7 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleOAuthSignIn('apple')}
                 disabled={!!oauthLoading || submitting}
-                className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-2.5 border border-theme-line rounded-theme-md bg-theme-surface hover:bg-theme-surface-2 text-theme-ink font-medium text-sm transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.12 4.45-3.74 4.25z"/>
@@ -268,16 +267,16 @@ export function LoginPage() {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-theme-line" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-gray-400">{(t.auth as Record<string, string>).orWithEmail || 'oder mit E-Mail'}</span>
+              <span className="bg-theme-surface px-3 text-theme-ink-3">{(t.auth as Record<string, string>).orWithEmail || 'oder mit E-Mail'}</span>
             </div>
           </div>
 
           {/* Email */}
           <div>
-            <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-email" className="block text-sm font-medium text-theme-ink mb-1">
               {t.auth.email}
             </label>
             <input
@@ -286,14 +285,14 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
+              className="w-full px-3 py-2 bg-theme-surface border border-theme-line rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-colors"
               required
             />
           </div>
 
           {/* Password with visibility toggle */}
           <div>
-            <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-password" className="block text-sm font-medium text-theme-ink mb-1">
               {t.auth.password}
             </label>
             <div className="relative">
@@ -303,13 +302,13 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
+                className="w-full px-3 py-2 pr-10 bg-theme-surface border border-theme-line rounded-theme-md focus:ring-2 focus:ring-theme-primary focus:border-theme-primary outline-none transition-colors"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-theme-ink-3 hover:text-theme-ink-2 transition-colors"
                 tabIndex={-1}
                 aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
               >
@@ -322,18 +321,18 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-emerald-700 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 bg-theme-primary text-theme-primary-on font-medium rounded-theme-md hover:bg-theme-primary-2 disabled:opacity-50 transition-colors"
           >
             {submitting ? t.common.loading : t.auth.login}
           </button>
 
-          <div className="text-center text-sm text-gray-500 space-y-2">
-            <Link to="/forgot-password" className="block text-teal-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
+          <div className="text-center text-sm text-theme-ink-2 space-y-2">
+            <Link to="/forgot-password" className="block text-theme-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary rounded">
               {t.auth.forgotPassword}
             </Link>
             <p>
               {t.auth.noAccount}{' '}
-              <Link to="/register" className="text-teal-700 font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
+              <Link to="/register" className="text-theme-primary font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary rounded">
                 {t.auth.register}
               </Link>
             </p>
@@ -341,12 +340,12 @@ export function LoginPage() {
         </form>
 
         {/* Legal Links */}
-        <div className="mt-6 flex justify-center gap-4 text-xs text-gray-400">
-          <Link to="/impressum" className="hover:text-teal-600 transition-colors">
+        <div className="mt-6 flex justify-center gap-4 text-xs text-theme-ink-3">
+          <Link to="/impressum" className="hover:text-theme-primary transition-colors">
             {t.legal.impressumTitle}
           </Link>
           <span>|</span>
-          <Link to="/datenschutz" className="hover:text-teal-600 transition-colors">
+          <Link to="/datenschutz" className="hover:text-theme-primary transition-colors">
             {t.legal.privacyPolicy}
           </Link>
         </div>

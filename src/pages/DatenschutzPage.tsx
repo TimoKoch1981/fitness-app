@@ -25,55 +25,55 @@ export function DatenschutzPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 py-8 px-4">
+    <div className="min-h-screen bg-theme-bg py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 mb-4"
+            className="inline-flex items-center gap-1 text-sm text-theme-primary hover:text-theme-primary-2 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             {t.common.back}
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl flex items-center justify-center shadow">
-              <Shield className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-theme-primary rounded-theme-md flex items-center justify-center">
+              <Shield className="w-5 h-5 text-theme-primary-on" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{t.privacy.title}</h1>
+            <h1 className="text-2xl font-semibold text-theme-ink font-theme-display tracking-tight">{t.privacy.title}</h1>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-theme-ink-2">
             {t.privacy.lastUpdated}: 28.02.2026
           </p>
         </div>
 
         {/* Content Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-8">
+        <div className="bg-theme-surface rounded-theme-lg border border-theme-line p-6 space-y-8">
 
           {/* 1. Verantwortlicher */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               1. {t.privacy.controllerTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-1">
+            <div className="text-theme-ink text-sm space-y-1">
               <p className="font-medium">Timo Koch</p>
               <p>{t.legal.address}</p>
               <p>
-                <span className="text-gray-500">{t.legal.email}: </span>
-                <a href="mailto:datenschutz@fudda.de" className="text-teal-600 hover:underline">datenschutz@fudda.de</a>
+                <span className="text-theme-ink-2">{t.legal.email}: </span>
+                <a href="mailto:datenschutz@fudda.de" className="text-theme-primary hover:underline">datenschutz@fudda.de</a>
               </p>
             </div>
           </section>
 
           {/* 2. Uebersicht */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               2. {t.privacy.overviewTitle}
             </h2>
-            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+            <p className="text-theme-ink text-sm leading-relaxed mb-3">
               {t.privacy.overviewText}
             </p>
-            <ul className="text-gray-700 text-sm space-y-1 list-disc list-inside">
+            <ul className="text-theme-ink text-sm space-y-1 list-disc list-inside">
               <li>{t.privacy.dataTypeAccount}</li>
               <li>{t.privacy.dataTypeHealth}</li>
               <li>{t.privacy.dataTypeNutrition}</li>
@@ -85,18 +85,19 @@ export function DatenschutzPage() {
 
           {/* 3. Rechtsgrundlagen */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               3. {t.privacy.legalBasisTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-2 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-2 leading-relaxed">
               <p><strong>{t.privacy.legalBasisConsent}:</strong> {t.privacy.legalBasisConsentText}</p>
               <p><strong>{t.privacy.legalBasisContract}:</strong> {t.privacy.legalBasisContractText}</p>
               <p><strong>{t.privacy.legalBasisLegitimate}:</strong> {t.privacy.legalBasisLegitimateText}</p>
             </div>
           </section>
 
-          {/* 4. Gesundheitsdaten (Art. 9 DSGVO) */}
-          <section className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          {/* 4. Gesundheitsdaten (Art. 9 DSGVO) — bewusst amber: kontextuelle
+              compliance-Warnung, folgt nicht der Studio-Palette. */}
+          <section className="bg-amber-50 border border-amber-200 rounded-theme-md p-4">
             <h2 className="text-lg font-semibold text-amber-900 mb-3">
               4. {t.privacy.healthDataTitle}
             </h2>
@@ -116,10 +117,10 @@ export function DatenschutzPage() {
 
           {/* 5. KI-Verarbeitung */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               5. {t.privacy.aiProcessingTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-2 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-2 leading-relaxed">
               <p>{t.privacy.aiProcessingText}</p>
               <p><strong>{t.privacy.aiProvider}:</strong> {t.privacy.aiProviderText}</p>
               <p><strong>{t.privacy.aiDataMinimization}:</strong> {t.privacy.aiDataMinimizationText}</p>
@@ -129,10 +130,10 @@ export function DatenschutzPage() {
 
           {/* 6. Hosting & Speicherort */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               6. {t.privacy.hostingTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-2 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-2 leading-relaxed">
               <p>{t.privacy.hostingText}</p>
               <p><strong>{t.privacy.hostingLocation}:</strong> {t.privacy.hostingLocationText}</p>
               <p><strong>{t.privacy.hostingProvider}:</strong> {t.privacy.hostingProviderText}</p>
@@ -142,10 +143,10 @@ export function DatenschutzPage() {
 
           {/* 7. Cookies & Local Storage */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               7. {t.privacy.cookiesTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-2 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-2 leading-relaxed">
               <p>{t.privacy.cookiesText}</p>
               <p><strong>{t.privacy.cookiesEssential}:</strong> {t.privacy.cookiesEssentialText}</p>
               <p>{t.privacy.cookiesNoTracking}</p>
@@ -154,10 +155,10 @@ export function DatenschutzPage() {
 
           {/* 8. Drittdienste */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               8. {t.privacy.thirdPartyTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-3 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-3 leading-relaxed">
               <div>
                 <p className="font-medium">{t.privacy.thirdPartyOpenAI}</p>
                 <p>{t.privacy.thirdPartyOpenAIText}</p>
@@ -179,10 +180,10 @@ export function DatenschutzPage() {
 
           {/* 9. Betroffenenrechte */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               9. {t.privacy.rightsTitle}
             </h2>
-            <div className="text-gray-700 text-sm space-y-2 leading-relaxed">
+            <div className="text-theme-ink text-sm space-y-2 leading-relaxed">
               <p>{t.privacy.rightsIntro}</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li><strong>{t.privacy.rightAccess}</strong> — {t.privacy.rightAccessText}</li>
@@ -199,28 +200,28 @@ export function DatenschutzPage() {
 
           {/* 10. Aenderungen */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-theme-ink mb-3">
               10. {t.privacy.changesTitle}
             </h2>
-            <p className="text-gray-700 text-sm leading-relaxed">
+            <p className="text-theme-ink text-sm leading-relaxed">
               {t.privacy.changesText}
             </p>
           </section>
         </div>
 
         {/* Footer Links */}
-        <div className="mt-6 flex justify-center gap-6 text-sm text-gray-500">
-          <Link to="/impressum" className="hover:text-teal-600">
+        <div className="mt-6 flex justify-center gap-6 text-sm text-theme-ink-2">
+          <Link to="/impressum" className="hover:text-theme-primary transition-colors">
             {t.legal.impressumTitle}
           </Link>
-          <span>|</span>
-          <Link to="/login" className="hover:text-teal-600">
+          <span className="text-theme-ink-3">|</span>
+          <Link to="/login" className="hover:text-theme-primary transition-colors">
             {t.legal.backToApp}
           </Link>
         </div>
 
         {/* App Info */}
-        <div className="mt-4 text-center text-xs text-gray-400">
+        <div className="mt-4 text-center text-xs text-theme-ink-3">
           {APP_NAME} &copy; {new Date().getFullYear()}
         </div>
       </div>
