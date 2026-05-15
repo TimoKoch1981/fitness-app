@@ -8,6 +8,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { DailyCheckin } from '../../../types/health';
 
 const CHECKIN_KEY = 'daily_checkin';
@@ -54,7 +55,7 @@ export function useAddCheckin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddCheckinInput) => {
+    mutationFn: withTelemetry('log_checkin', 'ui', async (input: AddCheckinInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -73,7 +74,7 @@ export function useAddCheckin() {
 
       if (error) throw error;
       return data as DailyCheckin;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CHECKIN_KEY] });
     },

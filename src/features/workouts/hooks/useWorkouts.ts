@@ -111,11 +111,11 @@ export function useDeleteWorkout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, date }: { id: string; date: string }) => {
+    mutationFn: withTelemetry('delete_workout', 'ui', async ({ id, date }: { id: string; date: string }) => {
       const { error } = await supabase.from('workouts').delete().eq('id', id);
       if (error) throw error;
       return { id, date };
-    },
+    }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY, data.date] });
       queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY, 'recent'] });
@@ -136,7 +136,7 @@ export function useUpdateWorkout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateWorkoutInput) => {
+    mutationFn: withTelemetry('update_workout', 'ui', async (input: UpdateWorkoutInput) => {
       const { data, error } = await supabase
         .from('workouts')
         .update({ session_exercises: input.session_exercises })
@@ -146,7 +146,7 @@ export function useUpdateWorkout() {
 
       if (error) throw error;
       return data as Workout;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [WORKOUTS_KEY] });
       queryClient.invalidateQueries({ queryKey: ['workout_history'] });

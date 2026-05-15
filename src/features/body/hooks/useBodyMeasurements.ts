@@ -124,10 +124,10 @@ export function useDeleteBodyMeasurement() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_body_measurement', 'ui', async (id: string) => {
       const { error } = await supabase.from('body_measurements').delete().eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [BODY_KEY] });
     },

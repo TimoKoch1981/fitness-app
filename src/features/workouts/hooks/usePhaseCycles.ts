@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useUpdateProfile } from '../../auth/hooks/useProfile';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { TrainingPhaseCycle, CyclePhaseEntry } from '../types/phaseCycle';
 
 const QUERY_KEY = 'training_phase_cycles';
@@ -50,7 +51,7 @@ export function useCreatePhaseCycle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: {
+    mutationFn: withTelemetry('create_phase_cycle', 'ui', async (input: {
       name: string;
       phases: CyclePhaseEntry[];
       auto_repeat: boolean;
@@ -84,7 +85,7 @@ export function useCreatePhaseCycle() {
 
       if (error) throw error;
       return data as TrainingPhaseCycle;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -99,7 +100,7 @@ export function useUpdatePhaseCycle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: {
+    mutationFn: withTelemetry('update_phase_cycle', 'ui', async (input: {
       id: string;
       name?: string;
       phases?: CyclePhaseEntry[];
@@ -121,7 +122,7 @@ export function useUpdatePhaseCycle() {
 
       if (error) throw error;
       return data as TrainingPhaseCycle;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -138,7 +139,7 @@ export function useActivatePhaseCycle() {
   const updateProfile = useUpdateProfile();
 
   return useMutation({
-    mutationFn: async (cycleId: string) => {
+    mutationFn: withTelemetry('activate_phase_cycle', 'ui', async (cycleId: string) => {
       if (!user) throw new Error('Not authenticated');
 
       // Deactivate all
@@ -170,7 +171,7 @@ export function useActivatePhaseCycle() {
       }
 
       return cycle;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -182,13 +183,13 @@ export function useDeactivatePhaseCycle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: withTelemetry('deactivate_phase_cycle', 'ui', async () => {
       if (!user) throw new Error('Not authenticated');
       await supabase
         .from('training_phase_cycles')
         .update({ is_active: false })
         .eq('user_id', user.id);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -204,7 +205,7 @@ export function useAdvancePhase() {
   const updateProfile = useUpdateProfile();
 
   return useMutation({
-    mutationFn: async (cycle: TrainingPhaseCycle) => {
+    mutationFn: withTelemetry('advance_phase', 'ui', async (cycle: TrainingPhaseCycle) => {
       const nextIndex = cycle.current_phase_index + 1;
 
       // Check if we've reached the end
@@ -250,7 +251,7 @@ export function useAdvancePhase() {
       });
 
       return { phaseIndex: nextIndex };
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -265,13 +266,13 @@ export function useDeletePhaseCycle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_phase_cycle', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('training_phase_cycles')
         .delete()
         .eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },

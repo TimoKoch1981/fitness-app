@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Meal } from '../../../types/health';
 
 const MEALS_KEY = 'meals';
@@ -24,7 +25,7 @@ export function useCopyYesterdayMeals() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (sourceDate?: string): Promise<CopyResult> => {
+    mutationFn: withTelemetry('copy_yesterday_meals', 'ui', async (sourceDate?: string): Promise<CopyResult> => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -82,7 +83,7 @@ export function useCopyYesterdayMeals() {
       if (insertError) throw insertError;
 
       return { copiedCount: newMeals.length };
-    },
+    }),
     onSuccess: () => {
       // Invalidate today's meals to refresh the list
       queryClient.invalidateQueries({ queryKey: [MEALS_KEY, today()] });

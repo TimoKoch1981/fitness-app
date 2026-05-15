@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { ShoppingList, ShoppingListItem, ShoppingListItemInput } from '../types';
 
 const QUERY_KEY = 'shopping-lists';
@@ -73,7 +74,7 @@ export function useCreateShoppingList() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateListInput) => {
+    mutationFn: withTelemetry('create_shopping_list', 'ui', async (input: CreateListInput) => {
       if (!user) throw new Error('Not authenticated');
 
       // 1. Create list
@@ -109,7 +110,7 @@ export function useCreateShoppingList() {
       }
 
       return list as ShoppingList;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -122,13 +123,13 @@ export function useToggleShoppingItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, is_checked }: { id: string; is_checked: boolean }) => {
+    mutationFn: withTelemetry('toggle_shopping_item', 'ui', async ({ id, is_checked }: { id: string; is_checked: boolean }) => {
       const { error } = await supabase
         .from('shopping_list_items')
         .update({ is_checked })
         .eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -141,7 +142,7 @@ export function useAddItemsToList() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ listId, items }: { listId: string; items: ShoppingListItemInput[] }) => {
+    mutationFn: withTelemetry('add_items_to_list', 'ui', async ({ listId, items }: { listId: string; items: ShoppingListItemInput[] }) => {
       if (items.length === 0) return;
 
       const rows = items.map((item) => ({
@@ -158,7 +159,7 @@ export function useAddItemsToList() {
         .from('shopping_list_items')
         .insert(rows);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -171,14 +172,14 @@ export function useDeleteShoppingList() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (listId: string) => {
+    mutationFn: withTelemetry('delete_shopping_list', 'ui', async (listId: string) => {
       // Items are cascade-deleted via FK
       const { error } = await supabase
         .from('shopping_lists')
         .delete()
         .eq('id', listId);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -192,7 +193,7 @@ export function useCompleteShoppingList() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ listId, addToPantry = true }: { listId: string; addToPantry?: boolean }) => {
+    mutationFn: withTelemetry('complete_shopping_list', 'ui', async ({ listId, addToPantry = true }: { listId: string; addToPantry?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
 
       // 1. Get checked items from this list
@@ -232,7 +233,7 @@ export function useCompleteShoppingList() {
         .update({ is_active: false, completed_at: new Date().toISOString() })
         .eq('id', listId);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
       // Also invalidate pantry cache so new items show up
@@ -249,7 +250,7 @@ export function useAddShoppingItemToPantry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (item: { ingredient_name: string; ingredient_normalized: string; category: string }) => {
+    mutationFn: withTelemetry('add_shopping_item_to_pantry', 'ui', async (item: { ingredient_name: string; ingredient_normalized: string; category: string }) => {
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -269,7 +270,7 @@ export function useAddShoppingItemToPantry() {
         );
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });

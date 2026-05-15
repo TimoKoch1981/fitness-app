@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 
 // ── Constants ───────────────────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ export function useWaterIntake(date?: string) {
 
   // Add water mutation
   const addWaterMutation = useMutation({
-    mutationFn: (amountMl: number): Promise<WaterEntry> => {
+    mutationFn: withTelemetry('log_water', 'ui', (amountMl: number): Promise<WaterEntry> => {
       const entries = readEntries(storageKey);
       const newEntry: WaterEntry = {
         id: generateEntryId(),
@@ -132,19 +133,19 @@ export function useWaterIntake(date?: string) {
       entries.push(newEntry);
       writeEntries(storageKey, entries);
       return Promise.resolve(newEntry);
-    },
+    }),
     onSuccess: invalidate,
   });
 
   // Remove last water entry mutation
   const removeLastMutation = useMutation({
-    mutationFn: (): Promise<WaterEntry | null> => {
+    mutationFn: withTelemetry('undo_water', 'ui', (): Promise<WaterEntry | null> => {
       const entries = readEntries(storageKey);
       if (entries.length === 0) return Promise.resolve(null);
       const removed = entries.pop()!;
       writeEntries(storageKey, entries);
       return Promise.resolve(removed);
-    },
+    }),
     onSuccess: invalidate,
   });
 

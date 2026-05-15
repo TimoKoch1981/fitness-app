@@ -8,6 +8,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Reminder, ReminderLog, ReminderType, RepeatMode, TimePeriod } from '../../../types/health';
 
 const REMINDERS_KEY = 'reminders';
@@ -121,7 +122,7 @@ export function useAddReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddReminderInput) => {
+    mutationFn: withTelemetry('add_reminder', 'ui', async (input: AddReminderInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -145,7 +146,7 @@ export function useAddReminder() {
 
       if (error) throw error;
       return data as Reminder;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REMINDERS_KEY] });
     },
@@ -170,7 +171,7 @@ export function useUpdateReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...fields }: UpdateReminderInput) => {
+    mutationFn: withTelemetry('update_reminder', 'ui', async ({ id, ...fields }: UpdateReminderInput) => {
       // Build update payload, converting null to explicit null for clearable fields
       const payload: Record<string, unknown> = {};
       if (fields.title !== undefined) payload.title = fields.title;
@@ -193,7 +194,7 @@ export function useUpdateReminder() {
 
       if (error) throw error;
       return data as Reminder;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REMINDERS_KEY] });
     },
@@ -204,14 +205,14 @@ export function useToggleReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+    mutationFn: withTelemetry('toggle_reminder', 'ui', async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase
         .from('reminders')
         .update({ is_active })
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REMINDERS_KEY] });
     },
@@ -222,10 +223,10 @@ export function useDeleteReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_reminder', 'ui', async (id: string) => {
       const { error } = await supabase.from('reminders').delete().eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REMINDERS_KEY] });
     },
@@ -237,7 +238,7 @@ export function useCompleteReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (reminderId: string) => {
+    mutationFn: withTelemetry('complete_reminder', 'ui', async (reminderId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -252,7 +253,7 @@ export function useCompleteReminder() {
 
       if (error) throw error;
       return data as ReminderLog;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REMINDER_LOGS_KEY] });
     },

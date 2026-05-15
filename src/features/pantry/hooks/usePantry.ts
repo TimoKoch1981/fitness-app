@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { PantryItem, PantryStatus, BuyPreference, IngredientCatalogItem } from '../types';
 import { normalizeIngredient } from '../types';
 
@@ -97,7 +98,7 @@ export function useAddPantryItems() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (items: AddPantryItemInput[]) => {
+    mutationFn: withTelemetry('add_pantry_items', 'ui', async (items: AddPantryItemInput[]) => {
       if (!user) throw new Error('Not authenticated');
 
       const rows = items.map((item) => ({
@@ -121,7 +122,7 @@ export function useAddPantryItems() {
 
       if (error) throw error;
       return data;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
@@ -137,7 +138,7 @@ export function useAddFromCatalog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (catalogItems: IngredientCatalogItem[]) => {
+    mutationFn: withTelemetry('add_pantry_from_catalog', 'ui', async (catalogItems: IngredientCatalogItem[]) => {
       if (!user) throw new Error('Not authenticated');
 
       const rows = catalogItems.map((item) => ({
@@ -159,7 +160,7 @@ export function useAddFromCatalog() {
 
       if (error) throw error;
       return data;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
@@ -174,7 +175,7 @@ export function useUpdatePantryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: withTelemetry('update_pantry_item', 'ui', async ({
       id,
       status,
       buy_preference,
@@ -199,7 +200,7 @@ export function useUpdatePantryItem() {
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
@@ -214,14 +215,14 @@ export function useRemovePantryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('remove_pantry_item', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('user_pantry')
         .update({ status: 'empty' as PantryStatus, last_confirmed_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
@@ -236,14 +237,14 @@ export function useHardDeletePantryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('hard_delete_pantry_item', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('user_pantry')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });
@@ -259,7 +260,7 @@ export function useClearPantry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: withTelemetry('clear_pantry', 'ui', async () => {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
         .from('user_pantry')
@@ -267,7 +268,7 @@ export function useClearPantry() {
         .eq('user_id', user.id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-pantry'] });
       queryClient.invalidateQueries({ queryKey: ['user-pantry-all'] });

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { TrainingPlan, TrainingPlanDay, SplitType, PlanExercise, ReviewConfig } from '../../../types/health';
 
 const PLANS_KEY = 'training_plans';
@@ -121,7 +122,7 @@ export function useAddTrainingPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddTrainingPlanInput) => {
+    mutationFn: withTelemetry('save_training_plan', 'ui', async (input: AddTrainingPlanInput) => {
       // Use provided user_id, or refresh session to get a fresh one
       let userId = input.user_id;
       if (!userId) {
@@ -191,7 +192,7 @@ export function useAddTrainingPlan() {
 
       console.log(`[TrainingPlan] ✅ Plan "${input.name}" saved with ID ${plan.id}, ${insertedDays?.length ?? 0} days inserted`);
       return plan as TrainingPlan;
-    },
+    }),
     onSuccess: () => {
       // Explicitly invalidate both the list AND the active plan query
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
@@ -220,7 +221,7 @@ export function useUpdateTrainingPlanCalibration() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CalibrationSaveInput) => {
+    mutationFn: withTelemetry('save_calibration', 'ui', async (input: CalibrationSaveInput) => {
       console.log(`[CalibrationWizard] Saving calibration for plan ${input.planId}`);
 
       // Step 1: Update training_plans row (ai_supervised + review_config)
@@ -251,7 +252,7 @@ export function useUpdateTrainingPlanCalibration() {
       }
 
       console.log('[CalibrationWizard] ✅ Calibration saved successfully');
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -277,7 +278,7 @@ export function useUpdateTrainingPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateTrainingPlanInput) => {
+    mutationFn: withTelemetry('update_training_plan', 'ui', async (input: UpdateTrainingPlanInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -294,7 +295,7 @@ export function useUpdateTrainingPlan() {
       }
 
       console.log(`[TrainingPlan] ✅ Plan ${id} metadata updated`);
-    },
+    }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -310,13 +311,13 @@ export function useDeleteTrainingPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_training_plan', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('training_plans')
         .delete()
         .eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -333,7 +334,7 @@ export function useActivatePlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (planId: string) => {
+    mutationFn: withTelemetry('activate_training_plan', 'ui', async (planId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -360,7 +361,7 @@ export function useActivatePlan() {
       }
 
       console.log(`[TrainingPlan] ✅ Plan ${planId} activated`);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -377,7 +378,7 @@ export function useDuplicatePlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (planId: string) => {
+    mutationFn: withTelemetry('duplicate_training_plan', 'ui', async (planId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -442,7 +443,7 @@ export function useDuplicatePlan() {
 
       console.log(`[TrainingPlan] ✅ Plan duplicated: "${newPlan.name}" (${newPlan.id})`);
       return newPlan as TrainingPlan;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
     },
@@ -470,7 +471,7 @@ export function useAddTrainingPlanDay() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddTrainingPlanDayInput) => {
+    mutationFn: withTelemetry('add_training_plan_day', 'ui', async (input: AddTrainingPlanDayInput) => {
       // Resolve user
       let userId = input.user_id;
       if (!userId) {
@@ -522,7 +523,7 @@ export function useAddTrainingPlanDay() {
       }
 
       console.log(`[TrainingPlan] ✅ Day "${input.name}" added to plan ${activePlan.id}`);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -550,7 +551,7 @@ export function useModifyTrainingPlanDay() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: ModifyTrainingPlanDayInput) => {
+    mutationFn: withTelemetry('modify_training_plan_day', 'ui', async (input: ModifyTrainingPlanDayInput) => {
       let userId = input.user_id;
       if (!userId) {
         const { ensureFreshSession } = await import('../../../lib/refreshSession');
@@ -598,7 +599,7 @@ export function useModifyTrainingPlanDay() {
       }
 
       console.log('[TrainingPlan] Day ' + input.day_number + ' modified in plan ' + activePlan.id);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -620,7 +621,7 @@ export function useRemoveTrainingPlanDay() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: RemoveTrainingPlanDayInput) => {
+    mutationFn: withTelemetry('remove_training_plan_day', 'ui', async (input: RemoveTrainingPlanDayInput) => {
       let userId = input.user_id;
       if (!userId) {
         const { ensureFreshSession } = await import('../../../lib/refreshSession');
@@ -670,7 +671,7 @@ export function useRemoveTrainingPlanDay() {
       }
 
       console.log('[TrainingPlan] Day ' + input.day_number + ' removed from plan ' + activePlan.id);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY, 'active'] });
@@ -684,13 +685,13 @@ export function useRemoveTrainingPlanDay() {
 export function useDeleteTrainingPlanDay() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (dayId: string) => {
+    mutationFn: withTelemetry('delete_training_plan_day', 'ui', async (dayId: string) => {
       const { error } = await supabase
         .from('training_plan_days')
         .delete()
         .eq('id', dayId);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
     },

@@ -124,7 +124,7 @@ export function useUpdateMeal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, _previousDate, ...updates }: Partial<Meal> & { id: string; _previousDate?: string }) => {
+    mutationFn: withTelemetry('update_meal', 'ui', async ({ id, _previousDate, ...updates }: Partial<Meal> & { id: string; _previousDate?: string }) => {
       const { data, error } = await supabase
         .from('meals')
         .update(updates)
@@ -134,7 +134,7 @@ export function useUpdateMeal() {
 
       if (error) throw error;
       return { meal: data as Meal, _previousDate };
-    },
+    }),
     onSuccess: ({ meal, _previousDate }) => {
       queryClient.invalidateQueries({ queryKey: [MEALS_KEY, meal.date] });
       // If date was changed, also refresh the old date's meal list
@@ -149,11 +149,11 @@ export function useDeleteMeal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, date }: { id: string; date: string }) => {
+    mutationFn: withTelemetry('delete_meal', 'ui', async ({ id, date }: { id: string; date: string }) => {
       const { error } = await supabase.from('meals').delete().eq('id', id);
       if (error) throw error;
       return { id, date };
-    },
+    }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [MEALS_KEY, data.date] });
     },

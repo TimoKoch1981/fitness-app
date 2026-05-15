@@ -16,6 +16,7 @@
  */
 
 import type { Language } from '../../../i18n';
+import { logActionEvent } from '../../../lib/telemetry/actionLog';
 
 export type CockpitTab = 'today' | 'week' | 'month';
 
@@ -51,7 +52,17 @@ export function CockpitTabs({ active, onChange, language }: CockpitTabsProps) {
             aria-selected={isActive}
             aria-controls={`cockpit-panel-${tab}`}
             id={`cockpit-tab-${tab}`}
-            onClick={() => onChange(tab)}
+            onClick={() => {
+              if (!isActive) {
+                void logActionEvent({
+                  actionType: 'ui_cockpit_tab_change',
+                  phase: 'execute',
+                  status: 'success',
+                  metadata: { source: 'ui', from: active, to: tab },
+                });
+              }
+              onChange(tab);
+            }}
             className={`
               relative px-1 py-3 mr-7 text-[15px] font-semibold tracking-[-0.005em]
               transition-colors cursor-pointer

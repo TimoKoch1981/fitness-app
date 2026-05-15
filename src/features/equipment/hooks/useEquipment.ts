@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Equipment, GymProfile, UserEquipment } from '../../../types/health';
 
 // ── Query Keys ──────────────────────────────────────────────────────────
@@ -81,7 +82,7 @@ export function useSetUserEquipment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
+    mutationFn: withTelemetry('set_user_equipment', 'ui', async (params: {
       equipment_ids: string[];
       gym_profile_id?: string | null;
       custom_name?: string;
@@ -107,7 +108,7 @@ export function useSetUserEquipment() {
 
       if (error) throw error;
       return data;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: USER_EQUIPMENT_KEY });
     },

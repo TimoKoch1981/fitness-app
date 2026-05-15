@@ -6,13 +6,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 
 export function useAddRecipe() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: Record<string, unknown>) => {
+    mutationFn: withTelemetry('save_recipe', 'agent', async (input: Record<string, unknown>) => {
       if (!user?.id) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('recipes')
@@ -21,7 +22,7 @@ export function useAddRecipe() {
         .single();
       if (error) throw error;
       return data;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },

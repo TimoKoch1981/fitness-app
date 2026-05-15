@@ -9,6 +9,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { Workout } from '../../../types/health';
 import type { ActiveWorkoutState } from '../context/ActiveWorkoutContext';
 
@@ -75,8 +76,10 @@ export function useAnyInProgressWorkout() {
 export function useSaveDraft() {
   const queryClient = useQueryClient();
 
+  // 60s-Auto-Save: source='background' damit Dashboard die Auto-Saves
+  // von User-Actions trennen kann (sonst dominieren sie die Telemetrie).
   return useMutation({
-    mutationFn: async (input: {
+    mutationFn: withTelemetry('save_workout_draft', 'background', async (input: {
       session: ActiveWorkoutState;
       userId: string;
     }) => {
@@ -129,7 +132,7 @@ export function useSaveDraft() {
             status: 'in_progress',
           });
       }
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [DRAFT_KEY] });
     },
@@ -143,12 +146,12 @@ export function useAbortDraft() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (workoutId: string) => {
+    mutationFn: withTelemetry('abort_workout_draft', 'ui', async (workoutId: string) => {
       await supabase
         .from('workouts')
         .update({ status: 'aborted', finished_at: new Date().toISOString() })
         .eq('id', workoutId);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [DRAFT_KEY] });
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
@@ -164,7 +167,7 @@ export function useCompleteDraft() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: {
+    mutationFn: withTelemetry('complete_workout_draft', 'ui', async (input: {
       workoutId: string;
       data: Record<string, unknown>;
     }) => {
@@ -177,7 +180,7 @@ export function useCompleteDraft() {
 
       if (error) throw error;
       return data as Workout;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [DRAFT_KEY] });
       queryClient.invalidateQueries({ queryKey: ['workouts'] });

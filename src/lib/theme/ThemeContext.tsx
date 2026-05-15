@@ -18,6 +18,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
+import { logActionEvent } from '../telemetry/actionLog';
 
 export type SurfaceMode = 'studio' | 'console';
 export type DensityMode = 'spacious' | 'comfortable' | 'compact';
@@ -97,16 +98,34 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setSurfaceMode = useCallback((mode: SurfaceMode) => {
     setSurfaceModeState(mode);
     try { localStorage.setItem(STORAGE_KEYS.surfaceMode, mode); } catch { /* noop */ }
+    void logActionEvent({
+      actionType: 'ui_theme_surface_change',
+      phase: 'execute',
+      status: 'success',
+      metadata: { source: 'ui', new_mode: mode },
+    });
   }, []);
 
   const setDensity = useCallback((d: DensityMode) => {
     setDensityState(d);
     try { localStorage.setItem(STORAGE_KEYS.density, d); } catch { /* noop */ }
+    void logActionEvent({
+      actionType: 'ui_theme_density_change',
+      phase: 'execute',
+      status: 'success',
+      metadata: { source: 'ui', new_density: d },
+    });
   }, []);
 
   const setAutoSwitchWorkout = useCallback((enabled: boolean) => {
     setAutoSwitchState(enabled);
     try { localStorage.setItem(STORAGE_KEYS.autoSwitch, String(enabled)); } catch { /* noop */ }
+    void logActionEvent({
+      actionType: 'ui_theme_auto_switch_toggle',
+      phase: 'execute',
+      status: 'success',
+      metadata: { source: 'ui', enabled },
+    });
   }, []);
 
   const setTempSurfaceMode = useCallback((mode: SurfaceMode | null) => {

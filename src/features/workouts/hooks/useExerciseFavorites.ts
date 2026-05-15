@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 
 export function useExerciseFavorites() {
   const { user } = useAuth();
@@ -28,7 +29,7 @@ export function useExerciseFavorites() {
   });
 
   const toggleFavorite = useMutation({
-    mutationFn: async (exerciseId: string) => {
+    mutationFn: withTelemetry('toggle_exercise_favorite', 'ui', async (exerciseId: string) => {
       if (!userId) throw new Error('Not authenticated');
 
       const isFav = favoriteIds.includes(exerciseId);
@@ -45,7 +46,7 @@ export function useExerciseFavorites() {
           .insert({ user_id: userId, exercise_id: exerciseId });
         if (error) throw error;
       }
-    },
+    }),
     onMutate: async (exerciseId: string) => {
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['exercise-favorites', userId] });

@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { SymptomLog, SymptomKey } from '../../../types/health';
 
 const SL_KEY = 'symptom_logs';
@@ -66,7 +67,7 @@ export function useAddSymptomLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddSymptomLogInput) => {
+    mutationFn: withTelemetry('log_symptom', 'ui', async (input: AddSymptomLogInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -89,7 +90,7 @@ export function useAddSymptomLog() {
 
       if (error) throw error;
       return data as SymptomLog;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SL_KEY] });
     },
@@ -101,11 +102,11 @@ export function useDeleteSymptomLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_symptom', 'ui', async (id: string) => {
       const { error } = await supabase.from('symptom_logs').delete().eq('id', id);
       if (error) throw error;
       return id;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SL_KEY] });
     },

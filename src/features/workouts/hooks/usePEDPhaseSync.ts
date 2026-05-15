@@ -15,6 +15,7 @@ import { supabase } from '../../../lib/supabase';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { useActivePlan } from './useTrainingPlans';
 import { getSmartPreset } from './useCalibration';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { ReviewConfig } from '../../../types/health';
 
 /**
@@ -28,7 +29,7 @@ export function usePEDPhaseSync() {
   const lastSyncedPhase = useRef<string | null>(null);
 
   const syncMutation = useMutation({
-    mutationFn: async ({ planId, updatedConfig }: { planId: string; updatedConfig: Partial<ReviewConfig> }) => {
+    mutationFn: withTelemetry('sync_ped_phase', 'background', async ({ planId, updatedConfig }: { planId: string; updatedConfig: Partial<ReviewConfig> }) => {
       // Read current review_config first
       const { data: plan, error: readError } = await supabase
         .from('training_plans')
@@ -54,7 +55,7 @@ export function usePEDPhaseSync() {
 
       if (error) throw error;
       return mergedConfig;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training_plans'] });
     },

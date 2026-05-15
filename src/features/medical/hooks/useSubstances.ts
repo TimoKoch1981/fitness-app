@@ -67,14 +67,14 @@ export function useToggleSubstance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+    mutationFn: withTelemetry('toggle_substance', 'ui', async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase
         .from('substances')
         .update({ is_active })
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCES_KEY] });
     },
@@ -85,14 +85,14 @@ export function useDeleteSubstance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_substance', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('substances')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCES_KEY] });
       queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });
@@ -176,14 +176,14 @@ export function useDeleteSubstanceLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_substance_log', 'ui', async (id: string) => {
       const { error } = await supabase
         .from('substance_logs')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUBSTANCE_LOGS_KEY] });
     },

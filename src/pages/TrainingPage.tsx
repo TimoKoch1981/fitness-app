@@ -26,6 +26,7 @@ import { HematocritAlert } from '../features/workouts/components/powerplus/Hemat
 import { BloodWorkDashboard } from '../features/workouts/components/powerplus/BloodWorkDashboard';
 import { PhaseSetupWizard } from '../features/nutrition/components/PhaseSetupWizard';
 import { PhaseCyclePlanner } from '../features/workouts/components/power/PhaseCyclePlanner';
+import { logActionEvent } from '../lib/telemetry/actionLog';
 
 export function TrainingPage() {
   const { t, language } = useTranslation();
@@ -129,7 +130,15 @@ export function TrainingPage() {
       <section className="mb-5">
         <div className="bg-theme-surface border border-theme-line rounded-theme-lg overflow-hidden">
           <button
-            onClick={() => navigate('/workout/active?mode=free')}
+            onClick={() => {
+              void logActionEvent({
+                actionType: 'ui_free_workout_hero_click',
+                phase: 'execute',
+                status: 'success',
+                metadata: { source: 'ui', page: 'training' },
+              });
+              navigate('/workout/active?mode=free');
+            }}
             className="w-full flex items-center gap-4 p-4 hover:bg-theme-surface-2 active:scale-[0.99] transition-all text-left group"
             data-tour-free-workout
           >

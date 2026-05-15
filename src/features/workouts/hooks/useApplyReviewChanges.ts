@@ -10,6 +10,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { today } from '../../../lib/utils';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { PlanExercise, ReviewConfig } from '../../../types/health';
 import type { ReviewChanges, ExerciseChange } from '../utils/reviewChanges';
 
@@ -23,7 +24,7 @@ export function useApplyReviewChanges() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: ApplyReviewInput) => {
+    mutationFn: withTelemetry('apply_review_changes', 'ui', async (input: ApplyReviewInput) => {
       const { planId, changes, currentReviewConfig } = input;
 
       if (changes.changes.length === 0) {
@@ -95,7 +96,7 @@ export function useApplyReviewChanges() {
 
       // Reset mesocycle for new cycle
       await resetMesocycle(planId, currentReviewConfig);
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training_plans'] });
       queryClient.invalidateQueries({ queryKey: ['workouts'] });

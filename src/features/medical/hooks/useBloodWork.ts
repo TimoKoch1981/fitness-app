@@ -145,10 +145,10 @@ export function useDeleteBloodWork() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_blood_work', 'ui', async (id: string) => {
       const { error } = await supabase.from('blood_work').delete().eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [BW_KEY] });
     },

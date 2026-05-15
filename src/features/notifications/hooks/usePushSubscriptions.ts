@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { subscribeToPush, unsubscribeFromPush, isWebPushSupported } from '../lib/pushSubscription';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 
 interface PushSubscription {
   id: string;
@@ -46,13 +47,13 @@ export function useToggleWebPush() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (enable: boolean) => {
+    mutationFn: withTelemetry('toggle_web_push', 'ui', async (enable: boolean) => {
       if (enable) {
         await subscribeToPush();
       } else {
         await unsubscribeFromPush();
       }
-    },
+    }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [PUSH_KEY] }),
   });
 }
@@ -62,7 +63,7 @@ export function useRegisterWhatsApp() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (phone: string) => {
+    mutationFn: withTelemetry('register_whatsapp', 'ui', async (phone: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -89,7 +90,7 @@ export function useRegisterWhatsApp() {
         });
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [PUSH_KEY] }),
   });
 }
@@ -99,7 +100,7 @@ export function useLinkTelegram() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (): Promise<string> => {
+    mutationFn: withTelemetry('link_telegram', 'ui', async (): Promise<string> => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -120,7 +121,7 @@ export function useLinkTelegram() {
       if (error) throw error;
 
       return linkToken;
-    },
+    }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [PUSH_KEY] }),
   });
 }
@@ -130,7 +131,7 @@ export function useRemovePushSubscription() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (subscriptionId: string) => {
+    mutationFn: withTelemetry('remove_push_subscription', 'ui', async (subscriptionId: string) => {
       // If it's a web push subscription, also unsubscribe from browser
       const { data } = await supabase
         .from('push_subscriptions')
@@ -148,7 +149,7 @@ export function useRemovePushSubscription() {
         .eq('id', subscriptionId);
 
       if (error) throw error;
-    },
+    }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [PUSH_KEY] }),
   });
 }
@@ -156,7 +157,7 @@ export function useRemovePushSubscription() {
 /** Send a test push notification to self */
 export function useSendTestPush() {
   return useMutation({
-    mutationFn: async (channel?: 'web_push' | 'whatsapp' | 'telegram') => {
+    mutationFn: withTelemetry('send_test_push', 'ui', async (channel?: 'web_push' | 'whatsapp' | 'telegram') => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
@@ -185,7 +186,7 @@ export function useSendTestPush() {
       }
 
       return response.json();
-    },
+    }),
   });
 }
 

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { MenstrualCycleLog, CyclePhase, FlowIntensity, CycleSymptom, CervicalMucus, SexualActivity } from '../../../types/health';
 
 const CYCLE_KEY = 'menstrual_cycle_logs';
@@ -162,7 +163,7 @@ export function useAddCycleLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddCycleLogInput) => {
+    mutationFn: withTelemetry('log_cycle', 'ui', async (input: AddCycleLogInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -190,7 +191,7 @@ export function useAddCycleLog() {
 
       if (error) throw error;
       return data as MenstrualCycleLog;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CYCLE_KEY] });
     },
@@ -202,7 +203,7 @@ export function useAddCycleLogBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (inputs: AddCycleLogInput[]) => {
+    mutationFn: withTelemetry('log_cycle_batch', 'ui', async (inputs: AddCycleLogInput[]) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -228,7 +229,7 @@ export function useAddCycleLogBatch() {
 
       if (error) throw error;
       return data as MenstrualCycleLog[];
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CYCLE_KEY] });
     },
@@ -240,10 +241,10 @@ export function useDeleteCycleLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_cycle', 'ui', async (id: string) => {
       const { error } = await supabase.from('menstrual_cycle_logs').delete().eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CYCLE_KEY] });
     },

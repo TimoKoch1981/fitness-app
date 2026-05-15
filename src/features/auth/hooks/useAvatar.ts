@@ -14,6 +14,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import { PROFILE_KEY } from './useProfile';
 
 const BUCKET = 'avatars';
@@ -34,7 +35,7 @@ export function useUploadAvatar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: withTelemetry('upload_avatar', 'ui', async (file: File) => {
       // 1. Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -70,7 +71,7 @@ export function useUploadAvatar() {
       if (profileError) throw profileError;
 
       return publicUrl;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] });
     },
@@ -83,7 +84,7 @@ export function useDeleteAvatar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: withTelemetry('delete_avatar', 'ui', async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -102,7 +103,7 @@ export function useDeleteAvatar() {
         .eq('id', user.id);
 
       if (profileError) throw profileError;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] });
     },

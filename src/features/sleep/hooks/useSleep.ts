@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { SleepLog } from '../../../types/health';
 
 const SLEEP_KEY = 'sleep_logs';
@@ -81,7 +82,7 @@ export function useAddSleepLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: AddSleepInput) => {
+    mutationFn: withTelemetry('log_sleep', 'ui', async (input: AddSleepInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -110,7 +111,7 @@ export function useAddSleepLog() {
 
       if (error) throw error;
       return data as SleepLog;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SLEEP_KEY] });
     },
@@ -122,10 +123,10 @@ export function useDeleteSleepLog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: withTelemetry('delete_sleep', 'ui', async (id: string) => {
       const { error } = await supabase.from('sleep_logs').delete().eq('id', id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SLEEP_KEY] });
     },

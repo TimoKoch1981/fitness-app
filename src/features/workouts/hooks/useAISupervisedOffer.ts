@@ -13,6 +13,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { TrainingPlan } from '../../../types/health';
 
 const OFFER_DISMISSED_PREFIX = 'fitbuddy_ai_offer_dismissed_';
@@ -47,14 +48,14 @@ export function useAISupervisedOffer(
   }, [plan?.id, plan?.ai_supervised, aiTrainerEnabled]);
 
   const acceptMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: withTelemetry('accept_ai_supervised', 'ui', async () => {
       if (!plan) throw new Error('No plan');
       const { error } = await supabase
         .from('training_plans')
         .update({ ai_supervised: true })
         .eq('id', plan.id);
       if (error) throw error;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training_plans'] });
     },

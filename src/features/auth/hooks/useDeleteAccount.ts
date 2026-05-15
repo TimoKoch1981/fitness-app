@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 
 /**
  * Hook fuer die vollstaendige Account-Loeschung (DSGVO Art. 17).
@@ -12,7 +13,7 @@ import { supabase } from '../../../lib/supabase';
  */
 export function useDeleteAccount() {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: withTelemetry('delete_account', 'ui', async () => {
       // 1. DB-Funktion aufrufen (loescht alles)
       const { error } = await supabase.rpc('delete_user_account');
       if (error) throw error;
@@ -30,6 +31,6 @@ export function useDeleteAccount() {
 
       // 3. Supabase Session beenden
       await supabase.auth.signOut();
-    },
+    }),
   });
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { withTelemetry } from '../../../lib/telemetry/actionLog';
 import type { UserProfile, Gender, BMRFormula, PersonalGoals, TrainingMode, TrainingPhase, CycleStatus, BuddyAvatarStyle } from '../../../types/health';
 
 export const PROFILE_KEY = 'profile';
@@ -86,7 +87,7 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateProfileInput) => {
+    mutationFn: withTelemetry('update_profile', 'ui', async (input: UpdateProfileInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -99,7 +100,7 @@ export function useUpdateProfile() {
 
       if (error) throw error;
       return data as UserProfile;
-    },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] });
     },
