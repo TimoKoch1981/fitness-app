@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Plus, Sparkles, Heart } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Sparkles, Heart, Play, ClipboardList } from 'lucide-react';
 import { PageShell } from '../shared/components/PageShell';
 import { useTranslation } from '../i18n';
 import { useTrainingMode } from '../shared/hooks/useTrainingMode';
@@ -29,6 +29,7 @@ import { PhaseCyclePlanner } from '../features/workouts/components/power/PhaseCy
 
 export function TrainingPage() {
   const { t, language } = useTranslation();
+  const navigate = useNavigate();
   const [showWorkoutDialog, setShowWorkoutDialog] = useState(false);
   const [showStartDialog, setShowStartDialog] = useState(false);
   // U2: Force switch to Plan tab when "Plan erstellen" is clicked
@@ -120,6 +121,47 @@ export function TrainingPage() {
           {showBloodWorkDashboard && <BloodWorkDashboard />}
         </div>
       )}
+
+      {/* v14.28 Stufe 3b — Hero-CTA: Direkt-Einstieg in Freies Training.
+          Loest User-Feedback "ich finde Freies Training nicht" — vorher
+          3-Klick-Pfad ueber Plus-FAB → Workout-Chip → Dialog → "Freies
+          Training". Jetzt 1 Klick auf der TrainingPage. */}
+      <section className="mb-5">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-lg overflow-hidden">
+          <button
+            onClick={() => navigate('/workout/active?mode=free')}
+            className="w-full flex items-center gap-4 p-4 hover:bg-theme-surface-2 active:scale-[0.99] transition-all text-left group"
+            data-tour-free-workout
+          >
+            <div className="w-12 h-12 bg-theme-primary rounded-theme-md flex items-center justify-center flex-shrink-0">
+              <Play className="h-6 w-6 text-theme-primary-on" strokeWidth={2} fill="currentColor" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-theme-ink">
+                {language === 'de' ? 'Freies Training starten' : 'Start Free Workout'}
+              </p>
+              <p className="text-[13px] text-theme-ink-2 mt-0.5">
+                {language === 'de'
+                  ? 'Übungen frei wählen, Sätze live tracken'
+                  : 'Pick exercises, track sets live'}
+              </p>
+            </div>
+            <span className="text-theme-ink-3 group-hover:text-theme-primary text-xl" aria-hidden="true">›</span>
+          </button>
+          <div className="border-t border-theme-line">
+            <button
+              onClick={() => setShowWorkoutDialog(true)}
+              className="w-full flex items-center gap-4 px-4 py-3 hover:bg-theme-surface-2 transition-colors text-left text-theme-ink-2"
+            >
+              <ClipboardList className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
+              <span className="flex-1 text-[13px]">
+                {language === 'de' ? 'Stattdessen abgeschlossenes Training loggen' : 'Or quick-log a completed workout'}
+              </span>
+              <span className="text-theme-ink-3" aria-hidden="true">›</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* ── KI-Trainer & Zyklus-Training Toggles ─────────────────────── */}
       <div className="space-y-2 mb-4">
