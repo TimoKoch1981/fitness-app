@@ -139,67 +139,66 @@ export function LeadingMetricCard({
   const PrimaryIcon = view.Icon;
 
   return (
-    <div className={`rounded-theme-lg p-5 border ${view.cardTone}`}>
-      <div className="flex items-center gap-1.5 mb-2">
-        <PrimaryIcon className="h-4 w-4 text-theme-primary" strokeWidth={1.5} />
-        <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.12em]">
-          {view.primaryLabel}
+    <div className={`rounded-theme-lg p-7 border ${view.cardTone}`}>
+      {/* Section-Eyebrow ueber dem Hero — gibt der Karte Editorial-Charakter */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-1.5">
+          <PrimaryIcon className="h-3.5 w-3.5 text-theme-primary" strokeWidth={1.5} />
+          <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
+            {view.primaryLabel}
+          </p>
+        </div>
+        <p className="text-[11px] text-theme-ink-3 font-theme-numeric tabular-nums">
+          {new Date().toLocaleDateString(isDE ? 'de-DE' : 'en-US', { day: '2-digit', month: '2-digit' })}
         </p>
       </div>
 
-      {/* Hero-Zahl: Source Serif Display fuer editoriale Anmutung (Phase 7 §1.1) */}
-      <div className="flex items-baseline gap-2 mb-1">
-        <NumericValue
-          value={view.primaryValue}
-          sign={view.primarySign}
-          variant="display"
-          locale={isDE ? 'de-DE' : 'en-US'}
-          className={`font-theme-display ${view.primaryColor}`}
-        />
-        <span className="text-base text-theme-ink-2 font-medium">kcal</span>
+      {/* HERO — Source Serif Display, drastisch groesser. Dominant auf dem Cockpit. */}
+      <div className="flex items-baseline gap-3 mb-2 leading-none">
+        <span className={`text-7xl md:text-8xl font-semibold tracking-tight font-theme-display tabular-nums ${view.primaryColor}`}>
+          {view.primarySign ?? ''}{view.primaryValue.toLocaleString(isDE ? 'de-DE' : 'en-US')}
+        </span>
+        <span className="text-lg text-theme-ink-2 font-medium tracking-tight">kcal</span>
       </div>
 
-      <p className="text-xs text-theme-ink-2 mb-3">{view.contextLine}</p>
+      <p className="text-xs text-theme-ink-2 mb-5 font-theme-numeric tabular-nums">{view.contextLine}</p>
 
-      {/* Progress bar (calories) */}
-      <div className="bg-theme-surface-2 rounded-full h-2 overflow-hidden mb-3">
+      {/* Progress bar (calories) — duenner, editorialer */}
+      <div className="bg-theme-surface-2 rounded-full h-1 overflow-hidden mb-5">
         <div
-          className="bg-theme-primary h-2 rounded-full transition-all duration-500"
+          className="bg-theme-primary h-1 rounded-full transition-all duration-500"
           style={{ width: `${view.progressPct}%` }}
         />
       </div>
 
-      {/* Protein companion — secondary metric, dimmer */}
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 text-theme-ink-2">
-          <Target className="h-3.5 w-3.5 text-theme-success" strokeWidth={1.5} />
-          <span className="font-medium">{t.dashboard.protein}:</span>
-          <NumericValue
-            value={Math.round(proteinConsumed)}
-            variant="caption"
-            locale={isDE ? 'de-DE' : 'en-US'}
-            className="text-theme-ink !text-xs !font-semibold"
-          />
-          <span className="text-theme-ink-3">/</span>
-          <NumericValue
-            value={proteinGoal}
-            unit="g"
-            variant="caption"
-            locale={isDE ? 'de-DE' : 'en-US'}
-            className="text-theme-ink !text-xs !font-semibold"
+      {/* Protein companion — eigene Sub-Sektion, klar abgetrennt */}
+      <div className="border-t border-theme-line pt-4">
+        <div className="flex items-center justify-between text-sm mb-1.5">
+          <div className="flex items-center gap-2 text-theme-ink-2">
+            <Target className="h-3.5 w-3.5 text-theme-success" strokeWidth={1.5} />
+            <span className="text-[11px] uppercase tracking-[0.12em] font-semibold">{t.dashboard.protein}</span>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <NumericValue
+              value={Math.round(proteinConsumed)}
+              variant="inline"
+              locale={isDE ? 'de-DE' : 'en-US'}
+              className="!text-base !font-semibold text-theme-ink"
+            />
+            <span className="text-xs text-theme-ink-3">/ {proteinGoal} g</span>
+          </div>
+        </div>
+        <div className="bg-theme-surface-2 rounded-full h-1 overflow-hidden">
+          <div
+            className="bg-theme-success h-1 rounded-full transition-all duration-500"
+            style={{ width: `${proteinPct}%` }}
           />
         </div>
-        <span className="text-[11px] text-theme-ink-3">
+        <p className="text-[10px] text-theme-ink-3 mt-1.5 font-theme-numeric tabular-nums">
           {proteinRemaining > 0
-            ? `${proteinRemaining} g ${isDE ? 'fehlen' : 'left'}`
-            : (isDE ? '✓ Ziel erreicht' : '✓ Goal hit')}
-        </span>
-      </div>
-      <div className="bg-theme-surface-2 rounded-full h-1 overflow-hidden mt-1">
-        <div
-          className="bg-theme-success h-1 rounded-full transition-all duration-500"
-          style={{ width: `${proteinPct}%` }}
-        />
+            ? `${proteinRemaining} g ${isDE ? 'noch offen' : 'remaining'}`
+            : (isDE ? 'Ziel erreicht' : 'Goal hit')}
+        </p>
       </div>
     </div>
   );
