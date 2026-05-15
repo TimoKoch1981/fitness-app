@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy, Split } from 'lucide-react';
+import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy, Split, Pencil } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -53,10 +53,14 @@ export function SetBySetTracker({
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { setTag, toggleUnilateral } = useActiveWorkout();
+  const { setTag, toggleUnilateral, editLoggedSet } = useActiveWorkout();
 
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
+
+  // v14.30 / B7: inline-edit for already-logged sets so the user does not
+  // have to switch to the Overview-Mode just to correct a typo.
+  const [editingSetIdx, setEditingSetIdx] = useState<number | null>(null);
 
   // Check if exercise is unilateral (needs L/R) + movement pattern
   const { data: catalog } = useExerciseCatalog();
@@ -156,6 +160,105 @@ export function SetBySetTracker({
           </div>
         ))}
       </div>
+
+      {/* v14.30 / B7: Already logged sets — inline-edit, no mode-switch needed */}
+      {completedCount > 0 && (
+        <div className="bg-gray-50 rounded-lg p-2.5 space-y-1.5">
+          <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider px-0.5">
+            {isDE ? 'Bereits geloggt — tippe zum Korrigieren' : 'Already logged — tap to correct'}
+          </p>
+          {exercise.sets.map((s, idx) => {
+            if (!s.completed) return null;
+            const isEditing = editingSetIdx === idx;
+            const tag = s.set_tag ?? 'normal';
+            const tagCfg = TAG_CONFIG[tag];
+
+            if (isEditing) {
+              return (
+                <div key={idx} className="grid grid-cols-[2.5rem_1fr_1fr_1.5rem] items-center gap-2 px-0.5">
+                  <span className="text-xs font-medium text-gray-600">
+                    S{s.set_number}{s.side === 'left' ? 'L' : s.side === 'right' ? 'R' : ''}
+                  </span>
+                  <input
+                    type="number"
+                    inputMode={isCardio ? 'decimal' : 'numeric'}
+                    step={isCardio ? '0.1' : undefined}
+                    autoFocus
+                    defaultValue={isCardio
+                      ? (s.actual_duration_minutes?.toString() ?? '')
+                      : (s.actual_reps?.toString() ?? '')}
+                    onBlur={(e) => {
+                      const v = e.target.value === '' ? undefined : Number(e.target.value);
+                      if (v != null && !isNaN(v)) {
+                        editLoggedSet(exerciseIndex, idx,
+                          isCardio ? { durationMinutes: v } : { reps: v });
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                      if (e.key === 'Escape') setEditingSetIdx(null);
+                    }}
+                    placeholder={isCardio ? 'min' : 'Wdh'}
+                    className="px-2 py-1 text-sm text-center rounded border-2 border-theme-primary bg-white font-semibold focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step={isCardio ? '0.01' : '0.5'}
+                    defaultValue={isCardio
+                      ? (s.actual_distance_km?.toString() ?? '')
+                      : (s.actual_weight_kg?.toString() ?? '')}
+                    onBlur={(e) => {
+                      const v = e.target.value === '' ? undefined : Number(e.target.value);
+                      if (v != null && !isNaN(v)) {
+                        editLoggedSet(exerciseIndex, idx,
+                          isCardio ? { distanceKm: v } : { weightKg: v });
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                      if (e.key === 'Escape') setEditingSetIdx(null);
+                    }}
+                    placeholder={isCardio ? 'km' : 'kg'}
+                    className="px-2 py-1 text-sm text-center rounded border-2 border-theme-primary bg-white font-semibold focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setEditingSetIdx(null)}
+                    className="w-7 h-7 rounded-full bg-theme-primary text-white flex items-center justify-center hover:bg-theme-primary-2"
+                    title={isDE ? 'Fertig' : 'Done'}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setEditingSetIdx(idx)}
+                className="w-full grid grid-cols-[2.5rem_1fr_1fr_1.5rem] items-center gap-2 px-0.5 py-1 rounded hover:bg-white transition-colors text-left"
+              >
+                <span className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  S{s.set_number}{s.side === 'left' ? 'L' : s.side === 'right' ? 'R' : ''}
+                  {tag !== 'normal' && (
+                    <span className={`text-[9px] px-1 rounded ${tagCfg.bg} ${tagCfg.text}`}>{tagCfg.letter}</span>
+                  )}
+                </span>
+                <span className="text-sm text-gray-800 font-semibold">
+                  {isCardio ? `${s.actual_duration_minutes ?? '-'} min` : `${s.actual_reps ?? '-'} ${isDE ? 'Wdh' : 'reps'}`}
+                </span>
+                <span className="text-sm text-gray-800 font-semibold">
+                  {isCardio ? `${s.actual_distance_km ?? '-'} km` : `${s.actual_weight_kg ?? '-'} kg`}
+                </span>
+                <Pencil className="h-3 w-3 text-theme-primary justify-self-end" />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Current Set Label + Tag Toggle */}
       <div className="flex items-center justify-center gap-2">

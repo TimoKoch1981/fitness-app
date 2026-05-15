@@ -15,7 +15,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   CheckCircle2, Clock, Flame, Trophy, TrendingUp,
   Save, Trash2, SkipForward, ChevronDown, ChevronUp,
-  AlertCircle, X, BookmarkPlus, Plus,
+  AlertCircle, X, BookmarkPlus, Plus, Pencil,
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
@@ -400,7 +400,9 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           <h3 className="text-sm font-semibold text-gray-900">
             {isDE ? 'Übersicht' : 'Overview'}
           </h3>
-          <span className="text-[10px] text-gray-400">
+          {/* v14.30 / B8: Edit-Hint prominenter (war text-[10px] text-gray-400). */}
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-theme-primary bg-theme-surface-2 px-2 py-0.5 rounded-full">
+            <Pencil className="h-2.5 w-2.5" />
             {isDE ? 'Antippen zum Bearbeiten' : 'Tap to edit'}
           </span>
         </div>
