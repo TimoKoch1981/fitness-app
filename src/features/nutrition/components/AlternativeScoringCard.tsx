@@ -84,7 +84,7 @@ export function AlternativeScoringCard({ totals, activeSystems, onSystemsChange 
   if (totals.calories <= 0) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 transition-colors"
@@ -143,8 +143,8 @@ export function AlternativeScoringCard({ totals, activeSystems, onSystemsChange 
                 className={cn(
                   'px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors border',
                   systems.includes(sys.key)
-                    ? 'bg-teal-50 text-teal-700 border-teal-200'
-                    : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                    ? 'bg-theme-surface-2 text-theme-primary border-theme-primary'
+                    : 'bg-theme-surface text-theme-ink-3 border-theme-line hover:border-theme-ink-3'
                 )}
               >
                 {isDE ? sys.labelDe : sys.labelEn}
@@ -280,7 +280,7 @@ export function AlternativeScoringCard({ totals, activeSystems, onSystemsChange 
               <p>• <strong>Nutri-Score:</strong> {isDE ? 'EU-Standard, vereinfacht (ohne Obst/Gemuese-%)' : 'EU standard, simplified (without fruit/veg %)'}</p>
               <button
                 onClick={() => setShowConfig(false)}
-                className="text-teal-600 hover:underline mt-1"
+                className="text-theme-primary hover:underline mt-1"
               >
                 {isDE ? 'Schliessen' : 'Close'}
               </button>

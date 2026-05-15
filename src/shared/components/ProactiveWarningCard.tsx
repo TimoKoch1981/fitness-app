@@ -130,7 +130,7 @@ export function ProactiveWarningCard() {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">
+      <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] px-1">
         {de ? 'Proaktive Hinweise' : 'Proactive Alerts'}
       </p>
       {visibleDeviations.map((d, i) => {
@@ -141,7 +141,7 @@ export function ProactiveWarningCard() {
         return (
           <div
             key={id + i}
-            className={`rounded-xl border p-3 ${
+            className={`rounded-theme-md border p-3 ${
               isWarning
                 ? 'bg-amber-50 border-amber-200'
                 : 'bg-blue-50 border-blue-200'

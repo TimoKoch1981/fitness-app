@@ -66,6 +66,7 @@ import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyC
 import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidget';
 import { AlternativeScoringCard } from '../features/nutrition/components/AlternativeScoringCard';
 import { LeadingMetricCard } from '../features/nutrition/components/LeadingMetricCard';
+import { NumericValue } from '../shared/components/NumericValue';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -186,35 +187,34 @@ export function CockpitPage() {
 
   const isBreastfeeding = profile?.is_breastfeeding === true;
 
+  // Studio: alle Macro-Bars in der Primary-Farbe (Indigo). Differenzierung
+  // ueber Label/Position, nicht ueber 4 verschiedene Farben (Phase 8 §2 Lina:
+  // "kein Tailwind-Palette-Auspackbuch").
   const stats = [
     {
       label: t.dashboard.calories,
       value: totals.calories,
       goal: caloriesGoal,
       unit: 'kcal',
-      color: 'from-teal-400 to-teal-500',
-      badge: isBreastfeeding ? (language === 'de' ? '🤱 inkl. Stillzeit' : '🤱 incl. lactation') : undefined,
+      badge: isBreastfeeding ? (language === 'de' ? 'inkl. Stillzeit' : 'incl. lactation') : undefined,
     },
     {
       label: t.dashboard.protein,
       value: Math.round(totals.protein),
       goal: proteinGoal,
       unit: 'g',
-      color: 'from-emerald-400 to-emerald-500',
     },
     {
       label: t.dashboard.carbs,
       value: Math.round(totals.carbs),
       goal: DEFAULT_CARBS_GOAL,
       unit: 'g',
-      color: 'from-blue-400 to-blue-500',
     },
     {
       label: t.dashboard.fat,
       value: Math.round(totals.fat),
       goal: DEFAULT_FAT_GOAL,
       unit: 'g',
-      color: 'from-amber-400 to-amber-500',
     },
   ];
 
@@ -273,9 +273,9 @@ export function CockpitPage() {
           <div className="flex justify-end -mt-2 -mb-2">
             <button
               onClick={() => setShowShareCard(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-teal-600 bg-teal-50 rounded-full hover:bg-teal-100 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-theme-primary bg-theme-surface border border-theme-line rounded-theme-sm hover:bg-theme-surface-2 transition-colors"
             >
-              <Share2 className="h-3 w-3" />
+              <Share2 className="h-3 w-3" strokeWidth={1.5} />
               {t.share.shareProgress}
             </button>
           </div>
@@ -325,50 +325,53 @@ export function CockpitPage() {
         {!profileComplete && (
           <button
             onClick={() => navigate('/profile')}
-            className="w-full bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-4 shadow-sm flex items-center gap-3 hover:from-teal-100 hover:to-emerald-100 transition-colors text-left"
+            className="w-full bg-theme-surface border border-theme-line border-l-[3px] border-l-theme-primary rounded-theme-md p-4 flex items-center gap-3 hover:bg-theme-surface-2 transition-colors text-left"
           >
-            <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-              <Target className="h-5 w-5 text-teal-600" />
+            <div className="w-10 h-10 rounded-theme-md bg-theme-surface-2 border border-theme-line flex items-center justify-center flex-shrink-0">
+              <Target className="h-5 w-5 text-theme-primary" strokeWidth={1.5} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-teal-800">{t.cockpit.setupGoals}</p>
-              <p className="text-xs text-teal-600 mt-0.5">{t.cockpit.setupGoalsHint}</p>
+              <p className="text-sm font-semibold text-theme-ink">{t.cockpit.setupGoals}</p>
+              <p className="text-xs text-theme-ink-2 mt-0.5">{t.cockpit.setupGoalsHint}</p>
             </div>
-            <ChevronRight className="h-5 w-5 text-teal-400 flex-shrink-0" />
+            <ChevronRight className="h-5 w-5 text-theme-ink-3 flex-shrink-0" strokeWidth={1.5} />
           </button>
         )}
 
-        {/* Macro Stats Grid */}
+        {/* Macro Stats Grid — Phase 7 §3.2: 4 Stat-Cards mit konsistenter Studio-Hierarchie */}
         <div className="grid grid-cols-2 gap-3">
           {stats.map((stat) => {
             const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
             return (
-              <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm">
-                <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {stat.value}
-                  <span className="text-sm font-normal text-gray-400 ml-1">{stat.unit}</span>
-                </p>
+              <div key={stat.label} className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
+                <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{stat.label}</p>
+                <NumericValue
+                  value={stat.value}
+                  unit={stat.unit}
+                  variant="inline"
+                  className="!text-2xl !font-bold text-theme-ink mt-1 block"
+                  locale={language === 'de' ? 'de-DE' : 'en-US'}
+                />
                 {profileComplete ? (
                   <>
-                    <div className="mt-2 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                    <div className="mt-2 bg-theme-surface-2 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className={`bg-gradient-to-r ${stat.color} rounded-full h-1.5 transition-all duration-500`}
+                        className="bg-theme-primary rounded-full h-1.5 transition-all duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-1">
+                    <p className="text-[10px] text-theme-ink-3 mt-1">
                       {stat.goal - stat.value > 0
                         ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
                         : `${t.dashboard.goal} ${t.dashboard.consumed}`
                       }
                     </p>
                     {(stat as { badge?: string }).badge && (
-                      <p className="text-[9px] text-pink-500 mt-0.5 font-medium">{(stat as { badge?: string }).badge}</p>
+                      <p className="text-[9px] text-theme-ink-2 mt-0.5 font-medium italic">{(stat as { badge?: string }).badge}</p>
                     )}
                   </>
                 ) : (
-                  <p className="text-[10px] text-gray-400 mt-2">{t.cockpit.noGoalSet}</p>
+                  <p className="text-[10px] text-theme-ink-3 mt-2">{t.cockpit.noGoalSet}</p>
                 )}
               </div>
             );
@@ -387,18 +390,21 @@ export function CockpitPage() {
         <WaterWidget />
 
         {/* Energy Balance */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
           <div className="flex items-center gap-1.5 mb-2">
-            <Flame className="h-4 w-4 text-orange-500" />
-            <p className="text-xs text-gray-500 font-medium">{t.dashboard.balance}</p>
+            <Flame className="h-4 w-4 text-theme-accent" strokeWidth={1.5} />
+            <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{t.dashboard.balance}</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${profileComplete && netCalories > caloriesGoal ? 'text-red-500' : 'text-gray-900'}`}>
-              {netCalories}
-            </p>
-            <p className="text-[10px] text-gray-400">{t.dashboard.net} kcal</p>
+            <NumericValue
+              value={netCalories}
+              variant="inline"
+              className={`!text-2xl !font-bold block ${profileComplete && netCalories > caloriesGoal ? 'text-theme-danger' : 'text-theme-ink'}`}
+              locale={language === 'de' ? 'de-DE' : 'en-US'}
+            />
+            <p className="text-[10px] text-theme-ink-3 mt-1">{t.dashboard.net} kcal</p>
           </div>
-          <div className="mt-2 flex justify-between text-[10px] text-gray-400">
+          <div className="mt-2 flex justify-between text-[10px] text-theme-ink-3">
             <span>+{totals.calories} {t.dashboard.consumed}</span>
             <span>-{totalCaloriesBurned} {t.dashboard.burned}</span>
           </div>
@@ -407,10 +413,10 @@ export function CockpitPage() {
         {/* Weekly Calorie Chart */}
         {weekMeals.data && weekMeals.data.some(d => d.calories > 0) && (
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
+            <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] px-1 mb-2">
               {t.cockpit.weeklyCalories}
             </p>
-            <Suspense fallback={<div className="h-48 bg-gray-50 rounded-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-48 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
               <CalorieChart data={weekMeals.data} calorieGoal={profileComplete ? caloriesGoal : 0} language={language} />
             </Suspense>
           </div>
@@ -418,23 +424,23 @@ export function CockpitPage() {
 
         {/* BMR/TDEE Card — only shown when profile has enough data */}
         {bmrResult && tdee && (
-          <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <Zap className="h-4 w-4 text-yellow-500" />
-              <p className="text-xs text-gray-500 font-medium">{t.dashboard.bmrTdee}</p>
+              <Zap className="h-4 w-4 text-theme-warning" strokeWidth={1.5} />
+              <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{t.dashboard.bmrTdee}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">{bmrResult.bmr}</p>
-                <p className="text-[10px] text-gray-400">{t.dashboard.bmr}</p>
-                <p className="text-[10px] text-gray-300 mt-0.5">
+                <NumericValue value={bmrResult.bmr} variant="inline" className="!text-lg !font-bold text-theme-ink block" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                <p className="text-[10px] text-theme-ink-2 mt-1">{t.dashboard.bmr}</p>
+                <p className="text-[10px] text-theme-ink-3 mt-0.5">
                   {bmrResult.formula === 'katch' ? 'Katch-McArdle' : 'Mifflin-St Jeor'}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-teal-600">{tdee}</p>
-                <p className="text-[10px] text-gray-400">{t.dashboard.tdee}</p>
-                <p className="text-[10px] text-gray-300 mt-0.5">{t.dashboard.kcalDay}</p>
+                <NumericValue value={tdee} variant="inline" className="!text-lg !font-bold text-theme-primary block" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                <p className="text-[10px] text-theme-ink-2 mt-1">{t.dashboard.tdee}</p>
+                <p className="text-[10px] text-theme-ink-3 mt-0.5">{t.dashboard.kcalDay}</p>
               </div>
             </div>
           </div>
@@ -443,24 +449,24 @@ export function CockpitPage() {
         {/* Weight Trend Chart */}
         {bodyTrendData.data && bodyTrendData.data.length > 1 && (
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-2">
+            <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] px-1 mb-2">
               {t.cockpit.weightTrend}
             </p>
-            <Suspense fallback={<div className="h-48 bg-gray-50 rounded-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-48 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
               <WeightChart data={bodyTrendData.data} language={language} />
             </Suspense>
           </div>
         )}
 
         {/* Progression / Forecast */}
-        <Suspense fallback={<div className="h-32 bg-gray-50 rounded-xl animate-pulse" />}>
+        <Suspense fallback={<div className="h-32 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
           <ProgressionCard language={language} />
         </Suspense>
 
         {/* Key Metrics Card (BMI + FFMI) */}
         {latestBody?.bmi && (
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4">
+            <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] mb-3">
               {t.cockpit.keyMetrics}
             </p>
             <div className="flex gap-3">
@@ -469,9 +475,9 @@ export function CockpitPage() {
                 const bmiClass = classifyBMI(latestBody.bmi!);
                 return (
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500">{t.body.bmi}</p>
-                    <p className="text-lg font-bold text-gray-900">{latestBody.bmi}</p>
-                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${bmiClass.color} ${bmiClass.textColor}`}>
+                    <p className="text-xs text-theme-ink-2">{t.body.bmi}</p>
+                    <NumericValue value={latestBody.bmi} decimals={1} variant="inline" className="!text-lg !font-bold text-theme-ink block" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-theme-sm text-[9px] font-medium ${bmiClass.color} ${bmiClass.textColor}`}>
                       {language === 'de' ? bmiClass.label_de : bmiClass.label_en}
                     </span>
                   </div>
@@ -483,9 +489,9 @@ export function CockpitPage() {
                 const ffmiClass = classifyFFMI(ffmiResult.normalizedFFMI, profile.gender ?? 'male');
                 return (
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500">{t.body.ffmi}</p>
-                    <p className="text-lg font-bold text-gray-900">{ffmiResult.normalizedFFMI}</p>
-                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${ffmiClass.color} ${ffmiClass.textColor}`}>
+                    <p className="text-xs text-theme-ink-2">{t.body.ffmi}</p>
+                    <NumericValue value={ffmiResult.normalizedFFMI} decimals={1} variant="inline" className="!text-lg !font-bold text-theme-ink block" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-theme-sm text-[9px] font-medium ${ffmiClass.color} ${ffmiClass.textColor}`}>
                       {language === 'de' ? ffmiClass.label_de : ffmiClass.label_en}
                     </span>
                   </div>
@@ -497,27 +503,27 @@ export function CockpitPage() {
 
         {/* Reminders Widget */}
         {reminderStatus.totalDue > 0 && (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-theme-line">
               <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-teal-500" />
-                <p className="text-xs text-gray-500 font-medium">{t.reminders.title}</p>
+                <Bell className="h-4 w-4 text-theme-primary" strokeWidth={1.5} />
+                <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{t.reminders.title}</p>
                 {reminderStatus.pending.length > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-medium">
+                  <span className="px-1.5 py-0.5 rounded-theme-sm bg-theme-surface-2 border border-theme-line text-theme-primary text-[10px] font-semibold">
                     {reminderStatus.pending.length}
                   </span>
                 )}
               </div>
               <button
                 onClick={() => navigate('/medical')}
-                className="text-[10px] text-teal-600 hover:underline"
+                className="text-[10px] text-theme-primary hover:underline"
               >
                 {t.dashboard.viewAll}
               </button>
             </div>
 
             {reminderStatus.pending.length > 0 ? (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-theme-line">
                 {reminderStatus.pending.slice(0, 3).map((reminder) => {
                   const typeIcons: Record<string, string> = {
                     substance: '\u{1F48A}',
@@ -535,16 +541,16 @@ export function CockpitPage() {
                     <div key={reminder.id} className="px-4 py-2.5 flex items-center gap-3">
                       <span className="text-sm">{typeIcons[reminder.type] ?? '\u{1F4CC}'}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 truncate">{reminder.title}</p>
+                        <p className="text-sm text-theme-ink truncate">{reminder.title}</p>
                         {timeDisplay && (
-                          <p className="text-[10px] text-gray-400">{timeDisplay}</p>
+                          <p className="text-[10px] text-theme-ink-3 font-theme-numeric">{timeDisplay}</p>
                         )}
                       </div>
                       <button
                         onClick={() => completeReminder.mutate(reminder.id)}
-                        className="w-7 h-7 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-300 hover:border-teal-400 hover:text-teal-500 transition-all"
+                        className="w-7 h-7 rounded-full border border-theme-line flex items-center justify-center text-theme-ink-3 hover:border-theme-primary hover:text-theme-primary transition-colors"
                       >
-                        <Check className="h-3.5 w-3.5" />
+                        <Check className="h-3.5 w-3.5" strokeWidth={2} />
                       </button>
                     </div>
                   );
@@ -552,7 +558,7 @@ export function CockpitPage() {
               </div>
             ) : (
               <div className="px-4 py-3 text-center">
-                <p className="text-xs text-teal-600">
+                <p className="text-xs text-theme-success">
                   {t.dashboard.allDone}
                 </p>
               </div>
@@ -568,7 +574,7 @@ export function CockpitPage() {
         {/* Insights Widget */}
         {visibleInsights.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">
+            <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] px-1">
               {t.dashboard.recommendations}
             </p>
             {visibleInsights.map((insight) => (

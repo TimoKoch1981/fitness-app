@@ -80,9 +80,9 @@ export function WeeklyChallengeCard() {
 
   if (weeklyActivity.isLoading || !challenge) {
     return (
-      <div className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
-        <div className="h-4 bg-gray-100 rounded w-48 mb-2" />
-        <div className="h-2 bg-gray-100 rounded w-full" />
+      <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4 animate-pulse">
+        <div className="h-4 bg-theme-surface-2 rounded w-48 mb-2" />
+        <div className="h-2 bg-theme-surface-2 rounded w-full" />
       </div>
     );
   }
@@ -106,48 +106,46 @@ export function WeeklyChallengeCard() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className={`rounded-xl p-4 shadow-sm border ${
+      className={`rounded-theme-md p-4 border ${
         challenge.completed
-          ? 'bg-gradient-to-r from-teal-50 to-emerald-50 border-teal-200'
-          : 'bg-white border-gray-100'
+          ? 'bg-theme-surface border-theme-line border-l-[3px] border-l-theme-success'
+          : 'bg-theme-surface border-theme-line'
       }`}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Trophy className={`h-4 w-4 ${challenge.completed ? 'text-teal-500' : 'text-gray-400'}`} />
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+          <Trophy className={`h-4 w-4 ${challenge.completed ? 'text-theme-success' : 'text-theme-ink-3'}`} strokeWidth={1.5} />
+          <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.08em]">
             {t.gamification.weeklyChallenge}
           </p>
         </div>
         {challenge.completed && (
-          <span className="text-[10px] font-medium text-teal-600 bg-teal-100 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-medium text-theme-success bg-theme-surface-2 border border-theme-line px-2 py-0.5 rounded-theme-sm">
             {'\u{2705}'} {t.gamification.challengeComplete}
           </span>
         )}
       </div>
 
-      <p className={`text-sm font-semibold ${challenge.completed ? 'text-teal-800' : 'text-gray-800'}`}>
+      <p className={`text-sm font-semibold ${challenge.completed ? 'text-theme-ink' : 'text-theme-ink'}`}>
         {title}
       </p>
 
       <div className="mt-2">
         <div className="flex items-center justify-between text-[10px] mb-1">
-          <span className={challenge.completed ? 'text-teal-600' : 'text-gray-500'}>
+          <span className="text-theme-ink-2">
             {t.gamification.challengeProgress}
           </span>
-          <span className={`font-medium ${challenge.completed ? 'text-teal-700' : 'text-gray-600'}`}>
+          <span className="font-medium text-theme-ink tabular-nums">
             {challenge.current}/{challenge.target}
           </span>
         </div>
-        <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
+        <div className="bg-theme-surface-2 rounded-full h-2 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className={`h-2 rounded-full ${
-              challenge.completed
-                ? 'bg-gradient-to-r from-teal-400 to-emerald-400'
-                : 'bg-gradient-to-r from-teal-300 to-teal-400'
+              challenge.completed ? 'bg-theme-success' : 'bg-theme-primary'
             }`}
           />
         </div>

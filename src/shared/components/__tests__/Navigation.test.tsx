@@ -40,16 +40,19 @@ describe('Navigation', () => {
     expect(hrefs).toContain('/profile');
   });
 
-  it('highlights active route', () => {
+  it('highlights active route with Studio primary token', () => {
+    // v14.28 Stufe 2: Teal-Klassen → Theme-Tokens. Active-Indicator ist
+    // text-theme-primary statt text-teal-600.
     renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const cockpitLink = screen.getByText('Cockpit').closest('a');
-    expect(cockpitLink?.className).toContain('text-teal-600');
+    expect(cockpitLink?.className).toContain('text-theme-primary');
   });
 
-  it('non-active items have gray color', () => {
+  it('non-active items use muted theme-ink token', () => {
+    // v14.28 Stufe 2: text-gray-500 → text-theme-ink-3.
     renderWithProviders(<Navigation />, { initialRoute: '/cockpit' });
     const medizinLink = screen.getByText('Medizin').closest('a');
-    expect(medizinLink?.className).toContain('text-gray-500');
+    expect(medizinLink?.className).toContain('text-theme-ink-3');
   });
 
   it('is fixed to bottom of screen', () => {

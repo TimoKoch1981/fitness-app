@@ -34,8 +34,8 @@ export function GapAlertBanner() {
   const gapDetail = parts.join(language === 'de' ? ' & ' : ' & ');
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-3">
-      <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+    <div className="bg-amber-50 border border-amber-200 rounded-theme-md p-3 flex items-start gap-3">
+      <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-amber-800">
           {t.gaps.title}

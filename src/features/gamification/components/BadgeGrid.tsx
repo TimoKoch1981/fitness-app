@@ -43,10 +43,10 @@ function BadgeCard({ badge }: { badge: Badge }) {
       onClick={handleClick}
       animate={popped ? { scale: [1, 1.15, 1] } : {}}
       transition={{ duration: 0.3 }}
-      className={`relative flex flex-col items-center p-3 rounded-xl text-center transition-colors ${
+      className={`relative flex flex-col items-center p-3 rounded-theme-md text-center transition-colors ${
         badge.earned
-          ? 'bg-white shadow-sm border border-teal-100 hover:border-teal-300 cursor-pointer'
-          : 'bg-gray-50 border border-gray-100 cursor-default'
+          ? 'bg-theme-surface border border-theme-line hover:border-theme-primary cursor-pointer'
+          : 'bg-theme-surface-2 border border-theme-line cursor-default'
       }`}
     >
       {/* Icon */}
@@ -57,20 +57,20 @@ function BadgeCard({ badge }: { badge: Badge }) {
       {/* Lock overlay for unearned */}
       {!badge.earned && (
         <div className="absolute top-2 right-2">
-          <Lock className="h-3 w-3 text-gray-300" />
+          <Lock className="h-3 w-3 text-theme-ink-3" strokeWidth={1.5} />
         </div>
       )}
 
       {/* Name */}
       <p className={`text-[10px] font-medium mt-1.5 leading-tight ${
-        badge.earned ? 'text-gray-800' : 'text-gray-400'
+        badge.earned ? 'text-theme-ink' : 'text-theme-ink-3'
       }`}>
         {name}
       </p>
 
       {/* Description */}
       <p className={`text-[9px] mt-0.5 leading-tight ${
-        badge.earned ? 'text-teal-600' : 'text-gray-300'
+        badge.earned ? 'text-theme-primary' : 'text-theme-ink-3'
       }`}>
         {description}
       </p>
@@ -85,10 +85,10 @@ export function BadgeGrid() {
   if (isLoading) {
     return (
       <div className="space-y-2">
-        <div className="h-4 bg-gray-100 rounded w-32 animate-pulse" />
+        <div className="h-4 bg-theme-surface-2 rounded w-32 animate-pulse" />
         <div className="grid grid-cols-3 gap-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-24 bg-gray-50 rounded-xl animate-pulse" />
+            <div key={i} className="h-24 bg-theme-surface-2 rounded-theme-md animate-pulse" />
           ))}
         </div>
       </div>
@@ -98,10 +98,10 @@ export function BadgeGrid() {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">
+        <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.12em] px-1">
           {t.gamification.badges}
         </p>
-        <p className="text-[10px] text-teal-600 font-medium">
+        <p className="text-[10px] text-theme-primary font-medium tabular-nums">
           {earnedCount}/{totalBadges} {t.gamification.badgesEarned}
         </p>
       </div>

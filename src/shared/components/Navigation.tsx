@@ -67,7 +67,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg" aria-label="Main navigation">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-theme-surface border-t border-theme-line" aria-label="Main navigation">
       <div className={`grid ${gridCols} items-center h-14 max-w-lg mx-auto`} role="menubar">
         {navItems.map(({ path, icon: Icon, labelKey }) => {
           const isActive = location.pathname === path;
@@ -80,21 +80,25 @@ export function Navigation() {
               aria-current={isActive ? 'page' : undefined}
               aria-label={getLabel(labelKey)}
               className={cn(
-                'flex flex-col items-center justify-center h-full py-1',
-                'transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1',
+                'relative flex flex-col items-center justify-center h-full py-1',
+                'transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-1',
                 isActive
-                  ? 'text-teal-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-theme-primary'
+                  : 'text-theme-ink-3 hover:text-theme-ink-2'
               )}
             >
+              {/* Active-Indicator: 2px Underline oben (Linear-/Stripe-Pattern, Phase 7 §2.2.1) */}
+              {isActive && (
+                <span aria-hidden="true" className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 bg-theme-primary rounded-full" />
+              )}
               <Icon
                 aria-hidden={true}
                 className={cn(
                   'h-5 w-5 mb-0.5',
-                  isActive && 'stroke-[2.5px]'
+                  isActive && 'stroke-[2.25px]'
                 )}
               />
-              <span className="text-[10px] font-medium leading-tight">
+              <span className="text-[11px] font-semibold leading-tight tracking-[0.01em]">
                 {getLabel(labelKey)}
               </span>
             </NavLink>

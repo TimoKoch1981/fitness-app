@@ -81,7 +81,7 @@ export function REDSWarningBanner({
 
   return (
     <div
-      className={`rounded-xl border p-3 ${
+      className={`rounded-theme-md border p-3 ${
         isDanger
           ? 'bg-red-50 border-red-300'
           : 'bg-amber-50 border-amber-200'

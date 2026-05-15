@@ -20,6 +20,7 @@
 import { Flame, TrendingDown, TrendingUp, Target } from 'lucide-react';
 import type { UserProfile, TrainingPhase } from '../../../types/health';
 import { useTranslation } from '../../../i18n';
+import { NumericValue } from '../../../shared/components/NumericValue';
 
 interface LeadingMetricCardProps {
   caloriesConsumed: number;
@@ -73,9 +74,9 @@ function buildMetricView(
       contextLine: isDE
         ? `Cut-Ziel: −500 kcal/Tag · TDEE ${Math.round(tdee)}`
         : `Cut target: −500 kcal/day · TDEE ${Math.round(tdee)}`,
-      primaryColor: deficit < 0 ? 'text-emerald-600' : 'text-amber-600',
+      primaryColor: deficit < 0 ? 'text-theme-success' : 'text-theme-warning',
       Icon: TrendingDown,
-      cardTone: 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200',
+      cardTone: 'bg-theme-surface border-theme-line',
       progressPct: onTrackPct,
     };
   }
@@ -89,9 +90,9 @@ function buildMetricView(
       contextLine: isDE
         ? `Bulk-Ziel: ${goal} kcal/Tag${tdee ? ` · +${goal - Math.round(tdee)} ueber TDEE` : ''}`
         : `Bulk target: ${goal} kcal/day${tdee ? ` · +${goal - Math.round(tdee)} over TDEE` : ''}`,
-      primaryColor: remaining > 0 ? 'text-teal-600' : 'text-emerald-600',
+      primaryColor: remaining > 0 ? 'text-theme-primary' : 'text-theme-success',
       Icon: TrendingUp,
-      cardTone: 'bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200',
+      cardTone: 'bg-theme-surface border-theme-line',
       progressPct: goal > 0 ? Math.min(100, (consumed / goal) * 100) : 0,
     };
   }
@@ -104,9 +105,9 @@ function buildMetricView(
     contextLine: isDE
       ? `Tagesziel: ${goal} kcal${tdee ? ` · TDEE ${Math.round(tdee)}` : ''}`
       : `Daily goal: ${goal} kcal${tdee ? ` · TDEE ${Math.round(tdee)}` : ''}`,
-    primaryColor: 'text-teal-700',
+    primaryColor: 'text-theme-primary',
     Icon: Flame,
-    cardTone: 'bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200',
+    cardTone: 'bg-theme-surface border-theme-line',
     progressPct: goal > 0 ? Math.min(100, (consumed / goal) * 100) : 0,
   };
 }
@@ -138,50 +139,65 @@ export function LeadingMetricCard({
   const PrimaryIcon = view.Icon;
 
   return (
-    <div className={`rounded-2xl p-5 shadow-sm border ${view.cardTone}`}>
+    <div className={`rounded-theme-lg p-5 border ${view.cardTone}`}>
       <div className="flex items-center gap-1.5 mb-2">
-        <PrimaryIcon className="h-4 w-4 text-teal-600" />
-        <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">
+        <PrimaryIcon className="h-4 w-4 text-theme-primary" strokeWidth={1.5} />
+        <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.12em]">
           {view.primaryLabel}
         </p>
       </div>
 
+      {/* Hero-Zahl: Source Serif Display fuer editoriale Anmutung (Phase 7 §1.1) */}
       <div className="flex items-baseline gap-2 mb-1">
-        <span className={`text-5xl font-bold tabular-nums ${view.primaryColor}`}>
-          {view.primarySign ?? ''}{view.primaryValue.toLocaleString(isDE ? 'de-DE' : 'en-US')}
-        </span>
-        <span className="text-base text-gray-500 font-medium">kcal</span>
+        <NumericValue
+          value={view.primaryValue}
+          sign={view.primarySign}
+          variant="display"
+          locale={isDE ? 'de-DE' : 'en-US'}
+          className={`font-theme-display ${view.primaryColor}`}
+        />
+        <span className="text-base text-theme-ink-2 font-medium">kcal</span>
       </div>
 
-      <p className="text-xs text-gray-500 mb-3">{view.contextLine}</p>
+      <p className="text-xs text-theme-ink-2 mb-3">{view.contextLine}</p>
 
       {/* Progress bar (calories) */}
-      <div className="bg-white/70 rounded-full h-2 overflow-hidden mb-3">
+      <div className="bg-theme-surface-2 rounded-full h-2 overflow-hidden mb-3">
         <div
-          className="bg-gradient-to-r from-teal-400 to-emerald-500 h-2 rounded-full transition-all duration-500"
+          className="bg-theme-primary h-2 rounded-full transition-all duration-500"
           style={{ width: `${view.progressPct}%` }}
         />
       </div>
 
       {/* Protein companion — secondary metric, dimmer */}
       <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 text-gray-600">
-          <Target className="h-3.5 w-3.5 text-emerald-500" />
+        <div className="flex items-center gap-1.5 text-theme-ink-2">
+          <Target className="h-3.5 w-3.5 text-theme-success" strokeWidth={1.5} />
           <span className="font-medium">{t.dashboard.protein}:</span>
-          <span className="font-semibold text-gray-900 tabular-nums">
-            {Math.round(proteinConsumed)} / {proteinGoal}{' '}
-            <span className="text-gray-500 font-normal">g</span>
-          </span>
+          <NumericValue
+            value={Math.round(proteinConsumed)}
+            variant="caption"
+            locale={isDE ? 'de-DE' : 'en-US'}
+            className="text-theme-ink !text-xs !font-semibold"
+          />
+          <span className="text-theme-ink-3">/</span>
+          <NumericValue
+            value={proteinGoal}
+            unit="g"
+            variant="caption"
+            locale={isDE ? 'de-DE' : 'en-US'}
+            className="text-theme-ink !text-xs !font-semibold"
+          />
         </div>
-        <span className="text-[11px] text-gray-400">
+        <span className="text-[11px] text-theme-ink-3">
           {proteinRemaining > 0
             ? `${proteinRemaining} g ${isDE ? 'fehlen' : 'left'}`
             : (isDE ? '✓ Ziel erreicht' : '✓ Goal hit')}
         </span>
       </div>
-      <div className="bg-white/70 rounded-full h-1 overflow-hidden mt-1">
+      <div className="bg-theme-surface-2 rounded-full h-1 overflow-hidden mt-1">
         <div
-          className="bg-emerald-500 h-1 rounded-full transition-all duration-500"
+          className="bg-theme-success h-1 rounded-full transition-all duration-500"
           style={{ width: `${proteinPct}%` }}
         />
       </div>

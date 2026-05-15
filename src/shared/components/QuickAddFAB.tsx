@@ -49,13 +49,15 @@ interface ActionDef {
   tone: string;
 }
 
+// Studio: einheitliche Card-Tone, Domain-Tint nur ueber Border-Left-Akzent
+// (Phase 7 §3 — keine 6 Hintergrund-Pastell-Farben mehr).
 const ACTIONS: ActionDef[] = [
-  { key: 'meal',           Icon: Utensils, labelDE: 'Mahlzeit',  labelEN: 'Meal',      tone: 'bg-teal-50 text-teal-700 border-teal-200' },
-  { key: 'meal_photo',     Icon: Camera,   labelDE: 'Foto-Meal', labelEN: 'Photo meal', tone: 'bg-teal-50 text-teal-700 border-teal-200' },
-  { key: 'workout',        Icon: Dumbbell, labelDE: 'Workout',   labelEN: 'Workout',   tone: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { key: 'substance',      Icon: Pill,     labelDE: 'Einnahme',  labelEN: 'Dose',      tone: 'bg-violet-50 text-violet-700 border-violet-200' },
-  { key: 'blood_pressure', Icon: Heart,    labelDE: 'Blutdruck', labelEN: 'BP',        tone: 'bg-rose-50 text-rose-700 border-rose-200' },
-  { key: 'body',           Icon: Scale,    labelDE: 'Gewicht',   labelEN: 'Weight',    tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { key: 'meal',           Icon: Utensils, labelDE: 'Mahlzeit',  labelEN: 'Meal',      tone: 'border-l-[3px] border-l-theme-success' },
+  { key: 'meal_photo',     Icon: Camera,   labelDE: 'Foto-Meal', labelEN: 'Photo meal', tone: 'border-l-[3px] border-l-theme-success' },
+  { key: 'workout',        Icon: Dumbbell, labelDE: 'Workout',   labelEN: 'Workout',   tone: 'border-l-[3px] border-l-theme-primary' },
+  { key: 'substance',      Icon: Pill,     labelDE: 'Einnahme',  labelEN: 'Dose',      tone: 'border-l-[3px] border-l-violet-600' },
+  { key: 'blood_pressure', Icon: Heart,    labelDE: 'Blutdruck', labelEN: 'BP',        tone: 'border-l-[3px] border-l-theme-danger' },
+  { key: 'body',           Icon: Scale,    labelDE: 'Gewicht',   labelEN: 'Weight',    tone: 'border-l-[3px] border-l-theme-accent' },
 ];
 
 export function QuickAddFAB() {
@@ -96,9 +98,9 @@ export function QuickAddFAB() {
         type="button"
         onClick={() => setSheetOpen(true)}
         aria-label={isDE ? 'Schnell-Eintrag' : 'Quick add'}
-        className="fixed bottom-20 right-24 z-[51] w-14 h-14 rounded-full shadow-lg flex items-center justify-center bg-gradient-to-br from-teal-500 to-emerald-600 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-95 transition-transform"
+        className="fixed bottom-20 right-24 z-[51] w-14 h-14 rounded-full shadow-md flex items-center justify-center bg-theme-primary text-theme-primary-on hover:bg-theme-primary-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2 active:scale-95 transition-all"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
 
       {/* Bottom Sheet */}
@@ -109,20 +111,20 @@ export function QuickAddFAB() {
         >
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-xl"
+            className="relative bg-theme-surface border border-theme-line rounded-t-theme-lg sm:rounded-theme-lg w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h2 className="text-base font-semibold text-gray-900">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-theme-line">
+              <h2 className="text-base font-semibold text-theme-ink">
                 {isDE ? 'Schnell-Eintrag' : 'Quick add'}
               </h2>
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
-                className="p-1 text-gray-400 hover:text-gray-600"
+                className="p-1 text-theme-ink-3 hover:text-theme-ink-2 transition-colors"
                 aria-label={isDE ? 'Schliessen' : 'Close'}
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" strokeWidth={1.5} />
               </button>
             </div>
             <div className="p-4">
@@ -134,9 +136,9 @@ export function QuickAddFAB() {
                       key={a.key}
                       type="button"
                       onClick={() => handlePick(a.key)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all hover:scale-105 active:scale-95 ${a.tone}`}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-theme-md border border-theme-line bg-theme-surface-2 text-theme-ink hover:bg-theme-surface-3 active:scale-95 transition-all ${a.tone}`}
                     >
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-6 w-6" strokeWidth={1.5} />
                       <span className="text-xs font-medium">
                         {isDE ? a.labelDE : a.labelEN}
                       </span>
@@ -144,7 +146,7 @@ export function QuickAddFAB() {
                   );
                 })}
               </div>
-              <p className="text-[10px] text-gray-400 text-center mt-4">
+              <p className="text-[10px] text-theme-ink-3 text-center mt-4">
                 {isDE
                   ? 'Tipp: Spr im Buddy-Chat reicht oft — der erkennt was du loggen willst.'
                   : 'Tip: Just tell the Buddy chat what you ate — it picks the right action.'}

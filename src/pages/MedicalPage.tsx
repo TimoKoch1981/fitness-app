@@ -94,11 +94,11 @@ export function MedicalPage() {
         </ComponentErrorBoundary>
 
         {/* Blood Work Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <FlaskConical className="h-4 w-4 text-indigo-500" />
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-theme-ink">
                 {(t as unknown as Record<string, Record<string, string>>).powerPlus?.bloodWork ?? (language === 'de' ? 'Blutwerte' : 'Blood Work')}
               </h3>
             </div>
@@ -143,22 +143,22 @@ export function MedicalPage() {
                   <div key={bw.id} className="px-4 py-2.5 flex items-center gap-3 group">
                     <div className="w-2 h-2 rounded-full flex-shrink-0 bg-indigo-400" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-theme-ink">
                         {filledMarkers.length} {language === 'de' ? 'Marker' : 'markers'}
                         {summaryParts.length > 0 && (
-                          <span className="text-gray-400 font-normal text-xs ml-1.5">
+                          <span className="text-theme-ink-3 font-normal text-xs ml-1.5">
                             {summaryParts.slice(0, 3).join(' · ')}
                           </span>
                         )}
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-theme-ink-3">
                         {formatDate(bw.date, locale)}
                         {bw.notes && ` — ${bw.notes}`}
                       </p>
                     </div>
                     <button
                       onClick={() => deleteBloodWork.mutate(bw.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
+                      className="p-1.5 text-theme-ink-3 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -168,7 +168,7 @@ export function MedicalPage() {
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-theme-ink-3">
                 {(t as unknown as Record<string, Record<string, string>>).powerPlus?.noBloodWork ?? (language === 'de' ? 'Noch kein Blutbild vorhanden' : 'No blood work data yet')}
               </p>
               <button
@@ -182,15 +182,15 @@ export function MedicalPage() {
         </div>
 
         {/* Blood Pressure Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-red-500" />
-              <h3 className="font-semibold text-gray-900">{t.medical.bloodPressure}</h3>
+              <h3 className="font-semibold text-theme-ink">{t.medical.bloodPressure}</h3>
             </div>
             <button
               onClick={() => setShowBPDialog(true)}
-              className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+              className="p-1.5 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
@@ -198,7 +198,7 @@ export function MedicalPage() {
 
           {bpLoading ? (
             <div className="p-4 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto" />
             </div>
           ) : bpLogs && bpLogs.length > 0 ? (
             <>
@@ -215,17 +215,17 @@ export function MedicalPage() {
                         color === 'orange' ? 'bg-orange-500' : 'bg-red-500'
                       }`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-theme-ink">
                           {bp.systolic}/{bp.diastolic}
-                          {bp.pulse && <span className="text-gray-400 font-normal"> · {bp.pulse} bpm</span>}
+                          {bp.pulse && <span className="text-theme-ink-3 font-normal"> · {bp.pulse} bpm</span>}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] text-theme-ink-3">
                           {formatDate(bp.date, locale)} {formatTime(bp.time, locale)} — {classLabel}
                         </p>
                       </div>
                       <button
                         onClick={() => deleteBP.mutate(bp.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
+                        className="p-1.5 text-theme-ink-3 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -234,16 +234,16 @@ export function MedicalPage() {
                 })}
               </div>
               {/* BP classification disclaimer — ESC/ESH reference, not a diagnosis */}
-              <p className="px-4 py-2 text-[9px] text-gray-300 border-t border-gray-50 select-none">
+              <p className="px-4 py-2 text-[9px] text-theme-ink-3 border-t border-theme-line select-none">
                 ⓘ {t.medical.bpDisclaimer}
               </p>
             </>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">{t.common.noData}</p>
+              <p className="text-sm text-theme-ink-3">{t.common.noData}</p>
               <button
                 onClick={() => setShowBPDialog(true)}
-                className="mt-2 text-xs text-teal-600 hover:underline"
+                className="mt-2 text-xs text-theme-primary hover:underline"
               >
                 {t.medical.addBP}
               </button>
@@ -252,11 +252,11 @@ export function MedicalPage() {
         </div>
 
         {/* Symptom Tracker Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-amber-500" />
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-theme-ink">
                 {((t as Record<string, unknown>).symptoms as Record<string, string>)?.title ?? 'Symptom-Tracker'}
               </h3>
             </div>
@@ -290,10 +290,10 @@ export function MedicalPage() {
                           </span>
                         ))}
                         {symptoms.length > 4 && (
-                          <span className="text-[10px] text-gray-400">+{symptoms.length - 4}</span>
+                          <span className="text-[10px] text-theme-ink-3">+{symptoms.length - 4}</span>
                         )}
                       </div>
-                      <p className="text-[10px] text-gray-400 mt-0.5">
+                      <p className="text-[10px] text-theme-ink-3 mt-0.5">
                         {formatDate(log.date, locale)}
                         {log.mood && ` · ${['😢','😔','😐','🙂','😄'][log.mood - 1]}`}
                         {log.energy && ` · ${['🪫','😴','😐','⚡','🔥'][log.energy - 1]}`}
@@ -302,7 +302,7 @@ export function MedicalPage() {
                     </div>
                     <button
                       onClick={() => deleteSymptom.mutate(log.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
+                      className="p-1.5 text-theme-ink-3 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -312,7 +312,7 @@ export function MedicalPage() {
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-theme-ink-3">
                 {((t as Record<string, unknown>).symptoms as Record<string, string>)?.noData ?? 'Keine Symptome erfasst'}
               </p>
             </div>
@@ -320,11 +320,11 @@ export function MedicalPage() {
         </div>
 
         {/* Sleep & Recovery Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <Moon className="h-4 w-4 text-indigo-500" />
-              <h3 className="font-semibold text-gray-900">{t.sleep.title}</h3>
+              <h3 className="font-semibold text-theme-ink">{t.sleep.title}</h3>
             </div>
             <button
               onClick={() => setShowSleepDialog(true)}
@@ -348,18 +348,18 @@ export function MedicalPage() {
                   <div key={log.id} className="px-4 py-2.5 flex items-center gap-3 group">
                     <span className="text-lg flex-shrink-0">{qualityEmoji}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-theme-ink">
                         {log.duration_minutes ? formatSleepDuration(log.duration_minutes) : '--'}
-                        {qualityLabel && <span className="text-gray-400 font-normal"> · {qualityLabel}</span>}
+                        {qualityLabel && <span className="text-theme-ink-3 font-normal"> · {qualityLabel}</span>}
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-theme-ink-3">
                         {formatDate(log.date, locale)}
                         {log.bedtime && log.wake_time && ` · ${log.bedtime.slice(0, 5)} → ${log.wake_time.slice(0, 5)}`}
                       </p>
                     </div>
                     <button
                       onClick={() => deleteSleep.mutate(log.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
+                      className="p-1.5 text-theme-ink-3 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -369,7 +369,7 @@ export function MedicalPage() {
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">{t.sleep.noData}</p>
+              <p className="text-sm text-theme-ink-3">{t.sleep.noData}</p>
               <button
                 onClick={() => setShowSleepDialog(true)}
                 className="mt-2 text-xs text-indigo-600 hover:underline"
@@ -381,11 +381,11 @@ export function MedicalPage() {
         </div>
 
         {/* Substances Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
-              <Pill className="h-4 w-4 text-teal-500" />
-              <h3 className="font-semibold text-gray-900">{t.medical.substances}</h3>
+              <Pill className="h-4 w-4 text-theme-primary" />
+              <h3 className="font-semibold text-theme-ink">{t.medical.substances}</h3>
             </div>
             <div className="flex gap-1.5">
               {substances && substances.length > 0 && (
@@ -399,7 +399,7 @@ export function MedicalPage() {
               )}
               <button
                 onClick={() => setShowAddSubstanceDialog(true)}
-                className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+                className="p-1.5 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
                 title={t.medical.addSubstance}
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -416,17 +416,17 @@ export function MedicalPage() {
                 return (
                   <div key={sub.id} className="px-4 py-2.5 group">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900">{sub.name}</p>
+                      <p className="text-sm font-medium text-theme-ink">{sub.name}</p>
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                           sub.category === 'ped' ? 'bg-amber-100 text-amber-700' :
                           sub.category === 'trt' ? 'bg-amber-50 text-amber-600' :
-                          'bg-gray-100 text-gray-500'
+                          'bg-theme-surface-2 text-theme-ink-2'
                         }`}>
                           {sub.category === 'ped' ? `⚠ ${catLabel}` : catLabel}
                         </span>
                         {linkedReminder && (
-                          <Bell className={`h-3 w-3 ${linkedReminder.is_active ? 'text-teal-500' : 'text-gray-300'}`} />
+                          <Bell className={`h-3 w-3 ${linkedReminder.is_active ? 'text-theme-primary' : 'text-theme-ink-3'}`} />
                         )}
                         <button
                           onClick={() => {
@@ -434,14 +434,14 @@ export function MedicalPage() {
                             if (linkedReminder) deleteReminder.mutate(linkedReminder.id);
                             deleteSubstance.mutate(sub.id);
                           }}
-                          className="p-1 text-gray-400 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
+                          className="p-1 text-theme-ink-3 hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity"
                           title={t.medical.deleteSubstance}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-theme-ink-3">
                       {sub.dosage} {sub.unit} · {sub.frequency}
                       {sub.ester && ` · ${sub.ester}`}
                     </p>
@@ -450,17 +450,17 @@ export function MedicalPage() {
               })}
               {/* PED disclaimer — shown when any PED/TRT substance exists */}
               {substances.some(s => s.category === 'ped' || s.category === 'trt') && (
-                <p className="px-4 py-2 text-[9px] text-amber-400 border-t border-gray-50 select-none">
+                <p className="px-4 py-2 text-[9px] text-amber-400 border-t border-theme-line select-none">
                   ⚠ {t.medical.pedDisclaimer}
                 </p>
               )}
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">{t.common.noData}</p>
+              <p className="text-sm text-theme-ink-3">{t.common.noData}</p>
               <button
                 onClick={() => setShowAddSubstanceDialog(true)}
-                className="mt-2 text-xs text-teal-600 hover:underline"
+                className="mt-2 text-xs text-theme-primary hover:underline"
               >
                 {t.medical.addSubstance}
               </button>
@@ -470,19 +470,19 @@ export function MedicalPage() {
 
         {/* Recent Substance Logs */}
         {substanceLogs && substanceLogs.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="font-semibold text-gray-900 text-sm">
+              <h3 className="font-semibold text-theme-ink text-sm">
                 {t.medical.recentLogs}
               </h3>
             </div>
             <div className="divide-y divide-gray-50">
               {substanceLogs.slice(0, 5).map((log) => (
                 <div key={log.id} className="px-4 py-2.5 flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${log.taken ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <div className={`w-2 h-2 rounded-full ${log.taken ? 'bg-theme-success' : 'bg-theme-ink-3'}`} />
                   <div className="flex-1">
-                    <p className="text-sm text-gray-900">{log.substance_name ?? 'Substanz'}</p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-sm text-theme-ink">{log.substance_name ?? 'Substanz'}</p>
+                    <p className="text-[10px] text-theme-ink-3">
                       {formatDate(log.date, locale)}
                       {log.dosage_taken && ` · ${log.dosage_taken}`}
                       {log.site && ` · ${t.medical[`site_${log.site}` as keyof typeof t.medical] ?? log.site}`}
@@ -495,20 +495,20 @@ export function MedicalPage() {
         )}
 
         {/* Reminders Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-teal-500" />
-              <h3 className="font-semibold text-gray-900">{t.reminders.title}</h3>
+              <Bell className="h-4 w-4 text-theme-primary" />
+              <h3 className="font-semibold text-theme-ink">{t.reminders.title}</h3>
               {reminderStatus.pending.length > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-medium">
+                <span className="px-1.5 py-0.5 rounded-full bg-theme-surface-2 text-theme-primary text-[10px] font-medium">
                   {reminderStatus.pending.length}
                 </span>
               )}
             </div>
             <button
               onClick={() => setShowReminderDialog(true)}
-              className="p-1.5 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+              className="p-1.5 bg-theme-primary text-white rounded-lg hover:bg-theme-primary-2 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
@@ -528,12 +528,12 @@ export function MedicalPage() {
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-theme-ink-3">
                 {t.medical.noReminders}
               </p>
               <button
                 onClick={() => setShowReminderDialog(true)}
-                className="mt-2 text-xs text-teal-600 hover:underline"
+                className="mt-2 text-xs text-theme-primary hover:underline"
               >
                 {t.reminders.addReminder}
               </button>

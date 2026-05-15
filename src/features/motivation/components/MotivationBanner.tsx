@@ -16,33 +16,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import { useInactivityCheck } from '../hooks/useInactivityCheck';
 
+// Studio: alle Tiers nutzen Surface mit Border-Left in Severity-Farbe.
+// Statt 3 verschiedener Pastell-BGs eine konsistente Card-Sprache (Phase 7 §3).
 const TIER_STYLES = {
   gentle: {
-    bg: 'bg-teal-50',
-    border: 'border-teal-200',
-    icon: 'text-teal-500',
-    title: 'text-teal-800',
-    text: 'text-teal-600',
-    button: 'bg-teal-500 hover:bg-teal-600',
-    dismiss: 'text-teal-400 hover:text-teal-600',
+    bg: 'bg-theme-surface',
+    border: 'border-theme-line border-l-[3px] border-l-theme-primary',
+    icon: 'text-theme-primary',
+    title: 'text-theme-ink',
+    text: 'text-theme-ink-2',
+    button: 'bg-theme-primary hover:bg-theme-primary-2 text-theme-primary-on',
+    dismiss: 'text-theme-ink-3 hover:text-theme-ink-2',
   },
   supportive: {
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
-    icon: 'text-amber-500',
-    title: 'text-amber-800',
-    text: 'text-amber-600',
-    button: 'bg-amber-500 hover:bg-amber-600',
-    dismiss: 'text-amber-400 hover:text-amber-600',
+    bg: 'bg-theme-surface',
+    border: 'border-theme-line border-l-[3px] border-l-theme-warning',
+    icon: 'text-theme-warning',
+    title: 'text-theme-ink',
+    text: 'text-theme-ink-2',
+    button: 'bg-theme-warning hover:opacity-90 text-white',
+    dismiss: 'text-theme-ink-3 hover:text-theme-ink-2',
   },
   reengagement: {
-    bg: 'bg-gradient-to-r from-teal-50 to-amber-50',
-    border: 'border-teal-200',
-    icon: 'text-teal-500',
-    title: 'text-teal-800',
-    text: 'text-teal-700',
-    button: 'bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600',
-    dismiss: 'text-teal-400 hover:text-teal-600',
+    bg: 'bg-theme-surface',
+    border: 'border-theme-line border-l-[3px] border-l-theme-accent',
+    icon: 'text-theme-accent',
+    title: 'text-theme-ink',
+    text: 'text-theme-ink-2',
+    button: 'bg-theme-primary hover:bg-theme-primary-2 text-theme-primary-on',
+    dismiss: 'text-theme-ink-3 hover:text-theme-ink-2',
   },
 } as const;
 
@@ -78,7 +80,7 @@ export function MotivationBanner() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className={`${styles.bg} border ${styles.border} rounded-xl p-4 shadow-sm`}
+        className={`${styles.bg} border ${styles.border} rounded-theme-md p-4`}
       >
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-0.5">
@@ -96,7 +98,7 @@ export function MotivationBanner() {
             {/* Action Button */}
             <button
               onClick={() => navigate(motivationMessage.actionRoute)}
-              className={`mt-3 px-4 py-1.5 text-xs font-medium text-white rounded-lg transition-colors ${styles.button}`}
+              className={`mt-3 px-4 py-1.5 text-xs font-medium rounded-theme-md transition-colors ${styles.button}`}
             >
               {actionLabel}
             </button>

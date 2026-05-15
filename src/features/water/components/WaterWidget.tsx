@@ -146,15 +146,15 @@ export function WaterWidget() {
   }, [water]);
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm relative overflow-hidden">
+    <div className="bg-theme-surface border border-theme-line rounded-theme-md p-4 relative overflow-hidden">
       {/* Ripple overlay */}
       <WaterRipple trigger={rippleKey} size={120} />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
-          <Droplets className="h-4 w-4 text-blue-500" />
-          <p className="text-xs text-gray-500 font-medium">{t.water.title}</p>
+          <Droplets className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
+          <p className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.08em]">{t.water.title}</p>
         </div>
         {water.entries.length > 0 && (
           <button
@@ -198,11 +198,11 @@ export function WaterWidget() {
             >
               {water.totalMl}
             </motion.span>
-            <span className="text-sm text-gray-400">/ {water.goalMl} {t.water.ml}</span>
+            <span className="text-sm text-theme-ink-3">/ {water.goalMl} {t.water.ml}</span>
           </div>
 
           {/* Status message */}
-          <p className="text-[10px] text-gray-400 mt-0.5">
+          <p className="text-[10px] text-theme-ink-3 mt-0.5">
             {water.goalReached ? (
               <span className="text-blue-500 font-medium">{t.water.goalReached}</span>
             ) : (
