@@ -82,9 +82,9 @@ export function WeightChart({ data, showBodyFat = true, language = 'de' }: Weigh
             yAxisId="weight"
             type="monotone"
             dataKey="weight_kg"
-            stroke="#14b8a6"
+            stroke="#3D4FB8"
             strokeWidth={2}
-            dot={{ r: 3, fill: '#14b8a6' }}
+            dot={{ r: 3, fill: '#3D4FB8' }}
             activeDot={{ r: 5 }}
             connectNulls
           />

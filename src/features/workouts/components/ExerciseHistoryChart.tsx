@@ -82,9 +82,9 @@ export function ExerciseHistoryChart({ data, showVolume = false }: ExerciseHisto
             yAxisId="weight"
             type="monotone"
             dataKey="maxWeight"
-            stroke="#14b8a6"
+            stroke="#3D4FB8"
             strokeWidth={2}
-            dot={{ r: 4, fill: '#14b8a6' }}
+            dot={{ r: 4, fill: '#3D4FB8' }}
             activeDot={{ r: 6 }}
           />
           {showVolume && (

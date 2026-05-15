@@ -177,7 +177,7 @@ export function ShareTrainingPlanDialog({ plan, onClose }: ShareTrainingPlanDial
                         size={200}
                         level="L"
                         bgColor="#ffffff"
-                        fgColor="#0d9488"
+                        fgColor="#3D4FB8"
                         includeMargin={false}
                       />
                     </div>

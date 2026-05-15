@@ -73,7 +73,7 @@ export function BalanceChart({ data, language = 'de' }: BalanceChartProps) {
           />
           <Bar
             dataKey="intake"
-            fill="#14b8a6"
+            fill="#3D4FB8"
             radius={[4, 4, 0, 0]}
             maxBarSize={30}
             name="intake"

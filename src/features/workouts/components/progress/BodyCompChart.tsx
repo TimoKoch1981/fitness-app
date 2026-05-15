@@ -50,7 +50,7 @@ export function BodyCompChart({ timeRange }: BodyCompChartProps) {
           <YAxis yAxisId="weight" tick={{ fontSize: 10 }} width={40} domain={['auto', 'auto']} />
           {hasBodyFat && <YAxis yAxisId="fat" orientation="right" tick={{ fontSize: 10 }} width={35} domain={['auto', 'auto']} />}
           <Tooltip contentStyle={{ fontSize: 12 }} />
-          <Line yAxisId="weight" type="monotone" dataKey="weight" stroke="#14b8a6" strokeWidth={2} dot={{ r: 2 }} name={isDE ? 'Gewicht (kg)' : 'Weight (kg)'} />
+          <Line yAxisId="weight" type="monotone" dataKey="weight" stroke="#3D4FB8" strokeWidth={2} dot={{ r: 2 }} name={isDE ? 'Gewicht (kg)' : 'Weight (kg)'} />
           {hasBodyFat && (
             <Line yAxisId="fat" type="monotone" dataKey="bodyFat" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} name={isDE ? 'K\u00f6rperfett (%)' : 'Body Fat (%)'} />
           )}

@@ -29,7 +29,7 @@ import type { WeekData, PeriodizationPhase } from '../types/periodization';
 type ViewMode = 'total' | 'muscleGroup';
 
 const PHASE_COLORS: Record<PeriodizationPhase, string> = {
-  accumulation: '#14b8a6',  // teal
+  accumulation: '#3D4FB8',  // teal
   intensification: '#f59e0b', // amber
   deload: '#3b82f6',         // blue
   unknown: '#9ca3af',        // gray

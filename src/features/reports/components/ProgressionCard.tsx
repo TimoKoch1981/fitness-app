@@ -168,9 +168,9 @@ export function ProgressionCard({ language }: ProgressionCardProps) {
             <Line
               type="monotone"
               dataKey="weight_kg"
-              stroke="#14b8a6"
+              stroke="#3D4FB8"
               strokeWidth={2}
-              dot={{ r: 2, fill: '#14b8a6' }}
+              dot={{ r: 2, fill: '#3D4FB8' }}
               connectNulls
             />
             {/* Moving average */}

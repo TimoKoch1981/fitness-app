@@ -89,7 +89,7 @@ export function E1RMChart({ workouts, timeRange }: E1RMChartProps) {
               labelFormatter={d => d}
               contentStyle={{ fontSize: 12 }}
             />
-            <Line type="monotone" dataKey="estimated1RM" stroke="#14b8a6" strokeWidth={2} dot={{ r: 3 }} name="e1RM" />
+            <Line type="monotone" dataKey="estimated1RM" stroke="#3D4FB8" strokeWidth={2} dot={{ r: 3 }} name="e1RM" />
             <Line type="monotone" dataKey="maxWeight" stroke="#10b981" strokeWidth={1} strokeDasharray="4 2" dot={false} name="Max kg" />
           </LineChart>
         </ResponsiveContainer>

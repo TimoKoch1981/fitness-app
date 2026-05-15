@@ -51,7 +51,7 @@ export function CalorieChart({ data, calorieGoal, language = 'de' }: CalorieChar
           />
           <Bar
             dataKey="calories"
-            fill="#14b8a6"
+            fill="#3D4FB8"
             radius={[4, 4, 0, 0]}
             maxBarSize={40}
           />

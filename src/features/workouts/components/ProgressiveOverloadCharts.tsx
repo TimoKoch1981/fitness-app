@@ -219,9 +219,9 @@ export function ProgressiveOverloadCharts() {
                 <Line
                   type="monotone"
                   dataKey="estimated1RM"
-                  stroke="#14b8a6"
+                  stroke="#3D4FB8"
                   strokeWidth={2.5}
-                  dot={{ r: 4, fill: '#14b8a6' }}
+                  dot={{ r: 4, fill: '#3D4FB8' }}
                   activeDot={{ r: 6 }}
                 />
                 <Line
@@ -280,7 +280,7 @@ export function ProgressiveOverloadCharts() {
                 />
                 <Bar
                   dataKey="totalVolume"
-                  fill="#14b8a6"
+                  fill="#3D4FB8"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={40}
                 />

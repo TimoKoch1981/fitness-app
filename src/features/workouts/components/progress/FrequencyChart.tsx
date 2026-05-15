@@ -80,7 +80,7 @@ export function FrequencyChart({ workouts, timeRange }: FrequencyChartProps) {
             <YAxis tick={{ fontSize: 10 }} width={25} allowDecimals={false} />
             <Tooltip contentStyle={{ fontSize: 12 }} />
             <ReferenceLine y={avgPerWeek} stroke="#94a3b8" strokeDasharray="3 3" label="" />
-            <Bar dataKey="sessions" fill="#14b8a6" radius={[4, 4, 0, 0]} name={isDE ? 'Sessions' : 'Sessions'} />
+            <Bar dataKey="sessions" fill="#3D4FB8" radius={[4, 4, 0, 0]} name={isDE ? 'Sessions' : 'Sessions'} />
           </BarChart>
         </ResponsiveContainer>
       ) : (

@@ -82,7 +82,7 @@ export function RestTimer({ seconds, onComplete, onSkip, onAdjust }: RestTimerPr
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#14b8a6"
+            stroke="#3D4FB8"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}

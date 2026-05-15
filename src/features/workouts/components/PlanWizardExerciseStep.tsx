@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   ChevronUp,
   ChevronDown,
+  ListChecks,
 } from 'lucide-react';
 import { usePlanWizard } from '../context/PlanWizardContext';
 import { ExercisePicker } from './ExercisePicker';
@@ -52,6 +53,7 @@ export function PlanWizardExerciseStep() {
 
   const [activeTab, setActiveTab] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -136,18 +138,36 @@ export function PlanWizardExerciseStep() {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center gap-2 mb-3">
-          <button onClick={() => setShowPicker(false)} className="p-1 rounded-full hover:bg-gray-100">
+          <button onClick={() => { setShowPicker(false); setMultiSelectMode(false); }} className="p-1 rounded-full hover:bg-gray-100">
             <ChevronLeft className="h-4 w-4 text-gray-400" />
           </button>
           <h4 className="font-semibold text-gray-900 text-sm flex-1">
-            {isDE ? 'Übung hinzufügen' : 'Add Exercise'} — {currentDay.name}
+            {multiSelectMode
+              ? (isDE ? 'Mehrere auswählen' : 'Select Multiple')
+              : (isDE ? 'Übung hinzufügen' : 'Add Exercise')
+            } — {currentDay.name}
           </h4>
+          <button
+            onClick={() => setMultiSelectMode(!multiSelectMode)}
+            className={`p-1.5 rounded-lg transition-colors ${
+              multiSelectMode ? 'bg-theme-surface-2 text-theme-primary' : 'text-gray-400 hover:bg-gray-100'
+            }`}
+            title={isDE ? 'Mehrfachauswahl' : 'Multi-select'}
+          >
+            <ListChecks className="h-4 w-4" />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto">
           <ExercisePicker
-            onSelect={handleAddFromCatalog}
-            multiSelect
-            onMultiSelectConfirm={handleMultiSelectConfirm}
+            onSelect={(ex) => {
+              handleAddFromCatalog(ex);
+              setMultiSelectMode(false);
+            }}
+            multiSelect={multiSelectMode}
+            onMultiSelectConfirm={(exs) => {
+              handleMultiSelectConfirm(exs);
+              setMultiSelectMode(false);
+            }}
             maxHeight="50vh"
             dayType={effectiveDayType}
           />
