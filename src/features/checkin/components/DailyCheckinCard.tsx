@@ -38,7 +38,7 @@ function RatingRow({ label, value, onChange }: RatingRowProps) {
               key={level}
               type="button"
               onClick={() => onChange(level)}
-              className={`w-8 h-8 rounded-full text-base flex items-center justify-center transition-all ${
+              className={`w-11 h-11 rounded-full text-lg flex items-center justify-center transition-all ${
                 isSelected
                   ? 'bg-theme-surface-2 ring-2 ring-theme-primary scale-110'
                   : 'bg-theme-surface-2 hover:bg-theme-surface-3'

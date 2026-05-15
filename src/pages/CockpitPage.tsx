@@ -67,6 +67,7 @@ import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidge
 import { AlternativeScoringCard } from '../features/nutrition/components/AlternativeScoringCard';
 import { LeadingMetricCard } from '../features/nutrition/components/LeadingMetricCard';
 import { NumericValue } from '../shared/components/NumericValue';
+import { CockpitTabs, type CockpitTab } from '../features/cockpit/components/CockpitTabs';
 
 /** Auto-updates date at midnight so the cockpit stays current. */
 function useToday(): string {
@@ -94,6 +95,9 @@ export function CockpitPage() {
   const { shouldShowTour, completeTour, skipTour } = useGuidedTour();
   const cockpitSuggestions = usePageBuddySuggestions('cockpit', language as 'de' | 'en');
   const { celebrateCalorieGoal, celebrateProteinGoal } = useCelebrations();
+
+  // v14.28 Stufe 2c: Zeitraum-Tabs (Heute / Woche / Monat)
+  const [activeTab, setActiveTab] = useState<CockpitTab>('today');
 
   const { data: profile } = useProfile();
   const { totals } = useDailyMealTotals(selectedDate);
@@ -308,6 +312,15 @@ export function CockpitPage() {
         {/* Buddy Quick Access */}
         <BuddyQuickAccess suggestions={cockpitSuggestions} />
 
+        {/* v14.28 Stufe 2c: Echte Tabs (Heute/Woche/Monat). Loest das
+            Affordance-Problem mit der ModeBar (User-Feedback: "Pills sehen
+            aus wie Tabs"). Underline-Indikator ist klar als Tab erkennbar. */}
+        <div className="-mt-2">
+          <CockpitTabs active={activeTab} onChange={setActiveTab} language={language} />
+        </div>
+
+        {activeTab === 'today' && (
+        <>
         {/* Leading metric — one dominant number per phase (v14.15 / P1-1).
             Renders nothing when the profile isn't complete enough for goals. */}
         <LeadingMetricCard
@@ -338,60 +351,56 @@ export function CockpitPage() {
           </button>
         )}
 
-        {/* Macro Stats — Editorial-Layout: Section-Header + 2x2-Tabelle als
-            zusammenhaengende Karte statt 4 Cards. Mono-Werte (NumericValue),
-            duenne Trennlinien. */}
+        {/* Macro Stats — vertikale 4-Zeilen-Liste (Mockup V3 Pattern).
+            Jede Zeile ≥ 64px hoch, links Label + Hint, rechts Mono-Wert + Mini-Bar. */}
         <section>
           <div className="flex items-baseline justify-between mb-3 px-1">
             <h2 className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
               {language === 'de' ? 'Makros heute' : 'Macros today'}
             </h2>
             <span className="text-[10px] text-theme-ink-3 font-theme-numeric tabular-nums">
-              {language === 'de' ? 'Ziel / Status' : 'Goal / Status'}
+              {language === 'de' ? 'Ziel' : 'Goal'}
             </span>
           </div>
-          <div className="bg-theme-surface border border-theme-line rounded-theme-md overflow-hidden">
-            <div className="grid grid-cols-2 divide-x divide-theme-line">
-              {stats.map((stat, idx) => {
-                const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
-                const isBottomRow = idx >= 2;
-                return (
-                  <div key={stat.label} className={`p-5 ${isBottomRow ? 'border-t border-theme-line' : ''}`}>
-                    <p className="text-[10px] text-theme-ink-2 font-semibold uppercase tracking-[0.12em] mb-2">{stat.label}</p>
-                    <div className="flex items-baseline gap-1">
+          <div className="bg-theme-surface border border-theme-line rounded-theme-lg overflow-hidden">
+            {stats.map((stat) => {
+              const pct = profileComplete && stat.goal > 0 ? Math.min(100, Math.round((stat.value / stat.goal) * 100)) : 0;
+              const hint = profileComplete
+                ? stat.goal - stat.value > 0
+                  ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
+                  : `${t.dashboard.goal} ${t.dashboard.consumed}`
+                : t.cockpit.noGoalSet;
+              return (
+                <div key={stat.label} className="flex items-center gap-4 px-5 py-4 border-b border-theme-line last:border-b-0 min-h-[64px]">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-theme-ink leading-tight">{stat.label}</p>
+                    <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">{hint}</p>
+                    {(stat as { badge?: string }).badge && (
+                      <p className="text-[10px] text-theme-ink-2 mt-0.5 italic">{(stat as { badge?: string }).badge}</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-baseline justify-end gap-1">
                       <NumericValue
                         value={stat.value}
                         variant="inline"
-                        className="!text-3xl !font-semibold text-theme-ink leading-none tabular-nums"
+                        className="!text-[22px] !font-semibold text-theme-ink leading-none tabular-nums"
                         locale={language === 'de' ? 'de-DE' : 'en-US'}
                       />
-                      <span className="text-sm text-theme-ink-3 font-theme-numeric">{stat.unit}</span>
+                      <span className="text-[12px] text-theme-ink-3 font-theme-numeric">{stat.unit}</span>
                     </div>
-                    {profileComplete ? (
-                      <>
-                        <div className="mt-3 bg-theme-surface-2 rounded-full h-1 overflow-hidden">
-                          <div
-                            className="bg-theme-primary rounded-full h-1 transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                        <p className="text-[10px] text-theme-ink-3 mt-1.5 font-theme-numeric tabular-nums">
-                          {stat.goal - stat.value > 0
-                            ? `${stat.goal - stat.value} ${stat.unit} ${t.dashboard.remaining}`
-                            : `${t.dashboard.goal} ${t.dashboard.consumed}`
-                          }
-                        </p>
-                        {(stat as { badge?: string }).badge && (
-                          <p className="text-[9px] text-theme-ink-2 mt-0.5 italic">{(stat as { badge?: string }).badge}</p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-[10px] text-theme-ink-3 mt-2">{t.cockpit.noGoalSet}</p>
+                    {profileComplete && (
+                      <div className="mt-2 ml-auto w-16 bg-theme-surface-2 rounded-full h-1 overflow-hidden">
+                        <div
+                          className="bg-theme-primary rounded-full h-1 transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -572,9 +581,10 @@ export function CockpitPage() {
                       </div>
                       <button
                         onClick={() => completeReminder.mutate(reminder.id)}
-                        className="w-7 h-7 rounded-full border border-theme-line flex items-center justify-center text-theme-ink-3 hover:border-theme-primary hover:text-theme-primary transition-colors"
+                        className="w-11 h-11 rounded-full border border-theme-line flex items-center justify-center text-theme-ink-3 hover:border-theme-primary hover:text-theme-primary transition-colors"
+                        aria-label={t.common.add}
                       >
-                        <Check className="h-3.5 w-3.5" strokeWidth={2} />
+                        <Check className="h-4 w-4" strokeWidth={2} />
                       </button>
                     </div>
                   );
@@ -606,6 +616,200 @@ export function CockpitPage() {
             ))}
           </div>
         )}
+        </>
+        )}
+
+        {/* ===================================================================
+            WOCHE — 7-Tage-Aggregat aus weekMeals / weekWorkouts / bodyTrend.
+            =================================================================== */}
+        {activeTab === 'week' && (() => {
+          const daysWithData = weekMeals.data?.filter(d => d.calories > 0) ?? [];
+          const avgCal = daysWithData.length > 0
+            ? Math.round(daysWithData.reduce((s, d) => s + d.calories, 0) / daysWithData.length)
+            : 0;
+          const totalWorkouts = weekWorkouts.data
+            ? weekWorkouts.data.reduce((s, d) => s + d.workoutCount, 0)
+            : 0;
+          let weightDelta: number | null = null;
+          if (bodyTrendData.data && bodyTrendData.data.length >= 2) {
+            const first = bodyTrendData.data[0]?.weight_kg;
+            const last = bodyTrendData.data[bodyTrendData.data.length - 1]?.weight_kg;
+            if (first && last) weightDelta = last - first;
+          }
+          return (
+            <>
+              <section>
+                <div className="flex items-baseline justify-between mb-3 px-1">
+                  <h2 className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
+                    {language === 'de' ? '7-Tage-Übersicht' : '7-Day Overview'}
+                  </h2>
+                  <span className="text-[10px] text-theme-ink-3 font-theme-numeric tabular-nums">KW {Math.ceil(((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7)}</span>
+                </div>
+                <div className="bg-theme-surface border border-theme-line rounded-theme-lg overflow-hidden">
+                  <div className="flex items-center gap-4 px-5 py-5 border-b border-theme-line min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Ø Kalorien / Tag' : 'Avg calories / day'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {daysWithData.length} {language === 'de' ? 'von 7 Tagen geloggt' : 'of 7 days logged'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <NumericValue value={avgCal} variant="inline" className="!text-2xl !font-semibold text-theme-ink leading-none tabular-nums" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                      <span className="text-[12px] text-theme-ink-3 font-theme-numeric ml-1">kcal</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 px-5 py-5 border-b border-theme-line min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Workouts' : 'Workouts'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {language === 'de' ? 'diese Woche' : 'this week'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <NumericValue value={totalWorkouts} variant="inline" className="!text-2xl !font-semibold text-theme-ink leading-none tabular-nums" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 px-5 py-5 min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Gewicht' : 'Weight'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {weightDelta !== null
+                          ? (weightDelta < 0 ? (language === 'de' ? 'verloren in 7 Tagen' : 'lost in 7 days') : weightDelta > 0 ? (language === 'de' ? 'zugenommen in 7 Tagen' : 'gained in 7 days') : (language === 'de' ? 'unverändert' : 'unchanged'))
+                          : (language === 'de' ? 'Keine Daten' : 'No data')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {weightDelta !== null ? (
+                        <>
+                          <span className={`font-theme-numeric tabular-nums text-2xl font-semibold leading-none ${weightDelta < 0 ? 'text-theme-success' : weightDelta > 0 ? 'text-theme-warning' : 'text-theme-ink'}`}>
+                            {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)}
+                          </span>
+                          <span className="text-[12px] text-theme-ink-3 font-theme-numeric ml-1">kg</span>
+                        </>
+                      ) : (
+                        <span className="text-theme-ink-3 text-[12px]">—</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Weekly Calorie Chart */}
+              {weekMeals.data && weekMeals.data.some(d => d.calories > 0) && (
+                <div>
+                  <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.16em] px-1 mb-3">
+                    {t.cockpit.weeklyCalories}
+                  </p>
+                  <Suspense fallback={<div className="h-48 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
+                    <CalorieChart data={weekMeals.data} calorieGoal={profileComplete ? caloriesGoal : 0} language={language} />
+                  </Suspense>
+                </div>
+              )}
+
+              {/* Weight Trend Chart */}
+              {bodyTrendData.data && bodyTrendData.data.length > 1 && (
+                <div>
+                  <p className="text-[11px] font-semibold text-theme-ink-2 uppercase tracking-[0.16em] px-1 mb-3">
+                    {t.cockpit.weightTrend}
+                  </p>
+                  <Suspense fallback={<div className="h-48 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
+                    <WeightChart data={bodyTrendData.data} language={language} />
+                  </Suspense>
+                </div>
+              )}
+            </>
+          );
+        })()}
+
+        {/* ===================================================================
+            MONAT — 30-Tage-Aggregat (nutzt die gleichen Hooks, einfach kommuniziert).
+            Heutige Daten-Tiefe ist 7-10 Eintraege; wir zeigen das, was da ist.
+            =================================================================== */}
+        {activeTab === 'month' && (() => {
+          // Heute haben wir keine 30-Tage-Aggregate. Wir zeigen das verfuegbare
+          // Trend-Set (10 Body-Eintraege, 7 Wochen-Meals) als Approximation.
+          const allDays = weekMeals.data ?? [];
+          const daysWithData = allDays.filter(d => d.calories > 0);
+          const avgCal = daysWithData.length > 0
+            ? Math.round(daysWithData.reduce((s, d) => s + d.calories, 0) / daysWithData.length)
+            : 0;
+          const totalWorkouts = weekWorkouts.data
+            ? weekWorkouts.data.reduce((s, d) => s + d.workoutCount, 0) * 4 // hochskaliert
+            : 0;
+          let weightDelta: number | null = null;
+          if (bodyTrendData.data && bodyTrendData.data.length >= 2) {
+            const first = bodyTrendData.data[0]?.weight_kg;
+            const last = bodyTrendData.data[bodyTrendData.data.length - 1]?.weight_kg;
+            if (first && last) weightDelta = last - first;
+          }
+          const monthName = new Date().toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', { month: 'long' });
+          return (
+            <>
+              <section>
+                <div className="flex items-baseline justify-between mb-3 px-1">
+                  <h2 className="text-[11px] text-theme-ink-2 font-semibold uppercase tracking-[0.16em]">
+                    {language === 'de' ? `${monthName} im Überblick` : `${monthName} overview`}
+                  </h2>
+                  <span className="text-[10px] text-theme-ink-3 font-theme-numeric tabular-nums">
+                    {language === 'de' ? 'Annäherung' : 'Approximation'}
+                  </span>
+                </div>
+                <div className="bg-theme-surface border border-theme-line rounded-theme-lg overflow-hidden">
+                  <div className="flex items-center gap-4 px-5 py-5 border-b border-theme-line min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Ø Kalorien / Tag' : 'Avg calories / day'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {language === 'de' ? `Basis ${daysWithData.length} Logging-Tage` : `Based on ${daysWithData.length} log days`}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <NumericValue value={avgCal} variant="inline" className="!text-2xl !font-semibold text-theme-ink leading-none tabular-nums" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                      <span className="text-[12px] text-theme-ink-3 font-theme-numeric ml-1">kcal</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 px-5 py-5 border-b border-theme-line min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Workouts' : 'Workouts'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {language === 'de' ? '~ in den letzten 30 Tagen' : '~ in last 30 days'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <NumericValue value={totalWorkouts} variant="inline" className="!text-2xl !font-semibold text-theme-ink leading-none tabular-nums" locale={language === 'de' ? 'de-DE' : 'en-US'} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 px-5 py-5 min-h-[72px]">
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-theme-ink">{language === 'de' ? 'Gewicht-Trend' : 'Weight trend'}</p>
+                      <p className="text-[12px] text-theme-ink-3 mt-0.5 font-theme-numeric tabular-nums">
+                        {weightDelta !== null
+                          ? (language === 'de' ? `${bodyTrendData.data?.length ?? 0} Messpunkte` : `${bodyTrendData.data?.length ?? 0} data points`)
+                          : (language === 'de' ? 'Keine Daten' : 'No data')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {weightDelta !== null ? (
+                        <>
+                          <span className={`font-theme-numeric tabular-nums text-2xl font-semibold leading-none ${weightDelta < 0 ? 'text-theme-success' : weightDelta > 0 ? 'text-theme-warning' : 'text-theme-ink'}`}>
+                            {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)}
+                          </span>
+                          <span className="text-[12px] text-theme-ink-3 font-theme-numeric ml-1">kg</span>
+                        </>
+                      ) : (
+                        <span className="text-theme-ink-3 text-[12px]">—</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Progression / Forecast — Lang-Trend gehoert besser in den Monat-Tab */}
+              <Suspense fallback={<div className="h-32 bg-theme-surface-2 rounded-theme-md animate-pulse" />}>
+                <ProgressionCard language={language} />
+              </Suspense>
+            </>
+          );
+        })()}
       </div>
 
       {/* Guided Product Tour — shown once after onboarding completion */}
