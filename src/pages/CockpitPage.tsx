@@ -66,6 +66,8 @@ import { WeeklyChallengeCard } from '../features/gamification/components/WeeklyC
 import { CyclePhaseWidget } from '../features/medical/components/CyclePhaseWidget';
 import { AlternativeScoringCard } from '../features/nutrition/components/AlternativeScoringCard';
 import { LeadingMetricCard } from '../features/nutrition/components/LeadingMetricCard';
+import { PeakWeekCard } from '../features/nutrition/components/PeakWeekCard';
+import { SubstanceReminderCard } from '../features/medical/components/SubstanceReminderCard';
 import { NumericValue } from '../shared/components/NumericValue';
 import { CockpitTabs, type CockpitTab } from '../features/cockpit/components/CockpitTabs';
 
@@ -321,6 +323,17 @@ export function CockpitPage() {
 
         {activeTab === 'today' && (
         <>
+        {/* UX12: Peak-Week-Modus — Tag-fuer-Tag-Guidance bei aktiver Show-Prep.
+            Renders nur wenn profile.current_phase === 'peak_week'. */}
+        <PeakWeekCard profile={profile} language={language as 'de' | 'en'} />
+
+        {/* UX4: Substanz-Erinnerungen (Wegovy, TRT, B12 etc.) — wenn weekly-frequenz
+            und Dosis faellig/ueberfaellig. Renders nichts ausser sichtbare Reminders. */}
+        <SubstanceReminderCard
+          language={language as 'de' | 'en'}
+          onQuickLog={() => navigate('/medical?tab=substances')}
+        />
+
         {/* Leading metric — one dominant number per phase (v14.15 / P1-1).
             Renders nothing when the profile isn't complete enough for goals. */}
         <LeadingMetricCard

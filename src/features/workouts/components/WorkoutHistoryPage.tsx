@@ -18,6 +18,7 @@ import {
 import { useUpdateWorkout } from '../hooks/useWorkouts';
 import { ExerciseHistoryChart } from './ExerciseHistoryChart';
 import { estimate1RM } from '../../../lib/calculations/progressiveOverload';
+import { JargonTerm } from '../../../shared/components/JargonTerm';
 import type { Workout, WorkoutExerciseResult } from '../../../types/health';
 
 interface WorkoutHistoryPageProps {
@@ -327,11 +328,11 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                         <span className="text-xs text-gray-400 flex-shrink-0 ml-2 flex items-center gap-2">
                           <span>{completed.length}×{avgR}{maxW > 0 && ` @ ${maxW}kg`}</span>
                           {bestE1rm > 0 && (
-                            <span
-                              className="px-1.5 py-0.5 rounded bg-theme-surface-2 text-theme-primary font-medium"
-                              title={isDE ? 'Geschätzter 1RM (Epley)' : 'Estimated 1RM (Epley)'}
-                            >
-                              e1RM {bestE1rm.toFixed(0)}kg
+                            <span className="px-1.5 py-0.5 rounded bg-theme-surface-2 text-theme-primary font-medium inline-flex items-center">
+                              <JargonTerm term="e1RM" language={isDE ? 'de' : 'en'} display="subtle">
+                                e1RM
+                              </JargonTerm>
+                              <span className="ml-1">{bestE1rm.toFixed(0)}kg</span>
                             </span>
                           )}
                         </span>
