@@ -50,6 +50,8 @@ const PricingPage = lazy(() => import('../pages/PricingPage').then(m => ({ defau
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 // CookieBanner is NOT lazy — must show on first load before any tracking opt-in
 import { CookieBanner } from '../features/consent/components/CookieBanner';
+// ImpersonationBanner is NOT lazy — must show immediately when admin impersonates
+import { ImpersonationBanner } from '../features/admin/components/ImpersonationBanner';
 const LandingPage = lazy(() => import('../pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const JoinPage = lazy(() => import('../features/invite/components/JoinPage').then(m => ({ default: m.JoinPage })));
 
@@ -306,6 +308,8 @@ export default function App() {
           <PWAUpdatePrompt />
           {/* Phase 3 / PL3: DSGVO cookie consent (essential vs analytics) */}
           <CookieBanner />
+          {/* Phase 4 / PH5: Admin-Impersonation banner — visible if admin is logged in as another user */}
+          <ImpersonationBanner />
           <OfflineBanner />
         </I18nProvider>
       </QueryProvider>
