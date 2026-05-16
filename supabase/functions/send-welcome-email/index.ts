@@ -4,18 +4,21 @@
  * Sends a welcome/activation confirmation email to users after they
  * confirm their email address. Called from the frontend on first login.
  *
- * Flow:
+ * Flow (PH4 update 2026-05-16):
  * 1. Validates user JWT from Authorization header
- * 2. Checks if welcome email was already sent (idempotent)
- * 3. Sends email via Resend HTTP API
- * 4. Updates profiles.welcome_email_sent_at
+ * 2. Checks if welcome email was already sent (idempotent via profiles.welcome_email_sent_at)
+ * 3. Checks email_suppressions (DSGVO/CAN-SPAM — kein send bei suppressed)
+ * 4. Sends email via Resend HTTP API (with Unsubscribe-Link & List-Unsubscribe-Header)
+ * 5. Inserts email_logs row (audit-trail)
+ * 6. Updates profiles.welcome_email_sent_at
  *
  * Required env vars:
- * - RESEND_API_KEY — Resend API key for sending emails
- * - SUPABASE_SERVICE_ROLE_KEY — for DB updates
- * - SUPABASE_URL — Supabase API URL
- * - WELCOME_EMAIL_FROM — sender address (default: noreply@fudda.de)
- * - SITE_URL — app URL for "Jetzt loslegen" button
+ * - RESEND_API_KEY               - Resend API key for sending emails
+ * - SUPABASE_SERVICE_ROLE_KEY    - for DB updates + RPC calls
+ * - SUPABASE_URL                 - Supabase API URL
+ * - WELCOME_EMAIL_FROM           - sender address (default: noreply@fudda.de)
+ * - SITE_URL                     - app URL for "Jetzt loslegen" button
+ * - EMAIL_UNSUBSCRIBE_SECRET     - HMAC secret for unsubscribe-token (PH4)
  */
 
 const corsHeaders = {
@@ -24,8 +27,24 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// ── Unsubscribe-Token: base64url(hmac_sha256(secret, lower(email))) ──────────
+async function makeUnsubscribeToken(email: string, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(email.toLowerCase().trim()));
+  // base64url (RFC 4648 §5): replace +/=,
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 /** Inline welcome email HTML template */
-function buildWelcomeHtml(siteUrl: string): string {
+function buildWelcomeHtml(siteUrl: string, unsubscribeUrl: string): string {
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -66,7 +85,11 @@ function buildWelcomeHtml(siteUrl: string): string {
     </tr>
     <tr>
       <td style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-        <p style="color:#9ca3af;font-size:12px;margin:0;">FitBuddy — Dein persoenlicher Fitness- und Gesundheitsbegleiter</p>
+        <p style="color:#9ca3af;font-size:12px;margin:0 0 8px;">FitBuddy &mdash; Dein persoenlicher Fitness- und Gesundheitsbegleiter</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;">
+          Du erhaeltst diese Mail, weil du dich bei FitBuddy registriert hast.
+          <a href="${unsubscribeUrl}" style="color:#9ca3af;text-decoration:underline;">Abmelden</a>
+        </p>
       </td>
     </tr>
   </table>
@@ -114,6 +137,14 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  const unsubscribeSecret = Deno.env.get('EMAIL_UNSUBSCRIBE_SECRET');
+  if (!unsubscribeSecret) {
+    return new Response(JSON.stringify({ error: 'EMAIL_UNSUBSCRIBE_SECRET not configured' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const fromEmail = Deno.env.get('WELCOME_EMAIL_FROM') ?? 'FitBuddy <noreply@fudda.de>';
   const siteUrl = Deno.env.get('SITE_URL') ?? 'https://fudda.de';
 
@@ -143,6 +174,8 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    const recipient = user.email.toLowerCase().trim();
+
     // ── Check if welcome email already sent (idempotent) ────────────
     const profileRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=welcome_email_sent_at`,
@@ -165,8 +198,51 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // ── PH4: Suppression-Check ──────────────────────────────────────
+    const suppRes = await fetch(`${supabaseUrl}/rest/v1/rpc/is_email_suppressed`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_email: recipient }),
+    });
+
+    if (suppRes.ok) {
+      const suppressed = await suppRes.json() as boolean;
+      if (suppressed) {
+        // Log suppressed-skip fuer Audit
+        await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${serviceRoleKey}`,
+            'apikey': serviceRoleKey,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            template: 'welcome',
+            recipient,
+            status: 'suppressed',
+          }),
+        }).catch(e => console.error('[send-welcome-email] log suppressed-skip failed:', e));
+
+        console.log('[send-welcome-email] Skipped (suppressed):', recipient);
+        return new Response(JSON.stringify({ message: 'Email suppressed', skipped: true, reason: 'suppression' }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // ── Build unsubscribe URL ───────────────────────────────────────
+    const token2 = await makeUnsubscribeToken(recipient, unsubscribeSecret);
+    const unsubscribeUrl = `${siteUrl}/functions/v1/email-unsubscribe?email=${encodeURIComponent(recipient)}&token=${token2}`;
+
     // ── Send welcome email via Resend HTTP API ──────────────────────
-    const htmlContent = buildWelcomeHtml(siteUrl);
+    const htmlContent = buildWelcomeHtml(siteUrl, unsubscribeUrl);
 
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -179,12 +255,36 @@ Deno.serve(async (req: Request) => {
         to: [user.email],
         subject: 'FitBuddy — Dein Konto ist aktiviert!',
         html: htmlContent,
+        headers: {
+          // RFC 8058 / RFC 2369 — One-Click-Unsubscribe (Gmail/Yahoo Pflicht ab 2024)
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       }),
     });
 
     if (!resendRes.ok) {
       const errBody = await resendRes.text();
       console.error('[send-welcome-email] Resend error:', resendRes.status, errBody);
+
+      // Log failed-attempt fuer Audit
+      await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${serviceRoleKey}`,
+          'apikey': serviceRoleKey,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          template: 'welcome',
+          recipient,
+          status: 'failed',
+          raw_event: { resend_status: resendRes.status, body: errBody.slice(0, 500) },
+        }),
+      }).catch(() => undefined);
+
       return new Response(JSON.stringify({ error: `Resend API error: ${resendRes.status}` }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -193,6 +293,24 @@ Deno.serve(async (req: Request) => {
 
     const resendData = await resendRes.json() as { id: string };
     console.log('[send-welcome-email] Sent to', user.email, '— Resend ID:', resendData.id);
+
+    // ── PH4: email_logs insert ──────────────────────────────────────
+    await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        resend_message_id: resendData.id,
+        template: 'welcome',
+        recipient,
+        status: 'sent',
+      }),
+    }).catch(e => console.error('[send-welcome-email] log insert failed:', e));
 
     // ── Mark welcome email as sent ──────────────────────────────────
     const updateRes = await fetch(
