@@ -696,6 +696,7 @@ export const de = {
     nutritionPerServing: 'Nährwerte pro Portion',
     adminLink: 'Admin',
     feedback: 'Feedback',
+    authAudit: 'Auth-Audit',
     keyRotation: {
       title: 'API Key Rotation',
       status: 'Status',

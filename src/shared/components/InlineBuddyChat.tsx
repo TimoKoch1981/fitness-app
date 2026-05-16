@@ -228,6 +228,7 @@ function InlineBuddyChatContent() {
     clearAction,
     addSystemMessage,
     checkConnection,
+    retryMessage,
     activeThread,
     setActiveThread,
     threads,
@@ -534,7 +535,7 @@ function InlineBuddyChatContent() {
 
         {/* Messages */}
         {messages.map((msg) => (
-          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} />
+          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} onRetry={retryMessage} />
         ))}
 
         <div ref={chatEndRef} />

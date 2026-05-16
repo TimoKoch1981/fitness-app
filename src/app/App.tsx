@@ -67,6 +67,7 @@ const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage').then(m
 const AdminProductsPage = lazy(() => import('../pages/admin/AdminProductsPage').then(m => ({ default: m.AdminProductsPage })));
 const AdminUsagePage = lazy(() => import('../pages/admin/AdminUsagePage').then(m => ({ default: m.AdminUsagePage })));
 const AdminFeedbackPage = lazy(() => import('../pages/admin/AdminFeedbackPage').then(m => ({ default: m.AdminFeedbackPage })));
+const AdminAuthAuditPage = lazy(() => import('../pages/admin/AdminAuthAuditPage').then(m => ({ default: m.AdminAuthAuditPage })));
 
 /** Home route: shows LandingPage for new guests, redirects to /cockpit for authenticated users,
  *  redirects to /login for returning visitors (who previously logged in on this browser). */
@@ -222,6 +223,14 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <AdminFeedbackPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/auth-audit"
+          element={
+            <AdminRoute>
+              <AdminAuthAuditPage />
             </AdminRoute>
           }
         />

@@ -164,6 +164,7 @@ export function BuddyPage() {
     clearAction,
     addSystemMessage,
     checkConnection,
+    retryMessage,
     providerName,
     activeThread,
     setActiveThread,
@@ -378,7 +379,7 @@ export function BuddyPage() {
 
         {/* Messages */}
         {messages.map((msg) => (
-          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} />
+          <ChatMessageBubble key={msg.id} message={msg} avatarUrl={profile?.avatar_url} onRetry={retryMessage} />
         ))}
 
         {/* Help hint when no messages */}
