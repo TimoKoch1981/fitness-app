@@ -61,6 +61,13 @@ export interface DisplayMessage {
   skillVersions?: Record<string, string>;
   // Parsed actions from this message (if any — supports multiple per message)
   pendingActions?: ParsedAction[];
+  // PH9: Streaming-Drop-Retry — User-Input speichern, damit "Erneut versuchen"-
+  // Button im UI denselben Request neu senden kann
+  canRetry?: boolean;
+  originalInput?: string;
+  /** Bytes received before the stream errored — used to distinguish
+   *  "connection failure" (0 bytes) vs "stream dropped" (>0 bytes). */
+  streamedBytes?: number;
 }
 
 interface UseBuddyChatOptions {
@@ -696,22 +703,30 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
 
       setIsConnected(true);
     } catch (error) {
-      // Replace streaming message with error
+      // PH9: Detect stream-drop vs connect-failure based on bytes received.
+      // Pull the partial content from the streaming placeholder before we overwrite it.
+      const partial = messagesRef.current.find(m => m.id === streamId);
+      const streamedBytes = (partial?.content ?? '').length;
+      const isDrop = streamedBytes > 0;
+
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       setMessages(prev => prev.map(m =>
         m.id === streamId
           ? {
               ...m,
               content: language === 'de'
-                // v14.17: provider-agnostic error message. The old text only made
-                // sense when Ollama was the local dev provider — in production
-                // (Supabase Proxy → OpenAI/Anthropic) "Läuft Ollama?" was simply
-                // confusing for the user.
-                ? `Verbindungsfehler: ${errorMsg}. Versuche es nochmal — wenn das Problem bleibt, lade die App neu.`
-                : `Connection error: ${errorMsg}. Try again — if the issue persists, reload the app.`,
+                ? (isDrop
+                    ? `Verbindung abgebrochen nach ${streamedBytes} Zeichen. Klick "Erneut versuchen", um die Antwort neu zu generieren.`
+                    : `Verbindungsfehler: ${errorMsg}. Versuche es nochmal — wenn das Problem bleibt, lade die App neu.`)
+                : (isDrop
+                    ? `Connection dropped after ${streamedBytes} chars. Click "Retry" to regenerate the response.`
+                    : `Connection error: ${errorMsg}. Try again — if the issue persists, reload the app.`),
               isLoading: false,
               isStreaming: false,
               isError: true,
+              canRetry: true,
+              originalInput: userMessage.trim(),
+              streamedBytes,
             }
           : m
       ));
@@ -728,6 +743,36 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
       m.id === messageId ? { ...m, pendingActions: undefined } : m
     ));
   }, []);
+
+  /**
+   * PH9: Retry a failed streaming message. Finds the error message by id,
+   * removes it (and the trailing user message that triggered it) so the new
+   * call doesn't double-render, and re-invokes sendMessage with the original
+   * input.
+   */
+  const retryMessage = useCallback((messageId: string) => {
+    const target = messagesRef.current.find(m => m.id === messageId);
+    if (!target?.originalInput || !target.canRetry) {
+      console.warn('[BuddyChat] retryMessage: no canRetry message found for', messageId);
+      return;
+    }
+    const original = target.originalInput;
+    // Drop the failed assistant message + the user-message right above it.
+    // Index of error message:
+    const idx = messagesRef.current.findIndex(m => m.id === messageId);
+    setMessages(prev => {
+      const next = [...prev];
+      // Remove error message
+      next.splice(idx, 1);
+      // Remove preceding user message if it matches (best-effort)
+      if (idx > 0 && next[idx - 1]?.role === 'user' && next[idx - 1].content === original) {
+        next.splice(idx - 1, 1);
+      }
+      return next;
+    });
+    // Re-send (sendMessage will add user-message + streaming placeholder again)
+    void sendMessage(original);
+  }, [sendMessage]);
 
   /** Add a system/confirmation message (e.g. "✅ Mahlzeit gespeichert!") */
   const addSystemMessage = useCallback((content: string, icon?: string) => {
@@ -749,6 +794,7 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
     clearAction,
     addSystemMessage,
     checkConnection,
+    retryMessage,
     providerName: provider.getName(),
     // Thread management
     activeThread,

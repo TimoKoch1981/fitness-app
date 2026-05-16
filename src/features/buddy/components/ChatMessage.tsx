@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { AlertCircle, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, BookOpen, ChevronDown, ChevronUp, RotateCw } from 'lucide-react';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
 import { BuddyAvatar } from '../../../shared/components/BuddyAvatar';
 import { useProfile } from '../../auth/hooks/useProfile';
@@ -168,9 +168,11 @@ function SkillSourcesFooter({ skillVersions, pmids, language }: {
 interface ChatMessageProps {
   message: DisplayMessage;
   avatarUrl?: string | null;
+  /** PH9: Streaming-Drop-Retry — called from "Erneut versuchen"-Button on error messages */
+  onRetry?: (messageId: string) => void;
 }
 
-export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
+export function ChatMessageBubble({ message, avatarUrl, onRetry }: ChatMessageProps) {
   const { t, language } = useTranslation();
   const { data: profile } = useProfile();
   const buddyStyle = profile?.buddy_avatar_style ?? 'coach';
@@ -236,7 +238,11 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
         {message.isError && (
           <div className="flex items-center gap-1.5 mb-1.5">
             <AlertCircle className="h-3.5 w-3.5 text-red-500" />
-            <span className="text-xs font-medium text-red-600">Fehler</span>
+            <span className="text-xs font-medium text-red-600">
+              {message.streamedBytes && message.streamedBytes > 0
+                ? (language === 'de' ? 'Stream abgebrochen' : 'Stream dropped')
+                : 'Fehler'}
+            </span>
           </div>
         )}
         <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
@@ -262,6 +268,17 @@ export function ChatMessageBubble({ message, avatarUrl }: ChatMessageProps) {
             pmids={pmids}
             language={language}
           />
+        )}
+        {/* PH9: Streaming-Drop-Retry — "Erneut versuchen" button on error messages */}
+        {message.isError && message.canRetry && onRetry && (
+          <button
+            type="button"
+            onClick={() => onRetry(message.id)}
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-red-300 text-red-700 hover:bg-red-50 transition-colors"
+          >
+            <RotateCw className="h-3 w-3" aria-hidden="true" />
+            {language === 'de' ? 'Erneut versuchen' : 'Retry'}
+          </button>
         )}
       </div>
     </div>

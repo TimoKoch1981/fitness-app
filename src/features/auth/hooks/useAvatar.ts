@@ -1,10 +1,12 @@
 /**
  * useAvatar — Upload & delete avatar images via Supabase Storage.
  *
- * Upload flow:
+ * Upload flow (PH6 update 2026-05-16):
  * 1. Client-side compression (max 500×500, ≤200KB, WebP)
- * 2. Upload to `avatars/{user_id}/avatar.webp` (upsert)
- * 3. Get public URL → update profiles.avatar_url
+ * 2. POST base64 to Edge Function `validate-avatar`
+ *    - Function checks magic-bytes (WebP/JPEG/PNG, ablehnen sonst)
+ *    - Function uploaded via service_role (umgeht spoofable Content-Type-Check)
+ * 3. Update profiles.avatar_url with returned public_url (mit cache-buster)
  *
  * Delete flow:
  * 1. Remove file from Storage
@@ -29,6 +31,22 @@ const COMPRESSION_OPTIONS = {
   fileType: 'image/webp' as const,
 };
 
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+/** Convert a Blob to base64 string (without data:-prefix). */
+async function blobToBase64(blob: Blob): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
+    reader.onload = () => {
+      const result = reader.result as string;
+      const commaIdx = result.indexOf(',');
+      resolve(commaIdx >= 0 ? result.slice(commaIdx + 1) : result);
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
 // ── Upload Avatar ────────────────────────────────────────────────────────
 
 export function useUploadAvatar() {
@@ -43,24 +61,27 @@ export function useUploadAvatar() {
       // 2. Compress image (client-side)
       const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
 
-      // 3. Upload to Storage (upsert)
-      const filePath = `${user.id}/${AVATAR_FILENAME}`;
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(filePath, compressed, {
-          contentType: 'image/webp',
-          upsert: true,
-        });
+      // 3. PH6: Upload via Edge Function (server-magic-bytes-check)
+      const fileB64 = await blobToBase64(compressed);
+      const { data, error: fnError } = await supabase.functions.invoke<{
+        ok: boolean;
+        public_url: string;
+        path: string;
+        format: string;
+        error?: string;
+      }>('validate-avatar', {
+        body: { file_b64: fileB64 },
+      });
 
-      if (uploadError) throw uploadError;
+      if (fnError) {
+        throw new Error(fnError.message ?? 'Avatar-Upload fehlgeschlagen');
+      }
+      if (!data?.ok || !data.public_url) {
+        throw new Error(data?.error ?? 'Avatar-Validation fehlgeschlagen');
+      }
 
-      // 4. Get public URL
-      const { data: urlData } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(filePath);
-
-      // Append cache-buster to force reload after update
-      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      // 4. Cache-buster anhaengen (gleicher Pfad bei upsert)
+      const publicUrl = `${data.public_url}?t=${Date.now()}`;
 
       // 5. Update profile with avatar URL
       const { error: profileError } = await supabase
