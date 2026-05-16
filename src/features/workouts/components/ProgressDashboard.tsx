@@ -8,6 +8,7 @@ import { useTranslation } from '../../../i18n';
 import { useAllWorkoutHistory } from '../hooks/useWorkoutHistory';
 import { TimeRangeSelector, getPresetRange, type TimeRange } from './progress/TimeRangeSelector';
 import { VolumeChart } from './progress/VolumeChart';
+import { SetsPerMuscleChart } from './progress/SetsPerMuscleChart';
 import { E1RMChart } from './progress/E1RMChart';
 import { PRTimeline } from './progress/PRTimeline';
 import { FrequencyChart } from './progress/FrequencyChart';
@@ -94,6 +95,7 @@ export function ProgressDashboard() {
             <>
               <SectionHeader title={isDE ? 'Kraft' : 'Strength'} />
               <VolumeChart workouts={workouts || []} timeRange={timeRange} />
+              <SetsPerMuscleChart workouts={workouts || []} timeRange={timeRange} />
               <E1RMChart workouts={workouts || []} timeRange={timeRange} />
               <PRTimeline workouts={workouts || []} timeRange={timeRange} />
               <FrequencyChart workouts={workouts || []} timeRange={timeRange} />

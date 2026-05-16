@@ -38,6 +38,17 @@ export interface WeeklyVolumePoint {
   totalSets: number;
 }
 
+/** Eine Muskelgruppe = grobes Body-Region-Bucket (8 Kategorien). */
+export type MuscleBucket = 'chest' | 'back' | 'shoulders' | 'legs' | 'arms' | 'core' | 'cardio' | 'other';
+
+/** Sets pro Muskelgruppe in einer Woche. */
+export interface WeeklySetsPerMusclePoint {
+  weekLabel: string;
+  weekStart: string;
+  /** counts pro bucket (0 wenn keine Saetze in der Woche) */
+  buckets: Record<MuscleBucket, number>;
+}
+
 // ── Core Calculations ────────────────────────────────────────────────────
 
 /**
@@ -125,6 +136,73 @@ export function calculateWeeklyVolume(
           totalSets: completedSets.length,
         });
       }
+    }
+  }
+
+  return Array.from(weekMap.values());
+}
+
+// ── UX11: Sets-per-Muscle-Group / Woche ─────────────────────────────────────
+
+/**
+ * Mappt eine body_region oder einen Exercise-Namen auf einen der 8 Muskel-Buckets.
+ * Konsistent mit VolumeChart.tsx mapToGroup() — gleiche Heuristik.
+ */
+export function mapToMuscleBucket(regionOrName: string | undefined): MuscleBucket {
+  if (!regionOrName) return 'other';
+  const r = regionOrName.toLowerCase();
+  if (r.includes('chest') || r.includes('brust')) return 'chest';
+  if (r.includes('back') || r.includes('rücken') || r.includes('rueck') || r.includes('lat') || r.includes('rhomboid') || r.includes('trap')) return 'back';
+  if (r.includes('shoulder') || r.includes('schulter') || r.includes('delt')) return 'shoulders';
+  if (r.includes('leg') || r.includes('bein') || r.includes('quad') || r.includes('hamstr') || r.includes('glut') || r.includes('calf') || r.includes('wad') || r.includes('adductor') || r.includes('abductor')) return 'legs';
+  if (r.includes('arm') || r.includes('bicep') || r.includes('tricep') || r.includes('forearm') || r.includes('unterarm')) return 'arms';
+  if (r.includes('core') || r.includes('abs') || r.includes('bauch') || r.includes('oblique') || r.includes('seitlich')) return 'core';
+  if (r.includes('cardio') || r.includes('lauf') || r.includes('run') || r.includes('bike') || r.includes('rad')) return 'cardio';
+  return 'other';
+}
+
+/**
+ * UX11: Sets pro Muskelgruppe pro Woche.
+ *
+ * Wissenschafts-Standard fuer Hypertrophy-Programming (Schoenfeld et al. 2017):
+ * 10-20 work-sets/Woche pro Muskelgruppe ist der typische Bereich. Saetze werden
+ * als die "harte Waehrung" gezaehlt — Warmup-Saetze nicht.
+ *
+ * @param workouts Workout-Historie
+ * @returns Pro KW ein Punkt mit Sets-Counts pro Bucket
+ */
+export function calculateWeeklySetsPerMuscleGroup(workouts: Workout[]): WeeklySetsPerMusclePoint[] {
+  const weekMap = new Map<string, WeeklySetsPerMusclePoint>();
+  const sorted = [...workouts].sort((a, b) => a.date.localeCompare(b.date));
+
+  for (const w of sorted) {
+    const exercises = w.session_exercises as WorkoutExerciseResult[] | undefined;
+    if (!exercises) continue;
+
+    const weekStart = getISOWeekStart(w.date);
+    const weekNumber = getISOWeekNumber(w.date);
+    const year = new Date(w.date).getFullYear();
+    const weekKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+    const weekLabel = `KW ${weekNumber}`;
+
+    let point = weekMap.get(weekKey);
+    if (!point) {
+      point = {
+        weekLabel, weekStart,
+        buckets: { chest: 0, back: 0, shoulders: 0, legs: 0, arms: 0, core: 0, cardio: 0, other: 0 },
+      };
+      weekMap.set(weekKey, point);
+    }
+
+    for (const ex of exercises) {
+      if (ex.skipped) continue;
+      // primary_muscles ist nicht im SetResult, body_region waere ideal aber Workouts
+      // speichern oft nur den Exercise-Namen. Wir mappen beides:
+      const bucket = mapToMuscleBucket((ex as unknown as { body_region?: string; name?: string }).body_region ?? ex.name);
+
+      // Zaehle nur abgeschlossene Work-Saetze (kein Warmup, kein Skip)
+      const workSets = ex.sets.filter(s => s.completed && s.set_tag !== 'warmup' && !s.skipped);
+      point.buckets[bucket] += workSets.length;
     }
   }
 
