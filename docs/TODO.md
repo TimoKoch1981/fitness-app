@@ -194,17 +194,12 @@
 
 ---
 
-## UX-Polish-Sprint Tranche 2 (carried over aus 2026-05-16)
+## UX-Polish-Sprint (komplett abgeschlossen 2026-05-16)
 
-UX-Polish-Sprint Tranche 1 deployed mit UX2/9/10/13/15/8 (RPE-Picker, e1RM-Spalte,
-Plate-Calculator, Assay-Hinweis Hormone, Sparklines, Touch-44 Utility).
-Diese 4 Items wurden verschoben und sind weiterhin offen:
+- **Tranche 1 deployed:** UX2/9/10/13/15/8 (RPE-Picker, e1RM-Spalte,
+  Plate-Calculator, Assay-Hinweis Hormone, Sparklines, Touch-44 Utility)
+- **Tranche 2 deployed:** UX4/6/11/12 (Wegovy/Substanz-Reminder, JargonTerm-Glossar
+  mit 15 Begriffen, Sets-pro-Muskelgruppe-Chart, Peak-Week-Modus mit
+  Tag-fuer-Tag-Guidance)
 
-| ID | Titel | Aufwand | Begruendung |
-|---|---|---|---|
-| **UX6** | Normal-Nutzer-Vokabular Sweep | 1.5h | Power+-Jargon (PED, FFMI, Phase-Cycle, Mesozyklus) in Tooltips ergaenzen oder fuer Laien-Modus uebersetzen. Power+-Toggle entscheidet Vocabulary. |
-| **UX11** | Volumen-pro-Muskelgruppe Chart | 3h | Weekly-Aggregation: geloggte Workouts nach `primary_muscle_group` gruppiert → Stacked-Bar pro Woche. Insertion: WorkoutHistoryPage als 4. Chart oder neue ProgressDashboard-Section. |
-| **UX12** | Peak-Week-Modus | 4h | Profile-Flag `is_peak_week` + Date-Range. Override fuer Makros (KH-Cycling, Wasser-Loading 5 Tage). UI-Card auf Cockpit mit Day-of-Peak-Week (Day 1-7). |
-| **UX4** | Wegovy-Reminder (Substanz-spezifisch) | 2h | Erweiterung von SubstanceCycle: cadence='weekly'+specific_day, Notification-Trigger. Auch fuer andere injizierbare Substanzen verwertbar. |
-
-Total Tranche 2: ~10.5h. Empfehlung: erst UX11 (User-Wert hoch) → UX6 → UX12 → UX4.
+Alle 10 UX-Items aus dem Persona-Review-Backlog gebaut, getestet und live.
