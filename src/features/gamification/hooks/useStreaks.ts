@@ -36,7 +36,7 @@ function todayStr(): string {
  */
 export function computeStreaks(activeDates: string[]): Omit<StreakData, 'isLoading'> {
   if (activeDates.length === 0) {
-    return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0 };
+    return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0, rollingActiveDays7: 0, rollingGoalMet: false };
   }
 
   // Deduplicate and sort ascending
@@ -81,7 +81,20 @@ export function computeStreaks(activeDates: string[]): Omit<StreakData, 'isLoadi
     currentStreak = lastRun.length;
   }
 
-  return { currentStreak, longestStreak, totalActiveDays };
+  // UX5 / Phase 5: Rolling-7-Day "5 von 7"-Streak (Luecken-Toleranz fuer
+  // Andrea-Persona). Verhindert dass 1 Krankheits-Tag den 30-Tage-Streak killt.
+  // Default-Ziel: 5 von 7 aktiven Tagen = "Active Week".
+  const today_ = todayStr();
+  const last7Days = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    last7Days.add(daysAgo(i));
+  }
+  const rollingActiveDays7 = unique.filter(d => last7Days.has(d)).length;
+  const rollingGoalMet = rollingActiveDays7 >= 5;
+  // Suppress unused-var lint for today_ — kept for readability of the rolling-window
+  void today_;
+
+  return { currentStreak, longestStreak, totalActiveDays, rollingActiveDays7, rollingGoalMet };
 }
 
 /**
@@ -161,7 +174,7 @@ export function useStreaks(): StreakData {
 
   const streakData = useMemo(() => {
     if (isLoading) {
-      return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0 };
+      return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0, rollingActiveDays7: 0, rollingGoalMet: false };
     }
 
     // Merge all dates from all sources

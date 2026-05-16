@@ -27,6 +27,7 @@ import { useBloodWorkLogs, useDeleteBloodWork } from '../features/medical/hooks/
 import { AddBloodWorkDialog } from '../features/medical/components/AddBloodWorkDialog';
 import { ComponentErrorBoundary } from '../shared/components/ComponentErrorBoundary';
 import { BodyTabContent } from '../features/body/components/BodyTabContent';
+import { PrintBloodWorkReport } from '../features/medical/components/PrintBloodWorkReport';
 
 export function MedicalPage() {
   const { t, language } = useTranslation();
@@ -575,6 +576,8 @@ export function MedicalPage() {
         reminder={editingReminder}
         onClose={() => setEditingReminder(null)}
       />
+      {/* UX1 / Phase 5: Print-only Doctor-Report (Ctrl+P) */}
+      <PrintBloodWorkReport />
     </PageShell>
   );
 }

@@ -250,4 +250,74 @@ body {
     --theme-warning:     #000000;
     --theme-danger:      #000000;
   }
+
+  /* UX1 / Phase 5: Doctor-Report Print-Stylesheet.
+   * Verstecke Navigation, FABs, Modals, Buddy-Chat — der Print-Output
+   * soll wie ein klinischer Report aussehen, nicht wie ein App-Screenshot. */
+  nav, [role="navigation"],
+  .no-print, [data-no-print],
+  button[aria-label*="Buddy"i],
+  button[title*="Schnell"i],
+  [class*="FloatingBuddy"i],
+  [class*="QuickAddFAB"i],
+  [class*="InlineBuddyChat"i],
+  [class*="CookieBanner"i],
+  [class*="PWAUpdate"i] {
+    display: none !important;
+  }
+
+  /* Page-Breaks: Card-Container bleiben zusammen, neue Sections starten oben */
+  [data-print-section] { page-break-before: always; }
+  [data-print-section]:first-of-type { page-break-before: auto; }
+  [data-print-keep] { page-break-inside: avoid; }
+
+  /* Print-Header (auf jeder Seite via CSS Paged Media via @page) */
+  @page {
+    margin: 1.5cm 1.5cm 2cm 1.5cm;
+    size: A4;
+  }
+
+  /* Print-Footer fuer Doctor-Report:
+   * URL + Generierungs-Datum auf jeder Seite via Browser-Default. */
+  body { font-size: 10pt; line-height: 1.4; color: #000; background: #fff; }
+  h1, h2, h3 { color: #000; page-break-after: avoid; }
+  table { border-collapse: collapse; width: 100%; page-break-inside: auto; }
+  table th, table td { border: 1px solid #333; padding: 4px 8px; text-align: left; }
+  table thead { display: table-header-group; }  /* Header wiederholen auf jeder Seite */
+
+  /* Pflicht-Disclaimer fuer Doctor-Reports — wird via .print-disclaimer class
+   * in den Report-Components eingebunden */
+  .print-disclaimer {
+    display: block !important;
+    margin-top: 1.5cm;
+    padding-top: 0.8cm;
+    border-top: 1px solid #999;
+    font-size: 9pt;
+    color: #333;
+    page-break-inside: avoid;
+  }
+
+  /* Pflicht-Felder fuer Blutwerte: Einheit + Referenz + Methode + Datum + Labor.
+   * Werden via .print-only sichtbar gemacht. */
+  .print-only { display: block !important; }
+  .screen-only { display: none !important; }
+}
+
+/* Outside print: hide print-only content */
+@media not print {
+  .print-only { display: none; }
+}
+
+/* UX14 / Phase 5: reduced-motion Per-Element-Guards.
+ * Respektiert prefers-reduced-motion fuer alle Animationen, Transitions
+ * und Scroll-Behavior. Reicht nicht fuer Framer-Motion (das hat eigene
+ * Respect-prefers-reduced-motion-Logik) — Framer-Motion-Komponenten
+ * sollten in <MotionConfig reducedMotion="user"> gewrapped sein. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

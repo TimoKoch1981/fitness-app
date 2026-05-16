@@ -21,13 +21,14 @@
  * buttons fall to <5% usage and can be deleted.
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, X, Utensils, Dumbbell, Pill, Heart, Scale, Camera,
 } from 'lucide-react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useTranslation } from '../../i18n';
+import { useInlineBuddyChat } from './InlineBuddyChatContext';
 import { AddMealDialog } from '../../features/meals/components/AddMealDialog';
 import { AddWorkoutDialog } from '../../features/workouts/components/AddWorkoutDialog';
 import { WorkoutStartDialog } from '../../features/workouts/components/WorkoutStartDialog';
@@ -93,15 +94,13 @@ export function QuickAddFAB() {
 
   return (
     <>
-      {/* FAB — bottom-right, just left of the Buddy avatar (right-4) */}
-      <button
-        type="button"
-        onClick={() => setSheetOpen(true)}
-        aria-label={isDE ? 'Schnell-Eintrag' : 'Quick add'}
-        className="fixed bottom-20 right-24 z-[51] w-14 h-14 rounded-full shadow-md flex items-center justify-center bg-theme-primary text-theme-primary-on hover:bg-theme-primary-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2 active:scale-95 transition-all"
-      >
-        <Plus className="h-6 w-6" strokeWidth={2} />
-      </button>
+      {/* FAB — UX16 / Phase 5: Long-Press (>500ms) oeffnet Buddy-Chat,
+       * Short-Tap oeffnet Quick-Eintrag. Verhindert "zwei FABs"-Problem aus
+       * Marco-Persona-Review. */}
+      <FabButton
+        onShortTap={() => setSheetOpen(true)}
+        ariaLabel={isDE ? 'Schnell-Eintrag (lang druecken fuer Buddy-Chat)' : 'Quick add (long-press for Buddy chat)'}
+      />
 
       {/* Bottom Sheet */}
       {sheetOpen && (
@@ -175,5 +174,58 @@ export function QuickAddFAB() {
       <AddBloodPressureDialog open={activeOverlay === 'blood_pressure'} onClose={closeOverlay} />
       <AddBodyMeasurementDialog open={activeOverlay === 'body'} onClose={closeOverlay} />
     </>
+  );
+}
+
+/**
+ * FabButton — Plus-FAB mit Short-Tap (Quick-Eintrag) und Long-Press (Buddy-Chat).
+ * Long-Press-Threshold: 500ms. Funktioniert mit Maus + Touch.
+ */
+function FabButton({ onShortTap, ariaLabel }: { onShortTap: () => void; ariaLabel: string }) {
+  const { openBuddyChat } = useInlineBuddyChat();
+  const longPressTimer = useRef<number | null>(null);
+  const wasLongPress = useRef<boolean>(false);
+
+  const startPress = () => {
+    wasLongPress.current = false;
+    longPressTimer.current = window.setTimeout(() => {
+      wasLongPress.current = true;
+      // Haptic-Feedback (silent on devices without vibration)
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+      openBuddyChat();
+    }, 500);
+  };
+
+  const endPress = () => {
+    if (longPressTimer.current !== null) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (!wasLongPress.current) {
+      onShortTap();
+    }
+  };
+
+  const cancelPress = () => {
+    if (longPressTimer.current !== null) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    wasLongPress.current = false;
+  };
+
+  return (
+    <button
+      type="button"
+      onPointerDown={startPress}
+      onPointerUp={endPress}
+      onPointerLeave={cancelPress}
+      onPointerCancel={cancelPress}
+      aria-label={ariaLabel}
+      title={ariaLabel}
+      className="fixed bottom-20 right-24 z-[51] w-14 h-14 rounded-full shadow-md flex items-center justify-center bg-theme-primary text-theme-primary-on hover:bg-theme-primary-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2 active:scale-95 transition-all"
+    >
+      <Plus className="h-6 w-6" strokeWidth={2} />
+    </button>
   );
 }

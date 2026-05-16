@@ -11,6 +11,10 @@ export interface StreakData {
   totalActiveDays: number;
   /** Whether the underlying queries are still loading. */
   isLoading: boolean;
+  /** UX5 / Phase 5: "5 von 7"-Streak. Active days in the last 7 calendar days. */
+  rollingActiveDays7: number;
+  /** UX5: Whether the rolling-7 goal is met (default 5 of 7 = "active week"). */
+  rollingGoalMet: boolean;
 }
 
 export interface Badge {
