@@ -91,7 +91,23 @@ export abstract class BaseAgent {
       parts.unshift(getOnboardingPrompt(context.language));
     }
 
-    return parts.filter(Boolean).join('\n\n');
+    const finalPrompt = parts.filter(Boolean).join('\n\n');
+
+    // PH10 / Phase 4: Token-budget estimate + warning at >12k tokens.
+    // Rough estimate: 1 token ~= 4 chars. Most LLMs handle 100k+ context but
+    // *cost* scales linearly, and high context risks truncation of action-blocks
+    // at the response side. Log so we see drift before it hurts.
+    if (typeof process === 'undefined' || (typeof window !== 'undefined' && !import.meta.env.PROD)) {
+      const estimatedTokens = Math.ceil(finalPrompt.length / 4);
+      if (estimatedTokens > 12000) {
+        console.warn(
+          `[Agent:${this.config.type}] Prompt-budget WARNING: ~${estimatedTokens} tokens ` +
+          `(${finalPrompt.length} chars). Consider trimming skills or user-data sections.`
+        );
+      }
+    }
+
+    return finalPrompt;
   }
 
   /**

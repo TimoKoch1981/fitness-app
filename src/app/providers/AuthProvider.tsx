@@ -165,7 +165,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // alte value-Objekt zurueck — funktionierte zufaellig, war aber fragil
   // und triggerte downstream Re-Render-Bursts in der useAuth-Konsumenten.
   const signIn = useCallback(async (email: string, password: string) => {
+    // PH1 / Phase 4: Pre-check lockout status (5 failed attempts = 15 min lock)
+    try {
+      const { data: lockData } = await supabase.rpc('check_login_locked', { p_email: email });
+      const lock = (lockData as Array<{ is_locked: boolean; locked_until: string | null; remaining_attempts: number }> | null)?.[0];
+      if (lock?.is_locked && lock.locked_until) {
+        const minutesLeft = Math.max(1, Math.ceil((new Date(lock.locked_until).getTime() - Date.now()) / 60000));
+        return {
+          error: new Error(`Konto gesperrt. Versuche es in ${minutesLeft} Minuten erneut. / Account locked. Try again in ${minutesLeft} minutes.`),
+          errorCode: 'account_locked',
+        };
+      }
+    } catch { /* RPC unavailable -> fail-open, don't block legitimate users */ }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    // Track failed attempt OR reset on success. Fire-and-forget.
+    if (error) {
+      void supabase.rpc('register_failed_login', { p_email: email }).then(() => undefined);
+    } else {
+      void supabase.rpc('reset_failed_login', { p_email: email }).then(() => undefined);
+    }
+
     return {
       error: error ? new Error(error.message) : null,
       errorCode: error?.code,

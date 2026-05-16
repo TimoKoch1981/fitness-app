@@ -62,10 +62,15 @@ interface UseActionExecutorReturn {
   rejectAction: () => void;
 }
 
-// ── Idempotency cache (module-level, persists across renders) ──────────
+// ── Idempotency cache (PH8 / Phase 4) ─────────────────────────────────
 // Prevents duplicate action execution within a 60s window.
 // Keyed by: userId + actionType + JSON-hash of data
+//
+// Storage: sessionStorage (Cross-Tab same-origin sync) with module-level Map
+// fallback. Module-Map only is too narrow — Reload + Tab-Switch beats it
+// (we hit the same bug pattern as Workout-Save-after-Reload).
 const IDEMPOTENCY_WINDOW_MS = 60_000;
+const IDEMPOTENCY_PREFIX = 'fitbuddy_idem_';
 const idempotencyCache = new Map<string, number>();
 
 function makeIdempotencyKey(action: ParsedAction, userId?: string): string {
@@ -79,10 +84,30 @@ function makeIdempotencyKey(action: ParsedAction, userId?: string): string {
   return `${userId ?? 'anon'}:${action.type}:${(hash >>> 0).toString(36)}`;
 }
 
+function readPersistent(key: string): number | null {
+  try {
+    const raw = sessionStorage.getItem(IDEMPOTENCY_PREFIX + key);
+    if (!raw) return null;
+    const v = parseInt(raw, 10);
+    return isNaN(v) ? null : v;
+  } catch { return null; }
+}
+
+function writePersistent(key: string, ts: number): void {
+  try { sessionStorage.setItem(IDEMPOTENCY_PREFIX + key, String(ts)); } catch { /* private mode */ }
+}
+
 function isDuplicate(key: string): boolean {
   const now = Date.now();
-  const last = idempotencyCache.get(key);
-  if (last && now - last < IDEMPOTENCY_WINDOW_MS) return true;
+  // Check both module-Map (fast, in-memory) and sessionStorage (persistent across reload)
+  const lastMem = idempotencyCache.get(key);
+  if (lastMem && now - lastMem < IDEMPOTENCY_WINDOW_MS) return true;
+  const lastPersist = readPersistent(key);
+  if (lastPersist && now - lastPersist < IDEMPOTENCY_WINDOW_MS) {
+    // Hydrate Map for next check
+    idempotencyCache.set(key, lastPersist);
+    return true;
+  }
   // Cleanup stale entries occasionally
   if (idempotencyCache.size > 100) {
     for (const [k, t] of idempotencyCache.entries()) {
@@ -93,7 +118,9 @@ function isDuplicate(key: string): boolean {
 }
 
 function markExecuted(key: string): void {
-  idempotencyCache.set(key, Date.now());
+  const now = Date.now();
+  idempotencyCache.set(key, now);
+  writePersistent(key, now);
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────
