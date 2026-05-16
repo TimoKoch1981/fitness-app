@@ -97,6 +97,7 @@ Fuer jeden externen Dienstleister, an den personenbezogene Daten uebermittelt we
 |---|---|---|---|---|
 | Hetzner Cloud | Hosting (VPS CX33, Nuernberg) | Alle Daten auf Server | Ja | ✅ AVV abgeschlossen (2026-03-01) |
 | OpenAI (gpt-4o-mini) | KI-Analyse via ai-proxy | Chat-Nachrichten + Kontext | **Ja (kritisch!)** | ✅ DPA abgeschlossen (OpenAI Ireland Ltd.) |
+| Anthropic (Claude Sonnet 4.6) | KI-System-Agent fuer Function-Calling via ai-proxy | Chat-Nachrichten + Kontext | **Ja (kritisch!)** | ⏳ DPA angefragt (Audit 2026-05-16, Phase 1 OH6) — siehe `docs/PHASE1_USER_ACTIONS_2026-05-16.md` |
 | Resend | Email-Versand | Email-Adressen | Ja | OFFEN |
 | Open Food Facts | Naehrwert-Lookup | Suchanfragen (keine PII) | Nein* | - |
 | Strato | Domain-Registrar | WHOIS-Daten | Ja (Bestandskunde) | PRUEFEN |
@@ -377,6 +378,7 @@ Als kommerziell geplante App (100+ Nutzer, EU/Deutschland) besteht **Impressumsp
 | E.1.2 | **Impressum erstellen** | TMG/DDG | Niedrig | Pflichtangaben auf fudda.de |
 | E.1.3 | ~~**Einwilligung granularisieren**~~ ✅ | DSGVO Art. 9 | Mittel | ✅ 3 Consent-Felder, DisclaimerModal 4 Checkboxen, useDisclaimerCheck, Production deployed (2026-03-01) |
 | E.1.4 | ~~**AVV mit OpenAI abschliessen**~~ ✅ | DSGVO Art. 28 | Mittel | ✅ DPA mit OpenAI Ireland Ltd. abgeschlossen (2026-03-01) |
+| E.1.4b | **AVV mit Anthropic abschliessen** | DSGVO Art. 28 | Mittel | ⏳ angefragt (2026-05-16) — privacy@anthropic.com; Template in `docs/PHASE1_USER_ACTIONS_2026-05-16.md` |
 | E.1.5 | ~~**AVV mit Hetzner pruefen**~~ ✅ | DSGVO Art. 28 | Niedrig | ✅ AVV mit Hetzner Online GmbH abgeschlossen (2026-03-01) |
 | E.1.6 | ~~**Account-Loeschung implementieren**~~ ✅ | DSGVO Art. 17 | Mittel | ✅ delete_user_account() RPC, CASCADE auth.users→alle Tabellen, Storage-Cleanup, DeleteAccountDialog, Production deployed (2026-03-01) |
 | E.1.7 | ~~**Widerrufsrecht implementieren**~~ ✅ | DSGVO Art. 7 Abs. 3 | Mittel | ✅ PrivacySettings Komponente, pro-Consent Revoke, Re-Consent-Flow (2026-02-28) |
