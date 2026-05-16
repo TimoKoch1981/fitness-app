@@ -116,10 +116,12 @@ export function AdminUsersPage() {
                         <td className="px-4 py-3 text-center">
                           <button
                             type="button"
-                            onClick={() => handleImpersonate(user.user_id, user.email)}
-                            disabled={isSelf || isBusy}
+                            onClick={() => handleImpersonate(user.user_id, user.email ?? '')}
+                            disabled={isSelf || isBusy || !user.email}
                             title={isSelf
                               ? 'Du kannst dich nicht selbst impersonieren'
+                              : !user.email
+                              ? 'Nutzer hat keine Email-Adresse'
                               : 'Als diesen Nutzer einloggen (Audit-protokolliert)'}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-red-50 hover:border-red-300 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           >
