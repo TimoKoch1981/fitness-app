@@ -63,13 +63,49 @@ setInterval(() => {
 // ── SSRF Protection ───────────────────────────────────────────────────
 
 function isPrivateIP(hostname: string): boolean {
-  // Block private/reserved IPs
-  const patterns = [
-    /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
-    /^0\./, /^169\.254\./, /^::1$/, /^fc00:/, /^fe80:/,
-    /^localhost$/i, /^.*\.local$/i,
+  // PH7 / Phase 4: Hardened SSRF check.
+  // Block private/reserved/multicast IPs + DNS-rebinding patterns.
+  const lower = hostname.toLowerCase();
+
+  // Direct IP patterns (IPv4)
+  const ipv4Patterns = [
+    /^127\./,                              // loopback
+    /^10\./,                               // RFC1918 class A
+    /^172\.(1[6-9]|2\d|3[01])\./,          // RFC1918 class B
+    /^192\.168\./,                         // RFC1918 class C
+    /^0\./,                                // 0.0.0.0/8 (this-network)
+    /^169\.254\./,                         // link-local (incl. AWS metadata 169.254.169.254)
+    /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, // CGNAT 100.64.0.0/10
+    /^224\./,                              // multicast 224.0.0.0/4 (covers 224-239)
+    /^2(2[5-9]|3\d)\./,                    // rest of multicast 225-239
+    /^255\.255\.255\.255$/,                // broadcast
   ];
-  return patterns.some(p => p.test(hostname));
+
+  // IPv6 patterns
+  const ipv6Patterns = [
+    /^::1$/,                               // loopback
+    /^::$/,                                // unspecified
+    /^fc00:/i, /^fd[0-9a-f]{2}:/i,         // ULA fc00::/7
+    /^fe[89ab][0-9a-f]:/i,                 // link-local fe80::/10
+    /^ff[0-9a-f]{2}:/i,                    // multicast
+    /^::ffff:7f/i,                         // ::ffff:127.x.x.x (IPv4-mapped loopback)
+  ];
+
+  // DNS / hostname patterns
+  const hostnamePatterns = [
+    /^localhost$/i,
+    /\.local$/i,                            // mDNS
+    /\.localhost$/i,
+    /\.internal$/i,                         // common internal-domain marker
+    /\.test$/i, /\.example$/i,              // RFC 2606 reserved (often used internally)
+    // DNS-Rebinding: hostname looks like a private IP wrapped in a public domain
+    // (e.g. "127.0.0.1.attacker.com" or "0.0.0.0.evil.com")
+    /^(127\.0\.0\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+|0\.0\.0\.\d+)\./,
+  ];
+
+  return ipv4Patterns.some(p => p.test(hostname))
+    || ipv6Patterns.some(p => p.test(lower))
+    || hostnamePatterns.some(p => p.test(lower));
 }
 
 // ── JSON-LD Extraction ────────────────────────────────────────────────
