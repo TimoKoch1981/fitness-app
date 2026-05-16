@@ -13,6 +13,7 @@
  */
 
 import type { UserSkillsMeta } from './types';
+import { escapeForPrompt } from '../promptSafety';
 import type {
   UserProfile,
   DailyStats,
@@ -204,7 +205,7 @@ export function generateNutritionLogSkill(data: UserSkillData): string {
   if (recentMeals && recentMeals.length > 0) {
     skill += `\n### Heutige Mahlzeiten\n`;
     recentMeals.slice(0, 10).forEach((meal) => {
-      skill += `- ${mealTypeDE(meal.type)}: ${meal.name} (${meal.calories} kcal, ${meal.protein}g P, ${meal.carbs}g C, ${meal.fat}g F)\n`;
+      skill += `- ${mealTypeDE(meal.type)}: ${escapeForPrompt(meal.name)} (${meal.calories} kcal, ${meal.protein}g P, ${meal.carbs}g C, ${meal.fat}g F)\n`;
     });
   } else {
     skill += `\n> Heute noch keine Mahlzeiten geloggt.\n`;
@@ -240,13 +241,13 @@ export function generateTrainingLogSkill(data: UserSkillData): string {
   if (recentWorkouts && recentWorkouts.length > 0) {
     skill += `\n### Letzte Trainings (neueste zuerst)\n`;
     recentWorkouts.slice(0, 10).forEach((w) => {
-      skill += `- ${w.date}: ${w.name} (${workoutTypeDE(w.type)}`;
+      skill += `- ${w.date}: ${escapeForPrompt(w.name)} (${workoutTypeDE(w.type)}`;
       if (w.duration_minutes) skill += `, ${w.duration_minutes} Min`;
       if (w.calories_burned) skill += `, ~${w.calories_burned} kcal verbrannt`;
       skill += `)\n`;
       if (w.exercises && w.exercises.length > 0) {
         w.exercises.slice(0, 5).forEach((ex) => {
-          skill += `  • ${ex.name}`;
+          skill += `  • ${escapeForPrompt(ex.name)}`;
           if (ex.sets && ex.reps) skill += `: ${ex.sets}×${ex.reps}`;
           if (ex.weight_kg) skill += ` @ ${ex.weight_kg}kg`;
           skill += `\n`;
@@ -371,7 +372,7 @@ export function generateSubstanceProtocolSkill(data: UserSkillData): string {
   if (recentSubstanceLogs && recentSubstanceLogs.length > 0) {
     skill += `\n### Letzte Einnahmen/Injektionen\n`;
     recentSubstanceLogs.slice(0, 10).forEach((log) => {
-      skill += `- ${log.date}${log.time ? ' ' + log.time : ''}: ${log.substance_name ?? 'Substanz'}`;
+      skill += `- ${log.date}${log.time ? ' ' + log.time : ''}: ${escapeForPrompt(log.substance_name ?? 'Substanz')}`;
       if (log.dosage_taken) skill += ` — ${log.dosage_taken}`;
       if (log.site) skill += ` [${injectionSiteDE(log.site)}]`;
       if (!log.taken) skill += ` ⚠️ NICHT eingenommen`;
@@ -563,14 +564,14 @@ export function generateActivePlanSkill(data: UserSkillData): string {
       // Adaptive format: strength vs endurance
       const isEndurance = ex.exercise_type === 'cardio' || (ex.duration_minutes != null && ex.sets == null);
       if (isEndurance) {
-        const parts: string[] = [ex.name + ':'];
+        const parts: string[] = [escapeForPrompt(ex.name) + ':'];
         if (ex.duration_minutes) parts.push(`${ex.duration_minutes} Min`);
         if (ex.distance_km) parts.push(`${ex.distance_km} km`);
-        if (ex.pace) parts.push(`@ ${ex.pace}`);
-        if (ex.intensity) parts.push(`(${ex.intensity})`);
+        if (ex.pace) parts.push(`@ ${escapeForPrompt(ex.pace)}`);
+        if (ex.intensity) parts.push(`(${escapeForPrompt(ex.intensity)})`);
         skill += `- ${parts.join(' ')}\n`;
       } else {
-        skill += `- ${ex.name}: ${ex.sets ?? '?'}×${ex.reps ?? '?'}`;
+        skill += `- ${escapeForPrompt(ex.name)}: ${ex.sets ?? '?'}×${escapeForPrompt(String(ex.reps ?? '?'))}`;
         if (ex.weight_kg) skill += ` @ ${ex.weight_kg}kg`;
         skill += `\n`;
       }

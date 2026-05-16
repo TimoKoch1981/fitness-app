@@ -533,6 +533,24 @@ export async function routeAndExecute(
   context: AgentContext,
 ): Promise<AgentResult> {
   const decision = detectIntent(userMessage);
+
+  // KI2 / Phase 2: routing-decision telemetry. Fire-and-forget.
+  void (async () => {
+    const { logActionEvent } = await import('../../telemetry/actionLog');
+    void logActionEvent({
+      actionType: 'ui_router_decision',
+      phase: 'parse',
+      status: 'success',
+      agentType: decision.targetAgent,
+      metadata: {
+        source: 'ui',
+        confidence: decision.confidence,
+        matched_keywords: decision.matchedKeywords?.slice(0, 5),
+        message_length: userMessage.length,
+      },
+    });
+  })();
+
   const agent = getAgent(decision.targetAgent);
 
   // Add the user message to conversation history for the agent
@@ -564,6 +582,24 @@ export async function routeAndExecuteStream(
   onChunk: StreamCallback,
 ): Promise<AgentResult> {
   const decision = detectMultiIntent(userMessage);
+
+  // KI2 / Phase 2: routing-decision telemetry. Fire-and-forget.
+  void (async () => {
+    const { logActionEvent } = await import('../../telemetry/actionLog');
+    void logActionEvent({
+      actionType: 'ui_router_decision',
+      phase: 'parse',
+      status: 'success',
+      agentType: decision.primaryAgent,
+      metadata: {
+        source: 'ui',
+        primary_agent: decision.primaryAgent,
+        all_agents: decision.agents.map(a => ({ agent: a.targetAgent, confidence: a.confidence })),
+        is_multi_intent: decision.agents.length > 1,
+        message_length: userMessage.length,
+      },
+    });
+  })();
 
   const fullContext: AgentContext = {
     ...context,
