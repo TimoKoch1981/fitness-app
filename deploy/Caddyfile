@@ -10,6 +10,11 @@ www.{$DOMAIN} {
 }
 
 {$DOMAIN} {
+	# Health-check (Phase 3 PL5) — keeps Better Stack Uptime sane
+	handle /healthz {
+		respond "ok" 200
+	}
+
 	# Frontend — Static SPA
 	handle {
 		root * /srv/frontend
@@ -26,6 +31,9 @@ www.{$DOMAIN} {
 			path *.html /
 		}
 		header @html Cache-Control "no-cache, no-store, must-revalidate"
+		# Service Worker — never cache (browser must always check for updates)
+		@sw path /sw.js /workbox-*.js
+		header @sw Cache-Control "no-cache, no-store, must-revalidate"
 	}
 
 	# Supabase API — Proxy zu Kong
@@ -33,7 +41,7 @@ www.{$DOMAIN} {
 		reverse_proxy kong:8000
 	}
 
-	handle /auth/* {
+	handle /auth/v1/* {
 		reverse_proxy kong:8000
 	}
 
@@ -96,3 +104,55 @@ www.{$DOMAIN} {
 :3000 {
 	reverse_proxy studio:3000
 }
+
+# =============================================================================
+# Foerdermittelkoordinator – foerdermittelkoordinator.de
+# =============================================================================
+www.foerdermittelkoordinator.de {
+	redir https://foerdermittelkoordinator.de{uri} permanent
+}
+
+foerdermittelkoordinator.de {
+	log {
+		output file /var/log/caddy/foerdermittel.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Grafana Monitoring Dashboard (FK-1403)
+	handle /grafana/* {
+		reverse_proxy fk-prod-grafana:3000
+	}
+
+	handle /api/* {
+		reverse_proxy fk-prod-backend:8000
+	}
+
+	handle {
+		root * /srv/foerdermittel
+		try_files {path} /index.html
+		file_server
+
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# index.html & other HTML — never cache (so deploys take effect immediately)
+		@fkhtml {
+			not path /assets/*
+			path *.html /
+		}
+		header @fkhtml Cache-Control "no-cache, no-store, must-revalidate"
+	}
+
+	encode gzip zstd
+}
+

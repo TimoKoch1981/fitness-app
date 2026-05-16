@@ -43,9 +43,13 @@ const SocialPage = lazy(() => import('../pages/SocialPage').then(m => ({ default
 const FeatureVotingPage = lazy(() => import('../pages/FeatureVotingPage').then(m => ({ default: m.FeatureVotingPage })));
 const ImpressumPage = lazy(() => import('../pages/ImpressumPage').then(m => ({ default: m.ImpressumPage })));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage').then(m => ({ default: m.DatenschutzPage })));
+const AgbPage = lazy(() => import('../pages/AgbPage').then(m => ({ default: m.AgbPage })));
+const PricingPage = lazy(() => import('../pages/PricingPage').then(m => ({ default: m.PricingPage })));
 // AuthCallbackPage is NOT lazy — must be immediately available for email confirmation redirects
 // (stale service workers might fail to load lazy chunks)
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
+// CookieBanner is NOT lazy — must show on first load before any tracking opt-in
+import { CookieBanner } from '../features/consent/components/CookieBanner';
 const LandingPage = lazy(() => import('../pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const JoinPage = lazy(() => import('../features/invite/components/JoinPage').then(m => ({ default: m.JoinPage })));
 
@@ -89,6 +93,8 @@ function AppRoutes() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/impressum" element={<ImpressumPage />} />
         <Route path="/datenschutz" element={<DatenschutzPage />} />
+        <Route path="/agb" element={<AgbPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/join/:code" element={<JoinPage />} />
 
@@ -298,6 +304,8 @@ export default function App() {
           </FeatureFlagProvider>
           {/* PWA: global overlays (outside router, inside I18nProvider for translations) */}
           <PWAUpdatePrompt />
+          {/* Phase 3 / PL3: DSGVO cookie consent (essential vs analytics) */}
+          <CookieBanner />
           <OfflineBanner />
         </I18nProvider>
       </QueryProvider>
