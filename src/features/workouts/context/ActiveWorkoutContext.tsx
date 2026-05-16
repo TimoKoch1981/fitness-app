@@ -86,7 +86,7 @@ type Action =
   | { type: 'SET_READY' }
   | { type: 'SET_TAG'; exerciseIndex: number; setIndex: number; tag: import('../../../types/health').SetTag }
   | { type: 'TOGGLE_UNILATERAL'; exerciseIndex: number }
-  | { type: 'EDIT_LOGGED_SET'; exerciseIndex: number; setIndex: number; actualReps?: number; actualWeightKg?: number; actualDurationMinutes?: number; actualDistanceKm?: number }
+  | { type: 'EDIT_LOGGED_SET'; exerciseIndex: number; setIndex: number; actualReps?: number; actualWeightKg?: number; actualDurationMinutes?: number; actualDistanceKm?: number; rpe?: number }
   | { type: 'REPLACE_EXERCISES'; exercises: WorkoutExerciseResult[] }
   | { type: 'CLEAR_SESSION' };
 
@@ -452,6 +452,8 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         ...(action.actualWeightKg != null && { actual_weight_kg: action.actualWeightKg }),
         ...(action.actualDurationMinutes != null && { actual_duration_minutes: action.actualDurationMinutes }),
         ...(action.actualDistanceKm != null && { actual_distance_km: action.actualDistanceKm }),
+        // UX2: RPE 1-10. Erlaubt auch explizites Loeschen (undefined = nicht setzen).
+        ...(action.rpe != null && { rpe: action.rpe }),
       };
       ex.sets = sets;
       exercises[action.exerciseIndex] = ex;
@@ -627,11 +629,12 @@ interface ActiveWorkoutContextValue {
   setTag: (exerciseIdx: number, setIdx: number, tag: import('../../../types/health').SetTag) => void;
   /** v14.20 / Punkt 3: Flip a single exercise between bilateral and L/R. */
   toggleUnilateral: (exerciseIdx: number) => void;
-  /** v14.20 / Punkt 4: Edit a set that's already been logged (typo fix). */
+  /** v14.20 / Punkt 4: Edit a set that's already been logged (typo fix).
+   *  UX2 / v14.30: rpe (1-10) supported fuer Effort-Tracking nach Satz. */
   editLoggedSet: (
     exerciseIdx: number,
     setIdx: number,
-    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number },
+    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number; rpe?: number },
   ) => void;
   toggleMode: () => void;
   toggleTimer: () => void;
@@ -765,10 +768,11 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'TOGGLE_UNILATERAL', exerciseIndex: exerciseIdx });
   }, []);
   // v14.20 / Punkt 4: Inline edit of an already-completed set.
+  // UX2 / v14.30: rpe (1-10) hinzugefuegt.
   const editLoggedSet = useCallback((
     exerciseIdx: number,
     setIdx: number,
-    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number },
+    overrides: { reps?: number; weightKg?: number; durationMinutes?: number; distanceKm?: number; rpe?: number },
   ) => {
     dispatch({
       type: 'EDIT_LOGGED_SET',
@@ -778,6 +782,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       actualWeightKg: overrides.weightKg,
       actualDurationMinutes: overrides.durationMinutes,
       actualDistanceKm: overrides.distanceKm,
+      rpe: overrides.rpe,
     });
   }, []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);

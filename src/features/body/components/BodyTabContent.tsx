@@ -14,6 +14,7 @@ import { BodySilhouette } from './BodySilhouette';
 import { DataImportDialog } from '../../import/components/DataImportDialog';
 import { classifyBMI, calculateFFMI, classifyFFMI } from '../../../lib/calculations';
 import { formatDate } from '../../../lib/utils';
+import { Sparkline } from '../../../shared/components/Sparkline';
 
 interface BodyTabContentProps {
   showAddDialog: boolean;
@@ -134,14 +135,20 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
         {/* Current Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: t.body.weight, value: latest.weight_kg, unit: t.body.kg, prev: previous?.weight_kg },
-            { label: t.body.bodyFat, value: latest.body_fat_pct, unit: t.body.percent, prev: previous?.body_fat_pct },
-            { label: t.body.muscleMass, value: latest.muscle_mass_kg, unit: t.body.kg, prev: previous?.muscle_mass_kg },
-            { label: t.body.waist, value: latest.waist_cm, unit: t.body.cm, prev: previous?.waist_cm },
-            { label: t.body.waterPct, value: latest.water_pct, unit: t.body.percent, prev: previous?.water_pct },
+            { label: t.body.weight, value: latest.weight_kg, unit: t.body.kg, prev: previous?.weight_kg, key: 'weight_kg' as const },
+            { label: t.body.bodyFat, value: latest.body_fat_pct, unit: t.body.percent, prev: previous?.body_fat_pct, key: 'body_fat_pct' as const },
+            { label: t.body.muscleMass, value: latest.muscle_mass_kg, unit: t.body.kg, prev: previous?.muscle_mass_kg, key: 'muscle_mass_kg' as const },
+            { label: t.body.waist, value: latest.waist_cm, unit: t.body.cm, prev: previous?.waist_cm, key: 'waist_cm' as const },
+            { label: t.body.waterPct, value: latest.water_pct, unit: t.body.percent, prev: previous?.water_pct, key: 'water_pct' as const },
           ].map((stat) => {
             if (!stat.value) return null;
             const trend = getTrend(stat.value, stat.prev);
+            // UX15: Sparkline aus den letzten ~14 Eintraegen fuer diese Metrik
+            const series = (measurements ?? [])
+              .slice(0, 14)
+              .map(m => (m as Record<string, unknown>)[stat.key] as number | null | undefined)
+              .filter((v): v is number => typeof v === 'number' && v > 0)
+              .reverse();  // chronologisch: alt -> neu
             return (
               <div key={stat.label} className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
@@ -154,6 +161,18 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
                       : <TrendingDown className="h-3.5 w-3.5 text-green-500 mb-0.5 ml-auto" />
                   )}
                 </div>
+                {series.length >= 3 && (
+                  <div className="mt-1.5 text-gray-400">
+                    <Sparkline
+                      data={series}
+                      width={80}
+                      height={18}
+                      trend={trend === 'up' ? 'up' : trend === 'down' ? 'down' : 'neutral'}
+                      filled
+                      ariaLabel={`${stat.label} Trend ueber ${series.length} Eintraege`}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}

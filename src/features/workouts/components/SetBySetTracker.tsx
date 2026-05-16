@@ -15,6 +15,8 @@ import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy, Split, Pe
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import { RpePicker } from './RpePicker';
+import { PlateCalculator } from './PlateCalculator';
 import { PlateCalculatorPopup } from './PlateCalculatorPopup';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
 
@@ -235,26 +237,37 @@ export function SetBySetTracker({
             }
 
             return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setEditingSetIdx(idx)}
-                className="w-full grid grid-cols-[2.5rem_1fr_1fr_1.5rem] items-center gap-2 px-0.5 py-1 rounded hover:bg-white transition-colors text-left"
-              >
-                <span className="text-xs font-medium text-gray-600 flex items-center gap-1">
-                  S{s.set_number}{s.side === 'left' ? 'L' : s.side === 'right' ? 'R' : ''}
-                  {tag !== 'normal' && (
-                    <span className={`text-[9px] px-1 rounded ${tagCfg.bg} ${tagCfg.text}`}>{tagCfg.letter}</span>
-                  )}
-                </span>
-                <span className="text-sm text-gray-800 font-semibold">
-                  {isCardio ? `${s.actual_duration_minutes ?? '-'} min` : `${s.actual_reps ?? '-'} ${isDE ? 'Wdh' : 'reps'}`}
-                </span>
-                <span className="text-sm text-gray-800 font-semibold">
-                  {isCardio ? `${s.actual_distance_km ?? '-'} km` : `${s.actual_weight_kg ?? '-'} kg`}
-                </span>
-                <Pencil className="h-3 w-3 text-theme-primary justify-self-end" />
-              </button>
+              <div key={idx}>
+                <button
+                  type="button"
+                  onClick={() => setEditingSetIdx(idx)}
+                  className="w-full grid grid-cols-[2.5rem_1fr_1fr_1.5rem] items-center gap-2 px-0.5 py-1 rounded hover:bg-white transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                    S{s.set_number}{s.side === 'left' ? 'L' : s.side === 'right' ? 'R' : ''}
+                    {tag !== 'normal' && (
+                      <span className={`text-[9px] px-1 rounded ${tagCfg.bg} ${tagCfg.text}`}>{tagCfg.letter}</span>
+                    )}
+                  </span>
+                  <span className="text-sm text-gray-800 font-semibold">
+                    {isCardio ? `${s.actual_duration_minutes ?? '-'} min` : `${s.actual_reps ?? '-'} ${isDE ? 'Wdh' : 'reps'}`}
+                  </span>
+                  <span className="text-sm text-gray-800 font-semibold">
+                    {isCardio ? `${s.actual_distance_km ?? '-'} km` : `${s.actual_weight_kg ?? '-'} kg`}
+                  </span>
+                  <Pencil className="h-3 w-3 text-theme-primary justify-self-end" />
+                </button>
+                {/* UX2: RPE Picker — nur Strength, optional */}
+                {!isCardio && (
+                  <div className="px-0.5 pt-0.5 pb-1 flex justify-end">
+                    <RpePicker
+                      value={s.rpe}
+                      onChange={(rpe) => editLoggedSet(exerciseIndex, idx, { rpe })}
+                      language={isDE ? 'de' : 'en'}
+                    />
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -344,6 +357,15 @@ export function SetBySetTracker({
               <p className="text-xl font-semibold text-theme-primary mt-1">
                 @ {currentSet.target_weight_kg} kg
               </p>
+            )}
+            {/* UX10: Plate-Calculator — nur fuer Strength mit Target-Weight >= 20kg */}
+            {currentSet.target_weight_kg != null && currentSet.target_weight_kg >= 20 && (
+              <div className="mt-2 flex justify-center">
+                <PlateCalculator
+                  targetWeightKg={currentSet.target_weight_kg}
+                  language={isDE ? 'de' : 'en'}
+                />
+              </div>
             )}
           </>
         )}

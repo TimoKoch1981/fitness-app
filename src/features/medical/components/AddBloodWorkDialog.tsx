@@ -198,7 +198,7 @@ export function AddBloodWorkDialog({ open, onClose }: Props) {
               onChange={handleFileUpload}
               className="hidden"
             />
-            <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} className="touch-44 p-1 text-gray-400 hover:text-gray-600" aria-label={isDE ? 'Schliessen' : 'Close'}>
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -267,6 +267,15 @@ export function AddBloodWorkDialog({ open, onClose }: Props) {
 
                 {isExpanded && (
                   <div className="px-3 py-2 space-y-2">
+                    {/* UX13: Assay-Spezifizitaet — Hinweis bei Hormonen, dass Referenzbereiche
+                        je nach Labor-Messmethode variieren (ECLIA, CLIA, LC-MS/MS, RIA). */}
+                    {groupId === 'hormones' && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-md px-2 py-1.5 text-[10px] text-blue-700 leading-tight">
+                        {isDE
+                          ? <>ℹ Referenzbereiche fuer Hormone variieren je nach Labor-Methode (ECLIA, CLIA, LC-MS/MS). Pruefe immer den <strong>Bereich auf deinem Laborbefund</strong>. LC-MS/MS gilt fuer Testosteron/Estradiol als Goldstandard.</>
+                          : <>ℹ Hormone reference ranges vary by lab method (ECLIA, CLIA, LC-MS/MS). Always check the <strong>range printed on your lab report</strong>. LC-MS/MS is the gold standard for testosterone/estradiol.</>}
+                      </div>
+                    )}
                     {visibleKeys.map((markerKey) => {
                       const ref = REFERENCE_RANGES[markerKey];
                       if (!ref) return null;
