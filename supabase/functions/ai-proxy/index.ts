@@ -152,6 +152,56 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  // ── PL2 / Phase 3: Monthly AI quota check (per plan tier) ─────────
+  // Skip for 'anon' (unauthenticated requests already rate-limited above).
+  // Quota-check runs against Supabase RPC `check_and_increment_ai_quota`.
+  // Estimated tokens 0 here -> will be reconciled post-response with real usage.
+  if (userId !== 'anon') {
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      if (supabaseUrl && serviceKey) {
+        // Pre-flight check with 0 tokens — only reads current usage + checks limit
+        const qResp = await fetch(`${supabaseUrl}/rest/v1/rpc/check_and_increment_ai_quota`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+          },
+          body: JSON.stringify({
+            p_user_id: userId,
+            p_tokens: 0,            // pre-flight: don't increment
+            p_cost_cents_x100: 0,
+          }),
+        });
+        if (qResp.ok) {
+          const qData = await qResp.json() as Array<{ allowed: boolean; reason: string; tokens_used: number; tier: string }>;
+          const q = qData?.[0];
+          if (q && !q.allowed) {
+            console.warn(`[ai-proxy] Quota exceeded for user ${userId} (tier ${q.tier}, used ${q.tokens_used})`);
+            return new Response(
+              JSON.stringify({
+                error: 'Monthly AI quota exceeded.',
+                reason: q.reason,
+                tier: q.tier,
+                tokens_used: q.tokens_used,
+                upgrade_url: '/pricing',
+              }),
+              {
+                status: 429,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Quota-Reason': q.reason },
+              },
+            );
+          }
+        }
+      }
+    } catch (err) {
+      // Quota-check failure: log + fail open (don't block legitimate users on infra error)
+      console.warn('[ai-proxy] Quota pre-check failed (fail-open):', err);
+    }
+  }
+
   try {
     const body = await req.json();
     const {
@@ -279,6 +329,34 @@ Deno.serve(async (req: Request) => {
         `prompt=${usage.prompt_tokens ?? 0} | completion=${usage.completion_tokens ?? 0} | ` +
         `total=${usage.total_tokens ?? 0}`
       );
+
+      // PL2: Increment monthly AI quota with actual usage. Fire-and-forget.
+      if (userId !== 'anon') {
+        const totalTokens = usage.total_tokens ?? 0;
+        if (totalTokens > 0) {
+          // Pricing (USD per 1M tokens → cents x100): gpt-4o-mini = ~15 input + 60 output.
+          // Simplified: avg ~30 cents x100 per 1k tokens for mini, more for full models.
+          const costPer1kCentsX100 = model.includes('mini') ? 3 : model.includes('gpt-4o') ? 50 : 30;
+          const costCentsX100 = Math.round((totalTokens / 1000) * costPer1kCentsX100);
+          const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+          const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+          if (supabaseUrl && serviceKey) {
+            fetch(`${supabaseUrl}/rest/v1/rpc/check_and_increment_ai_quota`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': serviceKey,
+                'Authorization': `Bearer ${serviceKey}`,
+              },
+              body: JSON.stringify({
+                p_user_id: userId,
+                p_tokens: totalTokens,
+                p_cost_cents_x100: costCentsX100,
+              }),
+            }).catch(err => console.warn('[ai-proxy] Quota increment failed:', err));
+          }
+        }
+      }
     }
 
     // Include token count as response header for client-side tracking
