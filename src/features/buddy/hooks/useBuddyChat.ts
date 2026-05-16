@@ -423,19 +423,41 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
 
       // Fallback: detect log_meal from text if the nutrition agent claims "gespeichert / geloggt"
       // but didn't produce a parseable ACTION_REQUEST block. Surface as error so the user knows.
-      if (parsedActions.length === 0 && result.agentType === 'nutrition') {
-        const claimsSaved = /(?:geloggt|gespeichert|eingetragen|erfasst|notiert|logged|saved|recorded|tracked)/i.test(result.content);
-        const hasFoodKeyword = /(?:kalori|kcal|protein|carb|fett|gramm|frühstück|mittag|abend|snack|breakfast|lunch|dinner)/i.test(result.content);
-        if (claimsSaved && hasFoodKeyword) {
+      if (parsedActions.length === 0) {
+        // KI1 / Phase 2: Generic halluzination detection (was nutrition-only).
+        const claimsSaved = /(?:geloggt|gespeichert|eingetragen|erfasst|notiert|hinzugefügt|hinzugefuegt|logged|saved|recorded|tracked|added)/i.test(result.content);
+        const c = result.content.toLowerCase();
+        // Only fire for messages that look like an action claim — avoid false positives on general chat
+        const looksLikeActionDomain =
+          (result.agentType === 'nutrition' && /(?:kalori|kcal|protein|carb|fett|gramm|frühstück|mittag|abend|snack|breakfast|lunch|dinner|mahlzeit|meal|wasser|water|glas)/i.test(c)) ||
+          (result.agentType === 'training' && /(?:training|workout|satz|wdh|gewicht|kg|übung|uebung)/i.test(c)) ||
+          (result.agentType === 'medical' && /(?:blutdruck|systol|gewicht|kilo|körperfett|koerperfett|blutwert|hormon|testosteron|estradiol|puls)/i.test(c)) ||
+          (result.agentType === 'substance' && /(?:substanz|einnahme|injekt|spritze|tablette)/i.test(c)) ||
+          /(?:wasser|water|glas|liter|\d+\s*ml)/i.test(c);
+        if (claimsSaved && looksLikeActionDomain) {
           console.error('[BuddyChat] ⚠ Nutrition agent CLAIMS saved but NO action was parsed! Agent response:', result.content.slice(0, 500));
           // Telemetry: This is the worst-case "ghost save" failure mode (#1 user-reported pain).
           // We log it as a parse-phase failure with a dedicated path so we can count occurrences.
+          // Infer probable action type from agent + keyword context
+          const inferredActionType = (() => {
+            if (result.agentType === 'nutrition' && /(?:kalori|kcal|protein|carb|fett|gramm|mahlzeit|meal|breakfast|lunch|dinner|frühstück|mittag|abend|snack)/i.test(c)) return 'log_meal';
+            if (/(?:wasser|water|glas|liter|\d+\s*ml)/i.test(c)) return 'log_water';
+            if (result.agentType === 'training' && /(?:training|workout|satz|wdh|gewicht|kg|übung|uebung)/i.test(c)) return 'log_workout';
+            if (result.agentType === 'medical') {
+              if (/(?:blutdruck|systol|diastol|puls|blood pressure)/i.test(c)) return 'log_blood_pressure';
+              if (/(?:gewicht|kilo|körperfett|koerperfett|body)/i.test(c)) return 'log_body';
+              if (/(?:blutwert|hormon|testosteron|estradiol)/i.test(c)) return 'log_blood_work';
+            }
+            if (result.agentType === 'substance' && /(?:substanz|einnahme|injekt|spritze|tablette)/i.test(c)) return 'log_substance';
+            return 'unknown_claim';
+          })();
+
           void logActionEvent({
-            actionType: 'log_meal',
+            actionType: inferredActionType,
             phase: 'parse',
             status: 'failed',
             parsingPath: 'agent_claim_no_block',
-            errorCode: 'agent_no_action_block',
+            errorCode: 'agent_claim_no_block',
             errorDetail: result.content.slice(0, 500),
             agentType: result.agentType,
           });
@@ -445,8 +467,8 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
               id: crypto.randomUUID(),
               role: 'assistant' as const,
               content: language === 'de'
-                ? '\u26A0\uFE0F Der Buddy hat behauptet, die Mahlzeit sei geloggt, aber es wurde KEIN Action-Block erkannt. Bitte nochmal versuchen — oder in der Konsole (F12) schauen was der Agent geantwortet hat.'
-                : '\u26A0\uFE0F The buddy claimed the meal was logged but NO action block was parsed. Please try again — or check the console (F12) for the agent response.',
+                ? '\u26A0\uFE0F Der Buddy hat behauptet, dass etwas gespeichert wurde — die Aktion wurde aber NICHT ausgefuehrt. Bitte formuliere deine Anfrage anders oder nutze den Plus-Button (Schnell-Eintrag).'
+                : '\u26A0\uFE0F The buddy claimed something was saved, but the action was NOT executed. Please try rephrasing or use the Plus button (quick entry).',
               timestamp: new Date(),
               agentIcon: '\u26A0\uFE0F',
               isError: true,
