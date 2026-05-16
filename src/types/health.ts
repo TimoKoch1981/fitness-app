@@ -68,6 +68,9 @@ export interface SetResult {
   set_tag?: SetTag;
   /** Side for unilateral exercises — undefined = bilateral */
   side?: SetSide;
+  /** UX2: Rate of Perceived Exertion 1-10 (10=Max-Effort, 8=2 RIR, etc.).
+   *  Optional self-report nach jedem Satz fuer Autoregulation + Progression. */
+  rpe?: number;
 }
 
 /** Detailed per-exercise result from a live session */

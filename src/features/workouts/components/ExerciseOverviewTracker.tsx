@@ -17,6 +17,7 @@ import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy, Penc
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
+import { RpePicker } from './RpePicker';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
 
 /** Tag display: letter + color */
@@ -511,6 +512,18 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
                 )}
               </div>
             </div>
+
+            {/* UX2: RPE Picker — sichtbar nur fuer abgeschlossene Strength-Saetze
+                (Cardio hat keinen sinnvollen RPE-Begriff). Optional, kein Pflicht. */}
+            {isDone && !isCardio && !isSkipped && (
+              <div className="flex items-center justify-end px-3 pt-1 pb-0.5">
+                <RpePicker
+                  value={set.rpe}
+                  onChange={(rpe) => editLoggedSet(exerciseIndex, idx, { rpe })}
+                  language={isDE ? 'de' : 'en'}
+                />
+              </div>
+            )}
 
             {/* Empty field warning + Skip option */}
             {hasWarning && !isDone && !isSkipped && (

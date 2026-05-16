@@ -321,3 +321,26 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* UX8 / Phase 5: Touch-Target-Mindestgroesse 44x44px (Apple HIG / WCAG 2.5.5).
+ *
+ * Verwendung: Apply `class="touch-44"` auf Buttons/Links unter 44px Hit-Area.
+ * Erweitert die klickbare Flaeche INVISIBLY per ::after-Overlay — visueller
+ * Look bleibt gleich, nur der Hit-Bereich wird groesser. Z-Index reserviert. */
+.touch-44 {
+  position: relative;
+}
+.touch-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+

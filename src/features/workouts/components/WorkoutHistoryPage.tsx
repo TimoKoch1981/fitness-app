@@ -17,6 +17,7 @@ import {
 } from '../hooks/useWorkoutHistory';
 import { useUpdateWorkout } from '../hooks/useWorkouts';
 import { ExerciseHistoryChart } from './ExerciseHistoryChart';
+import { estimate1RM } from '../../../lib/calculations/progressiveOverload';
 import type { Workout, WorkoutExerciseResult } from '../../../types/health';
 
 interface WorkoutHistoryPageProps {
@@ -306,14 +307,33 @@ function SessionsList({ workouts, locale, isDE }: { workouts: Workout[]; locale:
                       ? Math.round(completed.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / completed.length)
                       : 0;
 
+                    // UX9: Best-Set e1RM via Epley = weight*(1+reps/30).
+                    // Liefert pro Exercise den hoechsten geschaetzten 1RM aus
+                    // allen geloggten Saetzen — direkter Progressions-Indikator.
+                    const bestE1rm = completed.reduce((best, set) => {
+                      const w = set.actual_weight_kg ?? 0;
+                      const r = set.actual_reps ?? 0;
+                      if (w <= 0 || r < 1) return best;
+                      const e = estimate1RM(w, r);
+                      return e > best ? e : best;
+                    }, 0);
+
                     return (
                       <div key={exIdx} className="flex items-center justify-between py-1 pl-6">
                         <span className="text-xs text-gray-600 truncate">
                           {ex.is_addition && <span className="text-theme-primary">+ </span>}
                           {ex.name}
                         </span>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                          {completed.length}×{avgR}{maxW > 0 && ` @ ${maxW}kg`}
+                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2 flex items-center gap-2">
+                          <span>{completed.length}×{avgR}{maxW > 0 && ` @ ${maxW}kg`}</span>
+                          {bestE1rm > 0 && (
+                            <span
+                              className="px-1.5 py-0.5 rounded bg-theme-surface-2 text-theme-primary font-medium"
+                              title={isDE ? 'Geschätzter 1RM (Epley)' : 'Estimated 1RM (Epley)'}
+                            >
+                              e1RM {bestE1rm.toFixed(0)}kg
+                            </span>
+                          )}
                         </span>
                       </div>
                     );
