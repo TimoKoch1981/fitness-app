@@ -176,29 +176,64 @@ Component-Test:
 
 ### Verdaechtige Commits
 
-`git log --follow ExerciseTracker.tsx` und `ExerciseVideoModal.tsx` zeigt im Mai
-nur ac783e9 (Farb-Cleanup). Keine Logik-Aenderung an `hasVideo` oder Modal.
+`git log --follow ExerciseTracker.tsx` + `ExerciseVideoModal.tsx` + `useExerciseCatalog.ts`:
+im Mai NUR ac783e9 (Color-Sweep). Diff `ac783e9~1..ac783e9` an ExerciseTracker:
+nur teal→theme-primary, **keine Logik-Aenderung am `hasVideo`-Check oder am
+Video-Button-Render**. Catalog-Query `select('*')` mit `staleTime: Infinity`
+ebenfalls unveraendert.
+
+Schema-v2 (20260309000004) hat ein paralleles `videos JSONB`-Feld angelegt, aber
+`video_url_de/en` Spalten bestehen weiter und werden in 20260318000001 fuer
+Mind-Body noch befuellt. Built-Bundle `ActiveWorkoutPage-BkMr8DA3.js` enthaelt
+`video_url_de` und `video_url_en` als String-Literals — Code liest also weiterhin
+die richtigen Felder.
+
+### Annahme: recent regression im Daten-Pfad
+
+Timo sagt "hat doch frueher einwandfrei funktioniert". Da der Code unveraendert
+ist, ist die Regression mit hoher Wahrscheinlichkeit **daten-** oder
+**lookup-seitig** entstanden — nicht im Render-Pfad. Aufwand fuer Fix ist
+voraussichtlich **klein**, sobald die Ursache identifiziert ist.
 
 ### Hypothesen
 
-1. **H1 (am wahrscheinlichsten) — Catalog-Lookup faellt:** `findExerciseInCatalog`
-   versucht exact → alias → partial. Wenn der User-Plan eine Uebung mit Namen
-   "Bankdruecken" hat aber der Catalog "Bench Press" mit Alias "Bankdrücken"
-   (Umlaut!), schlaegt der case-insensitive Match wegen Encoding fehl. `catalogEntry = null`
-   → `hasVideo = false` → **kein Button gerendert**. Konsistent mit "Videobutton
-   wird gar nicht angezeigt".
-2. **H2 — `video_url` fehlt im Catalog-Row:** Nur 70 von ~150+ Catalog-Eintraegen
-   haben URLs (siehe Migrations-Grep). Fuer alles ohne URL → kein Button.
-3. **H3 — YouTube-Embed blockiert:** Modal oeffnet sich, iframe laedt nicht
-   (CSP / Network). Erklaert "Video funktioniert nicht", aber Button waere
-   sichtbar. Wenn beide Symptome auftreten, ist das Hybrid.
+1. **H1 (am wahrscheinlichsten) — Production-DB hat `video_url_de/en` verloren
+   oder ueberschrieben:** Irgendeine Production-Operation (manueller
+   UPDATE, fehlgeschlagene Seed-Re-Run, RLS-Filter, Migration-Rollback) hat
+   die Werte auf NULL gesetzt. Eine Stichprobe `SELECT name, video_url_de,
+   video_url_en FROM exercise_catalog LIMIT 10;` auf Production klaert das in
+   30 Sekunden. Fix: UPDATE-Statement aus Seed-File re-applizieren.
+2. **H2 — `findExerciseInCatalog` matcht nicht:** Wenn die Test-User-Plaene
+   ueber den Wizard mit leicht abweichenden Exercise-Namen erstellt wurden
+   (z. B. "Bankdruecken" ohne Umlaut, "Push-Up" statt "Liegestütze"), schlaegt
+   exact → alias → partial nacheinander fehl. `catalogEntry = null` →
+   `hasVideo = false` → kein Button. Fix: alias-Liste pflegen oder
+   Levenshtein-Match einbauen.
+3. **H3 — `useExerciseCatalog`-Query gibt undefined zurueck:** RLS-Policy
+   wurde geaendert und blockt anonyme/authenticated reads. Production-Curl
+   gegen `/rest/v1/exercise_catalog?select=name,video_url_de` zeigt 0 rows.
+   Eher unwahrscheinlich, weil Catalog-Anzeige im PlanWizard noch funktioniert
+   (sonst koennten User keinen Plan bauen).
 
 ### Empfohlene Verifikation
 
-- Browser-Console im Workout: `document.querySelectorAll('[title*="Video"]').length`
-  + `[...document.querySelectorAll('.text-red-400')].map(e => e.parentElement?.outerHTML)`
-- DB-Query: `SELECT name, video_url_de IS NULL AS de_null, video_url_en IS NULL AS en_null FROM exercise_catalog ORDER BY name;`
-- Catalog-Lookup-Test fuer Plan-Exercise-Names der betroffenen Test-User
+- **DB-Probe (Production):**
+  ```sql
+  SELECT name, video_url_de IS NULL AS de_null, video_url_en IS NULL AS en_null
+  FROM exercise_catalog ORDER BY name LIMIT 20;
+  ```
+  Wenn ueberwiegend `de_null=true` → H1.
+- **Browser-Console** waehrend Active Workout, betroffene Uebung:
+  ```js
+  // catalogEntry?
+  window.__catalog?.find(e => e.name === 'Bankdrücken')?.video_url_de
+  ```
+  (oder via React DevTools in den ExerciseTracker-State schauen).
+- **Component-Test** (Portion B): Render ExerciseTracker mit Mock-Catalog
+  `[{ name: 'Bench Press', video_url_de: 'https://...', ... }]` und
+  Mock-Exercise `{ name: 'Bench Press' }` — Erwartung: Video-Button (red-400)
+  sichtbar im DOM. Wenn der Test im aktuellen Branch gruen ist, ist B24 **nicht
+  code-seitig** und der Fix gehoert in Portion C-F als Production-DB-Patch.
 
 ---
 
@@ -273,7 +308,7 @@ Bewertung nach `User-Impact × Fix-Aufwand`:
 | **B23** Gewichte | **Block-Bug** — verhindert Kern-Feature (Saetze tracken) fuer Test-User komplett | Mittel — Default-Logik in `buildExercisesFromPlan` oder `noWeight`-Check ueberarbeiten | **Portion C (1.)** |
 | **B25** Theme | Sichtbar in JEDER Session, Timer komplett unleserlich | Niedrig — `bg-gray-800`-Panels auf Token, ein paar `text-blue-*` Sweeps | **Portion D (2.)** |
 | **B22** Multi-Day | Power-User-Feature blockiert, Workaround via Tag 1 + Switch existiert | Mittel — Empty-State fuer Days mit `exercises=[]` + Day-Lookup ueber Plans hinweg | **Portion E (3.)** |
-| **B24** Videos | Komfort-Feature, kein Blocker fuer Workout | Mittel-Hoch — Catalog-Encoding, evtl. Daten-Migration | **Portion F (4.)** |
+| **B24** Videos | Komfort-Feature, kein Blocker fuer Workout — **aber Timo bestaetigt: "frueher einwandfrei"**, also wahrscheinlich recent regression | **Niedrig** — wenn H1 stimmt: 1 UPDATE-Statement auf Prod-DB. Wenn H2: Alias-Eintrag. Wenn H3: RLS-Policy. Diagnose ist der eigentliche Aufwand. | **Portion F (4.)** |
 
 Diese Reihenfolge deckt sich mit der Default-Empfehlung im
 [REGRESSION_FIX_PROMPT](docs/REGRESSION_FIX_PROMPT_2026-05-17.md) Portion C.
