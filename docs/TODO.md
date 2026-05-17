@@ -10,9 +10,19 @@
 
 | # | Bug | Prio | Analyse |
 |---|-----|------|---------|
+| **B22** | **Multi-Day-Training: nur Tag 1 hat Start-Button** | **P0** | Verifiziert 2026-05-17 mit 2 Test-Usern. Tag 2..n koennen nicht gestartet werden. Siehe Regression-Sprint-Prompt `docs/REGRESSION_FIX_PROMPT_2026-05-17.md`. |
+| **B23** | **Gewichte im Workout fehlen / Eingabe defekt / Last-Weight-Memory weg** | **P0** | Verifiziert 2026-05-17. 3 Sub-Bugs: (a) keine Gewicht-Anzeige in Saetzen, (b) Eingabe/Aenderung unmoeglich, (c) Vor-Befuellung mit letzten Werten greift nicht. Wahrscheinlich Regression aus Theme/Token-Migration (Stufe 2-4) ODER Telemetry-Wrap-Sprint (v14.29) ODER UX-Polish-Sprint Tranchen. Siehe Sprint-Prompt. |
+| **B24** | **Uebungs-Videos defekt oder Button verschwunden** | **P0** | Verifiziert 2026-05-17. Video-Button fehlt komplett oder fuehrt zu Fehler. Siehe Sprint-Prompt. |
+| **B25** | **Active-Workout-Theme: blaue Schrift auf schwarzem Grund schwer lesbar** | **P0** | Verifiziert 2026-05-17. Power-Console-Auto-Switch (v14.28 Stufe 3) zieht offenbar nicht alle Text-Farben mit, oder es ueberlagert Studio-Indigo auf Charcoal-Background. Siehe Sprint-Prompt. |
 | ~~B19~~ | ~~Plan-Speichern / Multi-Day-Split unzuverlaessig~~ | ~~P0~~ | **GEFIXT v13.4 (2026-04-08)** — Trainings-Agent schreibt jetzt Klartext-Description statt JSON, SystemAgent-FC erhaelt Original-User-Message als Kontext + Vollstaendigkeits-Regel, Idempotenz-Cache, Save-Retry-Fallback. **Live-verifiziert auf fudda.de**: 4-Tage-Split mit allen 4 Tagen + 5 Uebungen pro Tag in einem einzigen Klick gespeichert. |
 | ~~B20~~ | ~~Workout-Musik-Player unzuverlaessig~~ | ~~P1~~ | **GEFIXT v13.5 (2026-04-08)** — Persistent Single Iframe Architektur: `MusicPlayerContext` + `MusicPlayerProvider` global am App-Root, eine einzige Iframe-Instanz mit `key="persistent-music-iframe"` + `React.memo`, ueberlebt Route-Navigation, Collapse/Expand und Scroll. Spotify-Dead-Code (600 Zeilen) komplett entfernt. **Audio-Test braucht manuelle User-Verifikation.** |
 | **B21** | **Supabase Studio Container unhealthy** | P3 | `fitbuddy-studio-1` zeigt `unhealthy` — Next.js startet aber Healthcheck scheitert mit `ECONNREFUSED 127.0.0.1:3000` (falsche Interface-Bindung / zu frueher Check). Funktional OK (Studio ist nur Admin-UI, blockiert keine User). **Fix:** Healthcheck in `deploy/docker-compose.yml` anpassen — `start_period: 60s` + `retries: 20` ODER `healthcheck: disable: true`. **Aufwand:** 15 min. |
+
+### Offene User-Action (Backlog, nicht-blockierend)
+
+| # | Action | Prio | Details |
+|---|--------|------|---------|
+| U2 | **Resend-Webhook konfigurieren** | P2 | PH4 (2026-05-16) deployed mit Placeholder `RESEND_WEBHOOK_SECRET=PLACEHOLDER_set_after_Resend_dashboard_config`. Schritte: (1) Resend-Dashboard → Webhooks → Add Endpoint `https://fudda.de/functions/v1/resend-webhook`, (2) Events `email.bounced` + `email.complained` abonnieren, (3) `whsec_xxx` kopieren, (4) in `/opt/fitbuddy/.env` als `RESEND_WEBHOOK_SECRET=whsec_xxx` setzen, (5) `docker compose up -d --force-recreate functions`. Doku: `docs/PH4_EMAIL_COMPLIANCE_2026-05-16.md`. **Aufwand:** 10 min. Solange Placeholder gesetzt ist: Bounce-Webhooks werden mit 401 abgewiesen, Suppression-List bleibt leer (kein Schaden, nur Schutz inaktiv). |
 
 ---
 
