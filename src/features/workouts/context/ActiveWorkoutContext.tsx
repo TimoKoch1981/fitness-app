@@ -151,9 +151,15 @@ export function buildExercisesFromPlan(
       targetDistanceKm = pe.exercise_type === 'cardio' ? pe.distance_km : undefined;
     } else {
       // Strength: 4-level priority chain
-      // a. Plan value → b. Cross-plan previous → c. Smart defaults → d. Fallback
+      // a. Plan value → b. Cross-plan previous → c. Smart defaults → d. Fallback 0
+      // B23-Fix: Ohne den Final-Fallback 0 blieb targetWeightKg = undefined,
+      // wenn der User keinen Plan-Wert hatte, keine Cross-Plan-History und der
+      // Smart-Default fuer den Exercise-Namen `undefined` lieferte. Folge: alle
+      // sets[i].target_weight_kg = undefined → `noWeight`-Check in Trackern
+      // wurde true → Gewichts-Spalte komplett ausgeblendet, User konnte nichts
+      // eintragen.
       targetReps = pe.reps ?? prevSet?.target_reps ?? defaults.reps;
-      targetWeightKg = pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg;
+      targetWeightKg = pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg ?? 0;
       targetDurationMinutes = undefined;
       targetDistanceKm = undefined;
     }
