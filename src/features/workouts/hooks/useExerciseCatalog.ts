@@ -127,6 +127,24 @@ export function useFilteredExercises(
  * @param catalog The full exercise catalog array
  * @returns The matching CatalogExercise or null
  */
+/**
+ * B24-Fix: Normalize a name for robust catalog matching.
+ * - lowercase
+ * - Umlaute → ASCII (ä→ae, ö→oe, ü→ue, ß→ss)
+ * - Alle nicht-alphanumerischen Zeichen weg (Bindestriche, Whitespace,
+ *   Klammern, Punkte) — Bizeps-Curls / Bizepscurls / "Bizepscurls (mit Kh)"
+ *   reduzieren sich alle auf "bizepscurls" (bzw. mit Suffix).
+ */
+function normalizeName(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 export function findExerciseInCatalog(
   name: string,
   catalog: CatalogExercise[],
@@ -134,8 +152,9 @@ export function findExerciseInCatalog(
   if (!name || !catalog.length) return null;
 
   const lower = name.toLowerCase().trim();
+  const norm = normalizeName(name);
 
-  // 1. Exact match (name or name_en)
+  // 1. Exact match (name or name_en) — lowercase only, schnelle Pfad
   const exact = catalog.find(
     (ex) =>
       ex.name.toLowerCase() === lower ||
@@ -143,22 +162,41 @@ export function findExerciseInCatalog(
   );
   if (exact) return exact;
 
-  // 2. Alias match
+  // 2. Alias match — lowercase only
   const aliasMatch = catalog.find((ex) =>
     ex.aliases.some((alias) => alias.toLowerCase() === lower),
   );
   if (aliasMatch) return aliasMatch;
 
-  // 3. Partial match (catalog name starts with search, or vice versa)
-  const partial = catalog.find(
-    (ex) =>
-      ex.name.toLowerCase().includes(lower) ||
-      lower.includes(ex.name.toLowerCase()) ||
-      (ex.name_en && (
-        ex.name_en.toLowerCase().includes(lower) ||
-        lower.includes(ex.name_en.toLowerCase())
-      )),
-  );
+  // 3. Normalized exact match — faengt Umlaut-Encoding, Bindestriche,
+  //    Whitespace, Klammern (Bankdruecken/Bankdrücken, Bizepscurls/Bizeps-Curls).
+  if (norm) {
+    const normExact = catalog.find((ex) => {
+      if (normalizeName(ex.name) === norm) return true;
+      if (ex.name_en && normalizeName(ex.name_en) === norm) return true;
+      return ex.aliases.some((alias) => normalizeName(alias) === norm);
+    });
+    if (normExact) return normExact;
+  }
+
+  // 4. Partial match — bidirectional substring, sowohl auf lowercase als auch
+  //    auf normalisierter Form. Faengt Klammer-Suffixe ("Bankdrücken
+  //    (Flachbank)" → "Bankdrücken") und Plurale ("Bulgarian Split Squats" →
+  //    "Bulgarian Split Squat").
+  const partial = catalog.find((ex) => {
+    const exName = ex.name.toLowerCase();
+    const exNameEn = ex.name_en?.toLowerCase();
+    const exNorm = normalizeName(ex.name);
+    const exNormEn = ex.name_en ? normalizeName(ex.name_en) : '';
+
+    return (
+      exName.includes(lower) ||
+      lower.includes(exName) ||
+      (exNameEn && (exNameEn.includes(lower) || lower.includes(exNameEn))) ||
+      (norm && (exNorm.includes(norm) || norm.includes(exNorm))) ||
+      (norm && exNormEn && (exNormEn.includes(norm) || norm.includes(exNormEn)))
+    );
+  });
   if (partial) return partial;
 
   return null;
