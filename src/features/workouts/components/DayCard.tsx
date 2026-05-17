@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Play, Target, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Play, Target, Pencil, RotateCcw, Trash2, Plus } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import type { TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 import { findExerciseInCatalog } from '../hooks/useExerciseCatalog';
@@ -150,7 +150,7 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
           >
             <Trash2 className="h-3.5 w-3.5" />
           </span>
-          {day.exercises.length > 0 && (
+          {day.exercises.length > 0 ? (
             <span
               role="button"
               onClick={handleStartWorkout}
@@ -168,6 +168,20 @@ export function DayCard({ day, planId, isExpanded, onToggle, catalog, onExercise
               ) : (
                 <><Play className="h-3 w-3" /> {isDE ? 'Start' : 'Start'}</>
               )}
+            </span>
+          ) : (
+            // B22-Fix: Wenn ein Plan-Tag keine Uebungen hat, ist der Start-Button
+            // sinnlos. Stattdessen Add-Exercise-CTA, der zum Plan-Editor navigiert
+            // (gleicher Pfad wie das Pencil-Icon). Damit ist jeder Tag eines Multi-
+            // Day-Plans bedienbar, auch wenn der User ihn beim Wizard leer gelassen
+            // hat.
+            <span
+              role="button"
+              onClick={(e) => { e.stopPropagation(); onEdit(day); }}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors border border-theme-line text-theme-primary hover:bg-theme-surface-2"
+              title={isDE ? 'Übungen hinzufügen' : 'Add Exercises'}
+            >
+              <Plus className="h-3 w-3" /> {isDE ? 'Übungen hinzufügen' : 'Add Exercises'}
             </span>
           )}
         </div>
