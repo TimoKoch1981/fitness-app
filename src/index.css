@@ -137,6 +137,10 @@ body {
   --color-theme-primary-2:  var(--theme-primary-2);
   --color-theme-primary-on: var(--theme-primary-on);
   --color-theme-accent:     var(--theme-accent);
+  /* B25-Fix: Akzent-Token fuer dunkle Surfaces (Timer-Panels, Cards mit bg-gray-800).
+     Auf Studio resolved zu hellem Teal (Kontrast ~7:1 auf gray-800), auf Console zu
+     Acid-Lime (~9:1). Beides WCAG AAA. Ersetzt das alte hardcoded text-teal-400. */
+  --color-theme-accent-on-dark: var(--theme-accent-on-dark);
   --color-theme-success:    var(--theme-success);
   --color-theme-warning:    var(--theme-warning);
   --color-theme-danger:     var(--theme-danger);
@@ -163,6 +167,7 @@ body {
   --theme-primary-2:   #2F3E96;
   --theme-primary-on:  #FFFFFF;
   --theme-accent:      #B8612E;
+  --theme-accent-on-dark: #2DD4BF;  /* Tailwind teal-400 — vor v14.28 Stufe 4 fest verdrahtet, WCAG AAA auf gray-800 */
   --theme-success:     #3F7A4D;
   --theme-warning:     #A8742F;
   --theme-danger:      #9C2F2F;
@@ -200,6 +205,7 @@ body {
   --theme-primary-2:   #84B82A;
   --theme-primary-on:  #0B0D0F;
   --theme-accent:      #5DB8F0;     /* Cyan */
+  --theme-accent-on-dark: #A8E635;  /* Lime (= primary, passt zur Console-Palette) */
   --theme-success:     #A8E635;
   --theme-warning:     #F0A53D;
   --theme-danger:      #F05D5D;

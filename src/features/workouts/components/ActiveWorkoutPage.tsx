@@ -477,17 +477,19 @@ export function ActiveWorkoutPage() {
           />
         )}
 
-        {/* Inline Set Timer — prominent display when set is active */}
+        {/* Inline Set Timer — prominent display when set is active.
+            B25-Fix: text-theme-accent-on-dark (Teal-400 Studio / Lime Console) statt
+            text-theme-primary (Studio-Indigo) — Kontrast auf bg-gray-800 ~7:1 vs vorher ~1.8:1. */}
         {state.phase === 'exercise' && state.setReady && setTimerRunning && (
           <div className="bg-gray-800 rounded-2xl p-4 mb-4 text-center shadow-lg">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <TimerIcon className="h-4 w-4 text-theme-primary" />
+              <TimerIcon className="h-4 w-4 text-theme-accent-on-dark" />
               <span className="text-xs uppercase tracking-wider text-gray-400 font-medium">
                 {isDE ? `Satz ${state.currentSetIndex + 1} läuft` : `Set ${state.currentSetIndex + 1} active`}
               </span>
-              <span className="h-2 w-2 rounded-full bg-theme-primary animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-theme-accent-on-dark animate-pulse" />
             </div>
-            <div className="text-4xl font-bold font-mono tabular-nums text-theme-primary">
+            <div className="text-4xl font-bold font-mono tabular-nums text-theme-accent-on-dark">
               {setTimerStr}
             </div>
           </div>
@@ -524,21 +526,22 @@ export function ActiveWorkoutPage() {
 
         {state.phase === 'rest' && (
           <div className="flex flex-col items-center py-8">
-            {/* Compact rest countdown (replaces old circular RestTimer) */}
+            {/* Compact rest countdown (replaces old circular RestTimer).
+                B25-Fix: text-theme-accent-on-dark statt text-theme-primary (siehe Set-Timer-Panel oben). */}
             <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-xs shadow-lg text-center">
               <p className="text-xs uppercase tracking-wider text-gray-400 mb-3">
                 {isDE ? 'Satzpause' : 'Set Rest'}
               </p>
 
               {/* Large countdown display */}
-              <div className="text-5xl font-bold font-mono tabular-nums text-theme-primary mb-4">
+              <div className="text-5xl font-bold font-mono tabular-nums text-theme-accent-on-dark mb-4">
                 {restStr}
               </div>
 
               {/* Progress bar */}
               <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden mb-5">
                 <div
-                  className="h-full bg-theme-primary rounded-full transition-all duration-1000 ease-linear"
+                  className="h-full bg-theme-accent-on-dark rounded-full transition-all duration-1000 ease-linear"
                   style={{ width: `${Math.min(100, restProgress)}%` }}
                 />
               </div>
@@ -546,7 +549,7 @@ export function ActiveWorkoutPage() {
               {/* Skip button */}
               <button
                 onClick={handleSkipRest}
-                className="flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-theme-primary/20 text-theme-primary rounded-lg hover:bg-theme-primary/30 transition-colors text-sm font-medium"
+                className="flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-theme-accent-on-dark/20 text-theme-accent-on-dark rounded-lg hover:bg-theme-accent-on-dark/30 transition-colors text-sm font-medium"
               >
                 <SkipForward className="h-4 w-4" />
                 {isDE ? 'Überspringen' : 'Skip'}
