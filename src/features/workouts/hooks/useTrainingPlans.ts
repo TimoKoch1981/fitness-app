@@ -113,6 +113,12 @@ export interface AddTrainingPlanInput {
   }[];
   /** Optional: pass user_id directly to avoid auth race conditions */
   user_id?: string;
+  /**
+   * Whether to deactivate existing plans and activate the new one (default: true).
+   * Set to false for Buddy-driven creates so the user keeps their previous
+   * active plan and activates the new one manually. See B28 (2026-05-22).
+   */
+  activate?: boolean;
 }
 
 /**
@@ -130,18 +136,23 @@ export function useAddTrainingPlan() {
         userId = await ensureFreshSession();
       }
 
-      console.log(`[TrainingPlan] Saving plan "${input.name}" with ${input.days.length} days for user ${userId}`);
+      const activate = input.activate ?? true;
+      console.log(`[TrainingPlan] Saving plan "${input.name}" with ${input.days.length} days for user ${userId} (activate=${activate})`);
 
-      // Step 1: Deactivate all existing plans
-      const { error: deactivateError } = await supabase
-        .from('training_plans')
-        .update({ is_active: false })
-        .eq('user_id', userId)
-        .eq('is_active', true);
+      // Step 1: Deactivate all existing plans — only when the new plan should
+      // become the active one. Skipping this for Buddy-driven creates lets
+      // the user keep their previous active plan untouched (B28, 2026-05-22).
+      if (activate) {
+        const { error: deactivateError } = await supabase
+          .from('training_plans')
+          .update({ is_active: false })
+          .eq('user_id', userId)
+          .eq('is_active', true);
 
-      if (deactivateError) {
-        console.warn('[TrainingPlan] Deactivate old plans warning:', deactivateError);
-        // Non-fatal: continue even if no old plans exist
+        if (deactivateError) {
+          console.warn('[TrainingPlan] Deactivate old plans warning:', deactivateError);
+          // Non-fatal: continue even if no old plans exist
+        }
       }
 
       // Step 2: Insert the new plan
@@ -152,7 +163,7 @@ export function useAddTrainingPlan() {
           name: input.name,
           split_type: input.split_type,
           days_per_week: input.days_per_week,
-          is_active: true,
+          is_active: activate,
           notes: input.notes,
         })
         .select()

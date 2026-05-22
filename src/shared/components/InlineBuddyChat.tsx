@@ -405,11 +405,12 @@ function InlineBuddyChatContent() {
           const display = getActionDisplayInfo(r.action);
           return `${display.icon} ${display.summary}`;
         });
-        // Add navigation hints
+        // Add navigation hints. Buddy-created plans land inactive (B28) so
+        // the user keeps their previous active plan and can switch deliberately.
         const hasPlanSave = successes.some(r => r.action.type === 'save_training_plan');
         const hasRecipeSave = successes.some(r => r.action.type === 'save_recipe');
         const navHint = hasPlanSave
-          ? (language === 'de' ? '\n\n👉 Öffne Training → Plan um deinen Plan zu sehen.' : '\n\n👉 Open Training → Plan to see your plan.')
+          ? (language === 'de' ? '\n\n👉 Plan ist gespeichert, aber noch nicht aktiv. Öffne Training → Plan und aktiviere ihn, wenn du danach trainieren willst.' : '\n\n👉 Plan saved but not active yet. Open Training → Plan and activate it when you want to train it.')
           : hasRecipeSave
             ? (language === 'de' ? '\n\n👉 Öffne Ernährung → Rezepte um dein Rezept zu sehen.' : '\n\n👉 Open Nutrition → Recipes to see your recipe.')
             : '';

@@ -562,6 +562,9 @@ export function registerDefaultActions(): void {
           notes: day.notes as string | undefined,
         })),
         user_id: ctx.userId,
+        // B28 (2026-05-22): Buddy-driven creates don't touch the active plan.
+        // The user activates the new plan explicitly via Training → Plan list.
+        activate: false,
       });
     },
     toolDescription: 'Trainingsplan speichern. Erfasse Planname, Split-Typ, Tage pro Woche und die einzelnen Trainingstage mit Uebungen.',
