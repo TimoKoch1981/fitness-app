@@ -26,6 +26,7 @@ import { calculateSessionCalories } from '../utils/calorieCalculation';
 import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { ShareButton } from '../../../shared/components/ShareButton';
 import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
+import { ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
 import type { SetTag, WorkoutExerciseResult } from '../../../types/health';
 
 /** Tag display config (matches SetBySetTracker/ExerciseOverviewTracker) */
@@ -421,6 +422,10 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           // Exclude warmup sets from summary stats (industry standard)
           const workingSets = completedSets.filter(s => s.set_tag !== 'warmup');
           const exIsCardio = ex.exercise_type === 'cardio';
+          // B34 (2026-05-22): Isometric holds (Plank, Wall Sit, Dead Hang, L-Sit)
+          // store the held seconds in actual_reps and have no kg; column labels
+          // must reflect that. Detection mirrors ExerciseTracker.tsx:97.
+          const exIsIsometric = !exIsCardio && ISOMETRIC_PATTERNS.some((p) => p.test(ex.name));
           const avgReps = !exIsCardio && workingSets.length > 0
             ? Math.round(workingSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / workingSets.length)
             : 0;
@@ -467,6 +472,13 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                         {totalDuration > 0 && `${Math.round(totalDuration * 10) / 10} min`}
                         {totalDistance > 0 && ` · ${Math.round(totalDistance * 100) / 100} km`}
                       </>
+                    ) : exIsIsometric ? (
+                      <>
+                        {workingSets.length}×{avgReps}s
+                        {completedSets.length > workingSets.length && (
+                          <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                        )}
+                      </>
                     ) : (
                       <>
                         {workingSets.length}×{avgReps}
@@ -488,67 +500,86 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
               {/* Expanded: editable table with add/delete */}
               {isExpanded && (
                 <div className="border-t border-gray-100 bg-gray-50/50">
-                  {/* Table Header */}
-                  <div className="grid grid-cols-[2rem_1fr_1fr_1.5rem] items-center gap-1 px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                    <span>#</span>
-                    <span>{exIsCardio ? 'Min' : (isDE ? 'Wdh' : 'Reps')}</span>
-                    <span>{exIsCardio ? 'km' : 'kg'}</span>
-                    <span />
-                  </div>
-                  {/* Set Rows */}
-                  {ex.sets.map((set, setIdx) => {
-                    const tag = set.set_tag ?? 'normal';
-                    const tagCfg = TAG_CONFIG[tag];
+                  {(() => {
+                    // B34: Isometric holds collapse to a single column for held seconds
+                    // (no kg). Layout uses 3 columns instead of 4 in that case.
+                    const gridCols = exIsIsometric
+                      ? 'grid-cols-[2rem_1fr_1.5rem]'
+                      : 'grid-cols-[2rem_1fr_1fr_1.5rem]';
+                    const col1Label = exIsCardio
+                      ? 'Min'
+                      : exIsIsometric
+                        ? (isDE ? 'Sek' : 'Sec')
+                        : (isDE ? 'Wdh' : 'Reps');
+                    const col2Label = exIsCardio ? 'km' : 'kg';
                     return (
-                      <div key={setIdx} className="grid grid-cols-[2rem_1fr_1fr_1.5rem] items-center gap-1 px-3 py-1 border-b border-gray-50">
-                        {/* Set number + tag badge */}
-                        <span className="text-xs font-medium text-gray-500 flex items-center gap-0.5">
-                          {tag !== 'normal' && (
-                            <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded text-[8px] font-bold ${tagCfg.bg} ${tagCfg.text}`}>
-                              {tagCfg.letter}
-                            </span>
-                          )}
-                          {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : setIdx + 1}
-                        </span>
-                        {/* Value 1: Reps or Duration */}
-                        <input
-                          type="number"
-                          inputMode={exIsCardio ? 'decimal' : 'numeric'}
-                          step={exIsCardio ? '0.1' : '1'}
-                          value={exIsCardio ? (set.actual_duration_minutes ?? '') : (set.actual_reps ?? '')}
-                          onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'duration' : 'reps', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
-                          placeholder={exIsCardio ? 'Min' : (isDE ? 'Wdh' : 'Reps')}
-                        />
-                        {/* Value 2: Weight or Distance */}
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          step={exIsCardio ? '0.01' : '0.5'}
-                          value={exIsCardio ? (set.actual_distance_km ?? '') : (set.actual_weight_kg ?? '')}
-                          onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'distance' : 'weight', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
-                          placeholder={exIsCardio ? 'km' : 'kg'}
-                        />
-                        {/* Delete set button */}
+                      <>
+                        {/* Table Header */}
+                        <div className={`grid ${gridCols} items-center gap-1 px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100`}>
+                          <span>#</span>
+                          <span>{col1Label}</span>
+                          {!exIsIsometric && <span>{col2Label}</span>}
+                          <span />
+                        </div>
+                        {/* Set Rows */}
+                        {ex.sets.map((set, setIdx) => {
+                          const tag = set.set_tag ?? 'normal';
+                          const tagCfg = TAG_CONFIG[tag];
+                          return (
+                            <div key={setIdx} className={`grid ${gridCols} items-center gap-1 px-3 py-1 border-b border-gray-50`}>
+                              {/* Set number + tag badge */}
+                              <span className="text-xs font-medium text-gray-500 flex items-center gap-0.5">
+                                {tag !== 'normal' && (
+                                  <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded text-[8px] font-bold ${tagCfg.bg} ${tagCfg.text}`}>
+                                    {tagCfg.letter}
+                                  </span>
+                                )}
+                                {set.side ? `${set.set_number}${set.side === 'left' ? 'L' : 'R'}` : setIdx + 1}
+                              </span>
+                              {/* Value 1: Reps / Sec / Duration */}
+                              <input
+                                type="number"
+                                inputMode={exIsCardio ? 'decimal' : 'numeric'}
+                                step={exIsCardio ? '0.1' : '1'}
+                                value={exIsCardio ? (set.actual_duration_minutes ?? '') : (set.actual_reps ?? '')}
+                                onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'duration' : 'reps', e.target.value)}
+                                className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
+                                placeholder={col1Label}
+                              />
+                              {/* Value 2: Weight or Distance — hidden for isometric */}
+                              {!exIsIsometric && (
+                                <input
+                                  type="number"
+                                  inputMode="decimal"
+                                  step={exIsCardio ? '0.01' : '0.5'}
+                                  value={exIsCardio ? (set.actual_distance_km ?? '') : (set.actual_weight_kg ?? '')}
+                                  onChange={e => updateSetValue(exIdx, setIdx, exIsCardio ? 'distance' : 'weight', e.target.value)}
+                                  className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
+                                  placeholder={col2Label}
+                                />
+                              )}
+                              {/* Delete set button */}
+                              <button
+                                onClick={() => removeSet(exIdx, setIdx)}
+                                className="p-0.5 text-gray-300 hover:text-red-400 transition-colors"
+                                title={isDE ? 'Satz entfernen' : 'Remove set'}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                        {/* Add Set Button */}
                         <button
-                          onClick={() => removeSet(exIdx, setIdx)}
-                          className="p-0.5 text-gray-300 hover:text-red-400 transition-colors"
-                          title={isDE ? 'Satz entfernen' : 'Remove set'}
+                          onClick={() => addSet(exIdx)}
+                          className="w-full flex items-center justify-center gap-1 py-2 text-xs text-theme-primary hover:text-theme-primary hover:bg-theme-surface-2/50 transition-colors"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <Plus className="h-3 w-3" />
+                          {isDE ? 'Satz hinzufügen' : 'Add set'}
                         </button>
-                      </div>
+                      </>
                     );
-                  })}
-                  {/* Add Set Button */}
-                  <button
-                    onClick={() => addSet(exIdx)}
-                    className="w-full flex items-center justify-center gap-1 py-2 text-xs text-theme-primary hover:text-theme-primary hover:bg-theme-surface-2/50 transition-colors"
-                  >
-                    <Plus className="h-3 w-3" />
-                    {isDE ? 'Satz hinzufügen' : 'Add set'}
-                  </button>
+                  })()}
                 </div>
               )}
             </div>

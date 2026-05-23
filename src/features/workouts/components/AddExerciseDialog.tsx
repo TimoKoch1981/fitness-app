@@ -12,7 +12,29 @@ import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { ExercisePicker } from './ExercisePicker';
 import { supabase } from '../../../lib/supabase';
+import { ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
 import type { WorkoutExerciseResult, PlanExercise, CatalogExercise } from '../../../types/health';
+
+/**
+ * B36 (2026-05-22): Free-Workout regression of the B23-Fix.
+ *
+ * Mirror of the buildExercisesFromPlan priority chain — Strength exercises
+ * added to a free workout must land with target_weight_kg=0 (not undefined),
+ * otherwise the tracker's noWeight check (`every(s => s.target_weight_kg == null)`)
+ * trips and the kg-column disappears. Cardio / Flexibility / Isometric stays
+ * undefined on purpose.
+ */
+function initialTargetWeightKg(
+  category: string | undefined,
+  name: string,
+  explicitWeight?: number,
+): number | undefined {
+  if (explicitWeight != null) return explicitWeight;
+  const isCardioOrFlex = category === 'cardio' || category === 'flexibility';
+  const isIsometric = ISOMETRIC_PATTERNS.some((p) => p.test(name));
+  if (isCardioOrFlex || isIsometric) return undefined;
+  return 0;
+}
 
 interface AddExerciseDialogProps {
   onClose: () => void;
@@ -47,14 +69,17 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
   /** Multi-select: add all selected exercises with default configs (3 sets, 10 reps) */
   const handleMultiAdd = useCallback((exercises: CatalogExercise[]) => {
     exercises.forEach((ex, offset) => {
+      const name = isDE ? ex.name : (ex.name_en ?? ex.name);
+      const targetWeightKg = initialTargetWeightKg(ex.category, name);
       const exercise: WorkoutExerciseResult = {
-        name: isDE ? ex.name : (ex.name_en ?? ex.name),
+        name,
         exercise_id: ex.id,
         exercise_type: ex.category as any ?? 'strength',
         plan_exercise_index: state.exercises.length + offset,
         sets: Array.from({ length: 3 }, (_, i) => ({
           set_number: i + 1,
           target_reps: '10',
+          target_weight_kg: targetWeightKg,
           completed: false,
         })),
         is_addition: true,
@@ -66,6 +91,8 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
 
   const handleAdd = async () => {
     const numSets = Math.max(1, parseInt(sets) || 3);
+    const explicitWeight = weight ? parseFloat(weight) : undefined;
+    const targetWeightKg = initialTargetWeightKg(selected?.category, customName, explicitWeight);
     const exercise: WorkoutExerciseResult = {
       name: customName,
       exercise_id: selected?.id,
@@ -74,7 +101,7 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
       sets: Array.from({ length: numSets }, (_, i) => ({
         set_number: i + 1,
         target_reps: reps || '10',
-        target_weight_kg: weight ? parseFloat(weight) : undefined,
+        target_weight_kg: targetWeightKg,
         completed: false,
       })),
       is_addition: true,
