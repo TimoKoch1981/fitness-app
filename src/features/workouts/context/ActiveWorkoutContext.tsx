@@ -158,8 +158,16 @@ export function buildExercisesFromPlan(
       // sets[i].target_weight_kg = undefined → `noWeight`-Check in Trackern
       // wurde true → Gewichts-Spalte komplett ausgeblendet, User konnte nichts
       // eintragen.
+      //
+      // B35 (2026-05-22): Plan-level bodyweight flag overrides the chain.
+      // Explicit `pe.is_bodyweight` wins; for older plans without the flag we
+      // fall back to "user typed 0 in the plan" as a heuristic (Corinna's
+      // Wadenheben case — pre-existing weight_kg=0 should mean bodyweight).
+      const isBodyweightPlan = pe.is_bodyweight ?? pe.weight_kg === 0;
       targetReps = pe.reps ?? prevSet?.target_reps ?? defaults.reps;
-      targetWeightKg = pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg ?? 0;
+      targetWeightKg = isBodyweightPlan
+        ? undefined
+        : (pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg ?? 0);
       targetDurationMinutes = undefined;
       targetDistanceKm = undefined;
     }

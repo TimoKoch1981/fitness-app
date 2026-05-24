@@ -119,13 +119,21 @@ export function AddExerciseDialog({ onClose }: AddExerciseDialogProps) {
           .single();
 
         if (planDay) {
+          // B35: A free-workout add with no weight entered AND a strength
+          // category that isn't isometric is the user saying "I do this with
+          // bodyweight". Persist the flag so the tracker hides the kg column
+          // when the plan is started later.
+          const explicitWeight = weight ? parseFloat(weight) : undefined;
+          const isIsometric = ISOMETRIC_PATTERNS.some((p) => p.test(customName));
+          const isCardioOrFlex = selected?.category === 'cardio' || selected?.category === 'flexibility';
           const planExercise: PlanExercise = {
             name: customName,
             exercise_id: selected?.id,
             exercise_type: selected?.category as any ?? 'strength',
             sets: numSets,
             reps: reps || '10',
-            weight_kg: weight ? parseFloat(weight) : undefined,
+            weight_kg: explicitWeight,
+            is_bodyweight: explicitWeight == null && !isIsometric && !isCardioOrFlex ? true : undefined,
           };
           const exercises = [...(planDay.exercises as PlanExercise[]), planExercise];
           await supabase

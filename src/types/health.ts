@@ -750,6 +750,14 @@ export interface PlanExercise {
   reps?: string;              // "8-10" or "12" or "60s"
   weight_kg?: number;
   rest_seconds?: number;
+  /**
+   * B35 (2026-05-22): Explicit bodyweight flag.
+   * When true, the tracker hides the kg column for this exercise — user
+   * trains it with own bodyweight only. When undefined, the loader falls
+   * back to a heuristic (weight_kg === 0 ⇒ likely bodyweight) so older
+   * plans behave correctly without manual migration.
+   */
+  is_bodyweight?: boolean;
   // Endurance fields
   duration_minutes?: number;
   distance_km?: number;

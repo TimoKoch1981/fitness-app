@@ -426,6 +426,15 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           // store the held seconds in actual_reps and have no kg; column labels
           // must reflect that. Detection mirrors ExerciseTracker.tsx:97.
           const exIsIsometric = !exIsCardio && ISOMETRIC_PATTERNS.some((p) => p.test(ex.name));
+          // B35 (2026-05-22): Plan-driven bodyweight exercises arrive here with
+          // every target_weight_kg == null (buildExercisesFromPlan honours the
+          // pe.is_bodyweight flag). Match the noWeight-Check the live trackers
+          // (SetBySetTracker.tsx:74, ExerciseOverviewTracker.tsx:60) already use
+          // so the summary hides the kg column too.
+          const exIsBodyweight = !exIsCardio && !exIsIsometric
+            && ex.sets.length > 0
+            && ex.sets.every(s => s.target_weight_kg == null && s.actual_weight_kg == null);
+          const hideWeightCol = exIsIsometric || exIsBodyweight;
           const avgReps = !exIsCardio && workingSets.length > 0
             ? Math.round(workingSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / workingSets.length)
             : 0;
@@ -479,6 +488,13 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                           <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
                         )}
                       </>
+                    ) : exIsBodyweight ? (
+                      <>
+                        {workingSets.length}×{avgReps}
+                        {completedSets.length > workingSets.length && (
+                          <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                        )}
+                      </>
                     ) : (
                       <>
                         {workingSets.length}×{avgReps}
@@ -501,9 +517,11 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
               {isExpanded && (
                 <div className="border-t border-gray-100 bg-gray-50/50">
                   {(() => {
-                    // B34: Isometric holds collapse to a single column for held seconds
-                    // (no kg). Layout uses 3 columns instead of 4 in that case.
-                    const gridCols = exIsIsometric
+                    // B34/B35: Isometric & Bodyweight collapse to a single value
+                    // column (no kg). Layout uses 3 columns instead of 4 in
+                    // that case. Isometric labels the column "Sek", everything
+                    // else stays "Wdh".
+                    const gridCols = hideWeightCol
                       ? 'grid-cols-[2rem_1fr_1.5rem]'
                       : 'grid-cols-[2rem_1fr_1fr_1.5rem]';
                     const col1Label = exIsCardio
@@ -518,7 +536,7 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                         <div className={`grid ${gridCols} items-center gap-1 px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100`}>
                           <span>#</span>
                           <span>{col1Label}</span>
-                          {!exIsIsometric && <span>{col2Label}</span>}
+                          {!hideWeightCol && <span>{col2Label}</span>}
                           <span />
                         </div>
                         {/* Set Rows */}
@@ -546,8 +564,8 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                                 className="w-full px-2 py-1.5 text-sm text-center rounded border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-theme-primary focus:border-theme-primary"
                                 placeholder={col1Label}
                               />
-                              {/* Value 2: Weight or Distance — hidden for isometric */}
-                              {!exIsIsometric && (
+                              {/* Value 2: Weight or Distance — hidden for isometric/bodyweight */}
+                              {!hideWeightCol && (
                                 <input
                                   type="number"
                                   inputMode="decimal"
