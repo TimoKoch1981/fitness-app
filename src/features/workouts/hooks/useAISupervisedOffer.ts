@@ -69,7 +69,7 @@ export function useAISupervisedOffer(
 
   return {
     shouldOffer,
-    acceptOffer: () => acceptMutation.mutate(),
+    acceptOffer: () => acceptMutation.mutate(undefined as never),
     dismissOffer,
     isAccepting: acceptMutation.isPending,
   };

@@ -687,6 +687,7 @@ export const ro: TranslationKeys = {
     nutritionPerServing: 'Valori nutriționale pe porție',
     adminLink: 'Admin',
     feedback: 'Feedback',
+    authAudit: 'Audit Auth',
     keyRotation: {
       title: 'Rotația Cheilor API',
       status: 'Stare',

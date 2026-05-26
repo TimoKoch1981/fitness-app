@@ -687,6 +687,7 @@ export const tr: TranslationKeys = {
     nutritionPerServing: 'Porsiyon Başı Besin Değerleri',
     adminLink: 'Yönetici',
     feedback: 'Geri Bildirim',
+    authAudit: 'Auth Denetimi',
     keyRotation: {
       title: 'API Anahtar Rotasyonu',
       status: 'Durum',

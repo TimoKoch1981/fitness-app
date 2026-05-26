@@ -102,7 +102,7 @@ export function PlanEditorDialog({ day, onClose, onSaved }: PlanEditorDialogProp
     markChanged();
   };
 
-  const handleUpdate = (id: string, field: keyof PlanExercise, value: string | number | undefined) => {
+  const handleUpdate = (id: string, field: keyof PlanExercise, value: string | number | boolean | undefined) => {
     setExercises((prev) =>
       prev.map((ex) => (ex._id === id ? { ...ex, [field]: value } : ex)),
     );
@@ -300,7 +300,7 @@ interface SortableExerciseRowProps {
   index: number;
   total: number;
   isDE: boolean;
-  onUpdate: (id: string, field: keyof PlanExercise, value: string | number | undefined) => void;
+  onUpdate: (id: string, field: keyof PlanExercise, value: string | number | boolean | undefined) => void;
   onRemove: (id: string) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
@@ -395,16 +395,39 @@ function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove,
             className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="8-10"
           />
+          {/* B17 (2026-05-26): Bodyweight toggle. When active, the weight input
+              is disabled, weight_kg cleared and is_bodyweight=true persisted so
+              the tracker hides the kg column for this exercise (Corinnas
+              Wadenheben use case). */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = !exercise.is_bodyweight;
+              onUpdate(exercise._id, 'is_bodyweight', next || undefined);
+              if (next) onUpdate(exercise._id, 'weight_kg', undefined);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
+              exercise.is_bodyweight
+                ? 'bg-theme-primary text-white border-theme-primary'
+                : 'bg-white text-gray-400 border-gray-200 hover:text-gray-600'
+            }`}
+            title={isDE ? 'Ohne Zusatzgewicht (Bodyweight)' : 'Bodyweight only (no added weight)'}
+          >
+            BW
+          </button>
           <input
             type="number"
             inputMode="decimal"
             step="0.1"
             value={exercise.weight_kg ?? ''}
+            disabled={!!exercise.is_bodyweight}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate(exercise._id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
-            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
-            placeholder="kg"
+            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
+            placeholder={exercise.is_bodyweight ? '—' : 'kg'}
           />
         </div>
       ) : (

@@ -166,6 +166,31 @@ export function useAddTrainingPlan() {
       // become the active one. Skipping this for Buddy-driven creates lets
       // the user keep their previous active plan untouched (B28, 2026-05-22).
       if (activate) {
+        // B38 (2026-05-26): capture the name of the plan that's about to be
+        // deactivated so TrainingPlanList can show a "Plan X was just
+        // deactivated — reactivate?" banner. Corinna lost ~10 minutes today
+        // looking for her old plan; this would have shortcut the confusion.
+        try {
+          const { data: prev } = await supabase
+            .from('training_plans')
+            .select('id, name')
+            .eq('user_id', userId)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (prev?.id && prev.name) {
+            sessionStorage.setItem('fitbuddy_plan_swap', JSON.stringify({
+              previousId: prev.id,
+              previousName: prev.name,
+              newName: input.name,
+              at: Date.now(),
+            }));
+          }
+        } catch {
+          // Non-critical: banner just won't show
+        }
+
         const { error: deactivateError } = await supabase
           .from('training_plans')
           .update({ is_active: false })
@@ -311,7 +336,7 @@ export interface UpdateTrainingPlanInput {
 export function useUpdateTrainingPlan() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<void, Error, UpdateTrainingPlanInput>({
     mutationFn: withTelemetry('update_training_plan', 'ui', async (input: UpdateTrainingPlanInput) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -371,6 +396,35 @@ export function useActivatePlan() {
     mutationFn: withTelemetry('activate_training_plan', 'ui', async (planId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      // B38 (2026-05-26): capture name of plan that's about to be deactivated
+      // and of the plan being activated, so the list can show a banner.
+      try {
+        const [{ data: prev }, { data: next }] = await Promise.all([
+          supabase.from('training_plans')
+            .select('id, name')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase.from('training_plans')
+            .select('name')
+            .eq('id', planId)
+            .maybeSingle(),
+        ]);
+        // Only set the banner if a different plan really gets replaced.
+        if (prev?.id && prev.id !== planId && prev.name) {
+          sessionStorage.setItem('fitbuddy_plan_swap', JSON.stringify({
+            previousId: prev.id,
+            previousName: prev.name,
+            newName: next?.name ?? '',
+            at: Date.now(),
+          }));
+        }
+      } catch {
+        // Non-critical
+      }
 
       // Step 1: Deactivate all plans
       const { error: deactivateError } = await supabase

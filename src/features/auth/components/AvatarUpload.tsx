@@ -92,7 +92,7 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
 
   const handleDelete = async () => {
     try {
-      await deleteAvatar.mutateAsync();
+      await deleteAvatar.mutateAsync(undefined as never);
     } catch {
       // Error is handled by mutation
     }

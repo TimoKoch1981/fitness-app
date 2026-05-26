@@ -175,4 +175,13 @@ describe('detectMultiIntent', () => {
     const result = detectMultiIntent('Hähnchen mit Reis gegessen');
     expect(result.primaryAgent).toBe(result.agents[0].targetAgent);
   });
+
+  it('B44 regression: weak secondary agent is dropped to avoid duplicate parallel answers', () => {
+    // "logge Wegovy und Kreatin" scored substance=0.235 + nutrition=0.132
+    // pre-B44 fix — both above the 0.12 routing threshold but nutrition was
+    // weak (single Kreatin keyword). Filter should now return substance only.
+    const result = detectMultiIntent('logge mir bitte meine Wegovy 2.4mg Spritze von heute morgen und ausserdem 5g Kreatin Monohydrat');
+    expect(result.primaryAgent).toBe('substance');
+    expect(result.agents).toHaveLength(1);
+  });
 });

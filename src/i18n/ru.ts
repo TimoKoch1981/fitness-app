@@ -687,6 +687,7 @@ export const ru: TranslationKeys = {
     nutritionPerServing: 'Пищевая ценность на порцию',
     adminLink: 'Админ',
     feedback: 'Обратная связь',
+    authAudit: 'Аудит Auth',
     keyRotation: {
       title: 'Ротация API Ключей',
       status: 'Статус',

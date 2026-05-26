@@ -687,6 +687,7 @@ export const uk: TranslationKeys = {
     nutritionPerServing: 'Харчова цінність на порцію',
     adminLink: 'Адмін',
     feedback: 'Зворотний зв\'язок',
+    authAudit: 'Аудит Auth',
     keyRotation: {
       title: 'Ротація API Ключів',
       status: 'Статус',

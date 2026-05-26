@@ -687,6 +687,7 @@ export const ja: TranslationKeys = {
     nutritionPerServing: '1食分あたりの栄養成分',
     adminLink: '管理',
     feedback: 'フィードバック',
+    authAudit: '認証監査',
     keyRotation: {
       title: 'APIキーローテーション',
       status: 'ステータス',

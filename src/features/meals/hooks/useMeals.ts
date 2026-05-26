@@ -123,7 +123,7 @@ export function useAddMeal() {
 export function useUpdateMeal() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ meal: Meal; _previousDate?: string }, Error, Partial<Meal> & { id: string; _previousDate?: string }>({
     mutationFn: withTelemetry('update_meal', 'ui', async ({ id, _previousDate, ...updates }: Partial<Meal> & { id: string; _previousDate?: string }) => {
       const { data, error } = await supabase
         .from('meals')
@@ -148,7 +148,7 @@ export function useUpdateMeal() {
 export function useDeleteMeal() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ id: string; date: string }, Error, { id: string; date: string }>({
     mutationFn: withTelemetry('delete_meal', 'ui', async ({ id, date }: { id: string; date: string }) => {
       const { error } = await supabase.from('meals').delete().eq('id', id);
       if (error) throw error;

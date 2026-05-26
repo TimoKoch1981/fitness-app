@@ -687,6 +687,7 @@ export const ko: TranslationKeys = {
     nutritionPerServing: '1회 제공량당 영양 성분',
     adminLink: '관리',
     feedback: '피드백',
+    authAudit: '인증 감사',
     keyRotation: {
       title: 'API 키 순환',
       status: '상태',

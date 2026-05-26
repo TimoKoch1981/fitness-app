@@ -146,7 +146,7 @@ export function BodyTabContent({ showAddDialog, onOpenAddDialog, onCloseAddDialo
             // UX15: Sparkline aus den letzten ~14 Eintraegen fuer diese Metrik
             const series = (measurements ?? [])
               .slice(0, 14)
-              .map(m => (m as Record<string, unknown>)[stat.key] as number | null | undefined)
+              .map(m => (m as unknown as Record<string, unknown>)[stat.key] as number | null | undefined)
               .filter((v): v is number => typeof v === 'number' && v > 0)
               .reverse();  // chronologisch: alt -> neu
             return (

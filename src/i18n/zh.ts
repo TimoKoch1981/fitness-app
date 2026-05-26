@@ -687,6 +687,7 @@ export const zh: TranslationKeys = {
     nutritionPerServing: '每份营养成分',
     adminLink: '管理',
     feedback: '反馈',
+    authAudit: '认证审计',
     keyRotation: {
       title: 'API密钥轮换',
       status: '状态',

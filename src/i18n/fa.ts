@@ -687,6 +687,7 @@ export const fa: TranslationKeys = {
     nutritionPerServing: 'ارزش غذایی هر وعده',
     adminLink: 'مدیریت',
     feedback: 'بازخورد',
+    authAudit: 'حسابرسی احراز',
     keyRotation: {
       title: 'چرخش کلیدهای API',
       status: 'وضعیت',

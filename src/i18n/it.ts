@@ -687,6 +687,7 @@ export const it: TranslationKeys = {
     nutritionPerServing: 'Valori nutrizionali per porzione',
     adminLink: 'Admin',
     feedback: 'Feedback',
+    authAudit: 'Audit Auth',
     keyRotation: {
       title: 'Rotazione Chiavi API',
       status: 'Stato',

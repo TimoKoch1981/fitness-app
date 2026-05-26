@@ -254,7 +254,7 @@ export function PhaseCyclePlanner({ open, onClose }: PhaseCyclePlannerProps) {
                         <SkipForward className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => deactivateCycle.mutate()}
+                        onClick={() => deactivateCycle.mutate(undefined as never)}
                         className="p-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors"
                         title={de ? 'Pausieren' : 'Pause'}
                       >

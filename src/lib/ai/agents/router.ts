@@ -517,10 +517,24 @@ export function detectMultiIntent(userMessage: string): MultiRoutingDecision {
     return { agents: [scores[0]], primaryAgent: 'analysis' };
   }
 
-  // 6. Return ALL agents above threshold — multi-agent dispatch!
+  // 6. Drop weak secondaries — only fan out to additional agents when their
+  // confidence is meaningful in absolute terms. Prevents "two agents repeat
+  // the same answer" (B44, 2026-05-26): "logge Wegovy und Kreatin" scored
+  // substance=0.235 + nutrition=0.132. Both above the 0.12 routing threshold,
+  // but nutrition is a weak signal — the only nutrition match was "Kreatin",
+  // which the substance agent already handles. Fanning out anyway caused
+  // BOTH agents to emit a parallel "Ich logge jetzt deine Wegovy-Spritze..."
+  // that the UI rendered stacked.
+  // Real multi-intent ("Kekse gegessen und TRT Spritze gesetzt") still keeps
+  // the secondary because each side hits multiple keywords (≥ 0.15 score).
+  const SECONDARY_MIN_CONFIDENCE = 0.15;
+  const primary = scores[0];
+  const survivors = scores.filter((s, i) => i === 0 || s.confidence >= SECONDARY_MIN_CONFIDENCE);
+
+  // 7. Return surviving agents.
   return {
-    agents: scores,
-    primaryAgent: scores[0].targetAgent,
+    agents: survivors,
+    primaryAgent: primary.targetAgent,
   };
 }
 

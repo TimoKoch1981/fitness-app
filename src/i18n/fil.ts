@@ -687,6 +687,7 @@ export const fil: TranslationKeys = {
     nutritionPerServing: 'Nutrition bawat Serving',
     adminLink: 'Admin',
     feedback: 'Feedback',
+    authAudit: 'Auth Audit',
     keyRotation: {
       title: 'Pag-ikot ng API Key',
       status: 'Katayuan',

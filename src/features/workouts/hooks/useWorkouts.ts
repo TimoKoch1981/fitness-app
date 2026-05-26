@@ -110,7 +110,7 @@ export function useAddWorkout() {
 export function useDeleteWorkout() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ id: string; date: string }, Error, { id: string; date: string }>({
     mutationFn: withTelemetry('delete_workout', 'ui', async ({ id, date }: { id: string; date: string }) => {
       const { error } = await supabase.from('workouts').delete().eq('id', id);
       if (error) throw error;

@@ -11,11 +11,11 @@
  * Pattern: Hevy-inspired card list (no swipe, desktop-compatible, touch-friendly)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CheckCircle2, Copy, Trash2, Dumbbell,
   Plus, ChevronRight, ChevronDown, Calendar, Layers, Sparkles,
-  Pencil, Star,
+  Pencil, Star, Info, X,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '../../../i18n';
@@ -85,6 +85,44 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [editingDay, setEditingDay] = useState<TrainingPlanDay | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null);
+
+  // B38 (2026-05-26): Plan-swap banner — read sessionStorage flag set by
+  // useAddTrainingPlan / useActivatePlan when an active plan was just
+  // replaced. Window: 30 min. Corinna's case from 2026-05-25 would have
+  // gotten an immediate hint here instead of "Where is my plan?".
+  const [planSwap, setPlanSwap] = useState<{
+    previousId: string;
+    previousName: string;
+    newName: string;
+    at: number;
+  } | null>(null);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('fitbuddy_plan_swap');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.at > 30 * 60 * 1000) {
+        sessionStorage.removeItem('fitbuddy_plan_swap');
+        return;
+      }
+      setPlanSwap(parsed);
+    } catch {
+      // ignore malformed
+    }
+  }, []);
+  const dismissPlanSwap = () => {
+    sessionStorage.removeItem('fitbuddy_plan_swap');
+    setPlanSwap(null);
+  };
+  const reactivatePrevious = async () => {
+    if (!planSwap) return;
+    try {
+      await activatePlan.mutateAsync(planSwap.previousId);
+      dismissPlanSwap();
+    } catch (err) {
+      console.error('[TrainingPlanList] Reactivate previous failed:', err);
+    }
+  };
   const [deleteDayTarget, setDeleteDayTarget] = useState<TrainingPlanDay | null>(null);
   const deleteDay = useDeleteTrainingPlanDay();
 
@@ -221,6 +259,34 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
           {isDE ? 'Neu' : 'New'}
         </button>
       </div>
+
+      {/* B38: Plan-swap notice */}
+      {planSwap && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs">
+          <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-gray-700">
+              {isDE
+                ? <>Dein vorheriger aktiver Plan <strong>{planSwap.previousName}</strong>{planSwap.newName ? <> wurde durch <strong>{planSwap.newName}</strong> ersetzt</> : ' wurde deaktiviert'}.</>
+                : <>Your previously active plan <strong>{planSwap.previousName}</strong>{planSwap.newName ? <> was replaced by <strong>{planSwap.newName}</strong></> : ' was deactivated'}.</>}
+            </p>
+            <button
+              onClick={reactivatePrevious}
+              disabled={activatePlan.isPending}
+              className="mt-1 text-[11px] font-medium text-theme-primary hover:underline disabled:opacity-50"
+            >
+              {isDE ? '↩︎ Zurueck zum vorigen Plan' : '↩︎ Switch back to previous plan'}
+            </button>
+          </div>
+          <button
+            onClick={dismissPlanSwap}
+            className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+            aria-label={isDE ? 'Schliessen' : 'Dismiss'}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Plan Cards (Accordion) */}
       {allPlans.map((plan) => {

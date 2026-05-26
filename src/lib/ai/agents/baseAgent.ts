@@ -97,7 +97,10 @@ export abstract class BaseAgent {
     // Rough estimate: 1 token ~= 4 chars. Most LLMs handle 100k+ context but
     // *cost* scales linearly, and high context risks truncation of action-blocks
     // at the response side. Log so we see drift before it hurts.
-    if (typeof process === 'undefined' || (typeof window !== 'undefined' && !import.meta.env.PROD)) {
+    // `process` only exists in Node — in the browser bundle the typeof check
+    // resolves to 'undefined' at runtime and triggers the warning. Cast guards
+    // tsc -b which doesn't have @types/node loaded for the app project.
+    if (typeof (globalThis as Record<string, unknown>).process === 'undefined' || (typeof window !== 'undefined' && !import.meta.env.PROD)) {
       const estimatedTokens = Math.ceil(finalPrompt.length / 4);
       if (estimatedTokens > 12000) {
         console.warn(

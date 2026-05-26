@@ -12,6 +12,7 @@
  * Wird vom MedicalPage parent gerendert wenn ein "Drucken"-Button geklickt wird.
  */
 
+import type React from 'react';
 import { useBloodWorkLogs } from '../hooks/useBloodWork';
 import { useProfile } from '../../auth/hooks/useProfile';
 import { getReferenceRange } from '../utils/bloodWorkReferenceRanges';
@@ -49,7 +50,7 @@ export function PrintBloodWorkReport({ bloodWorkId }: PrintBloodWorkReportProps)
             <tr>
               <td style={{ border: 'none', padding: '2px 12px 2px 0', fontWeight: 'bold' }}>Patient:</td>
               <td style={{ border: 'none', padding: '2px 0' }}>
-                {profile?.name ?? '___________________'}
+                {profile?.display_name ?? '___________________'}
               </td>
             </tr>
             {profile?.birth_date && (
@@ -84,11 +85,8 @@ export function PrintBloodWorkReport({ bloodWorkId }: PrintBloodWorkReportProps)
           <h2 style={{ fontSize: '12pt', margin: '0.3cm 0 0.2cm 0' }}>
             Messung vom {new Date(bw.date).toLocaleDateString('de-DE')}
           </h2>
-          {bw.lab_name && (
-            <p style={{ fontSize: '10pt', margin: '0 0 0.2cm 0' }}>
-              <strong>Labor:</strong> {bw.lab_name}
-            </p>
-          )}
+          {/* lab_name not in BloodWork type today — kept as TODO when the
+              field is added. */}
           {bw.notes && (
             <p style={{ fontSize: '10pt', margin: '0 0 0.2cm 0', fontStyle: 'italic' }}>
               {bw.notes}
@@ -107,7 +105,7 @@ export function PrintBloodWorkReport({ bloodWorkId }: PrintBloodWorkReportProps)
               </tr>
             </thead>
             <tbody>
-              {renderMarkers(bw, gender, age)}
+              {renderMarkers(bw as unknown as BloodWorkEntry, gender, age)}
             </tbody>
           </table>
         </div>
@@ -173,14 +171,14 @@ const MARKER_LABELS: Record<string, { de: string; unit: string; method?: string 
   tsh: { de: 'TSH', unit: 'mIU/L', method: 'ECLIA' },
 };
 
-function renderMarkers(bw: BloodWorkEntry, gender?: Gender, age?: number) {
-  const rows: JSX.Element[] = [];
+function renderMarkers(bw: BloodWorkEntry, gender?: Gender, age?: number): React.ReactElement[] {
+  const rows: React.ReactElement[] = [];
   for (const [key, def] of Object.entries(MARKER_LABELS)) {
     const value = bw[key];
     if (value == null || typeof value !== 'number') continue;
     const ref = getReferenceRange(key, gender ?? 'male', age);
-    const refStr = ref ? `${ref.min} – ${ref.max}` : '—';
-    const inRange = ref ? value >= ref.min && value <= ref.max : null;
+    const refStr = ref ? `${ref.low} – ${ref.high}` : '—';
+    const inRange = ref ? value >= ref.low && value <= ref.high : null;
     rows.push(
       <tr key={key}>
         <td>{def.de}</td>
@@ -189,7 +187,7 @@ function renderMarkers(bw: BloodWorkEntry, gender?: Gender, age?: number) {
         <td>{refStr}</td>
         <td style={{ fontSize: '9pt' }}>{def.method ?? '—'}</td>
         <td>
-          {inRange === null ? '—' : inRange ? 'im Bereich' : value < (ref?.min ?? 0) ? '↓ niedrig' : '↑ hoch'}
+          {inRange === null ? '—' : inRange ? 'im Bereich' : value < (ref?.low ?? 0) ? '↓ niedrig' : '↑ hoch'}
         </td>
       </tr>,
     );

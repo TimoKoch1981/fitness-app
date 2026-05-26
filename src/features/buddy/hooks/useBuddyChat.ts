@@ -91,6 +91,13 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
   const isLoadingRef = useRef(isLoading);
   isLoadingRef.current = isLoading;
 
+  // B41 (2026-05-26): Suppress KI1 halluzination-toast when a recent stream
+  // pass already produced parseable actions. Buddy occasionally double-
+  // processes (router fan-out, retry, agent-claim-on-success) — without this
+  // guard the user sees "Gespeichert" PLUS the warning "NICHT ausgefuehrt"
+  // because the second pass has no action block.
+  const lastParsedActionsAt = useRef<number>(0);
+
   const provider = getAIProvider();
 
   /** Check if AI provider is available */
@@ -428,9 +435,18 @@ export function useBuddyChat({ context, language = 'de', communicationStyle }: U
         }
       }
 
+      // Track when actions were successfully parsed so a later pass within
+      // 30s won't double-warn. See lastParsedActionsAt declaration.
+      if (parsedActions.length > 0) {
+        lastParsedActionsAt.current = Date.now();
+      }
+
       // Fallback: detect log_meal from text if the nutrition agent claims "gespeichert / geloggt"
       // but didn't produce a parseable ACTION_REQUEST block. Surface as error so the user knows.
-      if (parsedActions.length === 0) {
+      // B41: Skip the toast if we just parsed an action in another stream pass — almost always
+      // a router double-process, not a real halluzination.
+      const suppressKi1Toast = Date.now() - lastParsedActionsAt.current < 30000;
+      if (parsedActions.length === 0 && !suppressKi1Toast) {
         // KI1 / Phase 2: Generic halluzination detection (was nutrition-only).
         const claimsSaved = /(?:geloggt|gespeichert|eingetragen|erfasst|notiert|hinzugefügt|hinzugefuegt|logged|saved|recorded|tracked|added)/i.test(result.content);
         const c = result.content.toLowerCase();

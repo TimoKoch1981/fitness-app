@@ -172,7 +172,7 @@ export function useWaterIntake(date?: string) {
 
     // Actions
     addWater: (amountMl: number) => addWaterMutation.mutate(amountMl),
-    removeLastWater: () => removeLastMutation.mutate(),
+    removeLastWater: () => removeLastMutation.mutate(undefined as never),
     isAdding: addWaterMutation.isPending,
     isRemoving: removeLastMutation.isPending,
   };

@@ -687,6 +687,7 @@ export const ar: TranslationKeys = {
     nutritionPerServing: 'القيم الغذائية لكل حصة',
     adminLink: 'الإدارة',
     feedback: 'الملاحظات',
+    authAudit: 'تدقيق المصادقة',
     keyRotation: {
       title: 'تدوير مفاتيح API',
       status: 'الحالة',

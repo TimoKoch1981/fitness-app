@@ -127,7 +127,7 @@ export function PlanWizardExerciseStep() {
     setShowPicker(false);
   };
 
-  const handleUpdateExercise = (exIndex: number, field: keyof PlanExercise, value: string | number | undefined) => {
+  const handleUpdateExercise = (exIndex: number, field: keyof PlanExercise, value: string | number | boolean | undefined) => {
     const updated = { ...currentDay.exercises[exIndex], [field]: value };
     const newExercises = [...currentDay.exercises];
     newExercises[exIndex] = updated;
@@ -303,7 +303,7 @@ interface SortableExerciseRowProps {
   total: number;
   isDE: boolean;
   isFlexDay?: boolean;
-  onUpdate: (field: keyof PlanExercise, value: string | number | undefined) => void;
+  onUpdate: (field: keyof PlanExercise, value: string | number | boolean | undefined) => void;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -408,15 +408,35 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUp
             className="w-10 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
             placeholder="8-10"
           />
+          {/* B17 (2026-05-26): Bodyweight toggle — mirror of PlanEditorDialog */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = !exercise.is_bodyweight;
+              onUpdate('is_bodyweight', next || undefined);
+              if (next) onUpdate('weight_kg', undefined);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
+              exercise.is_bodyweight
+                ? 'bg-theme-primary text-white border-theme-primary'
+                : 'bg-white text-gray-400 border-gray-200 hover:text-gray-600'
+            }`}
+            title={isDE ? 'Ohne Zusatzgewicht (Bodyweight)' : 'Bodyweight only'}
+          >
+            BW
+          </button>
           <input
             type="number"
             inputMode="decimal"
             step="0.1"
             value={exercise.weight_kg ?? ''}
+            disabled={!!exercise.is_bodyweight}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => onUpdate('weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
-            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text"
+            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
             placeholder="kg"
           />
         </div>

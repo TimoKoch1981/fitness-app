@@ -29,7 +29,7 @@ export function DeleteAccountDialog({ onClose }: DeleteAccountDialogProps) {
     setError('');
 
     try {
-      await deleteAccount.mutateAsync();
+      await deleteAccount.mutateAsync(undefined as never);
       // After deletion, AuthProvider will detect signOut and redirect to /login
     } catch (err) {
       setError(err instanceof Error ? err.message : t.common.error);
