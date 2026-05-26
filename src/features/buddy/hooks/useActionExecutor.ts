@@ -193,12 +193,15 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
 
     console.log('[ActionExecutor] === executeAction ===', actionToExecute.type, 'data:', JSON.stringify(actionToExecute.data).slice(0, 300));
 
-    // Telemetry: log attempt
-    void logActionEvent({
-      actionType: actionToExecute.type,
-      phase: 'execute',
-      status: 'attempted',
-    });
+    // B45 (2026-05-26): The mutations themselves are wrapped in withTelemetry
+    // (source='ui') and log their own attempted/success/failed. Logging the
+    // same lifecycle here too gives double Inserts per Action in
+    // ai_action_logs, which over-counts Aggregates in the Action-Reliability
+    // dashboard. We therefore only emit two agent-specific signals:
+    //   - duplicate_idempotency (the mutation never runs, so no other log)
+    //   - failed (when descriptor.execute throws BEFORE the mutation, or
+    //     when neither retry nor first attempt succeed — the catch below)
+    // Successful executions are covered by the mutation's own success log.
     const execStart = Date.now();
 
     // Idempotency check — prevents double-execution when user / auto-execute collide
@@ -207,12 +210,15 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       console.warn('[ActionExecutor] Idempotency skip — duplicate within 60s:', actionToExecute.type, 'key:', idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
+      // B45: agent-pipeline tag so duplicate-skips aren't double-counted
+      // with mutation-level success logs.
       void logActionEvent({
         actionType: actionToExecute.type,
         phase: 'execute',
         status: 'success',
         errorCode: 'duplicate_idempotency',
         latencyMs: Date.now() - execStart,
+        metadata: { source: 'agent-pipeline' },
       });
       return { success: true };
     }
@@ -248,12 +254,8 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
       markExecuted(idempotencyKey);
       setActionStatus('executed');
       setPendingAction(null);
-      void logActionEvent({
-        actionType: actionToExecute.type,
-        phase: 'execute',
-        status: 'success',
-        latencyMs: Date.now() - execStart,
-      });
+      // B45: success is logged by the underlying withTelemetry mutation
+      // (source='ui'). No second log here to avoid double-counting.
       return { success: true };
     };
 
@@ -285,6 +287,8 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           console.error('[ActionExecutor] Retry also failed:', retryMsg);
           setErrorMessage(retryMsg);
           setActionStatus('failed');
+          // B45: source='agent-pipeline' makes this distinguishable from the
+          // mutation's own failed-log (source='ui') so dashboards can dedup.
           void logActionEvent({
             actionType: actionToExecute.type,
             phase: 'execute',
@@ -292,6 +296,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
             errorCode: 'auth_error',
             errorDetail: retryMsg,
             latencyMs: Date.now() - execStart,
+            metadata: { source: 'agent-pipeline' },
           });
           return { success: false, error: retryMsg };
         }
@@ -309,6 +314,7 @@ export function useActionExecutor(userId?: string): UseActionExecutorReturn {
           : 'mutation_error',
         errorDetail: msg,
         latencyMs: Date.now() - execStart,
+        metadata: { source: 'agent-pipeline' },
       });
       return { success: false, error: msg };
     }
