@@ -231,7 +231,12 @@ describe('analyzeDeviations', () => {
     vi.useRealTimers();
   });
 
-  it('detects severe calorie deficit >1000 kcal', () => {
+  it('detects severe calorie deficit >1000 kcal after 18:00', () => {
+    // Mock time to 19:00 — B40 fix requires the day to be mostly over
+    // before flagging a real deficit; mornings show "X kcal remaining",
+    // not a deficit.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 1, 19, 0, 0));
     const ctx = makeContext({
       dailyStats: {
         calories: 500, caloriesGoal: 2000, // deficit = 1500
@@ -244,6 +249,24 @@ describe('analyzeDeviations', () => {
     expect(deficit).toBeDefined();
     expect(deficit!.priority).toBe(2);
     expect(deficit!.agent).toBe('nutrition');
+    vi.useRealTimers();
+  });
+
+  it('does NOT flag deficit in the morning even if calories below goal', () => {
+    // B40 regression guard: at 08:00 the same calorie state must not warn.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 1, 8, 0, 0));
+    const ctx = makeContext({
+      dailyStats: {
+        calories: 500, caloriesGoal: 2000,
+        protein: 30, proteinGoal: 150,
+        carbs: 50, fat: 10, water: 2, waterGoal: 8,
+      },
+    });
+    const result = analyzeDeviations(ctx, null);
+    const deficit = result.find(d => d.message.includes('defizit ueber 1000'));
+    expect(deficit).toBeUndefined();
+    vi.useRealTimers();
   });
 
   it('does NOT flag deficit when it is under 1000 kcal', () => {
@@ -410,7 +433,10 @@ describe('getDeviationSuggestions', () => {
     vi.useRealTimers();
   });
 
-  it('generates deficit chip for >1000 kcal deficit', () => {
+  it('generates deficit chip for >1000 kcal deficit after 18:00', () => {
+    // B40: deficit-suggestion only after 18:00 — see analyzeDeviations.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 1, 19, 0, 0));
     const ctx = makeContext({
       dailyStats: {
         calories: 500, caloriesGoal: 2000,
@@ -422,5 +448,6 @@ describe('getDeviationSuggestions', () => {
     const chips = getDeviationSuggestions(deviations, 'de');
     const deficitChip = chips.find(c => c.id === 'dev_deficit');
     expect(deficitChip).toBeDefined();
+    vi.useRealTimers();
   });
 });

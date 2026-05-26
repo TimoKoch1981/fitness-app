@@ -152,8 +152,10 @@ export function analyzeDeviations(
       });
     }
 
-    // Severe calorie deficit: >1000 kcal below goal
-    if (stats.calories > 0 && calGoal - stats.calories > 1000) {
+    // Severe calorie deficit: >1000 kcal below goal — ONLY late in the day
+    // (after 18:00) so morning "X kcal noch zu essen" is not flagged as deficit.
+    // B40 (2026-05-26, Timos E2E-Test).
+    if (hour >= 18 && stats.calories > 0 && calGoal - stats.calories > 1000) {
       deviations.push({
         type: 'warning',
         agent: 'nutrition',

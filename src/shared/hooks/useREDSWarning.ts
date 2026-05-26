@@ -104,11 +104,16 @@ export function useREDSWarning(
   const isSevereUnderweight = bmi !== null && bmi < BMI_SEVERE_UNDERWEIGHT;
 
   // ── Check 3: Excessive calorie deficit ──
-  // Only check if we have TDEE and the user has logged some food today
+  // Only check if we have TDEE and the user has logged some food today.
+  // Suppress the check until 18:00 so morning "X kcal noch offen" isn't
+  // misread as a real deficit (B40, 2026-05-26).
+  const lateInDay = new Date().getHours() >= 18;
   const calorieDeficit = tdee !== null && caloriesConsumed > 0
     ? tdee - caloriesConsumed
     : null;
-  const hasExcessiveDeficit = calorieDeficit !== null && calorieDeficit > DEFICIT_WARNING;
+  const hasExcessiveDeficit = lateInDay
+    && calorieDeficit !== null
+    && calorieDeficit > DEFICIT_WARNING;
 
   // ── Check 4: RED-S Energy Availability (female/other only) ──
   // EA = (Dietary Energy Intake - Exercise Energy Expenditure) / FFM
