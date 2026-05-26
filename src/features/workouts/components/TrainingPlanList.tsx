@@ -267,9 +267,25 @@ export function TrainingPlanList({ selectedPlanId: _selectedPlanId, onSelectPlan
                       <Calendar className="h-3 w-3" />
                       {plan.days_per_week}x/{isDE ? 'Wo' : 'wk'}
                     </span>
-                    <span className="text-[11px] text-gray-300">
-                      {formatDate(plan.created_at)}
+                  </div>
+                  {/* B39: Lifecycle dates — created / updated / last used.
+                      "Aktualisiert" only when it differs from created (Buddy
+                      modify_training_day touches updated_at). "Zuletzt benutzt"
+                      only when at least one workout was started from this plan. */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[11px] text-gray-300">
+                    <span>
+                      {isDE ? 'Erstellt' : 'Created'} {formatDate(plan.created_at)}
                     </span>
+                    {plan.updated_at && plan.updated_at !== plan.created_at && (
+                      <span>
+                        · {isDE ? 'aktualisiert' : 'updated'} {formatDate(plan.updated_at)}
+                      </span>
+                    )}
+                    {plan.last_used_at && (
+                      <span className="text-gray-400">
+                        · {isDE ? 'zuletzt trainiert' : 'last trained'} {formatDate(plan.last_used_at)}
+                      </span>
+                    )}
                   </div>
                 </div>
 

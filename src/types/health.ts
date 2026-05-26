@@ -825,4 +825,10 @@ export interface TrainingPlan {
   days?: TrainingPlanDay[]; // eagerly loaded via join
   ai_supervised?: boolean;
   review_config?: ReviewConfig;
+  /**
+   * Last time this plan was used to start a workout (MAX(workouts.created_at)
+   * WHERE plan_id = this.id). Null if the plan has never been trained yet.
+   * Populated client-side by useTrainingPlans() — see B37 (2026-05-25).
+   */
+  last_used_at?: string | null;
 }

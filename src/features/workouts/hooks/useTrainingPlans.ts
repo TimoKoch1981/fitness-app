@@ -76,6 +76,11 @@ export function usePlanById(planId: string | undefined) {
 /**
  * Load all training plans (without days) for listing.
  * Sorted: active plan first, then by creation date (newest first).
+ *
+ * B39 (2026-05-25): Plus per-plan `last_used_at` = MAX(workouts.created_at)
+ * via second query + client-side merge. Lets the UI show "zuletzt benutzt"
+ * next to "erstellt", which would have saved Corinna from thinking her
+ * March plan was gone after the B28 auto-deactivation incident.
  */
 export function useTrainingPlans() {
   return useQuery({
@@ -84,7 +89,7 @@ export function useTrainingPlans() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data, error } = await supabase
+      const { data: plans, error } = await supabase
         .from('training_plans')
         .select('*')
         .eq('user_id', user.id)
@@ -92,7 +97,25 @@ export function useTrainingPlans() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data ?? [];
+      if (!plans?.length) return [];
+
+      // Last-used lookup: one round-trip for all plans, merged client-side.
+      const { data: workouts } = await supabase
+        .from('workouts')
+        .select('plan_id, created_at')
+        .eq('user_id', user.id)
+        .not('plan_id', 'is', null)
+        .order('created_at', { ascending: false });
+
+      const lastUsed = new Map<string, string>();
+      for (const w of workouts ?? []) {
+        if (w.plan_id && !lastUsed.has(w.plan_id)) {
+          // First hit per plan_id is the newest because of the DESC order.
+          lastUsed.set(w.plan_id, w.created_at);
+        }
+      }
+
+      return plans.map((p) => ({ ...p, last_used_at: lastUsed.get(p.id) ?? null }));
     },
   });
 }
