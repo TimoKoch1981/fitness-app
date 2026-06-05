@@ -36,6 +36,7 @@ import { usePlanWizard } from '../context/PlanWizardContext';
 import { ExercisePicker } from './ExercisePicker';
 import { DAY_TYPE_OPTIONS, getDefaultDayType } from '../data/planConstants';
 import { useTranslation } from '../../../i18n';
+import { ATX_BANDS, getAtxBand, DEFAULT_BAND_KEY } from '../data/atxBands';
 import type { PlanExercise, CatalogExercise, DayType } from '../../../types/health';
 
 export function PlanWizardExerciseStep() {
@@ -415,7 +416,11 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUp
               e.stopPropagation();
               const next = !exercise.is_bodyweight;
               onUpdate('is_bodyweight', next || undefined);
-              if (next) onUpdate('weight_kg', undefined);
+              if (next) {
+                onUpdate('weight_kg', undefined);
+                onUpdate('is_band', undefined);
+                onUpdate('band_color', undefined);
+              }
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
@@ -427,18 +432,60 @@ function SortableExerciseRow({ id, exercise, index, total, isDE, isFlexDay, onUp
           >
             BW
           </button>
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            value={exercise.weight_kg ?? ''}
-            disabled={!!exercise.is_bodyweight}
-            onClick={(e) => e.stopPropagation()}
+          {/* B51 (2026-06-04): Band toggle — mirror of PlanEditorDialog */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = !exercise.is_band;
+              onUpdate('is_band', next || undefined);
+              if (next) {
+                onUpdate('weight_kg', undefined);
+                onUpdate('is_bodyweight', undefined);
+                if (!exercise.band_color) onUpdate('band_color', DEFAULT_BAND_KEY);
+              } else {
+                onUpdate('band_color', undefined);
+              }
+            }}
             onPointerDown={(e) => e.stopPropagation()}
-            onChange={(e) => onUpdate('weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
-            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
-            placeholder="kg"
-          />
+            className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
+              exercise.is_band
+                ? 'bg-theme-primary text-white border-theme-primary'
+                : 'bg-white text-gray-400 border-gray-200 hover:text-gray-600'
+            }`}
+            title={isDE ? 'Mit Widerstandsband (ATX)' : 'Resistance band (ATX)'}
+          >
+            Band
+          </button>
+          {exercise.is_band ? (
+            <select
+              value={exercise.band_color ?? DEFAULT_BAND_KEY}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onChange={(e) => onUpdate('band_color', e.target.value)}
+              className="w-24 text-xs text-gray-700 bg-white border border-gray-200 rounded px-1 py-1 cursor-pointer"
+              style={{ borderLeft: `6px solid ${getAtxBand(exercise.band_color ?? DEFAULT_BAND_KEY)?.hex ?? '#999'}` }}
+            >
+              {ATX_BANDS.map(b => (
+                <option key={b.key} value={b.key}>
+                  L{b.level} {isDE ? b.labelDe : b.labelEn}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={exercise.weight_kg ?? ''}
+              disabled={!!exercise.is_bodyweight}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onChange={(e) => onUpdate('weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
+              className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
+              placeholder="kg"
+            />
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-1 flex-shrink-0">

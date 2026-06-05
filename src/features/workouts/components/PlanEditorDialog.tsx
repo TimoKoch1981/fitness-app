@@ -30,6 +30,7 @@ import { X, Plus, GripVertical, Trash2, Save, ChevronLeft, ChevronUp, ChevronDow
 import { useTranslation } from '../../../i18n';
 import { supabase } from '../../../lib/supabase';
 import { ExercisePicker } from './ExercisePicker';
+import { ATX_BANDS, getAtxBand, DEFAULT_BAND_KEY } from '../data/atxBands';
 import type { TrainingPlanDay, PlanExercise, CatalogExercise } from '../../../types/health';
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -405,7 +406,11 @@ function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove,
               e.stopPropagation();
               const next = !exercise.is_bodyweight;
               onUpdate(exercise._id, 'is_bodyweight', next || undefined);
-              if (next) onUpdate(exercise._id, 'weight_kg', undefined);
+              if (next) {
+                onUpdate(exercise._id, 'weight_kg', undefined);
+                onUpdate(exercise._id, 'is_band', undefined);
+                onUpdate(exercise._id, 'band_color', undefined);
+              }
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
@@ -417,18 +422,61 @@ function SortableExerciseRow({ exercise, index, total, isDE, onUpdate, onRemove,
           >
             BW
           </button>
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            value={exercise.weight_kg ?? ''}
-            disabled={!!exercise.is_bodyweight}
-            onClick={(e) => e.stopPropagation()}
+          {/* B51 (2026-06-04): Band toggle. When active, kg input is disabled
+              and an ATX color dropdown appears (Hip Thrust mit Widerstandsband). */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = !exercise.is_band;
+              onUpdate(exercise._id, 'is_band', next || undefined);
+              if (next) {
+                onUpdate(exercise._id, 'weight_kg', undefined);
+                onUpdate(exercise._id, 'is_bodyweight', undefined);
+                if (!exercise.band_color) onUpdate(exercise._id, 'band_color', DEFAULT_BAND_KEY);
+              } else {
+                onUpdate(exercise._id, 'band_color', undefined);
+              }
+            }}
             onPointerDown={(e) => e.stopPropagation()}
-            onChange={(e) => onUpdate(exercise._id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
-            className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
-            placeholder={exercise.is_bodyweight ? '—' : 'kg'}
-          />
+            className={`px-1.5 py-1 text-[10px] font-semibold rounded border transition-colors ${
+              exercise.is_band
+                ? 'bg-theme-primary text-white border-theme-primary'
+                : 'bg-white text-gray-400 border-gray-200 hover:text-gray-600'
+            }`}
+            title={isDE ? 'Mit Widerstandsband (ATX)' : 'Resistance band (ATX)'}
+          >
+            Band
+          </button>
+          {exercise.is_band ? (
+            <select
+              value={exercise.band_color ?? DEFAULT_BAND_KEY}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onChange={(e) => onUpdate(exercise._id, 'band_color', e.target.value)}
+              className="w-24 text-xs text-gray-700 bg-white border border-gray-200 rounded px-1 py-1 cursor-pointer"
+              style={{ borderLeft: `6px solid ${getAtxBand(exercise.band_color ?? DEFAULT_BAND_KEY)?.hex ?? '#999'}` }}
+            >
+              {ATX_BANDS.map(b => (
+                <option key={b.key} value={b.key}>
+                  L{b.level} {isDE ? b.labelDe : b.labelEn}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={exercise.weight_kg ?? ''}
+              disabled={!!exercise.is_bodyweight}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onChange={(e) => onUpdate(exercise._id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : undefined)}
+              className="w-12 text-xs text-center text-gray-600 bg-white border border-gray-200 rounded px-0.5 py-1 cursor-text disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed"
+              placeholder={exercise.is_bodyweight ? '—' : 'kg'}
+            />
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-1 flex-shrink-0">

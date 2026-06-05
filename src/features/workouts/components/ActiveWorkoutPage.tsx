@@ -28,7 +28,8 @@ import { WorkoutMusicPlayer } from './WorkoutMusicPlayer';
 import { WorkoutVoiceControl } from './WorkoutVoiceControl';
 import { ExerciseListBar } from './ExerciseListBar';
 import { AddExerciseDialog } from './AddExerciseDialog';
-import { suggestRestTime } from '../utils/suggestRestTimes';
+import { suggestRestTime, goalFromPhase } from '../utils/suggestRestTimes';
+import { useProfile } from '../../auth/hooks/useProfile';
 import type { WorkoutExerciseResult } from '../../../types/health';
 import { useTempSurfaceMode } from '../../../lib/theme/ThemeContext';
 
@@ -51,6 +52,10 @@ export function ActiveWorkoutPage() {
   } = useActiveWorkout();
 
   const { data: latestBody } = useLatestBodyMeasurement();
+  const { data: profile } = useProfile();
+  // B48: derive the rep-scheme goal from the user's current training phase
+  // so a Bulk/Cut user gets hypertrophy reps, a strength phase gets low reps.
+  const repGoal = useMemo(() => goalFromPhase(profile?.current_phase), [profile?.current_phase]);
 
   // Prevent screen from dimming during active workout
   useWakeLock(state.isActive && state.phase !== 'summary');
@@ -186,16 +191,16 @@ export function ActiveWorkoutPage() {
         } else {
           // No draft found — start fresh
           const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-          startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
+          startSession(planDay, planId, lastResults, catalog, crossPlanLookup, repGoal);
         }
       } catch (err) {
         console.warn('[Resume] Failed to load draft:', err);
         // Fallback: start fresh
         const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-        startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
+        startSession(planDay, planId, lastResults, catalog, crossPlanLookup, repGoal);
       }
     })();
-  }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession]);
+  }, [isResume, activePlan, dayId, planId, dayNumber, lastWorkout, state.isActive, state.planDayId, dispatch, startSession, catalog, crossPlanLookup, repGoal]);
 
   // Start FREE session (no plan required)
   // If there's a restored plan-based session (from localStorage), override it
@@ -220,8 +225,8 @@ export function ActiveWorkoutPage() {
     if (!planDay) return;
 
     const lastResults = lastWorkout?.session_exercises as WorkoutExerciseResult[] | undefined;
-    startSession(planDay, planId, lastResults, catalog, crossPlanLookup);
-  }, [isFreeMode, isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession]);
+    startSession(planDay, planId, lastResults, catalog, crossPlanLookup, repGoal);
+  }, [isFreeMode, isResume, activePlan, dayId, planId, lastWorkout, state.isActive, state.planDayId, startSession, catalog, crossPlanLookup, repGoal]);
 
   // ── Start total timer when session becomes active ──────────────────────
   useEffect(() => {

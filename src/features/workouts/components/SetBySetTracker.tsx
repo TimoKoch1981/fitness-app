@@ -16,6 +16,7 @@ import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
+import { ATX_BANDS, getAtxBand } from '../data/atxBands';
 import { RpePicker } from './RpePicker';
 import { PlateCalculator } from './PlateCalculator';
 import { PlateCalculatorPopup } from './PlateCalculatorPopup';
@@ -56,7 +57,7 @@ export function SetBySetTracker({
 }: SetBySetTrackerProps) {
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { setTag, toggleUnilateral, editLoggedSet } = useActiveWorkout();
+  const { setTag, toggleUnilateral, editLoggedSet, editExercise } = useActiveWorkout();
 
   const currentSet = exercise.sets[currentSetIndex];
   const lastSet = lastExercise?.sets[currentSetIndex];
@@ -76,8 +77,10 @@ export function SetBySetTracker({
   // werden semantisch in actual_reps gespeichert (no DB-Migration needed —
   // WorkoutSummary B34 stellt das gleiche Mapping).
   const isIsometric = !isCardio && ISOMETRIC_PATTERNS.some((p) => p.test(exercise.name));
+  // B51: band mode — the exercise carries an ATX band color instead of kg.
+  const isBand = !!exercise.band_color;
   // No-weight exercises (bodyweight, Five Tibetans, etc.) — show only reps, full width
-  const noWeight = !isCardio && !isIsometric && exercise.sets.every(s => s.target_weight_kg == null);
+  const noWeight = !isCardio && !isIsometric && !isBand && exercise.sets.every(s => s.target_weight_kg == null);
 
   /** Cycle the current set's tag */
   const cycleCurrentTag = useCallback(() => {
@@ -507,39 +510,63 @@ export function SetBySetTracker({
                 {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
               </p>
             </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1.5 block font-medium">
-                {isDE ? 'Gewicht (kg)' : 'Weight (kg)'}
-              </label>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                value={weight}
-                onChange={e => setWeight(e.target.value)}
-                placeholder={currentSet.target_weight_kg?.toString() ?? '-'}
-                className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-theme-line rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-theme-primary bg-white placeholder:text-gray-300 placeholder:font-normal"
-              />
-              {/* PR indicator */}
-              {(() => {
-                const currentWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? 0);
-                if (maxWeight != null && currentWeight > maxWeight && currentWeight > 0) {
+            {isBand ? (
+              /* B51: resistance band — color picker instead of kg */
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                  {isDE ? 'Band (ATX)' : 'Band (ATX)'}
+                </label>
+                <select
+                  value={exercise.band_color ?? ''}
+                  onChange={e => editExercise(exerciseIndex, { band_color: e.target.value })}
+                  className="w-full px-3 py-3.5 text-center text-base font-bold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary bg-white"
+                  style={{ borderColor: getAtxBand(exercise.band_color)?.hex ?? 'var(--theme-line, #ddd)' }}
+                >
+                  {ATX_BANDS.map(b => (
+                    <option key={b.key} value={b.key}>
+                      L{b.level} {isDE ? b.labelDe : b.labelEn}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1 text-center">
+                  {getAtxBand(exercise.band_color)?.resistanceKg ?? ''}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block font-medium">
+                  {isDE ? 'Gewicht (kg)' : 'Weight (kg)'}
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.1"
+                  value={weight}
+                  onChange={e => setWeight(e.target.value)}
+                  placeholder={currentSet.target_weight_kg?.toString() ?? '-'}
+                  className="w-full px-3 py-3.5 text-center text-xl font-bold border-2 border-theme-line rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-theme-primary bg-white placeholder:text-gray-300 placeholder:font-normal"
+                />
+                {/* PR indicator */}
+                {(() => {
+                  const currentWeight = weight ? parseFloat(weight) : (currentSet.target_weight_kg ?? 0);
+                  if (maxWeight != null && currentWeight > maxWeight && currentWeight > 0) {
+                    return (
+                      <div className="flex items-center justify-center gap-1 mt-1 text-amber-600 animate-pulse">
+                        <Trophy className="h-3.5 w-3.5" />
+                        <span className="text-[11px] font-bold">{isDE ? 'Neuer Rekord!' : 'New PR!'}</span>
+                      </div>
+                    );
+                  }
                   return (
-                    <div className="flex items-center justify-center gap-1 mt-1 text-amber-600 animate-pulse">
-                      <Trophy className="h-3.5 w-3.5" />
-                      <span className="text-[11px] font-bold">{isDE ? 'Neuer Rekord!' : 'New PR!'}</span>
-                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1 text-center">
+                      {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+                    </p>
                   );
-                }
-                return (
-                  <p className="text-[10px] text-gray-400 mt-1 text-center">
-                    {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
-                  </p>
-                );
-              })()}
-              {/* Plate Calculator */}
-              <PlateCalculatorPopup weight={weight ? parseFloat(weight) : currentSet.target_weight_kg} />
-            </div>
+                })()}
+                {/* Plate Calculator */}
+                <PlateCalculatorPopup weight={weight ? parseFloat(weight) : currentSet.target_weight_kg} />
+              </div>
+            )}
           </>
         )}
       </div>

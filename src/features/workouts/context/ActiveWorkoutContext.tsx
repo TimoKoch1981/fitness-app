@@ -20,6 +20,8 @@ import type {
   CatalogExercise,
 } from '../../../types/health';
 import { suggestExerciseDefaults } from '../utils/suggestExerciseDefaults';
+import type { TrainingGoal } from '../utils/suggestRestTimes';
+import { DEFAULT_BAND_KEY } from '../data/atxBands';
 
 // ── State ────────────────────────────────────────────────────────────────
 
@@ -62,7 +64,7 @@ const STORAGE_KEY = 'fitbuddy_active_workout';
 // ── Actions ──────────────────────────────────────────────────────────────
 
 type Action =
-  | { type: 'START_SESSION'; planDay: TrainingPlanDay; planId: string; lastResults?: WorkoutExerciseResult[]; catalog?: CatalogExercise[]; crossPlanData?: Map<string, WorkoutExerciseResult> }
+  | { type: 'START_SESSION'; planDay: TrainingPlanDay; planId: string; lastResults?: WorkoutExerciseResult[]; catalog?: CatalogExercise[]; crossPlanData?: Map<string, WorkoutExerciseResult>; goal?: TrainingGoal }
   | { type: 'START_FREE_SESSION'; name?: string }
   | { type: 'LOG_WARMUP'; warmup: WarmupResult }
   | { type: 'SKIP_WARMUP' }
@@ -100,6 +102,8 @@ export interface ExerciseEditPayload {
   rest_seconds?: number;
   /** Duration in minutes (for timed exercises) */
   duration_minutes?: number;
+  /** B51: change the ATX resistance band mid-session (Hip Thrust grabbed a different band). */
+  band_color?: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -108,12 +112,14 @@ export function buildExercisesFromPlan(
   planExercises: PlanExercise[],
   catalog?: CatalogExercise[],
   crossPlanData?: Map<string, WorkoutExerciseResult>,
+  /** B48: training goal derived from the user's phase, sharpens rep defaults. */
+  goal?: TrainingGoal,
 ): WorkoutExerciseResult[] {
   return planExercises.map((pe, idx) => {
     // Look up catalog entry for smart defaults
     const catEntry = catalog?.find(c => c.id === pe.exercise_id)
       ?? catalog?.find(c => c.name.toLowerCase() === pe.name.toLowerCase());
-    const defaults = suggestExerciseDefaults(pe.name, catEntry);
+    const defaults = suggestExerciseDefaults(pe.name, catEntry, goal);
 
     // Cross-plan previous data (per-set positional match, with fallbacks).
     // B46 (2026-06-04): pre-fix this returned only the first non-warmup
@@ -123,9 +129,6 @@ export function buildExercisesFromPlan(
     const prevEx = crossPlanData?.get(crossKey);
     const prevWorkingSets = prevEx?.sets.filter(s => s.completed && s.set_tag !== 'warmup') ?? [];
     const prevSet = prevWorkingSets[0];
-    /** Pick the matching previous set for a given new-session set index. */
-    const prevSetAt = (i: number) =>
-      prevWorkingSets[i] ?? prevWorkingSets[prevWorkingSets.length - 1] ?? prevSet;
     const prevHeaviest = prevWorkingSets.reduce<number | undefined>(
       (max, s) => (s.actual_weight_kg != null && (max === undefined || s.actual_weight_kg > max))
         ? s.actual_weight_kg : max,
@@ -175,9 +178,10 @@ export function buildExercisesFromPlan(
       // Explicit `pe.is_bodyweight` wins; for older plans without the flag we
       // fall back to "user typed 0 in the plan" as a heuristic (Corinna's
       // Wadenheben case — pre-existing weight_kg=0 should mean bodyweight).
-      const isBodyweightPlan = pe.is_bodyweight ?? pe.weight_kg === 0;
+      // B51: band mode hides kg just like bodyweight does.
+      const noExternalWeight = pe.is_band === true || (pe.is_bodyweight ?? pe.weight_kg === 0);
       targetReps = pe.reps ?? prevSet?.target_reps ?? defaults.reps;
-      targetWeightKg = isBodyweightPlan
+      targetWeightKg = noExternalWeight
         ? undefined
         : (pe.weight_kg ?? prevSet?.actual_weight_kg ?? defaults.weight_kg ?? 0);
       targetDurationMinutes = undefined;
@@ -188,13 +192,16 @@ export function buildExercisesFromPlan(
     for (let setIdx = 0; setIdx < numSets; setIdx++) {
       // B46: per-set override of target_weight_kg from the matching previous
       // set. Only applies when the plan didn't pin a weight and we're not
-      // bodyweight/cardio/iso. If the previous workout had MORE sets, we
+      // bodyweight/band/cardio/iso. If the previous workout had MORE sets, we
       // use the heaviest as the high-water mark for extra sets.
-      const isBodyweightPlan = pe.is_bodyweight ?? pe.weight_kg === 0;
-      const useStrengthOverride = !isTimedType && !isBodyweightPlan && pe.weight_kg == null;
-      const positionalPrev = prevSetAt(setIdx);
+      const noExternalWeight = pe.is_band === true || (pe.is_bodyweight ?? pe.weight_kg === 0);
+      const useStrengthOverride = !isTimedType && !noExternalWeight && pe.weight_kg == null;
+      // B46 (review 2026-06-04): index prevWorkingSets DIRECTLY so a missing
+      // position truly falls through to prevHeaviest. An earlier helper
+      // returned the last set for out-of-range indices, which made the
+      // prevHeaviest high-water-mark unreachable for back-off/drop last sets.
       const perSetWeight = useStrengthOverride
-        ? (positionalPrev?.actual_weight_kg ?? prevHeaviest ?? targetWeightKg)
+        ? (prevWorkingSets[setIdx]?.actual_weight_kg ?? prevHeaviest ?? targetWeightKg)
         : targetWeightKg;
       const baseSet = {
         set_number: setIdx + 1,
@@ -228,6 +235,11 @@ export function buildExercisesFromPlan(
       pace: pe.pace,
       intensity: pe.intensity,
       rest_seconds: pe.rest_seconds,
+      // B51: carry the band color into the session so the tracker shows it.
+      // Review 2026-06-04: if a plan sets is_band but no color (e.g. an
+      // AI-generated plan), default to a sensible band so band mode is not
+      // silently lost — the trackers key band-mode off band_color presence.
+      band_color: pe.is_band ? (pe.band_color ?? DEFAULT_BAND_KEY) : undefined,
       skipped: false,
       is_addition: false,
       notes: pe.notes,
@@ -244,6 +256,7 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         action.planDay.exercises,
         action.catalog,
         action.crossPlanData,
+        action.goal,
       );
       return {
         planId: action.planId,
@@ -533,6 +546,11 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
         ex.rest_seconds = updates.rest_seconds;
       }
 
+      // B51: update the band color mid-session
+      if (updates.band_color != null) {
+        ex.band_color = updates.band_color;
+      }
+
       // Adjust number of sets
       if (updates.numSets != null && updates.numSets !== ex.sets.length) {
         const newSets = [...ex.sets];
@@ -582,7 +600,15 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       }
 
       exercises[action.exerciseIndex] = ex;
-      return { ...state, exercises, currentSetIndex: 0 };
+      // B51 (review 2026-06-04): only reset the set pointer when the set
+      // STRUCTURE changed (added/removed sets or per-set overrides). A pure
+      // band_color / rest / duration edit must NOT throw the user from set 3
+      // back to set 1 mid-Hip-Thrust. Clamp like TOGGLE_UNILATERAL otherwise.
+      const structureChanged = updates.numSets != null || updates.setOverrides != null;
+      const nextSetIndex = structureChanged
+        ? 0
+        : Math.max(0, Math.min(state.currentSetIndex, ex.sets.length - 1));
+      return { ...state, exercises, currentSetIndex: nextSetIndex };
     }
 
     case 'REORDER_EXERCISES': {
@@ -666,7 +692,7 @@ export const initialState: ActiveWorkoutState = {
 interface ActiveWorkoutContextValue {
   state: ActiveWorkoutState;
   dispatch: React.Dispatch<Action>;
-  startSession: (planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>) => void;
+  startSession: (planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>, goal?: TrainingGoal) => void;
   startFreeSession: (name?: string) => void;
   logWarmup: (warmup: WarmupResult) => void;
   skipWarmup: () => void;
@@ -792,8 +818,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     };
   }, [state.exercises, state.currentExerciseIndex, state.isActive, state.phase, state.planDayId, state.planId, state.planDayName, state.planDayNumber, state.warmup, state.startedAt]);
 
-  const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>) => {
-    dispatch({ type: 'START_SESSION', planDay, planId, lastResults, catalog, crossPlanData });
+  const startSession = useCallback((planDay: TrainingPlanDay, planId: string, lastResults?: WorkoutExerciseResult[], catalog?: CatalogExercise[], crossPlanData?: Map<string, WorkoutExerciseResult>, goal?: TrainingGoal) => {
+    dispatch({ type: 'START_SESSION', planDay, planId, lastResults, catalog, crossPlanData, goal });
   }, []);
 
   const startFreeSession = useCallback((name?: string) => {

@@ -27,6 +27,7 @@ import { useCelebrations } from '../../celebrations/CelebrationProvider';
 import { ShareButton } from '../../../shared/components/ShareButton';
 import { createWorkoutShareCard } from '../../../shared/utils/shareCard';
 import { ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
+import { getAtxBand } from '../data/atxBands';
 import type { SetTag, WorkoutExerciseResult } from '../../../types/health';
 
 /** Tag display config (matches SetBySetTracker/ExerciseOverviewTracker) */
@@ -206,7 +207,12 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
             exercise_type: ex.exercise_type ?? 'strength',
             sets: ex.sets.length,
             reps: ex.sets[0]?.target_reps || String(ex.sets[0]?.actual_reps ?? 10),
-            weight_kg: ex.sets[0]?.actual_weight_kg ?? ex.sets[0]?.target_weight_kg,
+            // B51 (review 2026-06-04): carry the band designation into the saved
+            // plan so a banded Hip Thrust doesn't silently become a free-weight
+            // exercise next session. Band exercises have no kg.
+            ...(ex.band_color
+              ? { is_band: true, band_color: ex.band_color, weight_kg: undefined }
+              : { weight_kg: ex.sets[0]?.actual_weight_kg ?? ex.sets[0]?.target_weight_kg }),
             rest_seconds: ex.rest_seconds,
             notes: ex.notes,
           })),
@@ -431,10 +437,12 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
           // pe.is_bodyweight flag). Match the noWeight-Check the live trackers
           // (SetBySetTracker.tsx:74, ExerciseOverviewTracker.tsx:60) already use
           // so the summary hides the kg column too.
-          const exIsBodyweight = !exIsCardio && !exIsIsometric
+          const exIsBodyweight = !exIsCardio && !exIsIsometric && !ex.band_color
             && ex.sets.length > 0
             && ex.sets.every(s => s.target_weight_kg == null && s.actual_weight_kg == null);
-          const hideWeightCol = exIsIsometric || exIsBodyweight;
+          // B51: band exercises show the ATX color instead of kg
+          const exBand = !exIsCardio ? getAtxBand(ex.band_color) : undefined;
+          const hideWeightCol = exIsIsometric || exIsBodyweight || !!exBand;
           const avgReps = !exIsCardio && workingSets.length > 0
             ? Math.round(workingSets.reduce((s, set) => s + (set.actual_reps ?? 0), 0) / workingSets.length)
             : 0;
@@ -484,6 +492,16 @@ export function WorkoutSummary({ weightKg, onClose }: WorkoutSummaryProps) {
                     ) : exIsIsometric ? (
                       <>
                         {workingSets.length}×{avgReps}s
+                        {completedSets.length > workingSets.length && (
+                          <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
+                        )}
+                      </>
+                    ) : exBand ? (
+                      <>
+                        {workingSets.length}×{avgReps}
+                        {' · '}
+                        <span style={{ color: exBand.hex }}>● </span>
+                        {isDE ? exBand.labelDe : exBand.labelEn}
                         {completedSets.length > workingSets.length && (
                           <span className="text-amber-500"> +{completedSets.length - workingSets.length}W</span>
                         )}

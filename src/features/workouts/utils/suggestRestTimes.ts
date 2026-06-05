@@ -82,6 +82,100 @@ function detectGoalFromReps(reps?: number): TrainingGoal {
   return 'endurance';
 }
 
+// ── Rep recommendations (B48, 2026-06-04) ────────────────────────────────
+//
+// Before B48 the deterministic default reps came purely from EQUIPMENT
+// (barbell 6-8, dumbbell/cable/machine flat 10-12, band 12-15), so a heavy
+// compound and a light isolation got near-identical rep targets — the user
+// reported "alles wird gleich behandelt". This function derives a rep range
+// from the TRAINING GOAL × MOVEMENT ROLE, the same two axes the rest-time
+// recommendation already uses. Sources: ACSM Position Stand 2009, Schoenfeld
+// 2017 (hypertrophy dose-response), NSCA Essentials Ch.17.
+
+export interface RepSuggestion {
+  /** Rep-range string, e.g. "6-10" */
+  reps: string;
+  goal: TrainingGoal;
+  reason: string;
+  reasonEN: string;
+}
+
+/** Rep-range table: goal × movement role. */
+const REP_TABLE: Record<TrainingGoal, { compound: string; isolation: string }> = {
+  strength:    { compound: '3-5',   isolation: '6-8'   },
+  hypertrophy: { compound: '6-10',  isolation: '10-15' },
+  endurance:   { compound: '12-15', isolation: '15-20' },
+  // general = sensible default that still differentiates compound vs isolation
+  general:     { compound: '6-10',  isolation: '10-12' },
+};
+
+/**
+ * Map the user's current training phase to a rep-scheme goal.
+ *
+ * Keys on the REAL TrainingPhase union (types/health.ts:268) — the only
+ * writer is PowerModeSetupWizard which emits exactly these six values:
+ *   'bulk' | 'cut' | 'maintenance' | 'peak_week' | 'reverse_diet' | 'off_season'.
+ * (B48 review 2026-06-04: an earlier version keyed on invented aliases like
+ * 'lean_bulk'/'massephase' that the app never produces, leaving off_season +
+ * reverse_diet silently at 'general' and mapping peak_week to a max-strength
+ * scheme — wrong for a competition taper.)
+ *
+ * - bulk / off_season → hypertrophy (both are muscle-building blocks)
+ * - cut               → hypertrophy (keep reps moderate-high to retain muscle)
+ * - maintenance / reverse_diet → general
+ * - peak_week         → general (taper/deload, NOT a 3-5 rep strength block)
+ */
+export function goalFromPhase(phase?: string | null): TrainingGoal {
+  switch ((phase ?? '').toLowerCase()) {
+    case 'bulk':
+    case 'off_season':
+    case 'cut':
+      return 'hypertrophy';
+    case 'maintenance':
+    case 'reverse_diet':
+    case 'peak_week':
+      return 'general';
+    default:
+      return 'general';
+  }
+}
+
+/**
+ * Recommend a rep range from goal + movement role.
+ * Isometric / cardio / flexibility are duration-based and handled by callers;
+ * if such a category slips in we fall back to the isolation column.
+ */
+export function suggestReps(params: {
+  category?: ExerciseCategory;
+  exerciseName?: string;
+  goal?: TrainingGoal;
+  isCompound?: boolean;
+}): RepSuggestion {
+  const category = params.category
+    ?? (params.exerciseName ? detectCategory(params.exerciseName) : 'isolation');
+  const isCompound = params.isCompound ?? category === 'compound';
+  const goal = params.goal ?? 'general';
+
+  const reps = isCompound ? REP_TABLE[goal].compound : REP_TABLE[goal].isolation;
+  const role = isCompound ? 'Verbundübung' : 'Isolationsübung';
+  const roleEN = isCompound ? 'compound' : 'isolation';
+  const goalDE: Record<TrainingGoal, string> = {
+    strength: 'Maximalkraft', hypertrophy: 'Muskelaufbau',
+    endurance: 'Kraftausdauer', general: 'Allround',
+  };
+  const goalENm: Record<TrainingGoal, string> = {
+    strength: 'strength', hypertrophy: 'hypertrophy',
+    endurance: 'endurance', general: 'general',
+  };
+
+  return {
+    reps,
+    goal,
+    reason: `${goalDE[goal]} · ${role}: ${reps} Wdh`,
+    reasonEN: `${goalENm[goal]} · ${roleEN}: ${reps} reps`,
+  };
+}
+
 export function suggestRestTime(params: SuggestParams): RestTimeSuggestion {
   const {
     exerciseName,

@@ -87,6 +87,9 @@ export interface WorkoutExerciseResult {
   intensity?: string;
   // timer / rest
   rest_seconds?: number;       // per-exercise rest time (from plan or user-adjusted)
+  // B51: resistance-band mode — when set, the exercise is trained with an ATX
+  // band (kg column hidden, band color shown). Editable during the session.
+  band_color?: string;
   // meta
   skipped?: boolean;
   is_addition?: boolean;       // user-added exercise (not in plan)
@@ -758,6 +761,14 @@ export interface PlanExercise {
    * plans behave correctly without manual migration.
    */
   is_bodyweight?: boolean;
+  /**
+   * B51 (2026-06-04): Resistance-band mode. When true the exercise is trained
+   * with an ATX resistance band instead of free weight — the tracker hides
+   * the kg column (like bodyweight) and shows the band color instead.
+   */
+  is_band?: boolean;
+  /** ATX band color key (see data/atxBands.ts), only meaningful when is_band. */
+  band_color?: string;
   // Endurance fields
   duration_minutes?: number;
   distance_km?: number;

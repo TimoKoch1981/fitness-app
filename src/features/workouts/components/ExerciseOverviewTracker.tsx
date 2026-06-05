@@ -17,6 +17,7 @@ import { Check, ChevronRight, Info, SkipForward, AlertCircle, Lock, Trophy, Penc
 import { useTranslation } from '../../../i18n';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
+import { ATX_BANDS, getAtxBand } from '../data/atxBands';
 import { RpePicker } from './RpePicker';
 import type { WorkoutExerciseResult, SetTag } from '../../../types/health';
 
@@ -44,7 +45,7 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
   const { exercise, exerciseIndex, lastExercise, onLogSet, onSkipSet, onAllDone, maxWeight } = props;
   const { language } = useTranslation();
   const isDE = language === 'de';
-  const { state: workoutState, setTag, toggleUnilateral, editLoggedSet } = useActiveWorkout();
+  const { state: workoutState, setTag, toggleUnilateral, editLoggedSet, editExercise } = useActiveWorkout();
   const setReady = workoutState.setReady;
 
   // v14.20 / Punkt 4: which completed set is currently being re-edited
@@ -56,8 +57,12 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
 
   // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
   const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
-  // No-weight exercises (Five Tibetans, bodyweight) — hide weight column
-  const noWeight = !isCardio && exercise.sets.every(s => s.target_weight_kg == null);
+  // B51: band mode — show an ATX color picker instead of (hidden) kg column
+  const isBand = !!exercise.band_color;
+  // No-weight exercises (Five Tibetans, bodyweight, band) — hide weight column.
+  // Review 2026-06-04: explicitly exclude isBand so a band exercise that ever
+  // carries a stray target_weight_kg still hides the kg column (single source).
+  const noWeight = !isCardio && (isBand || exercise.sets.every(s => s.target_weight_kg == null));
 
   /** Cycle set tag: normal → warmup → drop → failure → normal */
   const cycleTag = useCallback((setIdx: number) => {
@@ -215,6 +220,23 @@ export function ExerciseOverviewTracker(props: ExerciseOverviewTrackerProps) {
               ? (isDE ? 'L/R aktiv' : 'L/R active')
               : (isDE ? 'L/R einseitig' : 'L/R single-side')}
           </button>
+        </div>
+      )}
+
+      {/* B51: band selector */}
+      {isBand && (
+        <div className="flex items-center justify-end gap-2 px-2">
+          <span className="text-[11px] text-gray-400">{isDE ? 'Band' : 'Band'}</span>
+          <select
+            value={exercise.band_color ?? ''}
+            onChange={e => editExercise(exerciseIndex, { band_color: e.target.value })}
+            className="text-xs text-gray-700 bg-white border-2 rounded-lg px-2 py-1 cursor-pointer"
+            style={{ borderColor: getAtxBand(exercise.band_color)?.hex ?? '#ddd' }}
+          >
+            {ATX_BANDS.map(b => (
+              <option key={b.key} value={b.key}>L{b.level} {isDE ? b.labelDe : b.labelEn}</option>
+            ))}
+          </select>
         </div>
       )}
 

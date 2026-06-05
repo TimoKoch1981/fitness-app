@@ -12,7 +12,7 @@
  */
 
 import type { CatalogExercise } from '../../../types/health';
-import { ISOMETRIC_PATTERNS } from './suggestRestTimes';
+import { ISOMETRIC_PATTERNS, COMPOUND_PATTERNS, suggestReps, type TrainingGoal } from './suggestRestTimes';
 
 export interface ExerciseDefaults {
   /** Suggested weight. undefined = no weight (isometric). 0 = bodyweight. */
@@ -83,7 +83,17 @@ function isLegsRegion(bodyRegion?: string): boolean {
 export function suggestExerciseDefaults(
   exerciseName: string,
   catalogEntry?: CatalogExercise,
+  goal?: TrainingGoal,
 ): ExerciseDefaults {
+  // B48 (2026-06-04): goal-aware rep helper. Compound detection prefers the
+  // catalog flag, falls back to the name pattern. The weight stays
+  // equipment-based; only the rep range now varies by goal × role so a
+  // heavy compound and a light isolation no longer share a rep target.
+  const isCompoundExercise =
+    catalogEntry?.is_compound ?? COMPOUND_PATTERNS.some(p => p.test(exerciseName));
+  const repFor = (compound: boolean) =>
+    suggestReps({ goal, isCompound: compound, exerciseName }).reps;
+
   // 0. Mind-Body detection (Yoga, Tai Chi, Five Tibetans)
   const sub = catalogEntry?.subcategory;
   if (sub) {
@@ -113,11 +123,13 @@ export function suggestExerciseDefaults(
 
   // 2. Bodyweight exercises (Dips, Pull-Ups, Push-Ups, etc.)
   if (isBodyweight(exerciseName, catalogEntry)) {
-    // Pull-ups are harder → fewer reps
-    const isPullUp = /pull.?up|klimmz|chin.?up|muscle.?up|negative/i.test(exerciseName);
+    // Pull-ups are harder → fewer reps (cap the goal-based range for them).
+    // Review 2026-06-04: anchor "negative" to pull-up context so a negative-tempo
+    // dip/push-up isn't mis-capped at 5-8.
+    const isPullUp = /pull.?up|klimmz|chin.?up|muscle.?up|negative\s*(klimmz|pull)/i.test(exerciseName);
     return {
       weight_kg: 0,
-      reps: isPullUp ? '5-8' : '8-12',
+      reps: isPullUp ? '5-8' : repFor(isCompoundExercise),
       isIsometric: false,
     };
   }
@@ -126,45 +138,50 @@ export function suggestExerciseDefaults(
   const diff = catalogEntry?.difficulty ?? 'beginner';
   const mult = difficultyMultiplier(diff);
   const legs = isLegsRegion(catalogEntry?.body_region);
-  const isCompound = catalogEntry?.is_compound ?? false;
+  const isCompound = isCompoundExercise;
+  const reps = repFor(isCompound);
 
   // Trap Bar (special — heavier than regular barbell)
   if (EQUIPMENT.trap_bar.test(exerciseName)) {
-    return { weight_kg: Math.round(30 * mult), reps: isCompound ? '6-8' : '8-10', isIsometric: false };
+    return { weight_kg: Math.round(30 * mult), reps, isIsometric: false };
   }
 
   // Barbell
   if (EQUIPMENT.barbell.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.barbell.test(e)))) {
     const base = isCompound ? (legs ? 30 : 20) : 15;
-    return { weight_kg: Math.round(base * mult), reps: isCompound ? '6-8' : '8-10', isIsometric: false };
+    return { weight_kg: Math.round(base * mult), reps, isIsometric: false };
   }
 
   // Dumbbell
   if (EQUIPMENT.dumbbell.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.dumbbell.test(e)))) {
     const base = legs ? 10 : 6;
-    return { weight_kg: Math.round(base * mult), reps: '10-12', isIsometric: false };
+    return { weight_kg: Math.round(base * mult), reps, isIsometric: false };
   }
 
   // Cable
   if (EQUIPMENT.cable.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.cable.test(e)))) {
     const base = legs ? 15 : 10;
-    return { weight_kg: Math.round(base * mult), reps: '10-12', isIsometric: false };
+    return { weight_kg: Math.round(base * mult), reps, isIsometric: false };
   }
 
   // Machine
   if (EQUIPMENT.machine.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.machine.test(e)))) {
     const base = legs ? 30 : 20;
-    return { weight_kg: Math.round(base * mult), reps: '10-12', isIsometric: false };
+    return { weight_kg: Math.round(base * mult), reps, isIsometric: false };
   }
 
   // Kettlebell
   if (EQUIPMENT.kettlebell.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.kettlebell.test(e)))) {
-    return { weight_kg: Math.round(12 * mult), reps: '10-12', isIsometric: false };
+    return { weight_kg: Math.round(12 * mult), reps, isIsometric: false };
   }
 
-  // Band (no weight tracking)
+  // Band (no weight tracking) — keep the goal × role differentiation (B48 review:
+  // hardcoding 12-15 re-introduced the "everything the same" bug on the band path).
+  // Floor banded work at the hypertrophy column though — an elastic band can't
+  // deliver a true 3-5RM strength stimulus, so never go below hypertrophy reps.
   if (EQUIPMENT.band.test(exerciseName) || (catalogEntry?.equipment_needed?.some(e => EQUIPMENT.band.test(e)))) {
-    return { weight_kg: undefined, reps: '12-15', isIsometric: false };
+    const bandGoal: TrainingGoal = goal === 'strength' ? 'hypertrophy' : (goal ?? 'general');
+    return { weight_kg: undefined, reps: suggestReps({ goal: bandGoal, isCompound, exerciseName }).reps, isIsometric: false };
   }
 
   // 4. Fallback — unknown equipment, use catalog hints
@@ -172,10 +189,10 @@ export function suggestExerciseDefaults(
     // Has any equipment → probably needs weight
     if (catalogEntry.equipment_needed && catalogEntry.equipment_needed.length > 0 && catalogEntry.equipment_needed[0] !== '') {
       const base = legs ? 15 : 10;
-      return { weight_kg: Math.round(base * mult), reps: '10-12', isIsometric: false };
+      return { weight_kg: Math.round(base * mult), reps, isIsometric: false };
     }
   }
 
   // 5. Ultimate fallback — no info
-  return { weight_kg: undefined, reps: '10', isIsometric: false };
+  return { weight_kg: undefined, reps, isIsometric: false };
 }

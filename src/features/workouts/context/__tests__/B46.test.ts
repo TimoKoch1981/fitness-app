@@ -60,6 +60,28 @@ describe('B46 — per-set cross-plan lookup', () => {
     expect(result[0].sets[3].target_weight_kg).toBe(50);
   });
 
+  it('extra sets use the HEAVIEST previous set, not the last (review fix)', () => {
+    // History 40/50/40 (last set is a back-off). A 4-set plan: sets 1-3 match
+    // positionally (40/50/40), set 4 has no positional match → must take the
+    // heaviest (50), NOT the last set's 40.
+    const backoff: WorkoutExerciseResult = {
+      name: 'Hip Thrust', exercise_id: undefined, exercise_type: 'strength',
+      plan_exercise_index: 0, skipped: false, is_addition: false,
+      sets: [
+        { set_number: 1, target_reps: '8', actual_reps: 8, actual_weight_kg: 40, completed: true, skipped: false, set_tag: 'normal' },
+        { set_number: 2, target_reps: '8', actual_reps: 8, actual_weight_kg: 50, completed: true, skipped: false, set_tag: 'normal' },
+        { set_number: 3, target_reps: '8', actual_reps: 8, actual_weight_kg: 40, completed: true, skipped: false, set_tag: 'normal' },
+      ],
+    };
+    const map = new Map<string, WorkoutExerciseResult>([['hip thrust', backoff]]);
+    const fourSetPlan: PlanExercise[] = [{ name: 'Hip Thrust', sets: 4, reps: '8-10', rest_seconds: 90 }];
+    const result = buildExercisesFromPlan(fourSetPlan, undefined, map);
+    expect(result[0].sets[0].target_weight_kg).toBe(40);
+    expect(result[0].sets[1].target_weight_kg).toBe(50);
+    expect(result[0].sets[2].target_weight_kg).toBe(40);
+    expect(result[0].sets[3].target_weight_kg).toBe(50); // heaviest, not last (40)
+  });
+
   it('skips warmup sets from the previous workout when computing position', () => {
     const prevWithWarmup: WorkoutExerciseResult = {
       ...prevWorkout,
