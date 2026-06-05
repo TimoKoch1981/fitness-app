@@ -115,10 +115,22 @@ export function buildExercisesFromPlan(
       ?? catalog?.find(c => c.name.toLowerCase() === pe.name.toLowerCase());
     const defaults = suggestExerciseDefaults(pe.name, catEntry);
 
-    // Cross-plan previous data (best completed non-warmup set)
+    // Cross-plan previous data (per-set positional match, with fallbacks).
+    // B46 (2026-06-04): pre-fix this returned only the first non-warmup
+    // completed set, so every set in the new session inherited the same
+    // weight (40/40/40 instead of last session's 40/45/50).
     const crossKey = pe.exercise_id ?? pe.name.toLowerCase();
     const prevEx = crossPlanData?.get(crossKey);
-    const prevSet = prevEx?.sets.find(s => s.completed && s.set_tag !== 'warmup');
+    const prevWorkingSets = prevEx?.sets.filter(s => s.completed && s.set_tag !== 'warmup') ?? [];
+    const prevSet = prevWorkingSets[0];
+    /** Pick the matching previous set for a given new-session set index. */
+    const prevSetAt = (i: number) =>
+      prevWorkingSets[i] ?? prevWorkingSets[prevWorkingSets.length - 1] ?? prevSet;
+    const prevHeaviest = prevWorkingSets.reduce<number | undefined>(
+      (max, s) => (s.actual_weight_kg != null && (max === undefined || s.actual_weight_kg > max))
+        ? s.actual_weight_kg : max,
+      undefined,
+    );
 
     // Detect exercise type
     const isCardioOrFlex = pe.exercise_type === 'cardio' || pe.exercise_type === 'flexibility';
@@ -174,12 +186,22 @@ export function buildExercisesFromPlan(
 
     const sets: SetResult[] = [];
     for (let setIdx = 0; setIdx < numSets; setIdx++) {
+      // B46: per-set override of target_weight_kg from the matching previous
+      // set. Only applies when the plan didn't pin a weight and we're not
+      // bodyweight/cardio/iso. If the previous workout had MORE sets, we
+      // use the heaviest as the high-water mark for extra sets.
+      const isBodyweightPlan = pe.is_bodyweight ?? pe.weight_kg === 0;
+      const useStrengthOverride = !isTimedType && !isBodyweightPlan && pe.weight_kg == null;
+      const positionalPrev = prevSetAt(setIdx);
+      const perSetWeight = useStrengthOverride
+        ? (positionalPrev?.actual_weight_kg ?? prevHeaviest ?? targetWeightKg)
+        : targetWeightKg;
       const baseSet = {
         set_number: setIdx + 1,
         target_reps: targetReps,
-        target_weight_kg: targetWeightKg,
+        target_weight_kg: perSetWeight,
         actual_reps: undefined as number | undefined,
-        actual_weight_kg: isTimedType ? undefined : targetWeightKg,
+        actual_weight_kg: isTimedType ? undefined : perSetWeight,
         target_duration_minutes: targetDurationMinutes,
         target_distance_km: targetDistanceKm,
         actual_duration_minutes: undefined as number | undefined,
@@ -274,16 +296,35 @@ export function reducer(state: ActiveWorkoutState, action: Action): ActiveWorkou
       const exercises = [...state.exercises];
       const ex = { ...exercises[action.exerciseIndex] };
       const sets = [...ex.sets];
+      const resolvedWeight = action.actualWeightKg ?? sets[action.setIndex].target_weight_kg;
       sets[action.setIndex] = {
         ...sets[action.setIndex],
         actual_reps: action.actualReps,
-        actual_weight_kg: action.actualWeightKg ?? sets[action.setIndex].target_weight_kg,
+        actual_weight_kg: resolvedWeight,
         actual_duration_minutes: action.actualDurationMinutes,
         actual_distance_km: action.actualDistanceKm,
         completed: true,
         skipped: false,
         notes: action.notes,
       };
+
+      // B47 (2026-06-04): Propagate the actuals we just learned to every
+      // later non-completed set. Most lifters keep the same weight across
+      // sets; if Set-1's actual is 50 kg, Set-2's target must be 50 — not
+      // the stale plan default that gets re-typed every single time. The
+      // user-perceived bug: "App vergisst dass ich 50 statt 40 mache".
+      // Completed/skipped sets are NEVER touched (re-edits don't propagate).
+      for (let i = action.setIndex + 1; i < sets.length; i++) {
+        if (sets[i].completed || sets[i].skipped) continue;
+        const update: Partial<typeof sets[number]> = {};
+        if (resolvedWeight != null) update.target_weight_kg = resolvedWeight;
+        if (action.actualDurationMinutes != null) update.target_duration_minutes = action.actualDurationMinutes;
+        if (action.actualDistanceKm != null) update.target_distance_km = action.actualDistanceKm;
+        if (Object.keys(update).length > 0) {
+          sets[i] = { ...sets[i], ...update };
+        }
+      }
+
       ex.sets = sets;
       exercises[action.exerciseIndex] = ex;
 

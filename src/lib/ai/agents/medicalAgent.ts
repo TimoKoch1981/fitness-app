@@ -25,6 +25,9 @@ const CONFIG: AgentConfig = {
   userSkills: ['profile', 'substance_protocol', 'body_progress'],
   maxContextTokens: 10000,
   description: 'Expertenrat: Sportmedizin, Kardiologie, Endokrinologie, Schlaf/Regeneration, PCT-Monitoring — evidenzbasiert, sachlich',
+  // B52 (2026-06-04): medizinische Themen brauchen tiefere Differential-
+  // Diagnose-Fähigkeit als gpt-4o-mini bietet.
+  modelOverride: 'gpt-4o-2024-11-20',
 };
 
 export class MedicalAgent extends BaseAgent {

@@ -442,7 +442,7 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
       ...context.conversationHistory.slice(-8),
     ];
 
-    const provider = getAIProvider();
+    const provider = getAIProvider(this.config.modelOverride ? { model: this.config.modelOverride } : undefined);
     const response = await provider.chat(messages);
 
     // Build version map for transparency (profile-conditional + mode-aware skill list)
@@ -480,7 +480,7 @@ Say: "I'm starting the product tour for you! You'll be redirected shortly."`;
       ...context.conversationHistory.slice(-8),
     ];
 
-    const provider = getAIProvider();
+    const provider = getAIProvider(this.config.modelOverride ? { model: this.config.modelOverride } : undefined);
     const response = await provider.chatStream(messages, onChunk);
 
     const skillIds = getSkillIdsForContext(this.config.type, trainingMode, profileStream);

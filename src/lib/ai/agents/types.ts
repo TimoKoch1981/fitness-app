@@ -33,6 +33,14 @@ export interface AgentConfig {
   userSkills: UserSkillType[];     // which dynamic user skills to generate
   maxContextTokens: number;        // token budget for this agent's prompt
   description: string;             // what this agent does (DE)
+  /**
+   * Override the default expert-agent model for this agent. Most agents use
+   * the cheap `gpt-4o-mini`. Reasoning-heavy domains (substance, medical,
+   * analysis) need stronger models — set e.g. `gpt-4o-2024-11-20` here.
+   * B52 (2026-06-04): user reported weak Doping-Beratung — Power+ now uses
+   * the larger model for these three agents only.
+   */
+  modelOverride?: string;
 }
 
 /** User's preferred communication style for AI responses */

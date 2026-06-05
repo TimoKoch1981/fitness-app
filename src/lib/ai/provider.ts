@@ -82,61 +82,66 @@ let currentProvider: AIProvider | null = null;
 /**
  * Get the configured AI provider instance.
  * Creates a singleton based on environment configuration.
+ *
+ * B52 (2026-06-04): When `config` is passed (per-agent override like a
+ * stronger model for substance/medical/analysis), we always create a fresh
+ * instance and do NOT cache or mutate the singleton — otherwise the next
+ * default-call would silently reuse the override and the wrong model
+ * appears in ai_action_logs.llm_model.
  */
 export function getAIProvider(config?: Partial<AIProviderConfig>): AIProvider {
   const envConfig = getConfigFromEnv();
   const mergedConfig = { ...envConfig, ...config };
+  const isOverride = !!config && Object.keys(config).length > 0;
 
-  if (!currentProvider || (config && Object.keys(config).length > 0)) {
-    switch (mergedConfig.provider) {
-      case 'supabase': {
-        const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
-        const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
-        if (!supabaseUrl || !anonKey) {
-          console.warn('[FitBuddy] Supabase URL/Key missing. Falling back to OpenAI direct.');
-          if (mergedConfig.apiKey) {
-            currentProvider = new OpenAIProvider(mergedConfig.apiKey, mergedConfig.model ?? 'gpt-4o-mini');
-          } else {
-            console.warn('[FitBuddy] No OpenAI key either. Falling back to Ollama.');
-            currentProvider = new OllamaProvider(
-              mergedConfig.baseUrl ?? 'http://localhost:11434',
-              mergedConfig.model ?? 'llama3.1:8b',
-            );
-          }
-        } else {
-          currentProvider = new SupabaseAIProvider(supabaseUrl, anonKey, mergedConfig.model ?? 'gpt-4o-mini');
-        }
-        break;
-      }
-      case 'openai':
-        if (!mergedConfig.apiKey) {
-          console.warn('[FitBuddy] VITE_OPENAI_API_KEY is not set. Falling back to Ollama.');
-          currentProvider = new OllamaProvider(
-            mergedConfig.baseUrl ?? 'http://localhost:11434',
-            mergedConfig.model ?? 'llama3.1:8b'
-          );
-        } else {
-          currentProvider = new OpenAIProvider(
-            mergedConfig.apiKey,
-            mergedConfig.model ?? 'gpt-4o-mini'
-          );
-        }
-        break;
-      case 'ollama':
-        currentProvider = new OllamaProvider(
-          mergedConfig.baseUrl ?? 'http://localhost:11434',
-          mergedConfig.model ?? 'llama3.1:8b'
-        );
-        break;
-      default:
-        currentProvider = new OllamaProvider(
-          mergedConfig.baseUrl ?? 'http://localhost:11434',
-          mergedConfig.model ?? 'llama3.1:8b'
-        );
-    }
+  // Override path: build a fresh provider, never touch the singleton.
+  if (isOverride) {
+    return buildProvider(mergedConfig);
   }
 
+  if (!currentProvider) {
+    currentProvider = buildProvider(mergedConfig);
+  }
   return currentProvider;
+}
+
+function buildProvider(mergedConfig: AIProviderConfig): AIProvider {
+  switch (mergedConfig.provider) {
+    case 'supabase': {
+      const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+      const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+      if (!supabaseUrl || !anonKey) {
+        console.warn('[FitBuddy] Supabase URL/Key missing. Falling back to OpenAI direct.');
+        if (mergedConfig.apiKey) {
+          return new OpenAIProvider(mergedConfig.apiKey, mergedConfig.model ?? 'gpt-4o-mini');
+        }
+        console.warn('[FitBuddy] No OpenAI key either. Falling back to Ollama.');
+        return new OllamaProvider(
+          mergedConfig.baseUrl ?? 'http://localhost:11434',
+          mergedConfig.model ?? 'llama3.1:8b',
+        );
+      }
+      return new SupabaseAIProvider(supabaseUrl, anonKey, mergedConfig.model ?? 'gpt-4o-mini');
+    }
+    case 'openai':
+      if (!mergedConfig.apiKey) {
+        console.warn('[FitBuddy] VITE_OPENAI_API_KEY is not set. Falling back to Ollama.');
+        return new OllamaProvider(
+          mergedConfig.baseUrl ?? 'http://localhost:11434',
+          mergedConfig.model ?? 'llama3.1:8b',
+        );
+      }
+      return new OpenAIProvider(
+        mergedConfig.apiKey,
+        mergedConfig.model ?? 'gpt-4o-mini',
+      );
+    case 'ollama':
+    default:
+      return new OllamaProvider(
+        mergedConfig.baseUrl ?? 'http://localhost:11434',
+        mergedConfig.model ?? 'llama3.1:8b',
+      );
+  }
 }
 
 /**

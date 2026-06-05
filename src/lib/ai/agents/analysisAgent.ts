@@ -21,6 +21,9 @@ const CONFIG: AgentConfig = {
   userSkills: ['profile', 'nutrition_log', 'training_log', 'body_progress', 'substance_protocol'],
   maxContextTokens: 10000,
   description: 'Spezialist für Datenanalyse, Trend-Erkennung, Fortschrittsbewertung und Empfehlungen',
+  // B52 (2026-06-04): Trend-Analysen + holistische Bewertungen brauchen
+  // bessere Reasoning-Kette als gpt-4o-mini.
+  modelOverride: 'gpt-4o-2024-11-20',
 };
 
 export class AnalysisAgent extends BaseAgent {

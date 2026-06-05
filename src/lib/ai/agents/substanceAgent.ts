@@ -22,6 +22,11 @@ const CONFIG: AgentConfig = {
   userSkills: ['profile', 'substance_protocol', 'body_progress'],
   maxContextTokens: 12000,
   description: 'Spezialist für Substanzen, Harm Reduction, Doping-Erkennung, PCT, Injektionstechnik, Blutbild-Monitoring und Blutdruck',
+  // B52 (2026-06-04): Substance-Themen verlangen tiefes Reasoning (Stack-
+  // Interaktionen, Dosen-Schemen, PCT-Logik). gpt-4o-mini lieferte
+  // generische Antworten ("Anabole Steroide erhöhen die Proteinsynthese...").
+  // Mit gpt-4o sind die Antworten konkret + Power+-Niveau-tauglich.
+  modelOverride: 'gpt-4o-2024-11-20',
 };
 
 export class SubstanceAgent extends BaseAgent {
