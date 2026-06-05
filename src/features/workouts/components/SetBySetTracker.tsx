@@ -15,6 +15,7 @@ import { Check, SkipForward, Info, ArrowRight, ArrowLeftRight, Trophy, Split, Pe
 import { useTranslation } from '../../../i18n';
 import { useExerciseCatalog } from '../hooks/useExerciseCatalog';
 import { useActiveWorkout } from '../context/ActiveWorkoutContext';
+import { ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
 import { RpePicker } from './RpePicker';
 import { PlateCalculator } from './PlateCalculator';
 import { PlateCalculatorPopup } from './PlateCalculatorPopup';
@@ -70,8 +71,13 @@ export function SetBySetTracker({
 
   // Adaptive field detection (Phase D.2) — cardio OR carry exercises use duration+distance
   const isCardio = exercise.exercise_type === 'cardio' || catalogEntry?.movement_pattern === 'carry';
+  // B50 (2026-06-04): Isometric strength holds (Plank, Wall Sit, Dead Hang,
+  // L-Sit, Hold) get a Seconds-input per set instead of Reps+kg. Sekunden
+  // werden semantisch in actual_reps gespeichert (no DB-Migration needed —
+  // WorkoutSummary B34 stellt das gleiche Mapping).
+  const isIsometric = !isCardio && ISOMETRIC_PATTERNS.some((p) => p.test(exercise.name));
   // No-weight exercises (bodyweight, Five Tibetans, etc.) — show only reps, full width
-  const noWeight = !isCardio && exercise.sets.every(s => s.target_weight_kg == null);
+  const noWeight = !isCardio && !isIsometric && exercise.sets.every(s => s.target_weight_kg == null);
 
   /** Cycle the current set's tag */
   const cycleCurrentTag = useCallback(() => {
@@ -408,8 +414,8 @@ export function SetBySetTracker({
         </div>
       )}
 
-      {/* Input Fields — adaptive for cardio / no-weight / strength */}
-      <div className={`grid gap-3 ${isCardio || !noWeight ? 'grid-cols-2' : 'grid-cols-1 max-w-xs mx-auto'}`}>
+      {/* Input Fields — adaptive for cardio / isometric / no-weight / strength */}
+      <div className={`grid gap-3 ${isCardio || (!noWeight && !isIsometric) ? 'grid-cols-2' : 'grid-cols-1 max-w-xs mx-auto'}`}>
         {isCardio ? (
           <>
             <div>
@@ -447,6 +453,24 @@ export function SetBySetTracker({
               </p>
             </div>
           </>
+        ) : isIsometric ? (
+          /* B50: isometric strength holds — single Seconds-input, centered */
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block font-medium text-center">
+              {isDE ? 'Sekunden gehalten' : 'Seconds held'}
+            </label>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={reps}
+              onChange={e => setReps(e.target.value)}
+              placeholder={currentSet.target_reps}
+              className="w-full px-3 py-3.5 text-center text-2xl font-bold border-2 border-theme-line rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-theme-primary bg-white placeholder:text-gray-300 placeholder:font-normal"
+            />
+            <p className="text-[10px] text-gray-400 mt-1 text-center">
+              {isDE ? 'Leer = Ziel übernehmen' : 'Empty = use target'}
+            </p>
+          </div>
         ) : noWeight ? (
           /* No-weight exercises (Five Tibetans, Bodyweight, etc.) — reps only, centered */
           <div>

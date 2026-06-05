@@ -19,7 +19,7 @@ import { ExerciseVideoModal } from './ExerciseVideoModal';
 import { ExerciseModifyDialog } from './ExerciseModifyDialog';
 import { AddExerciseDialog } from './AddExerciseDialog';
 import { RIRFeedbackDialog } from './RIRFeedbackDialog';
-import { suggestRestTime, ISOMETRIC_PATTERNS } from '../utils/suggestRestTimes';
+import { suggestRestTime } from '../utils/suggestRestTimes';
 import { useIsFirstSessionForPlan } from '../hooks/useIsFirstSessionForPlan';
 import { useLastExerciseData } from '../hooks/useLastExerciseData';
 import { useExercisePR } from '../hooks/useExercisePR';
@@ -93,8 +93,9 @@ export function ExerciseTracker() {
 
   // Detect exercise categories for adaptive UI (Phase D.2)
   const isCardio = exercise.exercise_type === 'cardio';
-  // Isometric detection (Plank, Dead Hang, Wall Sit, L-Sit)
-  const isIsometric = ISOMETRIC_PATTERNS.some(p => p.test(exercise.name));
+  // B50 (2026-06-04): isometric pattern check moved to the per-set tracker
+  // (SetBySetTracker). ExerciseTracker no longer auto-completes all sets
+  // via a single timer for Plank-style holds.
 
   // Mind-Body subcategory detection from catalog
   const subcategory = catalogEntry?.subcategory ?? '';
@@ -102,11 +103,16 @@ export function ExerciseTracker() {
   const isTaiChi = subcategory.startsWith('tai_chi');
   const isYoga = subcategory.startsWith('yoga');
 
-  // Timed exercises use ExerciseTimer (flexibility, isometric holds; cardio uses set trackers with Duration+Distance)
-  // Exception: Five Tibetans are rep-based, NOT timed
+  // Timed exercises use ExerciseTimer (yoga/tai-chi-style flexibility flows).
+  // B50 (2026-06-04): isometric strength holds (Plank, Wall Sit, Dead Hang,
+  // L-Sit) used to fall in here too — the single timer auto-completed all
+  // 3 sets with notes='60s' but the user couldn't see the per-set duration
+  // and WorkoutSummary then showed 3 sets to re-edit. Move them to the
+  // per-set tracker (which renders Sek-input per row); the standalone
+  // WorkoutTimerPanel can still be used as a stopwatch.
+  // Exception: Five Tibetans are rep-based, NOT timed.
   const isTimedExercise = (
     (exercise.exercise_type === 'flexibility' && !isFiveTibetans) ||
-    isIsometric ||
     (!isCardio && exercise.duration_minutes != null && exercise.duration_minutes > 0 && !exercise.sets[0]?.target_weight_kg)
   );
 
